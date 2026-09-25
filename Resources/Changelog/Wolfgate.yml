@@ -446,3 +446,10 @@ Entries:
   id: 100039
   time: '2026-09-25T19:58:53.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/84
+- author: Gandalf2k15
+  changes:
+    - type: Remove
+      message: Classic windreign has been removed as upstream have reimplemented it.
+  id: 100040
+  time: '2026-09-25T20:59:19.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/89
