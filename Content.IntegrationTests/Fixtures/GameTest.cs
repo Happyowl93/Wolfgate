@@ -254,12 +254,56 @@ public abstract partial class GameTest
         }
         finally
         {
-            PreFinalizeHook?.Invoke();
-
-            if (!_pairDestroyed)
-                await Pair.CleanReturnAsync();
-            else
-                await Pair.DisposeAsync();
+            // WOLFGATE START: a fixture object outlives its test, so it must not keep its pair.
+            // NUnit holds every per-test fixture object until the run ends. A fixture that still pointed at a
+            // disposed pair, directly or through an injected manager, kept that pair's server and client (about
+            // 2 GB) alive, and a run with a few dirty-disposed pairs went out of memory. The hook and a dirty
+            // dispose can both throw, so each later step sits in its own finally: a hook failure still disposes
+            // the pair (its state is unknown, as after a failed teardown) and the fields are cleared either way.
+            // Nothing reads them after teardown.
+            try
+            {
+                PreFinalizeHook?.Invoke();
+            }
+            catch (Exception)
+            {
+                _pairDestroyed = true;
+                throw;
+            }
+            finally
+            {
+                try
+                {
+                    if (!_pairDestroyed)
+                        await Pair.CleanReturnAsync();
+                    else
+                        await Pair.DisposeAsync();
+                }
+                finally
+                {
+                    ClearReferences();
+                }
+            }
+            // WOLFGATE END
         }
     }
+
+    // WOLFGATE START: resets every instance field of the fixture, from its own class up to this one.
+    /// <summary>
+    /// Nulls every reference field and defaults every struct field (an Entity&lt;T&gt; carries its component)
+    /// declared on the fixture's class or any base up to this one. A subclass's own [TearDown] has already run
+    /// by the time this base teardown does, so nothing reads them.
+    /// </summary>
+    private void ClearReferences()
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+        for (var type = GetType(); type != null && typeof(GameTest).IsAssignableFrom(type); type = type.BaseType)
+        {
+            foreach (var field in type.GetFields(flags))
+            {
+                field.SetValue(this, field.FieldType.IsValueType ? Activator.CreateInstance(field.FieldType) : null);
+            }
+        }
+    }
+    // WOLFGATE END
 }
