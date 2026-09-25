@@ -155,19 +155,21 @@
       tags:
       - MMCUplink
 
-- type: listing
-  id: MMCLaserDrillFlatpack
-  productEntity: LaserDrillFlatpack
-  cost:
-    MMCIndustrialCredit: 150
-  categories:
-  - UplinkMmcEngineeringFlatpacks
-  - UplinkMmcFlatpacks
-  conditions:
-  - !type:StoreWhitelistCondition
-    whitelist:
-      tags:
-      - MMCUplink
+# WOLFGATE(BrokenMachines) START: laser drills are broken, so the flatpack is no longer sold
+# - type: listing
+#   id: MMCLaserDrillFlatpack
+#   productEntity: LaserDrillFlatpack
+#   cost:
+#     MMCIndustrialCredit: 150
+#   categories:
+#   - UplinkMmcEngineeringFlatpacks
+#   - UplinkMmcFlatpacks
+#   conditions:
+#   - !type:StoreWhitelistCondition
+#     whitelist:
+#       tags:
+#       - MMCUplink
+# WOLFGATE END
 
 - type: listing
   id: MMCOreMagnetFlatpack
