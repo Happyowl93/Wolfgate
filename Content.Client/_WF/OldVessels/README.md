@@ -1,7 +1,8 @@
 # OldVessels
 
-Classic ships: the 117 ships that Monolith#4624 (the shipyard refactor, autoported as Wolfgate #51) deleted, kept by
-Wolfgate with their original IDs. Every one carries the `WFClassicVessel` tag (`ClassicVessels`): the shipyard
+Classic ships: the 116 ships that Monolith#4624 (the shipyard refactor, autoported as Wolfgate #51) deleted, kept by
+Wolfgate with their original IDs. (The Windreign was 117th until Monolith brought its own back in Wolfgate #86; the
+classic copy went with it.) Every one carries the `WFClassicVessel` tag (`ClassicVessels`): the shipyard
 console, and so every trader's ship menu, marks classic rows and gets a Ships filter (all, current, classic) when its
 listing has any (`ShipyardConsoleMenu.Classic.cs`), and the admin vessel spawner marks them too. Each was placed from
 a per-ship scorecard that measured it against the ships that sell now:
@@ -13,8 +14,8 @@ a per-ship scorecard that measured it against the ships that sell now:
   Andromeda (TSF T3), Flyssa (TSF T4), Sulak and Remontnik (USSP T2), Ledokol (USSP T4). Those LPCs come from the
   faction lathe; their recipes (`Recipes/shipyard.yml`) unlock with `TsfTierThreeVouchers`, `UsspMediumShips` and the
   restored `UsspLedokol` research.
-- Carrier craft sell from their carrier's console. The consoles of the Balor, Ledokol, M-Class, Ravager, Tumour and
-  Windreign are restored with a `WF` prefix (`Entities/carrier_consoles.yml`), because `Resources/mono_migration.yml`
+- Carrier craft sell from their carrier's console. The consoles of the Balor, Ledokol, M-Class, Ravager and Tumour
+  are restored with a `WF` prefix (`Entities/carrier_consoles.yml`), because `Resources/mono_migration.yml`
   deletes the old IDs on load. The Ledokol's rams need a `ShipVoucherLedokolAttachment`.
 - Eight stay admin only (`WFAdminOnlyVessel`, `group: Custom`, the old group kept as a comment and as
   `mapchecker_group_override`): Kortik-EM, Zephyr, Jaguar and Pacem live on in current ships, Hunter, Hydra and
@@ -162,7 +163,6 @@ Sentinel; the hardpoints under the swapped guns shrank with them.
 - [`Resources/Prototypes/_WF/OldVessels/Shipyard/USSP/svinya.yml`](../../../Resources/Prototypes/_WF/OldVessels/Shipyard/USSP/svinya.yml)
 - [`Resources/Prototypes/_WF/OldVessels/Shipyard/Valkyrie.yml`](../../../Resources/Prototypes/_WF/OldVessels/Shipyard/Valkyrie.yml)
 - [`Resources/Prototypes/_WF/OldVessels/Shipyard/vaquita.yml`](../../../Resources/Prototypes/_WF/OldVessels/Shipyard/vaquita.yml)
-- [`Resources/Prototypes/_WF/OldVessels/Shipyard/windreign.yml`](../../../Resources/Prototypes/_WF/OldVessels/Shipyard/windreign.yml)
 - [`Resources/Prototypes/_WF/OldVessels/tags.yml`](../../../Resources/Prototypes/_WF/OldVessels/tags.yml)
 
 ### Localization
@@ -286,7 +286,6 @@ Sentinel; the hardpoints under the swapped guns shrank with them.
 - [`Resources/SharedMaps/_WF/OldVessels/USSP/svinya.yml`](../../../Resources/SharedMaps/_WF/OldVessels/USSP/svinya.yml)
 - [`Resources/SharedMaps/_WF/OldVessels/valkyrie.yml`](../../../Resources/SharedMaps/_WF/OldVessels/valkyrie.yml)
 - [`Resources/SharedMaps/_WF/OldVessels/vaquita.yml`](../../../Resources/SharedMaps/_WF/OldVessels/vaquita.yml)
-- [`Resources/SharedMaps/_WF/OldVessels/windreign.yml`](../../../Resources/SharedMaps/_WF/OldVessels/windreign.yml)
 
 ## Non-modular edits
 
@@ -295,6 +294,7 @@ Sentinel; the hardpoints under the swapped guns shrank with them.
 - [`Content.Client/_NF/Shipyard/UI/ShipyardConsoleMenu.xaml.cs`](../../_NF/Shipyard/UI/ShipyardConsoleMenu.xaml.cs)
   - classic ships filter
   - marks a classic ship
+- [`Resources/migration.yml`](../../../Resources/migration.yml): the classic Windreign gave way to the one Monolith brought back
 - [`Resources/Prototypes/_Mono/Entities/Objects/Devices/ship_vouchers.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Devices/ship_vouchers.yml): classic ships returned at this tier
 - [`Resources/Prototypes/_Mono/Recipes/Lathes/Packs/Factions/tsfmc.yml`](../../../Resources/Prototypes/_Mono/Recipes/Lathes/Packs/Factions/tsfmc.yml): classic ship LPCs
 - [`Resources/Prototypes/_Mono/Recipes/Lathes/Packs/Factions/ussp.yml`](../../../Resources/Prototypes/_Mono/Recipes/Lathes/Packs/Factions/ussp.yml): classic ship LPCs

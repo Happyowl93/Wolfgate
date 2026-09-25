@@ -1,4 +1,4 @@
-# Carrier consoles of the restored Balor, Ledokol, M-Class, Ravager, Tumour and Windreign, removed upstream by
+# Carrier consoles of the restored Balor, Ledokol, M-Class, Ravager and Tumour, removed upstream by
 # Monolith#4624. The old IDs are nulled in Resources/mono_migration.yml, so these carry a WF prefix and the restored
 # grids use them.
 
@@ -34,16 +34,6 @@
     - Molotok
     - Kopye
     - Kupol
-
-- type: entity
-  id: WFWindreignCarrierComputer
-  parent: BaseCarrierComputer
-  name: windreign shipyard console
-  components:
-  - type: ShipyardListing
-    shuttles:
-    - Antlion
-    - StratoRat
 
 - type: entity
   id: WFRavagerCarrierComputer
