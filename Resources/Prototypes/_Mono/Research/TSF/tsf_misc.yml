@@ -66,6 +66,11 @@
   recipeUnlocks:
   - ShipVoucherLudaRecipe
   - ShipVoucherPolarisRecipe
+  # WOLFGATE(OldVessels) START: classic ship LPCs
+  - AltairVoucherTSF
+  - WFAndromedaVoucherTSF
+  - FlyssaVoucherTSF
+  # WOLFGATE END
   technologyPrerequisites:
   - TsfTierTwoVouchers
   - UniversalMaterialResearchT3

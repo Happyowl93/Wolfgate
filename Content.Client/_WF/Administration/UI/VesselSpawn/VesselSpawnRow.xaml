@@ -7,6 +7,10 @@
         <Label Name="NameLabel"
                HorizontalExpand="True"
                ClipText="True" />
+        <Label Name="ClassicLabel"
+               StyleClasses="LabelSubText"
+               Visible="False"
+               Margin="4 0" />
         <Label Name="SizeLabel"
                StyleClasses="LabelSubText"
                Margin="4 0" />

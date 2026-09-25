@@ -60,6 +60,13 @@ namespace Content.Server.Database
                 .HasMethod("GIN")
                 .IsTsVectorExpressionIndex("english");
 
+            // WOLFGATE START: EF compares list defaults by reference, so upstream's empty-list default was a permanent pending change
+            // Same SQL the PersistentData migration already wrote, so the database needs no new migration.
+            modelBuilder.Entity<Profile>().Property(p => p.Flags)
+                .HasDefaultValue(null)
+                .HasDefaultValueSql("ARRAY[]::text[]");
+            // WOLFGATE END
+
             foreach(var entity in modelBuilder.Model.GetEntityTypes())
             {
                 foreach(var property in entity.GetProperties())

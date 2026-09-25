@@ -166,9 +166,7 @@ dotnet test Content.IntegrationTests/Content.IntegrationTests.csproj --filter Fu
 
 Integration tests use real grids and machine prototypes. They inject the power
 network's received-power result to isolate the tractor system from unrelated
-station machinery. The test-vessel check additionally loads the real map and
-verifies its shared 2 MW supply approaches maximum dish demand while powering the ship.
-Manual multiplayer testing should cover generator load changes,
+station machinery. Manual multiplayer testing should cover generator load changes,
 piloted thrust/braking, crowded battles and the appearance of long beams.
 
 <!-- WOLFGATE-GENERATED START -->
@@ -207,7 +205,6 @@ piloted thrust/braking, crowded battles and the appearance of long beams.
 
 ### Integration tests
 
-- [`Content.IntegrationTests/Tests/_WF/TractorBeam/RoswellVesselTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TractorBeam/RoswellVesselTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TractorBeam/TractorBeamArcTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TractorBeam/TractorBeamArcTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TractorBeam/TractorBeamAudioTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TractorBeam/TractorBeamAudioTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TractorBeam/TractorBeamCollectionAccelerationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TractorBeam/TractorBeamCollectionAccelerationTest.cs)
@@ -222,7 +219,6 @@ piloted thrust/braking, crowded battles and the appearance of long beams.
 - [`Content.IntegrationTests/Tests/_WF/TractorBeam/TractorBeamStationKeepingTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TractorBeam/TractorBeamStationKeepingTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TractorBeam/TractorBeamTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TractorBeam/TractorBeamTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TractorBeam/TractorCaptureWarningTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TractorBeam/TractorCaptureWarningTest.cs)
-- [`Content.IntegrationTests/Tests/_WF/TractorBeam/TractorTestVesselTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TractorBeam/TractorTestVesselTest.cs)
 
 ### Unit tests
 
@@ -256,10 +252,10 @@ piloted thrust/braking, crowded battles and the appearance of long beams.
 - [`Resources/Audio/_WF/TractorBeam/tractorbeam_engage.ogg`](../../../Resources/Audio/_WF/TractorBeam/tractorbeam_engage.ogg)
 - [`Resources/Audio/_WF/TractorBeam/tractorbeam_loop.ogg`](../../../Resources/Audio/_WF/TractorBeam/tractorbeam_loop.ogg)
 
-### Maps
+### Shared maps
 
-- [`Resources/Maps/_WF/TractorBeam/Shuttles/roswell.yml`](../../../Resources/Maps/_WF/TractorBeam/Shuttles/roswell.yml)
-- [`Resources/Maps/_WF/TractorBeam/Shuttles/tractor_test.yml`](../../../Resources/Maps/_WF/TractorBeam/Shuttles/tractor_test.yml)
+- [`Resources/SharedMaps/_WF/TractorBeam/Shuttles/roswell.yml`](../../../Resources/SharedMaps/_WF/TractorBeam/Shuttles/roswell.yml)
+- [`Resources/SharedMaps/_WF/TractorBeam/Shuttles/tractor_test.yml`](../../../Resources/SharedMaps/_WF/TractorBeam/Shuttles/tractor_test.yml)
 
 ## Non-modular edits
 

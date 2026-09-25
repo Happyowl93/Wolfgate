@@ -21,6 +21,10 @@
   recipeUnlocks:
   - ShipVoucherUsspDrakon
   - ShipVoucherUsspTayfun
+  # WOLFGATE(OldVessels) START: classic ship LPCs
+  - ShipVoucherUsspSulak
+  - ShipVoucherUsspRemontnik
+  # WOLFGATE END
   technologyPrerequisites:
   - UsspBasicShips
   position: 3, -16

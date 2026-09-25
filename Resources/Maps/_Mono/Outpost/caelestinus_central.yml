@@ -10012,21 +10012,11 @@ entities:
     - type: Transform
       pos: -0.5,35.5
       parent: 2
-    - type: Lathe
-      timeMultiplier: 0.001
-      materialUseMultiplier: 0.015625
-      finalTimeMultiplier: 0.001
-      finalMaterialUseMultiplier: 0.015625
   - uid: 574
     components:
     - type: Transform
       pos: -17.5,41.5
       parent: 2
-    - type: Lathe
-      timeMultiplier: 0.001
-      materialUseMultiplier: 0.015625
-      finalTimeMultiplier: 0.001
-      finalMaterialUseMultiplier: 0.015625
 - proto: BannerEngineering
   entities:
   - uid: 575
@@ -30293,11 +30283,6 @@ entities:
     - type: Transform
       pos: -30.5,16.5
       parent: 2
-    - type: Lathe
-      timeMultiplier: 0.001
-      materialUseMultiplier: 0.015625
-      finalTimeMultiplier: 0.001
-      finalMaterialUseMultiplier: 0.015625
 - proto: ExosuitFabricator
   entities:
   - uid: 4224
@@ -30305,11 +30290,6 @@ entities:
     - type: Transform
       pos: -11.5,35.5
       parent: 2
-    - type: Lathe
-      timeMultiplier: 0.001
-      materialUseMultiplier: 0.015625
-      finalTimeMultiplier: 0.001
-      finalMaterialUseMultiplier: 0.015625
 - proto: EZNutrientChemistryBottle
   entities:
   - uid: 4225
@@ -45318,11 +45298,6 @@ entities:
     - type: Transform
       pos: -13.5,45.5
       parent: 2
-    - type: Lathe
-      timeMultiplier: 0.001
-      materialUseMultiplier: 0.015625
-      finalTimeMultiplier: 0.001
-      finalMaterialUseMultiplier: 0.015625
 - proto: MedicalScanner
   entities:
   - uid: 6035
@@ -45337,11 +45312,6 @@ entities:
     - type: Transform
       pos: -17.5,43.5
       parent: 2
-    - type: Lathe
-      timeMultiplier: 0.001
-      materialUseMultiplier: 0.015625
-      finalTimeMultiplier: 0.001
-      finalMaterialUseMultiplier: 0.015625
 - proto: MedkitFilled
   entities:
   - uid: 4356
@@ -54620,11 +54590,6 @@ entities:
     - type: Transform
       pos: -13.5,37.5
       parent: 2
-    - type: Lathe
-      timeMultiplier: 0.001
-      materialUseMultiplier: 0.015625
-      finalTimeMultiplier: 0.001
-      finalMaterialUseMultiplier: 0.015625
 - proto: SeedExtractor
   entities:
   - uid: 7453
@@ -54639,11 +54604,6 @@ entities:
     - type: Transform
       pos: 10.5,37.5
       parent: 2
-    - type: Lathe
-      timeMultiplier: 0.001
-      materialUseMultiplier: 0.015625
-      finalTimeMultiplier: 0.001
-      finalMaterialUseMultiplier: 0.015625
 - proto: ShardGlass
   entities:
   - uid: 10005

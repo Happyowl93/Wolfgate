@@ -105,7 +105,10 @@
   components:
   - type: SolutionContainerManager
     solutions:
-      beaker:
+      # WOLFGATE(Lathe) START: key matches the tank solution the other components use
+      # beaker:
+      tank:
+      # WOLFGATE END
         maxVol: 250 #Mono 200 >> 250
   - type: Sprite
     sprite: _NF/Objects/Specific/Chemistry/jerrycan.rsi

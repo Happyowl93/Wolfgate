@@ -150,7 +150,10 @@ public sealed partial class LatheMenu : FancyWindow
 
         foreach (var prototype in sortedRecipesToShow)
         {
-            var canProduce = _lathe.CanProduce(Entity, prototype, quantity, component: lathe);
+            // WOLFGATE(Lathe) START: readiness comes from the server so linked silos count
+            // var canProduce = _lathe.CanProduce(Entity, prototype, quantity, component: lathe);
+            var canProduce = IsRecipeReady(prototype);
+            // WOLFGATE END
 
             var control = new RecipeControl(_lathe, prototype, () => GenerateTooltipText(prototype), canProduce, GetRecipeDisplayControl(prototype));
             control.OnButtonPressed += s =>
@@ -206,7 +209,7 @@ public sealed partial class LatheMenu : FancyWindow
                 continue;
 
             var name = Loc.GetString(proto.Name);
-            var currentAmount = GetEntityCount(id);
+            var currentAmount = GetEntityCount(id) + GetSiloPartCount(id); // WOLFGATE(Lathe): count parts in the linked parts silo
 
             var missingAmount = amount - currentAmount;
 
@@ -226,7 +229,7 @@ public sealed partial class LatheMenu : FancyWindow
                 continue;
 
             var name = Loc.GetString(proto.LocalizedName);
-            var currentAmount = GetReagentAmount(id);
+            var currentAmount = GetReagentAmount(id) + GetSiloReagentAmount(id); // WOLFGATE(Lathe): count reagents in the linked chemical silo
 
             var missingAmount = amount - currentAmount;
 
@@ -297,34 +300,37 @@ public sealed partial class LatheMenu : FancyWindow
     /// <param name="queue"></param>
     public void PopulateQueueList(List<LatheRecipeBatch> queue) // Frontier: LatheRecipePrototype<LatheRecipeBatch
     {
-        QueueList.DisposeAllChildren();
-
-        var idx = 1;
-        foreach (var batch in queue) // Frontier: recipe<batch
-        {
-            var queuedRecipeBox = new BoxContainer();
-            queuedRecipeBox.Orientation = BoxContainer.LayoutOrientation.Horizontal;
-
-            // Frontier: batch handling
-            queuedRecipeBox.AddChild(GetRecipeDisplayControl(batch.Recipe));
-
-            var queuedRecipeLabel = new Label();
-            if (batch.ItemsRequested > 1)
-                queuedRecipeLabel.Text = $"{idx}. {_lathe.GetRecipeName(batch.Recipe)} ({batch.ItemsPrinted}/{batch.ItemsRequested})";
-            else
-                queuedRecipeLabel.Text = $"{idx}. {_lathe.GetRecipeName(batch.Recipe)}";
-            // End Frontier
-            queuedRecipeBox.AddChild(queuedRecipeLabel);
-            // <Mono>
-            var cancelButton = new Button();
-            cancelButton.Text = "X";
-            cancelButton.StyleClasses.Add(StyleBase.ButtonCaution);
-            cancelButton.OnPressed += _ => OnRecipeCancelled?.Invoke(batch.Index);
-            queuedRecipeBox.AddChild(cancelButton);
-            // </Mono>
-            QueueList.AddChild(queuedRecipeBox);
-            idx++;
-        }
+        // WOLFGATE(Lathe) START: queue cards with editable totals, updated in place
+        // QueueList.DisposeAllChildren();
+        //
+        // var idx = 1;
+        // foreach (var batch in queue) // Frontier: recipe<batch
+        // {
+        //     var queuedRecipeBox = new BoxContainer();
+        //     queuedRecipeBox.Orientation = BoxContainer.LayoutOrientation.Horizontal;
+        //
+        //     // Frontier: batch handling
+        //     queuedRecipeBox.AddChild(GetRecipeDisplayControl(batch.Recipe));
+        //
+        //     var queuedRecipeLabel = new Label();
+        //     if (batch.ItemsRequested > 1)
+        //         queuedRecipeLabel.Text = $"{idx}. {_lathe.GetRecipeName(batch.Recipe)} ({batch.ItemsPrinted}/{batch.ItemsRequested})";
+        //     else
+        //         queuedRecipeLabel.Text = $"{idx}. {_lathe.GetRecipeName(batch.Recipe)}";
+        //     // End Frontier
+        //     queuedRecipeBox.AddChild(queuedRecipeLabel);
+        //     // <Mono>
+        //     var cancelButton = new Button();
+        //     cancelButton.Text = "X";
+        //     cancelButton.StyleClasses.Add(StyleBase.ButtonCaution);
+        //     cancelButton.OnPressed += _ => OnRecipeCancelled?.Invoke(batch.Index);
+        //     queuedRecipeBox.AddChild(cancelButton);
+        //     // </Mono>
+        //     QueueList.AddChild(queuedRecipeBox);
+        //     idx++;
+        // }
+        PopulateWolfgateQueue(queue);
+        // WOLFGATE END
     }
 
     public void SetQueueInfo(LatheRecipePrototype? recipe)
@@ -356,6 +362,10 @@ public sealed partial class LatheMenu : FancyWindow
         if (recipe.Icon != null)
         {
             var textRect = new TextureRect();
+            // WOLFGATE(Lathe) START: fixed icon size so recipe and queue rows line up
+            textRect.SetSize = new System.Numerics.Vector2(32, 32);
+            textRect.Stretch = TextureRect.StretchMode.KeepAspectCentered;
+            // WOLFGATE END
             textRect.Texture = _spriteSystem.Frame0(recipe.Icon);
             return textRect;
         }
@@ -363,6 +373,7 @@ public sealed partial class LatheMenu : FancyWindow
         if (recipe.Result is { } result)
         {
             var entProtoView = new EntityPrototypeView();
+            entProtoView.SetSize = new System.Numerics.Vector2(32, 32); // WOLFGATE(Lathe): fixed icon size so recipe and queue rows line up
             entProtoView.SetPrototype(result);
             return entProtoView;
         }

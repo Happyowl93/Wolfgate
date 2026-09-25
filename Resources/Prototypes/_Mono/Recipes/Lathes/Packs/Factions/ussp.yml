@@ -33,6 +33,12 @@
   - ShipVoucherUsspDrakon
   - ShipVoucherUsspTayfun
   - ShipVoucherUsspBuran
+  # WOLFGATE(OldVessels) START: classic ship LPCs
+  - ShipVoucherUsspSulak
+  - ShipVoucherUsspRemontnik
+  - ShipVoucherUsspLedokol
+  - ShipVoucherUsspLedokolAttachment
+  # WOLFGATE END
 
 - type: latheRecipePack
   id: MonoUSSPStatic

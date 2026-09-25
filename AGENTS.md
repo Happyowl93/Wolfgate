@@ -14,7 +14,9 @@ PascalCase name is its folder name in every area:
 | Tests | `Content.IntegrationTests/Tests/_WF/<Module>`, `Content.Tests/_WF/<Module>` |
 | Prototypes | `Resources/Prototypes/_WF/<Module>` |
 | Localization | `Resources/Locale/en-US/_WF/<Module>` |
-| Textures, audio, maps | `Resources/Textures/_WF/<Module>`, `Resources/Audio/_WF/<Module>`, `Resources/Maps/_WF/<Module>` |
+| Textures, audio | `Resources/Textures/_WF/<Module>`, `Resources/Audio/_WF/<Module>` |
+| Ship grids (a vessel's `shuttlePath`) | `Resources/SharedMaps/_WF/<Module>` |
+| Other maps (stations, POIs) | `Resources/Maps/_WF/<Module>` |
 | Guidebook pages | `Resources/ServerInfo/_WF/<Module>` |
 | Scripts and generators | `Tools/_WF/<Module>` |
 | Design docs | `Docs/_WF/<Module>` |
@@ -117,6 +119,9 @@ for `[AUTOPORT]` pull requests).
   event, grep for an existing subscription; a duplicate compiles and then crashes the server at startup.
 - `DefaultWindow` subclasses must not name controls `CloseButton`, `ContentsContainer`, `TitleLabel` or
   `WindowHeader`.
+- Client builds leave out `Resources/Maps` (`ClientIgnoredResources` in `Robust.Packaging`), while a dev client
+  reads all of `Resources`. A grid the client loads, such as a vessel grid for the ship previewer, goes in
+  `Resources/SharedMaps` (`/SharedMaps/...`); `VesselGridPathTest` fails a vessel whose grid is anywhere else.
 - Files are LF in git but CRLF in a Windows working tree; keep each file's existing line endings. Don't write a
   doubled carriage return (`\r\r\n`); Fluent rejects the file and git treats it as binary.
 

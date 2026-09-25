@@ -68,6 +68,7 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
         _menu.PopulateCategories(availablePrototypes, unavailablePrototypes);
         _menu.PopulateClasses(availablePrototypes, unavailablePrototypes);
         _menu.PopulateEngines(availablePrototypes, unavailablePrototypes);
+        _menu.PopulateClassicFilter(availablePrototypes, unavailablePrototypes); // WOLFGATE(OldVessels): classic ships filter
     }
 
     protected override void UpdateState(BoundUserInterfaceState state)

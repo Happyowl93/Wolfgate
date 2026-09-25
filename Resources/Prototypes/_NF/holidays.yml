@@ -2,10 +2,12 @@
 - type: holiday
   id: FrontierBirthday
   name: holiday-name-frontier-birthday
-  beginDay: 1
-  beginMonth: July
-  endDay: 3
-  endMonth: July
+  # WOLFGATE(Branding) START: Wolfgate's birthday (repository created 2026-08-08) instead of Monolith's (January 16-18)
+  beginDay: 8
+  beginMonth: August
+  endDay: 10
+  endMonth: August
+  # WOLFGATE END
   greet:
     !type:Custom
     text: holiday-custom-frontier-birthday

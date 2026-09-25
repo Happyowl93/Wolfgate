@@ -55,29 +55,31 @@
         !type:CableDeviceNode
         nodeGroupID: HVPower
 
-- type: entity
-  id: LaserDrill
-  name: automated laser drill
-  parent: LaserDrillBase
-  description: A large automated drill that digs up random materials when powered with 50 kW of HV. Only works on expedition planets.
-  components:
-  - type: PlanetMiner
-    requireExpedition: true
-    requireGround: false # works just fine on lattice
-
-- type: entity
-  id: StationLaserDrill
-  name: advanced automated laser drill
-  parent: LaserDrillBase
-  description: A large bluespace automated drill that digs up random materials when powered with 150 kW of HV. Now works in space! You can just make out a scratched off logo starting with an embossed 'N' on the side.
-  components:
-  - type: Anchorable
-    flags: None # 1984
-  - type: ItemMiner
-    interval: 1 # previously 20
-  - type: PowerConsumer
-    voltage: High
-    drawRate: 150000
+# WOLFGATE(BrokenMachines) START: replaced by a broken prop in _WF/BrokenMachines
+# - type: entity
+#   id: LaserDrill
+#   name: automated laser drill
+#   parent: LaserDrillBase
+#   description: A large automated drill that digs up random materials when powered with 50 kW of HV. Only works on expedition planets.
+#   components:
+#   - type: PlanetMiner
+#     requireExpedition: true
+#     requireGround: false # works just fine on lattice
+#
+# - type: entity
+#   id: StationLaserDrill
+#   name: advanced automated laser drill
+#   parent: LaserDrillBase
+#   description: A large bluespace automated drill that digs up random materials when powered with 150 kW of HV. Now works in space! You can just make out a scratched off logo starting with an embossed 'N' on the side.
+#   components:
+#   - type: Anchorable
+#     flags: None # 1984
+#   - type: ItemMiner
+#     interval: 1 # previously 20
+#   - type: PowerConsumer
+#     voltage: High
+#     drawRate: 150000
+# WOLFGATE END
 
 - type: entity
   name: random ores

@@ -1,7 +1,9 @@
 ## Holiday Names
 
-holiday-name-frontier-birthday = Birthday of Frontier Station
+# WOLFGATE(Branding) START: Wolfgate's birthday instead of Monolith's
+holiday-name-frontier-birthday = Birthday of Wolfgate
 
 holiday-custom-frontier-birthday =
-    It's Frontier Station's birthday!
-    Thanks for helping make Frontier what it is.
+    It's Wolfgate's birthday!
+    Thanks for helping make Wolfgate what it is.
+# WOLFGATE END

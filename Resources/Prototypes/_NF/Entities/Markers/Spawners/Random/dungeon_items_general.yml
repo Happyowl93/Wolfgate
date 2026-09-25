@@ -1066,7 +1066,8 @@
     - ComputerResearchAndDevelopmentFlatpack
     - ResearchAndDevelopmentServerFlatpack
     - MercenaryTechFabFlatpack
-    - LaserDrillFlatpack
+    # WOLFGATE(BrokenMachines): laser drills are broken, so the flatpack no longer drops
+    # - LaserDrillFlatpack
     chance: 0.95
     offset: 0.0
     rarePrototypes:
