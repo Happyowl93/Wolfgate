@@ -435,3 +435,14 @@ Entries:
   id: 100038
   time: '2026-09-25T19:31:09.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/83
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Harpoons no longer hurt you when dropped.
+    - type: Fix
+      message: Harpoon turrets can be built now.
+    - type: Fix
+      message: Harpoon turrets now face the correct direction whe nbuilt.
+  id: 100039
+  time: '2026-09-25T19:58:53.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/84
