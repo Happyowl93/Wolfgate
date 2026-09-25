@@ -428,3 +428,10 @@ Entries:
   id: 100037
   time: '2026-09-25T19:21:00.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/82
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Derelict Drillsite now spawns with broken centrifuges and laser drills.
+  id: 100038
+  time: '2026-09-25T19:31:09.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/83
