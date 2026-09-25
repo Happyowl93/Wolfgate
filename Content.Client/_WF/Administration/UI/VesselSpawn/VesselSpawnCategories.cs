@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Client._WF.OldVessels;
 using Content.Shared._NF.Shipyard;
 using Content.Shared._NF.Shipyard.Prototypes;
 
@@ -20,6 +21,7 @@ public enum VesselSpawnCategory : byte
     Military,
     Antagonist,
     Other,
+    AdminOnly,
 }
 
 /// <summary>
@@ -48,17 +50,20 @@ public static class VesselSpawnCategories
         VesselSpawnCategory.Military,
         VesselSpawnCategory.Antagonist,
         VesselSpawnCategory.Other,
+        VesselSpawnCategory.AdminOnly,
     };
 
     /// <summary>
-    /// Picks the vessel's category. Rules are evaluated in order over all of its classes plus its shipyard group;
-    /// the first match wins.
+    /// Picks the vessel's category. Admin-only vessels go in their own bucket; otherwise rules are evaluated in order
+    /// over all of its classes plus its shipyard group, and the first match wins.
     /// </summary>
     public static VesselSpawnCategory Get(VesselPrototype vessel)
     {
         var classes = vessel.Classes;
         var group = vessel.Group;
 
+        if (ClassicVessels.IsAdminOnly(vessel))
+            return VesselSpawnCategory.AdminOnly;
         if (group is ShipyardConsoleUiKey.Syndicate or ShipyardConsoleUiKey.BlackMarket || classes.Any(c => AntagClasses.Contains(c)))
             return VesselSpawnCategory.Antagonist;
         if (group == ShipyardConsoleUiKey.Security || classes.Any(c => SecurityClasses.Contains(c)))

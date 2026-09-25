@@ -204,7 +204,7 @@ namespace Content.Client.Lobby
 
             if (_gameTicker.ServerInfoBlob != null)
             {
-                //Lobby!.ServerInfo.SetInfoBlob(_gameTicker.ServerInfoBlob); // Frontier: ???
+                Lobby!.ServerInfo.SetInfoBlob(_gameTicker.ServerInfoBlob);
             }
         }
 

@@ -45,6 +45,7 @@ public sealed partial class ShipyardConsoleMenu : FancyWindow
         Categories.OnItemSelected += OnCategoryItemSelected;
         Classes.OnItemSelected += OnClassItemSelected;
         Engines.OnItemSelected += OnEngineItemSelected;
+        InitClassicFilter(); // WOLFGATE(OldVessels): classic ships filter
         SellShipButton.OnPressed += (args) => { OnSellShip?.Invoke(args); };
         UnassignDeedButton.OnPressed += (args) => { OnUnassignDeed?.Invoke(args); };
         RenameButton.OnPressed += OnRenameButtonPressed;
@@ -160,6 +161,10 @@ public sealed partial class ShipyardConsoleMenu : FancyWindow
                 continue;
             if (_engine != null && !prototype!.Engines.Contains(_engine.Value))
                 continue;
+            // WOLFGATE(OldVessels) START: classic ships filter
+            if (!PassesClassicFilter(prototype!))
+                continue;
+            // WOLFGATE END
             if (search.Length > 0 && !prototype!.Name.ToLowerInvariant().Contains(search))
                 continue;
 
@@ -180,6 +185,7 @@ public sealed partial class ShipyardConsoleMenu : FancyWindow
                 Guidebook = { Disabled = prototype.GuidebookPage is null, TooltipDelay = 0.2f, ToolTip = prototype.Description },
                 Price = { Text = priceText },
             };
+            MarkClassic(vesselEntry); // WOLFGATE(OldVessels): marks a classic ship
             vesselEntry.Purchase.OnPressed += (args) => { OnOrderApproved?.Invoke(args); };
             vesselEntry.Preview.OnPressed += (args) => { OnPreviewShip?.Invoke(args); };
             Vessels.AddChild(vesselEntry);

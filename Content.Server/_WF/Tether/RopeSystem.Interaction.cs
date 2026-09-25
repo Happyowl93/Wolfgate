@@ -328,7 +328,9 @@ public sealed partial class RopeSystem
         var user = args.User;
         foreach (var net in ent.Comp.Ropes.ToArray())
         {
-            if (!TryGetEntity(net, out var rope) || rope is not { } uid || !TryComp<RopeComponent>(uid, out var comp))
+            // A winch cable is worked from its winch, not by hand.
+            if (!TryGetEntity(net, out var rope) || rope is not { } uid || !TryComp<RopeComponent>(uid, out var comp) ||
+                !comp.Refundable)
                 continue;
 
             var label = GetRopeName(comp);
@@ -436,7 +438,7 @@ public sealed partial class RopeSystem
         return false;
     }
 
-    /// <summary>Returns units to a held coil of the same type, or spawns a fresh one.</summary>
+    /// <summary>Returns units to held coils of the same type as far as they have room, and spawns the rest.</summary>
     private void GiveUnits(EntityUid user, RopeComponent rope, RopeTypePrototype proto, int units)
     {
         if (units <= 0 || proto.StackType is not { } stackType)
@@ -448,12 +450,30 @@ public sealed partial class RopeSystem
                 !TryComp<StackComponent>(held, out var stack))
                 continue;
 
-            _stack.SetCount(held, stack.Count + units, stack);
-            return;
+            var added = Math.Min(units, _stack.GetAvailableSpace(stack));
+            if (added <= 0)
+                continue;
+
+            _stack.SetCount(held, stack.Count + added, stack);
+            units -= added;
+            if (units == 0)
+                return;
         }
 
-        var spawned = _stack.Spawn(units, stackType, Transform(user).Coordinates);
-        _hands.PickupOrDrop(user, spawned);
+        SpawnUnits(stackType, units, Transform(user).Coordinates, user);
+    }
+
+    /// <summary>Spawns units as full coils plus a remainder, since one stack only holds its max count.</summary>
+    private void SpawnUnits(ProtoId<StackPrototype> stackType, int units, EntityCoordinates coordinates, EntityUid? user)
+    {
+        if (!_protos.TryIndex(stackType, out var stackProto))
+            return;
+
+        foreach (var spawned in _stack.SpawnMultiple(stackProto.Spawn, units, coordinates))
+        {
+            if (user is { } holder && !TerminatingOrDeleted(holder))
+                _hands.PickupOrDrop(holder, spawned);
+        }
     }
 
     /// <summary>Untying returns exactly the units the rope was paid out with.</summary>
@@ -471,9 +491,7 @@ public sealed partial class RopeSystem
         if (!coordinates.IsValid(EntityManager))
             return;
 
-        var spawned = _stack.Spawn(units, stackType, coordinates);
-        if (user is { } holder && !TerminatingOrDeleted(holder))
-            _hands.PickupOrDrop(holder, spawned);
+        SpawnUnits(stackType, units, coordinates, user);
     }
 
     private void OnAttachPointInteractUsing(Entity<RopeAttachPointComponent> ent, ref InteractUsingEvent args)

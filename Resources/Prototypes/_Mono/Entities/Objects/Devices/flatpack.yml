@@ -334,7 +334,7 @@
   - type: Flatpack
     entity: LaserDrill
   - type: StaticPrice
-    price: 3000
+    price: 0 # WOLFGATE(BrokenMachines): the drill it builds is broken, so no cargo value
     vendPrice: 20000
 
 - type: entity

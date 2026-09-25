@@ -235,13 +235,17 @@ namespace Content.Server.Lathe
                 return false;
 
             // Frontier: argument check
-            if (quantity <= 0)
+            if (quantity <= 0 || quantity > LatheRecipeBatch.MaxItemsRequested) // WOLFGATE(Lathe): cap the batch size
                 return false;
             // Frontier: argument check
 
-            // Mono - debt
-            if (!canDebt && !CanProduceEnd((uid, component), recipe, quantity)) // Frontier: 1<quantity
+            // WOLFGATE(Lathe) START: queued jobs wait for supplies; batch size and queue length are capped
+            // // Mono - debt
+            // if (!canDebt && !CanProduceEnd((uid, component), recipe, quantity)) // Frontier: 1<quantity
+            //     return false;
+            if ((!canDebt && !HasRecipe(uid, recipe, component)) || !CanQueue(component, recipe, quantity))
                 return false;
+            // WOLFGATE END
 
             // Frontier: queue up a batch
             if (component.Queue.Count > 0 && component.Queue[^1].Recipe.ID == recipe.ID)
@@ -268,21 +272,33 @@ namespace Content.Server.Lathe
                 return false;
 
             // Frontier: handle batches
-            var batch = component.Queue.First();
+            // WOLFGATE(Lathe) START: skip blocked batches without dropping them
+            // var batch = component.Queue.First();
+            var batchIndex = component.SkipBad
+                ? FindStartableBatch(uid, component)
+                : 0;
+            if (batchIndex < 0 || !component.SkipBad && !CanProduce(uid, component.Queue[0].Recipe, 1, component))
+                return false;
+
+            var batch = component.Queue[batchIndex];
+            component.PrintingBatch = batch.Index;
+            // WOLFGATE END
             var actor = batch.Actor; // Mono: Adds actor
             var recipe = batch.Recipe;
             // <Mono> - resources now consumed as the production goes
-            if (!CanProduce(uid, recipe, 1, component))
-            {
-                if (component.SkipBad)
-                {
-                    component.Queue.RemoveAt(0);
-                    if (component.Loop)
-                        component.Queue.Add(batch);
-                    UpdateUserInterfaceState(uid, component);
-                }
-                return false;
-            }
+            // WOLFGATE(Lathe) START: blocked batches are handled by the batch selection above
+            // if (!CanProduce(uid, recipe, 1, component))
+            // {
+            //     if (component.SkipBad)
+            //     {
+            //         component.Queue.RemoveAt(0);
+            //         if (component.Loop)
+            //             component.Queue.Add(batch);
+            //         UpdateUserInterfaceState(uid, component);
+            //     }
+            //     return false;
+            // }
+            // WOLFGATE END
 
             foreach (var (mat, amount) in recipe.Materials)
             {
@@ -291,48 +307,59 @@ namespace Content.Server.Lathe
                 _materialStorage.TryChangeMaterialAmount(uid, mat, adjustedAmount);
             }
 
+            // WOLFGATE(Lathe) START: draw reagents and parts from linked silos too
+            // foreach (var (reag, amount) in recipe.Reagents)
+            // {
+            //     if (component.ReagentOutputSlotId is not { } slotId)
+            //         break;
+            //
+            //     if (!_container.TryGetContainer(uid, slotId, out var container) ||
+            //         !_solution.TryGetDrainableSolution(container.ContainedEntities.First(), out var solEnt, out _))
+            //         break;
+            //
+            //     _solution.SplitSolutionPerReagentWithOnly(solEnt.Value, amount, reag);
+            // }
+            //
+            // if (TryComp<EntityStorageComponent>(uid, out var storage))
+            // {
+            //     foreach (var (entity, amount) in recipe.Entities)
+            //     {
+            //         var counter = 0;
+            //         foreach (var conEnt in storage.Contents.ContainedEntities)
+            //         {
+            //             if (MetaData(conEnt).EntityPrototype?.ID != entity.Id)
+            //                 continue;
+            //
+            //             _stackQuery.TryComp(conEnt, out var stack);
+            //             var count = stack?.Count ?? 1;
+            //
+            //             if (count > amount)
+            //                 _stack.SetCount(conEnt, count - amount);
+            //             if (count <= amount)
+            //                 QueueDel(conEnt);
+            //
+            //             counter += count;
+            //             if (counter >= amount)
+            //                 break;
+            //         }
+            //     }
+            // }
             foreach (var (reag, amount) in recipe.Reagents)
             {
-                if (component.ReagentOutputSlotId is not { } slotId)
-                    break;
-
-                if (!_container.TryGetContainer(uid, slotId, out var container) ||
-                    !_solution.TryGetDrainableSolution(container.ContainedEntities.First(), out var solEnt, out _))
-                    break;
-
-                _solution.SplitSolutionPerReagentWithOnly(solEnt.Value, amount, reag);
+                ConsumeRecipeReagent(uid, component, reag, amount);
             }
 
-            if (TryComp<EntityStorageComponent>(uid, out var storage))
+            foreach (var (entity, amount) in recipe.Entities)
             {
-                foreach (var (entity, amount) in recipe.Entities)
-                {
-                    var counter = 0;
-                    foreach (var conEnt in storage.Contents.ContainedEntities)
-                    {
-                        if (MetaData(conEnt).EntityPrototype?.ID != entity.Id)
-                            continue;
-
-                        _stackQuery.TryComp(conEnt, out var stack);
-                        var count = stack?.Count ?? 1;
-
-                        if (count > amount)
-                            _stack.SetCount(conEnt, count - amount);
-                        if (count <= amount)
-                            QueueDel(conEnt);
-
-                        counter += count;
-                        if (counter >= amount)
-                            break;
-                    }
-                }
+                ConsumeRecipeEntities(uid, entity, amount);
             }
+            // WOLFGATE END
 
             // </Mono>
 
             batch.ItemsPrinted++;
             if (batch.ItemsPrinted >= batch.ItemsRequested || batch.ItemsPrinted < 0) // Rollover sanity check
-                component.Queue.RemoveAt(0);
+                component.Queue.RemoveAt(batchIndex); // WOLFGATE(Lathe): remove the batch that printed, which may not be first
             // End Frontier
 
             var time = _reagentSpeed.ApplySpeed(uid, recipe.CompleteTime) * component.TimeMultiplier;
@@ -432,9 +459,13 @@ namespace Content.Server.Lathe
             if (!Resolve(uid, ref component))
                 return;
 
-            var producing = component.CurrentRecipe ?? component.Queue.FirstOrDefault()?.Recipe; // Frontier: add ?.Recipe
+            // WOLFGATE(Lathe) START: a queued batch waiting for supplies is not being fabricated
+            // var producing = component.CurrentRecipe ?? component.Queue.FirstOrDefault()?.Recipe; // Frontier: add ?.Recipe
+            var producing = component.CurrentRecipe;
+            // WOLFGATE END
 
             var state = new LatheUpdateState(GetAvailableRecipes(uid, component), component.Queue, producing, component.Loop, component.SkipBad); // Mono
+            FillWolfgateState(uid, component, state); // WOLFGATE(Lathe): add the printing batch and recipe readiness
             _uiSys.SetUiState(uid, LatheUiKey.Key, state);
         }
 
@@ -681,29 +712,36 @@ namespace Content.Server.Lathe
         // Mono
         public override bool CanProduce(EntityUid uid, LatheRecipePrototype recipe, int amount = 1, LatheComponent? component = null)
         {
-            if (!TryComp<EntityStorageComponent>(uid, out var storage) &&
-                recipe.Entities.Count != 0)
-                return false;
-
-            if (storage == null)
-                return base.CanProduce(uid, recipe, amount, component);
-
+            // WOLFGATE(Lathe) START: count parts in the linked parts silo
+            // if (!TryComp<EntityStorageComponent>(uid, out var storage) &&
+            //     recipe.Entities.Count != 0)
+            //     return false;
+            //
+            // if (storage == null)
+            //     return base.CanProduce(uid, recipe, amount, component);
+            //
+            // foreach (var (entity, needed) in recipe.Entities)
+            // {
+            //     var processedEntities = 0;
+            //     foreach (var conEnt in storage.Contents.ContainedEntities)
+            //     {
+            //         if (MetaData(conEnt).EntityPrototype?.ID != entity.Id)
+            //             continue;
+            //
+            //         _stackQuery.TryComp(conEnt, out var stack);
+            //
+            //         processedEntities += stack?.Count ?? 1;
+            //     }
+            //
+            //     if (processedEntities < needed * amount)
+            //         return false;
+            // }
             foreach (var (entity, needed) in recipe.Entities)
             {
-                var processedEntities = 0;
-                foreach (var conEnt in storage.Contents.ContainedEntities)
-                {
-                    if (MetaData(conEnt).EntityPrototype?.ID != entity.Id)
-                        continue;
-
-                    _stackQuery.TryComp(conEnt, out var stack);
-
-                    processedEntities += stack?.Count ?? 1;
-                }
-
-                if (processedEntities < needed * amount)
+                if (CountStoredEntities(uid, entity) < needed * amount)
                     return false;
             }
+            // WOLFGATE END
 
             return base.CanProduce(uid, recipe, amount, component);
         }

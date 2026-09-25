@@ -9,7 +9,7 @@
   group: Sr
   access: Brig
   mapchecker_group_override: Security
-  shuttlePath: /Maps/_WF/TractorBeam/Shuttles/roswell.yml
+  shuttlePath: /SharedMaps/_WF/TractorBeam/Shuttles/roswell.yml
   guidebookPage: null
   class:
   - Patrol
@@ -20,7 +20,7 @@
 - type: gameMap
   id: WFRoswell
   mapName: Roswell
-  mapPath: /Maps/_WF/TractorBeam/Shuttles/roswell.yml
+  mapPath: /SharedMaps/_WF/TractorBeam/Shuttles/roswell.yml
   minPlayers: 0
   stations:
     WFRoswell:

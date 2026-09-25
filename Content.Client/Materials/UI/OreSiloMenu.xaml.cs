@@ -31,6 +31,16 @@ public sealed partial class OreSiloMenu : FancyWindow
 
     public void Update(OreSiloBuiState state)
     {
+        // WOLFGATE(Lathe) START: list filling is static so fabrication silo windows share it; the parameter keeps the field's name so the body is unchanged
+        UpdateClientList(ClientList, state);
+    }
+
+    /// <summary>
+    /// Fills a silo's client list from its window state.
+    /// </summary>
+    public static void UpdateClientList(ItemList ClientList, OreSiloBuiState state)
+    {
+        // WOLFGATE END
         var items = new List<ItemList.Item>();
         var orderedClients = state.Clients.OrderBy(t => t.Item3).ThenBy(t => t.Item1.Id);
         foreach (var (ent, _, _) in orderedClients)

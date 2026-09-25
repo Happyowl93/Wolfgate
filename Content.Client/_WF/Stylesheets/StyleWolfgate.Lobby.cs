@@ -13,6 +13,7 @@ public sealed partial class StyleWolfgate
     public const string StyleClassLobbyShade = "LobbyShade";
     public const string StyleClassLobbyTitle = "LobbyTitle";
     public const string StyleClassLobbyStatus = "LobbyStatus";
+    public const string StyleClassLobbyInfo = "LobbyInfo";
     public const string StyleClassLobbyNav = "LobbyNav";
     public const string StyleClassLobbyNavPrimary = "LobbyNavPrimary";
     public const string StyleClassLobbyLinks = "LobbyLinks";
@@ -80,6 +81,9 @@ public sealed partial class StyleWolfgate
                 .Prop(Label.StylePropertyFontColor, Accent),
             Element<Label>().Class(StyleClassLobbyStatus)
                 .Prop(Label.StylePropertyFont, Display(16))
+                .Prop(Label.StylePropertyFontColor, TextMuted),
+            // Round info: ServerInfo builds its label in code, so the rule reaches it through the box
+            Child().Parent(Element<BoxContainer>().Class(StyleClassLobbyInfo)).Child(Element<RichTextLabel>())
                 .Prop(Label.StylePropertyFontColor, TextMuted),
 
             // Link row: the banner controls build plain buttons in code, so style them by position

@@ -27,10 +27,20 @@ entry ids from 100000).
 
 ## Non-modular edits
 
+- [`.github/mapchecker/mapchecker.py`](../../../.github/mapchecker/mapchecker.py)
+  - Wolfgate entities sit in module folders
+  - Wolfgate vessels and map prototypes sit in module folders
 - [`.github/workflows/changelog.yml`](../../../.github/workflows/changelog.yml)
   - our changes. Monolith.yml fills itself from upstream merges.
   - keep our ids above Monolith's so the client's read marker follows this file.
 - [`.github/workflows/discord-pr-notify.yml`](../../../.github/workflows/discord-pr-notify.yml)
+- [`.github/workflows/nf-mapchecker.yml`](../../../.github/workflows/nf-mapchecker.yml)
+  - Wolfgate entities, vessels and map prototypes, which sit in module folders
+  - Wolfgate ship grids
+- [`.github/workflows/nf-shipyard-tests.yml`](../../../.github/workflows/nf-shipyard-tests.yml)
+  - Wolfgate ship grids
+  - Wolfgate vessels and entity prices, which sit in module folders
+  - run when this workflow changes
 - [`.github/workflows/publish-changelog.yml`](../../../.github/workflows/publish-changelog.yml): re-enabled, posts Wolfgate and upstream Monolith changelogs
 - [`.github/workflows/publish-testing.yml`](../../../.github/workflows/publish-testing.yml): was wizards-testing
 - [`.github/workflows/publish.yml`](../../../.github/workflows/publish.yml)

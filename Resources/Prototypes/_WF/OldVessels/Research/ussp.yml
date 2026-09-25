@@ -1,0 +1,14 @@
+# The USSP Ledokol research, removed upstream by Monolith#4624 along with the ship.
+- type: technology
+  id: UsspLedokol
+  name: research-technology-ussp-ships-ledokol
+  entityIcon: ShipVoucherLedokol
+  discipline: Ussp
+  tier: 3
+  cost: 100000
+  recipeUnlocks:
+  - ShipVoucherUsspLedokol
+  - ShipVoucherUsspLedokolAttachment
+  technologyPrerequisites:
+  - UsspAdvancedShips
+  position: 4, -25

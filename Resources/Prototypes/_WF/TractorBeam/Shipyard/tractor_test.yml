@@ -8,7 +8,7 @@
   purchasable: false
   category: Small
   group: Shipyard
-  shuttlePath: /Maps/_WF/TractorBeam/Shuttles/tractor_test.yml
+  shuttlePath: /SharedMaps/_WF/TractorBeam/Shuttles/tractor_test.yml
   guidebookPage: null
   class:
   - Science

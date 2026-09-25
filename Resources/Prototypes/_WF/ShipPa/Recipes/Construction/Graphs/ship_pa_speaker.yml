@@ -5,10 +5,10 @@
   - node: start
     edges:
     - to: speaker
+      # Only material steps: the construction menu can't start a structure on a tool step.
       steps:
       - material: Steel
         amount: 2
-      - tool: Screwing
         doAfter: 2
 
   - node: speaker

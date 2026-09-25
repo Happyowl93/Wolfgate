@@ -136,16 +136,20 @@ public abstract partial class SharedLatheSystem : EntitySystem
         // mono start
         foreach (var (reagent, needed) in recipe.Reagents)
         {
-            if (component.ReagentOutputSlotId is not { } slotId)
+            // WOLFGATE(Lathe) START: count the linked chemical silo
+            // if (component.ReagentOutputSlotId is not { } slotId)
+            //     return false;
+            //
+            // if (!_container.TryGetContainer(uid, slotId, out var container) ||
+            //     container.ContainedEntities.Count == 0)
+            //     return false;
+            //
+            // if (!_solution.TryGetDrainableSolution(container.ContainedEntities[0], out _, out var solution )
+            //     || solution.GetReagent(new ReagentId(reagent.Id, [])).Quantity < needed * amount)
+            //     return false;
+            if (GetAvailableReagent(uid, component, reagent) < needed * amount)
                 return false;
-
-            if (!_container.TryGetContainer(uid, slotId, out var container) ||
-                container.ContainedEntities.Count == 0)
-                return false;
-
-            if (!_solution.TryGetDrainableSolution(container.ContainedEntities[0], out _, out var solution )
-                || solution.GetReagent(new ReagentId(reagent.Id, [])).Quantity < needed * amount)
-                return false;
+            // WOLFGATE END
         }
         // mono end
 
