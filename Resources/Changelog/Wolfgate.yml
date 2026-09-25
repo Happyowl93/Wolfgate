@@ -402,3 +402,29 @@ Entries:
   id: 100036
   time: '2026-09-25T05:18:44.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/81
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Classic ships are back! Most of the ships the Monolith shipyard refactor
+        removed return to their old shipyards, and faction warships return on
+        the tier vouchers.
+    - type: Add
+      message: >-
+        The TSF Altair, Andromeda and Flyssa, and the USSP Sulak, Remontnik and
+        Ledokol have their own LPCs again, made at their faction lathe.
+    - type: Add
+      message: Janitors, mail carriers and the HoP have their department ships again.
+    - type: Add
+      message: >-
+        The Balor, Ledokol, M-Class, Ravager, Tumour and Windreign have their
+        carrier consoles back.
+    - type: Tweak
+      message: >-
+        The Siebel and Hammerhead carry lighter guns than before, and the
+        Ravager has lighter guns and a smaller shield.
+    - type: Fix
+      message: The ship preview no longer fails to load some ships, such as the Mite.
+  id: 100037
+  time: '2026-09-25T19:21:00.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/82
