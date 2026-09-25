@@ -6,7 +6,9 @@ Drag to pan, wheel to zoom.
 
 Used by the admin vessel spawner and the shipyard console's Preview button; `wf_shippreview <vesselId>` opens one on
 its own. Entry points: `ShipPreviewSystem` (loads grids onto preview maps), `ShipPreviewControl` (draws one) and
-`ShipPreviewWindow`.
+`ShipPreviewWindow`. `ShipPreviewMigrationSystem` applies the entity migration files (`/migration.yml`,
+`/nf_migration.yml`, `/mono_migration.yml`) the way the server's `MapMigrationSystem` does; without it a grid that
+still uses a removed prototype ID fails to preview.
 
 Vessel grids must sit under `Resources/SharedMaps`: client builds leave out `Resources/Maps`, so a grid there only
 previews in a dev client. `VesselGridPathTest` checks every vessel.
@@ -20,6 +22,7 @@ previews in a dev client. `VesselGridPathTest` checks every vessel.
 
 - [`Content.Client/_WF/ShipPreview/ShipPreviewCommand.cs`](ShipPreviewCommand.cs)
 - [`Content.Client/_WF/ShipPreview/ShipPreviewControl.cs`](ShipPreviewControl.cs)
+- [`Content.Client/_WF/ShipPreview/ShipPreviewMigrationSystem.cs`](ShipPreviewMigrationSystem.cs)
 - [`Content.Client/_WF/ShipPreview/ShipPreviewSystem.cs`](ShipPreviewSystem.cs)
 - [`Content.Client/_WF/ShipPreview/UI/ShipPreviewWindow.xaml`](UI/ShipPreviewWindow.xaml)
 - [`Content.Client/_WF/ShipPreview/UI/ShipPreviewWindow.xaml.cs`](UI/ShipPreviewWindow.xaml.cs)

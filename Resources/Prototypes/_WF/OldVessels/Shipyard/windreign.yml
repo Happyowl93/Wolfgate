@@ -1,0 +1,40 @@
+# Classic ship: removed upstream by Monolith#4624 (Wolfgate #51) and kept by Wolfgate.
+
+- type: vessel
+  id: Windreign
+  parent: BaseVessel
+  name: HES Windreign
+  description: A massive, high-end Horizon Energy vessel built for long-term atmospheric work and gas mining. Carrier-capable with a small fleet of gas mining and salvage shuttles. Features a large, luxurious crew area. Recommended crew is 2-6.
+  price: 316000 # appraised at 286876 with hardpoints; classic reprice
+  category: Large
+  group: Shipyard
+  shuttlePath: /SharedMaps/_WF/OldVessels/windreign.yml
+  tags:
+  - WFClassicVessel
+  guidebookPage: Null
+  class:
+  - Science
+  - Atmospherics
+  - Salvage
+  engine:
+  - AME
+
+- type: gameMap
+  id: Windreign
+  mapName: 'HES Windreign'
+  mapPath: /SharedMaps/_WF/OldVessels/windreign.yml
+  minPlayers: 0
+  stations:
+    Windreign:
+      stationProto: StandardFrontierVessel
+      components:
+        - type: StationNameSetup
+          mapNameTemplate: 'Windreign CIV{1}'
+          nameGenerator:
+            !type:NanotrasenNameGenerator
+            prefixCreator: '14'
+        - type: StationJobs
+          availableJobs:
+            Contractor: [ 0, 0 ]
+            # Pilot: [ 0, 0 ]
+            # Mercenary: [ 0, 0 ]

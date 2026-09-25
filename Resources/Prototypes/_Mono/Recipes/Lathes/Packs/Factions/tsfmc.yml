@@ -41,6 +41,11 @@
   - ShipVoucherTsfT2Recipe
   - ShipVoucherPolarisRecipe
   - ShipVoucherLudaRecipe
+  # WOLFGATE(OldVessels) START: classic ship LPCs
+  - AltairVoucherTSF
+  - WFAndromedaVoucherTSF
+  - FlyssaVoucherTSF
+  # WOLFGATE END
 
 - type: latheRecipePack
   id: MonoTSFMiscDynamic

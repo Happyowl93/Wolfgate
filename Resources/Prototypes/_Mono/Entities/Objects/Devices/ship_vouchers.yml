@@ -81,6 +81,14 @@
     - QJ271
     - Seax
     - Xiphos
+    # WOLFGATE(OldVessels) START: classic ships returned at this tier
+    - Welder
+    - Hoplite
+    - Spica
+    - Syringe
+    - Tumour
+    - Razorback
+    # WOLFGATE END
 
 - type: entity
   parent: ShipVoucherTsfT0
@@ -131,6 +139,11 @@
     - Mercury
     - Spekter
     - Cinquedea
+    # WOLFGATE(OldVessels) START: classic ships returned at this tier
+    - Aldebaran
+    - Sentinel
+    - Tarantula
+    # WOLFGATE END
 
 - type: entity
   parent: BaseShipLPCRenewable
@@ -240,6 +253,13 @@
     - Kresta
     - Kynda
     - Tethys
+    # WOLFGATE(OldVessels) START: classic ships returned at this tier
+    - Hazel
+    - Metis
+    - Carrion
+    - Eris
+    - Prowler
+    # WOLFGATE END
 
 - type: entity
   parent: ShipVoucherPdvT0
@@ -265,6 +285,12 @@
     - Layak
     - Scorpion
     - Osa
+    # WOLFGATE(OldVessels) START: classic ships returned at this tier
+    - Fenrir
+    - Kalisto
+    - Bastion
+    - Garm
+    # WOLFGATE END
 
 - type: entity
   parent: ShipVoucherPdvT0
@@ -289,6 +315,10 @@
     vessels:
     - MotleyAnne
     - Neptune
+    # WOLFGATE(OldVessels) START: classic ships returned at this tier
+    - Ganymede
+    - Vulture
+    # WOLFGATE END
 
 - type: entity
   parent: ShipVoucherPdvT0
@@ -313,6 +343,9 @@
     vessels:
     - KortikR
     - Europa
+    # WOLFGATE(OldVessels) START: classic ships returned at this tier
+    - Saintie
+    # WOLFGATE END
 
 - type: entity
   parent: BaseShipLPCRenewable
@@ -493,6 +526,13 @@
     companyName: USSP
     vessels:
     - Strayk
+    # WOLFGATE(OldVessels) START: classic ships returned at this tier
+    - Natisk
+    - Akula
+    - Gruznyk
+    - Sekunda
+    - Svinya
+    # WOLFGATE END
 
 - type: entity
   parent: BaseShipLPCRenewable
