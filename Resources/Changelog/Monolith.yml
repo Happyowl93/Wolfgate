@@ -25348,3 +25348,30 @@ Entries:
   id: 2758
   time: '2026-09-25T01:35:39.0000000+00:00'
   url: https://github.com/Monolith-Station/Monolith/pull/4753
+- author: SuperGDPWYL
+  changes:
+    - type: Tweak
+      message: >-
+        Reduced the number of crates on Derelict Jupiter and added some more
+        threats in the form of more turrets, NPCs and landmines.
+    - type: Fix
+      message: The turrets on Derelict Jupiter no longer kill the hostile NPCs.
+  id: 2759
+  time: '2026-09-25T13:34:12.0000000+00:00'
+  url: https://github.com/Monolith-Station/Monolith/pull/4766
+- author: Corrupt142
+  changes:
+    - type: Add
+      message: >-
+        Remapped windreign is now aviable for purchase at the nearest CIV
+        shipyard! (Drones not included)
+  id: 2760
+  time: '2026-09-25T13:48:27.0000000+00:00'
+  url: https://github.com/Monolith-Station/Monolith/pull/4761
+- author: Mrrpip
+  changes:
+    - type: Add
+      message: Added a large security thruster for mapping purposes.
+  id: 2761
+  time: '2026-09-25T13:49:13.0000000+00:00'
+  url: https://github.com/Monolith-Station/Monolith/pull/4765
