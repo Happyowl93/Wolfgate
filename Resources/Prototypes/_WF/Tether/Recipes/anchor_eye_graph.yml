@@ -1,4 +1,4 @@
-# 2 steel + 1 rod, welder to finish. Deconstruct: welder then wrench, returns the materials.
+# 2 steel + 1 rod; the construction menu can't start a structure on a tool step. Deconstruct: welder then wrench, returns the materials.
 - type: constructionGraph
   id: WFTetherAnchorEye
   start: start
@@ -9,10 +9,10 @@
       steps:
       - material: Steel
         amount: 2
+        doAfter: 2
       - material: MetalRod
         amount: 1
-      - tool: Welding
-        doAfter: 3
+        doAfter: 1
 
   - node: eye
     entity: WFTetherAnchorEye

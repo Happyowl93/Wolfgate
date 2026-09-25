@@ -88,8 +88,8 @@ guessed: a small shuttle under full thrust should snap hemp, stretch synthetic, 
 Lathe recipes (autolathe / engineering techfab) and cargo-free: craftable from cloth / plastic / steel.
 
 `WFTetherAnchorEye`: anchored, non colliding, draws above walls, may be built on any tile including wall tiles (hull
-exterior), `RopeAttachPoint` maxRopes 2, damageable (destroyed -> ropes sever), construction graph (2 steel + 1 rod,
-welder to finish; wrench/welder to deconstruct), construction menu entry under utilities.
+exterior), `RopeAttachPoint` maxRopes 2, damageable (destroyed -> ropes sever), construction graph (2 steel + 1 rod;
+wrench/welder to deconstruct), construction menu entry under utilities.
 
 `WFTetherInstaller` ("tether install gun"): item with material storage for steel (insert sheets by hand), examine
 shows remaining installs, click a tile within range 3 -> 1.5 s doafter -> spawns `WFTetherAnchorEye` there, costs

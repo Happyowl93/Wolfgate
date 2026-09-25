@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Content.Server._WF.Tether;
+using Content.Server.Power.Components;
 using Content.Shared._WF.Tether;
 using Content.Shared._WF.Tether.Harpoon;
 using Content.Shared.Actions;
 using Content.Shared.Buckle;
+using Content.Shared.Damage;
+using Content.Shared.Interaction;
 using Content.Shared.Projectiles;
 using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Systems;
@@ -240,6 +243,237 @@ public sealed class HarpoonTest
             entities.DeleteEntity(user);
             entities.DeleteEntity(gridA);
             entities.DeleteEntity(gridB);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task LooseHarpoonsHurtNobody()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.ResolveDependency<IEntityManager>();
+        var maps = server.ResolveDependency<IMapManager>();
+
+        EntityUid grid = default, user = default, spent = default;
+
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            grid = MakeGrid(entities, maps, map.MapId, Vector2.Zero, 3);
+            var coordinates = new EntityCoordinates(grid, new Vector2(1.5f, 1.5f));
+            user = entities.SpawnEntity(Operator, coordinates);
+
+            // A vendor stack dropped at the buyer's feet.
+            for (var i = 0; i < 4; i++)
+            {
+                entities.SpawnEntity("WFShipHarpoon", coordinates);
+            }
+
+            // One left lying on the deck after a clean miss, still marked as fired.
+            spent = entities.SpawnEntity("WFShipHarpoon", coordinates);
+            var projectile = entities.GetComponent<ProjectileComponent>(spent);
+            projectile.Weapon = grid;
+            projectile.Shooter = grid;
+        });
+
+        await server.WaitRunTicks(30);
+        await server.WaitAssertion(() =>
+        {
+            Assert.Multiple(() =>
+            {
+                // Only piercing: the test map has no air, so the mob takes some pressure damage regardless.
+                Assert.That(entities.GetComponent<DamageableComponent>(user).Damage.DamageDict
+                        .GetValueOrDefault("Piercing").Float(), Is.Zero,
+                    "A harpoon that is not in flight must not hurt whoever it lands on.");
+                Assert.That(entities.GetComponent<ProjectileComponent>(spent).Weapon, Is.Null,
+                    "A stopped harpoon goes back to being a plain item.");
+            });
+
+            entities.DeleteEntity(user);
+            entities.DeleteEntity(grid);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task RecoveredHarpoonBitesAgain()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.ResolveDependency<IEntityManager>();
+        var maps = server.ResolveDependency<IMapManager>();
+
+        EntityUid gridA = default, gridB = default, turret = default, user = default, harpoon = default;
+
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            gridA = MakeGrid(entities, maps, map.MapId, Vector2.Zero, 3);
+            gridB = MakeGrid(entities, maps, map.MapId, new Vector2(10f, 0f), 1, 20);
+            for (var y = 0; y < 20; y++)
+            {
+                entities.SpawnEntity(Wall, new EntityCoordinates(gridB, new Vector2(0.5f, y + 0.5f)));
+            }
+
+            (turret, user) = MakeTurret(entities, gridA);
+        });
+
+        await server.WaitRunTicks(5);
+        await server.WaitPost(() =>
+        {
+            Man(entities, user, turret);
+            Fire(entities, user, turret, new MapCoordinates(new Vector2(10.5f, 14f), map.MapId));
+            harpoon = entities.GetEntity(entities.GetComponent<ShipHarpoonTurretComponent>(turret).Harpoon!.Value);
+        });
+
+        await server.WaitRunTicks(40);
+        await server.WaitPost(() =>
+        {
+            Assert.That(entities.GetComponent<ShipHarpoonComponent>(harpoon).Embedded, Is.False,
+                "The first shot has to glance for this test to mean anything.");
+
+            // Pick the harpoon back up and load it, the way a player recovers a miss.
+            var reload = new InteractUsingEvent(user, harpoon, turret, entities.GetComponent<TransformComponent>(turret).Coordinates);
+            entities.EventBus.RaiseLocalEvent(turret, reload);
+            Assert.That(reload.Handled, Is.True, "The turret must take the recovered harpoon back.");
+            entities.GetComponent<GunComponent>(turret).NextFire = TimeSpan.Zero;
+
+            // The first shot's recoil spins the tiny test hull; put it back so the second one is square on again.
+            var physics = entities.System<SharedPhysicsSystem>();
+            var transform = entities.System<SharedTransformSystem>();
+            transform.SetWorldPositionRotation(gridA, Vector2.Zero, Angle.Zero);
+            physics.SetLinearVelocity(gridA, Vector2.Zero);
+            physics.SetAngularVelocity(gridA, 0f);
+            Fire(entities, user, turret, new MapCoordinates(new Vector2(10.5f, 1.5f), map.MapId));
+        });
+
+        await server.WaitRunTicks(40);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.GetComponent<ShipHarpoonComponent>(harpoon).Embedded, Is.True,
+                "A recovered harpoon fired square on sinks in like a fresh one.");
+
+            entities.DeleteEntity(user);
+            entities.DeleteEntity(gridA);
+            entities.DeleteEntity(gridB);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ArcFollowsHowTheTurretIsTurned()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.ResolveDependency<IEntityManager>();
+        var maps = server.ResolveDependency<IMapManager>();
+
+        EntityUid grid = default, user = default, turret = default;
+
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            grid = MakeGrid(entities, maps, map.MapId, Vector2.Zero, 3);
+            var center = new EntityCoordinates(grid, new Vector2(1.5f, 1.5f));
+            user = entities.SpawnEntity(Operator, center);
+
+            // Unpack a flatpack turned to face east.
+            var flatpack = entities.SpawnEntity("WFShipHarpoonTurretFlatpack", center);
+            var transform = entities.System<SharedTransformSystem>();
+            transform.SetLocalRotation(flatpack, new Vector2(1f, 0f).ToWorldAngle());
+            var tool = entities.SpawnEntity("Multitool", center);
+            var unpack = new InteractUsingEvent(user, tool, flatpack, center);
+            entities.EventBus.RaiseLocalEvent(flatpack, unpack);
+            Assert.That(unpack.Handled, Is.True);
+            entities.DeleteEntity(tool);
+        });
+
+        await server.WaitRunTicks(2);
+        await server.WaitAssertion(() =>
+        {
+            var query = entities.EntityQueryEnumerator<ShipHarpoonTurretComponent, TransformComponent>();
+            while (query.MoveNext(out var uid, out _, out var xform))
+            {
+                if (xform.GridUid == grid)
+                    turret = uid;
+            }
+
+            Assert.That(turret, Is.Not.EqualTo(EntityUid.Invalid), "Unpacking must build the turret.");
+
+            var system = entities.System<SharedShipHarpoonTurretSystem>();
+            var transform = entities.System<SharedTransformSystem>();
+            var comp = entities.GetComponent<ShipHarpoonTurretComponent>(turret);
+            var east = transform.ToCoordinates(new MapCoordinates(new Vector2(10f, 1.5f), map.MapId));
+            var north = transform.ToCoordinates(new MapCoordinates(new Vector2(1.5f, 10f), map.MapId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(system.InArc((turret, comp), east), Is.True, "It fires the way the flatpack faced.");
+                Assert.That(system.InArc((turret, comp), north), Is.False);
+            });
+
+            // Rotating it after placement turns the arc with it.
+            transform.SetLocalRotation(turret, new Vector2(0f, 1f).ToWorldAngle());
+            Assert.Multiple(() =>
+            {
+                Assert.That(system.InArc((turret, comp), north), Is.True, "A rotated turret fires the new way.");
+                Assert.That(system.InArc((turret, comp), east), Is.False);
+            });
+
+            // No grid power here; a turret without a receiver counts as powered and will take an operator.
+            entities.RemoveComponent<ApcPowerReceiverComponent>(turret);
+
+            // A manned turret's rotation is its aim, and leaves the mount alone.
+            Assert.That(entities.System<SharedBuckleSystem>().TryBuckle(user, null, turret), Is.True);
+            Assert.That(comp.Operator, Is.EqualTo(entities.GetNetEntity(user)));
+            transform.SetLocalRotation(turret, new Vector2(1f, 1f).ToWorldAngle());
+            Assert.That(system.InArc((turret, comp), north), Is.True, "Aiming must not move the mount.");
+
+            entities.System<SharedBuckleSystem>().Unbuckle(user, null);
+            Assert.That(entities.GetComponent<TransformComponent>(turret).LocalRotation.EqualsApprox(comp.MountRotation),
+                Is.True, "Letting go returns the turret to rest.");
+
+            entities.DeleteEntity(user);
+            entities.DeleteEntity(grid);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task TurretRefusesHandCoils()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.ResolveDependency<IEntityManager>();
+        var maps = server.ResolveDependency<IMapManager>();
+
+        await server.WaitAssertion(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            var grid = MakeGrid(entities, maps, map.MapId, Vector2.Zero, 3);
+            var (turret, user) = MakeTurret(entities, grid);
+            var coil = entities.SpawnEntity("WFRopeTowCableCoil", entities.GetComponent<TransformComponent>(user).Coordinates);
+
+            // A tow cable coil tied to the drum would take the turret's only rope slot and stop it firing.
+            var click = new AfterInteractEvent(user, coil, turret, entities.GetComponent<TransformComponent>(turret).Coordinates, true);
+            entities.EventBus.RaiseLocalEvent(coil, click);
+            Assert.Multiple(() =>
+            {
+                Assert.That(click.Handled, Is.True, "The refusal still consumes the click.");
+                Assert.That(entities.HasComponent<RopeCarrierComponent>(user), Is.False,
+                    "No loose end is taken off the coil at a harpoon turret.");
+            });
+
+            entities.DeleteEntity(user);
+            entities.DeleteEntity(grid);
         });
 
         await pair.CleanReturnAsync();
