@@ -963,6 +963,11 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("hair_name");
 
+                    b.Property<string>("HeadshotUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("headshot_url");
+
                     b.Property<float>("Height")
                         .HasColumnType("REAL")
                         .HasColumnName("height");

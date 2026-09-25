@@ -205,6 +205,8 @@
                     <Label Name="DescriptionCounter" StyleClasses="CreatorFieldLabel" VAlign="Center" />
                 </BoxContainer>
             </BoxContainer>
+            <!-- WOLFGATE(Headshot): opens the headshot URL editor -->
+            <Button Name="HeadshotButton" StyleClasses="LinkButton" HorizontalAlignment="Left" />
             <Control VerticalExpand="True" />
             <Button Name="SaveButton" Text="{Loc 'humanoid-profile-editor-save-button'}" StyleClasses="CreatorPrimary" />
             <Button Name="ResetButton" Disabled="True" Text="{Loc 'humanoid-profile-editor-reset-button'}" />

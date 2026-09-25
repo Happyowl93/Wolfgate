@@ -14,6 +14,8 @@
     <PackageReference Include="JetBrains.Annotations" PrivateAssets="All" />
     <PackageReference Include="prometheus-net" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" />
+    <!-- WOLFGATE(Headshot): decodes and re-encodes headshot images, as Content.Client already does -->
+    <PackageReference Include="SixLabors.ImageSharp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Content.Packaging\Content.Packaging.csproj" />

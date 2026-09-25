@@ -497,6 +497,9 @@ namespace Content.Server.Database
         // WOLFGATE(Genitals): creator anatomy as versioned JSON; empty until the profile is migrated or saved.
         [Column("genitals")] public string Genitals { get; set; } = "";
 
+        // WOLFGATE(Headshot): image URL shown on examine, empty when unused.
+        [Column("headshot_url")] public string HeadshotUrl { get; set; } = "";
+
         public int PreferenceId { get; set; }
         public Preference Preference { get; set; } = null!;
 

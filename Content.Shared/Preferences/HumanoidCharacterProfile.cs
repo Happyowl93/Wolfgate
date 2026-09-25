@@ -214,6 +214,7 @@ namespace Content.Shared.Preferences
                 jobPriorities, other.PreferenceUnavailable, antagPreferences, traitPreferences, loadouts, other.Company, other.CustomSpeciesName, // WOLFGATE(Humanoid)
                 other.Genitals) // WOLFGATE(Genitals): GenitalProfile is immutable, so copies share it
         {
+            HeadshotUrl = other.HeadshotUrl; // WOLFGATE(Headshot)
         }
 
         /// <summary>Copy constructor</summary>
@@ -236,6 +237,7 @@ namespace Content.Shared.Preferences
                 other.CustomSpeciesName, // WOLFGATE(Humanoid)
                 other.Genitals.Clone()) // WOLFGATE(Genitals)
         {
+            HeadshotUrl = other.HeadshotUrl; // WOLFGATE(Headshot)
         }
 
         /// <summary>
@@ -557,6 +559,7 @@ namespace Content.Shared.Preferences
             if (Company != other.Company) return false;
             if (CustomSpeciesName != other.CustomSpeciesName) return false; // WOLFGATE(Humanoid)
             if (!Genitals.MemberwiseEquals(other.Genitals)) return false; // WOLFGATE(Genitals)
+            if (HeadshotUrl != other.HeadshotUrl) return false; // WOLFGATE(Headshot)
             if (!_jobPriorities.SequenceEqual(other._jobPriorities)) return false;
             if (!_antagPreferences.SequenceEqual(other._antagPreferences)) return false;
             if (!_traitPreferences.SequenceEqual(other._traitPreferences)) return false;
@@ -756,6 +759,8 @@ namespace Content.Shared.Preferences
                 .Trim();
             // WOLFGATE END
 
+            EnsureHeadshotValid(); // WOLFGATE(Headshot)
+
             // Check if the company exists, if not set to "None"
             if (!string.IsNullOrEmpty(Company) &&
                 Company != "None" &&
@@ -883,6 +888,7 @@ namespace Content.Shared.Preferences
             hashCode.Add((int)PreferenceUnavailable);
             hashCode.Add(Company); // WOLFGATE: the company is part of the hash
             hashCode.Add(CustomSpeciesName); // WOLFGATE(Humanoid)
+            hashCode.Add(HeadshotUrl); // WOLFGATE(Headshot)
             return hashCode.ToHashCode();
         }
 
