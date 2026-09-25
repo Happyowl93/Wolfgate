@@ -32,7 +32,10 @@
         - id: IngotGold1
         - id: IngotSilver1
         - id: SheetPlasteel1
-      - id: SheetPlastitanium1
+        # WOLFGATE START: plastitanium moved into the rare materials group so scrap doesn't undercut the crystallizer
+        - id: SheetPlastitanium1
+      # - id: SheetPlastitanium1
+        # WOLFGATE END
     - !type:GroupSelector
       weight: 1
       children:
