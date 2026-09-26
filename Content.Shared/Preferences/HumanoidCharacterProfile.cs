@@ -165,6 +165,17 @@ namespace Content.Shared.Preferences
         public GenitalProfile Genitals { get; private set; } = GenitalProfile.Unmigrated;
         // WOLFGATE END
 
+        // Mono start
+        [DataField]
+        public List<string> Flags { get; private set; } = [];
+
+        [DataField]
+        public List<PersistentProfileComponent> Components { get; private set; } = [];
+
+        [DataField]
+        public List<PersistentProfileItem> Items { get; private set; } = [];
+        // Mono end
+
         public HumanoidCharacterProfile(
             string name,
             string flavortext,
@@ -182,7 +193,10 @@ namespace Content.Shared.Preferences
             Dictionary<string, RoleLoadout> loadouts,
             string company = "None", // WOLFGATE: the company is passed through the constructor
             string customSpeciesName = "", // WOLFGATE(Humanoid)
-            GenitalProfile? genitals = null) // WOLFGATE(Genitals)
+            GenitalProfile? genitals = null, // WOLFGATE(Genitals)
+            IEnumerable<string>? flags = null, // Mono
+            IEnumerable<PersistentProfileComponent>? components = null, // Mono
+            IEnumerable<PersistentProfileItem>? items = null) // Mono
         {
             Name = name;
             FlavorText = flavortext;
@@ -201,6 +215,11 @@ namespace Content.Shared.Preferences
             Company = company;
             CustomSpeciesName = customSpeciesName; // WOLFGATE(Humanoid)
             Genitals = genitals ?? GenitalProfile.Unmigrated; // WOLFGATE(Genitals)
+            // Mono start
+            Flags = flags is null ? [] : [..flags];
+            Components = components is null ? [] : [..components];
+            Items = items is null ? [] : [..items];
+            // Mono end
         }
 
         /// <summary>Copy constructor but with overridable references (to prevent useless copies)</summary>
@@ -212,7 +231,8 @@ namespace Content.Shared.Preferences
             Dictionary<string, RoleLoadout> loadouts)
             : this(other.Name, other.FlavorText, other.Species, other.Age, other.Sex, other.Gender, other.BankBalance, other.Appearance, other.SpawnPriority,
                 jobPriorities, other.PreferenceUnavailable, antagPreferences, traitPreferences, loadouts, other.Company, other.CustomSpeciesName, // WOLFGATE(Humanoid)
-                other.Genitals) // WOLFGATE(Genitals): GenitalProfile is immutable, so copies share it
+                other.Genitals, // WOLFGATE(Genitals): GenitalProfile is immutable, so copies share it
+                other.Flags, other.Components, other.Items) // Mono
         {
         }
 
@@ -234,7 +254,10 @@ namespace Content.Shared.Preferences
                 new Dictionary<string, RoleLoadout>(other.Loadouts),
                 other.Company, // WOLFGATE: copies keep the company
                 other.CustomSpeciesName, // WOLFGATE(Humanoid)
-                other.Genitals.Clone()) // WOLFGATE(Genitals)
+                other.Genitals.Clone(), // WOLFGATE(Genitals)
+                other.Flags, // Mono
+                other.Components, // Mono
+                other.Items) // Mono
         {
         }
 
@@ -439,6 +462,21 @@ namespace Content.Shared.Preferences
             return new(this) { Company = company };
         }
 
+        // Mono start
+        public HumanoidCharacterProfile WithPersistentData(
+            IEnumerable<string> flags,
+            IEnumerable<PersistentProfileComponent> components,
+            IEnumerable<PersistentProfileItem> items)
+        {
+            return new(this)
+            {
+                Flags = [..flags],
+                Components = [..components],
+                Items = [..items],
+            };
+        }
+        // Mono end
+
         public HumanoidCharacterProfile WithAntagPreferences(IEnumerable<ProtoId<AntagPrototype>> antagPreferences)
         {
             return new(this)
@@ -557,6 +595,9 @@ namespace Content.Shared.Preferences
             if (Company != other.Company) return false;
             if (CustomSpeciesName != other.CustomSpeciesName) return false; // WOLFGATE(Humanoid)
             if (!Genitals.MemberwiseEquals(other.Genitals)) return false; // WOLFGATE(Genitals)
+            if (!Flags.SequenceEqual(other.Flags)) return false; // Mono
+            if (!Components.SequenceEqual(other.Components)) return false; // Mono
+            if (!Items.SequenceEqual(other.Items)) return false; // Mono
             if (!_jobPriorities.SequenceEqual(other._jobPriorities)) return false;
             if (!_antagPreferences.SequenceEqual(other._antagPreferences)) return false;
             if (!_traitPreferences.SequenceEqual(other._traitPreferences)) return false;
@@ -879,6 +920,14 @@ namespace Content.Shared.Preferences
             // hashCode.Add(Appearance);
             // WOLFGATE END
             hashCode.Add(BankBalance); // Frontier
+            // Mono start
+            foreach (var flag in Flags)
+                hashCode.Add(flag);
+            foreach (var component in Components)
+                hashCode.Add(component);
+            foreach (var item in Items)
+                hashCode.Add(item);
+            // Mono end
             hashCode.Add((int)SpawnPriority);
             hashCode.Add((int)PreferenceUnavailable);
             hashCode.Add(Company); // WOLFGATE: the company is part of the hash
