@@ -32,11 +32,13 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
   - logs characters that can't be previewed
   - a character this build cannot preview is skipped instead of aborting the loop
 - [`Content.Client/UserInterface/Systems/Chat/Widgets/ChatBox.xaml.cs`](../../Content.Client/UserInterface/Systems/Chat/Widgets/ChatBox.xaml.cs): Replay seeks and filter changes rebuild the output from scratch.
+- [`Content.IntegrationTests/Fixtures/GameTest.cs`](../../Content.IntegrationTests/Fixtures/GameTest.cs)
+  - a fixture object outlives its test, so it must not keep its pair.
+  - resets every instance field of the fixture, from its own class up to this one.
 - [`Content.IntegrationTests/Tests/Hands/HandTests.cs`](../../Content.IntegrationTests/Tests/Hands/HandTests.cs)
   - unused, the actor is spawned instead of read from the session
   - spawn the actor instead of using the session's entity
 - [`Content.IntegrationTests/Utility/GameDataScrounger.Files.cs`](../../Content.IntegrationTests/Utility/GameDataScrounger.Files.cs): Resource paths require forward slashes, including on Windows.
-- [`Content.Server.Database/ModelPostgres.cs`](../../Content.Server.Database/ModelPostgres.cs): EF compares list defaults by reference, so upstream's empty-list default was a permanent pending change
 - [`Content.Server/Body/Systems/RespiratorSystem.cs`](../../Content.Server/Body/Systems/RespiratorSystem.cs): entities without a respirator cannot metabolize inhaled gases; absence is valid.
 - [`Content.Server/Preferences/Managers/ServerPreferencesManager.cs`](../../Content.Server/Preferences/Managers/ServerPreferencesManager.cs)
   - a failed save is logged with its slot
@@ -54,6 +56,7 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
   - dropped Discord link
   - reworded for Wolfgate build differences
 - [`Resources/Locale/en-US/_Mono/guidebook/guides.ftl`](../../Resources/Locale/en-US/_Mono/guidebook/guides.ftl): was Monolith Rules
+- [`Resources/Prototypes/_Mono/Entities/Markers/Spawners/Random/scrap_processor.yml`](../../Resources/Prototypes/_Mono/Entities/Markers/Spawners/Random/scrap_processor.yml): plastitanium moved into the rare materials group so scrap doesn't undercut the crystallizer
 - [`Resources/Prototypes/_Mono/Guidebook/rules.yml`](../../Resources/Prototypes/_Mono/Guidebook/rules.yml)
   - erotic roleplay rule removed, PR #27
   - erotic roleplay rule entry removed, PR #27

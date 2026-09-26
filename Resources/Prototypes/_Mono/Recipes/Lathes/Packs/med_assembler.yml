@@ -15,6 +15,7 @@
   - CrisisAutoInjector
   - StimulantAutoInjector
   - HemostasisAutoInjector
+  - AvaliAutoInjector # WOLFGATE(Species): Avali auto-injector (amoxla and tranexamic acid)
   - AirlossAutoInjector
   - PyraAutoInjector
   - PunctAutoInjector

@@ -1,29 +1,33 @@
 - type: loadoutGroup
   id: NFSpeciesSpecific # prefixed just for visual ID
   name: loadout-group-breath-tool # if visible, rename
-  minLimit: 3
-  maxLimit: 3
+  minLimit: 4 # WOLFGATE(Species): one more for the Avali auto-injector
+  maxLimit: 4 # WOLFGATE(Species): one more for the Avali auto-injector
   hidden: true
   loadouts:
   - LoadoutTankHarness
   - LoadoutSpeciesBreathTool
   - LoadoutSpeciesVoxNitrogen
+  - WFLoadoutSpeciesAvaliAutoInjector # WOLFGATE(Species): Avali auto-injector, like the Vox tank
   fallbacks:
   - LoadoutTankHarness
   - LoadoutSpeciesBreathTool
   - LoadoutSpeciesVoxNitrogen
+  - WFLoadoutSpeciesAvaliAutoInjector # WOLFGATE(Species): Avali auto-injector, like the Vox tank
 
 - type: loadoutGroup
   id: NfsdSpeciesSpecific
   name: loadout-group-breath-tool # if visible, rename
-  minLimit: 3
-  maxLimit: 3
+  minLimit: 4 # WOLFGATE(Species): one more for the Avali auto-injector
+  maxLimit: 4 # WOLFGATE(Species): one more for the Avali auto-injector
   hidden: true
   loadouts:
   - LoadoutTankHarness
   - NfsdVoxClothingMaskGasNfsd
   - LoadoutSpeciesVoxNitrogen
+  - WFLoadoutSpeciesAvaliAutoInjector # WOLFGATE(Species): Avali auto-injector, like the Vox tank
   fallbacks:
   - LoadoutTankHarness
   - NfsdVoxClothingMaskGasNfsd
   - LoadoutSpeciesVoxNitrogen
+  - WFLoadoutSpeciesAvaliAutoInjector # WOLFGATE(Species): Avali auto-injector, like the Vox tank

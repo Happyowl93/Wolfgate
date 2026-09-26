@@ -1,0 +1,10 @@
+# Ported from HardLight, as a medical assembler recipe rather than a microwave one
+- type: latheRecipe
+  id: AvaliAutoInjector
+  result: AvaliAutoInjector
+  completetime: 5
+  entities:
+    BlankMediPen: 1
+  reagents:
+    Amoxla: 15
+    TranexamicAcid: 5

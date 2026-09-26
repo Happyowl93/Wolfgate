@@ -60,7 +60,11 @@ public sealed partial class SymphonyHubSystem : EntitySystem
         // A timer rather than Update: the server pauses its simulation while nobody is connected, and an empty
         // server is exactly when the switch gets flipped. Each tick hops onto the main thread, which keeps
         // pumping its queue paused or not, so the fields above need no lock.
-        _timer = new Timer(_ => _tasks.RunOnMainThread(Tick), null, TickEvery, TickEvery);
+        // The timer sits in the runtime's global queue, so its callback must not hold this system: a server that
+        // stops without a shutdown (the test pool disposes one that way) would stay in memory through it, systems,
+        // entities and all. The callback reaches the system weakly and disposes the timer once the system is gone.
+        var link = new TimerLink { System = new WeakReference<SymphonyHubSystem>(this) };
+        link.Timer = _timer = new Timer(OnTimer, link, TickEvery, TickEvery);
         if (_wanted && _engineAdvertises)
             Log.Info("hub.advertise is on in the config, so the engine advertises on its own; the panel's switch takes over once it is off");
         else if (_wanted)
@@ -72,6 +76,27 @@ public sealed partial class SymphonyHubSystem : EntitySystem
         _timer?.Dispose();
         _timer = null;
         base.Shutdown();
+    }
+
+    /// <summary>
+    /// The timer callback's state: the system it reaches weakly, and the timer itself so the callback can stop it.
+    /// </summary>
+    private sealed class TimerLink
+    {
+        public WeakReference<SymphonyHubSystem> System = default!;
+        public Timer? Timer;
+    }
+
+    /// <summary>
+    /// Queues a tick on the main thread while the system is alive, and disposes the timer once it is collected.
+    /// </summary>
+    private static void OnTimer(object? state)
+    {
+        var link = (TimerLink) state!;
+        if (link.System.TryGetTarget(out var system))
+            system._tasks.RunOnMainThread(system.Tick);
+        else
+            link.Timer?.Dispose();
     }
 
     /// <summary>

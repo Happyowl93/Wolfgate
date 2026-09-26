@@ -76,6 +76,7 @@
   - EmergencyNitrogen
   - EmergencyOxygen
   - LoadoutSpeciesVoxNitrogen
+  - WFLoadoutSpeciesAvaliAutoInjector # WOLFGATE(Species): Avali auto-injector, like the Vox tank
 
 - type: loadoutGroup
   id: GroupEVATank
@@ -476,6 +477,7 @@
   - EmergencyNitrogenClown
   - EmergencyOxygenClown
   - LoadoutSpeciesVoxNitrogen
+  - WFLoadoutSpeciesAvaliAutoInjector # WOLFGATE(Species): Avali auto-injector, like the Vox tank
 
 - type: loadoutGroup
   id: MimeHead
@@ -532,6 +534,7 @@
   - EmergencyNitrogenMime
   - EmergencyOxygenMime
   - LoadoutSpeciesVoxNitrogen
+  - WFLoadoutSpeciesAvaliAutoInjector # WOLFGATE(Species): Avali auto-injector, like the Vox tank
 
 - type: loadoutGroup
   id: MusicianJumpsuit
@@ -817,6 +820,7 @@
   - EmergencyNitrogenExtended
   - EmergencyOxygenExtended
   - LoadoutSpeciesVoxNitrogen
+  - WFLoadoutSpeciesAvaliAutoInjector # WOLFGATE(Species): Avali auto-injector, like the Vox tank
 
 # Science
 - type: loadoutGroup
@@ -1098,6 +1102,7 @@
   - EmergencyNitrogenSecurity
   - EmergencyOxygenSecurity
   - LoadoutSpeciesVoxNitrogen
+  - WFLoadoutSpeciesAvaliAutoInjector # WOLFGATE(Species): Avali auto-injector, like the Vox tank
 
 - type: loadoutGroup
   id: SecurityStar
@@ -1287,6 +1292,7 @@
   - EmergencyNitrogenMedical
   - EmergencyOxygenMedical
   - LoadoutSpeciesVoxNitrogen
+  - WFLoadoutSpeciesAvaliAutoInjector # WOLFGATE(Species): Avali auto-injector, like the Vox tank
 
 # Wildcards
 - type: loadoutGroup
@@ -1329,6 +1335,7 @@
   - EmergencyNitrogenSyndicate
   - EmergencyOxygenSyndicate
   - LoadoutSpeciesVoxNitrogen
+  - WFLoadoutSpeciesAvaliAutoInjector # WOLFGATE(Species): Avali auto-injector, like the Vox tank
 
 - type: loadoutGroup
   id: GroupSpeciesBreathTool

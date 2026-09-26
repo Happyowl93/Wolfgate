@@ -214,9 +214,25 @@
     Poison:
       effects:
       - !type:HealthChange
+        # WOLFGATE(Species) START: ammonia isn't caustic to Avali (Starlight)
+        conditions:
+        - !type:OrganType
+          type: Avali
+          shouldHave: false
+        # WOLFGATE END
         damage:
           types:
             Caustic: 1
+      # WOLFGATE(Species) START: ammonia heals Avali airloss (Starlight); kept in the Poison group so nobody else metabolises it faster
+      - !type:HealthChange
+        conditions:
+        - !type:OrganType
+          type: Avali
+          shouldHave: true
+        damage:
+          types:
+            Asphyxiation: -1
+      # WOLFGATE END
     Gas:
       effects:
       - !type:HealthChange

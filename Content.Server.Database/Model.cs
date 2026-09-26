@@ -96,24 +96,6 @@ namespace Content.Server.Database
                 .IsRequired();
             // WOLFGATE END
 
-            // Mono start
-            modelBuilder.Entity<Profile>()
-                .Property(p => p.Flags)
-                .HasDefaultValue(new List<string>());
-
-            modelBuilder.Entity<ProfileComponent>()
-                .HasOne(e => e.Profile)
-                .WithMany(e => e.Components)
-                .HasForeignKey(e => e.ProfileId)
-                .IsRequired();
-
-            modelBuilder.Entity<ProfileItem>()
-                .HasOne(e => e.Profile)
-                .WithMany(e => e.Items)
-                .HasForeignKey(e => e.ProfileId)
-                .IsRequired();
-            // Mono end
-
             modelBuilder.Entity<Antag>()
                 .HasIndex(p => new {HumanoidProfileId = p.ProfileId, p.AntagName})
                 .IsUnique();
@@ -515,12 +497,6 @@ namespace Content.Server.Database
         // WOLFGATE(Genitals): creator anatomy as versioned JSON; empty until the profile is migrated or saved.
         [Column("genitals")] public string Genitals { get; set; } = "";
 
-        // Mono start
-        public List<string> Flags { get; set; } = [];
-        public List<ProfileComponent> Components { get; } = [];
-        public List<ProfileItem> Items { get; } = [];
-        // Mono end
-
         // WOLFGATE(Headshot): image URL shown on examine, empty when unused.
         [Column("headshot_url")] public string HeadshotUrl { get; set; } = "";
 
@@ -590,26 +566,6 @@ namespace Content.Server.Database
 
     #endregion
     // WOLFGATE END
-
-    // Mono start
-    public class ProfileComponent
-    {
-        public int Id { get; set; }
-        public int ProfileId { get; set; }
-        public Profile Profile { get; set; } = null!;
-        public string Data { get; set; } = null!;
-        public bool Sticky { get; set; }
-    }
-
-    public class ProfileItem
-    {
-        public int Id { get; set; }
-        public int ProfileId { get; set; }
-        public Profile Profile { get; set; } = null!;
-        public string Data { get; set; } = null!;
-        public bool Sticky { get; set; }
-    }
-    // Mono end
 
     public class Job
     {

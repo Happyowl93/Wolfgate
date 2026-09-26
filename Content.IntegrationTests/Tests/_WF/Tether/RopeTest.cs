@@ -283,6 +283,36 @@ public sealed class RopeTest
         await pair.CleanReturnAsync();
     }
 
+    [Test]
+    public async Task UntyingALongRopeRefundsEveryUnitAcrossStacks()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.ResolveDependency<IEntityManager>();
+        var maps = server.ResolveDependency<IMapManager>();
+
+        await server.WaitAssertion(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            var (gridA, gridB, pointA, pointB) = CreatePair(entities, maps, map.MapId);
+            var system = entities.System<RopeSystem>();
+            Assert.That(system.TryCreateRope(pointA, pointB, "WFTestRopeStiff", 30f, out var created), Is.True);
+            var rope = created!.Value;
+
+            // More than two full stacks (max 60) worth of paid-out rope.
+            entities.GetComponent<RopeComponent>(rope).Units = 150;
+            system.BreakRope(rope, true);
+            Assert.That(CountLooseRope(entities, gridA), Is.EqualTo(150),
+                "A refund bigger than one stack comes back as several coils, not one capped stack.");
+
+            entities.DeleteEntity(gridA);
+            entities.DeleteEntity(gridB);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     private static void Interact(IEntityManager entities, EntityUid user, EntityUid coil, EntityUid target)
     {
         var ev = new AfterInteractEvent(user, coil, target, entities.GetComponent<TransformComponent>(target).Coordinates, true);

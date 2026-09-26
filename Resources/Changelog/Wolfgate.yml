@@ -435,3 +435,48 @@ Entries:
   id: 100038
   time: '2026-09-25T19:31:09.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/83
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Harpoons no longer hurt you when dropped.
+    - type: Fix
+      message: Harpoon turrets can be built now.
+    - type: Fix
+      message: Harpoon turrets now face the correct direction whe nbuilt.
+  id: 100039
+  time: '2026-09-25T19:58:53.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/84
+- author: Gandalf2k15
+  changes:
+    - type: Remove
+      message: Classic windreign has been removed as upstream have reimplemented it.
+  id: 100040
+  time: '2026-09-25T20:59:19.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/89
+- author: Happyowl93
+  changes:
+    - type: Tweak
+      message: Fixes plastitanium drop rate from scrap, lower yield now.
+  id: 100041
+  time: '2026-09-25T21:28:01.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/87
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Added amoxla, an ammonia-based medicine that treats airloss and
+        bloodloss in Avali, and the avali auto-injector. Avali and Proto-Avali
+        spawn with one in their survival kit.
+    - type: Add
+      message: >-
+        Ammonia now heals Avali airloss, while saline, dexalin, dexalin plus and
+        iron poison them. Avali, remind your doctors.
+    - type: Tweak
+      message: Saline metabolises twice as fast, restoring the same blood per unit.
+    - type: Fix
+      message: >-
+        Avali and Proto-Avali now wear the Avali versions of hardsuits and other
+        layered clothing instead of warped human ones.
+  id: 100042
+  time: '2026-09-25T23:51:35.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/93

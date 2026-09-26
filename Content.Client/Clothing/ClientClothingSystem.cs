@@ -330,11 +330,27 @@ public sealed partial class ClientClothingSystem : ClothingSystem
             sprite.LayerSetData(index, layerData);
             layer.Offset += slotDef.Offset;
 
+            // WOLFGATE(Species) START: explicit clothingVisuals layers pick their species state too, as in HardLight
+            // TryGetDefaultVisuals already does this for generated layers; explicit layers (hardsuit helmets and
+            // their lights) drew the human state on Avali with a displacement map over it.
+            if (layer.RSI != null
+                && inventory.SpeciesId != null
+                && layerData.State != null
+                && !layerData.State.EndsWith(inventory.SpeciesId))
+            {
+                var speciesState = $"{layerData.State}-{inventory.SpeciesId}";
+                if (layer.RSI.TryGetState(speciesState, out _))
+                    layer.State = speciesState;
+            }
+            // WOLFGATE END
+
             if (displacementData is not null)
             {
                 //Checking that the state is not tied to the current race. In this case we don't need to use the displacement maps.
-                if (layerData.State is not null && inventory.SpeciesId is not null && layerData.State.EndsWith(inventory.SpeciesId))
+                // WOLFGATE(Species) START: check the state actually drawn, which may now be the species one
+                if (layer.State.Name is not null && inventory.SpeciesId is not null && layer.State.Name.EndsWith(inventory.SpeciesId))
                     continue;
+                // WOLFGATE END
 
                 if (_displacement.TryAddDisplacement(displacementData, sprite, index, key, revealedLayers))
                     index++;
