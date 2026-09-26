@@ -1,7 +1,6 @@
 - type: soundCollection
   id: MeatBulletImpact
-  # WOLFGATE(Weapons) START: Skyrat flesh impacts, was bullet_meat1-4.ogg
-  files:
+  files: # WOLFGATE(Weapons): Skyrat flesh impacts
   - /Audio/_WF/Weapons/Impacts/impact_flesh_01.ogg
   - /Audio/_WF/Weapons/Impacts/impact_flesh_02.ogg
   - /Audio/_WF/Weapons/Impacts/impact_flesh_03.ogg
@@ -11,7 +10,6 @@
   - /Audio/_WF/Weapons/Impacts/impact_flesh_07.ogg
   - /Audio/_WF/Weapons/Impacts/impact_flesh_08.ogg
   - /Audio/_WF/Weapons/Impacts/impact_flesh_09.ogg
-  # WOLFGATE END
 
 - type: soundCollection
   id: MeatLaserImpact
@@ -21,8 +19,7 @@
 
 - type: soundCollection
   id: MetalBulletImpact
-  # WOLFGATE(Weapons) START: Skyrat metal impacts, was ric1-5.ogg
-  files:
+  files: # WOLFGATE(Weapons): Skyrat metal impacts
   - /Audio/_WF/Weapons/Impacts/impact_metal_01.ogg
   - /Audio/_WF/Weapons/Impacts/impact_metal_02.ogg
   - /Audio/_WF/Weapons/Impacts/impact_metal_03.ogg
@@ -40,7 +37,6 @@
   - /Audio/_WF/Weapons/Impacts/impact_metal_15.ogg
   - /Audio/_WF/Weapons/Impacts/impact_metal_16.ogg
   - /Audio/_WF/Weapons/Impacts/impact_metal_17.ogg
-  # WOLFGATE END
 
 - type: soundCollection
   id: MetalLaserImpact

@@ -104,11 +104,8 @@
     damage:
       types:
         Piercing: 14
-    soundHit:
-      # WOLFGATE(Weapons) START: untagged targets sound like metal
-      # path: /Audio/Weapons/Guns/Hits/bullet_hit.ogg
+    soundHit: # WOLFGATE(Weapons): untagged targets sound like metal
       collection: MetalBulletImpact
-      # WOLFGATE END
   - type: TimedDespawn
     lifetime: 10
   - type: Tracer # Mono
