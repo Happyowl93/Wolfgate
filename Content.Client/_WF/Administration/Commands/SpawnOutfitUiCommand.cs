@@ -22,6 +22,6 @@ public sealed class SpawnOutfitUiCommand : LocalizedCommands
             return;
         }
 
-        new SpawnOutfitMenu(new NetEntity(targetInt)).OpenCentered();
+        new SpawnOutfitMenu(OutfitMenuMode.Spawn, new NetEntity(targetInt)).OpenCentered();
     }
 }

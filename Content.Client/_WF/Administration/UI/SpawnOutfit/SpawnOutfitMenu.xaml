@@ -56,7 +56,7 @@
                     <RichTextLabel Name="SelectedDescription" Margin="0 0 0 6" />
                     <Label Text="{Loc 'wf-spawn-outfit-contents'}" StyleClasses="LabelKeyText" />
                     <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
-                        <BoxContainer Name="Contents"
+                        <BoxContainer Name="GearContents"
                                       Orientation="Vertical"
                                       HorizontalExpand="True" />
                     </ScrollContainer>
@@ -64,7 +64,7 @@
             </PanelContainer>
             <PanelContainer StyleClasses="AngleRect" HorizontalExpand="True" Margin="0 6 0 0">
                 <BoxContainer Orientation="Vertical" Margin="8">
-                    <RichTextLabel Name="GhostInfo"
+                    <RichTextLabel Name="TargetInfo"
                                    HorizontalExpand="True"
                                    Visible="False"
                                    Margin="0 0 0 6" />

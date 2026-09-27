@@ -1,0 +1,26 @@
+# Ported from Nova Sector's laugh selector. Stereo files were downmixed to mono Vorbis (quality 5) so they play positionally.
+- files: ["female_giggle_1.ogg", "female_giggle_2.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from Nova Sector (originally Skyrat-tg), converted to mono"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/modular_nova/modules/emotes/sound/emotes/female"
+
+- files: ["nyaha.ogg", "nyahaha1.ogg", "nyahaha2.ogg", "nyahehe.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from Nova Sector (originally Skyrat-tg), converted to mono"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/modular_nova/modules/emotes/sound/emotes"
+
+# skrelllaugh2 was MP3 data under an .ogg name; it was re-encoded to Vorbis.
+- files: ["skrelllaugh1.ogg", "skrelllaugh2.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Added to Nova Sector by hack-wrench (NovaSector#4445), converted to mono Vorbis"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/modular_nova/modules/emotes/sound/emotes"
+
+- files: ["scuglaugh_1.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Added to Nova Sector by CliffracerX (NovaSector#5757), converted to mono"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/modular_nova/modules/emotes/sound/voice"
+
+- files: ["hohoho.ogg", "hehe.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Cut from a recording by Nanakisan on freesound (https://freesound.org/people/Nanakisan/sounds/253534/); taken from tgstation via Nova Sector"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/sound/mobs/non-humanoids/clown"

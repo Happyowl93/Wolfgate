@@ -480,3 +480,49 @@ Entries:
   id: 100042
   time: '2026-09-25T23:51:35.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/93
+- author: Gandalf2k15
+  changes:
+    - type: Remove
+      message: Ventclog and gas leak random events no longer trigger
+  id: 100043
+  time: '2026-09-26T22:53:41.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/99
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Species should no longer be forced into an accent.
+    - type: Fix
+      message: Female displacement maps should now actually work.
+  id: 100044
+  time: '2026-09-27T01:49:08.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/100
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: The admin outfit UI is now modernised.
+  id: 100045
+  time: '2026-09-27T02:44:37.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/103
+- author: Balls2zawall
+  changes:
+    - type: Fix
+      message: Fixed the docking doors on the Dredger being backwards.
+  id: 100046
+  time: '2026-09-27T17:33:56.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/107
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Ported the fire sprites from TauCetiClassic
+  id: 100047
+  time: '2026-09-27T17:50:56.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/105
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        You can now select your characters scream and laugh, ported from ye ole
+        skyrat! Check it under appearance!
+  id: 100048
+  time: '2026-09-27T17:52:18.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/106

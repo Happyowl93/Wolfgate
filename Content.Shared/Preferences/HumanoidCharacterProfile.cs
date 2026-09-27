@@ -2,6 +2,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Content.Shared._Mono.Company;
 using Content.Shared._NF.Bank;
+using Content.Shared._WF.EmoteVoices; // WOLFGATE(EmoteVoices)
 using Content.Shared._WF.Genitals; // WOLFGATE(Genitals)
 using Content.Shared._WF.Genitals.Migration; // WOLFGATE(Genitals)
 using Content.Shared._WF.Genitals.Profile; // WOLFGATE(Genitals)
@@ -196,7 +197,12 @@ namespace Content.Shared.Preferences
             GenitalProfile? genitals = null, // WOLFGATE(Genitals)
             IEnumerable<string>? flags = null, // Mono
             IEnumerable<PersistentProfileComponent>? components = null, // Mono
-            IEnumerable<PersistentProfileItem>? items = null) // Mono
+            // WOLFGATE(EmoteVoices) START: the chosen voices follow the Mono data
+            // IEnumerable<PersistentProfileItem>? items = null) // Mono
+            IEnumerable<PersistentProfileItem>? items = null, // Mono
+            ProtoId<EmoteVoicePrototype>? screamVoice = null,
+            ProtoId<EmoteVoicePrototype>? laughVoice = null)
+            // WOLFGATE END
         {
             Name = name;
             FlavorText = flavortext;
@@ -220,6 +226,8 @@ namespace Content.Shared.Preferences
             Components = components is null ? [] : [..components];
             Items = items is null ? [] : [..items];
             // Mono end
+            ScreamVoice = screamVoice; // WOLFGATE(EmoteVoices)
+            LaughVoice = laughVoice; // WOLFGATE(EmoteVoices)
         }
 
         /// <summary>Copy constructor but with overridable references (to prevent useless copies)</summary>
@@ -232,7 +240,11 @@ namespace Content.Shared.Preferences
             : this(other.Name, other.FlavorText, other.Species, other.Age, other.Sex, other.Gender, other.BankBalance, other.Appearance, other.SpawnPriority,
                 jobPriorities, other.PreferenceUnavailable, antagPreferences, traitPreferences, loadouts, other.Company, other.CustomSpeciesName, // WOLFGATE(Humanoid)
                 other.Genitals, // WOLFGATE(Genitals): GenitalProfile is immutable, so copies share it
-                other.Flags, other.Components, other.Items) // Mono
+                // WOLFGATE(EmoteVoices) START: copies keep the chosen voices
+                // other.Flags, other.Components, other.Items) // Mono
+                other.Flags, other.Components, other.Items, // Mono
+                other.ScreamVoice, other.LaughVoice)
+                // WOLFGATE END
         {
             HeadshotUrl = other.HeadshotUrl; // WOLFGATE(Headshot)
         }
@@ -258,7 +270,12 @@ namespace Content.Shared.Preferences
                 other.Genitals.Clone(), // WOLFGATE(Genitals)
                 other.Flags, // Mono
                 other.Components, // Mono
-                other.Items) // Mono
+                // WOLFGATE(EmoteVoices) START: copies keep the chosen voices
+                // other.Items) // Mono
+                other.Items, // Mono
+                other.ScreamVoice,
+                other.LaughVoice)
+                // WOLFGATE END
         {
             HeadshotUrl = other.HeadshotUrl; // WOLFGATE(Headshot)
         }
@@ -598,6 +615,7 @@ namespace Content.Shared.Preferences
             if (CustomSpeciesName != other.CustomSpeciesName) return false; // WOLFGATE(Humanoid)
             if (!Genitals.MemberwiseEquals(other.Genitals)) return false; // WOLFGATE(Genitals)
             if (HeadshotUrl != other.HeadshotUrl) return false; // WOLFGATE(Headshot)
+            if (ScreamVoice != other.ScreamVoice || LaughVoice != other.LaughVoice) return false; // WOLFGATE(EmoteVoices)
             if (!Flags.SequenceEqual(other.Flags)) return false; // Mono
             if (!Components.SequenceEqual(other.Components)) return false; // Mono
             if (!Items.SequenceEqual(other.Items)) return false; // Mono
@@ -801,6 +819,7 @@ namespace Content.Shared.Preferences
             // WOLFGATE END
 
             EnsureHeadshotValid(); // WOLFGATE(Headshot)
+            EnsureValidEmoteVoices(prototypeManager); // WOLFGATE(EmoteVoices)
 
             // Check if the company exists, if not set to "None"
             if (!string.IsNullOrEmpty(Company) &&
@@ -938,6 +957,8 @@ namespace Content.Shared.Preferences
             hashCode.Add(Company); // WOLFGATE: the company is part of the hash
             hashCode.Add(CustomSpeciesName); // WOLFGATE(Humanoid)
             hashCode.Add(HeadshotUrl); // WOLFGATE(Headshot)
+            hashCode.Add(ScreamVoice); // WOLFGATE(EmoteVoices)
+            hashCode.Add(LaughVoice); // WOLFGATE(EmoteVoices)
             return hashCode.ToHashCode();
         }
 

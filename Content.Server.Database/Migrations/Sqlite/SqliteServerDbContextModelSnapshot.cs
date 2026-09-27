@@ -977,6 +977,11 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("REAL")
                         .HasColumnName("height");
 
+                    b.Property<string>("LaughVoice")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("laugh_voice");
+
                     b.Property<byte[]>("Markings")
                         .HasColumnType("jsonb")
                         .HasColumnName("markings");
@@ -988,6 +993,11 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Property<int>("PreferenceUnavailable")
                         .HasColumnType("INTEGER")
                         .HasColumnName("pref_unavailable");
+
+                    b.Property<string>("ScreamVoice")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("scream_voice");
 
                     b.Property<string>("Sex")
                         .IsRequired()

@@ -28,6 +28,8 @@ public sealed partial class FireVisualizerSystem : VisualizerSystem<FireVisualsC
             component.LightEntity = null;
         }
 
+        RemoveFireUnderlay(uid); // WOLFGATE(BetterFire): removes the fire underlay layer
+
         // Need LayerMapTryGet because Init fails if there's no existing sprite / appearancecomp
         // which means in some setups (most frequently no AppearanceComp) the layer never exists.
         if (TryComp<SpriteComponent>(uid, out var sprite) &&
@@ -47,6 +49,7 @@ public sealed partial class FireVisualizerSystem : VisualizerSystem<FireVisualsC
         sprite.LayerSetShader(FireVisualLayers.Fire, "unshaded");
         if (component.Sprite != null)
             sprite.LayerSetRSI(FireVisualLayers.Fire, component.Sprite);
+        AddFireUnderlay(uid, component, sprite); // WOLFGATE(BetterFire): adds a fire underlay layer below the sprite
 
         UpdateAppearance(uid, component, sprite, appearance);
     }
@@ -65,6 +68,7 @@ public sealed partial class FireVisualizerSystem : VisualizerSystem<FireVisualsC
         AppearanceSystem.TryGetData<bool>(uid, FireVisuals.OnFire, out var onFire, appearance);
         AppearanceSystem.TryGetData<float>(uid, FireVisuals.FireStacks, out var fireStacks, appearance);
         sprite.LayerSetVisible(index, onFire);
+        UpdateFireUnderlay(uid, component, sprite, onFire, fireStacks); // WOLFGATE(BetterFire): shows the matching fire underlay
 
         if (!onFire)
         {

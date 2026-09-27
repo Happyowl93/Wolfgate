@@ -1,3 +1,4 @@
+using Content.Client._WF.Administration.UI.SpawnOutfit; // WOLFGATE(Administration)
 using Content.Client.Eui;
 using Content.Shared.Administration;
 using Content.Shared.Eui;
@@ -8,13 +9,19 @@ namespace Content.Client.Administration.UI.SetOutfit
     [UsedImplicitly]
     public sealed class SetOutfitEui : BaseEui
     {
-        private readonly SetOutfitMenu _window;
+        // WOLFGATE(Administration) START: set outfit uses the Spawn as Outfit picker in set mode
+        // private readonly SetOutfitMenu _window;
+        private readonly SpawnOutfitMenu _window;
+        // WOLFGATE END
         private IEntityManager _entManager;
 
         public SetOutfitEui()
         {
             _entManager = IoCManager.Resolve<IEntityManager>();
-            _window = new SetOutfitMenu();
+            // WOLFGATE(Administration) START: set outfit uses the Spawn as Outfit picker in set mode
+            // _window = new SetOutfitMenu();
+            _window = new SpawnOutfitMenu(OutfitMenuMode.Set);
+            // WOLFGATE END
             _window.OnClose += OnClosed;
         }
 
@@ -37,7 +44,10 @@ namespace Content.Client.Administration.UI.SetOutfit
         public override void HandleState(EuiStateBase state)
         {
             var outfitState = (SetOutfitEuiState) state;
-            _window.TargetEntityId = outfitState.TargetNetEntity;
+            // WOLFGATE(Administration) START: set outfit uses the Spawn as Outfit picker in set mode
+            // _window.TargetEntityId = outfitState.TargetNetEntity;
+            _window.Target = outfitState.TargetNetEntity;
+            // WOLFGATE END
 
         }
     }

@@ -1,0 +1,55 @@
+# Ported from Nova Sector's scream selector. Stereo files were downmixed to mono Vorbis (quality 5) so they play positionally.
+- files: ["scream_f1.ogg", "scream_f2.ogg", "scream_f3.ogg", "scream_silicon.ogg", "scream_cat.ogg", "scream_monkey.ogg", "scream_skeleton.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from Nova Sector (originally Skyrat-tg), converted to mono"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/modular_nova/modules/emotes/sound/voice"
+
+- files: ["jelly_scream.ogg", "voxscream.ogg", "zombie_scream.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from Nova Sector (originally Skyrat-tg), converted to mono"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/modular_nova/modules/emotes/sound/emotes"
+
+- files: ["raptorscream.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Teshari scream from CitadelRP, a cockatoo scream edited by BlackMajor; taken from Nova Sector"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/modular_nova/modules/emotes/sound/emotes"
+
+- files: ["rodentscream.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "From Polaris/VOREStation; taken from Nova Sector, converted to mono"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/modular_nova/modules/emotes/sound/emotes"
+
+- files: ["scugscream_1.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Added to Nova Sector by CliffracerX (NovaSector#5757), converted to mono"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/modular_nova/modules/emotes/sound/voice"
+
+- files: ["ethereal_scream_1.ogg", "ethereal_scream_2.ogg", "ethereal_scream_3.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from tgstation via Nova Sector, converted to mono"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/sound/mobs/humanoids/ethereal"
+
+- files: ["lizard_scream_1.ogg", "lizard_scream_2.ogg", "lizard_scream_3.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "lizard_scream_1 by n Beats, lizard_scream_2 and 3 by -sihiL (3 edited by Lord Saladin); taken from tgstation via Nova Sector, converted to mono"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/sound/mobs/humanoids/lizard"
+
+- files: ["plasmeme_scream_1.ogg", "plasmeme_scream_2.ogg", "plasmeme_scream_3.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from tgstation via Nova Sector, converted to mono"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/sound/mobs/humanoids/plasmaman"
+
+- files: ["monkey_screech_1.ogg", "monkey_screech_2.ogg", "monkey_screech_3.ogg", "monkey_screech_4.ogg", "monkey_screech_5.ogg", "monkey_screech_6.ogg", "monkey_screech_7.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from tgstation via Nova Sector, converted to mono"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/sound/mobs/non-humanoids/monkey"
+
+- files: ["gorilla.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from tgstation via Nova Sector"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/sound/mobs/non-humanoids/gorilla"
+
+- files: ["hiss6.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from tgstation via Nova Sector"
+  source: "https://github.com/NovaSector/NovaSector/tree/7499f47bfc6b768a72c922be46971ebfccf794a1/sound/mobs/non-humanoids/hiss"

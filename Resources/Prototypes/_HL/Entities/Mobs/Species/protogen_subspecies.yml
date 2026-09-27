@@ -37,6 +37,7 @@
   - type: Inventory
     speciesId: protovulp #to be replaced with proto[species] when new sprites are made
     templateId: protogen
+    femaleDisplacements: {} # WOLFGATE(Species): drop BaseMobProtogen's jumpsuit-only set, which disabled these maps on females
     displacements:
       head:
         sizeMaps:
@@ -219,6 +220,7 @@
   - type: Inventory
     speciesId: vox #to be replaced with proto[species] when new sprites are made
     templateId: protogen
+    femaleDisplacements: {} # WOLFGATE(Species): drop BaseMobProtogen's jumpsuit-only set, which disabled these maps on females
     displacements:
       jumpsuit:
         sizeMaps:
@@ -400,6 +402,7 @@
     damageModifierSet: ProtoThaven
   - type: Inventory
     templateId: protogen
+    femaleDisplacements: {} # WOLFGATE(Species): drop BaseMobProtogen's jumpsuit-only set, which disabled these maps on females
     displacements:
       jumpsuit:
         sizeMaps:
@@ -1797,6 +1800,7 @@
   - type: Inventory
     speciesId: felionoid # Change when there's unique sprites
     templateId: protogen
+    femaleDisplacements: {} # WOLFGATE(Species): drop BaseMobProtogen's jumpsuit-only set, which disabled these maps on females
     displacements:
       jumpsuit:
         sizeMaps:
@@ -2199,6 +2203,7 @@
     - type: Inventory
       speciesId: avali
       templateId: protogen
+      femaleDisplacements: {} # WOLFGATE(Species): drop BaseMobProtogen's jumpsuit-only set, which disabled these maps on females
       displacements:
         jumpsuit:
           sizeMaps:

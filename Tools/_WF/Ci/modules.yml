@@ -186,3 +186,9 @@ unmarked:
   - path: Resources/Textures/Tiles/exoborg.png
     module: Xenoborgs
     reason: Exoborg floor tile redrawn.
+  - path: Resources/Textures/Effects/fire.rsi/
+    module: BetterFire
+    reason: Object fire state (fire) replaced with TauCeti generic_overlay.
+  - path: Resources/Textures/Mobs/Effects/onfire.rsi/
+    module: BetterFire
+    reason: Generic_mob_burning and Standing replaced with TauCeti fire sprites; Standing_underlay added.

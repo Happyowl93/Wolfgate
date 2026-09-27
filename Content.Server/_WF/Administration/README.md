@@ -2,7 +2,8 @@
 
 The Wolfgate tab in the admin menu and the tools behind it: spawn a vessel, spawn a humanoid in a starting gear
 outfit, build and call an ERT, power or unpower grids, and play internet sounds. Admins can also drag a ghost onto a
-body to put its player in it, and ctrl+click a ghost to spawn that player as their character in an outfit.
+body to put its player in it, and ctrl+click a ghost to spawn that player as their character in an outfit. The
+upstream Set Outfit debug verb and `setoutfit <entity>` open the same outfit picker in set mode.
 
 Entry points: `WolfgateTab` (the admin menu tab), `WolfgateAdminVerbSystem` (right-click verbs under Admin), the
 console commands in `Commands/` (names in `WolfgateAdminCommands`), and the server systems `AdminVesselSpawnSystem`,
@@ -65,6 +66,10 @@ console commands in `Commands/` (names in `WolfgateAdminCommands`), and the serv
 - [`Content.Client/_WF/Administration/UI/VesselSpawn/VesselSpawnWindow.xaml`](../../../Content.Client/_WF/Administration/UI/VesselSpawn/VesselSpawnWindow.xaml)
 - [`Content.Client/_WF/Administration/UI/VesselSpawn/VesselSpawnWindow.xaml.cs`](../../../Content.Client/_WF/Administration/UI/VesselSpawn/VesselSpawnWindow.xaml.cs)
 
+### Integration tests
+
+- [`Content.IntegrationTests/Tests/_WF/Administration/SetOutfitPickerTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Administration/SetOutfitPickerTest.cs)
+
 ### Prototypes
 
 - [`Resources/Prototypes/_WF/Administration/Entities/Markers/ert_spawner.yml`](../../../Resources/Prototypes/_WF/Administration/Entities/Markers/ert_spawner.yml)
@@ -80,5 +85,6 @@ console commands in `Commands/` (names in `WolfgateAdminCommands`), and the serv
 
 - [`Content.Client/Administration/UI/AdminMenuWindow.xaml`](../../../Content.Client/Administration/UI/AdminMenuWindow.xaml): admin tooling tab (xmlns:wfTabs above)
 - [`Content.Client/Administration/UI/AdminMenuWindow.xaml.cs`](../../../Content.Client/Administration/UI/AdminMenuWindow.xaml.cs)
+- [`Content.Client/Administration/UI/SetOutfit/SetOutfitEui.cs`](../../../Content.Client/Administration/UI/SetOutfit/SetOutfitEui.cs): set outfit uses the Spawn as Outfit picker in set mode
 
 <!-- WOLFGATE-GENERATED END -->

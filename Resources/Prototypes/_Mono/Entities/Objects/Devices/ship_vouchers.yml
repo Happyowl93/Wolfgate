@@ -444,7 +444,7 @@
   - type: ShipyardVoucher
     destroyOnEmpty: false
     cooldown: 1800 # 30 minutes
-    consoleType: BlackMarket
+    consoleType: Custom
     companyName: PDV
     vessels:
     - Mock
@@ -469,7 +469,7 @@
   - type: ShipyardVoucher
     destroyOnEmpty: false
     cooldown: 1800 # 30 minutes
-    consoleType: BlackMarket
+    consoleType: Custom
     companyName: PDV
     vessels:
     - Inertia
@@ -494,7 +494,7 @@
   - type: ShipyardVoucher
     destroyOnEmpty: false
     cooldown: 1800 # 30 minutes
-    consoleType: BlackMarket
+    consoleType: Custom
     companyName: PDV
     vessels:
     - Snakelet

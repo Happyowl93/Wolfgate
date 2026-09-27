@@ -244,6 +244,8 @@ namespace Content.Client.Lobby.UI
             DescriptionExpand.OnPressed += _ => OpenDescriptionWindow();
             // WOLFGATE END
 
+            InitializeEmoteVoices(); // WOLFGATE(EmoteVoices)
+
             #endregion Sex
 
             #region Age
@@ -1258,6 +1260,7 @@ namespace Content.Client.Lobby.UI
             UpdateWidthControls();
             UpdateAgeEdit();
             UpdateEyePickers();
+            UpdateEmoteVoiceControls(); // WOLFGATE(EmoteVoices)
             UpdateSaveButton();
             UpdateMarkings();
             // WOLFGATE(Genitals) START: sync the anatomy tab and doll with the loaded profile
@@ -1881,6 +1884,7 @@ namespace Content.Client.Lobby.UI
             _entManager.DeleteEntity(PreviewDummy);
             PreviewDummy = EntityUid.Invalid;
             _anatomySaveConfirm?.Close(); // WOLFGATE(Genitals): the editor left the lobby, so there is nothing left to save
+            StopEmoteVoicePreview(); // WOLFGATE(EmoteVoices): a closed editor stops its voice preview
         }
 
         private void SetAge(int newAge)

@@ -9,7 +9,8 @@
     # - id: BureaucraticError
     # - id: ClericalError
     - id: CockroachMigration
-    - id: GasLeak
+    # WOLFGATE: gas leak event disabled
+    # - id: GasLeak
     #- id: GreytideVirus
     - id: IonStorm # its calm like 90% of the time smh
     # - id: KudzuGrowth
@@ -23,7 +24,8 @@
     # - id: SnakeSpawn
     # - id: SpiderClownSpawn
     # - id: SpiderSpawn
-    - id: VentClog
+    # WOLFGATE: vent clog event disabled
+    # - id: VentClog
     - id: BluespaceCargoCrate # Frontier
     - id: BluespaceMcCargoCrate # Frontier
     - id: BluespaceSyndicateCrate # Frontier

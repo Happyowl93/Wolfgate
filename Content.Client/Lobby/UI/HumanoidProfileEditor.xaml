@@ -116,6 +116,8 @@
                                 <humanoid:EyeColorPicker Name="EyeColorPicker" />
                             </BoxContainer>
                         </PanelContainer>
+                        <!-- WOLFGATE(EmoteVoices): Voice card, filled in by HumanoidProfileEditor.EmoteVoices.cs -->
+                        <BoxContainer Name="EmoteVoiceContainer" Orientation="Vertical" HorizontalExpand="True" />
                     </BoxContainer>
                 </ScrollContainer>
             </BoxContainer>

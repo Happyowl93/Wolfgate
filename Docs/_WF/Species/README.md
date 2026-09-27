@@ -231,6 +231,7 @@ states so Avali wear Avali hardsuits. The creator UI is in Humanoid.
 - [`Resources/Prototypes/_HL/Entities/Mobs/Player/synth.yml`](../../../Resources/Prototypes/_HL/Entities/Mobs/Player/synth.yml): PotentialPsionic dropped - Wolfgate has no psionics system.
 - [`Resources/Prototypes/_HL/Entities/Mobs/Species/protogen_subspecies.yml`](../../../Resources/Prototypes/_HL/Entities/Mobs/Species/protogen_subspecies.yml)
   - Protogen subspecies mobs, ported from HardLight.
+  - drop BaseMobProtogen's jumpsuit-only set, which disabled these maps on females
   - JumpAbility here does not grant its own action
   - Tag replaces rather than merges
   - this species has wag-capable tails but had no Wagging Tail action
@@ -369,6 +370,7 @@ states so Avali wear Avali hardsuits. The creator UI is in Humanoid.
   - ported from HardLight/Starlight
   - ported from HardLight
   - ported from HardLight/Impstation
+- [`Resources/Prototypes/Traits/speech.yml`](../../../Resources/Prototypes/Traits/speech.yml): Felionoids and ProtoFelines have it as their species accent
 - [`Resources/Prototypes/Voice/speech_emotes.yml`](../../../Resources/Prototypes/Voice/speech_emotes.yml): was the default scream action icon; this is the open-mouthed face
 - [`Resources/Textures/_EE/Mobs/Customization/Harpy/harpy_wings.rsi/`](../../../Resources/Textures/_EE/Mobs/Customization/Harpy/harpy_wings.rsi/): whitescale_harpy_folded2 state added (meta.json re-serialised).
 - [`Resources/Textures/_Mono/Mobs/Species/Protogen/organs.rsi/`](../../../Resources/Textures/_Mono/Mobs/Species/Protogen/organs.rsi/): tongueforked state added (meta.json re-serialised).

@@ -87,6 +87,10 @@ wf-spawn-outfit-confirm = Spawn
 wf-spawn-outfit-ghost-title = Spawn Ghost as Outfit
 wf-spawn-outfit-ghost-info = Spawns [bold]{$name}[/bold]'s selected character wearing this outfit at their ghost and puts them in control.
 wf-spawn-outfit-ghost-confirm = Spawn {$name}
+# Set mode (the Set Outfit debug verb and setoutfit with only an entity)
+wf-spawn-outfit-set-title = Set Outfit
+wf-spawn-outfit-set-info = Dresses [bold]{$name}[/bold] in this outfit. Everything they currently wear drops to the floor.
+wf-spawn-outfit-set-confirm = Apply to {$name}
 
 ## spawnoutfit command
 cmd-spawnoutfit-desc = Spawns a humanoid wearing a starting gear outfit at the target entity.

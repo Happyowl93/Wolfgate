@@ -45,7 +45,7 @@ public sealed partial class GhostOutfitShortcutSystem : EntitySystem
             || !_admin.CanCommand(WolfgateAdminCommands.SpawnOutfitGhost))
             return false;
 
-        new SpawnOutfitMenu(GetNetEntity(uid), forGhost: true).OpenCentered();
+        new SpawnOutfitMenu(OutfitMenuMode.Ghost, GetNetEntity(uid)).OpenCentered();
         return true;
     }
 }
