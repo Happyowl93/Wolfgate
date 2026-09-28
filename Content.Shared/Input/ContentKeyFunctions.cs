@@ -170,6 +170,8 @@ namespace Content.Shared.Input
         public static readonly BoundKeyFunction WFMappingPaste = "WFMappingPaste";
         public static readonly BoundKeyFunction WFMappingDelete = "WFMappingDelete";
         public static readonly BoundKeyFunction WFMappingRotate = "WFMappingRotate";
+        public static readonly BoundKeyFunction WFMappingMirror = "WFMappingMirror";
+        public static readonly BoundKeyFunction WFMappingMirrorVertical = "WFMappingMirrorVertical";
         public static readonly BoundKeyFunction WFMappingUndo = "WFMappingUndo";
         public static readonly BoundKeyFunction WFMappingRedo = "WFMappingRedo";
         // WOLFGATE END

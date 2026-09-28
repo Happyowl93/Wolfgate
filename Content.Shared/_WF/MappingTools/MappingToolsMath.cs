@@ -136,6 +136,114 @@ public static class MappingToolsMath
         return new Box2i(Vector2i.ComponentMin(b.BottomLeft, cell), Vector2i.ComponentMax(b.TopRight, cell + Vector2i.One));
     }
 
+    /// <summary>
+    /// Mirrors a cell of <paramref name="extent"/> across its vertical axis (left-right), or its horizontal one when
+    /// <paramref name="vertical"/> is set (top-bottom).
+    /// </summary>
+    public static Vector2i MirrorCell(Vector2i cell, Box2i extent, bool vertical)
+    {
+        return vertical
+            ? new Vector2i(cell.X, extent.Bottom + extent.Top - 1 - cell.Y)
+            : new Vector2i(extent.Left + extent.Right - 1 - cell.X, cell.Y);
+    }
+
+    public static Vector2 MirrorPoint(Vector2 point, Box2i extent, bool vertical)
+    {
+        return vertical
+            ? new Vector2(point.X, extent.Bottom + extent.Top - point.Y)
+            : new Vector2(extent.Left + extent.Right - point.X, point.Y);
+    }
+
+    /// <summary>
+    /// The facing a mirrored entity takes. Angles count counterclockwise from south, so a left-right mirror negates
+    /// them and a top-bottom one reflects them about east-west.
+    /// </summary>
+    public static Angle MirrorAngle(Angle angle, bool vertical)
+    {
+        return (vertical ? new Angle(Math.PI - angle.Theta) : new Angle(-angle.Theta)).Reduced();
+    }
+
+    /// <summary>
+    /// The tile rotation-mirroring state that looks like <paramref name="state"/> turned clockwise.
+    /// </summary>
+    public static byte RotateTileState(byte state, int turns)
+    {
+        for (var i = 0; i < Normalize(turns); i++)
+        {
+            // A clockwise turn puts what was at bottom-right in the bottom-left, and so on round.
+            state = FindTileState(state, [1, 2, 3, 0]);
+        }
+
+        return state;
+    }
+
+    /// <summary>
+    /// The tile rotation-mirroring state that looks like <paramref name="state"/> mirrored.
+    /// </summary>
+    public static byte MirrorTileState(byte state, bool vertical)
+    {
+        return FindTileState(state, vertical ? [3, 2, 1, 0] : [1, 0, 3, 2]);
+    }
+
+    /// <summary>
+    /// Finds the state whose texture corners, at the tile's bottom-left, bottom-right, top-right and top-left, are
+    /// the given state's corners taken from the positions in <paramref name="from"/>.
+    /// </summary>
+    private static byte FindTileState(byte state, int[] from)
+    {
+        var original = TileCorners(state);
+        for (byte candidate = 0; candidate < 8; candidate++)
+        {
+            var corners = TileCorners(candidate);
+            var match = true;
+            for (var i = 0; i < 4 && match; i++)
+            {
+                match = corners[i] == original[from[i]];
+            }
+
+            if (match)
+                return candidate;
+        }
+
+        return state;
+    }
+
+    /// <summary>
+    /// Which texture corner each tile corner shows, as Clyde's grid renderer lays them out for a rotation-mirroring
+    /// byte: rotations are the low two bits and 4 adds a mirror.
+    /// </summary>
+    private static (int X, int Y)[] TileCorners(int state)
+    {
+        (int X, int Y) lb = (0, 0), rb = (1, 0), rt = (1, 1), lt = (0, 1);
+        if (state != 0)
+        {
+            for (var r = 0; r < state % 4; r++)
+            {
+                (lb, rb, rt, lt) = (lt, lb, rb, rt);
+            }
+
+            if (state >= 4)
+            {
+                if (state % 2 == 0)
+                {
+                    lb.X = 1 - lb.X;
+                    rb.X = 1 - rb.X;
+                    rt.X = 1 - rt.X;
+                    lt.X = 1 - lt.X;
+                }
+                else
+                {
+                    lb.Y = 1 - lb.Y;
+                    rb.Y = 1 - rb.Y;
+                    rt.Y = 1 - rt.Y;
+                    lt.Y = 1 - lt.Y;
+                }
+            }
+        }
+
+        return [lb, rb, rt, lt];
+    }
+
     private static int FloorDiv(int a, int b)
     {
         return (int) MathF.Floor(a / (float) b);

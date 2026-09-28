@@ -8,7 +8,9 @@ Used by the admin vessel spawner and the shipyard console's Preview button; `wf_
 its own. Entry points: `ShipPreviewSystem` (loads grids onto preview maps), `ShipPreviewControl` (draws one) and
 `ShipPreviewWindow`. `ShipPreviewMigrationSystem` applies the entity migration files (`/migration.yml`,
 `/nf_migration.yml`, `/mono_migration.yml`) the way the server's `MapMigrationSystem` does; without it a grid that
-still uses a removed prototype ID fails to preview.
+still uses a removed prototype ID fails to preview. Components the client doesn't have (`Shuttle`,
+`GridPathfinding` and the like, on every saved ship) are dropped before loading, so previews don't log errors.
+`TryLoadText` previews YAML the server sent, which the mapping tools' Maps window uses.
 
 Vessel grids must sit under `Resources/SharedMaps`: client builds leave out `Resources/Maps`, so a grid there only
 previews in a dev client. `VesselGridPathTest` checks every vessel.

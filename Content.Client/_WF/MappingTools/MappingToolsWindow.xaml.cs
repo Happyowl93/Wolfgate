@@ -23,6 +23,7 @@ public sealed partial class MappingToolsWindow : FancyWindow
         "wf-mapping-tools-key-shift-drag",
         "wf-mapping-tools-key-move",
         "wf-mapping-tools-key-rotate",
+        "wf-mapping-tools-key-mirror",
         "wf-mapping-tools-key-delete",
         "wf-mapping-tools-key-clipboard",
         "wf-mapping-tools-key-keep-pasting",

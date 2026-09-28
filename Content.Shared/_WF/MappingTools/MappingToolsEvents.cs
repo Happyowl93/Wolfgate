@@ -27,6 +27,16 @@ public sealed class MappingToolsMoveEvent(MappingSelection selection, Vector2i o
 }
 
 /// <summary>
+/// Mirrors the selection in place, left-right or with <see cref="Vertical"/> top-bottom.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class MappingToolsMirrorEvent(MappingSelection selection, bool vertical) : EntityEventArgs
+{
+    public readonly MappingSelection Selection = selection;
+    public readonly bool Vertical = vertical;
+}
+
+/// <summary>
 /// Copies the selection to the sender's clipboard, deleting it when <see cref="Cut"/> is set.
 /// </summary>
 [Serializable, NetSerializable]

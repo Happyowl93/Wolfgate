@@ -287,6 +287,18 @@ public sealed class MappingSelectionTool
         return true;
     }
 
+    /// <summary>
+    /// Mirrors the selection in place; it covers the same cells afterwards.
+    /// </summary>
+    public bool Mirror(bool vertical)
+    {
+        if (!Active || BuildSelection() is not { } selection)
+            return false;
+
+        _system.Send(new MappingToolsMirrorEvent(selection, vertical));
+        return true;
+    }
+
     public bool Copy(bool cut)
     {
         if (!Active || BuildSelection() is not { } selection)

@@ -653,6 +653,15 @@ binds:
 - function: WFMappingRotate
   type: State
   key: R
+- function: WFMappingMirror
+  type: State
+  key: F
+  priority: 1
+- function: WFMappingMirrorVertical
+  type: State
+  key: F
+  mod1: Shift
+  priority: 1
 - function: WFMappingUndo
   type: State
   key: Z

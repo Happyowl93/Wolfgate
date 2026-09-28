@@ -7,7 +7,10 @@ the selection to move it, R to rotate it clockwise, Delete to remove it, and Ctr
 Ctrl+X / Ctrl+V to copy, cut and paste it (R turns the paste preview, Shift+click keeps pasting). Picking something in
 the spawn menu pauses Select. Ctrl+Z and Ctrl+Y (or Ctrl+Shift+Z) undo and redo while the window is open, and the
 history also covers tiles, entities and decals placed or erased with the spawn menu. The Eyedropper picks the next clicked entity (with its rotation), or the floor tile under the cursor, and starts
-placing it; unlike the sandbox P key it works in any round. A Hide walls toggle hides every wall on your client only, so what's behind them can be seen and
+placing it; unlike the sandbox P key it works in any round. Mirror L/R (F) and Mirror T/B (Shift+F) flip the selection in place. The Maps window (Save / load maps...)
+lists your saves and the game's ships and maps with a preview of the selected one, saves the grid or map you stand on
+into `Mapping/` in the server data folder, opens a file on a new map as `mapping` does, or drops a grid where you
+stand. A Hide walls toggle hides every wall on your client only, so what's behind them can be seen and
 clicked. It needs the Mapping admin flag.
 
 Upstream's mapping screen (`MappingState`) is unreachable since upstream stopped switching to it, so these tools sit on
@@ -27,8 +30,12 @@ rotation maths).
   that wasn't deleted with it. Restored entities get new uids; `MappingEntityRef` lets older edits follow them.
 - Moves keep the same entities, so their links and state are untouched. Anchored entities stay anchored the whole way
   (unanchoring would make cables cut themselves); a `ReAnchorEvent` tells node networks and airtightness about the new
-  cell, and the client re-smooths walls that moved while anchored, since smoothing only reacts to anchoring. Only direct children of the grid are selected;
-  grids, players, ghosts and anything holding a player are skipped.
+  cell, and the client re-smooths walls that moved while anchored, since smoothing only reacts to anchoring. Only
+  direct children of the grid are selected; grids, players, ghosts and anything holding a player are skipped.
+- Mirroring flips angles (left-right negates them, top-bottom reflects them about east-west). Pipe fittings that
+  aren't symmetric take the quarter turn that gives them the mirrored connections; one-sided decals (`...Ne`, `...E`)
+  swap to their mirrored ID when it exists; rotatable tiles take the rotate/mirror state that matches Clyde's
+  rendering. Other lopsided sprites (a chair's armrest, a sign's text) can't be mirrored and keep their look.
 - Pasting off every grid lands on the grid the clipboard came from, or on a new grid if that one is gone.
 - Grid splitting is paused while an edit applies, so moving tiles away from the hull leaves one grid.
 - History holds the last 100 edits per mapper and is dropped on disconnect and round restart. Placement-menu edits in
@@ -42,18 +49,23 @@ rotation maths).
 ### Server
 
 - [`Content.Server/_WF/MappingTools/MappingEdit.cs`](MappingEdit.cs)
+- [`Content.Server/_WF/MappingTools/MappingMapsSystem.cs`](MappingMapsSystem.cs)
 - [`Content.Server/_WF/MappingTools/MappingToolsSystem.Apply.cs`](MappingToolsSystem.Apply.cs)
 - [`Content.Server/_WF/MappingTools/MappingToolsSystem.cs`](MappingToolsSystem.cs)
 - [`Content.Server/_WF/MappingTools/MappingToolsSystem.History.cs`](MappingToolsSystem.History.cs)
 
 ### Shared
 
+- [`Content.Shared/_WF/MappingTools/MappingMapsEvents.cs`](../../../Content.Shared/_WF/MappingTools/MappingMapsEvents.cs)
 - [`Content.Shared/_WF/MappingTools/MappingToolsEvents.cs`](../../../Content.Shared/_WF/MappingTools/MappingToolsEvents.cs)
 - [`Content.Shared/_WF/MappingTools/MappingToolsMath.cs`](../../../Content.Shared/_WF/MappingTools/MappingToolsMath.cs)
 - [`Content.Shared/_WF/MappingTools/ToggleMappingToolsActionEvent.cs`](../../../Content.Shared/_WF/MappingTools/ToggleMappingToolsActionEvent.cs)
 
 ### Client
 
+- [`Content.Client/_WF/MappingTools/MappingMapsSystem.cs`](../../../Content.Client/_WF/MappingTools/MappingMapsSystem.cs)
+- [`Content.Client/_WF/MappingTools/MappingMapsWindow.xaml`](../../../Content.Client/_WF/MappingTools/MappingMapsWindow.xaml)
+- [`Content.Client/_WF/MappingTools/MappingMapsWindow.xaml.cs`](../../../Content.Client/_WF/MappingTools/MappingMapsWindow.xaml.cs)
 - [`Content.Client/_WF/MappingTools/MappingSelectionOverlay.cs`](../../../Content.Client/_WF/MappingTools/MappingSelectionOverlay.cs)
 - [`Content.Client/_WF/MappingTools/MappingSelectionTool.cs`](../../../Content.Client/_WF/MappingTools/MappingSelectionTool.cs)
 - [`Content.Client/_WF/MappingTools/MappingToolsCommand.cs`](../../../Content.Client/_WF/MappingTools/MappingToolsCommand.cs)
@@ -63,6 +75,7 @@ rotation maths).
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/MappingTools/MappingMapsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/MappingTools/MappingMapsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/MappingTools/MappingToolsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/MappingTools/MappingToolsTest.cs)
 
 ### Localization

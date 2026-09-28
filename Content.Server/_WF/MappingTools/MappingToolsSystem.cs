@@ -4,7 +4,10 @@ using Content.Server.Administration.Logs;
 using Content.Server.Administration.Managers;
 using Content.Server.Decals;
 using Content.Server.Popups;
+using Content.Shared.NodeContainer;
+using Content.Server.NodeContainer.Nodes;
 using Content.Shared._WF.MappingTools;
+using Content.Shared.Atmos;
 using Content.Shared.Administration;
 using Content.Shared.Database;
 using Content.Shared.Decals;
@@ -16,6 +19,7 @@ using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Player;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.MappingTools;
 
@@ -35,6 +39,7 @@ public sealed partial class MappingToolsSystem : EntitySystem
     [Dependency] private MapSystem _map = default!;
     [Dependency] private MetaDataSystem _meta = default!;
     [Dependency] private PopupSystem _popup = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private TransformSystem _transform = default!;
 
     /// <summary>
@@ -57,6 +62,7 @@ public sealed partial class MappingToolsSystem : EntitySystem
         SubscribeNetworkEvent<MappingToolsCopyEvent>(OnCopy);
         SubscribeNetworkEvent<MappingToolsPasteEvent>(OnPaste);
         SubscribeNetworkEvent<MappingToolsDeleteEvent>(OnDelete);
+        SubscribeNetworkEvent<MappingToolsMirrorEvent>(OnMirror);
         SubscribeNetworkEvent<MappingToolsHistoryEvent>(OnHistory);
 
         InitializeHistory();
@@ -209,6 +215,12 @@ public sealed partial class MappingToolsSystem : EntitySystem
             Paste(args.SenderSession, GetCoordinates(ev.Target), ev.Turns);
     }
 
+    private void OnMirror(MappingToolsMirrorEvent ev, EntitySessionEventArgs args)
+    {
+        if (CanUse(args.SenderSession))
+            Mirror(args.SenderSession, ev.Selection, ev.Vertical);
+    }
+
     private void OnDelete(MappingToolsDeleteEvent ev, EntitySessionEventArgs args)
     {
         if (CanUse(args.SenderSession))
@@ -233,13 +245,58 @@ public sealed partial class MappingToolsSystem : EntitySystem
         if (offset == Vector2i.Zero && turns == 0)
             return;
 
+        var edit = TransformEdit(sel,
+            turns == 0 ? "wf-mapping-tools-edit-move" : "wf-mapping-tools-edit-rotate",
+            cell => MappingToolsMath.TransformCell(cell, sel.Extent, offset, turns),
+            point => MappingToolsMath.TransformPoint(point, sel.Extent, offset, turns),
+            (_, rotation) => rotation + MappingToolsMath.RotationDelta(turns),
+            tile => RotateTile(tile, turns),
+            decal => MoveDecal(decal, sel.Extent, offset, turns));
+
+        Commit(session, edit);
+        _adminLog.Add(LogType.Action, LogImpact.Medium,
+            $"{session:player} used mapping tools to move {sel.Entities.Count} entities and {sel.Tiles.Count} tiles on {ToPrettyString(sel.Grid.Owner):grid} by {offset}, {turns} turns");
+    }
+
+    /// <summary>
+    /// Mirrors a selection in place, left-right or with <paramref name="vertical"/> top-bottom, as one undoable edit.
+    /// </summary>
+    public void Mirror(ICommonSession session, MappingSelection selection, bool vertical)
+    {
+        if (!TryResolve(selection, out var sel))
+            return;
+
+        var edit = TransformEdit(sel, "wf-mapping-tools-edit-mirror",
+            cell => MappingToolsMath.MirrorCell(cell, sel.Extent, vertical),
+            point => MappingToolsMath.MirrorPoint(point, sel.Extent, vertical),
+            (uid, rotation) => MirrorRotation(uid, rotation, vertical),
+            tile => MirrorTile(tile, vertical),
+            decal => MirrorDecal(decal, sel.Extent, vertical));
+
+        Commit(session, edit);
+        _adminLog.Add(LogType.Action, LogImpact.Medium,
+            $"{session:player} used mapping tools to mirror {sel.Entities.Count} entities and {sel.Tiles.Count} tiles on {ToPrettyString(sel.Grid.Owner):grid}");
+    }
+
+    /// <summary>
+    /// An edit that carries everything in a selection to new cells, positions and facings.
+    /// </summary>
+    private MappingEdit TransformEdit(
+        Resolved sel,
+        string name,
+        Func<Vector2i, Vector2i> cellMap,
+        Func<Vector2, Vector2> pointMap,
+        Func<EntityUid, Angle, Angle> rotationMap,
+        Func<Tile, Tile> tileMap,
+        Func<Decal, Decal> decalMap)
+    {
         var grid = sel.Grid.Owner;
-        var edit = new MappingEdit(turns == 0 ? "wf-mapping-tools-edit-move" : "wf-mapping-tools-edit-rotate");
+        var edit = new MappingEdit(name);
 
         var newTiles = new Dictionary<Vector2i, Tile>();
         foreach (var (cell, tile) in sel.Tiles)
         {
-            newTiles[MappingToolsMath.TransformCell(cell, sel.Extent, offset, turns)] = RotateTile(tile, turns);
+            newTiles[cellMap(cell)] = tileMap(tile);
         }
 
         foreach (var (cell, _) in sel.Tiles)
@@ -258,8 +315,8 @@ public sealed partial class MappingToolsSystem : EntitySystem
             var old = PoseOf(uid);
             var pose = old with
             {
-                Position = MappingToolsMath.TransformPoint(old.Position, sel.Extent, offset, turns),
-                Rotation = old.Rotation + MappingToolsMath.RotationDelta(turns),
+                Position = pointMap(old.Position),
+                Rotation = rotationMap(uid, old.Rotation),
             };
             edit.Moves.Add(new MappingEntityMove(GetRef(uid), old, pose));
         }
@@ -267,12 +324,10 @@ public sealed partial class MappingToolsSystem : EntitySystem
         foreach (var decal in sel.Decals)
         {
             edit.DecalsRemoved.Add(new MappingDecal(grid, decal));
-            edit.DecalsAdded.Add(new MappingDecal(grid, MoveDecal(decal, sel.Extent, offset, turns)));
+            edit.DecalsAdded.Add(new MappingDecal(grid, decalMap(decal)));
         }
 
-        Commit(session, edit);
-        _adminLog.Add(LogType.Action, LogImpact.Medium,
-            $"{session:player} used mapping tools to move {sel.Entities.Count} entities and {sel.Tiles.Count} tiles on {ToPrettyString(grid):grid} by {offset}, {turns} turns");
+        return edit;
     }
 
     /// <summary>
@@ -466,16 +521,110 @@ public sealed partial class MappingToolsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Turns a rotatable tile with its selection; its rotation steps counterclockwise from south.
+    /// Turns a rotatable tile with its selection.
     /// </summary>
     private Tile RotateTile(Tile tile, int turns)
     {
         if (turns == 0 || tile.IsEmpty || !_tileDefs[tile.TypeId].AllowRotationMirror)
             return tile;
 
-        var mirror = tile.RotationMirroring & 4;
-        var direction = ((tile.RotationMirroring & 3) - turns + 4) % 4;
-        return new Tile(tile.TypeId, tile.Flags, tile.Variant, (byte) (direction | mirror));
+        return new Tile(tile.TypeId, tile.Flags, tile.Variant, MappingToolsMath.RotateTileState(tile.RotationMirroring, turns));
+    }
+
+    /// <summary>
+    /// Mirrors a rotatable tile with its selection.
+    /// </summary>
+    private Tile MirrorTile(Tile tile, bool vertical)
+    {
+        if (tile.IsEmpty || !_tileDefs[tile.TypeId].AllowRotationMirror)
+            return tile;
+
+        return new Tile(tile.TypeId, tile.Flags, tile.Variant, MappingToolsMath.MirrorTileState(tile.RotationMirroring, vertical));
+    }
+
+    /// <summary>
+    /// The facing a mirrored entity takes. Pipe fittings that aren't symmetric (bends, T-junctions, mixers) can't
+    /// just flip their angle, so they take whichever quarter turn gives them the mirrored connections.
+    /// </summary>
+    private Angle MirrorRotation(EntityUid uid, Angle rotation, bool vertical)
+    {
+        var mirrored = MappingToolsMath.MirrorAngle(rotation, vertical);
+        if (!TryComp(uid, out NodeContainerComponent? nodes))
+            return mirrored;
+
+        var pipes = new List<PipeNode>();
+        foreach (var node in nodes.Nodes.Values)
+        {
+            if (node is PipeNode pipe)
+                pipes.Add(pipe);
+        }
+
+        if (pipes.Count == 0)
+            return mirrored;
+
+        // The plain mirror goes first, so symmetric fittings keep the facing a mapper would expect.
+        foreach (var candidate in new[] { mirrored, mirrored + Math.PI / 2, mirrored + Math.PI, mirrored - Math.PI / 2 })
+        {
+            var matches = true;
+            foreach (var pipe in pipes)
+            {
+                var wanted = MirrorPipeDirection(pipe.OriginalPipeDirection.RotatePipeDirection(rotation), vertical);
+                if (pipe.OriginalPipeDirection.RotatePipeDirection(candidate) != wanted)
+                {
+                    matches = false;
+                    break;
+                }
+            }
+
+            if (matches)
+                return candidate.Reduced();
+        }
+
+        return mirrored;
+    }
+
+    private static PipeDirection MirrorPipeDirection(PipeDirection direction, bool vertical)
+    {
+        var (a, b) = vertical ? (PipeDirection.North, PipeDirection.South) : (PipeDirection.East, PipeDirection.West);
+        var result = direction & ~(a | b);
+        if (direction.HasFlag(a))
+            result |= b;
+        if (direction.HasFlag(b))
+            result |= a;
+
+        return result;
+    }
+
+    /// <summary>
+    /// Mirrors a decal with its selection. Decals drawn for one side (corners, ends, lines) swap to their mirrored
+    /// counterpart when one exists, since a sprite can't be flipped.
+    /// </summary>
+    private Decal MirrorDecal(Decal decal, Box2i extent, bool vertical)
+    {
+        var half = new Vector2(0.5f);
+        var centre = MappingToolsMath.MirrorPoint(decal.Coordinates + half, extent, vertical);
+        return new Decal(centre - half, MirrorDecalId(decal.Id, vertical), decal.Color,
+            MappingToolsMath.MirrorAngle(decal.Angle, vertical), decal.ZIndex, decal.Cleanable);
+    }
+
+    private static readonly (string From, string To)[] HorizontalDecalSuffixes =
+        { ("Ne", "Nw"), ("Nw", "Ne"), ("Se", "Sw"), ("Sw", "Se"), ("E", "W"), ("W", "E") };
+
+    private static readonly (string From, string To)[] VerticalDecalSuffixes =
+        { ("Ne", "Se"), ("Se", "Ne"), ("Nw", "Sw"), ("Sw", "Nw"), ("N", "S"), ("S", "N") };
+
+    private string MirrorDecalId(string id, bool vertical)
+    {
+        foreach (var (from, to) in vertical ? VerticalDecalSuffixes : HorizontalDecalSuffixes)
+        {
+            if (!id.EndsWith(from, StringComparison.Ordinal))
+                continue;
+
+            var mirrored = id[..^from.Length] + to;
+            return _prototypes.HasIndex<DecalPrototype>(mirrored) ? mirrored : id;
+        }
+
+        return id;
     }
 
     /// <summary>

@@ -22,6 +22,11 @@
                     ToolTip="{Loc 'wf-mapping-tools-rotate-tooltip'}" TooltipDelay="0" />
             <Button Name="DeleteButton" Access="Public" HorizontalExpand="True" Text="{Loc 'wf-mapping-tools-delete'}"
                     ToolTip="{Loc 'wf-mapping-tools-delete-tooltip'}" TooltipDelay="0" />
+            <Button Name="MirrorButton" Access="Public" HorizontalExpand="True" Text="{Loc 'wf-mapping-tools-mirror'}"
+                    ToolTip="{Loc 'wf-mapping-tools-mirror-tooltip'}" TooltipDelay="0" />
+            <Button Name="MirrorVerticalButton" Access="Public" HorizontalExpand="True"
+                    Text="{Loc 'wf-mapping-tools-mirror-vertical'}"
+                    ToolTip="{Loc 'wf-mapping-tools-mirror-vertical-tooltip'}" TooltipDelay="0" />
         </GridContainer>
 
         <Label Text="{Loc 'wf-mapping-tools-section-history'}" StyleClasses="LabelHeading" Margin="0 8 0 0" />
@@ -35,6 +40,10 @@
         <Label Text="{Loc 'wf-mapping-tools-section-view'}" StyleClasses="LabelHeading" Margin="0 8 0 0" />
         <Button Name="HideWallsButton" Access="Public" ToggleMode="True" Text="{Loc 'wf-mapping-tools-hide-walls'}"
                 ToolTip="{Loc 'wf-mapping-tools-hide-walls-tooltip'}" TooltipDelay="0" />
+
+        <Label Text="{Loc 'wf-mapping-tools-section-files'}" StyleClasses="LabelHeading" Margin="0 8 0 0" />
+        <Button Name="MapsButton" Access="Public" Text="{Loc 'wf-mapping-tools-maps'}"
+                ToolTip="{Loc 'wf-mapping-tools-maps-tooltip'}" TooltipDelay="0" />
 
         <Label Text="{Loc 'wf-mapping-tools-section-keys'}" StyleClasses="LabelHeading" Margin="0 8 0 0" />
         <GridContainer Name="KeyGrid" Columns="2" HSeparationOverride="12" VSeparationOverride="2" />

@@ -29,6 +29,7 @@ public sealed class MappingToolsSystem : EntitySystem
     [Dependency] private IMapManager _mapManager = default!;
     [Dependency] private IPlacementManager _placement = default!;
     [Dependency] private IconSmoothSystem _smooth = default!;
+    [Dependency] private MappingMapsSystem _maps = default!;
     [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private SpriteSystem _sprite = default!;
     [Dependency] private TagSystem _tag = default!;
@@ -51,6 +52,8 @@ public sealed class MappingToolsSystem : EntitySystem
         ContentKeyFunctions.WFMappingPaste,
         ContentKeyFunctions.WFMappingDelete,
         ContentKeyFunctions.WFMappingRotate,
+        ContentKeyFunctions.WFMappingMirror,
+        ContentKeyFunctions.WFMappingMirrorVertical,
         ContentKeyFunctions.WFMappingUndo,
         ContentKeyFunctions.WFMappingRedo,
     };
@@ -107,6 +110,8 @@ public sealed class MappingToolsSystem : EntitySystem
             .Bind(ContentKeyFunctions.WFMappingPaste, Handler(() => _tool.Paste()))
             .Bind(ContentKeyFunctions.WFMappingDelete, Handler(() => _tool.Delete()))
             .Bind(ContentKeyFunctions.WFMappingRotate, Handler(() => _tool.Rotate()))
+            .Bind(ContentKeyFunctions.WFMappingMirror, Handler(() => _tool.Mirror(false)))
+            .Bind(ContentKeyFunctions.WFMappingMirrorVertical, Handler(() => _tool.Mirror(true)))
             .Bind(ContentKeyFunctions.WFMappingUndo, Handler(() => Enabled && History(false)))
             .Bind(ContentKeyFunctions.WFMappingRedo, Handler(() => Enabled && History(true)))
             .Register<MappingToolsSystem>();
@@ -159,7 +164,10 @@ public sealed class MappingToolsSystem : EntitySystem
             _window.PasteButton.OnPressed += _ => _tool.Paste();
             _window.RotateButton.OnPressed += _ => _tool.Rotate();
             _window.DeleteButton.OnPressed += _ => _tool.Delete();
+            _window.MirrorButton.OnPressed += _ => _tool.Mirror(false);
+            _window.MirrorVerticalButton.OnPressed += _ => _tool.Mirror(true);
             _window.HideWallsButton.OnToggled += args => SetWallsHidden(args.Pressed);
+            _window.MapsButton.OnPressed += _ => _maps.Open();
             _window.EyedropperButton.OnToggled += args => SetPicking(args.Pressed);
             _window.OnClose += () => SetEnabled(false);
             _window.OpenCenteredLeft();

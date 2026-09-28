@@ -3,6 +3,7 @@ using System.Linq;
 using System.Numerics;
 using Content.Server._WF.MappingTools;
 using Content.Shared._WF.MappingTools;
+using Content.Shared.Atmos;
 using Robust.Server.GameObjects;
 using Robust.Shared.Containers;
 using Robust.Shared.GameObjects;
@@ -303,6 +304,78 @@ public sealed class MappingToolsTest
         });
 
         await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task Mirror()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var testMap = await pair.CreateTestMap();
+        var mapSys = entMan.System<MapSystem>();
+        var tools = entMan.System<MappingToolsSystem>();
+        var session = pair.Player!;
+        var grid = testMap.Grid;
+
+        await server.WaitAssertion(() =>
+        {
+            grid.Comp.CanSplit = false;
+            var plating = new Tile(server.ResolveDependency<ITileDefinitionManager>()["Plating"].TileId);
+            mapSys.SetTiles(grid, grid, new() { (new Vector2i(10, 0), plating), (new Vector2i(11, 0), plating), (new Vector2i(12, 0), plating) });
+
+            var fixture = entMan.SpawnEntity("WFMappingToolsTestFixture", new EntityCoordinates(grid, new Vector2(10.5f, 0.5f)));
+
+            // A bend is not symmetric: mirrored left-right, its east arm has to become a west arm.
+            var bend = entMan.SpawnEntity("GasPipeBend", new EntityCoordinates(grid, new Vector2(12.5f, 0.5f)));
+            PipeDirection Connections() => entMan.GetComponent<Content.Shared.NodeContainer.NodeContainerComponent>(bend)
+                .Nodes.Values.OfType<Content.Server.NodeContainer.Nodes.PipeNode>().Single().CurrentPipeDirection;
+            var before = Connections();
+
+            var selection = new MappingSelection { Grid = entMan.GetNetEntity(grid), Area = new Box2i(10, 0, 13, 1) };
+            tools.Mirror(session, selection, vertical: false);
+
+            var after = Connections();
+            Assert.Multiple(() =>
+            {
+                Assert.That(entMan.GetComponent<TransformComponent>(fixture).LocalPosition, Is.EqualTo(new Vector2(12.5f, 0.5f)));
+                Assert.That(entMan.GetComponent<TransformComponent>(bend).LocalPosition, Is.EqualTo(new Vector2(10.5f, 0.5f)));
+                Assert.That(after.HasFlag(PipeDirection.East), Is.EqualTo(before.HasFlag(PipeDirection.West)));
+                Assert.That(after.HasFlag(PipeDirection.West), Is.EqualTo(before.HasFlag(PipeDirection.East)));
+                Assert.That(after.HasFlag(PipeDirection.North), Is.EqualTo(before.HasFlag(PipeDirection.North)));
+                Assert.That(after.HasFlag(PipeDirection.South), Is.EqualTo(before.HasFlag(PipeDirection.South)));
+            });
+
+            tools.StepHistory(session, redo: false);
+            Assert.Multiple(() =>
+            {
+                Assert.That(entMan.GetComponent<TransformComponent>(fixture).LocalPosition, Is.EqualTo(new Vector2(10.5f, 0.5f)));
+                Assert.That(Connections(), Is.EqualTo(before));
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public void TileStateMath()
+    {
+        Assert.Multiple(() =>
+        {
+            for (byte state = 0; state < 8; state++)
+            {
+                Assert.That(MappingToolsMath.RotateTileState(state, 4), Is.EqualTo(state));
+                Assert.That(MappingToolsMath.MirrorTileState(MappingToolsMath.MirrorTileState(state, false), false), Is.EqualTo(state));
+                Assert.That(MappingToolsMath.MirrorTileState(MappingToolsMath.MirrorTileState(state, true), true), Is.EqualTo(state));
+                // A mirror always toggles the mirrored half of the states.
+                Assert.That(MappingToolsMath.MirrorTileState(state, false) >= 4, Is.Not.EqualTo(state >= 4));
+            }
+
+            // Facing east mirrors to west left-right; facing south mirrors to north top-bottom.
+            Assert.That(MappingToolsMath.MirrorAngle(Direction.East.ToAngle(), false).GetDir(), Is.EqualTo(Direction.West));
+            Assert.That(MappingToolsMath.MirrorAngle(Direction.South.ToAngle(), true).GetDir(), Is.EqualTo(Direction.North));
+            Assert.That(MappingToolsMath.MirrorAngle(Direction.North.ToAngle(), false).GetDir(), Is.EqualTo(Direction.North));
+        });
     }
 
     [Test]

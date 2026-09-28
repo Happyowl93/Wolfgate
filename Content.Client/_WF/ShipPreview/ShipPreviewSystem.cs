@@ -1,3 +1,5 @@
+using System.IO;
+using System.Linq;
 using System.Numerics;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Robust.Client.GameObjects;
@@ -5,7 +7,12 @@ using Robust.Shared.EntitySerialization;
 using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
+using Robust.Shared.Serialization.Markdown;
+using Robust.Shared.Serialization.Markdown.Mapping;
+using Robust.Shared.Serialization.Markdown.Sequence;
+using Robust.Shared.Serialization.Markdown.Value;
 using Robust.Shared.Utility;
+using YamlDotNet.RepresentationModel;
 
 namespace Content.Client._WF.ShipPreview;
 
@@ -44,6 +51,7 @@ public sealed class ShipPreviewHandle
 /// </remarks>
 public sealed partial class ShipPreviewSystem : EntitySystem
 {
+    [Dependency] private IComponentFactory _factory = default!;
     [Dependency] private MapSystem _map = default!;
     [Dependency] private MapLoaderSystem _loader = default!;
     [Dependency] private MetaDataSystem _meta = default!;
@@ -105,6 +113,30 @@ public sealed partial class ShipPreviewSystem : EntitySystem
     /// </summary>
     public bool TryLoad(ShipPreviewHandle handle, ResPath path, string? name, out ShipPreviewGrid preview)
     {
+        return TryLoad(handle, path, name, out preview, () => _loader.TryReadFile(path, out var data) ? data : null);
+    }
+
+    /// <summary>
+    /// Loads a grid from YAML text, such as a file the server sent over, under <paramref name="key"/> so loading the
+    /// same text again does nothing.
+    /// </summary>
+    public bool TryLoadText(ShipPreviewHandle handle, ResPath key, string yaml, string? name, out ShipPreviewGrid preview)
+    {
+        return TryLoad(handle, key, name, out preview, () =>
+        {
+            var stream = new YamlStream();
+            stream.Load(new StringReader(yaml));
+            return stream.Documents.Count > 0 ? stream.Documents[0].RootNode.ToDataNode() as MappingDataNode : null;
+        });
+    }
+
+    private bool TryLoad(
+        ShipPreviewHandle handle,
+        ResPath path,
+        string? name,
+        out ShipPreviewGrid preview,
+        Func<MappingDataNode?> read)
+    {
         preview = default;
 
         if (GetCurrent(handle) is { } current && handle.LoadedPath == path)
@@ -121,15 +153,39 @@ public sealed partial class ShipPreviewSystem : EntitySystem
         Entity<MapGridComponent>? grid;
         try
         {
-            if (!_loader.TryLoadGrid(handle.MapId, path, out grid, new DeserializationOptions
+            if (read() is not { } data)
+            {
+                Log.Warning($"Ship preview couldn't read {path}");
+                return false;
+            }
+
+            RemoveUnknownComponents(data);
+
+            var options = new MapLoadOptions
+            {
+                MergeMap = handle.MapId,
+                ExpectedCategory = FileCategory.Grid,
+                DeserializationOptions = new DeserializationOptions
                 {
                     InitializeMaps = false,
                     PauseMaps = true,
-                }))
+                },
+            };
+
+            if (!_loader.TryLoadGeneric(data, path.ToString(), out var result, options))
             {
                 Log.Warning($"Ship preview failed to load grid {path}");
                 return false;
             }
+
+            if (result.Grids.Count != 1)
+            {
+                _loader.Delete(result);
+                Log.Warning($"Ship preview expected one grid in {path}, found {result.Grids.Count}");
+                return false;
+            }
+
+            grid = result.Grids.Single();
         }
         catch (Exception e)
         {
@@ -162,6 +218,38 @@ public sealed partial class ShipPreviewSystem : EntitySystem
         handle.Loaded = preview;
         handle.LoadedPath = path;
         return true;
+    }
+
+    /// <summary>
+    /// Drops components the client has no registration for, such as the server-only shuttle and pathfinding
+    /// components every saved ship carries, which the loader would otherwise log an error for each time.
+    /// </summary>
+    private void RemoveUnknownComponents(MappingDataNode data)
+    {
+        if (!data.TryGet("entities", out SequenceDataNode? prototypes))
+            return;
+
+        foreach (var prototype in prototypes.OfType<MappingDataNode>())
+        {
+            if (!prototype.TryGet("entities", out SequenceDataNode? entities))
+                continue;
+
+            foreach (var entity in entities.OfType<MappingDataNode>())
+            {
+                if (!entity.TryGet("components", out SequenceDataNode? components))
+                    continue;
+
+                for (var i = components.Count - 1; i >= 0; i--)
+                {
+                    if (components[i] is MappingDataNode component &&
+                        component.TryGet("type", out ValueDataNode? type) &&
+                        !_factory.TryGetRegistration(type.Value, out _))
+                    {
+                        components.RemoveAt(i);
+                    }
+                }
+            }
+        }
     }
 
     /// <summary>
