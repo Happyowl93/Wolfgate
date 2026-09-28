@@ -1,6 +1,7 @@
 - type: cargoBounty
   id: MMCBountySpaceCashT1
-  reward: 300 # 1.5x input
+  # WOLFGATE: MMC cash bounties pay 0.9x their value so cash-to-MIC-to-cash can't loop for profit
+  reward: 180 # 0.9x input (was 300)
   rewardSuffix: MIC
   rewardProto: MMCIndustrialCredit
   description: mmc-bounty-desc-money
@@ -14,7 +15,8 @@
 
 - type: cargoBounty
   id: MMCBountySpaceCashT2
-  reward: 800 # 2x input
+  # WOLFGATE: MMC cash bounties pay 0.9x their value so cash-to-MIC-to-cash can't loop for profit
+  reward: 360 # 0.9x input (was 800)
   rewardSuffix: MIC
   rewardProto: MMCIndustrialCredit
   description: mmc-bounty-desc-money
@@ -28,7 +30,8 @@
 
 - type: cargoBounty
   id: MMCBountySpaceCashT3
-  reward: 1600 # 2x input
+  # WOLFGATE: MMC cash bounties pay 0.9x their value so cash-to-MIC-to-cash can't loop for profit
+  reward: 720 # 0.9x input (was 1600)
   rewardSuffix: MIC
   rewardProto: MMCIndustrialCredit
   description: mmc-bounty-desc-money
