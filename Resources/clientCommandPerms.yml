@@ -79,6 +79,8 @@
     - mapping
     - toggleautosave
     - toggledecals
+    # WOLFGATE(MappingTools): client-only command that opens the mapping tools window
+    - mappingtools
 
 - Flags: QUERY
   Commands:

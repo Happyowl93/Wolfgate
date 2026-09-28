@@ -7,6 +7,9 @@ wf-mapping-tools-action-name = Mapping tools
 wf-mapping-tools-select = Enable selection tools
 wf-mapping-tools-select-tooltip = While on, left click selects and drags instead of interacting (M). Picking something in the spawn menu pauses it.
 
+wf-mapping-tools-eyedropper = Eyedropper
+wf-mapping-tools-eyedropper-tooltip = Click an entity to start placing it with the same rotation, or empty floor to place that tile.
+
 wf-mapping-tools-section-edit = Edit
 wf-mapping-tools-section-history = History
 wf-mapping-tools-section-view = View

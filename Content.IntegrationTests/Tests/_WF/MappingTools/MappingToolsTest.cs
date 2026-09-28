@@ -217,6 +217,95 @@ public sealed class MappingToolsTest
     }
 
     [Test]
+    public async Task HideWalls()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var client = pair.Client;
+        var testMap = await pair.CreateTestMap();
+
+        var wall = EntityUid.Invalid;
+        await server.WaitPost(() =>
+        {
+            wall = server.EntMan.SpawnEntity("WallSolid", new EntityCoordinates(testMap.Grid, new Vector2(0.5f, 0.5f)));
+
+            // Maps opened with the mapping command are paused, which some entity queries skip.
+            server.EntMan.System<MapSystem>().SetPaused(testMap.MapId, true);
+        });
+        await pair.RunTicksSync(10);
+
+        var clientTools = client.EntMan.System<Content.Client._WF.MappingTools.MappingToolsSystem>();
+        var clientWall = client.EntMan.GetEntity(server.EntMan.GetNetEntity(wall));
+
+        await client.WaitAssertion(() =>
+        {
+            var sprite = client.EntMan.GetComponent<Robust.Client.GameObjects.SpriteComponent>(clientWall);
+            Assert.That(sprite.Visible, Is.True);
+
+            clientTools.SetWallsHidden(true);
+            Assert.That(sprite.Visible, Is.False, "Hiding walls hides the wall's sprite.");
+
+            clientTools.SetWallsHidden(false);
+            Assert.That(sprite.Visible, Is.True, "Showing walls brings it back.");
+
+            // The keys only exist while the tools are open, so Ctrl+C and the like don't shadow C for other players.
+            var common = client.ResolveDependency<Robust.Client.Input.IInputManager>().Contexts.GetContext("common");
+            Assert.That(common.FunctionExists(Content.Shared.Input.ContentKeyFunctions.WFMappingCopy), Is.False);
+            clientTools.SetEnabled(true);
+            Assert.That(common.FunctionExists(Content.Shared.Input.ContentKeyFunctions.WFMappingCopy), Is.True);
+            clientTools.SetEnabled(false);
+            Assert.That(common.FunctionExists(Content.Shared.Input.ContentKeyFunctions.WFMappingCopy), Is.False);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task Eyedropper()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var client = pair.Client;
+        var testMap = await pair.CreateTestMap();
+
+        var wall = EntityUid.Invalid;
+        await server.WaitPost(() =>
+        {
+            wall = server.EntMan.SpawnEntity("WallSolid", new EntityCoordinates(testMap.Grid, new Vector2(0.5f, 0.5f)));
+            server.EntMan.System<TransformSystem>().SetLocalRotation(wall, Angle.FromDegrees(90));
+            server.EntMan.System<MapSystem>().SetPaused(testMap.MapId, true);
+        });
+        await pair.RunTicksSync(10);
+
+        var tools = client.EntMan.System<Content.Client._WF.MappingTools.MappingToolsSystem>();
+        var placement = client.ResolveDependency<Robust.Client.Placement.IPlacementManager>();
+        var clientWall = client.EntMan.GetEntity(server.EntMan.GetNetEntity(wall));
+        var clientGrid = client.EntMan.GetEntity(server.EntMan.GetNetEntity(testMap.Grid.Owner));
+
+        await client.WaitAssertion(() =>
+        {
+            tools.Pick(client.EntMan.GetComponent<TransformComponent>(clientWall).Coordinates, clientWall);
+            Assert.Multiple(() =>
+            {
+                Assert.That(placement.CurrentPermission?.EntityType, Is.EqualTo("WallSolid"));
+                Assert.That(placement.Direction, Is.EqualTo(Direction.East), "The pick keeps the wall's rotation.");
+            });
+
+            // Nothing under the cursor: pick the floor tile instead.
+            placement.Clear();
+            tools.Pick(new EntityCoordinates(clientGrid, new Vector2(0.5f, 0.5f)), EntityUid.Invalid);
+            Assert.Multiple(() =>
+            {
+                Assert.That(placement.CurrentPermission?.IsTile, Is.True);
+                Assert.That(placement.CurrentPermission?.TileType, Is.EqualTo(testMap.Tile.Tile.TypeId));
+            });
+            placement.Clear();
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
     public void RotationMath()
     {
         var extent = new Box2i(0, 0, 3, 1);

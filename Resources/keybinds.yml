@@ -578,7 +578,7 @@ binds:
   key: Num6
 - function: Hotbar7
   type: State
-  key: M
+  key: Num7
 - function: Hotbar8
   type: State
   key: Num8

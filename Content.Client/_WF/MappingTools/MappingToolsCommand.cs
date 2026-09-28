@@ -1,12 +1,11 @@
-using Content.Shared.Administration;
 using Robust.Shared.Console;
 
 namespace Content.Client._WF.MappingTools;
 
 /// <summary>
-/// Opens or closes the mapping tools window. The server checks the Mapping flag on every request.
+/// Opens or closes the mapping tools window. Mapping admins only, via <c>clientCommandPerms.yml</c>; the server also
+/// checks the Mapping flag on every request.
 /// </summary>
-[AnyCommand]
 public sealed class MappingToolsCommand : LocalizedEntityCommands
 {
     [Dependency] private MappingToolsSystem _tools = default!;

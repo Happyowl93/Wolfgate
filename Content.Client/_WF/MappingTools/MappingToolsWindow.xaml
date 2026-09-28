@@ -6,6 +6,9 @@
         <Button Name="SelectButton" Access="Public" ToggleMode="True" MinHeight="36"
                 Text="{Loc 'wf-mapping-tools-select'}"
                 ToolTip="{Loc 'wf-mapping-tools-select-tooltip'}" TooltipDelay="0" />
+        <Button Name="EyedropperButton" Access="Public" ToggleMode="True"
+                Text="{Loc 'wf-mapping-tools-eyedropper'}"
+                ToolTip="{Loc 'wf-mapping-tools-eyedropper-tooltip'}" TooltipDelay="0" />
 
         <Label Text="{Loc 'wf-mapping-tools-section-edit'}" StyleClasses="LabelHeading" Margin="0 8 0 0" />
         <GridContainer Columns="3" HSeparationOverride="4" VSeparationOverride="4">

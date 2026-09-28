@@ -6,7 +6,8 @@ Shift+click to add or remove one, click and drag anywhere else to box-select til
 the selection to move it, R to rotate it clockwise, Delete to remove it, and Ctrl+C /
 Ctrl+X / Ctrl+V to copy, cut and paste it (R turns the paste preview, Shift+click keeps pasting). Picking something in
 the spawn menu pauses Select. Ctrl+Z and Ctrl+Y (or Ctrl+Shift+Z) undo and redo while the window is open, and the
-history also covers tiles, entities and decals placed or erased with the spawn menu. A Hide walls toggle hides every wall on your client only, so what's behind them can be seen and
+history also covers tiles, entities and decals placed or erased with the spawn menu. The Eyedropper picks the next clicked entity (with its rotation), or the floor tile under the cursor, and starts
+placing it; unlike the sandbox P key it works in any round. A Hide walls toggle hides every wall on your client only, so what's behind them can be seen and
 clicked. It needs the Mapping admin flag.
 
 Upstream's mapping screen (`MappingState`) is unreachable since upstream stopped switching to it, so these tools sit on
@@ -72,6 +73,7 @@ rotation maths).
 
 - [`Content.Client/Commands/MappingClientSideSetupCommand.cs`](../../../Content.Client/Commands/MappingClientSideSetupCommand.cs): open the mapping tools window
 - [`Content.Shared/Input/ContentKeyFunctions.cs`](../../../Content.Shared/Input/ContentKeyFunctions.cs): Select tool, clipboard and undo keys for the mapping tools
+- [`Resources/clientCommandPerms.yml`](../../../Resources/clientCommandPerms.yml): client-only command that opens the mapping tools window
 - [`Resources/keybinds.yml`](../../../Resources/keybinds.yml): Select tool, clipboard and undo keys for the mapping tools
 - [`Resources/mapping_actions.yml`](../../../Resources/mapping_actions.yml): button next to the eraser that opens or closes the mapping tools
 

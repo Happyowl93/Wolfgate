@@ -1,3 +1,4 @@
+using Content.Client._WF.MappingTools; // WOLFGATE(MappingTools)
 using Content.Client.Actions;
 using Content.Client.Mapping;
 using Content.Client.Markers;
@@ -26,7 +27,7 @@ internal sealed partial class MappingClientSideSetupCommand : LocalizedCommands
             _lightManager.Enabled = false;
             shell.ExecuteCommand("showsubfloorforever");
             _entitySystemManager.GetEntitySystem<ActionsSystem>().LoadActionAssignments("/mapping_actions.yml", false);
-            shell.ExecuteCommand("mappingtools true"); // WOLFGATE(MappingTools): open the mapping tools window
+            _entitySystemManager.GetEntitySystem<MappingToolsSystem>().SetEnabled(true); // WOLFGATE(MappingTools): open the mapping tools window
         }
     }
 }

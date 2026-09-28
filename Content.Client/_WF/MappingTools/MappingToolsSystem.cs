@@ -10,6 +10,7 @@ using Robust.Shared.Input;
 using Robust.Shared.Input.Binding;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
+using Robust.Shared.Enums;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
@@ -25,11 +26,13 @@ public sealed class MappingToolsSystem : EntitySystem
     [Dependency] private IInputManager _input = default!;
     [Dependency] private IOverlayManager _overlays = default!;
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private IMapManager _mapManager = default!;
     [Dependency] private IPlacementManager _placement = default!;
     [Dependency] private IconSmoothSystem _smooth = default!;
     [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private SpriteSystem _sprite = default!;
     [Dependency] private TagSystem _tag = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
 
     private static readonly ProtoId<TagPrototype> WallTag = "Wall";
 
@@ -55,6 +58,7 @@ public sealed class MappingToolsSystem : EntitySystem
     private MappingSelectionTool _tool = default!;
     private MappingToolsWindow? _window;
     private bool _selecting;
+    private bool _picking;
     private readonly HashSet<EntityUid> _hiddenWalls = new();
     private TimeSpan _nextWallSweep;
 
@@ -91,16 +95,10 @@ public sealed class MappingToolsSystem : EntitySystem
 
         _tool = new MappingSelectionTool(() => Selecting);
 
-        var context = _input.Contexts.GetContext("common");
-        foreach (var function in Functions)
-        {
-            context.AddFunction(function);
-        }
-
         CommandBinds.Builder
             .Bind(ContentKeyFunctions.WFMappingEnableSelect, Handler(() => Enabled && ToggleSelect()))
             .Bind(ContentKeyFunctions.WFMappingSelect, new PointerStateInputCmdHandler(
-                (_, coords, uid) => _tool.MouseDown(coords, uid),
+                (_, coords, uid) => Enabled && _picking ? Pick(coords, uid) : _tool.MouseDown(coords, uid),
                 (_, coords, _) => _tool.MouseUp(coords),
                 outsidePrediction: true))
             .Bind(ContentKeyFunctions.WFMappingSelectCancel, Handler(() => _tool.Cancel()))
@@ -120,11 +118,19 @@ public sealed class MappingToolsSystem : EntitySystem
 
         SetEnabled(false);
         CommandBinds.Unregister<MappingToolsSystem>();
+    }
 
+    /// <summary>
+    /// The keys exist only while the tools are open, so their Ctrl combos don't shadow the plain keys for anyone else.
+    /// </summary>
+    private void SetFunctionsActive(bool active)
+    {
         var context = _input.Contexts.GetContext("common");
         foreach (var function in Functions)
         {
-            if (context.FunctionExists(function))
+            if (active && !context.FunctionExists(function))
+                context.AddFunction(function);
+            else if (!active && context.FunctionExists(function))
                 context.RemoveFunction(function);
         }
     }
@@ -138,6 +144,7 @@ public sealed class MappingToolsSystem : EntitySystem
             return;
 
         Enabled = enabled;
+        SetFunctionsActive(enabled);
         if (enabled)
         {
             _tool.Startup();
@@ -153,6 +160,7 @@ public sealed class MappingToolsSystem : EntitySystem
             _window.RotateButton.OnPressed += _ => _tool.Rotate();
             _window.DeleteButton.OnPressed += _ => _tool.Delete();
             _window.HideWallsButton.OnToggled += args => SetWallsHidden(args.Pressed);
+            _window.EyedropperButton.OnToggled += args => SetPicking(args.Pressed);
             _window.OnClose += () => SetEnabled(false);
             _window.OpenCenteredLeft();
             SetSelecting(false);
@@ -160,6 +168,7 @@ public sealed class MappingToolsSystem : EntitySystem
         else
         {
             _selecting = false;
+            _picking = false;
             SetWallsHidden(false);
             _tool.Shutdown();
             _overlays.RemoveOverlay<MappingSelectionOverlay>();
@@ -229,6 +238,58 @@ public sealed class MappingToolsSystem : EntitySystem
         SetEnabled(!Enabled);
     }
 
+    /// <summary>
+    /// Arms the eyedropper: the next left click picks what's under the cursor instead of selecting.
+    /// </summary>
+    public void SetPicking(bool picking)
+    {
+        _picking = picking;
+        if (picking)
+            _placement.Clear();
+
+        if (_window != null)
+            _window.EyedropperButton.Pressed = picking;
+    }
+
+    /// <summary>
+    /// Starts placing the clicked entity with its rotation, or the tile under the cursor when nothing is there.
+    /// </summary>
+    public bool Pick(EntityCoordinates coords, EntityUid clicked)
+    {
+        SetPicking(false);
+
+        if (_placement.Eraser)
+            _placement.ToggleEraser();
+
+        if (clicked.IsValid() &&
+            _tool.IsSelectable(clicked) &&
+            MetaData(clicked).EntityPrototype is { Abstract: false } prototype)
+        {
+            _placement.BeginPlacing(new PlacementInformation
+            {
+                EntityType = prototype.ID,
+                PlacementOption = prototype.PlacementMode,
+            });
+            _placement.Direction = Transform(clicked).LocalRotation.GetDir();
+            return true;
+        }
+
+        var mapCoords = _transform.ToMapCoordinates(coords);
+        if (_mapManager.TryFindGridAt(mapCoords, out var gridUid, out var grid) &&
+            _map.TryGetTileRef(gridUid, grid, coords, out var tile) &&
+            !tile.Tile.IsEmpty)
+        {
+            _placement.BeginPlacing(new PlacementInformation
+            {
+                IsTile = true,
+                TileType = tile.Tile.TypeId,
+                PlacementOption = "AlignTileAny",
+            });
+        }
+
+        return true;
+    }
+
     public override void FrameUpdate(float frameTime)
     {
         base.FrameUpdate(frameTime);
@@ -266,7 +327,8 @@ public sealed class MappingToolsSystem : EntitySystem
 
     private void HideWalls()
     {
-        var query = EntityQueryEnumerator<TagComponent, SpriteComponent>();
+        // All, not just unpaused: maps opened with the mapping command are paused.
+        var query = AllEntityQuery<TagComponent, SpriteComponent>();
         while (query.MoveNext(out var uid, out var tags, out var sprite))
         {
             if (!sprite.Visible || !_tag.HasTag(tags, WallTag))
