@@ -578,7 +578,7 @@ binds:
   key: Num6
 - function: Hotbar7
   type: State
-  key: Num7
+  key: M
 - function: Hotbar8
   type: State
   key: Num8
@@ -615,6 +615,58 @@ binds:
   type: State
   key: MouseRight
   canFocus: true
+# WOLFGATE(MappingTools) START: Select tool, clipboard and undo keys for the mapping tools
+- function: WFMappingEnableSelect
+  type: State
+  key: M
+- function: WFMappingSelect
+  type: State
+  key: MouseLeft
+  canFocus: true
+  priority: 1
+- function: WFMappingSelect
+  type: State
+  key: MouseLeft
+  canFocus: true
+  mod1: Shift
+  priority: 1
+- function: WFMappingSelectCancel
+  type: State
+  key: MouseRight
+  canFocus: true
+  priority: 1
+- function: WFMappingCopy
+  type: State
+  key: C
+  mod1: Control
+- function: WFMappingCut
+  type: State
+  key: X
+  mod1: Control
+- function: WFMappingPaste
+  type: State
+  key: V
+  mod1: Control
+- function: WFMappingDelete
+  type: State
+  key: Delete
+- function: WFMappingRotate
+  type: State
+  key: R
+- function: WFMappingUndo
+  type: State
+  key: Z
+  mod1: Control
+- function: WFMappingRedo
+  type: State
+  key: Y
+  mod1: Control
+- function: WFMappingRedo
+  type: State
+  key: Z
+  mod1: Control
+  mod2: Shift
+# WOLFGATE END
 # region Frontier
 - function: SwapHandsPrevious
   type: State

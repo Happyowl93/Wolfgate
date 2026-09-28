@@ -25,6 +25,20 @@
   assignments:
   - 0: 9
   name: action-name-mapping-erase
+# WOLFGATE(MappingTools) START: button next to the eraser that opens or closes the mapping tools
+- action: !type:InstantActionComponent
+    icon: Interface/VerbIcons/point.svg.192dpi.png
+    keywords: []
+    checkCanInteract: False
+    checkConsciousness: False
+    clientExclusive: True
+    autoPopulate: False
+    temporary: True
+    event: !type:ToggleMappingToolsActionEvent
+  assignments:
+  - 5: 4
+  name: wf-mapping-tools-action-name
+# WOLFGATE END
 - action: !type:InstantActionComponent
     icon: /Textures/Tiles/plating.png
     keywords: []

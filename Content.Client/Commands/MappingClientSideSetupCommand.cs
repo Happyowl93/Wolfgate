@@ -26,6 +26,7 @@ internal sealed partial class MappingClientSideSetupCommand : LocalizedCommands
             _lightManager.Enabled = false;
             shell.ExecuteCommand("showsubfloorforever");
             _entitySystemManager.GetEntitySystem<ActionsSystem>().LoadActionAssignments("/mapping_actions.yml", false);
+            shell.ExecuteCommand("mappingtools true"); // WOLFGATE(MappingTools): open the mapping tools window
         }
     }
 }
