@@ -21,7 +21,8 @@ public sealed record HeadshotResult(string? Hash, byte[]? Png, string? Error)
 
 /// <summary>
 /// Downloads headshot images and re-encodes them as small PNGs. Connections only go to public addresses, checked
-/// at connect time, so a URL can't reach the server's own network, even through a redirect or DNS rebinding.
+/// at connect time, so a URL can't reach the server's own network, even through DNS rebinding.
+/// Redirects aren't followed, so the fetched host is always the one checked against the allowlist.
 /// </summary>
 public sealed class HeadshotFetcher : IDisposable
 {
@@ -38,8 +39,7 @@ public sealed class HeadshotFetcher : IDisposable
         {
             UseProxy = false,
             UseCookies = false,
-            AllowAutoRedirect = true,
-            MaxAutomaticRedirections = 3,
+            AllowAutoRedirect = false,
             ConnectCallback = ConnectPublicAsync,
         };
         _http = new HttpClient(handler) { Timeout = Timeout };

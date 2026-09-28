@@ -2,7 +2,7 @@ wf-headshot-editor-button-add = Add headshot
 wf-headshot-editor-button-edit = Edit headshot
 
 wf-headshot-window-title = Headshot
-wf-headshot-window-hint = Link an image of your character's face. People who examine you up close see it while your face is uncovered. Use a direct https link to a PNG, JPG, GIF or WebP; it is shrunk to {$size}x{$size} pixels.
+wf-headshot-window-hint = Link an image of your character's face. People who examine you up close see it while your face is uncovered. The link must point straight at the image file (right-click the image and copy its address), not a page or a redirecting short link. Use https and a PNG, JPG, GIF or WebP; it is shrunk to {$size}x{$size} pixels.
 wf-headshot-window-placeholder = https://example.com/headshot.png
 wf-headshot-window-preview = Preview
 wf-headshot-window-clear = Clear
