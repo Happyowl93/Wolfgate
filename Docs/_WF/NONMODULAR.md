@@ -49,6 +49,9 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
   - spawn the actor instead of using the session's entity
 - [`Content.IntegrationTests/Utility/GameDataScrounger.Files.cs`](../../Content.IntegrationTests/Utility/GameDataScrounger.Files.cs): Resource paths require forward slashes, including on Windows.
 - [`Content.Server/Body/Systems/RespiratorSystem.cs`](../../Content.Server/Body/Systems/RespiratorSystem.cs): entities without a respirator cannot metabolize inhaled gases; absence is valid.
+- [`Content.Server/Cargo/Systems/CargoSystem.Shuttle.cs`](../../Content.Server/Cargo/Systems/CargoSystem.Shuttle.cs)
+  - sums the bounty hand-in value
+  - items handed in to a bounty are paid by its reward, not sold
 - [`Content.Server/Preferences/Managers/ServerPreferencesManager.cs`](../../Content.Server/Preferences/Managers/ServerPreferencesManager.cs)
   - a failed save is logged with its slot
   - sanitized here like FinishLoad does on login
