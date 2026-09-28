@@ -14,7 +14,6 @@ public sealed partial class MappingMapsWindow : FancyWindow
 {
     private List<MappingMapFile> _files = new();
     private string? _selected;
-    private bool _selectedIsGrid;
 
     /// <summary>
     /// The save waiting for a second click because it would overwrite a file.
@@ -68,7 +67,6 @@ public sealed partial class MappingMapsWindow : FancyWindow
             return;
         }
 
-        _selectedIsGrid = true;
         LoadHereButton.Disabled = false;
         Preview.SetGridText(ev.Path, ev.Yaml, null);
     }
@@ -108,7 +106,6 @@ public sealed partial class MappingMapsWindow : FancyWindow
             return;
 
         _selected = path;
-        _selectedIsGrid = false;
         OpenButton.Disabled = false;
         LoadHereButton.Disabled = true;
         PreviewInfo.Text = path;
@@ -129,10 +126,8 @@ public sealed partial class MappingMapsWindow : FancyWindow
 
     private void Load(bool here)
     {
-        if (_selected == null || here && !_selectedIsGrid)
-            return;
-
-        LoadRequested?.Invoke(_selected, here);
+        if (_selected != null)
+            LoadRequested?.Invoke(_selected, here);
     }
 
     private void Save(bool wholeMap)

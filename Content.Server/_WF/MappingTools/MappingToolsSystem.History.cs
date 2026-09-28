@@ -1,7 +1,5 @@
 using System.Numerics;
-using Robust.Shared.Utility;
 using Content.Server.Decals;
-using Content.Shared._WF.MappingTools;
 using Content.Shared.Administration;
 using Content.Shared.Decals;
 using Content.Shared.GameTicking;
@@ -11,6 +9,7 @@ using Robust.Shared.Map.Components;
 using Robust.Shared.Placement;
 using Robust.Shared.Player;
 using Robust.Shared.Timing;
+using Robust.Shared.Utility;
 
 namespace Content.Server._WF.MappingTools;
 
@@ -40,7 +39,7 @@ public sealed partial class MappingToolsSystem
     private readonly List<PendingDecal> _pendingDecals = new();
 
     /// <summary>
-    /// A decal placement waiting for the decal system to add it, with the decals that were already there.
+    /// A decal placement the decal system hasn't handled yet, with the decals already there.
     /// </summary>
     private sealed record PendingDecal(ICommonSession Session, EntityUid Grid, Vector2 Position, string Id, HashSet<uint> Before);
 
@@ -136,16 +135,13 @@ public sealed partial class MappingToolsSystem
     /// </summary>
     public void StepHistory(ICommonSession session, bool redo)
     {
-        var history = _histories.GetOrNew(session);
-        var from = redo ? history.Redo : history.Undo;
-        var to = redo ? history.Undo : history.Redo;
-
-        if (from.Count == 0)
+        if (!_histories.TryGetValue(session, out var history) || (redo ? history.Redo : history.Undo).Count == 0)
         {
             _popup.PopupCursor(Loc.GetString(redo ? "wf-mapping-tools-nothing-to-redo" : "wf-mapping-tools-nothing-to-undo"), session);
             return;
         }
 
+        var (from, to) = redo ? (history.Redo, history.Undo) : (history.Undo, history.Redo);
         var edit = from[^1];
         from.RemoveAt(from.Count - 1);
         Apply(edit, forward: redo);
@@ -199,7 +195,7 @@ public sealed partial class MappingToolsSystem
         }
         else
         {
-            // Raised before the engine deletes it; save it now so undo can bring it back.
+            // Raised just before the engine deletes it.
             edit = new MappingEdit("wf-mapping-tools-edit-erase");
             SaveGroup(group, [uid]);
             edit.Deleted.Add(group);

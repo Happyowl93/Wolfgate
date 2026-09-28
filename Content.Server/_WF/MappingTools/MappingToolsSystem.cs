@@ -1,18 +1,19 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Numerics;
 using Content.Server.Administration.Logs;
 using Content.Server.Administration.Managers;
 using Content.Server.Decals;
-using Content.Server.Popups;
-using Content.Shared.NodeContainer;
 using Content.Server.NodeContainer.Nodes;
+using Content.Server.Popups;
 using Content.Shared._WF.MappingTools;
-using Content.Shared.Atmos;
 using Content.Shared.Administration;
+using Content.Shared.Atmos;
 using Content.Shared.Database;
 using Content.Shared.Decals;
 using Content.Shared.Ghost;
 using Content.Shared.Maps;
+using Content.Shared.NodeContainer;
 using Robust.Server.GameObjects;
 using Robust.Shared.EntitySerialization;
 using Robust.Shared.EntitySerialization.Systems;
@@ -24,8 +25,8 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._WF.MappingTools;
 
 /// <summary>
-/// Server side of the mapping tools: moves, copies, pastes and deletes selections, and keeps each mapper's
-/// undo history, including their placement-menu edits.
+/// Server side of the mapping tools: edits selections and keeps each mapper's undo history, spawn-menu edits
+/// included.
 /// </summary>
 public sealed partial class MappingToolsSystem : EntitySystem
 {
@@ -38,17 +39,22 @@ public sealed partial class MappingToolsSystem : EntitySystem
     [Dependency] private MapLoaderSystem _loader = default!;
     [Dependency] private MapSystem _map = default!;
     [Dependency] private MetaDataSystem _meta = default!;
-    [Dependency] private PopupSystem _popup = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private PopupSystem _popup = default!;
     [Dependency] private TransformSystem _transform = default!;
 
     /// <summary>
-    /// Set while this system changes the world itself, so its own tile changes aren't recorded as placements.
+    /// Largest area, in tiles, one request may touch.
+    /// </summary>
+    private const int MaxArea = 256 * 256;
+
+    /// <summary>
+    /// Set while this system edits the world, so its own tile changes aren't recorded as placements.
     /// </summary>
     private bool _applying;
 
     /// <summary>
-    /// Shared refs, so every edit that touches an entity follows it when undo recreates it.
+    /// One ref per entity, so every edit touching it follows it when undo recreates it.
     /// </summary>
     private readonly Dictionary<EntityUid, MappingEntityRef> _refs = new();
 
@@ -83,8 +89,6 @@ public sealed partial class MappingToolsSystem : EntitySystem
 
         return entityRef;
     }
-
-    #region Selection
 
     /// <summary>
     /// A selection resolved on the server: its grid, the tiles and decals in its area and its root entities.
@@ -162,40 +166,34 @@ public sealed partial class MappingToolsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Whether an entity can be moved, copied or deleted: not a grid, map, player or ghost, and not holding a player.
+    /// Whether an entity can be edited: not a grid, map, player or ghost, and not holding a player.
     /// </summary>
     private bool IsSelectable(EntityUid uid)
     {
-        if (TerminatingOrDeleted(uid) || HasComp<MapGridComponent>(uid) || HasComp<MapComponent>(uid) ||
-            HasComp<GhostComponent>(uid))
-        {
-            return false;
-        }
-
-        var queue = new List<EntityUid> { uid };
-        for (var i = 0; i < queue.Count; i++)
-        {
-            if (HasComp<ActorComponent>(queue[i]))
-                return false;
-
-            var children = Transform(queue[i]).ChildEnumerator;
-            while (children.MoveNext(out var child))
-            {
-                queue.Add(child);
-            }
-        }
-
-        return true;
+        return !TerminatingOrDeleted(uid) &&
+               !HasComp<MapGridComponent>(uid) &&
+               !HasComp<MapComponent>(uid) &&
+               !HasComp<GhostComponent>(uid) &&
+               !Tree(uid).Any(HasComp<ActorComponent>);
     }
 
     /// <summary>
-    /// Largest area, in tiles, one request may touch.
+    /// An entity and everything parented under it.
     /// </summary>
-    private const int MaxArea = 256 * 256;
+    private List<EntityUid> Tree(EntityUid root)
+    {
+        var tree = new List<EntityUid> { root };
+        for (var i = 0; i < tree.Count; i++)
+        {
+            var children = Transform(tree[i]).ChildEnumerator;
+            while (children.MoveNext(out var child))
+            {
+                tree.Add(child);
+            }
+        }
 
-    #endregion
-
-    #region Requests
+        return tree;
+    }
 
     private void OnMove(MappingToolsMoveEvent ev, EntitySessionEventArgs args)
     {
@@ -251,7 +249,8 @@ public sealed partial class MappingToolsSystem : EntitySystem
             point => MappingToolsMath.TransformPoint(point, sel.Extent, offset, turns),
             (_, rotation) => rotation + MappingToolsMath.RotationDelta(turns),
             tile => RotateTile(tile, turns),
-            decal => MoveDecal(decal, sel.Extent, offset, turns));
+            decal => MapDecal(decal, p => MappingToolsMath.TransformPoint(p, sel.Extent, offset, turns),
+                decal.Angle + MappingToolsMath.RotationDelta(turns)));
 
         Commit(session, edit);
         _adminLog.Add(LogType.Action, LogImpact.Medium,
@@ -271,7 +270,8 @@ public sealed partial class MappingToolsSystem : EntitySystem
             point => MappingToolsMath.MirrorPoint(point, sel.Extent, vertical),
             (uid, rotation) => MirrorRotation(uid, rotation, vertical),
             tile => MirrorTile(tile, vertical),
-            decal => MirrorDecal(decal, sel.Extent, vertical));
+            decal => MapDecal(decal, p => MappingToolsMath.MirrorPoint(p, sel.Extent, vertical),
+                MappingToolsMath.MirrorAngle(decal.Angle, vertical), MirrorDecalId(decal.Id, vertical)));
 
         Commit(session, edit);
         _adminLog.Add(LogType.Action, LogImpact.Medium,
@@ -368,7 +368,8 @@ public sealed partial class MappingToolsSystem : EntitySystem
         }
 
         _clipboards[session] = clip;
-        SendClipboard(session, clip, preview);
+        RaiseNetworkEvent(new MappingToolsClipboardEvent(GetNetEntity(clip.SourceGrid), clip.Size,
+            clip.Tiles.ConvertAll(t => t.Cell), preview), session);
 
         if (cut)
             Commit(session, DeleteEdit(sel, "wf-mapping-tools-edit-cut"));
@@ -409,7 +410,9 @@ public sealed partial class MappingToolsSystem : EntitySystem
 
         foreach (var decal in clip.Decals)
         {
-            edit.DecalsAdded.Add(new MappingDecal(gridUid, MoveDecal(decal, extent, offset, turns)));
+            var moved = MapDecal(decal, p => MappingToolsMath.TransformPoint(p, extent, offset, turns),
+                decal.Angle + MappingToolsMath.RotationDelta(turns));
+            edit.DecalsAdded.Add(new MappingDecal(gridUid, moved));
         }
 
         var group = new MappingEntityGroup { Data = clip.Data };
@@ -461,8 +464,6 @@ public sealed partial class MappingToolsSystem : EntitySystem
             $"{session:player} used mapping tools to delete {sel.Entities.Count} entities and {sel.Tiles.Count} tiles on {ToPrettyString(sel.Grid.Owner):grid}");
     }
 
-    #endregion
-
     /// <summary>
     /// An edit that removes everything in a selection, tiles included.
     /// </summary>
@@ -493,17 +494,6 @@ public sealed partial class MappingToolsSystem : EntitySystem
         }
 
         return edit;
-    }
-
-    private void SendClipboard(ICommonSession session, MappingClipboard clip, List<MappingClipEntity> entities)
-    {
-        var tiles = new List<Vector2i>(clip.Tiles.Count);
-        foreach (var (cell, _) in clip.Tiles)
-        {
-            tiles.Add(cell);
-        }
-
-        RaiseNetworkEvent(new MappingToolsClipboardEvent(GetNetEntity(clip.SourceGrid), clip.Size, tiles, entities), session);
     }
 
     /// <summary>
@@ -543,8 +533,8 @@ public sealed partial class MappingToolsSystem : EntitySystem
     }
 
     /// <summary>
-    /// The facing a mirrored entity takes. Pipe fittings that aren't symmetric (bends, T-junctions, mixers) can't
-    /// just flip their angle, so they take whichever quarter turn gives them the mirrored connections.
+    /// The facing a mirrored entity takes. Lopsided pipe fittings (bends, T-junctions, mixers) take whichever quarter
+    /// turn gives them the mirrored connections.
     /// </summary>
     private Angle MirrorRotation(EntityUid uid, Angle rotation, bool vertical)
     {
@@ -552,32 +542,18 @@ public sealed partial class MappingToolsSystem : EntitySystem
         if (!TryComp(uid, out NodeContainerComponent? nodes))
             return mirrored;
 
-        var pipes = new List<PipeNode>();
-        foreach (var node in nodes.Nodes.Values)
-        {
-            if (node is PipeNode pipe)
-                pipes.Add(pipe);
-        }
-
+        var pipes = nodes.Nodes.Values.OfType<PipeNode>().ToList();
         if (pipes.Count == 0)
             return mirrored;
 
-        // The plain mirror goes first, so symmetric fittings keep the facing a mapper would expect.
+        // The plain mirror goes first, so symmetric fittings keep the expected facing.
         foreach (var candidate in new[] { mirrored, mirrored + Math.PI / 2, mirrored + Math.PI, mirrored - Math.PI / 2 })
         {
-            var matches = true;
-            foreach (var pipe in pipes)
+            if (pipes.All(pipe => pipe.OriginalPipeDirection.RotatePipeDirection(candidate) ==
+                                  MirrorPipeDirection(pipe.OriginalPipeDirection.RotatePipeDirection(rotation), vertical)))
             {
-                var wanted = MirrorPipeDirection(pipe.OriginalPipeDirection.RotatePipeDirection(rotation), vertical);
-                if (pipe.OriginalPipeDirection.RotatePipeDirection(candidate) != wanted)
-                {
-                    matches = false;
-                    break;
-                }
-            }
-
-            if (matches)
                 return candidate.Reduced();
+            }
         }
 
         return mirrored;
@@ -595,24 +571,15 @@ public sealed partial class MappingToolsSystem : EntitySystem
         return result;
     }
 
-    /// <summary>
-    /// Mirrors a decal with its selection. Decals drawn for one side (corners, ends, lines) swap to their mirrored
-    /// counterpart when one exists, since a sprite can't be flipped.
-    /// </summary>
-    private Decal MirrorDecal(Decal decal, Box2i extent, bool vertical)
-    {
-        var half = new Vector2(0.5f);
-        var centre = MappingToolsMath.MirrorPoint(decal.Coordinates + half, extent, vertical);
-        return new Decal(centre - half, MirrorDecalId(decal.Id, vertical), decal.Color,
-            MappingToolsMath.MirrorAngle(decal.Angle, vertical), decal.ZIndex, decal.Cleanable);
-    }
-
     private static readonly (string From, string To)[] HorizontalDecalSuffixes =
         { ("Ne", "Nw"), ("Nw", "Ne"), ("Se", "Sw"), ("Sw", "Se"), ("E", "W"), ("W", "E") };
 
     private static readonly (string From, string To)[] VerticalDecalSuffixes =
         { ("Ne", "Se"), ("Se", "Ne"), ("Nw", "Sw"), ("Sw", "Nw"), ("N", "S"), ("S", "N") };
 
+    /// <summary>
+    /// A one-sided decal's mirrored counterpart (corner, end or line), when one exists; sprites can't be flipped.
+    /// </summary>
     private string MirrorDecalId(string id, bool vertical)
     {
         foreach (var (from, to) in vertical ? VerticalDecalSuffixes : HorizontalDecalSuffixes)
@@ -628,13 +595,12 @@ public sealed partial class MappingToolsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Moves a decal with its selection; its coordinates are its bottom-left, so it turns around its centre.
+    /// A decal carried by a selection. Its coordinates are its bottom-left, so the map is applied to its centre.
     /// </summary>
-    private static Decal MoveDecal(Decal decal, Box2i extent, Vector2i offset, int turns)
+    private static Decal MapDecal(Decal decal, Func<Vector2, Vector2> pointMap, Angle angle, string? id = null)
     {
         var half = new Vector2(0.5f);
-        var centre = MappingToolsMath.TransformPoint(decal.Coordinates + half, extent, offset, turns);
-        return new Decal(centre - half, decal.Id, decal.Color, decal.Angle + MappingToolsMath.RotationDelta(turns),
-            decal.ZIndex, decal.Cleanable);
+        return new Decal(pointMap(decal.Coordinates + half) - half, id ?? decal.Id, decal.Color, angle, decal.ZIndex,
+            decal.Cleanable);
     }
 }

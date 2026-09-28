@@ -12,8 +12,8 @@ using Robust.Shared.Map.Components;
 namespace Content.Client._WF.MappingTools;
 
 /// <summary>
-/// The mapping screen's Select tool: box and click selection, dragging, rotating, clipboard and undo requests.
-/// The server does the edits; this keeps the selection and draws the previews.
+/// Selection for the mapping tools: click and box selection, dragging, and the requests for every edit. The server
+/// makes the edits; this keeps the selection for the overlay to draw.
 /// </summary>
 public sealed class MappingSelectionTool
 {
@@ -30,6 +30,11 @@ public sealed class MappingSelectionTool
         Move,
     }
 
+    /// <summary>
+    /// How far, in tiles, the mouse has to travel with the button down before a click becomes a drag.
+    /// </summary>
+    private const float DragThreshold = 0.35f;
+
     private readonly Func<bool> _isActive;
 
     private SharedMapSystem _map = default!;
@@ -45,11 +50,6 @@ public sealed class MappingSelectionTool
     /// Entities selected by clicking, on top of those inside <see cref="Area"/>.
     /// </summary>
     public readonly HashSet<NetEntity> Picked = new();
-
-    /// <summary>
-    /// How far, in tiles, the mouse has to travel with the button down before a click becomes a drag.
-    /// </summary>
-    private const float DragThreshold = 0.35f;
 
     public DragMode Drag { get; private set; }
     public Vector2i DragStart { get; private set; }
@@ -101,8 +101,6 @@ public sealed class MappingSelectionTool
         _pressed = false;
         Pasting = false;
     }
-
-    #region Input
 
     /// <summary>
     /// Button down only remembers the press; what it does depends on whether the mouse moves before release.
@@ -332,20 +330,6 @@ public sealed class MappingSelectionTool
         return true;
     }
 
-    public void History(bool redo)
-    {
-        _system.Send(new MappingToolsHistoryEvent(redo));
-    }
-
-    #endregion
-
-    private void StartDrag(DragMode mode, Vector2i cell)
-    {
-        Drag = mode;
-        DragStart = cell;
-        DragTurns = 0;
-    }
-
     private void MoveSelection(Vector2i offset, int turns)
     {
         if (BuildSelection() is not { } selection || GetExtent() is not { } extent)
@@ -380,8 +364,6 @@ public sealed class MappingSelectionTool
         Picked.UnionWith(selection.Entities);
     }
 
-    #region Queries
-
     /// <summary>
     /// The box the server turns the selection around: the area plus every picked entity's cell.
     /// </summary>
@@ -390,7 +372,7 @@ public sealed class MappingSelectionTool
         var extent = Area;
         foreach (var uid in PickedEntities())
         {
-            extent = MappingToolsMath.Include(extent, MappingToolsMath.CellOf(_entities.GetComponent<TransformComponent>(uid).LocalPosition));
+            extent = MappingToolsMath.Include(extent, CellOf(uid));
         }
 
         return extent;
@@ -425,8 +407,7 @@ public sealed class MappingSelectionTool
             var children = gridXform.ChildEnumerator;
             while (children.MoveNext(out var child))
             {
-                if (IsSelectable(child) &&
-                    MappingToolsMath.Contains(area, MappingToolsMath.CellOf(_entities.GetComponent<TransformComponent>(child).LocalPosition)))
+                if (IsSelectable(child) && MappingToolsMath.Contains(area, CellOf(child)))
                 {
                     yield return child;
                 }
@@ -435,8 +416,7 @@ public sealed class MappingSelectionTool
 
         foreach (var uid in PickedEntities())
         {
-            if (Area is not { } a ||
-                !MappingToolsMath.Contains(a, MappingToolsMath.CellOf(_entities.GetComponent<TransformComponent>(uid).LocalPosition)))
+            if (Area is not { } a || !MappingToolsMath.Contains(a, CellOf(uid)))
             {
                 yield return uid;
             }
@@ -448,7 +428,7 @@ public sealed class MappingSelectionTool
     /// </summary>
     public bool TryGetMouseCell(EntityUid grid, out Vector2i cell)
     {
-        return TryGetCell(_eye.PixelToMap(_input.MouseScreenPosition), grid, out cell);
+        return TryGetCell(MouseMapPosition, grid, out cell);
     }
 
     public MapCoordinates MouseMapPosition => _eye.PixelToMap(_input.MouseScreenPosition);
@@ -466,6 +446,11 @@ public sealed class MappingSelectionTool
         return true;
     }
 
+    private Vector2i CellOf(EntityUid uid)
+    {
+        return MappingToolsMath.CellOf(_entities.GetComponent<TransformComponent>(uid).LocalPosition);
+    }
+
     private bool IsPicked(EntityUid uid)
     {
         return uid.IsValid() && _entities.TryGetNetEntity(uid, out var net) && Picked.Contains(net.Value);
@@ -478,6 +463,4 @@ public sealed class MappingSelectionTool
                !_entities.HasComponent<MapComponent>(uid) &&
                !_entities.HasComponent<GhostComponent>(uid);
     }
-
-    #endregion
 }

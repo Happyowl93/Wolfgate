@@ -18,11 +18,10 @@ using Robust.Shared.Utility;
 namespace Content.Server._WF.MappingTools;
 
 /// <summary>
-/// The Maps window's server side: lists the map files a mapper can open, sends one's text for the preview, saves
-/// the mapper's grid or map into the data folder and opens files, the way the console's savegrid, savemap, mapping
-/// and loadgrid do.
+/// The Maps window's server side: lists map files, sends one's text for the preview, and saves and opens them like
+/// the savegrid, savemap, mapping and loadgrid commands.
 /// </summary>
-public sealed partial class MappingMapsSystem : EntitySystem
+public sealed class MappingMapsSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private IAdminManager _admin = default!;
@@ -33,15 +32,17 @@ public sealed partial class MappingMapsSystem : EntitySystem
     [Dependency] private PopupSystem _popup = default!;
     [Dependency] private TransformSystem _transform = default!;
 
-    /// <summary>
-    /// Folder in the server's data directory that saves go into.
-    /// </summary>
     public static readonly ResPath SaveFolder = new(MappingMaps.SaveFolder);
 
     /// <summary>
     /// Files bigger than this aren't sent for preview; whole stations run to several MB.
     /// </summary>
     private const long MaxPreviewBytes = 2 * 1024 * 1024;
+
+    /// <summary>
+    /// How deep into the data folder saves are looked for.
+    /// </summary>
+    private const int MaxSaveDepth = 6;
 
     private static readonly ResPath ShipsFolder = new("/SharedMaps");
     private static readonly ResPath MapsFolder = new("/Maps");
@@ -67,34 +68,27 @@ public sealed partial class MappingMapsSystem : EntitySystem
     /// </summary>
     public List<MappingMapFile> ListFiles()
     {
-        var files = new List<MappingMapFile>();
-        var saved = new HashSet<string>();
+        var saved = new List<ResPath>();
+        FindSaved(ResPath.Root, saved, 0);
 
-        var savedPaths = new List<ResPath>();
-        FindSaved(ResPath.Root, savedPaths, 0);
-        foreach (var path in savedPaths.OrderBy(p => p.ToString()))
-        {
-            files.Add(new MappingMapFile(path.ToString(), MappingMapSource.Saved));
-            saved.Add(path.ToString());
-        }
+        var files = saved.Select(p => p.ToString()).Order()
+            .Select(p => new MappingMapFile(p, MappingMapSource.Saved))
+            .ToList();
 
+        // A save at the same path shadows the game's file when loading, so it's listed once.
+        var shadowed = files.Select(f => f.Path).ToHashSet();
         foreach (var (folder, source) in new[] { (ShipsFolder, MappingMapSource.Ships), (MapsFolder, MappingMapSource.Maps) })
         {
-            foreach (var path in _res.ContentFindFiles(folder).Where(p => p.Extension == "yml").OrderBy(p => p.ToString()))
-            {
-                // A save at the same path shadows the game's file when loading, so list it once.
-                if (!saved.Contains(path.ToString()))
-                    files.Add(new MappingMapFile(path.ToString(), source));
-            }
+            files.AddRange(_res.ContentFindFiles(folder)
+                .Where(p => p.Extension == "yml")
+                .Select(p => p.ToString())
+                .Where(p => !shadowed.Contains(p))
+                .Order()
+                .Select(p => new MappingMapFile(p, source)));
         }
 
         return files;
     }
-
-    /// <summary>
-    /// How deep into the data folder saved maps are looked for.
-    /// </summary>
-    private const int MaxSaveDepth = 6;
 
     /// <summary>
     /// Collects the .yml files in the server's data folder.
@@ -117,7 +111,7 @@ public sealed partial class MappingMapsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Whether a path is one <see cref="ListFiles"/> offers, so requests can't reach anything else on disk.
+    /// Whether <see cref="ListFiles"/> offers a path, so requests can't reach anything else on disk.
     /// </summary>
     private bool IsListed(string path)
     {
@@ -155,7 +149,7 @@ public sealed partial class MappingMapsSystem : EntitySystem
     }
 
     /// <summary>
-    /// A listed file's text for the preview, read the way the map loader does: saves first, then game files.
+    /// A listed file's text for the preview, read like the map loader does: saves first, then game files.
     /// </summary>
     public MappingMapsPreviewEvent ReadForPreview(string path)
     {
@@ -163,24 +157,12 @@ public sealed partial class MappingMapsSystem : EntitySystem
             return new MappingMapsPreviewEvent(path, null, "wf-mapping-maps-preview-missing");
 
         var res = new ResPath(path);
-        Stream? stream = null;
-        try
-        {
-            if (_res.UserData.Exists(res))
-                stream = _res.UserData.OpenRead(res);
-            else if (!_res.TryContentFileRead(res, out stream))
-                return new MappingMapsPreviewEvent(path, null, "wf-mapping-maps-preview-missing");
+        using var stream = _res.UserData.Exists(res) ? _res.UserData.OpenRead(res) : _res.ContentFileRead(res);
+        if (stream.CanSeek && stream.Length > MaxPreviewBytes)
+            return new MappingMapsPreviewEvent(path, null, "wf-mapping-maps-preview-too-large");
 
-            if (stream.CanSeek && stream.Length > MaxPreviewBytes)
-                return new MappingMapsPreviewEvent(path, null, "wf-mapping-maps-preview-too-large");
-
-            using var reader = new StreamReader(stream);
-            return new MappingMapsPreviewEvent(path, reader.ReadToEnd(), null);
-        }
-        finally
-        {
-            stream?.Dispose();
-        }
+        using var reader = new StreamReader(stream);
+        return new MappingMapsPreviewEvent(path, reader.ReadToEnd(), null);
     }
 
     private void OnSave(MappingMapsSaveEvent ev, EntitySessionEventArgs args)
@@ -220,7 +202,7 @@ public sealed partial class MappingMapsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Saves a grid, or with <paramref name="wholeMap"/> a map, into the save folder under a checked name.
+    /// Saves a grid, or with <paramref name="wholeMap"/> a map, into the save folder.
     /// </summary>
     public bool TrySave(EntityUid target, string name, bool wholeMap, out ResPath path)
     {
@@ -239,7 +221,7 @@ public sealed partial class MappingMapsSystem : EntitySystem
 
         if (!ev.Here)
         {
-            // The mapping command does the rest: a fresh uninitialised map, the aghost, the teleport and the tools.
+            // The mapping command sets up the fresh map, the aghost and the tools.
             var id = 1;
             while (_mapManager.MapExists(new MapId(id)))
             {

@@ -1,10 +1,10 @@
 using System.Numerics;
-using Robust.Shared.Utility;
 using Content.Shared.Decals;
 using Robust.Shared.EntitySerialization;
 using Robust.Shared.EntitySerialization.Components;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
+using Robust.Shared.Utility;
 
 namespace Content.Server._WF.MappingTools;
 
@@ -81,8 +81,7 @@ public sealed partial class MappingToolsSystem
     }
 
     /// <summary>
-    /// The tile each changed cell ends up with; the last write per cell wins, so going backward restores the first
-    /// old tile.
+    /// The tile each changed cell ends up with. The last write per cell wins, so going backward restores the first.
     /// </summary>
     private Dictionary<EntityUid, Dictionary<Vector2i, Tile>> TargetTiles(MappingEdit edit, bool forward)
     {
@@ -97,8 +96,7 @@ public sealed partial class MappingToolsSystem
     }
 
     /// <summary>
-    /// Sets either the filled or the empty target tiles, one at a time: some tile-change handlers (explosion edges)
-    /// assume a batch changes one tile.
+    /// Sets the filled or the empty target tiles one at a time; explosion edge tracking breaks on batched changes.
     /// </summary>
     private void SetTiles(Dictionary<EntityUid, Dictionary<Vector2i, Tile>> byGrid, bool filled)
     {
@@ -116,8 +114,8 @@ public sealed partial class MappingToolsSystem
     }
 
     /// <summary>
-    /// Puts an entity at a pose. An anchored entity moving along its own grid stays anchored the whole way, since
-    /// unanchoring it would make cables cut themselves and pipes drop off their network.
+    /// Puts an entity at a pose. Anchored entities moving along their grid stay anchored, since unanchoring makes
+    /// cables cut themselves and pipes drop off their network.
     /// </summary>
     private void MoveEntity(EntityUid uid, MappingPose pose)
     {
@@ -191,7 +189,7 @@ public sealed partial class MappingToolsSystem
     }
 
     /// <summary>
-    /// Saves the given roots of a group with everything inside them, without deleting them.
+    /// Saves a group's roots with everything inside them, without deleting them.
     /// </summary>
     private void SaveGroup(MappingEntityGroup group, HashSet<EntityUid> roots)
     {
@@ -283,10 +281,8 @@ public sealed partial class MappingToolsSystem
 
         var init = _map.IsInitialized(map);
         var paused = MetaData(map).EntityPaused;
-        var queue = new List<EntityUid> { root };
-        for (var i = 0; i < queue.Count; i++)
+        foreach (var uid in Tree(root))
         {
-            var uid = queue[i];
             if (TerminatingOrDeleted(uid))
                 continue;
 
@@ -295,12 +291,6 @@ public sealed partial class MappingToolsSystem
                 EntityManager.RunMapInit(uid, meta);
 
             _meta.SetEntityPaused(uid, paused, meta);
-
-            var children = Transform(uid).ChildEnumerator;
-            while (children.MoveNext(out var child))
-            {
-                queue.Add(child);
-            }
         }
     }
 

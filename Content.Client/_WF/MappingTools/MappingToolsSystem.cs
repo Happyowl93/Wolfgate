@@ -6,11 +6,11 @@ using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Client.Input;
 using Robust.Client.Placement;
+using Robust.Shared.Enums;
 using Robust.Shared.Input;
 using Robust.Shared.Input.Binding;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
-using Robust.Shared.Enums;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
@@ -18,27 +18,27 @@ using Robust.Shared.Timing;
 namespace Content.Client._WF.MappingTools;
 
 /// <summary>
-/// Client side of the mapping tools: the tools window, the Select tool's keys and overlay, and the clipboard and
-/// selection updates from the server. Off until <c>mappingtools</c> (or <c>mapping</c>) turns it on.
+/// Client side of the mapping tools: the window, keys, overlay, eyedropper and wall hiding. Off until the
+/// action-bar button, <c>mappingtools</c> or <c>mapping</c> turns it on.
 /// </summary>
 public sealed class MappingToolsSystem : EntitySystem
 {
-    [Dependency] private IInputManager _input = default!;
-    [Dependency] private IOverlayManager _overlays = default!;
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private IInputManager _input = default!;
     [Dependency] private IMapManager _mapManager = default!;
+    [Dependency] private IOverlayManager _overlays = default!;
     [Dependency] private IPlacementManager _placement = default!;
     [Dependency] private IconSmoothSystem _smooth = default!;
     [Dependency] private MappingMapsSystem _maps = default!;
     [Dependency] private SharedMapSystem _map = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SpriteSystem _sprite = default!;
     [Dependency] private TagSystem _tag = default!;
-    [Dependency] private SharedTransformSystem _transform = default!;
 
     private static readonly ProtoId<TagPrototype> WallTag = "Wall";
 
     /// <summary>
-    /// How often hidden walls are swept again, to catch walls that came into view or were placed since.
+    /// How often hidden walls are swept again, for walls that came into view or were placed since.
     /// </summary>
     private static readonly TimeSpan WallSweepInterval = TimeSpan.FromSeconds(1);
 
@@ -62,13 +62,9 @@ public sealed class MappingToolsSystem : EntitySystem
     private MappingToolsWindow? _window;
     private bool _selecting;
     private bool _picking;
+    private bool _wallsHidden;
     private readonly HashSet<EntityUid> _hiddenWalls = new();
     private TimeSpan _nextWallSweep;
-
-    /// <summary>
-    /// Whether walls are hidden on this client, so what's behind them can be seen and clicked.
-    /// </summary>
-    public bool WallsHidden { get; private set; }
 
     /// <summary>
     /// What the last copy or cut put on the clipboard.
@@ -78,12 +74,12 @@ public sealed class MappingToolsSystem : EntitySystem
     public event Action<MappingSelection>? SelectionReceived;
 
     /// <summary>
-    /// Whether the tools are on: the window is open and the keys work.
+    /// Whether the window is open and the keys work.
     /// </summary>
     public bool Enabled { get; private set; }
 
     /// <summary>
-    /// Whether left click selects instead of doing what it normally does. Spawn-menu placement takes precedence.
+    /// Whether left click selects instead of interacting. Spawn-menu placement pauses it.
     /// </summary>
     public bool Selecting => Enabled && _selecting && !_placement.IsActive;
 
@@ -126,7 +122,7 @@ public sealed class MappingToolsSystem : EntitySystem
     }
 
     /// <summary>
-    /// The keys exist only while the tools are open, so their Ctrl combos don't shadow the plain keys for anyone else.
+    /// The keys exist only while the tools are open, so their Ctrl combos don't shadow plain keys for anyone else.
     /// </summary>
     private void SetFunctionsActive(bool active)
     {
@@ -141,7 +137,7 @@ public sealed class MappingToolsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Turns the tools on (opening the window) or off (closing it and dropping the selection).
+    /// Opens the window and turns the keys on, or closes it and drops the selection.
     /// </summary>
     public void SetEnabled(bool enabled)
     {
@@ -188,7 +184,7 @@ public sealed class MappingToolsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Turns the Select tool on or off; turning it on drops whatever the spawn menu is placing.
+    /// Turns selection on or off; turning it on drops whatever the spawn menu is placing.
     /// </summary>
     public void SetSelecting(bool selecting)
     {
@@ -203,8 +199,8 @@ public sealed class MappingToolsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Smoothing only reacts to anchoring, so a wall the tools carry to another cell while anchored would keep its old
-    /// look. Re-smooth it and the neighbours it left.
+    /// Smoothing only reacts to anchoring, so a wall moved to another cell while anchored keeps its old look.
+    /// Re-smooth it and the neighbours it left.
     /// </summary>
     private void OnSmoothMoved(Entity<IconSmoothComponent> ent, ref MoveEvent ev)
     {
@@ -247,7 +243,7 @@ public sealed class MappingToolsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Arms the eyedropper: the next left click picks what's under the cursor instead of selecting.
+    /// Arms the eyedropper: the next left click picks what's under the cursor.
     /// </summary>
     public void SetPicking(bool picking)
     {
@@ -260,7 +256,7 @@ public sealed class MappingToolsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Starts placing the clicked entity with its rotation, or the tile under the cursor when nothing is there.
+    /// Starts placing the clicked entity with its rotation, or else the tile under the cursor.
     /// </summary>
     public bool Pick(EntityCoordinates coords, EntityUid clicked)
     {
@@ -302,7 +298,7 @@ public sealed class MappingToolsSystem : EntitySystem
     {
         base.FrameUpdate(frameTime);
 
-        if (!WallsHidden || _timing.RealTime < _nextWallSweep)
+        if (!_wallsHidden || _timing.RealTime < _nextWallSweep)
             return;
 
         _nextWallSweep = _timing.RealTime + WallSweepInterval;
@@ -310,11 +306,11 @@ public sealed class MappingToolsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Hides or shows every wall's sprite on this client only.
+    /// Hides or shows every wall's sprite, on this client only.
     /// </summary>
     public void SetWallsHidden(bool hidden)
     {
-        WallsHidden = hidden;
+        _wallsHidden = hidden;
         if (_window != null)
             _window.HideWallsButton.Pressed = hidden;
 
