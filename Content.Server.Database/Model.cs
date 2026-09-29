@@ -511,11 +511,19 @@ namespace Content.Server.Database
         // WOLFGATE(Genitals): creator anatomy as versioned JSON; empty until the profile is migrated or saved.
         [Column("genitals")] public string Genitals { get; set; } = "";
 
+        // WOLFGATE(EmoteVoices) START: scream and laugh chosen in the creator; empty keeps the species' own.
+        [Column("scream_voice")] public string ScreamVoice { get; set; } = "";
+        [Column("laugh_voice")] public string LaughVoice { get; set; } = "";
+        // WOLFGATE END
+
         // Mono start
         public string[] Flags { get; set; } = [];
         public List<ProfileComponent> Components { get; } = [];
         public List<ProfileItem> Items { get; } = [];
         // Mono end
+
+        // WOLFGATE(Headshot): image URL shown on examine, empty when unused.
+        [Column("headshot_url")] public string HeadshotUrl { get; set; } = "";
 
         public int PreferenceId { get; set; }
         public Preference Preference { get; set; } = null!;

@@ -507,7 +507,8 @@ public abstract partial class SharedGunSystem : EntitySystem
         EntityUid? user = null,
         bool throwItems = false);
 
-    public virtual void ShootProjectile(EntityUid uid, Vector2 direction, Vector2 gunVelocity, EntityUid gunUid, EntityUid? user = null, float speed = 20f,
+    // WOLFGATE(Performance): wizden#36641, gunUid was not nullable
+    public virtual void ShootProjectile(EntityUid uid, Vector2 direction, Vector2 gunVelocity, EntityUid? gunUid, EntityUid? user = null, float speed = 20f,
                                         float offset = 0f) // Mono - add offset
     {
         var physics = _physQuery.CompOrNull(uid) ?? EnsureComp<PhysicsComponent>(uid);
@@ -525,7 +526,12 @@ public abstract partial class SharedGunSystem : EntitySystem
         }
 
         var projectile = _projQuery.CompOrNull(uid) ?? EnsureComp<ProjectileComponent>(uid);
-        Projectiles.SetShooter(uid, projectile, user ?? gunUid);
+        // WOLFGATE(Performance) START: wizden#36641, a projectile may have no shooter
+        // Projectiles.SetShooter(uid, projectile, user ?? gunUid);
+        var shooter = user ?? gunUid;
+        if (shooter != null)
+            Projectiles.SetShooter(uid, projectile, shooter.Value);
+        // WOLFGATE END
         projectile.Weapon = gunUid;
 
         TransformSystem.SetWorldRotation(uid, direction.ToWorldAngle() + projectile.Angle);

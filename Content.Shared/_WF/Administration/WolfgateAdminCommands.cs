@@ -15,4 +15,5 @@ public static class WolfgateAdminCommands
     public const string GridPower = "gridpower";
     public const string ErtBuilder = "ertbuilder";
     public const string ErtBuilderUi = "ertbuilderui";
+    public const string OfferToGhosts = "offertoghosts";
 }

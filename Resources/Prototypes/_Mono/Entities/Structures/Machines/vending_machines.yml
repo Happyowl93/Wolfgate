@@ -171,6 +171,10 @@
     normalState: normal-unshaded
     ejectState: eject-unshaded
     denyState: deny-unshaded
+    # WOLFGATE(TradeGoods) START: no free crates from the eject wire or wrecking the vendor
+    ejectRandomMax: 0
+    ejectRandomCounter: 0
+    # WOLFGATE END
   - type: MarketModifier
     mod: 8
   - type: Sprite

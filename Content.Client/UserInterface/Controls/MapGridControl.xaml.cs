@@ -79,11 +79,11 @@ public partial class MapGridControl : LayoutContainer
 
     public Vector2 MaxRadarRangeVector => new Vector2(MaxRadarRange, MaxRadarRange);
 
-    protected Vector2 MidPointVector => new Vector2(MidPoint, MidPoint);
+    protected virtual Vector2 MidPointVector => new Vector2(MidPoint, MidPoint); // WOLFGATE(ShipAccess): virtual, so the door map can centre its drawing in a control of any size
 
     protected int MidPoint => SizeFull / 2;
     protected int SizeFull => (int)((UIDisplayRadius + MinimapMargin) * 2 * UIScale);
-    protected int ScaledMinimapRadius => (int)(UIDisplayRadius * UIScale);
+    protected virtual int ScaledMinimapRadius => (int)(UIDisplayRadius * UIScale); // WOLFGATE(ShipAccess): virtual, so the door map can fit the hull to its own shorter side
     protected float MinimapScale => WorldRange != 0 ? ScaledMinimapRadius / WorldRange : 0f;
 
     public event Action<float>? WorldRangeChanged;

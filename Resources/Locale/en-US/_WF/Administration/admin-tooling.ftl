@@ -46,7 +46,7 @@ wf-vessel-spawn-category-AdminOnly = Admin only
 shipyard-console-class-Mercenary = Mercenary
 
 ## spawnvessel command
-cmd-spawnvessel-desc = Spawns a vessel prototype's grid at your current position, optionally handing a player its deed.
+cmd-spawnvessel-desc = Spawns a vessel prototype's grid at your current position, optionally registering it to a player: their account, and the ID card they carry as its deed.
 cmd-spawnvessel-help = Usage: {$command} <vessel ID> [owner username]
 cmd-spawnvessel-hint = <vessel ID>
 cmd-spawnvessel-owner-hint = [owner username]
@@ -58,9 +58,11 @@ cmd-spawnvessel-failed = Failed to spawn vessel "{$id}". Check the server log.
 cmd-spawnvessel-success = Spawned {$name} (entity {$uid}).
 cmd-spawnvessel-owner-not-found = No connected player named "{$name}".
 cmd-spawnvessel-owner-no-entity = {$name} has no body to hold an ID card.
+cmd-spawnvessel-owner-ghost = {$name} is a ghost, and a ghost's ID card doesn't last.
 cmd-spawnvessel-owner-no-id = {$name} has no ID card on them.
 cmd-spawnvessel-owner-has-deed = {$name}'s ID card already holds a ship deed.
-cmd-spawnvessel-owner-assigned = Deed assigned to {$name}.
+cmd-spawnvessel-owner-assigned = Deed assigned to {$name}, and the ship registered to their account.
+cmd-spawnvessel-owner-registered = Registered to {$name}'s account, with no deed card: {$reason} Its access follows them into any body.
 cmd-spawnvessel-owner-failed = Could not assign the deed to {$name}.
 
 ## Spawn as Outfit verb and window

@@ -36,6 +36,7 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
         // Mode switching
         NavModeButton.OnPressed += NavPressed;
         ShipModeButton.OnPressed += ShipPressed; // WOLFGATE(Shuttles)
+        AccessModeButton.OnPressed += AccessPressed; // WOLFGATE(ShipAccess)
         MapModeButton.OnPressed += MapPressed;
         DockModeButton.OnPressed += DockPressed;
 
@@ -44,6 +45,7 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
 
         NavModeButton.Group = group;
         ShipModeButton.Group = group; // WOLFGATE(Shuttles)
+        AccessModeButton.Group = group; // WOLFGATE(ShipAccess)
         MapModeButton.Group = group;
         DockModeButton.Group = group;
 
@@ -88,6 +90,7 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
 
         NfInitialize(); // Frontier Initialization for the ShuttleConsoleWindow
         WfInitialize(); // WOLFGATE(Shuttles)
+        WfAccessInitialize(); // WOLFGATE(ShipAccess)
     }
 
     private void ClearModes(ShuttleConsoleMode mode)
@@ -101,6 +104,13 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
         if (mode != ShuttleConsoleMode.Ship)
         {
             WfSetShipMode(false);
+        }
+        // WOLFGATE END
+
+        // WOLFGATE(ShipAccess) START: access tab
+        if (mode != ShuttleConsoleMode.Access)
+        {
+            WfSetAccessMode(false);
         }
         // WOLFGATE END
 
@@ -128,6 +138,13 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
     }
     // WOLFGATE END
 
+    // WOLFGATE(ShipAccess) START: access tab
+    private void AccessPressed(BaseButton.ButtonEventArgs obj)
+    {
+        SwitchMode(ShuttleConsoleMode.Access);
+    }
+    // WOLFGATE END
+
     private void MapPressed(BaseButton.ButtonEventArgs obj)
     {
         SwitchMode(ShuttleConsoleMode.Map);
@@ -148,6 +165,11 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
             // WOLFGATE(Shuttles) START: ship mode
             case ShuttleConsoleMode.Ship:
                 WfSetShipMode(true);
+                break;
+            // WOLFGATE END
+            // WOLFGATE(ShipAccess) START: access tab
+            case ShuttleConsoleMode.Access:
+                WfSetAccessMode(true);
                 break;
             // WOLFGATE END
             case ShuttleConsoleMode.Map:
@@ -176,6 +198,7 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
     {
         Nav,
         Ship, // WOLFGATE(Shuttles)
+        Access, // WOLFGATE(ShipAccess)
         Map,
         Dock,
     }
@@ -193,6 +216,7 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
         CollisionBanner.SetShuttle(coordinates?.EntityId);
         WfUpdateTractorCapture(cState.TractorSources);
         // WOLFGATE END
+        WfAccessUpdateState(coordinates?.EntityId, owner); // WOLFGATE(ShipAccess)
 
         NavContainer.UpdateState(cState.NavState);
         MapContainer.UpdateState(cState.MapState);

@@ -1,5 +1,6 @@
 using Content.Shared._WF.Administration;
 using Content.Shared.Database;
+using Content.Shared.Popups;
 using Content.Shared.Verbs;
 using Robust.Server.Console;
 using Robust.Shared.Player;
@@ -14,6 +15,8 @@ public sealed partial class WolfgateAdminVerbSystem : EntitySystem
 {
     [Dependency] private IConGroupController _groupController = default!;
     [Dependency] private IServerConsoleHost _console = default!;
+    [Dependency] private GhostOfferSystem _ghostOffer = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
 
     public override void Initialize()
     {
@@ -38,6 +41,26 @@ public sealed partial class WolfgateAdminVerbSystem : EntitySystem
                 Category = VerbCategory.Admin,
                 Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/outfit.svg.192dpi.png")),
                 Act = () => _console.RemoteExecuteCommand(player, $"{WolfgateAdminCommands.SpawnOutfitUi} {GetNetEntity(args.Target)}"),
+                Impact = LogImpact.Medium,
+            });
+        }
+
+        // Offer to Ghosts: a mob nobody is playing, or an open ghost role, with its default texts.
+        if (_groupController.CanCommand(player, WolfgateAdminCommands.OfferToGhosts)
+            && _ghostOffer.CanOffer(args.Target))
+        {
+            var target = args.Target;
+            args.Verbs.Add(new Verb
+            {
+                Text = Loc.GetString("wf-admin-verbs-offer-to-ghosts"),
+                Message = Loc.GetString("wf-admin-verbs-offer-to-ghosts-description"),
+                Category = VerbCategory.Admin,
+                Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/sentient.svg.192dpi.png")),
+                Act = () =>
+                {
+                    var offered = _ghostOffer.TryOffer(target, player, null, null, null, out var message);
+                    _popup.PopupCursor(message, player, offered ? PopupType.Medium : PopupType.MediumCaution);
+                },
                 Impact = LogImpact.Medium,
             });
         }

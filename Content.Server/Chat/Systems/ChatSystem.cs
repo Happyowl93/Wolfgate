@@ -265,6 +265,11 @@ public sealed partial class ChatSystem : SharedChatSystem
             return;
         }
 
+        // WOLFGATE(Chimera) START: hivemind text from the channel selector has no + prefix, so it goes to the default mind
+        if (desiredType == InGameICChatType.CollectiveMind && !message.StartsWith(CollectiveMindPrefix))
+            message = $"{CollectiveMindPrefix} {message}";
+        // WOLFGATE END
+
         // This message may have a radio prefix, and should then be whispered to the resolved radio channel
         if (checkRadioPrefix)
         {
@@ -464,6 +469,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             if (_mobStateSystem.IsDead(uid))
                 continue;
 
+            _collectiveMind.UpdateCollectiveMind(uid, collectMindComp); // WOLFGATE(Chimera): members hear a mind before they've spoken
             if (collectMindComp.Minds.ContainsKey(collectiveMind.ID) || collectMindComp.HearAll)
             {
                 if (collectMindComp.SeeAllNames)

@@ -35,6 +35,7 @@ public sealed partial class ShuttleConsoleBoundUserInterface : BoundUserInterfac
         _window.ToggleFTLLockRequest += OnToggleFTLLockRequest;
         NfOpen(); // Frontier
         WfOpen(); // WOLFGATE(Shuttles)
+        WfAccessOpen(); // WOLFGATE(ShipAccess)
     }
 
     private void OnToggleFTLLockRequest(List<NetEntity> dockEntities, bool enabled)

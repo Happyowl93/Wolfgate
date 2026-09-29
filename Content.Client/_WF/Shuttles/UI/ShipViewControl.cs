@@ -13,7 +13,7 @@ namespace Content.Client._WF.Shuttles.UI;
 /// Nav map of a single ship, framed so the whole hull fits in the control, with hull telemetry drawn
 /// over it as line work so it reads against the wireframe underneath.
 /// </summary>
-public sealed class ShipViewControl : NavMapControl
+public class ShipViewControl : NavMapControl
 {
     /// <summary>
     /// Spare room left around the hull when fitting.
@@ -103,7 +103,7 @@ public sealed class ShipViewControl : NavMapControl
         PostWallDrawingAction += DrawStatus;
     }
 
-    public void SetGrid(EntityUid? grid)
+    public virtual void SetGrid(EntityUid? grid)
     {
         if (_grid == grid)
             return;

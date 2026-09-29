@@ -226,6 +226,15 @@ public abstract partial class SharedChatSystem : EntitySystem
         var channelKey = input[1];
         channelKey = char.ToLower(channelKey);
 
+        // WOLFGATE(Chimera) START: with a default mind a key needs a space after it, so "+look" isn't sent as "ook"
+        if (defaultChannel != null && input.Length > 2 && !char.IsWhiteSpace(input[2]))
+        {
+            output = SanitizeMessageCapital(input[1..].TrimStart());
+            channel = _prototypeManager.Index<CollectiveMindPrototype>(defaultChannel.Value);
+            return true;
+        }
+        // WOLFGATE END
+
         if (_mindKeyCodes.TryGetValue(channelKey, out channel))
         {
             output = SanitizeMessageCapital(input[2..].TrimStart());

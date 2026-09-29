@@ -487,7 +487,7 @@ public sealed partial class GunSystem : SharedGunSystem
     public override void ShootProjectile(EntityUid uid,
         Vector2 direction,
         Vector2 gunVelocity,
-        EntityUid gunUid,
+        EntityUid? gunUid, // WOLFGATE(Performance): wizden#36641, was EntityUid
         EntityUid? user = null,
         float speed = 20f,
         float offset = 0f) // Mono

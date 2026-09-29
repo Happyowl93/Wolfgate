@@ -162,10 +162,14 @@ public sealed partial class AtmosMonitoringConsoleNavMapControl : NavMapControl
         {
             var list = new List<AtmosMonitoringConsoleLine>();
 
-            foreach (var ((netId, layer, hexColor), atmosPipeData) in chunk.AtmosPipeData)
+            // WOLFGATE(Performance) START: wizden#38974, subnets carry a Color instead of a hex string
+            // foreach (var ((netId, layer, hexColor), atmosPipeData) in chunk.AtmosPipeData)
+            foreach (var ((netId, layer, pipeColor), atmosPipeData) in chunk.AtmosPipeData)
             {
                 // Determine the correct coloration for the pipe
-                var color = Color.FromHex(hexColor) * _basePipeNetColor;
+                // var color = Color.FromHex(hexColor) * _basePipeNetColor;
+                var color = pipeColor * _basePipeNetColor;
+                // WOLFGATE END
 
                 if (FocusNetId != null && FocusNetId != netId)
                     color *= _unfocusedPipeNetColor;

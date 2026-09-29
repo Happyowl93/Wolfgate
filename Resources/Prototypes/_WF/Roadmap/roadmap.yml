@@ -1,0 +1,121 @@
+# Columns run left to right by order, items top to bottom.
+# state: Planned (red), InProgress (blue), Partial (yellow) or Complete (green).
+
+- type: roadmapColumn
+  id: WFRoadmapCurrent
+  name: wf-roadmap-column-current
+  order: 0
+  items:
+  - name: wf-roadmap-item-species
+    description: wf-roadmap-item-species-desc
+    state: Complete
+  - name: wf-roadmap-item-anatomy
+    description: wf-roadmap-item-anatomy-desc
+    state: Complete
+  - name: wf-roadmap-item-ship-pa
+    description: wf-roadmap-item-ship-pa-desc
+    state: Complete
+  - name: wf-roadmap-item-ship-access
+    description: wf-roadmap-item-ship-access-desc
+    state: Complete
+  - name: wf-roadmap-item-traders
+    description: wf-roadmap-item-traders-desc
+    state: Complete
+  - name: wf-roadmap-item-classic-vessels
+    description: wf-roadmap-item-classic-vessels-desc
+    state: Complete
+  - name: wf-roadmap-item-dredger
+    description: wf-roadmap-item-dredger-desc
+    state: Complete
+  - name: wf-roadmap-item-tethers
+    description: wf-roadmap-item-tethers-desc
+    state: Complete
+  - name: wf-roadmap-item-tractor-beams
+    description: wf-roadmap-item-tractor-beams-desc
+    state: Complete
+  - name: wf-roadmap-item-ship-consoles
+    description: wf-roadmap-item-ship-consoles-desc
+    state: Complete
+  - name: wf-roadmap-item-deposit-boxes
+    description: wf-roadmap-item-deposit-boxes-desc
+    state: Complete
+  - name: wf-roadmap-item-interface
+    description: wf-roadmap-item-interface-desc
+    state: Complete
+  - name: wf-roadmap-item-prediction
+    description: wf-roadmap-item-prediction-desc
+    state: Complete
+  - name: wf-roadmap-item-shockwaves
+    description: wf-roadmap-item-shockwaves-desc
+    state: Complete
+  - name: wf-roadmap-item-heat-haze
+    description: wf-roadmap-item-heat-haze-desc
+    state: Complete
+  - name: wf-roadmap-item-job-titles
+    description: wf-roadmap-item-job-titles-desc
+    state: Complete
+  - name: wf-roadmap-item-emote-voices
+    description: wf-roadmap-item-emote-voices-desc
+    state: Complete
+  - name: wf-roadmap-item-headshots
+    description: wf-roadmap-item-headshots-desc
+    state: Complete
+  - name: wf-roadmap-item-avali
+    state: Complete
+  - name: wf-roadmap-item-fire-sprites
+    description: wf-roadmap-item-fire-sprites-desc
+    state: Complete
+
+- type: roadmapColumn
+  id: WFRoadmapUpcoming
+  name: wf-roadmap-column-upcoming
+  order: 1
+  items:
+  - name: wf-roadmap-item-wolfmed
+    description: wf-roadmap-item-wolfmed-desc
+    state: InProgress
+  - name: wf-roadmap-item-planets
+    description: wf-roadmap-item-planets-desc
+    state: InProgress
+  - name: wf-roadmap-item-planet-structures
+    description: wf-roadmap-item-planet-structures-desc
+    state: Planned
+
+- type: roadmapColumn
+  id: WFRoadmapFuture
+  name: wf-roadmap-column-future
+  order: 2
+  items:
+  - name: wf-roadmap-item-planet-cracking
+    description: wf-roadmap-item-planet-cracking-desc
+    state: Planned
+  - name: wf-roadmap-item-outposts-bases
+    description: wf-roadmap-item-outposts-bases-desc
+    state: Planned
+  - name: wf-roadmap-item-outposts-economy
+    description: wf-roadmap-item-outposts-economy-desc
+    state: Planned
+  - name: wf-roadmap-item-outposts-living
+    description: wf-roadmap-item-outposts-living-desc
+    state: Planned
+  - name: wf-roadmap-item-outposts-raids
+    description: wf-roadmap-item-outposts-raids-desc
+    state: Planned
+  - name: wf-roadmap-item-outposts-more
+    description: wf-roadmap-item-outposts-more-desc
+    state: Planned
+  - name: wf-roadmap-item-encounters-freighters
+    description: wf-roadmap-item-encounters-freighters-desc
+    state: Planned
+  - name: wf-roadmap-item-encounters-tiers
+    description: wf-roadmap-item-encounters-tiers-desc
+    state: Planned
+  - name: wf-roadmap-item-encounters-pirates
+    description: wf-roadmap-item-encounters-pirates-desc
+    state: Planned
+  - name: wf-roadmap-item-encounters-distress
+    description: wf-roadmap-item-encounters-distress-desc
+    state: Planned
+  - name: wf-roadmap-item-encounters-storyteller
+    description: wf-roadmap-item-encounters-storyteller-desc
+    state: Planned

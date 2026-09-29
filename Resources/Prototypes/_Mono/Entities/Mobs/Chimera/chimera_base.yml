@@ -184,6 +184,16 @@
     uis:
       enum.RadarConsoleUiKey.Key:
         toggleAction: ActionObserverShowRadar
+  # WOLFGATE(Chimera) START: a converted fleshbeast drops the body it was made from when it dies
+  - type: DropOriginalBodyOnDeath
+    purgedReagents:
+    - Letoferol
+    - NaturalLetoferol
+  # WOLFGATE END
+  # WOLFGATE(Chimera) START: whoever takes a fleshbeast is told how to talk to the hivemind
+  - type: MindGreeting
+    message: wf-chimera-greeting
+  # WOLFGATE END
 
 - type: entity
   parent:

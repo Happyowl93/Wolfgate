@@ -503,3 +503,120 @@ Entries:
   id: 100045
   time: '2026-09-27T02:44:37.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/103
+- author: Balls2zawall
+  changes:
+    - type: Fix
+      message: Fixed the docking doors on the Dredger being backwards.
+  id: 100046
+  time: '2026-09-27T17:33:56.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/107
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Ported the fire sprites from TauCetiClassic
+  id: 100047
+  time: '2026-09-27T17:50:56.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/105
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        You can now select your characters scream and laugh, ported from ye ole
+        skyrat! Check it under appearance!
+  id: 100048
+  time: '2026-09-27T17:52:18.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/106
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Cargo turn-in chutes no longer buy trade crates bought on the same
+        station, so the Caelestinus trade goods vendors can't be flipped at the
+        chute across the room. Haul them somewhere else.
+    - type: Fix
+      message: >-
+        Trade goods vendors no longer give out free crates when their eject wire
+        is pulsed or they are wrecked.
+  id: 100049
+  time: '2026-09-27T22:54:18.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/109
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Gyroscopes now throw shrapnel instead of an actual explosion.
+  id: 100050
+  time: '2026-09-27T22:54:41.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/108
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: You can now set who can access your ship.
+    - type: Add
+      message: Ships now come restricted to the owner by default.
+    - type: Add
+      message: You can codelock certain doors on your ship.
+    - type: Tweak
+      message: >-
+        Ship doors use the normal airlock access system, so they deny, get
+        hacked and get emagged like any airlock.
+  id: 100051
+  time: '2026-09-28T05:02:24.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/94
+- author: Happyowl93
+  changes:
+    - type: Fix
+      message: MMC cash bounties give far less MIC's
+  id: 100052
+  time: '2026-09-28T19:31:02.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/111
+- author: Happyowl93
+  changes:
+    - type: Add
+      message: Character headshots!
+  id: 100053
+  time: '2026-09-28T20:22:03.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/85
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Admins can now offer mobs to ghosts!
+  id: 100054
+  time: '2026-09-29T05:29:01.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/114
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Chimera's now drop your body once killed.
+    - type: Fix
+      message: >-
+        You can now tab to the chimera radio chat, and it's told to you (+
+        message)
+  id: 100055
+  time: '2026-09-29T05:29:14.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/113
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Ported RMC's roadmap and added our roadmap to it.
+  id: 100056
+  time: '2026-09-29T06:02:07.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/115
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Bluespace event grids no longer cause as much stutter when they spawn
+        and despawn.
+    - type: Fix
+      message: Stinger and other projectile grenades no longer cause lag spikes.
+    - type: Fix
+      message: >-
+        Atmos monitoring consoles no longer slow the server down over long
+        rounds as pipes are built and removed.
+    - type: Tweak
+      message: Radiators and other atmos devices check for walls more cheaply.
+    - type: Tweak
+      message: NPC pathfinding updates faster when grids change.
+  id: 100057
+  time: '2026-09-29T06:02:16.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/117

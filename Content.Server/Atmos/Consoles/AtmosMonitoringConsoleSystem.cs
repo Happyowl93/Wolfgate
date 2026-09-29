@@ -19,6 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Shared.DeviceNetwork.Components;
 using Content.Shared.NodeContainer;
+using Content.Server.Atmos.EntitySystems; // WOLFGATE(Performance)
 
 namespace Content.Server.Atmos.Consoles;
 
@@ -53,6 +54,7 @@ public sealed partial class AtmosMonitoringConsoleSystem : SharedAtmosMonitoring
 
         // Grid events
         SubscribeLocalEvent<GridSplitEvent>(OnGridSplit);
+        SubscribeLocalEvent<PipeNodeGroupRemovedEvent>(OnPipeNodeGroupRemoved); // WOLFGATE(Performance): wizden#38974
     }
 
     #region Event handling
@@ -295,6 +297,27 @@ public sealed partial class AtmosMonitoringConsoleSystem : SharedAtmosMonitoring
 
     #region Pipe net functions
 
+    // WOLFGATE(Performance) START: wizden#38974, drop pipe data of removed pipe nets
+    private void OnPipeNodeGroupRemoved(ref PipeNodeGroupRemovedEvent args)
+    {
+        // When a pipe node group is removed, we need to iterate over all of
+        // our pipe chunks and remove any entries with a matching net id.
+        // (We only need to check the chunks for the affected grid, though.)
+
+        if (!_gridAtmosPipeChunks.TryGetValue(args.Grid, out var chunkData))
+            return;
+
+        foreach (var chunk in chunkData.Values)
+        {
+            foreach (var key in chunk.AtmosPipeData.Keys)
+            {
+                if (key.NetId == args.NetId)
+                    chunk.AtmosPipeData.Remove(key);
+            }
+        }
+    }
+    // WOLFGATE END
+
     private void RebuildAtmosPipeGrid(EntityUid gridUid, MapGridComponent grid)
     {
         var allChunks = new Dictionary<Vector2i, AtmosPipeChunk>();
@@ -411,7 +434,7 @@ public sealed partial class AtmosMonitoringConsoleSystem : SharedAtmosMonitoring
                 continue;
 
             var netId = GetPipeNodeNetId(pipeNode);
-            var subnet = new AtmosMonitoringConsoleSubnet(netId, pipeNode.CurrentPipeLayer, pipeColor.Color.ToHex());
+            var subnet = new AtmosMonitoringConsoleSubnet(netId, pipeNode.CurrentPipeLayer, pipeColor.Color); // WOLFGATE(Performance): wizden#38974, was pipeColor.Color.ToHex()
             var pipeDirection = pipeNode.CurrentPipeDirection;
 
             chunk.AtmosPipeData.TryGetValue(subnet, out var atmosPipeData);

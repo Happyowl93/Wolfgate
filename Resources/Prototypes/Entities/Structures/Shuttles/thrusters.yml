@@ -251,7 +251,15 @@
             collection: MetalBreak
         - !type:ChangeConstructionNodeBehavior
           node: machineFrame
-        - !type:ExplodeBehavior # Mono
+        # WOLFGATE(Shrapnel) START: bursts into shrapnel like a shrapnel grenade instead of exploding
+        # - !type:ExplodeBehavior # Mono
+        - !type:PlaySoundBehavior
+          sound:
+            path: /Audio/Weapons/Guns/Gunshots/batrifle.ogg
+        - !type:ShrapnelBehavior
+          proto: PelletClusterLethal
+          count: 30
+        # WOLFGATE END
   - type: UpgradePowerDraw
     powerDrawMultiplier: 0.75
     scaling: Exponential
@@ -266,11 +274,13 @@
   - type: ShipRepairable
     repairTime: 6
     repairCost: 6
-  - type: Explosive
-    explosionType: Default
-    maxIntensity: 100
-    intensitySlope: 2
-    totalIntensity: 200
+  # WOLFGATE(Shrapnel) START: no blast, the destructible's ShrapnelBehavior replaces it
+  # - type: Explosive
+  #   explosionType: Default
+  #   maxIntensity: 100
+  #   intensitySlope: 2
+  #   totalIntensity: 200
+  # WOLFGATE END
 
 - type: entity
   id: GyroscopeUnanchored

@@ -1,3 +1,4 @@
+using System.Linq; // WOLFGATE: sums the bounty hand-in value
 using Content.Server.Cargo.Components;
 using Content.Shared.Stacks;
 using Content.Shared.Cargo;
@@ -392,6 +393,11 @@ public sealed partial class CargoSystem
                 if (price == 0)
                     continue;
                 toSell.Add(ent);
+
+                // WOLFGATE START: items handed in to a bounty are paid by its reward, not sold
+                if (IsBountyComplete(ent, out var turnedIn))
+                    price -= turnedIn.Sum(item => _pricing.GetPriceWithVendingDiscount(item, gridUid, false));
+                // WOLFGATE END
 
                 var station = _station.GetOwningStation(ent);
                 double multiplier = 1;

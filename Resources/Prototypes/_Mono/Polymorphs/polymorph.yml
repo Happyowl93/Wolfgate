@@ -3,7 +3,7 @@
   configuration:
     entity: MobLetoferolHorror
     forced: true
-    inventory: Drop
+    inventory: None # WOLFGATE(Chimera): the victim's gear stays on the stored body instead of dropping at conversion
     transferName: true
     polymorphTheLiving: false
     polymorphTheDead: true
@@ -20,7 +20,7 @@
   configuration:
     entity: MobLetoferolHorror
     forced: true
-    inventory: Drop
+    inventory: None # WOLFGATE(Chimera): the victim's gear stays on the stored body instead of dropping at conversion
     transferName: true
     polymorphTheLiving: false
     polymorphTheDead: true
@@ -37,7 +37,7 @@
   configuration:
     entity: MobLetoferolBeast
     forced: true
-    inventory: Drop
+    inventory: None # WOLFGATE(Chimera): the victim's gear stays on the stored body instead of dropping at conversion
     transferName: true
     polymorphTheLiving: false
     polymorphTheDead: true

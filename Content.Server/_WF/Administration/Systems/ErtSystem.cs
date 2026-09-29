@@ -1,5 +1,7 @@
 using System.Linq;
 using Content.Server._NF.CryoSleep;
+using Content.Server._NF.SectorServices;
+using Content.Server._WF.ShipAccess;
 using Content.Server.Access.Systems;
 using Content.Server.Administration.Commands;
 using Content.Server.Administration.Logs;
@@ -10,12 +12,15 @@ using Content.Server.Preferences.Managers;
 using Content.Server.Shuttles.Components;
 using Content.Server.Spawners.Components;
 using Content.Server.Station.Systems;
+using Content.Server.StationRecords;
+using Content.Server.StationRecords.Systems;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared._WF.Administration.Ert;
 using Content.Shared.Access;
 using Content.Shared.Access.Systems;
 using Content.Shared.Administration;
 using Content.Shared.Database;
+using Content.Shared.Forensics.Components;
 using Content.Shared.GameTicking;
 using Content.Shared.Ghost;
 using Content.Shared.Humanoid;
@@ -23,9 +28,11 @@ using Content.Shared.Humanoid.Prototypes;
 using Content.Shared.Mind.Components;
 using Content.Shared.Preferences;
 using Content.Shared.Roles;
+using Content.Shared.StationRecords;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Map;
+using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
@@ -51,8 +58,15 @@ public sealed partial class ErtSystem : EntitySystem
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private MetaDataSystem _metaData = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
+    [Dependency] private WFShipAccessServerSystem _shipAccess = default!;
+    [Dependency] private StationRecordsSystem _records = default!;
+    [Dependency] private SectorServiceSystem _sectorService = default!;
 
     private const string SpawnerPrototype = "WFErtSpawner";
+
+    /// <summary>Jobs a responder's crew record starts from; the record then takes the slot's title.</summary>
+    private static readonly ProtoId<JobPrototype> RecordJobLeader = "ERTLeader";
+    private static readonly ProtoId<JobPrototype> RecordJobMember = "ERTSecurity";
 
     private static readonly SoundSpecifier CallSound = new SoundPathSpecifier("/Audio/Misc/notice1.ogg");
 
@@ -137,6 +151,7 @@ public sealed partial class ErtSystem : EntitySystem
 
         var spawnAt = adminXform.Coordinates;
         var shipNote = string.Empty;
+        EntityUid? ship = null;
         if (!string.IsNullOrEmpty(config.Vessel))
         {
             if (!_prototypeManager.TryIndex<VesselPrototype>(config.Vessel, out var vessel) || vessel.Abstract)
@@ -154,6 +169,10 @@ public sealed partial class ErtSystem : EntitySystem
             _metaData.SetEntityName(grid.Value, $"{vessel.Name} ({team})");
             spawnAt = FindSpawnSpot(grid.Value) ?? spawnAt;
             shipNote = $" aboard {ToPrettyString(grid.Value)}";
+
+            // The team's ship: each responder is registered to it as they take their place.
+            _shipAccess.SetupRegisteredShip(grid.Value, team, Array.Empty<NetUserId>());
+            ship = grid;
         }
 
         var briefing = Clean(config.Briefing, ErtLimits.MaxBriefingLength);
@@ -184,6 +203,7 @@ public sealed partial class ErtSystem : EntitySystem
                 GenericHumans = config.GenericHumans,
                 AccessGroups = groups,
                 KeepOutfitAccess = config.KeepOutfitAccess,
+                Ship = ship,
             }, briefing));
         }
 
@@ -312,6 +332,7 @@ public sealed partial class ErtSystem : EntitySystem
         slot.GenericHumans = settings.GenericHumans;
         slot.AccessGroups = settings.AccessGroups;
         slot.KeepOutfitAccess = settings.KeepOutfitAccess;
+        slot.Ship = settings.Ship;
 
         var role = Comp<GhostRoleComponent>(uid);
         role.RoleName = settings.Title;
@@ -365,6 +386,12 @@ public sealed partial class ErtSystem : EntitySystem
         SetOutfitCommand.SetOutfit(mob, slot.Comp.Outfit, EntityManager);
         SetUpId(mob, slot.Comp);
 
+        if (slot.Comp.Ship is { } ship && !TerminatingOrDeleted(ship))
+        {
+            GiveRecord(mob, profile, slot.Comp);
+            _shipAccess.AddOwnerUser(ship, args.Player.UserId);
+        }
+
         EnsureComp<MindContainerComponent>(mob);
         _ghostRoles.GhostRoleInternalCreateMindAndTransfer(args.Player, slot, mob, role);
 
@@ -412,6 +439,33 @@ public sealed partial class ErtSystem : EntitySystem
 
         if (slot.AccessGroups.Count > 0)
             _access.TryAddGroups(id, slot.AccessGroups.Select(group => new ProtoId<AccessGroupPrototype>(group)));
+    }
+
+    /// <summary>
+    /// Gives a responder with a team ship the crew record a normal spawn gets, so their ID card carries a record key
+    /// the ship's doors can be keyed to. A character that already has a record keeps it, and its job.
+    /// </summary>
+    private void GiveRecord(EntityUid mob, HumanoidCharacterProfile profile, WolfgateErtSpawnerComponent slot)
+    {
+        var service = _sectorService.GetServiceEntity();
+        if (!TryComp<StationRecordsComponent>(service, out var records) || !_idCard.TryFindIdCard(mob, out var id))
+            return;
+
+        var name = Name(mob);
+        var existing = _records.GetRecordByName(service, name, records) != null;
+        TryComp<FingerprintComponent>(mob, out var fingerprint);
+        TryComp<DnaComponent>(mob, out var dna);
+        _records.CreateGeneralRecord(service, id, name, profile.Age, profile.Species, profile.Gender,
+            slot.Leader ? RecordJobLeader : RecordJobMember, fingerprint?.Fingerprint, dna?.DNA, profile, records);
+
+        if (existing
+            || !TryComp<StationRecordKeyStorageComponent>(id, out var storage)
+            || storage.Key is not { } key
+            || !_records.TryGetRecord<GeneralStationRecord>(key, out var record))
+            return;
+
+        record.JobTitle = slot.Title;
+        _records.Synchronize(key);
     }
 
     private static string Clean(string text, int maxLength)

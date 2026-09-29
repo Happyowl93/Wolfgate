@@ -16,6 +16,12 @@ public sealed partial class WolfgateErtSpawnerComponent : Component
     [ViewVariables]
     public bool Leader;
 
+    /// <summary>
+    /// The team's ship, if one was spawned: whoever takes this place is registered to it.
+    /// </summary>
+    [ViewVariables]
+    public EntityUid? Ship;
+
     [ViewVariables]
     public string TeamName = string.Empty;
 

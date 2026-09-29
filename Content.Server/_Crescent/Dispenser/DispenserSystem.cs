@@ -56,6 +56,10 @@ public sealed partial class DispenserSystem : SharedDispenserSystem
             && TryGetDispenseItem(component, prototype.ID, out string itemId))
         {
             args.Handled = true;
+            // WOLFGATE(TradeGoods) START: chutes refuse goods bought on their own grid
+            if (RefuseLocalGoods(uid, component, used, args.User))
+                return;
+            // WOLFGATE END
             TryDispenseItem(uid, component, itemId);
 
             if (virtualItem != null)

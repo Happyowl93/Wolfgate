@@ -13,7 +13,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._WF.Administration.Commands;
 
 /// <summary>
-/// Spawns a vessel prototype at the calling admin's position, optionally handing a player its deed.
+/// Spawns a vessel prototype at the calling admin's position, optionally registering it to a player.
 /// </summary>
 [AdminCommand(AdminFlags.Spawn)]
 public sealed partial class SpawnVesselCommand : LocalizedEntityCommands
@@ -55,20 +55,10 @@ public sealed partial class SpawnVesselCommand : LocalizedEntityCommands
 
         // Resolve the owner before spawning so a bad owner leaves nothing behind.
         ICommonSession? owner = null;
-        EntityUid? idCard = null;
-        if (args.Length == 2)
+        if (args.Length == 2 && !_players.TryGetSessionByUsername(args[1], out owner))
         {
-            if (!_players.TryGetSessionByUsername(args[1], out owner))
-            {
-                shell.WriteError(Loc.GetString("cmd-spawnvessel-owner-not-found", ("name", args[1])));
-                return;
-            }
-
-            if (!_vesselSpawn.TryGetDeedCard(owner, out idCard, out var errorKey))
-            {
-                shell.WriteError(Loc.GetString(errorKey, ("name", owner.Name)));
-                return;
-            }
+            shell.WriteError(Loc.GetString("cmd-spawnvessel-owner-not-found", ("name", args[1])));
+            return;
         }
 
         if (!_vesselSpawn.TrySpawnVessel(vessel, xform.MapID, _transform.GetWorldPosition(xform), player, out var grid))
@@ -79,13 +69,18 @@ public sealed partial class SpawnVesselCommand : LocalizedEntityCommands
 
         shell.WriteLine(Loc.GetString("cmd-spawnvessel-success", ("name", vessel.Name), ("uid", grid.Value)));
 
-        if (owner == null || idCard == null)
+        if (owner == null)
             return;
 
-        if (_vesselSpawn.TryAssignOwner(grid.Value, vessel, idCard.Value, owner))
+        // No card to hold the deed (a ghost, say) still registers the ship to the player's account.
+        var hasCard = _vesselSpawn.TryGetDeedCard(owner, out var idCard, out var noCardKey);
+        if (!_vesselSpawn.TryAssignOwner(grid.Value, vessel, idCard, owner))
+            shell.WriteError(Loc.GetString("cmd-spawnvessel-owner-failed", ("name", owner.Name)));
+        else if (hasCard)
             shell.WriteLine(Loc.GetString("cmd-spawnvessel-owner-assigned", ("name", owner.Name)));
         else
-            shell.WriteError(Loc.GetString("cmd-spawnvessel-owner-failed", ("name", owner.Name)));
+            shell.WriteLine(Loc.GetString("cmd-spawnvessel-owner-registered", ("name", owner.Name),
+                ("reason", Loc.GetString(noCardKey!, ("name", owner.Name)))));
     }
 
     public override CompletionResult GetCompletion(IConsoleShell shell, string[] args)
