@@ -2,7 +2,7 @@ using Content.Server.Chat.Systems; // Frontier: InGameICChatType
 using Content.Server.Radio.EntitySystems;
 using Content.Shared.Chat;
 using Content.Shared.Radio;
-using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype.Set;
+using Content.Shared._WF.EngineCompat;
 
 namespace Content.Server.Radio.Components;
 

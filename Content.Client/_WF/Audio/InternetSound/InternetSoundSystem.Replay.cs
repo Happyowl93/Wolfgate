@@ -40,9 +40,9 @@ public sealed partial class InternetSoundSystem
             _replayAssets[InternetSoundResources.PathFor(asset.Id)] = asset;
         if (_replay.Replay is not { } replay)
             return;
-        foreach (var frame in replay.Messages)
+        for (var i = 0; i < replay.Count; i++)
         {
-            foreach (var asset in frame.Messages.OfType<InternetSoundReplayAsset>())
+            foreach (var asset in replay.GetMessages(i).Messages.OfType<InternetSoundReplayAsset>())
                 _replayAssets[InternetSoundResources.PathFor(asset.Id)] = asset;
         }
         UpdateReplayResources();
