@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Original artwork generated with OpenAI image generation for Wolfgate (2026), with native-canvas and palette conversion by Codex. Existing Monolith sprites were inspected as style references; no reference pixels were copied.",
+  "size": { "x": 128, "y": 128 },
+  "states": [
+    { "name": "space_artillery", "directions": 1 }
+  ]
+}
