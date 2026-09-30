@@ -15,7 +15,7 @@ No pixels were copied. The six steel shades and two red shades match Vespera's m
 
 Artwork was generated using the built-in OpenAI image-generation tool, then converted in Aseprite to the
 native canvas, binary alpha and material ramp. The authoring artifacts retain the generated source,
-three prompts, conversion script and editable Aseprite source with separate body and indicator layers.
+generation prompts, conversion script and editable Aseprite source with separate body, cleanup and indicator layers.
 Only the runtime RSI is included here. The asset is licensed under CC-BY-SA-3.0 as recorded in `meta.json`.
 
 <!-- WOLFGATE-GENERATED START -->
