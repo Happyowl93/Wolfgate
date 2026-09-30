@@ -92,6 +92,9 @@
                                     <Label Text="{Loc 'humanoid-profile-editor-skin-color-label'}" StyleClasses="CreatorFieldLabel" Margin="0 6 0 0" />
                                     <Slider HorizontalExpand="True" Name="Skin" MinValue="0" MaxValue="100" Value="20" />
                                     <BoxContainer Name="RgbSkinColorContainer" Visible="False" Orientation="Vertical" HorizontalExpand="True" />
+                                    <!-- WOLFGATE(Species): lets any species wear every species' markings (HumanoidProfileEditor.MismatchedParts.cs) -->
+                                    <CheckBox Name="MismatchedPartsCheckBox" Text="{Loc 'wf-mismatched-parts-toggle'}"
+                                              ToolTip="{Loc 'wf-mismatched-parts-tooltip'}" Margin="0 6 0 0" />
                                 </BoxContainer>
                             </PanelContainer>
                         </BoxContainer>

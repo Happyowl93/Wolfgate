@@ -12,7 +12,7 @@ using Color = Robust.Shared.Maths.Color;
 namespace Content.Client._WF.UserInterface.Controls;
 
 /// <summary>
-/// Classic colour popup: a saturation/value box to drag around, a hue bar below it, and RGB plus hex fields.
+/// Classic colour popup: a saturation/value box to drag around, a hue bar below it, and RGB, HSV and hex fields.
 /// </summary>
 public sealed class WolfgateColorPopup : Popup
 {
@@ -24,6 +24,9 @@ public sealed class WolfgateColorPopup : Popup
     private readonly LineEdit _r;
     private readonly LineEdit _g;
     private readonly LineEdit _b;
+    private readonly LineEdit _hField;
+    private readonly LineEdit _sField;
+    private readonly LineEdit _vField;
     private readonly LineEdit _hex;
     private bool _updating;
 
@@ -54,12 +57,18 @@ public sealed class WolfgateColorPopup : Popup
         _r = Field(3);
         _g = Field(3);
         _b = Field(3);
+        _hField = Field(3);
+        _sField = Field(3);
+        _vField = Field(3);
         _hex = Field(9);
         _hex.HorizontalExpand = true;
 
         _r.OnTextChanged += _ => RgbEntered();
         _g.OnTextChanged += _ => RgbEntered();
         _b.OnTextChanged += _ => RgbEntered();
+        _hField.OnTextChanged += _ => HsvEntered(_hField, 360, value => SetHsv(value, _s, _v));
+        _sField.OnTextChanged += _ => HsvEntered(_sField, 100, value => SetHsv(_h, value, _v));
+        _vField.OnTextChanged += _ => HsvEntered(_vField, 100, value => SetHsv(_h, _s, value));
         _hex.OnTextChanged += _ => HexEntered();
 
         var fields = new BoxContainer
@@ -72,6 +81,19 @@ public sealed class WolfgateColorPopup : Popup
                 FieldLabel("wf-color-red"), _r,
                 FieldLabel("wf-color-green"), _g,
                 FieldLabel("wf-color-blue"), _b,
+            },
+        };
+        // Indented by the chip's width so the HSV fields sit under the RGB ones
+        var hsv = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Horizontal,
+            SeparationOverride = 4,
+            Children =
+            {
+                new Control { MinWidth = 28 },
+                FieldLabel("wf-color-hue"), _hField,
+                FieldLabel("wf-color-saturation"), _sField,
+                FieldLabel("wf-color-value"), _vField,
             },
         };
         var hex = new BoxContainer
@@ -90,7 +112,7 @@ public sealed class WolfgateColorPopup : Popup
                 {
                     Orientation = BoxContainer.LayoutOrientation.Vertical,
                     SeparationOverride = 6,
-                    Children = { _sv, _hue, fields, hex },
+                    Children = { _sv, _hue, fields, hsv, hex },
                 },
             },
         });
@@ -124,6 +146,9 @@ public sealed class WolfgateColorPopup : Popup
         _r.Text = color.RByte.ToString();
         _g.Text = color.GByte.ToString();
         _b.Text = color.BByte.ToString();
+        _hField.Text = MathF.Round(_h * 360f).ToString("0");
+        _sField.Text = MathF.Round(_s * 100f).ToString("0");
+        _vField.Text = MathF.Round(_v * 100f).ToString("0");
         _hex.Text = color.ToHexNoAlpha();
         _sv.SetHue(_h);
         _updating = false;
@@ -137,6 +162,17 @@ public sealed class WolfgateColorPopup : Popup
             return;
         var hsv = Color.ToHsv(new Color(r, g, b));
         SetHsv(hsv.Y > 0.001f && hsv.Z > 0.001f ? hsv.X : _h, hsv.Y, hsv.Z);
+    }
+
+    /// <summary>
+    /// One HSV field was edited: hue in degrees, saturation and value in percent. Only that component changes; the other
+    /// two keep their exact values rather than the rounded ones their fields show.
+    /// </summary>
+    private void HsvEntered(LineEdit field, int max, Action<float> set)
+    {
+        if (_updating || !int.TryParse(field.Text, out var entered))
+            return;
+        set(Math.Clamp(entered, 0, max) / (float) max);
     }
 
     private void HexEntered()

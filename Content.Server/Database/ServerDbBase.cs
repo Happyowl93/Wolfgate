@@ -324,6 +324,7 @@ namespace Content.Server.Database
                 // WOLFGATE END
             {
                 HeadshotUrl = profile.HeadshotUrl ?? string.Empty, // WOLFGATE(Headshot)
+                MismatchedParts = profile.MismatchedParts, // WOLFGATE(Species)
             };
         }
 
@@ -361,6 +362,7 @@ namespace Content.Server.Database
             profile.Company = humanoid.Company;
             profile.CustomSpeciesName = humanoid.CustomSpeciesName; // WOLFGATE(Humanoid)
             profile.HeadshotUrl = humanoid.HeadshotUrl; // WOLFGATE(Headshot)
+            profile.MismatchedParts = humanoid.MismatchedParts; // WOLFGATE(Species)
             profile.ScreamVoice = EmoteVoiceRules.ToStored(humanoid.ScreamVoice); // WOLFGATE(EmoteVoices)
             profile.LaughVoice = EmoteVoiceRules.ToStored(humanoid.LaughVoice); // WOLFGATE(EmoteVoices)
 

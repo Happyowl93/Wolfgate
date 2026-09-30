@@ -245,7 +245,7 @@
 - type: marking
   id: SynthEyesHeterochromia
   bodyPart: Eyes
-  markingCategory: Head
+  markingCategory: Eyes # WOLFGATE(Species): eye markings get their own points (was Head)
   speciesRestriction: [ Synth ]
   sprites:
   - sprite: _HL/Mobs/Customization/Synth/Orchids/eyes.rsi

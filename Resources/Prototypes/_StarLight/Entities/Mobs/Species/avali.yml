@@ -123,6 +123,10 @@
     - type: Damageable
       damageContainer: Biological
       damageModifierSet: Avali
+    # WOLFGATE(Avali) START: enable feather preening and regrowth for Avali
+    - type: Preenable
+      featherPrototype: AvaliFeather
+    # WOLFGATE END
     - type: Destructible # HardLight: Avali now turn into fried chicken when ashed.
       thresholds:
       - trigger:

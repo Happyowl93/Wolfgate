@@ -447,7 +447,7 @@
 - type: marking
   id: SpiderGlowEyes
   bodyPart: Eyes
-  markingCategory: Head
+  markingCategory: Eyes # WOLFGATE(Species): eye markings get their own points (was Head)
   speciesRestriction: [ Arachnid ]
   forcedColoring: false
   followSkinColor: false
@@ -459,7 +459,7 @@
 - type: marking
   id: SpiderEyesMulti
   bodyPart: Eyes
-  markingCategory: Head
+  markingCategory: Eyes # WOLFGATE(Species): eye markings get their own points (was Head)
   speciesRestriction: [ Arachnid ]
   forcedColoring: false
   followSkinColor: false
@@ -704,7 +704,7 @@
 - type: marking
   id: MothBiggerEyes
   bodyPart: Eyes
-  markingCategory: Head
+  markingCategory: Eyes # WOLFGATE(Species): eye markings get their own points (was Head)
   speciesRestriction: [ Moth ]
   coloring:
     default:

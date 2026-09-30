@@ -2,6 +2,7 @@ using System.Linq;
 using System.Numerics;
 using Content.Client._WF.Stylesheets;
 using Content.Client._WF.UserInterface.Controls;
+using Content.Shared._WF.Species;
 using Content.Shared.Humanoid;
 using Content.Shared.Humanoid.Markings;
 using Content.Shared.Humanoid.Prototypes;
@@ -110,6 +111,12 @@ public sealed class WolfgateMarkingPicker : BoxContainer
             Populate(_search.Text);
         }
     }
+
+    /// <summary>
+    /// Mismatched parts: every species' markings are offered, and a category the species has no points for gets one.
+    /// Takes effect on the next <see cref="SetData(List{Marking}, string, Sex, Color, Color)"/>.
+    /// </summary>
+    public bool MismatchedParts { get; set; }
 
     /// <summary>Marking ids never offered as tiles, e.g. the adult-only markings while the character is below the adult age.</summary>
     public IReadOnlySet<string> HiddenMarkings
@@ -244,7 +251,7 @@ public sealed class WolfgateMarkingPicker : BoxContainer
         }
 
         if (!IgnoreSpecies)
-            _current.EnsureSpecies(_species, CurrentSkinColor, _markingManager);
+            _current.EnsureSpecies(_species, CurrentSkinColor, MismatchedParts, _markingManager);
 
         Populate(_search.Text);
         PopulateUsed();
@@ -259,14 +266,14 @@ public sealed class WolfgateMarkingPicker : BoxContainer
     public void SetData(List<Marking> newMarkings, string species, Sex sex, Color skinColor, Color eyeColor)
     {
         var points = _prototypeManager.Index<SpeciesPrototype>(species).MarkingPoints;
-        SetData(new MarkingSet(newMarkings, points, _markingManager), species, sex, skinColor, eyeColor);
+        SetData(MarkingSet.ForProfile(newMarkings, points, MismatchedParts, _markingManager, _prototypeManager), species, sex, skinColor, eyeColor);
     }
 
     public void SetData(MarkingSet set, string species, Sex sex, Color skinColor, Color eyeColor)
     {
         _current = set;
         if (!IgnoreSpecies)
-            _current.EnsureSpecies(species, skinColor, _markingManager);
+            _current.EnsureSpecies(species, skinColor, MismatchedParts, _markingManager);
 
         _species = species;
         _sex = sex;
@@ -297,8 +304,8 @@ public sealed class WolfgateMarkingPicker : BoxContainer
     {
         var list = _current.GetForwardEnumerator().ToList();
         var speciesProto = _prototypeManager.Index<SpeciesPrototype>(_species);
-        _current = new MarkingSet(list, speciesProto.MarkingPoints, _markingManager, _prototypeManager);
-        _current.EnsureSpecies(_species, null, _markingManager);
+        _current = MarkingSet.ForProfile(list, speciesProto.MarkingPoints, MismatchedParts, _markingManager, _prototypeManager);
+        _current.EnsureSpecies(_species, null, MismatchedParts, _markingManager);
         _current.EnsureSexes(_sex, _markingManager);
         Populate(_search.Text);
         PopulateUsed();
@@ -314,17 +321,21 @@ public sealed class WolfgateMarkingPicker : BoxContainer
 
     private IReadOnlyDictionary<string, MarkingPrototype> GetMarkings(MarkingCategories category)
     {
-        return IgnoreSpecies
+        return IgnoreSpecies || MismatchedParts
             ? _markingManager.MarkingsByCategoryAndSex(category, _sex)
             : _markingManager.MarkingsByCategoryAndSpeciesAndSex(category, _species, _sex);
     }
 
-    /// <summary>Every marking the species can use, from every category that is not ignored, minus the hidden ones.</summary>
+    /// <summary>
+    /// Every marking the species can use, from every category that is not ignored, minus the hidden ones. With
+    /// Mismatched parts on, other species' markings the character's sprite has no layer for are left out.
+    /// </summary>
     private IEnumerable<MarkingPrototype> ValidMarkings()
     {
         return _allCategories.Where(c => !_ignoreCategories.Contains(c))
             .SelectMany(c => GetMarkings(c).Values)
-            .Where(m => !_hiddenMarkings.Contains(m.ID));
+            .Where(m => !_hiddenMarkings.Contains(m.ID))
+            .Where(m => !MismatchedParts || MismatchedPartsRules.Drawable(m, _species, _prototypeManager));
     }
 
     private IEnumerable<MarkingPrototype> PartMarkings(HumanoidVisualLayers part)
@@ -548,7 +559,7 @@ public sealed class WolfgateMarkingPicker : BoxContainer
         _applied.DisposeAllChildren();
         _appliedIcons.Clear();
         if (!IgnoreSpecies)
-            _current.EnsureSpecies(_species, null, _markingManager);
+            _current.EnsureSpecies(_species, null, MismatchedParts, _markingManager);
 
         var any = false;
         foreach (var category in _allCategories)

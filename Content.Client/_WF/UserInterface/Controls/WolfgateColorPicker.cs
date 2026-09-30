@@ -97,7 +97,7 @@ public sealed class WolfgateColorPicker : BoxContainer
 
         _popup.Color = Color;
         var origin = _custom.GlobalPosition + new Vector2(0, _custom.Height + 2);
-        _popup.Open(UIBox2.FromDimensions(origin, new Vector2(260, 300)));
+        _popup.Open(UIBox2.FromDimensions(origin, new Vector2(260, 334)));
     }
 
     protected override void Dispose(bool disposing)

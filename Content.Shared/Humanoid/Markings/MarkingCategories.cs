@@ -23,7 +23,10 @@ namespace Content.Shared.Humanoid.Markings
         Wings, // For IPC wings porting from SimpleStation
         Tail,
         TailExtras, // Starlight - Resomi Extra Tail Customisation
-        Overlay
+        // WOLFGATE(Species) START: eye markings get their own points instead of sharing the head's
+        Overlay,
+        Eyes,
+        // WOLFGATE END
     }
 
     public static class MarkingCategoriesConversion
@@ -60,6 +63,7 @@ namespace Content.Shared.Humanoid.Markings
                 HumanoidVisualLayers.Tail => MarkingCategories.Tail,
                 HumanoidVisualLayers.RArmExtension => MarkingCategories.Arms, // Frontier: species-specific layer
                 HumanoidVisualLayers.LArmExtension => MarkingCategories.Arms, // Frontier: species-specific layer
+                HumanoidVisualLayers.Eyes => MarkingCategories.Eyes, // WOLFGATE(Species): eye markings get their own category
                 _ => MarkingCategories.Overlay
             };
         }

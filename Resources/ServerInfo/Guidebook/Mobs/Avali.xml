@@ -22,4 +22,13 @@
   - Heal airloss from Ammonia and Amoxla but..
   - ..Saline, Dex and Dex+ is lethal to you. Remember to remind doctors about it!
   - Fall into crit at 90 and dead at 180.
+
+  <!-- WOLFGATE(Avali) START: describe feather preening, shedding and regrowth -->
+  ## Feathers
+  <Box>
+    <GuideEntityEmbed Entity="AvaliFeather" Caption=""/>
+  </Box>
+  Use the context menu to [color=#1e90ff]preen your own or another Avali's feathers[/color]. Preening takes five seconds and stops if you move or take damage. Avali have up to three feathers available, regrowing one every two and a half minutes after the last feather was removed.
+  A brute injury can tear out a bloody feather and grant three seconds of [color=#1e90ff]adrenaline[/color], temporarily ignoring injury slowdown. Shed feathers keep their owner's color and DNA. They can be used as quills or worn in the head or ear slot.
+  <!-- WOLFGATE END -->
 </Document>

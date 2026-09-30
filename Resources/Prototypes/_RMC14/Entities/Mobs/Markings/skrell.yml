@@ -284,7 +284,7 @@
 - type: marking
   id: RMCEyesSkrellAxiori # Alternate eye markings in case you wanna have giant frog eyes
   bodyPart: Eyes
-  markingCategory: Head
+  markingCategory: Eyes # WOLFGATE(Species): eye markings get their own points (was Head)
   speciesRestriction: [Skrell]
   sprites:
     - sprite: _RMC14/Mobs/Skrells/markings.rsi

@@ -3,7 +3,8 @@
 Client controls other Wolfgate UI is built from.
 
 - `WolfgateColorPicker`: an inline colour input (current colour, swatches and a Custom button that opens
-  `WolfgateColorPopup`) with the same surface as `ColorSelectorSliders`, so it can replace it.
+  `WolfgateColorPopup`, with a saturation/value box, a hue bar and RGB, HSV and hex fields) with the same surface as
+  `ColorSelectorSliders`, so it can replace it.
 - Window pop-out: `WindowPopoutUIController` puts a button next to the close button of every in-game window, and
   `WolfgatePopoutButton` moves the window into a `WolfgatePopoutWindow`, its own OS window, so players can put it on
   another monitor. No window has to opt in; `wf.ui_window_popout` switches it off.

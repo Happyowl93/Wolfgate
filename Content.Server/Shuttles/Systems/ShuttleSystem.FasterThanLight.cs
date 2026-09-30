@@ -409,7 +409,12 @@ public sealed partial class ShuttleSystem
             }
         }
 
-        var hyperspace = EnsureComp<FTLComponent>(shuttleUid);
+        // WOLFGATE START: start a real jump, as an ensured FTLComponent stayed Available and was removed
+        // Expedition targets are already fully undocked above, so TrySetupFTL's docked-shuttle checks can't refuse them.
+        // var hyperspace = EnsureComp<FTLComponent>(shuttleUid);
+        if (!TrySetupFTL(shuttleUid, component, out var hyperspace))
+            return;
+        // WOLFGATE END
         SetupFTL(hyperspace, startupTime, hyperspaceTime, priorityTag);
 
         if (TryComp<DockingComponent>(target, out var dock) && dock.Docked && dock.DockedWith != null)
@@ -417,7 +422,10 @@ public sealed partial class ShuttleSystem
             hyperspace.TargetCoordinates = new EntityCoordinates(dock.DockedWith.Value, Vector2.Zero);
             hyperspace.TargetAngle = _transform.GetWorldRotation(dock.DockedWith.Value) + Math.PI;
         }
-        else if (TryFTLDock(shuttleUid, component, target, out var config))
+        // WOLFGATE START: pick the dock without teleporting the shuttle there before the jump
+        // else if (TryFTLDock(shuttleUid, component, target, out var config))
+        else if (_dockSystem.GetDockingConfig(shuttleUid, target, priorityTag) is { } config)
+        // WOLFGATE END
         {
             hyperspace.TargetCoordinates = config.Coordinates;
             hyperspace.TargetAngle = config.Angle;

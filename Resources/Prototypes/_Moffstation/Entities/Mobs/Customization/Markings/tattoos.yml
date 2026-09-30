@@ -1,7 +1,7 @@
 - type: marking
   id: ResomiTattooEyeLeft
   bodyPart: Eyes
-  markingCategory: Head
+  markingCategory: Eyes # WOLFGATE(Species): eye markings get their own points (was Head)
   coloring:
     layers:
       eye_left:
@@ -14,7 +14,7 @@
 - type: marking
   id: ResomiTattooEyeRight
   bodyPart: Eyes
-  markingCategory: Head
+  markingCategory: Eyes # WOLFGATE(Species): eye markings get their own points (was Head)
   coloring:
     layers:
       eye_right:

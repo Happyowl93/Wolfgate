@@ -22,8 +22,6 @@
   guides:
   - Caelestinus
   special:
-  - !type:AddImplantSpecial
-    implants: [ MindShieldImplant ]
   - !type:AddComponentSpecial
     components:
       - type: NpcFactionMember
@@ -47,3 +45,4 @@
     - RubberStampDoctor
     - BoxFolderMedicalDoctor
     - WFShipVoucherMedicalResponder # WOLFGATE(Shipyard): free Triage or Stubby
+    - EncryptionKeyService

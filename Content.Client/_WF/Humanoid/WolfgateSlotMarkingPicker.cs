@@ -125,12 +125,13 @@ public sealed class WolfgateSlotMarkingPicker : BoxContainer
         AddChild(_colors);
     }
 
-    public void UpdateData(List<Marking> markings, string species, int totalPoints)
+    /// <summary>Loads the worn markings; <paramref name="styles"/> replaces the species' own choices when given.</summary>
+    public void UpdateData(List<Marking> markings, string species, int totalPoints, IReadOnlyDictionary<string, MarkingPrototype>? styles = null)
     {
         _markings = markings;
         _species = species;
         _totalPoints = totalPoints;
-        _prototypes = _markingManager.MarkingsByCategoryAndSpecies(Category, _species);
+        _prototypes = styles ?? _markingManager.MarkingsByCategoryAndSpecies(Category, _species);
 
         Visible = _prototypes.Count != 0;
         if (!Visible)

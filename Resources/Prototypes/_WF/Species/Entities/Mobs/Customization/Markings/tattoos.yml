@@ -1,7 +1,7 @@
 - type: marking
   id: TattooEyeMothRight
   bodyPart: Eyes
-  markingCategory: Overlay
+  markingCategory: Eyes
   speciesRestriction: [Skrell,Thaven, Dwarf, Diona, Human, SlimePerson, Felinid, Oni, Harpy, Reptilian, Vulpkanin, Rodentia, Goblin, Sheleg, IPC, Feroxi, Moth, Arachnid, Kitsune, Chitinid, Shadekin, WFCanine] # Frontier: added Goblin and afterwards
   coloring:
     default:
@@ -13,7 +13,7 @@
 - type: marking
   id: TattooEyeMothLeft
   bodyPart: Eyes
-  markingCategory: Overlay
+  markingCategory: Eyes
   speciesRestriction: [Skrell,Thaven, Dwarf, Diona, Human, SlimePerson, Felinid, Oni, Harpy, Reptilian, Vulpkanin, Rodentia, Goblin, Sheleg, IPC, Feroxi, Moth, Arachnid, Kitsune, Chitinid, Shadekin, WFCanine] # Frontier: added Goblin and afterwards
   coloring:
     default:

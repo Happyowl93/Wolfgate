@@ -12,10 +12,10 @@ public sealed class HeadshotCVars
 
     /// <summary>
     /// Comma-separated hosts headshots may be fetched from. A host also allows its subdomains. Empty allows any
-    /// public host.
+    /// public host. Replicated so the editor can list them.
     /// </summary>
     public static readonly CVarDef<string> AllowedHosts =
-        CVarDef.Create("wf.headshot.allowed_hosts", string.Empty, CVar.SERVERONLY);
+        CVarDef.Create("wf.headshot.allowed_hosts", string.Empty, CVar.SERVER | CVar.REPLICATED);
 
     /// <summary>Largest image download accepted, in kilobytes.</summary>
     public static readonly CVarDef<int> MaxDownloadKb =

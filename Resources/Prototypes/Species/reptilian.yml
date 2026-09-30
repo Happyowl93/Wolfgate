@@ -16,6 +16,8 @@
   id: MobReptilianSprites
   sprites:
     Head: MobReptilianHead
+    Hair: MobHumanoidAnyMarking # WOLFGATE(Species): hair layer so reptilian hair is drawn
+    FacialHair: MobHumanoidAnyMarking # WOLFGATE(Species): facial hair layer so reptilian facial hair is drawn
     Snout: MobHumanoidAnyMarking
     Chest: MobReptilianTorso
     UndergarmentTop: MobHumanoidAnyMarking # WOLFGATE(Genitals): underwear/genital layers ported from HardLight
@@ -40,13 +42,13 @@
 
 - type: markingPoints
   id: MobReptilianMarkingLimits
-  onlyWhitelisted: true
+  onlyWhitelisted: false # WOLFGATE(Species): was true, which hid the shared hair styles from reptilians
   points:
     Hair:
-      points: 0
+      points: 1 # WOLFGATE(Species): was 0, reptilians can wear hair
       required: false
     FacialHair:
-      points: 0
+      points: 1 # WOLFGATE(Species): was 0, reptilians can wear facial hair
       required: false
     Tail:
       points: 1
@@ -66,10 +68,10 @@
       points: 3
       required: false
     Legs:
-      points: 2
+      points: 8 # imp/mono 2<8
       required: false
     Arms:
-      points: 2
+      points: 8 # imp/mono 2<8
       required: false
 
 - type: humanoidBaseSprite

@@ -620,3 +620,59 @@ Entries:
   id: 100057
   time: '2026-09-29T06:02:16.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/117
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Avali can preen collectible, wearable feathers that preserve their color
+        and DNA and work as quills.
+    - type: Add
+      message: >-
+        Injuries can tear out bloody Avali feathers, briefly suppressing injury
+        slowdown.
+  id: 100058
+  time: '2026-09-29T17:53:01.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/119
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        You can now mis-match your appearance to unlock further(possibly
+        incompatible) appearance options(Starting with hair/beard being allowed
+        on ALL species with this toggled)
+  id: 100059
+  time: '2026-09-29T18:51:55.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/118
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: The bus, arrivals and evac shuttles actually jump when they dock.
+    - type: Fix
+      message: The bus announces its departures and arrivals again.
+  id: 100060
+  time: '2026-09-29T20:06:03.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/126
+- author: Erol509
+  changes:
+    - type: Add
+      message: >-
+        Added 13 Synthetic Lizard snout marking options, including long, thick,
+        layered, tertiary, and barless variants.
+  id: 100061
+  time: '2026-09-29T21:58:55.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/120
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        You can now select mismatched species parts to make anything you want
+        with species. It's under appearance.
+    - type: Add
+      message: >-
+        Eye markings have their own category, so you can wear a left and a right
+        eye (Shadekin, Moth and more) alongside your face markings.
+    - type: Add
+      message: Colour pickers have hue, saturation and value fields.
+  id: 100062
+  time: '2026-09-30T01:02:59.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/127

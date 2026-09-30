@@ -1040,6 +1040,10 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("jsonb")
                         .HasColumnName("markings");
 
+                    b.Property<bool>("MismatchedParts")
+                        .HasColumnType("boolean")
+                        .HasColumnName("mismatched_parts");
+
                     b.Property<int>("PreferenceId")
                         .HasColumnType("integer")
                         .HasColumnName("preference_id");

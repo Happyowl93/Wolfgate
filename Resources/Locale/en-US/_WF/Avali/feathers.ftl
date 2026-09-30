@@ -1,0 +1,13 @@
+ent-AvaliFeather = feather
+    .desc = Probably not ethically sourced.
+
+preening-action-verb = Preen
+
+preening-popup-self = You begin to preen your feathers...
+preening-popup-other = You begin to preen { CAPITALIZE(THE($preenee)) }'s feathers...
+preening-popup-self-recipient = { CAPITALIZE(THE($preener)) } begins to preen your feathers!
+
+preening-feather-dropped-injured = You feel a feather get torn off!
+
+feather-bloody-name-modifier = bloody {$item}
+feather-bloody-desc = DEFINITELY not ethically sourced.

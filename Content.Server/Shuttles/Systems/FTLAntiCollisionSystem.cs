@@ -78,6 +78,17 @@ public sealed partial class FTLAntiCollisionSystem : EntitySystem
         if (TryComp<FTLComponent>(shuttle, out var ftlComp) && ftlComp.LinkedShuttle.HasValue)
             return;
 
+        // WOLFGATE START: a docking jump ends on a free dock at its target, so don't push the shuttle off it
+        if (ftlComp != null)
+        {
+            foreach (var dock in _dockingSystem.GetDocks(shuttle))
+            {
+                if (dock.Comp.DockedWith is { } other && Transform(other).GridUid == ftlComp.TargetCoordinates.EntityId)
+                    return;
+            }
+        }
+        // WOLFGATE END
+
         // Get all docked ships to this shuttle to ignore them in collision checks
         var dockedShips = new HashSet<EntityUid>();
         _shuttle.GetAllDockedShuttles(shuttle, dockedShips);

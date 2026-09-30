@@ -222,7 +222,7 @@
 - type: marking
   id: HeterochromiaMoth
   bodyPart: Eyes
-  markingCategory: Head
+  markingCategory: Eyes # WOLFGATE(Species): eye markings get their own points (was Head)
   speciesRestriction: [Moth, ProtoMoth] # WOLFGATE(Species): was [Moth]
   followSkinColor: false
   coloring:

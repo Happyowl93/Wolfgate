@@ -3,12 +3,15 @@ using Content.Shared._WF.Headshot;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface.Controls;
 using Robust.Client.UserInterface.CustomControls;
+using Robust.Shared.Configuration;
+using Robust.Shared.Utility;
 
 namespace Content.Client._WF.Headshot;
 
 /// <summary>Edits a profile's headshot URL, with a preview the server fetches exactly as examiners will see it.</summary>
 public sealed class HeadshotWindow : DefaultWindow
 {
+    [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IEntityManager _entMan = default!;
 
     private readonly HeadshotSystem _headshot;
@@ -32,6 +35,13 @@ public sealed class HeadshotWindow : DefaultWindow
 
         var hint = new RichTextLabel { HorizontalExpand = true };
         hint.SetMessage(Loc.GetString("wf-headshot-window-hint", ("size", HeadshotRules.ImageSize)));
+
+        var hostList = _cfg.GetCVar(HeadshotCVars.AllowedHosts)
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var hosts = new RichTextLabel { HorizontalExpand = true };
+        hosts.SetMessage(FormattedMessage.FromUnformatted(hostList.Length == 0
+            ? Loc.GetString("wf-headshot-window-hosts-any")
+            : Loc.GetString("wf-headshot-window-hosts", ("hosts", string.Join(", ", hostList)))));
 
         _edit = new LineEdit
         {
@@ -65,6 +75,7 @@ public sealed class HeadshotWindow : DefaultWindow
             Children =
             {
                 hint,
+                hosts,
                 new BoxContainer
                 {
                     Orientation = BoxContainer.LayoutOrientation.Horizontal,

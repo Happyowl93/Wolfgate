@@ -167,6 +167,7 @@ public abstract partial class SharedHumanoidAppearanceSystem : EntitySystem
         SetSex(target, sourceHumanoid.Sex, false, targetHumanoid);
         targetHumanoid.CustomBaseLayers = new(sourceHumanoid.CustomBaseLayers);
         targetHumanoid.MarkingSet = new(sourceHumanoid.MarkingSet);
+        targetHumanoid.MismatchedParts = sourceHumanoid.MismatchedParts; // WOLFGATE(Species): copies keep drawing mismatched hair
 
         targetHumanoid.Gender = sourceHumanoid.Gender;
         if (TryComp<GrammarComponent>(target, out var grammar))
@@ -414,6 +415,7 @@ public abstract partial class SharedHumanoidAppearanceSystem : EntitySystem
         SetSkinColor(uid, profile.Appearance.SkinColor, false);
 
         humanoid.MarkingSet.Clear();
+        humanoid.MarkingSet.OpenPoints(profile.MismatchedParts); // WOLFGATE(Species): one point for each category the species has none for
 
         // Add markings that doesn't need coloring. We store them until we add all other markings that doesn't need it.
         var markingFColored = new Dictionary<Marking, MarkingPrototype>();
@@ -451,7 +453,8 @@ public abstract partial class SharedHumanoidAppearanceSystem : EntitySystem
             AddMarking(uid, profile.Appearance.FacialHairStyleId, facialHairColor, false);
         }
 
-        humanoid.MarkingSet.EnsureSpecies(profile.Species, profile.Appearance.SkinColor, _markingManager, _proto);
+        humanoid.MarkingSet.EnsureSpecies(profile.Species, profile.Appearance.SkinColor, profile.MismatchedParts, _markingManager, _proto); // WOLFGATE(Species): keeps other species' markings
+        AddMismatchedHair(uid, profile, humanoid, hairColor, facialHairColor); // WOLFGATE(Species): hair and beards the species can't wear
 
         // Finally adding marking with forced colors
         foreach (var (marking, prototype) in markingFColored)
