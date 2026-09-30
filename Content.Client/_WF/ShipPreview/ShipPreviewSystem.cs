@@ -27,6 +27,7 @@ public sealed class ShipPreviewHandle
     internal EntityUid MapUid = EntityUid.Invalid;
     internal ResPath? LoadedPath;
     internal ShipPreviewGrid? Loaded;
+    internal LoadResult? LoadedEntities;
 
     /// <summary>
     /// This previewer's map, or nullspace until its first load.
@@ -121,11 +122,7 @@ public sealed partial class ShipPreviewSystem : EntitySystem
         Entity<MapGridComponent>? grid;
         try
         {
-            if (!_loader.TryLoadGrid(handle.MapId, path, out grid, new DeserializationOptions
-                {
-                    InitializeMaps = false,
-                    PauseMaps = true,
-                }))
+            if (!TryLoadGrid(handle, path, out grid))
             {
                 Log.Warning($"Ship preview failed to load grid {path}");
                 return false;
@@ -133,8 +130,8 @@ public sealed partial class ShipPreviewSystem : EntitySystem
         }
         catch (Exception e)
         {
-            // TryLoadGrid rethrows deserialization failures after cleaning up its own entities.
             Log.Error($"Ship preview threw while loading grid {path}: {e}");
+            DestroyMap(handle);
             return false;
         }
 
@@ -169,9 +166,10 @@ public sealed partial class ShipPreviewSystem : EntitySystem
     /// </summary>
     public void Clear(ShipPreviewHandle handle)
     {
-        if (handle.Loaded is { } loaded && Exists(loaded.Grid.Owner))
-            Del(loaded.Grid.Owner);
+        if (handle.LoadedEntities is { } entities)
+            _loader.Delete(entities);
 
+        handle.LoadedEntities = null;
         handle.Loaded = null;
         handle.LoadedPath = null;
     }
@@ -186,10 +184,9 @@ public sealed partial class ShipPreviewSystem : EntitySystem
             return true;
 
         // Stale ids after a flush; a new map may well have taken the old id.
+        Clear(handle);
         handle.MapId = MapId.Nullspace;
         handle.MapUid = EntityUid.Invalid;
-        handle.Loaded = null;
-        handle.LoadedPath = null;
 
         try
         {
@@ -218,8 +215,7 @@ public sealed partial class ShipPreviewSystem : EntitySystem
 
     private void DestroyMap(ShipPreviewHandle handle)
     {
-        handle.Loaded = null;
-        handle.LoadedPath = null;
+        Clear(handle);
 
         if (MapAlive(handle))
             Del(handle.MapUid);
