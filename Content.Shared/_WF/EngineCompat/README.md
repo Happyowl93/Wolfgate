@@ -83,7 +83,9 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 - [`Content.Client/RCD/RCDMenu.xaml.cs`](../../../Content.Client/RCD/RCDMenu.xaml.cs): Engine v289 TryIndex no longer takes logError.
 - [`Content.Client/Sandbox/SandboxSystem.cs`](../../../Content.Client/Sandbox/SandboxSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Client/Shuttles/UI/MapScreen.xaml.cs`](../../../Content.Client/Shuttles/UI/MapScreen.xaml.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
-- [`Content.Client/Shuttles/UI/ShuttleDockControl.xaml.cs`](../../../Content.Client/Shuttles/UI/ShuttleDockControl.xaml.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
+- [`Content.Client/Shuttles/UI/ShuttleDockControl.xaml.cs`](../../../Content.Client/Shuttles/UI/ShuttleDockControl.xaml.cs)
+  - Draw rotated dock vertices because UIBox2 clamps inverted bounds.
+  - Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Client/Shuttles/UI/ShuttleMapControl.xaml.cs`](../../../Content.Client/Shuttles/UI/ShuttleMapControl.xaml.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Client/Shuttles/UI/ShuttleNavControl.xaml.cs`](../../../Content.Client/Shuttles/UI/ShuttleNavControl.xaml.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Client/Silicons/Borgs/BorgSelectTypeMenu.xaml.cs`](../../../Content.Client/Silicons/Borgs/BorgSelectTypeMenu.xaml.cs): Engine v289 removed [ValidatePrototypeId]; its constants became ProtoId fields.
