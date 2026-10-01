@@ -565,7 +565,7 @@
     cooldown: 5
     shape:
       !type:PhysShapeCircle
-      radius: 2
+      radius: 0.5 # WOLFGATE: Needs to fit on a crate
     repeating: true
   - type: StaticPrice
     price: 1200
