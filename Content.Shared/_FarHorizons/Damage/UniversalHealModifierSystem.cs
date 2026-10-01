@@ -1,3 +1,4 @@
+// WOLFGATE(Species): heal modifiers, ported from HardLight
 using Content.Shared.Damage;
 using Content.Shared.FixedPoint; // HardLight
 

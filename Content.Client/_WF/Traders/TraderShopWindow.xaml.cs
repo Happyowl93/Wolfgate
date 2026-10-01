@@ -11,6 +11,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Client._WF.Traders;
 
+/// <summary>A trader's shop: searchable catalogue, basket and purchase.</summary>
 [GenerateTypedNameReferences]
 public sealed partial class TraderShopWindow : FancyWindow
 {
@@ -32,6 +33,7 @@ public sealed partial class TraderShopWindow : FancyWindow
     /// </summary>
     private List<TraderShopEntry> _entries = new();
 
+    /// <summary>The customer bought the basket: item prototype to count.</summary>
     public event Action<Dictionary<string, int>>? OnPurchasePressed;
 
     public TraderShopWindow()

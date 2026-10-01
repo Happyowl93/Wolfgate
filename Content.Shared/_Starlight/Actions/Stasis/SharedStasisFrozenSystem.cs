@@ -1,3 +1,4 @@
+// WOLFGATE(Species): Avali stasis, ported from HardLight
 using Content.Shared.ActionBlocker;
 using Content.Shared.Emoting;
 using Content.Shared.Interaction.Events;

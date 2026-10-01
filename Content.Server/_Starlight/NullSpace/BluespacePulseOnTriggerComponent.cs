@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._Starlight.NullSpace;

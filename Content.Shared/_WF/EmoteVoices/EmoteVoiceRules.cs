@@ -12,7 +12,9 @@ namespace Content.Shared._WF.EmoteVoices;
 /// <summary>Emote voice checks and lookups shared by the creator and the server.</summary>
 public static class EmoteVoiceRules
 {
+    /// <summary>The scream emote.</summary>
     public static readonly ProtoId<EmotePrototype> Scream = "Scream";
+    /// <summary>The laugh emote.</summary>
     public static readonly ProtoId<EmotePrototype> Laugh = "Laugh";
 
     /// <summary>The voice if it exists and belongs to the emote, otherwise null (the species' own).</summary>

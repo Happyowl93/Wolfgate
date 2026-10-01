@@ -1,3 +1,4 @@
+// WOLFGATE(Silicons): ported from HardLight
 using Content.Shared._HL.Silicons.Synths.Battery;
 using Content.Shared._HL.Railroading.Events;
 using Content.Server.Power.EntitySystems;

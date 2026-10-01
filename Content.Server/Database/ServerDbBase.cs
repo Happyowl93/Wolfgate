@@ -2089,7 +2089,7 @@ INSERT INTO player_round (players_id, rounds_id) VALUES ({players[player]}, {id}
                 .AsSplitQuery()
                 .SingleOrDefaultAsync(c => c.UserId == userId);
 
-            // Rows holding renamed toggle ids are saved under the current ids on load.
+            // WOLFGATE(Prototypes): consent rows holding renamed toggle ids are saved under the current ids on load
             if (consentSettings != null && WFLegacyDbRows.Update(consentSettings))
                 await WFLegacyDbRows.Save(db.DbContext, _opsLog);
 

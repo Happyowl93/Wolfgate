@@ -6,6 +6,7 @@ using Robust.Client.UserInterface.CustomControls;
 
 namespace Content.Client._WF.TractorBeam;
 
+/// <summary>Tractor beam console: dish and target pick, hold/lock/release, range and telemetry.</summary>
 public sealed class TractorBeamConsoleWindow : DefaultWindow
 {
     public event Action<NetEntity, NetEntity?, bool, bool, float?>? OnCommand;

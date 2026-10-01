@@ -1,5 +1,5 @@
-# Debug content for the rope core. Stage 2A replaces all of this with the real eye, coils and
-# construction graphs; nothing here should be referenced by maps or cargo.
+# Debug content for the rope core, kept next to the real eye and coils; nothing here should be
+# referenced by maps or cargo.
 - type: stack
   id: WFRopeDebug
   name: rope-name-debug

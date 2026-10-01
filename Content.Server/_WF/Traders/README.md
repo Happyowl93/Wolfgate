@@ -56,6 +56,7 @@ Entry points: `TraderSystem` (dialogue, barter zone, payment and receipts), the 
 - [`Content.IntegrationTests/Tests/_WF/Traders/TraderShipTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Traders/TraderShipTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Traders/TraderTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Traders/TraderTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Traders/UsedShipSaveTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Traders/UsedShipSaveTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Traders/VendingCashTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Traders/VendingCashTest.cs)
 
 ### Prototypes
 
@@ -89,7 +90,7 @@ Entry points: `TraderSystem` (dialogue, barter zone, payment and receipts), the 
 - [`Content.IntegrationTests/Tests/PrototypeSaveTest.cs`](../../../Content.IntegrationTests/Tests/PrototypeSaveTest.cs): traders are skipped; they are humanoids kept savable so mappers can place them
 - [`Content.Server/_NF/Shipyard/Systems/ShipyardSystem.Consoles.cs`](../../_NF/Shipyard/Systems/ShipyardSystem.Consoles.cs)
   - a trader hosting this console may refuse to buy ships back.
-  - was a check for ActivatableUI.Key, which a trader hosting this console has not got.
+  - a trader hosting this console has no ActivatableUI, so check the key that was opened.
   - hosting traders read back why a sale was refused
   - a trader hosting this console has no ActivatableUI, so fall back to whichever shipyard key is open on it.
   - shipyard key lookup for trader-hosted consoles

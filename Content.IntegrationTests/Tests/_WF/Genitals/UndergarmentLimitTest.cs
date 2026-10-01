@@ -9,7 +9,7 @@ using Robust.Shared.IoC;
 using Robust.Shared.Maths;
 using Robust.Shared.Prototypes;
 
-namespace Content.IntegrationTests.Tests._WF.Humanoid;
+namespace Content.IntegrationTests.Tests._WF.Genitals;
 
 /// <summary>
 /// One undergarment top and one bottom per character on every species: a marking set built from a points prototype

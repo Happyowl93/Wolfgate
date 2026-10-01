@@ -85,13 +85,13 @@ even with a grid parked nearby. The fix it guards is a standalone edit listed in
 
 - [`Content.Client/Shuttles/BUI/ShuttleConsoleBoundUserInterface.cs`](../../../Content.Client/Shuttles/BUI/ShuttleConsoleBoundUserInterface.cs)
 - [`Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml`](../../../Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml)
-  - xmlns:wf and xmlns:tractor for _WF shuttle and tractor beam controls
+  - xmlns:wf for _WF shuttle controls
   - collision warning, across every mode
   - ship mode button
   - hull camera views
 - [`Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml.cs`](../../../Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml.cs)
   - ship mode
-  - ship screen, collision and tractor state
+  - ship screen and collision state
 - [`Content.Server/_Mono/Detection/ApplyIFFFlagsToDockedShipsSystem.cs`](../../_Mono/Detection/ApplyIFFFlagsToDockedShipsSystem.cs)
   - the host can be grid B, since docking orders the pair by entity id.
   - the host can be grid B, since grid A is the side that undocked, usually the ship.

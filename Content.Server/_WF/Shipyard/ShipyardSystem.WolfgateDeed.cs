@@ -153,7 +153,7 @@ public sealed partial class ShipyardSystem
             && TryComp<StationRecordsComponent>(shuttleStation, out var stationRecords))
         {
             _records.CreateGeneralRecord(shuttleStation, idCard, profile.Name, profile.Age, profile.Species, profile.Gender,
-                "Captain", fingerprint.Fingerprint, dna.DNA, profile, stationRecords);
+                Loc.GetString("job-name-captain"), fingerprint.Fingerprint, dna.DNA, profile, stationRecords);
         }
 
         _records.Synchronize(shuttleStation);

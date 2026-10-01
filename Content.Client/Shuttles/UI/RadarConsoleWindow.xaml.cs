@@ -19,6 +19,7 @@ public sealed partial class RadarConsoleWindow : FancyWindow,
     // Mono
         IFFToggle.OnToggled += OnIFFTogglePressed;
         IFFDetailedToggle.OnToggled += OnIFFDetailedTogglePressed;
+        InitAdminTeleport(); // WOLFGATE(Administration): admin ghosts can click the scanner to teleport there
     }
 
     public void UpdateState(NavInterfaceState scc)

@@ -269,7 +269,17 @@ public sealed partial class GunSystem : SharedGunSystem
             return;
         }
 
-        MarkPredicted(uid, gunUid); // WOLFGATE(Weapons): links to the shooter's predicted copy, see _WF/Weapons/Ranged/Systems/GunSystem.Prediction.cs
+        // WOLFGATE(Weapons) START: links to the shooter's predicted copy, see _WF/Weapons/Ranged/Systems/GunSystem.Prediction.cs
+        // upstream original, kept for merges:
+        // if (GunPrediction && user != null && TryComp<ActorComponent>(user, out var actor))
+        // {
+        //     var predicted = EnsureComp<PredictedProjectileServerComponent>(uid);
+        //     predicted.Shooter = actor.PlayerSession;
+        //     predicted.ClientId = uid.Id;
+        //     predicted.ClientEnt = user;
+        // }
+        MarkPredicted(uid, gunUid);
+        // WOLFGATE END
 
         projectileComp.Damage *= damageModifier.Modifier;
 
@@ -286,7 +296,42 @@ public sealed partial class GunSystem : SharedGunSystem
         }
     }
 
-    // WOLFGATE(Weapons): LinearSpread and GetRecoilAngle moved to _WF/Weapons/Ranged/Systems/SharedGunSystem.Prediction.cs so the client can predict them
+    // WOLFGATE(Weapons) START: LinearSpread and GetRecoilAngle moved to _WF/Weapons/Ranged/Systems/SharedGunSystem.Prediction.cs so the client can predict them
+    // upstream original, kept for merges:
+    // /// <summary>
+    // /// Gets a linear spread of angles between start and end.
+    // /// </summary>
+    // /// <param name="start">Start angle in degrees</param>
+    // /// <param name="end">End angle in degrees</param>
+    // /// <param name="intervals">How many shots there are</param>
+    // private Angle[] LinearSpread(Angle start, Angle end, int intervals)
+    // {
+    //     var angles = new Angle[intervals];
+    //     DebugTools.Assert(intervals > 1);
+    //
+    //     for (var i = 0; i <= intervals - 1; i++)
+    //     {
+    //         angles[i] = new Angle(start + (end - start) * i / (intervals - 1));
+    //     }
+    //
+    //     return angles;
+    // }
+    //
+    // private Angle GetRecoilAngle(TimeSpan curTime, GunComponent component, Angle direction)
+    // {
+    //     var timeSinceLastFire = (curTime - component.LastFire).TotalSeconds;
+    //     var newTheta = MathHelper.Clamp(component.CurrentAngle.Theta + component.AngleIncreaseModified.Theta - component.AngleDecayModified.Theta * timeSinceLastFire, component.MinAngleModified.Theta, component.MaxAngleModified.Theta);
+    //     component.CurrentAngle = new Angle(newTheta);
+    //     component.LastFire = component.NextFire;
+    //
+    //     // Convert it so angle can go either side.
+    //     var random = Random.NextFloat(-0.5f, 0.5f);
+    //     var spread = component.CurrentAngle.Theta * random;
+    //     var angle = new Angle(direction.Theta + component.CurrentAngle.Theta * random);
+    //     DebugTools.Assert(spread <= component.MaxAngleModified.Theta);
+    //     return angle;
+    // }
+    // WOLFGATE END
 
     protected override void Popup(string message, EntityUid? uid, EntityUid? user) { }
 

@@ -15,5 +15,5 @@ public sealed partial class ConsentSystemCCVars : CVars
     /// How many characters the consent text can be.
     /// </summary>
     public static readonly CVarDef<int> ConsentFreetextMaxLength =
-        CVarDef.Create("consent.freetext_max_length", 4000, CVar.REPLICATED | CVar.SERVER); // WOLFGATE: OOC notes limit raised from 1000
+        CVarDef.Create("consent.freetext_max_length", 4000, CVar.REPLICATED | CVar.SERVER); // WOLFGATE(Genitals): OOC notes limit raised from 1000
 }

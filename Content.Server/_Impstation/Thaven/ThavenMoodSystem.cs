@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight
 // SPDX-FileCopyrightText: 2025 ATDoop <bug@bug.bug>
 // SPDX-FileCopyrightText: 2025 Tay <td12233a@gmail.com>
 // SPDX-FileCopyrightText: 2025 corresp0nd <46357632+corresp0nd@users.noreply.github.com>

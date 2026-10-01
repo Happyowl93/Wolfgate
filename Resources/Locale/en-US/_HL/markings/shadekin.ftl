@@ -58,3 +58,8 @@ marking-ShadekinMothWingsFeathery-feathery = Wings
 marking-ShadekinMothWingsPlasmafire = Wings (Plasmafire)
 marking-ShadekinMothWingsPlasmafire-plasmafire_primary = Primary
 marking-ShadekinMothWingsPlasmafire-plasmafire_secondary = Secondary
+
+# WOLFGATE(Species): ported from HardLight
+marking-EarsShadekinDualColor = DualColor
+marking-TailShadekinBigTwoColored = Big, Two-Toned
+marking-ShadekinHairShort = Shadekin Short hair

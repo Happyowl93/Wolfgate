@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Threading;
@@ -11,9 +12,11 @@ using Content.Server.Power.Components;
 using Content.Shared._WF.Audio.InternetSound;
 using Moq;
 using Robust.Client.ResourceManagement;
+using Robust.Client.UserInterface.Controls;
 using Robust.Server.GameObjects;
 using Robust.Shared.ContentPack;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Localization;
 using Robust.Shared.Map;
 using Robust.Shared.Maths;
 using Robust.Shared.Network;
@@ -163,6 +166,42 @@ public sealed class ShipPaAudienceTest : InteractionTest
     }
 
     [Test]
+    public async Task StealthTrackNamesNobody()
+    {
+        await InitializeTransfer();
+        var id = Interlocked.Increment(ref _nextId);
+        await Server.WaitPost(() => PrepareTrack(id, null, stealth: true));
+
+        Content.Client._WF.Audio.InternetSound.InternetSoundPopup? popup = null;
+        for (var i = 0; i < 240 && popup == null; i++)
+        {
+            await RunTicks(1);
+            await Client.WaitPost(() => popup = (Content.Client._WF.Audio.InternetSound.InternetSoundPopup?) GetField(
+                Client.System<Content.Client._WF.Audio.InternetSound.InternetSoundSystem>(), "_popup"));
+        }
+        Assert.That(popup, Is.Not.Null, "A global sound must open the radio.");
+
+        var playing = false;
+        for (var i = 0; i < 240 && !playing; i++)
+        {
+            await RunTicks(1);
+            await Client.WaitPost(() => playing =
+                popup!.FindControl<Label>("StatusLabel").Text == Client.ResolveDependency<ILocalizationManager>().GetString("wf-internet-sound-popup-played-stealth"));
+        }
+        Assert.That(playing, Is.True, "The radio must say it's playing without crediting anyone.");
+
+        await Server.WaitAssertion(() =>
+        {
+            var system = Server.System<InternetSoundSystem>();
+            var state = (InternetSoundStateEvent) typeof(InternetSoundSystem).GetMethod("BuildState", Fields)!.Invoke(system, null)!;
+            Assert.That(state.Tracks.Single(t => t.Id == id).Requester, Is.Empty,
+                "Other admins' windows must not name a stealth track's requester.");
+            system.Stop(null);
+        });
+        await RunTicks(20);
+    }
+
+    [Test]
     public async Task ReconnectedClientReceivesActiveTrackAgain()
     {
         await InitializeTransfer();
@@ -226,7 +265,7 @@ public sealed class ShipPaAudienceTest : InteractionTest
         SEntMan.GetComponent<ApcPowerReceiverComponent>(speaker).NeedsPower = false;
     }
 
-    private object PrepareTrack(int id, EntityUid? grid)
+    private object PrepareTrack(int id, EntityUid? grid, bool stealth = false)
     {
         // Only replace external downloading. Everything from Distribute through the client Ready event
         // runs normally. Reflection is confined to setup because production has no test-only entry point.
@@ -236,6 +275,7 @@ public sealed class ShipPaAudienceTest : InteractionTest
         using var fetch = new CancellationTokenSource();
         trackType.GetField("Id")!.SetValue(track, id);
         trackType.GetField("Requester")!.SetValue(track, "ShipPaAudienceTest");
+        trackType.GetField("Stealth")!.SetValue(track, stealth);
         trackType.GetField("Grid")!.SetValue(track, grid);
         trackType.GetField("Fetch")!.SetValue(track, fetch);
         ((IDictionary) GetField(system, "_tracks")!).Add(id, track);

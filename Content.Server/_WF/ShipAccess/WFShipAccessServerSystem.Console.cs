@@ -17,6 +17,7 @@ public sealed partial class WFShipAccessServerSystem
             subs.Event<WFShipAccessRemoveMessage>(OnRemove);
             subs.Event<WFShipAccessSetBuilderMessage>(OnSetBuilder);
             subs.Event<WFShipAccessSetDoorRuleMessage>(OnSetDoorRule);
+            subs.Event<WFShipAccessSetAllDoorRulesMessage>(OnSetAllDoorRules);
             subs.Event<WFShipAccessSetDoorPlayerMessage>(OnSetDoorPlayer);
             subs.Event<WFShipAccessRequestCodesMessage>(OnRequestCodes);
             subs.Event<WFShipAccessSetShipCodeMessage>(OnSetShipCode);

@@ -185,7 +185,7 @@ public sealed partial class GhostUIController : UIController, IOnSystemChanged<G
         Gui.RequestWarpsPressed -= RequestWarps;
         Gui.ReturnToBodyPressed -= ReturnToBody;
         Gui.GhostRolesPressed -= GhostRolesPressed;
-        // WOLFGATE(Ghost) START: orbit window has no WarpClicked
+        // WOLFGATE(Ghost) START: orbit window has no WarpClicked; also unsubscribe the ghostnado button
         // Gui.TargetWindow.WarpClicked -= OnWarpClicked;
         Gui.TargetWindow.OnGhostnadoClicked -= OnGhostnadoClicked;
         // WOLFGATE END

@@ -36,7 +36,8 @@ Any edit to a file outside `_WF` is non-modular and must be marked with the modu
 
 - A single line: `// WOLFGATE(Traders): reason` at the end of the line or on the line above. The reason may be
   left out (`// WOLFGATE(Traders)`) only where the module makes it obvious, such as a `using` line; the
-  generated docs still list the file.
+  generated docs still list the file. A marker alone on its line also covers the lines below it up to the next
+  blank line, such as a ported prototype or a group of Fluent strings.
 - A block: `// WOLFGATE(Traders) START: reason` before it and `// WOLFGATE END` after it.
 - A small standalone edit that belongs to no module leaves the module out: `// WOLFGATE: reason`. Its reason
   is required.
@@ -83,8 +84,11 @@ Run `--write` after any change that adds, moves or removes a `_WF` file or a mar
 runs `--check`, which fails when the generated docs are stale, a marker names an unknown module, `START`/`END`
 don't pair, a standalone marker has no reason, a `_WF` file sits outside a module folder or a module has no
 README or still has the TODO overview; and `--pr-check origin/<base>`,
-which fails when a pull request edits a file outside `_WF` that has no marker and no `unmarked` entry (skipped
-for `[AUTOPORT]` pull requests).
+which fails when a pull request adds or changes lines outside `_WF` that no marker covers, or changes a file that
+can't hold one and has no `unmarked` entry (skipped for `[AUTOPORT]` pull requests). A marker elsewhere in the
+file doesn't cover a new edit, and lines that match Monolith at `fork_point` in `modules.yml` need none (move it
+forward after merging Monolith in). It prints the marker to add, or an `unmarked` entry with `TODO` for the module and
+reason; `--check` fails until both are filled in.
 
 ## Before building
 

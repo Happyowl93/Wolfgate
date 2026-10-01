@@ -1,0 +1,56 @@
+light_mode unshaded;
+
+uniform highp vec2 shuntCenter;
+uniform highp vec2 shuntDirection;
+uniform highp float shuntConcentration;
+uniform highp float shuntCosHalfArc;
+uniform highp float shuntBoost;
+uniform highp float shimmerStrength;
+uniform highp float transitionMode;
+uniform highp float transitionProgress;
+uniform highp vec2 fieldMin;
+uniform highp vec2 fieldSize;
+
+void fragment() {
+    highp vec2 offset = UV - shuntCenter;
+    highp float alignment = clamp(dot(offset, shuntDirection) / max(length(offset), 0.00001), -1.0, 1.0);
+    highp float inside = step(shuntCosHalfArc, alignment);
+    highp float strength = mix(1.0 - shuntConcentration, shuntBoost, inside);
+    if (strength <= 0.0) {
+        discard;
+    }
+    highp float sweep = 0.0;
+    highp float glint = 0.0;
+    if (shimmerStrength > 0.0) {
+        sweep = sin(UV.x * 0.7 + UV.y * 0.4 - TIME * 2.0);
+        glint = sin(UV.x * 2.1 - UV.y * 1.3 + TIME * 4.0);
+    }
+    highp float crest = pow(max(sweep, 0.0), 8.0);
+    highp float shimmer = mix(1.0, 1.0 + 0.65 * crest + 0.08 * glint, shimmerStrength);
+    highp float brightness = 1.0 + 0.10 * min(max(strength - 1.0, 0.0), 4.0);
+    highp float transitionAlpha = 1.0;
+    highp float transitionBrightness = 1.0;
+    if (transitionMode > 0.5) {
+        highp float progress = transitionProgress;
+        highp vec2 local = (UV - fieldMin) / max(fieldSize, vec2(0.001));
+        if (transitionMode < 1.5) {
+            highp float sweepPosition = progress * 1.24 - 0.12;
+            highp float revealed = 1.0 - smoothstep(sweepPosition - 0.08, sweepPosition + 0.08, local.y);
+            highp float band = 1.0 - smoothstep(0.0, 0.12, abs(local.y - sweepPosition));
+            transitionAlpha = revealed * smoothstep(0.0, 0.12, progress) + band * 3.0;
+            transitionBrightness = 1.0 + band * 1.4;
+        } else if (transitionMode < 2.5) {
+            highp float patches = 0.5 + 0.16 * sin(local.x * 18.0 + local.y * 7.0)
+                + 0.13 * sin(local.y * 21.0 - local.x * 8.0)
+                + 0.10 * sin(local.x * 31.0 + local.y * 27.0);
+            highp float remaining = 1.0 - smoothstep(patches - 0.16, patches + 0.16, progress * 1.35);
+            highp float flare = (1.0 - smoothstep(0.0, 0.22, progress)) * 1.8;
+            transitionAlpha = remaining * (1.0 + flare) * (1.0 - progress);
+            transitionBrightness = 1.0 + flare * 0.55;
+        } else {
+            transitionAlpha = 1.0 - smoothstep(0.0, 1.0, progress);
+        }
+    }
+    COLOR = vec4(vec3((1.0 + 0.15 * crest) * brightness * transitionBrightness),
+        shimmer * min(strength, 3.0) * transitionAlpha);
+}

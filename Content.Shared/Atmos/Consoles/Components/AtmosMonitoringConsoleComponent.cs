@@ -228,6 +228,7 @@ public struct AtmosMonitoringConsoleEntry
     }
 }
 
+// WOLFGATE(Performance): wizden#38974, subnets carry a Color
 /// <summary>
 /// Used to group atmos pipe chunks into subnets based on their properties and
 /// improve the efficiency of rendering these chunks on the atmos monitoring console.

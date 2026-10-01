@@ -15,7 +15,7 @@ concurrency:
 jobs:
   Label:
     if: ( github.event.pull_request.draft == false )
-    # WOLFGATE START: default token permissions are read-only
+    # WOLFGATE(Ci) START: default token permissions are read-only
     permissions:
       pull-requests: write
     # WOLFGATE END

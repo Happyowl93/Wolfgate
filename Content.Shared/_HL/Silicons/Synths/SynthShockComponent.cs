@@ -1,3 +1,4 @@
+// WOLFGATE(Species): synth shock, ported from HardLight
 using Content.Shared.Damage.Prototypes;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;

@@ -1,4 +1,5 @@
-<!-- WOLFGATE(Shuttles): xmlns:wf and xmlns:tractor for _WF shuttle and tractor beam controls -->
+<!-- WOLFGATE(Shuttles): xmlns:wf for _WF shuttle controls -->
+<!-- WOLFGATE(TractorBeam): xmlns:tractor for the capture banner -->
 <!-- WOLFGATE(ShipAccess): xmlns:access for the access tab -->
 <controls:FancyWindow xmlns="https://spacestation14.io"
                       xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"

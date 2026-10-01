@@ -1,3 +1,4 @@
+# WOLFGATE(Species): ported from HardLight
 # This file, as well as contents of this directory in general, is a copy of Resources/Audio/Voice/Human with minor edits
 - files: ["female_sigh.ogg", "male_sigh.ogg"]
   license: "CC-BY-3.0"

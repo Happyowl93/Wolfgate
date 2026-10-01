@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight (Avali stasis)
 using Content.Shared.Popups;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Spawners;

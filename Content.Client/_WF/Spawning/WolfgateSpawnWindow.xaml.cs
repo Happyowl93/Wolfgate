@@ -50,8 +50,13 @@ public sealed partial class WolfgateSpawnWindow : FancyWindow
     /// <summary>Raised when a tile is picked, with null when the selection is cleared.</summary>
     public event Action<WolfgateSpawnEntry?>? OnEntrySelected;
 
+    /// <summary>Raised when the replace button is toggled.</summary>
     public event Action<bool>? OnReplaceToggled;
+
+    /// <summary>Raised when the erase button is toggled.</summary>
     public event Action<bool>? OnEraseToggled;
+
+    /// <summary>Raised with the placement mode index picked in the override dropdown.</summary>
     public event Action<int>? OnOverrideSelected;
 
     public WolfgateSpawnWindow()
@@ -118,6 +123,7 @@ public sealed partial class WolfgateSpawnWindow : FancyWindow
     /// <summary>Placement mode the override dropdown currently shows.</summary>
     public int OverrideId => OverrideMenu.SelectedId;
 
+    /// <summary>Fills the override dropdown with the placement mode names, indexed by position.</summary>
     public void SetPlacementModes(string[] modes)
     {
         OverrideMenu.Clear();
@@ -127,10 +133,13 @@ public sealed partial class WolfgateSpawnWindow : FancyWindow
         }
     }
 
+    /// <summary>Shows the current placement direction.</summary>
     public void SetRotation(string text) => RotationLabel.Text = text;
 
+    /// <summary>Sets the replace button without raising its event.</summary>
     public void SetReplace(bool pressed) => ReplaceButton.Pressed = pressed;
 
+    /// <summary>Sets the erase button without raising its event; erasing disables the override dropdown.</summary>
     public void SetErase(bool pressed)
     {
         EraseButton.Pressed = pressed;
@@ -145,6 +154,7 @@ public sealed partial class WolfgateSpawnWindow : FancyWindow
         UpdateSelectionPanel();
     }
 
+    /// <summary>Gives the search bar keyboard focus.</summary>
     public void FocusSearch() => SearchBar.GrabKeyboardFocus();
 
     /// <summary>Re-reads the prototypes, for example after a prototype hot reload.</summary>

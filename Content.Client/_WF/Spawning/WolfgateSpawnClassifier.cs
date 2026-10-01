@@ -147,6 +147,7 @@ public sealed class WolfgateSpawnClassifier
         _lightBulb = Name<LightBulbComponent>(factory);
     }
 
+    /// <summary>The spawn menu category a prototype belongs in, judged from its components and parents.</summary>
     public WfSpawnCategory Classify(EntityPrototype proto)
     {
         var comps = proto.Components;

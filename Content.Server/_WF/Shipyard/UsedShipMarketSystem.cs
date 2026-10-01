@@ -188,7 +188,7 @@ public sealed class UsedShipMarketSystem : EntitySystem
         }
 
         ProtoId<VesselPrototype>? designId = null;
-        var designName = Loc.GetString("trader-used-unknown-design");
+        var designName = Loc.GetString("wf-used-ship-unknown-design");
         if (TryComp<VesselComponent>(shuttle, out var vessel)
             && _proto.TryIndex<VesselPrototype>(vessel.VesselId, out var design))
         {
@@ -221,7 +221,7 @@ public sealed class UsedShipMarketSystem : EntitySystem
             ShipName = shipName,
             DesignId = designId,
             DesignName = designName,
-            SellerName = string.IsNullOrWhiteSpace(seller) ? Loc.GetString("trader-used-unknown-seller") : seller,
+            SellerName = string.IsNullOrWhiteSpace(seller) ? Loc.GetString("wf-used-ship-unknown-seller") : seller,
             SaleValue = saleValue,
             Price = (int) Math.Ceiling(saleValue * (1f + Math.Max(0f, markup))),
             SoldAt = now,

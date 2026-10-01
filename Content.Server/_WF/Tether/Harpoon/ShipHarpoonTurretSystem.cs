@@ -5,6 +5,7 @@ using Content.Shared.Actions;
 using Content.Shared.Examine;
 using Content.Shared.Verbs;
 using Content.Shared.Interaction;
+using Content.Shared.Movement.Events;
 using Content.Shared.Popups;
 using Content.Shared.Projectiles;
 using Content.Shared.Tools.Systems;
@@ -15,6 +16,7 @@ using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
+using Robust.Shared.Physics;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Events;
 using Robust.Shared.Physics.Systems;
@@ -60,6 +62,10 @@ public sealed class ShipHarpoonTurretSystem : SharedShipHarpoonTurretSystem
         // Runs ahead of the projectile code so a glancing hit can drop the embed before it happens.
         SubscribeLocalEvent<ShipHarpoonComponent, StartCollideEvent>(OnHarpoonCollide,
             before: new[] { typeof(SharedProjectileSystem) });
+        SubscribeLocalEvent<ShipHarpoonComponent, PreventCollideEvent>(OnHarpoonPreventCollide);
+        // The projectile code takes all friction off anything that can be shot; give a loose harpoon its own back.
+        SubscribeLocalEvent<ShipHarpoonComponent, TileFrictionEvent>(OnHarpoonFriction,
+            after: new[] { typeof(SharedProjectileSystem) });
         SubscribeLocalEvent<ShipHarpoonComponent, EmbedEvent>(OnHarpoonEmbed);
         SubscribeLocalEvent<ShipHarpoonComponent, InteractUsingEvent>(OnHarpoonInteractUsing);
         SubscribeLocalEvent<ShipHarpoonComponent, HarpoonPryDoAfterEvent>(OnHarpoonPried);
@@ -300,6 +306,43 @@ public sealed class ShipHarpoonTurretSystem : SharedShipHarpoonTurretSystem
 
     #region Impact
 
+    /// <summary>Fired and still able to bite: not loose, not spent, not sunk into anything.</summary>
+    private bool InFlight(Entity<ShipHarpoonComponent> harpoon)
+    {
+        return !harpoon.Comp.Embedded && TryComp<ProjectileComponent>(harpoon, out var projectile) &&
+               projectile.Weapon != null && !projectile.ProjectileSpent;
+    }
+
+    /// <summary>
+    /// The point only strikes in flight; loose or loaded, a harpoon touches nothing with it.
+    /// In flight it is wider than its point, so beside a seam it also brushes the neighbour of whatever it is
+    /// about to strike. Only what its flight path runs into is hit: a brush would be judged against a face it
+    /// never flew at, and a square-on shot would skip off the hidden side of the next wall along.
+    /// </summary>
+    private void OnHarpoonPreventCollide(Entity<ShipHarpoonComponent> harpoon, ref PreventCollideEvent args)
+    {
+        // The hard fixture is the item's own body and collides like any other item's.
+        if (args.Cancelled || args.OurFixture.Hard)
+            return;
+
+        if (!InFlight(harpoon))
+        {
+            args.Cancelled = true;
+            return;
+        }
+
+        if (!args.OtherFixture.Hard)
+            return;
+
+        var velocity = _physics.GetMapLinearVelocity(harpoon) - _physics.GetMapLinearVelocity(args.OtherEntity);
+        var speed = velocity.Length();
+        if (speed < harpoon.Comp.MinEmbedSpeed)
+            return;
+
+        if (EntryNormal(harpoon, args.OtherEntity, velocity / speed) == Vector2.Zero)
+            args.Cancelled = true;
+    }
+
     /// <summary>
     /// Decides whether the harpoon was shot well: fast enough, and square enough on to the surface. A glancing
     /// hit loses the embed before the projectile code gets to it, so the harpoon simply drops.
@@ -363,7 +406,8 @@ public sealed class ShipHarpoonTurretSystem : SharedShipHarpoonTurretSystem
     }
 
     /// <summary>
-    /// The face the harpoon flew in through, as a slab test of its flight path against the struck entity's bounds.
+    /// The face the harpoon flew in through, as a slab test of its flight path against the struck entity's bounds,
+    /// or zero if the path misses them.
     /// The contact's own normal is no use here: a fast projectile is teleported into what it hit before the contact
     /// is generated, so the manifold points along the deepest overlap rather than out of the surface.
     /// </summary>
@@ -371,22 +415,30 @@ public sealed class ShipHarpoonTurretSystem : SharedShipHarpoonTurretSystem
     {
         // Work in the target's own frame, so a rotated hull's faces are its real faces and not a world box.
         var (_, targetRot, worldMatrix, invMatrix) = Transforms.GetWorldPositionRotationMatrixWithInv(target);
-        var box = invMatrix.TransformBox(_lookup.GetWorldAABB(target));
+        var box = _lookup.GetAABBNoContainer(target, Vector2.Zero, Angle.Zero);
         var localDir = (-targetRot).RotateVec(direction);
         // Start well outside the bounds, so the slab test reads the entry face and not the overlap.
         var origin = Vector2.Transform(Transforms.GetWorldPosition(harpoon), invMatrix) - localDir * (box.Width + box.Height + 2f);
         var entry = float.NegativeInfinity;
+        var exit = float.PositiveInfinity;
         var normal = Vector2.Zero;
         Axis(localDir.X, origin.X, box.Left, box.Right, new Vector2(-1f, 0f), new Vector2(1f, 0f));
         Axis(localDir.Y, origin.Y, box.Bottom, box.Top, new Vector2(0f, -1f), new Vector2(0f, 1f));
-        return targetRot.RotateVec(normal);
+        return entry > exit ? Vector2.Zero : targetRot.RotateVec(normal);
 
         // The last axis to be entered is the one whose face was struck.
         void Axis(float d, float o, float min, float max, Vector2 low, Vector2 high)
         {
             if (MathF.Abs(d) < 0.0001f)
-                return;
+            {
+                // Flying along this axis: the path is either between its two faces all the way, or never.
+                if (o < min || o > max)
+                    exit = float.NegativeInfinity;
 
+                return;
+            }
+
+            exit = MathF.Min(exit, ((d > 0f ? max : min) - o) / d);
             var near = ((d > 0f ? min : max) - o) / d;
             if (near <= entry)
                 return;
@@ -405,10 +457,18 @@ public sealed class ShipHarpoonTurretSystem : SharedShipHarpoonTurretSystem
         return TryComp<PhysicsComponent>(target, out var physics) && physics.Mass >= MinAnchorMass;
     }
 
+    private void OnHarpoonFriction(Entity<ShipHarpoonComponent> harpoon, ref TileFrictionEvent args)
+    {
+        if (!InFlight(harpoon))
+            args.Modifier = 1f;
+    }
+
     /// <summary>A poor shot skips off, drops its cable and lies where it lands.</summary>
     private void Glance(Entity<ShipHarpoonComponent> harpoon)
     {
         RemComp<EmbeddableProjectileComponent>(harpoon);
+        // Back on the deck as far as friction goes; a shot leaves it marked as airborne for good.
+        _physics.SetBodyStatus(harpoon, Comp<PhysicsComponent>(harpoon), BodyStatus.OnGround);
         _audio.PlayPvs(harpoon.Comp.GlanceSound, harpoon);
 
         if (TryGetEntity(harpoon.Comp.Turret, out var turret) &&
@@ -540,6 +600,23 @@ public sealed class ShipHarpoonTurretSystem : SharedShipHarpoonTurretSystem
         Dirty(flight, rope);
     }
 
+    /// <summary>Whether the two bodies the cable joins are pressed against each other.</summary>
+    private bool HullsTouch(RopeComponent rope)
+    {
+        if (rope.BodyA is not { } bodyA || rope.BodyB is not { } bodyB || TerminatingOrDeleted(bodyA))
+            return false;
+
+        var contacts = _physics.GetContacts(bodyA);
+        while (contacts.MoveNext(out var contact))
+        {
+            if (contact.IsTouching && contact.FixtureA is { Hard: true } && contact.FixtureB is { Hard: true } &&
+                (contact.EntityA == bodyB || contact.EntityB == bodyB))
+                return true;
+        }
+
+        return false;
+    }
+
     /// <summary>Works the winch, stalling rather than snapping the cable when the load is too much.</summary>
     private void UpdateReel(Entity<ShipHarpoonTurretComponent> turret, float frameTime)
     {
@@ -554,6 +631,23 @@ public sealed class ShipHarpoonTurretSystem : SharedShipHarpoonTurretSystem
 
         if (turret.Comp.Reeling > 0 && _rope.GetTension(rope) > turret.Comp.ReelMaxTension)
             return;
+
+        // Hull against hull there is nothing left to take in; hauling on would only grind the two together.
+        if (turret.Comp.Reeling > 0 && HullsTouch(comp))
+        {
+            if (TryGetEntity(comp.EndA, out var endA) && TryGetEntity(comp.EndB, out var endB))
+            {
+                // Ease the cable to what is actually out, so it holds the hulls there instead of squeezing them.
+                var paidOut = Vector2.Distance(_rope.GetAnchorPosition(endA.Value), _rope.GetAnchorPosition(endB.Value));
+                _rope.SetLength(rope, MathF.Max(comp.Length, paidOut));
+            }
+
+            SetReeling(turret, 0);
+            if (TryGetEntity(turret.Comp.Operator, out var user))
+                _popup.PopupEntity(Loc.GetString("wf-harpoon-turret-hulls-touching"), turret, user.Value);
+
+            return;
+        }
 
         // Reeling in shortens the cable, paying out lengthens it.
         var length = comp.Length - turret.Comp.Reeling * turret.Comp.ReelRate * frameTime;

@@ -1,3 +1,4 @@
+# WOLFGATE(Species): ported from HardLight (Skrell)
 species-name-skrell = Skrell
 
 marking-RMCHairSkrellLong = Long Skrell Hair

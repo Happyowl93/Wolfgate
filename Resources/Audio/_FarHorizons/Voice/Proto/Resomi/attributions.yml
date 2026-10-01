@@ -1,3 +1,4 @@
+# WOLFGATE(Species): ported from HardLight
 # This file, as well as contents of this directory in general, is a copy of Resources/Audio/Voice/Resomi and Resources/Audio/_Starlight/Voice/Resomi with minor edits
 - files: ["resomi_call_1.ogg", "resomi_call_2.ogg", "resomi_scree_1.ogg", "resomi_scree_2.ogg", "resomi_squawk_1.ogg"]
   license: "CC-BY-SA-3.0"

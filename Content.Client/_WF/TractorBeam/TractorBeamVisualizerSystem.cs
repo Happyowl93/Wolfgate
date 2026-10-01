@@ -4,6 +4,7 @@ using Robust.Shared.Timing;
 
 namespace Content.Client._WF.TractorBeam;
 
+/// <summary>Registers the overlay that draws tractor beams.</summary>
 public sealed partial class TractorBeamVisualizerSystem : EntitySystem
 {
     [Dependency] private IOverlayManager _overlays = default!;

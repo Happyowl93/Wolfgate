@@ -7,11 +7,17 @@ using Robust.Client.UserInterface.XAML;
 
 namespace Content.Client._WF.Traders;
 
+/// <summary>Conversation window with a trader NPC: its line, reply options, confirm and text prompts.</summary>
 [GenerateTypedNameReferences]
 public sealed partial class TraderDialogueWindow : FancyWindow
 {
+    /// <summary>The customer picked the reply option at this index.</summary>
     public event Action<int>? OnOptionPressed;
+
+    /// <summary>The customer accepted (true) or declined (false) the trader's offer.</summary>
     public event Action<bool>? OnConfirmPressed;
+
+    /// <summary>The customer submitted the text prompt, or cancelled it (null).</summary>
     public event Action<string?>? OnTextSubmitted;
 
     private int _textMaxLength;

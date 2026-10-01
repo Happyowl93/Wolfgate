@@ -68,7 +68,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactConcrete
+        collection: WFBulletImpactConcrete # WOLFGATE(Weapons)
   - type: Sprite
     sprite: Structures/Walls/brick.rsi
   - type: Icon
@@ -257,7 +257,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactIce
+        collection: WFBulletImpactIce # WOLFGATE(Weapons)
   - type: Tag
     tags:
     - Wall
@@ -277,7 +277,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactGlass
+        collection: WFBulletImpactGlass # WOLFGATE(Weapons)
   - type: Tag
     tags:
     - Wall
@@ -600,7 +600,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactConcrete
+        collection: WFBulletImpactConcrete # WOLFGATE(Weapons)
   - type: Tag
     tags:
     - Wall
@@ -998,7 +998,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactWood
+        collection: WFBulletImpactWood # WOLFGATE(Weapons)
   - type: Sprite
     sprite: Structures/Walls/wood.rsi
   - type: Icon
@@ -1152,7 +1152,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactConcrete
+        collection: WFBulletImpactConcrete # WOLFGATE(Weapons)
   - type: Sprite
     sprite: Structures/Walls/vault.rsi
     state: rockvault
@@ -1168,7 +1168,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactConcrete
+        collection: WFBulletImpactConcrete # WOLFGATE(Weapons)
   - type: Sprite
     sprite: Structures/Walls/vault.rsi
     state: sandstonevault
@@ -1275,7 +1275,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactIce
+        collection: WFBulletImpactIce # WOLFGATE(Weapons)
   - type: Sprite
     sprite: Structures/Walls/cobblebrick_snow.rsi
   - type: Icon

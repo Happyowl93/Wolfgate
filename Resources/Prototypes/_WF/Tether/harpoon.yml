@@ -35,6 +35,17 @@
     angularDamping: 0.5
   - type: Fixtures
     fixtures:
+      # The item's own body, so a loose harpoon stays inside the hull like anything else lying on the deck.
+      # Smaller than the point below, so in flight the point always strikes first.
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.1
+        density: 160
+        mask:
+        - ItemMask
+        restitution: 0.3
+        friction: 0.2
       projectile:
         shape:
           !type:PhysShapeAabb

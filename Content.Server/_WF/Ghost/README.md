@@ -40,7 +40,7 @@ of Interest; singularities, tesla balls, nukes, the disk, rifts and anomalies ar
 - [`Content.Client/UserInterface/Systems/Ghost/GhostUIController.cs`](../../../Content.Client/UserInterface/Systems/Ghost/GhostUIController.cs)
   - GhostOrbitWindow fetches its own targets through GhostOrbitSystem.
   - GhostOrbitWindow sends its own orbit requests, no WarpClicked
-  - orbit window has no WarpClicked
+  - orbit window has no WarpClicked; also unsubscribe the ghostnado button
   - the orbit window requests its targets when it opens
 - [`Content.Client/UserInterface/Systems/Ghost/Widgets/GhostGui.xaml.cs`](../../../Content.Client/UserInterface/Systems/Ghost/Widgets/GhostGui.xaml.cs): orbit menu replaces GhostTargetWindow
 - [`Content.Server/Radio/EntitySystems/RadioSystem.cs`](../../Radio/EntitySystems/RadioSystem.cs): ghost orbit link

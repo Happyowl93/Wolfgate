@@ -1,3 +1,4 @@
+// WOLFGATE(Silicons): synth battery, ported from HardLight
 using Content.Shared.Movement.Systems;
 
 namespace Content.Shared._HL.Silicons.Synths.Battery;

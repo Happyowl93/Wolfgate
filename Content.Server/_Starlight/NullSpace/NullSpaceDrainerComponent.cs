@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight
 namespace Content.Server._Starlight.Shadekin;
 
 [RegisterComponent]

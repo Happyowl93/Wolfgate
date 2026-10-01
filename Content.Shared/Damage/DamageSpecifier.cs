@@ -441,6 +441,20 @@ namespace Content.Shared.Damage
 
         // WOLFGATE(Shipyard) START: zero entries do not count
         // An initialised but undamaged entity equals its prototype, so map saves stay free of empty damage blocks.
+        // upstream original, kept for merges:
+        // public bool Equals(DamageSpecifier? other)
+        // {
+        //     if (other == null || DamageDict.Count != other.DamageDict.Count)
+        //         return false;
+        //
+        //     foreach (var (key, value) in DamageDict)
+        //     {
+        //         if (!other.DamageDict.TryGetValue(key, out var otherValue) || value != otherValue)
+        //             return false;
+        //     }
+        //
+        //     return true;
+        // }
         public bool Equals(DamageSpecifier? other)
         {
             if (other == null)

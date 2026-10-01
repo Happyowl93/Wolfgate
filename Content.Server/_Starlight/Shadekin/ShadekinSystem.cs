@@ -49,7 +49,7 @@ public sealed partial class ShadekinSystem : EntitySystem
     [Dependency] private readonly SharedEnsnareableSystem _ensnareable = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly EyeSystem _eye = default!;
-    [Dependency] private readonly SharedNightVisionSystem _nightVision = default!; // WOLFGATE(Species)
+    [Dependency] private SharedNightVisionSystem _nightVision = default!; // WOLFGATE(Species)
 
     private TimeSpan _nextUpdate = TimeSpan.Zero;
     private TimeSpan _updateCooldown = TimeSpan.FromSeconds(1f);

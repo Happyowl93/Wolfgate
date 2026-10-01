@@ -31,6 +31,7 @@ namespace Content.Server.Symphony;
 /// </summary>
 public sealed partial class SymphonyPlayersSystem : EntitySystem
 {
+    /// <summary>Status host path that answers GET with the player list.</summary>
     public const string PlayersPath = "/symphony/players";
 
     [Dependency] private IStatusHost _statusHost = default!;

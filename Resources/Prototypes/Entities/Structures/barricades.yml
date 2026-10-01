@@ -13,7 +13,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactWood
+        collection: WFBulletImpactWood # WOLFGATE(Weapons)
   - type: InteractionOutline
   - type: Sprite
     sprite: Structures/barricades.rsi

@@ -116,6 +116,92 @@ public sealed class ShipAccessDoorRuleTest
     }
 
     /// <summary>
+    /// The console's set-all control gives every door one rule in a single pass, Sealed included. Firelocks and
+    /// lockers take no rule.
+    /// </summary>
+    [Test]
+    public async Task SetAllGivesEveryDoorOneRule()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var readers = entMan.System<AccessReaderSystem>();
+        var doors = entMan.System<SharedDoorSystem>();
+        var access = entMan.System<WFShipAccessServerSystem>();
+        var hands = entMan.System<SharedHandsSystem>();
+        var map = await pair.CreateTestMap();
+        var grid = map.Grid.Owner;
+
+        EntityUid first = default, second = default, firelock = default, locker = default, owner = default, deed = default, stranger = default;
+        Entity<WFShipAccessComponent> ship = default;
+        await server.WaitPost(() =>
+        {
+            first = entMan.SpawnEntity(DoorProto, map.GridCoords);
+            second = entMan.SpawnEntity(DoorProto, map.GridCoords);
+            firelock = entMan.SpawnEntity("Firelock", map.GridCoords);
+            locker = entMan.SpawnEntity("LockerFreezer", map.GridCoords);
+            // Anchored so physics cannot shove it off the one-tile grid.
+            Assert.That(entMan.System<SharedTransformSystem>().AnchorEntity(locker), Is.True, "Precondition: the locker anchors to the grid.");
+            foreach (var door in new[] { first, second })
+                entMan.RemoveComponent<ApcPowerReceiverComponent>(door);
+
+            (owner, deed) = ShipAccessTest.SpawnPersonWithCard(entMan, hands, map, "Ada Vance", 1);
+            ShipAccessTest.GiveDeed(entMan, deed, grid);
+            (stranger, _) = ShipAccessTest.SpawnPersonWithCard(entMan, hands, map, "Random Stranger", 2);
+            ship = (grid, entMan.EnsureComponent<WFShipAccessComponent>(grid));
+            access.SetLocked(ship, true);
+            access.SetDoorRule(ship, second, WFDoorAccessRule.Sealed);
+        });
+
+        await server.WaitAssertion(() =>
+        {
+            WFDoorAccessRule? RuleOf(EntityUid uid) => entMan.TryGetComponent<WFDoorAccessRuleComponent>(uid, out var rule) ? rule.Rule : null;
+
+            Assert.That(access.SetAllDoorRules(ship, WFDoorAccessRule.Sealed), Is.EqualTo(1), "Only the door not sealed yet changes.");
+            Assert.Multiple(() =>
+            {
+                Assert.That(doors.IsBolted(first), Is.True, "Sealing every door bolts them all.");
+                Assert.That(doors.IsBolted(second), Is.True);
+                Assert.That(readers.IsAllowed(owner, first), Is.False, "Sealed refuses the deed at the reader.");
+                Assert.That(RuleOf(firelock), Is.Null, "Firelocks are not sealed.");
+            });
+
+            Assert.That(access.SetAllDoorRules(ship, WFDoorAccessRule.Public), Is.EqualTo(2), "Both doors change.");
+            Assert.Multiple(() =>
+            {
+                Assert.That(RuleOf(first), Is.EqualTo(WFDoorAccessRule.Public));
+                Assert.That(RuleOf(second), Is.EqualTo(WFDoorAccessRule.Public));
+                Assert.That(doors.IsBolted(second), Is.False, "A sealed door is unsealed by the new rule.");
+                Assert.That(RuleOf(firelock), Is.Null, "Firelocks take no rule.");
+                Assert.That(RuleOf(locker), Is.Null, "Lockers keep the ship rule.");
+                Assert.That(readers.IsAllowed(stranger, first), Is.True, "Public admits a stranger on a locked ship.");
+                Assert.That(readers.IsAllowed(stranger, second), Is.True);
+                Assert.That(ShipAccessTest.ReaderLocked(entMan, locker), Is.True, "The locker still follows the ship's lock.");
+            });
+
+            Assert.That(access.SetAllDoorRules(ship, WFDoorAccessRule.Public), Is.Zero, "Setting the same rule again changes nothing.");
+
+            Assert.That(access.SetAllDoorRules(ship, WFDoorAccessRule.OwnerOnly), Is.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.That(readers.IsAllowed(stranger, first), Is.False, "Deed only refuses a stranger.");
+                Assert.That(readers.IsAllowed(owner, first), Is.True, "Deed only admits the deed.");
+                Assert.That(readers.IsAllowed(owner, second), Is.True);
+            });
+
+            Assert.That(access.SetAllDoorRules(ship, WFDoorAccessRule.Default), Is.EqualTo(2), "Ship default resets both doors.");
+            access.SetLocked(ship, false);
+            Assert.Multiple(() =>
+            {
+                Assert.That(ShipAccessTest.ReaderLocked(entMan, first), Is.False, "Back on the ship rule, unlocking restores the reader.");
+                Assert.That(ShipAccessTest.ReaderLocked(entMan, second), Is.False);
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
     /// Sealing an open door closes it and bolts it once shut. Bolts dropped mid-close used to cancel the close and
     /// leave the door bolted open.
     /// </summary>

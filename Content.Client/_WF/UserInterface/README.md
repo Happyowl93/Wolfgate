@@ -24,6 +24,7 @@ Client controls other Wolfgate UI is built from.
 
 ### Localization
 
+- [`Resources/Locale/en-US/_WF/UserInterface/ui/color-picker.ftl`](../../../Resources/Locale/en-US/_WF/UserInterface/ui/color-picker.ftl)
 - [`Resources/Locale/en-US/_WF/UserInterface/ui/window-popout.ftl`](../../../Resources/Locale/en-US/_WF/UserInterface/ui/window-popout.ftl)
 
 ### Textures

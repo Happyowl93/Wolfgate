@@ -1,3 +1,4 @@
+# WOLFGATE(Species): ported from HardLight
 # Ears
 marking-EyesShadekin = Default
 marking-EyesShadekin-shadekin = Color

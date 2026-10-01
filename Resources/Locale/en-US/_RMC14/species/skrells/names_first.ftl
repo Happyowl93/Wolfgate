@@ -1,3 +1,4 @@
+# WOLFGATE(Species): ported from HardLight (Skrell)
 rmc-name-skrell-first-1 = Kaeker
 rmc-name-skrell-first-2 = Kaequx
 rmc-name-skrell-first-3 = Kaeteq

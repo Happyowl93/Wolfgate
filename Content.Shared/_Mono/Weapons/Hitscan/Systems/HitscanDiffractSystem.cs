@@ -1,4 +1,5 @@
 using System.Numerics;
+using Content.Shared._WF.ShipShields; // WOLFGATE(ShipShields)
 using Content.Shared.Physics;
 using Content.Shared.Weapons.Hitscan.Components;
 using Content.Shared.Weapons.Hitscan.Events;
@@ -49,6 +50,21 @@ public sealed partial class HitscanDiffractSystem : EntitySystem
 
         if (diffractorEntity == null)
             return;  // Let the original hitscan continue through glass
+
+        // WOLFGATE(ShipShields) START: an intervening shield stops beams before they can split behind it
+        var shieldTrace = new WFShipShieldHitscanTraceEvent(hitscan.Owner, new HitscanRaycastFiredEvent
+        {
+            FromCoordinates = args.FromCoordinates,
+            ShotDirection = args.ShotDirection,
+            Gun = args.Gun,
+            Shooter = args.Shooter,
+            HitEntities = new HashSet<EntityUid>(),
+            DistanceTried = Vector2.Distance(mapCoords.Position, hitPoint),
+        }) { ProbeOnly = true };
+        RaiseLocalEvent(ref shieldTrace);
+        if (shieldTrace.Trace.Canceled)
+            return;
+        // WOLFGATE END
 
         // Delete original hitspan if hitscanDiffractTarget entity is found
         QueueDel(hitscan);

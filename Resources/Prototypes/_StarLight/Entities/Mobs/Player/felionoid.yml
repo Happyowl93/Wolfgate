@@ -1,4 +1,5 @@
-﻿- type: entity
+﻿# WOLFGATE(Species): ported from HardLight
+- type: entity
   save: false
   name: Urist Felionoid
   parent: BaseMobFelionoid

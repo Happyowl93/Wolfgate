@@ -38,7 +38,10 @@ namespace Content.Server.Symphony;
 /// </summary>
 public sealed partial class SymphonyRolesSystem : EntitySystem
 {
+    /// <summary>Status host path that answers GET with the whitelisted roles.</summary>
     public const string RolesPath = "/symphony/roles";
+
+    /// <summary>Status host path that takes a POST to re-read players' rows.</summary>
     public const string RefreshPath = "/symphony/roles/refresh";
 
     [Dependency] private IStatusHost _statusHost = default!;

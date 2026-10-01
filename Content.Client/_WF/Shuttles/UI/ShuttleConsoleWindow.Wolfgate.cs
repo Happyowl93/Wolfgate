@@ -24,7 +24,15 @@ public sealed partial class ShuttleConsoleWindow
     /// The pilot wants a line read out over the PA.
     /// </summary>
     public event Action<string>? ShipAnnounceRequested;
+
+    /// <summary>
+    /// The pilot wants a sound played over the PA.
+    /// </summary>
     public event Action<string>? ShipSoundRequested;
+
+    /// <summary>
+    /// The pilot stopped the PA sound.
+    /// </summary>
     public event Action? ShipSoundStopRequested;
 
     /// <summary>
@@ -68,13 +76,9 @@ public sealed partial class ShuttleConsoleWindow
         ShipStatusActiveChanged?.Invoke(active, ShipContainer.Overlays);
     }
 
+    /// <summary>Feeds fresh hull telemetry to the ship screen.</summary>
     public void UpdateShipStatus(ShipStatusMessage message)
     {
         ShipContainer.UpdateStatus(message);
-    }
-
-    private void WfUpdateTractorCapture(string[] sources)
-    {
-        CaptureBanner.SetSources(sources);
     }
 }

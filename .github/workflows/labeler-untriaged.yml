@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   add_label:
-    # WOLFGATE START: default token permissions are read-only
+    # WOLFGATE(Ci) START: default token permissions are read-only
     permissions:
       issues: write
       pull-requests: write

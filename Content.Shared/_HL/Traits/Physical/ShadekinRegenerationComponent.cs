@@ -1,3 +1,4 @@
+// WOLFGATE(Species): Shadekin traits, ported from HardLight
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
 using Robust.Shared.Prototypes;

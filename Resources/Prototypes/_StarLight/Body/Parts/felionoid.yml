@@ -1,4 +1,5 @@
-﻿- type: entity
+﻿# WOLFGATE(Species): ported from HardLight
+- type: entity
   id: PartFelionoid
   parent: [BaseItem, BasePart]
   name: "felionoid body part"

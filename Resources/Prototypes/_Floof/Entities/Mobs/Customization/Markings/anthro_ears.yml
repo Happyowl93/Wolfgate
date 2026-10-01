@@ -955,6 +955,20 @@
 
 # WOLFGATE(Species): ported from HardLight
 - type: marking
+  id: EarsFaeFoxAlt
+  bodyPart: HeadTop
+  markingCategory: HeadTop
+  speciesRestriction: [Skrell, Thaven, Dwarf, Diona, Human, SlimePerson, Felinid, Oni, Harpy, Reptilian, Vulpkanin, Rodentia, Goblin, Sheleg, IPC, Feroxi, Moth, Arachnid, Kitsune, Chitinid, Tajaran]
+  sprites:
+  - sprite: _Floof/Mobs/Customization/skyratears.rsi
+    state: m_ears_faefox_primary_alt
+  - sprite: _Floof/Mobs/Customization/skyratears.rsi
+    state: m_ears_faefox_secondary_alt
+  - sprite: _Floof/Mobs/Customization/skyratears.rsi
+    state: m_ears_faefox_tertiary_alt
+
+# WOLFGATE(Species): ported from HardLight
+- type: marking
   id: EarsSixEars
   bodyPart: HeadTop
   markingCategory: HeadTop

@@ -123,6 +123,7 @@ public sealed class WolfgateSpawnTile : ContainerButton
         Pressed = selected;
     }
 
+    /// <summary>Applies a new UI skin's colours.</summary>
     public void SetSkin(WolfgateSkin skin)
     {
         _skin = skin;

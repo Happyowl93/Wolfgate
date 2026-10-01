@@ -6,20 +6,6 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
 `unmarked` entries without a module in `Tools/_WF/Ci/modules.yml`. Edits that serve a module are listed in its README.
 
 - [`.config/dotnet-tools.json`](../../.config/dotnet-tools.json): dotnet-ef local tool manifest (pinned 10.0.12) for generating EF migrations.
-- [`.github/workflows/changelog.yml`](../../.github/workflows/changelog.yml): built-in token instead of bot PAT
-- [`.github/workflows/labeler-conflict.yml`](../../.github/workflows/labeler-conflict.yml): default token permissions are read-only
-- [`.github/workflows/labeler-needsreview.yml`](../../.github/workflows/labeler-needsreview.yml): default token permissions are read-only
-- [`.github/workflows/labeler-review.yml`](../../.github/workflows/labeler-review.yml)
-  - our repo
-  - Aphelion-Moon org team
-- [`.github/workflows/labeler-size.yml`](../../.github/workflows/labeler-size.yml): default token permissions are read-only
-- [`.github/workflows/labeler-stable.yml`](../../.github/workflows/labeler-stable.yml): default token permissions are read-only
-- [`.github/workflows/labeler-staging.yml`](../../.github/workflows/labeler-staging.yml): default token permissions are read-only
-- [`.github/workflows/labeler-untriaged.yml`](../../.github/workflows/labeler-untriaged.yml): default token permissions are read-only
-- [`.github/workflows/prtitlecase.yml`](../../.github/workflows/prtitlecase.yml)
-  - built-in token instead of bot PAT
-  - needed since the built-in token replaces the bot PAT
-  - GITHUB_TOKEN is used instead, no PAT needed
 - [`Content.Client/CharacterInfo/CharacterInfoSystem.cs`](../../Content.Client/CharacterInfo/CharacterInfoSystem.cs)
   - replays skip the character info request
   - Replay spectators have a local entity but no server to answer this request.
@@ -60,8 +46,8 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
 - [`Content.Server/Shuttles/Systems/ShuttleSystem.FasterThanLight.cs`](../../Content.Server/Shuttles/Systems/ShuttleSystem.FasterThanLight.cs)
   - start a real jump, as an ensured FTLComponent stayed Available and was removed
   - pick the dock without teleporting the shuttle there before the jump
-- [`Content.Shared/_Common/CCVar/ConsentSystemCCVars.cs`](../../Content.Shared/_Common/CCVar/ConsentSystemCCVars.cs): OOC notes limit raised from 1000
-- [`Content.Shared/_RMC14/Random/Xoroshiro64S.cs`](../../Content.Shared/_RMC14/Random/Xoroshiro64S.cs): Math.Abs(int.MinValue) throws, and folding negatives biased the low half of the range
+- [`Content.Server/VendingMachines/VendingMachineSystem.cs`](../../Content.Server/VendingMachines/VendingMachineSystem.cs): a free vend skips the cash payment, which logs a zero amount as invalid
+- [`Content.Shared/_Mono/Economy/SharedCreditReceiverSystem.cs`](../../Content.Shared/_Mono/Economy/SharedCreditReceiverSystem.cs): _log was never assigned, so every log line in TryCashPayment threw a NullReferenceException
 - [`Content.Shared/Preferences/HumanoidCharacterProfile.cs`](../../Content.Shared/Preferences/HumanoidCharacterProfile.cs)
   - the company is passed through the constructor
   - copies keep the company
@@ -70,19 +56,22 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
   - removed - Appearance hashed by reference, broke equal profiles hashing alike
   - the company is part of the hash
 - [`Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.Revolver.cs`](../../Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.Revolver.cs): C# % keeps the sign, index 0 gave -1 and crashed the server
-- [`README.md`](../../README.md)
-  - dropped Discord link
-  - reworded for Wolfgate build differences
+- [`README.md`](../../README.md): reworded for Wolfgate build differences
 - [`Resources/Locale/en-US/_Mono/guidebook/guides.ftl`](../../Resources/Locale/en-US/_Mono/guidebook/guides.ftl): was Monolith Rules
 - [`Resources/Prototypes/_Mono/Catalogs/Bounties/MMC/value_bounties.yml`](../../Resources/Prototypes/_Mono/Catalogs/Bounties/MMC/value_bounties.yml): MMC cash bounties pay 0.9x their value so cash-to-MIC-to-cash can't loop for profit
 - [`Resources/Prototypes/_Mono/Entities/Markers/Spawners/Random/scrap_processor.yml`](../../Resources/Prototypes/_Mono/Entities/Markers/Spawners/Random/scrap_processor.yml): plastitanium moved into the rare materials group so scrap doesn't undercut the crystallizer
+- [`Resources/Prototypes/_Mono/game_presets.yml`](../../Resources/Prototypes/_Mono/game_presets.yml): only Insurgency is votable below 20 players
 - [`Resources/Prototypes/_Mono/Guidebook/rules.yml`](../../Resources/Prototypes/_Mono/Guidebook/rules.yml)
   - erotic roleplay rule removed, PR #27
   - erotic roleplay rule entry removed, PR #27
 - [`Resources/Prototypes/_NF/Events/events.yml`](../../Resources/Prototypes/_NF/Events/events.yml)
   - gas leak event disabled
   - vent clog event disabled
-- [`Resources/ServerInfo/_Mono/Guidebook/Rules/Conflict/Four_PortStriking.xml`](../../Resources/ServerInfo/_Mono/Guidebook/Rules/Conflict/Four_PortStriking.xml): fixed broken link, was MonolithRuleRoleplayEightSafeZones
+- [`Resources/ServerInfo/_Mono/Guidebook/Rules/Conflict/Four_PortStriking.xml`](../../Resources/ServerInfo/_Mono/Guidebook/Rules/Conflict/Four_PortStriking.xml)
+  - fixed broken link, was MonolithRuleRoleplayEightSafeZones
+  - was color=blue, unreadable on the dark background
+  - was color=maroon, unreadable on the dark background
+- [`Resources/ServerInfo/_Mono/Guidebook/Rules/Conflict/One_RandomDeathmatch.xml`](../../Resources/ServerInfo/_Mono/Guidebook/Rules/Conflict/One_RandomDeathmatch.xml): was color=blue, unreadable on the dark background
 - [`Resources/ServerInfo/_Mono/Guidebook/Rules/MonolithRuleset.xml`](../../Resources/ServerInfo/_Mono/Guidebook/Rules/MonolithRuleset.xml)
   - was "# Monolith Rules"
   - Wolfgate branding foreword
@@ -108,4 +97,4 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
 - [`Resources/ServerInfo/Guidebook/ServerRules/WizDenCoreOnlyRules.xml`](../../Resources/ServerInfo/Guidebook/ServerRules/WizDenCoreOnlyRules.xml): was 16
 - [`Resources/ServerInfo/Guidebook/ServerRules/WizDenLRPRules.xml`](../../Resources/ServerInfo/Guidebook/ServerRules/WizDenLRPRules.xml): was 16
 - [`Resources/ServerInfo/Guidebook/ServerRules/WizDenMRPRules.xml`](../../Resources/ServerInfo/Guidebook/ServerRules/WizDenMRPRules.xml): was 16
-- [`Resources/ServerInfo/Rules.txt`](../../Resources/ServerInfo/Rules.txt): Rules rebranded from Monolith to Wolfgate (intro and section headings), with the rule and age update (#19).
+- [`Resources/ServerInfo/Rules.txt`](../../Resources/ServerInfo/Rules.txt): Monolith renamed to Wolfgate in the intro and section headings (#19); the file is unused (server.rules_file is MonolithRuleset).

@@ -13,8 +13,8 @@ is the full design.
 
 ## Ropes
 
-Stage 1 of the `Tether` module: the rope core that harpoons, tow cables and power
-cords are built on. Code lives in `Content.{Shared,Server,Client}/_WF/Tether/`.
+The rope core that harpoons, tow cables and power cords are built on. Code lives in
+`Content.{Shared,Server,Client}/_WF/Tether/`.
 
 ### How a rope works
 
@@ -79,7 +79,7 @@ Events (all `[ByRefEvent]`, in `Content.Shared._WF.Tether`):
 - `RopeDetachedEvent(Rope, Other, RopeType)` — on both attach points when untied, for any reason.
 - `RopeBrokenEvent(Rope, EndA, EndB, RopeType, Refunded)` — on both ends and broadcast, before deletion.
 - `RopeCoilTargetAttemptEvent(User, Coil, Target, RopeType)` with `AttachPoint` and `Handled` —
-  raised on an entity a coil was used on that is not itself an attach point. Stage 2C's power cord
+  raised on an entity a coil was used on that is not itself an attach point. The power cord
   clamps set `AttachPoint` here instead of copying the coil flow.
 
 ### Hand interaction
@@ -108,9 +108,9 @@ stepped nor drawn.
 
 ### Debug content
 
-`Resources/Prototypes/_WF/Tether/` holds only the `WFRopeDebug` rope type, the
-`WFRopeAttachPointDebug` eye and the `WFRopeCoilDebug` coil, so the core can be tried in
-game. Stage 2A owns the real content.
+`debug.yml` and `rope_types.yml` in `Resources/Prototypes/_WF/Tether/` keep the
+`WFRopeDebug` rope type, the `WFRopeAttachPointDebug` eye and the `WFRopeCoilDebug` coil
+next to the real content, so the core can be tried in game on its own.
 
 ### Tests
 
@@ -122,7 +122,12 @@ dotnet test Content.IntegrationTests/Content.IntegrationTests.csproj -c DebugOpt
 `RopeMathTest` covers the pure spring and verlet maths with no server pair.
 `RopeTest` ties two dynamic grids together and checks the hard limit, towing, the
 absence of force while slack, breaking, severing on deletion and the coil's unit
-accounting. Rerun any Skipped test on its own: pair tests can be skipped by unrelated
+accounting. `TetherContentTest` spawns the real content, fires the installer and ties
+each real rope type between two anchor eyes. `HarpoonTest` covers manning the turret,
+the shot-well rule, the tow cable a good shot leaves, loose and loaded harpoons staying
+plain items and the winch stopping at hull contact. `PowerCordTest` checks that a
+cord joins two hulls' power nets until it parts, and refuses the wrong voltage.
+Rerun any Skipped test on its own: pair tests can be skipped by unrelated
 `db.ef` sqlite warnings on some machines.
 
 <!-- WOLFGATE-GENERATED START -->

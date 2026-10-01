@@ -630,10 +630,12 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             return;
 
         // kind of cursed. We need to update the UI when an Id is entered, but the UI needs to know the player characters bank account.
-        // WOLFGATE(Traders): was a check for ActivatableUI.Key, which a trader hosting this console has not got.
-        // The key that was actually opened is right here, and other keys on the same entity still bail.
+        // WOLFGATE(Traders) START: a trader hosting this console has no ActivatableUI, so check the key that was opened.
+        // Other keys on the same entity still bail.
+        // if (!TryComp<ActivatableUIComponent>(uid, out var uiComp) || uiComp.Key == null)
         if (args.UiKey is not ShipyardConsoleUiKey)
             return;
+        // WOLFGATE END
 
         if (args.Actor is not { Valid: true } player)
             return;

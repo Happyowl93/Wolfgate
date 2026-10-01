@@ -315,3 +315,50 @@
     state: stingers_primary_BEHIND
   - sprite: _WF/Genitals/Mobs/Customization/TailSplit/Mobs/Customization/Arachnid/appendages.rsi # WOLFGATE(Genitals): south frame on TailBehind
     state: stingers_secondary_BEHIND
+
+# WOLFGATE(Species): ported from HardLight
+# Big variant dual colored tail
+- type: marking
+  id: TailShadekinBigTwoColored
+  bodyPart: Tail
+  markingCategory: Tail
+  speciesRestriction: [Shadekin, ProtoKin]
+  layering: # WOLFGATE(Genitals): the south frame draws behind the body, so the tail never covers anatomy
+    shadekin_dual_color_primary_BEHIND: TailBehind
+    shadekin_dual_color_secondary_BEHIND: TailBehind
+  colorLinks: # WOLFGATE(Genitals): both halves of a tail share one colour
+    shadekin_dual_color_primary_BEHIND: shadekin_dual_color_primary_FRONT
+    shadekin_dual_color_secondary_BEHIND: shadekin_dual_color_secondary_FRONT
+  sprites:
+    - sprite: _WF/Genitals/Mobs/Customization/TailSplit/_HL/Mobs/Customization/Shadekin/shadekintails64x32.rsi # WOLFGATE(Genitals): split art
+      state: shadekin_dual_color_primary_FRONT
+    - sprite: _WF/Genitals/Mobs/Customization/TailSplit/_HL/Mobs/Customization/Shadekin/shadekintails64x32.rsi # WOLFGATE(Genitals): split art
+      state: shadekin_dual_color_secondary_FRONT
+    - sprite: _WF/Genitals/Mobs/Customization/TailSplit/_HL/Mobs/Customization/Shadekin/shadekintails64x32.rsi # WOLFGATE(Genitals): south frame on TailBehind
+      state: shadekin_dual_color_primary_BEHIND
+    - sprite: _WF/Genitals/Mobs/Customization/TailSplit/_HL/Mobs/Customization/Shadekin/shadekintails64x32.rsi # WOLFGATE(Genitals): south frame on TailBehind
+      state: shadekin_dual_color_secondary_BEHIND
+
+# WOLFGATE(Species): ported from HardLight
+# Normal ear dual color variant
+- type: marking
+  id: EarsShadekinDualColor
+  bodyPart: HeadTop
+  markingCategory: HeadTop
+  speciesRestriction: [Shadekin, ProtoKin]
+  sprites:
+    - sprite: _HL/Mobs/Customization/Shadekin/shadekinears.rsi
+      state: dual_color_primary
+    - sprite: _HL/Mobs/Customization/Shadekin/shadekinears.rsi
+      state: dual_color_secondary
+
+# WOLFGATE(Species): ported from HardLight
+# Short hair
+- type: marking
+  id: ShadekinHairShort
+  bodyPart: Hair
+  markingCategory: Hair
+  speciesRestriction: [Shadekin, ProtoKin]
+  sprites:
+    - sprite: _HL/Mobs/Customization/Shadekin/shadekinhair.rsi
+      state: shadekin_short

@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Shared._WF.ShipShields; // WOLFGATE(ShipShields)
 using Content.Shared._Mono.Weapons.Hitscan.Components;
 using Content.Shared.Administration.Logs;
 using Content.Shared.Damage.Components;
@@ -36,6 +37,9 @@ public sealed partial class HitscanMultiRaycastSystem : EntitySystem
         var mapCords = _transform.ToMapCoordinates(args.FromCoordinates);
         var ray = new CollisionRay(mapCords.Position, args.ShotDirection, (int) ent.Comp.CollisionMask);
         var rayCastResults = _physics.IntersectRay(mapCords.MapId, ray, ent.Comp.MaxDistance, shooter, false);
+        // WOLFGATE(ShipShields): shield fixtures are resolved against the visible perimeter
+        rayCastResults = rayCastResults.Where(hit => !HasComp<WFShipShieldVisualsComponent>(hit.HitEntity));
+        var hitDistances = new Dictionary<EntityUid, float>(); // WOLFGATE(ShipShields)
         var hitCount = 0;
         var latestDistance = ent.Comp.MaxDistance;
 
@@ -45,6 +49,7 @@ public sealed partial class HitscanMultiRaycastSystem : EntitySystem
                 continue;
 
             _hitEntities.Add(result.HitEntity);
+            hitDistances[result.HitEntity] = result.Distance; // WOLFGATE(ShipShields)
             latestDistance = result.Distance;
 
             hitCount++;
@@ -55,9 +60,11 @@ public sealed partial class HitscanMultiRaycastSystem : EntitySystem
             if ((phys.CollisionLayer & (int) ent.Comp.PierceCollisionMask) != 0x0)
                 break;
 
-            _log.Add(LogType.HitScanHit,
-                $"{ToPrettyString(shooter):user} hit {ToPrettyString(result.HitEntity):target}"
-                + $" using {ToPrettyString(args.Gun):entity}.");
+            // WOLFGATE(ShipShields) START: log piercing targets after shield interception
+            // _log.Add(LogType.HitScanHit,
+            //     $"{ToPrettyString(shooter):user} hit {ToPrettyString(result.HitEntity):target}"
+            //     + $" using {ToPrettyString(args.Gun):entity}.");
+            // WOLFGATE END
         }
 
         var trace = new HitscanRaycastFiredEvent
@@ -73,6 +80,17 @@ public sealed partial class HitscanMultiRaycastSystem : EntitySystem
             Canceled = _net.IsClient,
         };
 
+        // WOLFGATE(ShipShields) START: stop piercing beams while retaining targets before the perimeter
+        var shieldTrace = new WFShipShieldHitscanTraceEvent(ent.Owner, trace) { HitDistances = hitDistances };
+        RaiseLocalEvent(ref shieldTrace);
+        trace = shieldTrace.Trace;
+        foreach (var hitEntity in trace.HitEntities)
+        {
+            _log.Add(LogType.HitScanHit,
+                $"{ToPrettyString(shooter):user} hit {ToPrettyString(hitEntity):target}"
+                + $" using {ToPrettyString(args.Gun):entity}.");
+        }
+        // WOLFGATE END
         RaiseLocalEvent(ent, ref trace);
         _hitEntities.Clear();
     }

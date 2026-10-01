@@ -38,9 +38,10 @@ public sealed partial class InternetSoundAdminWindow : DefaultWindow
             _internetSound.StateReceived -= OnState;
         };
 
-        PlayButton.OnPressed += _ => Play();
-        UrlEdit.OnTextEntered += _ => Play();
-        GridEdit.OnTextEntered += _ => Play();
+        PlayButton.OnPressed += _ => Play(false);
+        StealthPlayButton.OnPressed += _ => Play(true);
+        UrlEdit.OnTextEntered += _ => Play(false);
+        GridEdit.OnTextEntered += _ => Play(false);
         StopButton.OnPressed += _ => _consoleHost.ExecuteCommand(WolfgateAdminCommands.StopInternetSound);
 
         PaCheck.OnToggled += _ => UpdatePaControls();
@@ -58,16 +59,21 @@ public sealed partial class InternetSoundAdminWindow : DefaultWindow
         OnState(_internetSound.State);
     }
 
-    private void Play()
+    /// <summary>
+    /// Plays the link to everyone or over the chosen PA. A stealth play doesn't say who played it.
+    /// </summary>
+    private void Play(bool stealth)
     {
         // Quotes would break the command line; links never need them.
         var url = UrlEdit.Text.Trim().Replace("\"", string.Empty);
         if (url.Length == 0)
             return;
 
+        var flag = stealth ? " true" : string.Empty;
+
         if (!PaCheck.Pressed)
         {
-            _consoleHost.ExecuteCommand($"{WolfgateAdminCommands.PlayInternetSound} \"{url}\"");
+            _consoleHost.ExecuteCommand($"{WolfgateAdminCommands.PlayInternetSound} \"{url}\"{flag}");
             return;
         }
 
@@ -78,7 +84,7 @@ public sealed partial class InternetSoundAdminWindow : DefaultWindow
             return;
         }
 
-        _consoleHost.ExecuteCommand($"{WolfgateAdminCommands.PlayInternetSoundPa} {grid} \"{url}\"");
+        _consoleHost.ExecuteCommand($"{WolfgateAdminCommands.PlayInternetSoundPa} {grid} \"{url}\"{flag}");
     }
 
     internal static bool IsValidGridInput(string grid)
@@ -94,6 +100,7 @@ public sealed partial class InternetSoundAdminWindow : DefaultWindow
     {
         // Only a global sound blocks the plain Play button; a ship can always take over its own PA.
         PlayButton.Disabled = state is { GlobalBusy: true } && !PaCheck.Pressed;
+        StealthPlayButton.Disabled = PlayButton.Disabled;
 
         if (state == null || state.Tracks.Count == 0)
         {
@@ -110,9 +117,12 @@ public sealed partial class InternetSoundAdminWindow : DefaultWindow
                 _ => track.Title,
             };
 
+            // Stealth tracks come with no requester, so other admins can't tell who played them either.
+            var admin = track.Requester.Length > 0 ? track.Requester : Loc.GetString("wf-internet-sound-admin-stealth-requester");
+
             return track.Ship is { } ship
-                ? Loc.GetString("wf-internet-sound-admin-entry-pa", ("title", what), ("admin", track.Requester), ("ship", ship))
-                : Loc.GetString("wf-internet-sound-admin-entry", ("title", what), ("admin", track.Requester));
+                ? Loc.GetString("wf-internet-sound-admin-entry-pa", ("title", what), ("admin", admin), ("ship", ship))
+                : Loc.GetString("wf-internet-sound-admin-entry", ("title", what), ("admin", admin));
         });
 
         NowPlayingLabel.Text = string.Join('\n', lines);

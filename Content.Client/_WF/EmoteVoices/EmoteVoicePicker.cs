@@ -14,6 +14,7 @@ public sealed partial class EmoteVoicePicker : PanelContainer
     /// <summary>A voice was picked for an emote; null is the species default.</summary>
     public event Action<ProtoId<EmotePrototype>, ProtoId<EmoteVoicePrototype>?>? OnVoiceSelected;
 
+    /// <summary>The play button was pressed for an emote.</summary>
     public event Action<ProtoId<EmotePrototype>>? OnPlayPressed;
 
     private readonly Dictionary<ProtoId<EmotePrototype>, (OptionButton Button, List<ProtoId<EmoteVoicePrototype>?> Voices)> _rows = new();

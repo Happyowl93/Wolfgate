@@ -90,7 +90,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactWood
+        collection: WFBulletImpactWood # WOLFGATE(Weapons)
   - type: Sprite
     sprite: Structures/Doors/MineralDoors/wood_door.rsi
     layers:

@@ -7,7 +7,7 @@
   defaultSkinTone: "#b8b8b8"
   markingLimits: MobSlimeMarkingLimits
   dollPrototype: MobSlimePersonDummy
-  skinColoration: Hues
+  skinColoration: AnyColour #WOLFGATE(Species): Anycolor skin support for slimes
 
 - type: speciesBaseSprites
   id: MobSlimeSprites

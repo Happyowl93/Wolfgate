@@ -3,6 +3,7 @@ using System.Numerics;
 using Content.Server._WF.Tether;
 using Content.Server.Power.Components;
 using Content.Shared._WF.Tether;
+using Content.Shared._Mono.CCVar;
 using Content.Shared._WF.Tether.Harpoon;
 using Content.Shared.Actions;
 using Content.Shared.Buckle;
@@ -11,10 +12,13 @@ using Content.Shared.Interaction;
 using Content.Shared.Projectiles;
 using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Systems;
+using Robust.Shared.Configuration;
+using Robust.Shared.Containers;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Maths;
 using Robust.Shared.Physics;
+using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Systems;
 
 namespace Content.IntegrationTests.Tests._WF.Tether;
@@ -46,10 +50,33 @@ public sealed class HarpoonTest
     proto: WFShipHarpoon
     capacity: 1
     cycleable: false
+
+# Loaded by hand, as the real turret is.
+- type: entity
+  id: WFTestHarpoonTurretEmpty
+  parent: WFBaseShipHarpoonTurret
+  components:
+  - type: ShipHarpoonTurret
+    ropeType: WFTestTowCable
+    arc: 120
+
+# No spread and no recoil, so a shot flies exactly where it is aimed.
+- type: entity
+  id: WFTestHarpoonTurretSteady
+  parent: WFTestHarpoonTurret
+  components:
+  - type: Gun
+    minAngle: 0
+    maxAngle: 0
+    recoil: 0
 ";
 
     private const string Operator = "MobHuman";
     private const string Wall = "WallSolid";
+    private const string DefaultTurret = "WFTestHarpoonTurret";
+    private const string SteadyTurret = "WFTestHarpoonTurretSteady";
+    private const string EmptyTurret = "WFTestHarpoonTurretEmpty";
+    private const string Harpoon = "WFShipHarpoon";
 
     [Test]
     public async Task ManningGrantsAndRemovesTheControls()
@@ -66,7 +93,7 @@ public sealed class HarpoonTest
         {
             entities.DeleteEntity(map.Grid);
             grid = MakeGrid(entities, maps, map.MapId, Vector2.Zero, 3);
-            turret = entities.SpawnEntity("WFTestHarpoonTurret", new EntityCoordinates(grid, new Vector2(1.5f, 1.5f)));
+            turret = entities.SpawnEntity(DefaultTurret, new EntityCoordinates(grid, new Vector2(1.5f, 1.5f)));
             user = entities.SpawnEntity(Operator, new EntityCoordinates(grid, new Vector2(1.5f, 1.5f)));
         });
 
@@ -248,6 +275,66 @@ public sealed class HarpoonTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>
+    /// A harpoon is wider than its point, so one landing beside the seam between two wall tiles also touches the
+    /// neighbour of the tile it strikes. Leaning towards the seam, it used to be judged against the neighbour's
+    /// hidden side face and skip off.
+    /// </summary>
+    [TestCase(-0.1f, 0f)]
+    [TestCase(0.1f, 0f)]
+    [TestCase(-0.1f, 25f)]
+    public async Task ShotBesideASeamBites(float lean, float degrees)
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.ResolveDependency<IEntityManager>();
+        var maps = server.System<SharedMapSystem>();
+
+        EntityUid gridA = default, gridB = default, turret = default, user = default, harpoon = default;
+        var turn = Angle.FromDegrees(degrees);
+
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            gridA = MakeGrid(entities, maps, map.MapId, Vector2.Zero, 3);
+            // The shot lands a tenth of a tile short of a seam, on the side it is leaning towards.
+            gridB = MakeGrid(entities, maps, map.MapId, turn.RotateVec(new Vector2(10f, 0.5f + 2f * lean)), 1, 20);
+            // The whole scene turned as one: hulls are rarely square to the map.
+            entities.System<SharedTransformSystem>().SetWorldRotation(gridA, turn);
+            entities.System<SharedTransformSystem>().SetWorldRotation(gridB, turn);
+            for (var y = 0; y < 20; y++)
+            {
+                entities.SpawnEntity(Wall, new EntityCoordinates(gridB, new Vector2(0.5f, y + 0.5f)));
+            }
+
+            (turret, user) = MakeTurret(entities, gridA, SteadyTurret);
+        });
+
+        await server.WaitRunTicks(5);
+        await server.WaitPost(() =>
+        {
+            Man(entities, user, turret);
+            Fire(entities, user, turret, new MapCoordinates(turn.RotateVec(new Vector2(10.5f, 1.5f + lean)), map.MapId));
+            harpoon = entities.GetEntity(entities.GetComponent<ShipHarpoonTurretComponent>(turret).Harpoon!.Value);
+        });
+
+        await server.WaitRunTicks(40);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.GetComponent<ShipHarpoonComponent>(harpoon).Embedded, Is.True,
+                "A square-on shot bites wherever on the wall it lands.");
+            Assert.That(entities.System<RopeSystem>().TryGetBody(harpoon, out var body, out _), Is.True);
+            Assert.That(body, Is.EqualTo(gridB));
+
+            entities.DeleteEntity(user);
+            entities.DeleteEntity(gridA);
+            entities.DeleteEntity(gridB);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     [Test]
     public async Task LooseHarpoonsHurtNobody()
     {
@@ -269,11 +356,11 @@ public sealed class HarpoonTest
             // A vendor stack dropped at the buyer's feet.
             for (var i = 0; i < 4; i++)
             {
-                entities.SpawnEntity("WFShipHarpoon", coordinates);
+                entities.SpawnEntity(Harpoon, coordinates);
             }
 
             // One left lying on the deck after a clean miss, still marked as fired.
-            spent = entities.SpawnEntity("WFShipHarpoon", coordinates);
+            spent = entities.SpawnEntity(Harpoon, coordinates);
             var projectile = entities.GetComponent<ProjectileComponent>(spent);
             projectile.Weapon = grid;
             projectile.Shooter = grid;
@@ -299,8 +386,89 @@ public sealed class HarpoonTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>
+    /// Fast projectiles are swept ahead of themselves each tick. A harpoon that has not been fired is not one,
+    /// however fast the ship carrying it goes: it used to be pulled out of its turret and thrown through the hull.
+    /// </summary>
     [Test]
-    public async Task RecoveredHarpoonBitesAgain()
+    public async Task UnfiredHarpoonsRideAFastShip()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.ResolveDependency<IEntityManager>();
+        var maps = server.System<SharedMapSystem>();
+        var config = server.ResolveDependency<IConfigurationManager>();
+        var threshold = config.GetCVar(MonoCVars.ProjectileRaycastSpeedThreshold);
+
+        EntityUid gridA = default, gridB = default, turret = default, user = default, loaded = default, loose = default;
+        var deck = new Vector2(0.5f, 1.5f);
+
+        try
+        {
+            await server.WaitPost(() =>
+            {
+                // Any ship counts as fast, so the test does not need one doing 75 m/s.
+                config.SetCVar(MonoCVars.ProjectileRaycastSpeedThreshold, 1f);
+                entities.DeleteEntity(map.Grid);
+                gridA = MakeGrid(entities, maps, map.MapId, Vector2.Zero, 3);
+                gridB = MakeGrid(entities, maps, map.MapId, new Vector2(10f, 0f), 3);
+                entities.SpawnEntity(Wall, new EntityCoordinates(gridB, new Vector2(0.5f, 1.5f)));
+                (turret, user) = MakeTurret(entities, gridA, EmptyTurret);
+                loaded = entities.SpawnEntity(Harpoon, new EntityCoordinates(gridA, new Vector2(1.5f, 1.5f)));
+                loose = entities.SpawnEntity(Harpoon, new EntityCoordinates(gridA, deck));
+            });
+
+            await server.WaitRunTicks(5);
+            await server.WaitPost(() =>
+            {
+                var load = new InteractUsingEvent(user, loaded, turret, entities.GetComponent<TransformComponent>(turret).Coordinates);
+                entities.EventBus.RaiseLocalEvent(turret, load);
+                Assert.That(load.Handled, Is.True);
+                Man(entities, user, turret);
+                entities.System<SharedPhysicsSystem>().SetLinearVelocity(gridA, new Vector2(0f, 4f));
+            });
+
+            await server.WaitRunTicks(30);
+            await server.WaitPost(() =>
+            {
+                var looseXform = entities.GetComponent<TransformComponent>(loose);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(entities.System<SharedContainerSystem>().IsEntityInContainer(loaded), Is.True,
+                        "A loaded harpoon stays in its turret while the ship moves.");
+                    Assert.That(looseXform.ParentUid, Is.EqualTo(gridA));
+                    Assert.That(looseXform.LocalPosition, Is.EqualTo(deck).Using<Vector2>((a, b) => (a - b).Length() < 0.01f),
+                        "A loose harpoon stays where it was put down.");
+                });
+
+                var physics = entities.System<SharedPhysicsSystem>();
+                entities.System<SharedTransformSystem>().SetWorldPositionRotation(gridA, Vector2.Zero, Angle.Zero);
+                physics.SetLinearVelocity(gridA, Vector2.Zero);
+                Fire(entities, user, turret, new MapCoordinates(new Vector2(10.5f, 1.5f), map.MapId));
+            });
+
+            await server.WaitRunTicks(40);
+            await server.WaitAssertion(() =>
+            {
+                Assert.That(entities.GetComponent<ShipHarpoonComponent>(loaded).Embedded, Is.True,
+                    "It still fires and bites after the ride.");
+
+                entities.DeleteEntity(user);
+                entities.DeleteEntity(gridA);
+                entities.DeleteEntity(gridB);
+            });
+        }
+        finally
+        {
+            await server.WaitPost(() => config.SetCVar(MonoCVars.ProjectileRaycastSpeedThreshold, threshold));
+        }
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task LooseHarpoonStaysInsideTheHull()
     {
         await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
@@ -308,60 +476,180 @@ public sealed class HarpoonTest
         var entities = server.ResolveDependency<IEntityManager>();
         var maps = server.System<SharedMapSystem>();
 
-        EntityUid gridA = default, gridB = default, turret = default, user = default, harpoon = default;
+        EntityUid grid = default, harpoon = default;
+
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            grid = MakeGrid(entities, maps, map.MapId, Vector2.Zero, 5);
+            for (var y = 0; y < 5; y++)
+            {
+                entities.SpawnEntity(Wall, new EntityCoordinates(grid, new Vector2(0.5f, y + 0.5f)));
+            }
+
+            harpoon = entities.SpawnEntity(Harpoon, new EntityCoordinates(grid, new Vector2(2.5f, 2.5f)));
+        });
+
+        await server.WaitRunTicks(5);
+        // Kicked across the deck at the hull wall, as a dropped or blown item is.
+        await server.WaitPost(() => entities.System<SharedPhysicsSystem>().SetLinearVelocity(harpoon, new Vector2(-6f, 0f)));
+
+        float early = 0f, late = 0f;
+        await server.WaitRunTicks(30);
+        await server.WaitPost(() => early = entities.GetComponent<PhysicsComponent>(harpoon).LinearVelocity.Length());
+        await server.WaitRunTicks(60);
+        await server.WaitAssertion(() =>
+        {
+            late = entities.GetComponent<PhysicsComponent>(harpoon).LinearVelocity.Length();
+            var xform = entities.GetComponent<TransformComponent>(harpoon);
+            Assert.Multiple(() =>
+            {
+                Assert.That(xform.ParentUid, Is.EqualTo(grid), "A loose harpoon cannot leave through a wall.");
+                Assert.That(xform.LocalPosition.X, Is.GreaterThan(1f));
+                Assert.That(late, Is.LessThan(early).Or.Zero, "The deck slows it down like any other item.");
+            });
+
+            entities.DeleteEntity(grid);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task WinchStopsWhenTheHullsTouch()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.ResolveDependency<IEntityManager>();
+        var maps = server.System<SharedMapSystem>();
+
+        EntityUid gridA = default, gridB = default, turret = default, user = default;
 
         await server.WaitPost(() =>
         {
             entities.DeleteEntity(map.Grid);
             gridA = MakeGrid(entities, maps, map.MapId, Vector2.Zero, 3);
-            gridB = MakeGrid(entities, maps, map.MapId, new Vector2(10f, 0f), 1, 20);
-            for (var y = 0; y < 20; y++)
-            {
-                entities.SpawnEntity(Wall, new EntityCoordinates(gridB, new Vector2(0.5f, y + 0.5f)));
-            }
-
-            (turret, user) = MakeTurret(entities, gridA);
+            gridB = MakeGrid(entities, maps, map.MapId, new Vector2(10f, 0f), 3);
+            // The wall is on the far side, so the cable is still two tiles long when the hulls meet.
+            entities.SpawnEntity(Wall, new EntityCoordinates(gridB, new Vector2(2.5f, 1.5f)));
+            (turret, user) = MakeTurret(entities, gridA, SteadyTurret);
         });
 
         await server.WaitRunTicks(5);
         await server.WaitPost(() =>
         {
             Man(entities, user, turret);
-            Fire(entities, user, turret, new MapCoordinates(new Vector2(10.5f, 14f), map.MapId));
-            harpoon = entities.GetEntity(entities.GetComponent<ShipHarpoonTurretComponent>(turret).Harpoon!.Value);
+            Fire(entities, user, turret, new MapCoordinates(new Vector2(12.5f, 1.5f), map.MapId));
         });
 
         await server.WaitRunTicks(40);
         await server.WaitPost(() =>
         {
-            Assert.That(entities.GetComponent<ShipHarpoonComponent>(harpoon).Embedded, Is.False,
-                "The first shot has to glance for this test to mean anything.");
-
-            // Pick the harpoon back up and load it, the way a player recovers a miss.
-            var reload = new InteractUsingEvent(user, harpoon, turret, entities.GetComponent<TransformComponent>(turret).Coordinates);
-            entities.EventBus.RaiseLocalEvent(turret, reload);
-            Assert.That(reload.Handled, Is.True, "The turret must take the recovered harpoon back.");
-            entities.GetComponent<GunComponent>(turret).NextFire = TimeSpan.Zero;
-
-            // The first shot's recoil spins the tiny test hull; put it back so the second one is square on again.
-            var physics = entities.System<SharedPhysicsSystem>();
-            var transform = entities.System<SharedTransformSystem>();
-            transform.SetWorldPositionRotation(gridA, Vector2.Zero, Angle.Zero);
-            physics.SetLinearVelocity(gridA, Vector2.Zero);
-            physics.SetAngularVelocity(gridA, 0f);
-            Fire(entities, user, turret, new MapCoordinates(new Vector2(10.5f, 1.5f), map.MapId));
+            Assert.That(entities.GetComponent<ShipHarpoonTurretComponent>(turret).Rope, Is.Not.Null);
+            entities.EventBus.RaiseLocalEvent(user, (object) new HarpoonReelInActionEvent(), true);
         });
 
-        await server.WaitRunTicks(40);
+        await server.WaitRunTicks(400);
         await server.WaitAssertion(() =>
         {
-            Assert.That(entities.GetComponent<ShipHarpoonComponent>(harpoon).Embedded, Is.True,
-                "A recovered harpoon fired square on sinks in like a fresh one.");
+            var comp = entities.GetComponent<ShipHarpoonTurretComponent>(turret);
+            Assert.That(comp.Rope, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(comp.Reeling, Is.Zero, "The winch stops once hull meets hull.");
+                Assert.That(entities.GetComponent<RopeComponent>(comp.Rope!.Value).Length, Is.GreaterThan(2f),
+                    "It does not go on hauling the two hulls into each other.");
+            });
 
             entities.DeleteEntity(user);
             entities.DeleteEntity(gridA);
             entities.DeleteEntity(gridB);
         });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// Fired the ordinary way, and again as a round fast enough to be swept ahead of itself each tick, where the
+    /// first flight's sweep used to carry over and send the second shot down the first one's path.
+    /// </summary>
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task RecoveredHarpoonBitesAgain(bool swept)
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.ResolveDependency<IEntityManager>();
+        var maps = server.System<SharedMapSystem>();
+        var config = server.ResolveDependency<IConfigurationManager>();
+        var threshold = config.GetCVar(MonoCVars.ProjectileRaycastSpeedThreshold);
+
+        EntityUid gridA = default, gridB = default, turret = default, user = default, harpoon = default;
+
+        try
+        {
+            await server.WaitPost(() =>
+            {
+                if (swept)
+                    config.SetCVar(MonoCVars.ProjectileRaycastSpeedThreshold, 1f);
+
+                entities.DeleteEntity(map.Grid);
+                gridA = MakeGrid(entities, maps, map.MapId, Vector2.Zero, 3);
+                gridB = MakeGrid(entities, maps, map.MapId, new Vector2(10f, 0f), 1, 20);
+                for (var y = 0; y < 20; y++)
+                {
+                    entities.SpawnEntity(Wall, new EntityCoordinates(gridB, new Vector2(0.5f, y + 0.5f)));
+                }
+
+                (turret, user) = MakeTurret(entities, gridA);
+            });
+
+            await server.WaitRunTicks(5);
+            await server.WaitPost(() =>
+            {
+                Man(entities, user, turret);
+                Fire(entities, user, turret, new MapCoordinates(new Vector2(10.5f, 14f), map.MapId));
+                harpoon = entities.GetEntity(entities.GetComponent<ShipHarpoonTurretComponent>(turret).Harpoon!.Value);
+            });
+
+            await server.WaitRunTicks(40);
+            await server.WaitPost(() =>
+            {
+                Assert.That(entities.GetComponent<ShipHarpoonComponent>(harpoon).Embedded, Is.False,
+                    "The first shot has to glance for this test to mean anything.");
+
+                // Pick the harpoon back up and load it, the way a player recovers a miss.
+                var reload = new InteractUsingEvent(user, harpoon, turret, entities.GetComponent<TransformComponent>(turret).Coordinates);
+                entities.EventBus.RaiseLocalEvent(turret, reload);
+                Assert.That(reload.Handled, Is.True, "The turret must take the recovered harpoon back.");
+                entities.GetComponent<GunComponent>(turret).NextFire = TimeSpan.Zero;
+
+                // The first shot's recoil spins the tiny test hull; put it back so the second one is square on again.
+                var physics = entities.System<SharedPhysicsSystem>();
+                var transform = entities.System<SharedTransformSystem>();
+                transform.SetWorldPositionRotation(gridA, Vector2.Zero, Angle.Zero);
+                physics.SetLinearVelocity(gridA, Vector2.Zero);
+                physics.SetAngularVelocity(gridA, 0f);
+                Fire(entities, user, turret, new MapCoordinates(new Vector2(10.5f, 1.5f), map.MapId));
+            });
+
+            await server.WaitRunTicks(40);
+            await server.WaitAssertion(() =>
+            {
+                Assert.That(entities.GetComponent<ShipHarpoonComponent>(harpoon).Embedded, Is.True,
+                    "A recovered harpoon fired square on sinks in like a fresh one.");
+
+                entities.DeleteEntity(user);
+                entities.DeleteEntity(gridA);
+                entities.DeleteEntity(gridB);
+            });
+        }
+        finally
+        {
+            await server.WaitPost(() => config.SetCVar(MonoCVars.ProjectileRaycastSpeedThreshold, threshold));
+        }
 
         await pair.CleanReturnAsync();
     }
@@ -480,10 +768,10 @@ public sealed class HarpoonTest
     }
 
     /// <summary>A turret bolted to the east edge of a hull, facing east, with an operator standing on it.</summary>
-    private static (EntityUid Turret, EntityUid User) MakeTurret(IEntityManager entities, EntityUid grid)
+    private static (EntityUid Turret, EntityUid User) MakeTurret(IEntityManager entities, EntityUid grid, string prototype = DefaultTurret)
     {
         var coordinates = new EntityCoordinates(grid, new Vector2(2.5f, 1.5f));
-        var turret = entities.SpawnEntity("WFTestHarpoonTurret", coordinates);
+        var turret = entities.SpawnEntity(prototype, coordinates);
         var comp = entities.GetComponent<ShipHarpoonTurretComponent>(turret);
         comp.MountRotation = new Vector2(1f, 0f).ToWorldAngle();
         return (turret, entities.SpawnEntity(Operator, coordinates));

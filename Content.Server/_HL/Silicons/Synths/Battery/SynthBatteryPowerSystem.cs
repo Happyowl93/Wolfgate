@@ -161,11 +161,10 @@ public sealed partial class SynthBatteryPowerSystem : EntitySystem
         _audio.PlayPvs(sound, ent);
     }
 
-    /// <summary>
-    /// WOLFGATE(Silicons): rejuvenating also fills the cell in the synth's battery organ slot
-    /// RejuvenateEvent only reaches the mob, so the synth was left on an empty battery. The charge change
-    /// clears the unpowered state and refreshes the alert through OnBatteryChargeChanged.
-    /// </summary>
+    // WOLFGATE(Silicons) START: rejuvenating also fills the cell in the synth's battery organ slot
+    // RejuvenateEvent only reaches the mob, so the synth was left on an empty battery. The charge change
+    // clears the unpowered state and refreshes the alert through OnBatteryChargeChanged.
+    /// <summary>Fills the cell in the synth's battery organ slot on rejuvenate.</summary>
     private void OnRejuvenate(Entity<SynthBatteryComponent> ent, ref RejuvenateEvent args)
     {
         if (!_synthBattery.TryGetBattery(ent.Owner, out var battery, ent.Comp))
@@ -173,6 +172,7 @@ public sealed partial class SynthBatteryPowerSystem : EntitySystem
 
         _battery.SetCharge(battery.Value.Owner, battery.Value.Comp.MaxCharge, battery.Value.Comp);
     }
+    // WOLFGATE END
 
     public void SetUnpowered(Entity<SynthBatteryComponent> ent, bool unpowered)
     {

@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight
 using Content.Shared.Inventory.Events;
 using Content.Shared.Clothing.Components;
 using Content.Shared.Actions;

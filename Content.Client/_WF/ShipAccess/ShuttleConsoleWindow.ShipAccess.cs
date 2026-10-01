@@ -19,6 +19,9 @@ public sealed partial class ShuttleConsoleWindow
     /// <summary>The owner picked a rule for a door.</summary>
     public event Action<NetEntity, WFDoorAccessRule>? ShipAccessDoorRuleRequested;
 
+    /// <summary>The owner set every door to one rule.</summary>
+    public event Action<WFDoorAccessRule>? ShipAccessAllDoorRulesRequested;
+
     /// <summary>The owner ticked or unticked a card on a door.</summary>
     public event Action<NetEntity, WFShipAccessKey, bool>? ShipAccessDoorPlayerRequested;
 
@@ -38,7 +41,8 @@ public sealed partial class ShuttleConsoleWindow
         AccessContainer.RemoveRequested += key => ShipAccessRemoveRequested?.Invoke(key);
         AccessContainer.BuilderChanged += (key, builder) => ShipAccessBuilderRequested?.Invoke(key, builder);
         AccessContainer.DoorRuleChanged += (door, rule) => ShipAccessDoorRuleRequested?.Invoke(door, rule);
-        AccessContainer.DoorPlayerChanged += (door, key, listed) => ShipAccessDoorPlayerRequested?.Invoke(door, key, listed);
+        AccessContainer.AllDoorRulesChanged += rule => ShipAccessAllDoorRulesRequested?.Invoke(rule);
+        AccessContainer.DoorPlayerChanged +=(door, key, listed) => ShipAccessDoorPlayerRequested?.Invoke(door, key, listed);
         AccessContainer.CodesRequested += () => ShipAccessCodesRequested?.Invoke();
         AccessContainer.ShipCodeChanged += code => ShipAccessShipCodeRequested?.Invoke(code);
         AccessContainer.DoorCodeChanged += (door, code) => ShipAccessDoorCodeRequested?.Invoke(door, code);

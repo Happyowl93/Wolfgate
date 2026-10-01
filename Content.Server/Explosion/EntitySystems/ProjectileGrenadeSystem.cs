@@ -80,6 +80,7 @@ public sealed partial class ProjectileGrenadeSystem : EntitySystem
             var direction = angle.ToVec().Normalized();
             var velocity = _random.NextVector2(component.MinVelocity, component.MaxVelocity);
             _gun.ShootProjectile(contentUid, direction, velocity, null); // WOLFGATE(Performance): wizden#36641, the grenade is deleted so it can't be the gun; was uid, null
+            InheritWolfgateShipProjectileSource(uid, contentUid); // WOLFGATE(ShipShields): preserve outgoing fragments and mines through their own shields.
         }
     }
 

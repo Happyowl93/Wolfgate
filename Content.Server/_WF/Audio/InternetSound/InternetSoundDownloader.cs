@@ -15,6 +15,7 @@ namespace Content.Server._WF.Audio.InternetSound;
 /// </summary>
 public static class InternetSoundDownloader
 {
+    /// <summary>Tool paths and the limits and output format a fetch runs with.</summary>
     public sealed record Settings(
         string YtDlpPath,
         string FfmpegPath,
@@ -26,6 +27,7 @@ public static class InternetSoundDownloader
         int BitrateKbps,
         long MaxDownloadBytes = 64L * 1024 * 1024);
 
+    /// <summary>A finished fetch: the source's title and the Ogg Vorbis bytes.</summary>
     public sealed record Result(string Title, byte[] Audio);
 
     /// <summary>

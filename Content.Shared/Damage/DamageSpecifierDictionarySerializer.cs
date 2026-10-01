@@ -13,6 +13,8 @@ using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 namespace Content.Shared.Damage;
 
 // WOLFGATE(Shipyard) START: adds writing support so DamageSpecifier can round-trip through DamageDict
+// upstream original, kept for merges:
+// //todo writing
 public sealed class DamageSpecifierDictionarySerializer : ITypeReader<Dictionary<string, FixedPoint2>, MappingDataNode>,
     ITypeWriter<Dictionary<string, FixedPoint2>>
 {

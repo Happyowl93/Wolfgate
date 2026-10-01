@@ -1,3 +1,4 @@
+# WOLFGATE(Xenoborgs): ported from Monolith #4558, not merged there
 - type: entityTable
   id: XenoborgShipTable
   table: !type:AllSelector # Pass a list of rules; StationEvent applies further restrictions.

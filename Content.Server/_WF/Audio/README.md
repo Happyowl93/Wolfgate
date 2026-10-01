@@ -3,7 +3,9 @@
 Internet sounds. An admin gives a YouTube, SoundCloud or other yt-dlp supported link; the server fetches it, converts
 it to Ogg and sends it to the clients, and both ends mount it as an ordinary resource, so it plays like any shipped
 sound. Played to everyone, it shows a small radio at the top of each screen with volume and stop. Ship PA speakers
-play the same tracks (see ShipPa). Station, ambient and lobby music pause while one plays and resume after.
+play the same tracks (see ShipPa). Station, ambient and lobby music pause while one plays and resume after. A stealth
+play (the admin window's Stealth Play button, or the commands' `stealth` flag) names nobody on the radio or in other
+admins' windows; only the admin logs record who played it.
 
 Entry points: `InternetSoundSystem` (server fetch and playback; client mounting and the radio),
 `InternetSoundDownloader` (yt-dlp and ffmpeg, off the main thread), `InternetSoundDownloadProxy` (a per-download

@@ -24,6 +24,7 @@ public enum GenitalRegion : byte
     All = Chest | Groin,
 }
 
+/// <summary>How a penis is housed: exposed, in a sheath or in a genital slit.</summary>
 [Serializable, NetSerializable]
 public enum SheathType : byte
 {
@@ -41,6 +42,7 @@ public enum TesticleType : byte
     Internal,
 }
 
+/// <summary>Per-organ visibility override the owner sets from the Anatomy panel.</summary>
 [Serializable, NetSerializable]
 public enum GenitalVisibility : byte
 {
@@ -49,6 +51,7 @@ public enum GenitalVisibility : byte
     ShowThroughClothing,
 }
 
+/// <summary>Whether removing the undergarment or only the clothing exposes anatomy.</summary>
 [Serializable, NetSerializable]
 public enum GenitalRevealMode : byte
 {
@@ -56,6 +59,7 @@ public enum GenitalRevealMode : byte
     ClothingRemoval,
 }
 
+/// <summary>Arousal stage derived from the arousal value.</summary>
 [Serializable, NetSerializable]
 public enum ArousalState : byte
 {
@@ -75,6 +79,7 @@ public enum UndergarmentFlags : byte
     BottomByOther = 1 << 3,
 }
 
+/// <summary>Undergarment top or bottom slot.</summary>
 [Serializable, NetSerializable]
 public enum UndergarmentSlot : byte
 {

@@ -29,12 +29,17 @@ tests for one ship: each vessel must load as a shuttle with every hardpoint-only
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/Shipyard/UsedShipReinitTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Shipyard/UsedShipReinitTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Shipyard/VesselShipyardTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Shipyard/VesselShipyardTest.cs)
 
 ### Prototypes
 
 - [`Resources/Prototypes/_WF/Shipyard/dredger.yml`](../../../Resources/Prototypes/_WF/Shipyard/dredger.yml)
 - [`Resources/Prototypes/_WF/Shipyard/Entities/Objects/Devices/ship_vouchers.yml`](../../../Resources/Prototypes/_WF/Shipyard/Entities/Objects/Devices/ship_vouchers.yml)
+
+### Localization
+
+- [`Resources/Locale/en-US/_WF/Shipyard/used-ships.ftl`](../../../Resources/Locale/en-US/_WF/Shipyard/used-ships.ftl)
 
 ### Textures
 
@@ -57,7 +62,7 @@ tests for one ship: each vessel must load as a shuttle with every hardpoint-only
 - [`Content.Shared/VendingMachines/VendingMachineComponent.cs`](../../../Content.Shared/VendingMachines/VendingMachineComponent.cs): a data definition, so a live machine's stock can be written out with its grid
 - [`Resources/Prototypes/_Mono/Outpost/caelestinus.yml`](../../../Resources/Prototypes/_Mono/Outpost/caelestinus.yml): ships sold anywhere on this station end up on the used ship lot
 - [`Resources/Prototypes/_Mono/Roles/Jobs/Medical/medic.yml`](../../../Resources/Prototypes/_Mono/Roles/Jobs/Medical/medic.yml): free Triage or Stubby
-- [`Resources/Prototypes/_Mono/Roles/Jobs/ViperGroup/commander.yml`](../../../Resources/Prototypes/_Mono/Roles/Jobs/ViperGroup/commander.yml)
+- [`Resources/Prototypes/_Mono/Roles/Jobs/ViperGroup/commander.yml`](../../../Resources/Prototypes/_Mono/Roles/Jobs/ViperGroup/commander.yml): VG commanders start with a voucher for their Wolf
 - [`Resources/Prototypes/_NF/Entities/Objects/Devices/Misc/ship_vouchers.yml`](../../../Resources/Prototypes/_NF/Entities/Objects/Devices/Misc/ship_vouchers.yml): Judges can redeem Roswell with the standard station guard voucher
 
 <!-- WOLFGATE-GENERATED END -->

@@ -98,6 +98,11 @@ marking-EarsFaeFox = Fae Fox Ears
 marking-EarsFaeFox-m_ears_faefox_primary = Fae Fox Ears (Primary)
 marking-EarsFaeFox-m_ears_faefox_secondary = Fae Fox Ears (Secondary)
 marking-EarsFaeFox-m_ears_faefox_tertiary = Fae Fox Ears (Tertiary)
+# WOLFGATE(Species): ported from HardLight
+marking-EarsFaeFoxAlt-m_ears_faefox_primary_alt = Fae Fox Ears Alt (Primary)
+marking-EarsFaeFoxAlt-m_ears_faefox_secondary_alt = Fae Fox Ears Alt (Secondary)
+marking-EarsFaeFoxAlt-m_ears_faefox_tertiary_alt = Fae Fox Ears Alt (Tertiary)
+marking-EarsFaeFoxAlt = Fae Fox Ears Alt
 marking-EarsFennec = Fennec Ears
 marking-EarsFennec-m_ears_fennec_ADJ_primary = Fennec Ears (Primary)
 marking-EarsFennec-m_ears_fennec_ADJ_tertiary = Fennec Ears (Secondary)

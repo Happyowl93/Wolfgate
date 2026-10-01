@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight
 using Content.Server._Starlight.Shadekin;
 using Content.Shared.Clothing.Components;
 using Content.Shared.Inventory.Events;

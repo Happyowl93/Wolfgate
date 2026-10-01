@@ -34,7 +34,9 @@ None.
   - wizden#44340, tile entities carry their fixtures
   - wizden#44340, resolve transforms and hard fixtures once per tile
   - wizden#44340, iterate the cached hard fixtures
-- [`Content.Shared/Atmos/Consoles/Components/AtmosMonitoringConsoleComponent.cs`](../../../Content.Shared/Atmos/Consoles/Components/AtmosMonitoringConsoleComponent.cs): wizden#38974, was string HexCode
+- [`Content.Shared/Atmos/Consoles/Components/AtmosMonitoringConsoleComponent.cs`](../../../Content.Shared/Atmos/Consoles/Components/AtmosMonitoringConsoleComponent.cs)
+  - wizden#38974, subnets carry a Color
+  - wizden#38974, was string HexCode
 - [`Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.cs`](../../../Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.cs)
   - wizden#36641, gunUid was not nullable
   - wizden#36641, a projectile may have no shooter

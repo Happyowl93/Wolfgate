@@ -16,6 +16,10 @@ Entry point: `WolfgateConsentTab`, added to `OptionsMenu` at `OptionsMenu.Consen
 - [`Content.Client/_WF/Options/UI/Tabs/WolfgateConsentTab.xaml`](UI/Tabs/WolfgateConsentTab.xaml)
 - [`Content.Client/_WF/Options/UI/Tabs/WolfgateConsentTab.xaml.cs`](UI/Tabs/WolfgateConsentTab.xaml.cs)
 
+### Localization
+
+- [`Resources/Locale/en-US/_WF/Options/consent.ftl`](../../../Resources/Locale/en-US/_WF/Options/consent.ftl)
+
 ## Non-modular edits
 
 - [`Content.Client/Options/UI/OptionsMenu.xaml`](../../Options/UI/OptionsMenu.xaml): consent tab (xmlns:wftabs), appended so existing tab indices stay valid

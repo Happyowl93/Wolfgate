@@ -83,6 +83,9 @@ public sealed partial class ShipAccessScreen : BoxContainer
     /// <summary>The deed holder picked a rule for the selected door.</summary>
     public event Action<NetEntity, WFDoorAccessRule>? DoorRuleChanged;
 
+    /// <summary>The deed holder confirmed one rule for every door on the ship.</summary>
+    public event Action<WFDoorAccessRule>? AllDoorRulesChanged;
+
     /// <summary>The deed holder ticked or unticked a card on the selected door.</summary>
     public event Action<NetEntity, WFShipAccessKey, bool>? DoorPlayerChanged;
 
@@ -122,6 +125,17 @@ public sealed partial class ShipAccessScreen : BoxContainer
             if (DoorMap.Selected is { } door)
                 DoorRuleChanged?.Invoke(_entManager.GetNetEntity(door), (WFDoorAccessRule) args.Id);
         };
+
+        foreach (var rule in Rules)
+            AllDoorsRuleButton.AddItem(RuleName(rule), (int) rule);
+
+        AllDoorsRuleButton.OnItemSelected += args =>
+        {
+            AllDoorsRuleButton.SelectId(args.Id);
+            RefreshAllDoorsHint();
+        };
+        AllDoorsApplyButton.OnPressed += _ => AllDoorRulesChanged?.Invoke((WFDoorAccessRule) AllDoorsRuleButton.SelectedId);
+        RefreshAllDoorsHint();
 
         BuildLegend();
 
@@ -385,6 +399,7 @@ public sealed partial class ShipAccessScreen : BoxContainer
         LockedCheck.Visible = isOwner;
         LockedLabel.Visible = !isOwner;
         CodeBox.Visible = isOwner;
+        AllDoorsBox.Visible = isOwner;
 
         OwnerLabel.Text = comp != null && comp.OwnerName.Length > 0 ? comp.OwnerName : Loc.GetString("ship-access-owner-none");
         var faction = comp != null ? comp.Mode == WFShipAccessMode.Faction : _grid != null && _access.IsFactionGrid(_grid.Value, out _);
@@ -455,6 +470,13 @@ public sealed partial class ShipAccessScreen : BoxContainer
         }
 
         DoorPlayersEmptyLabel.Visible = DoorPlayersContainer.ChildCount == 0;
+    }
+
+    /// <summary>What the rule picked for every door does, under the set-all control.</summary>
+    private void RefreshAllDoorsHint()
+    {
+        var rule = (WFDoorAccessRule) AllDoorsRuleButton.SelectedId;
+        SetHint(AllDoorsHint, Loc.GetString("ship-access-all-doors-hint", ("desc", Loc.GetString(RuleKey(rule, "desc")))));
     }
 
     /// <summary>Whether a listed card's key is on the door's own list.</summary>

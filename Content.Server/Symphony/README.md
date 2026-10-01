@@ -7,7 +7,9 @@ The hooks for the SSymphony panel. It is the one module outside `_WF`: its files
   `/symphony/players` lists who is connected with their character and job, and `/symphony/roles` and
   `/symphony/roles/refresh` list the whitelisted roles to map and re-read a player's rows after the panel writes them.
 - `/status` reports the hook version, the round clock and the test merges the build carries (`SymphonyTestMerges`,
-  read from `Resources/Symphony/testmerges.json`, which `Tools/_WF/Ci/test_merge.py` writes).
+  read from `Resources/Symphony/testmerges.json`, which `Tools/_WF/Ci/test_merge.py` writes). On a test merge build,
+  `SymphonyTestMergeSystem` also announces the merged pull requests at round start and to each player joining the
+  lobby (`symphony-test-merges-active`).
 - Whitelist by Discord: with `symphony.url` set, a player the whitelist turns away gets a one-time link ticket, and
   the launcher's connect-failed screen shows Link Discord and Copy link buttons. A revoke is re-checked on reconnect.
 

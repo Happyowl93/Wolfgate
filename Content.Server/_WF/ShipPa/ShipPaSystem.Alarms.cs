@@ -7,12 +7,15 @@ public sealed partial class ShipPaSystem
 {
     private readonly Queue<ShipPaTrackFinishedEvent> _finishedBroadcasts = new();
     private readonly List<EntityUid> _emptyBroadcastGrids = new();
+
+    /// <summary>Starts a looping alarm on the grid's PA under a key, replacing one with the same key.</summary>
     public void StartAlarm(EntityUid grid, string key, SoundSpecifier sound, AudioParams? audioParams = null,
         string? message = null, Color? color = null, int priority = ShipPaPlaybackPolicy.DefaultAlarmPriority)
     {
         StartBroadcast(grid, key, sound, true, ShipPaBroadcastKind.Alarm, priority, audioParams, message, color);
     }
 
+    /// <summary>Plays a track once on the grid's PA under a key, replacing one with the same key; false if the sound can't load.</summary>
     public bool StartTrack(EntityUid grid, string key, SoundSpecifier sound, AudioParams? audioParams = null, string? message = null, Color? color = null)
     {
         return StartBroadcast(grid, key, sound, false, ShipPaBroadcastKind.Track, 10, audioParams, message, color) != null;
@@ -62,6 +65,7 @@ public sealed partial class ShipPaSystem
         return broadcast;
     }
 
+    /// <summary>Stops the alarm or track under a key.</summary>
     public void StopAlarm(EntityUid grid, string key)
     {
         if (!TryComp(grid, out ShipPaBroadcastComponent? state) || state.Broadcasts.RemoveAll(b => b.Key == key) == 0)
@@ -73,6 +77,7 @@ public sealed partial class ShipPaSystem
             RemComp<ShipPaBroadcastComponent>(grid);
     }
 
+    /// <summary>Whether a broadcast under the key is about to start or still playing.</summary>
     public bool IsAlarmActive(EntityUid grid, string key)
     {
         return TryComp(grid, out ShipPaBroadcastComponent? state) && state.Broadcasts.Exists(b => b.Key == key && b.IsActive(_timing.CurTime));

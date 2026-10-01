@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight
 using Content.Server._HL.Silicons.Synths.Battery;
 using Content.Shared._HL.Silicons.Synths;
 using Content.Shared._HL.Silicons.Synths.Battery;

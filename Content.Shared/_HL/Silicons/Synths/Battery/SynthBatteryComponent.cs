@@ -1,3 +1,4 @@
+// WOLFGATE(Silicons): synth battery, ported from HardLight
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;

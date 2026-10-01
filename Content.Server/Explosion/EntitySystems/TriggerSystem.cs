@@ -304,8 +304,13 @@ namespace Content.Server.Explosion.EntitySystems
 
         private void OnTriggerCollide(EntityUid uid, TriggerOnCollideComponent component, ref StartCollideEvent args)
         {
-            if (args.OurFixtureId == component.FixtureID && (!component.IgnoreOtherNonHard || args.OtherFixture.Hard))
+            // WOLFGATE(ShipShields) START: absorb collision-triggered ship warheads before they can explode on the shield
+            // if (args.OurFixtureId == component.FixtureID && (!component.IgnoreOtherNonHard || args.OtherFixture.Hard))
+            //     Trigger(uid, args.OtherEntity);
+            if (args.OurFixtureId == component.FixtureID && (!component.IgnoreOtherNonHard || args.OtherFixture.Hard) &&
+                !AbsorbWolfgateShieldTriggerCollision(uid, args.OtherEntity))
                 Trigger(uid, args.OtherEntity);
+            // WOLFGATE END
         }
 
         private void OnSpawnTriggered(EntityUid uid, TriggerOnSpawnComponent component, MapInitEvent args)

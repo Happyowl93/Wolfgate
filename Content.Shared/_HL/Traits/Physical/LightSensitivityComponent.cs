@@ -1,3 +1,4 @@
+// WOLFGATE(Species): Shadekin traits, ported from HardLight
 using Content.Shared._Starlight.Shadekin;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 

@@ -6,9 +6,11 @@ namespace Content.Server._WF.Chimera;
 [RegisterComponent, Access(typeof(MindGreetingSystem))]
 public sealed partial class MindGreetingComponent : Component
 {
+    /// <summary>Chat message sent to the first player who takes the mob.</summary>
     [DataField(required: true)]
     public LocId Message;
 
+    /// <summary>Whether the greeting has been sent.</summary>
     [ViewVariables]
     public bool Greeted;
 }

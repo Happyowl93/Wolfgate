@@ -175,7 +175,7 @@ public sealed partial class BatteryDrinkerSystem : EntitySystem
         var amountToDrink = drinkerComp.DrinkMultiplier * 1000;
 
         amountToDrink = MathF.Min(amountToDrink, sourceBattery.CurrentCharge);
-        amountToDrink = MathF.Min(amountToDrink, drinkerBatteryComponent.MaxCharge - drinkerBatteryComponent.CurrentCharge); // WOLFGATE(Silicons)
+        amountToDrink = MathF.Min(amountToDrink, drinkerBatteryComponent.MaxCharge - drinkerBatteryComponent.CurrentCharge); // WOLFGATE(Silicons): drinker battery is never null here, so no null-forgiving
 
         if (sourceComp != null && sourceComp.MaxAmount > 0)
             amountToDrink = MathF.Min(amountToDrink, (float) sourceComp.MaxAmount);
@@ -194,10 +194,10 @@ public sealed partial class BatteryDrinkerSystem : EntitySystem
         }
 
         if (_battery.TryUseCharge(source, amountToDrink))
-            _battery.SetCharge(drinkerBattery.Value.Owner, drinkerBatteryComponent.CurrentCharge + amountToDrink, drinkerBatteryComponent); // WOLFGATE(Silicons)
+            _battery.SetCharge(drinkerBattery.Value.Owner, drinkerBatteryComponent.CurrentCharge + amountToDrink, drinkerBatteryComponent); // WOLFGATE(Silicons): drinker battery is now an Entity<BatteryComponent>
         else
         {
-            _battery.SetCharge(drinkerBattery.Value.Owner, sourceBattery.CurrentCharge + drinkerBatteryComponent.CurrentCharge, drinkerBatteryComponent); // WOLFGATE(Silicons)
+            _battery.SetCharge(drinkerBattery.Value.Owner, sourceBattery.CurrentCharge + drinkerBatteryComponent.CurrentCharge, drinkerBatteryComponent); // WOLFGATE(Silicons): drinker battery is now an Entity<BatteryComponent>
             _battery.SetCharge(source, 0);
         }
 

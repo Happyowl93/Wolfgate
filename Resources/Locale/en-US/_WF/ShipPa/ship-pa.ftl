@@ -38,7 +38,7 @@ cmd-shippa_announce-desc = Broadcasts a PA announcement on a ship.
 cmd-shippa_announce-help = Usage: {$command} <grid> <text...>
 
 cmd-shippa_code-desc = Sets a ship's alert code.
-cmd-shippa_code-help = Usage: {$command} <grid> <ShipCodeX>
+cmd-shippa_code-help = Usage: {$command} <grid> <WFShipCodeX>
 
 cmd-shippa_gq-desc = Toggles general quarters on a ship.
 cmd-shippa_gq-help = Usage: {$command} <grid> <true|false>

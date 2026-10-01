@@ -10,7 +10,7 @@ If you want to host or create content for Wolfgate, this is the repo you need. I
 
 ## Links
 
-<!-- WOLFGATE: dropped Discord link -->
+<!-- WOLFGATE(Branding): dropped Monolith's Discord link -->
 [Steam](https://store.steampowered.com/app/1255460/Space_Station_14/)
 
 ## Contributing

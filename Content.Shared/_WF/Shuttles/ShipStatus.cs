@@ -82,6 +82,7 @@ public struct ShipTileStatus
     public ShipTileFlags Flags;
 }
 
+/// <summary>Hazards flagged on one tile of the whole-ship view.</summary>
 [Flags]
 [Serializable, NetSerializable]
 public enum ShipTileFlags : byte

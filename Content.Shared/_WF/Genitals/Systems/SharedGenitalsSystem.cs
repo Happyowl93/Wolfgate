@@ -38,6 +38,7 @@ public abstract partial class SharedGenitalsSystem : EntitySystem
         return true;
     }
 
+    /// <summary>Whether an age meets the anatomy AdultAge.</summary>
     public bool IsAdult(int age)
     {
         return age >= Settings.AdultAge;

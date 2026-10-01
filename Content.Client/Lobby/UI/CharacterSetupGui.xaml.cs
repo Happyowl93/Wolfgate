@@ -42,8 +42,19 @@ namespace Content.Client.Lobby.UI
             RobustXamlLoader.Load(this);
             IoCManager.InjectDependencies(this);
 
-            // WOLFGATE(Stylesheets): skinned backdrop for the creator shell
+            // WOLFGATE(Stylesheets) START: skinned backdrop for the creator shell
+            // upstream original, kept for merges:
+            // var panelTex = _resourceCache.GetTexture("/Textures/Interface/Nano/button.svg.96dpi.png");
+            // var back = new StyleBoxTexture
+            // {
+            //     Texture = panelTex,
+            //     Modulate = new Color(37, 37, 42)
+            // };
+            // back.SetPatchMargin(StyleBox.Margin.All, 10);
+            //
+            // BackgroundPanel.PanelOverride = back;
             BackgroundPanel.StyleClasses.Add(StyleWolfgate.StyleClassCreatorBackdrop);
+            // WOLFGATE END
 
             _createNewCharacterButton = new Button
             {

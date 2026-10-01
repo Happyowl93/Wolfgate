@@ -282,7 +282,7 @@
     items:
     - EnergySword
     - WeaponLaserGunXenoborg
-    - JetpackXenoborgRechargable # WOLFGATE(Xenoborgs)
+    - JetpackXenoborgRechargable # WOLFGATE(Xenoborgs): Monolith #4558, regenerating xenoborg jetpack instead of JetpackADMFilled
         # Frontier -> GoobStation -> Monolith: droppable borg items
   - type: DroppableBorgModule
     moduleId: Surgery
@@ -329,7 +329,7 @@
     items:
     - EnergySword
     - WeaponLaserCannonXenoborg
-    - JetpackXenoborgRechargable # WOLFGATE(Xenoborgs)
+    - JetpackXenoborgRechargable # WOLFGATE(Xenoborgs): Monolith #4558, regenerating xenoborg jetpack instead of JetpackADMFilled
   - type: DroppableBorgModule
     moduleId: Surgery
     items:

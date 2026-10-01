@@ -104,8 +104,11 @@ public abstract partial class SharedProjectileSystem : EntitySystem
     /// <returns></returns>
     public bool ShouldRaycastProjectile(float speed)
     {
-        if (_adaptiveRaycasting && speed > _minRaycastVelocity * (_physicsTickrate / BasePhysicsTickrate))
+        // WOLFGATE(Weapons) START: scale by the real ratio, as whole-number division made any tickrate under 60 a threshold of zero
+        // if (_adaptiveRaycasting && speed > _minRaycastVelocity * (_physicsTickrate / BasePhysicsTickrate))
+        if (_adaptiveRaycasting && speed > _minRaycastVelocity * ((float) _physicsTickrate / BasePhysicsTickrate))
             return true;
+        // WOLFGATE END
         else if (speed > _minRaycastVelocity)
             return true;
 

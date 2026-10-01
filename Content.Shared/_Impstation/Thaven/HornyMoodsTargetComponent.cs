@@ -1,4 +1,5 @@
-﻿// hardlight!!!
+﻿// WOLFGATE(Species): Thaven moods, ported from HardLight
+// hardlight!!!
 
 namespace Content.Shared._Impstation.Thaven.Components;
 

@@ -17,7 +17,7 @@ using Robust.UnitTesting;
 namespace Content.IntegrationTests.Tests._WF.Tether;
 
 /// <summary>
-/// Stage 2A content: the real rope types and coils, the anchor eye and the installer gun.
+/// Rope content: the real rope types and coils, the anchor eye and the installer gun.
 /// </summary>
 [TestFixture]
 public sealed class TetherContentTest

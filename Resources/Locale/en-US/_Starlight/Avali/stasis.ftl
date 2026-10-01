@@ -1,3 +1,4 @@
+# WOLFGATE(Species): ported from HardLight
 stasis-entering = Entering Stasis
 stasis-exiting = Exiting Stasis
 

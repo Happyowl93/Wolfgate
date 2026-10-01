@@ -966,6 +966,18 @@
     {
       "name": "m_ears_faefox_tertiary",
       "directions": 4
+    },
+    {
+      "name": "m_ears_faefox_primary_alt",
+      "directions": 4
+    },
+    {
+      "name": "m_ears_faefox_secondary_alt",
+      "directions": 4
+    },
+    {
+      "name": "m_ears_faefox_tertiary_alt",
+      "directions": 4
     }
   ]
 }

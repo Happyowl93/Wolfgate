@@ -37,6 +37,7 @@ an existing prototype and that no old id still exists.
   - rows holding renamed prototype ids are saved under the current ids on load.
   - rows saved before a loadout rename load under its current id.
   - renamed species ids
+  - consent rows holding renamed toggle ids are saved under the current ids on load
 - [`Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs`](../../../Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs): exports saved before a species or loadout rename
 - [`Resources/migration.yml`](../../../Resources/migration.yml): WF prototype id prefix
 

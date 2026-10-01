@@ -20,9 +20,11 @@ entry ids from 100000).
 
 ### Tools
 
+- [`Tools/_WF/Ci/actions_changelogs_since_last_run.py`](../../../Tools/_WF/Ci/actions_changelogs_since_last_run.py)
 - [`Tools/_WF/Ci/actions_discord_pr_notify.py`](../../../Tools/_WF/Ci/actions_discord_pr_notify.py)
 - [`Tools/_WF/Ci/modules.py`](../../../Tools/_WF/Ci/modules.py)
 - [`Tools/_WF/Ci/modules.yml`](../../../Tools/_WF/Ci/modules.yml)
+- [`Tools/_WF/Ci/publish_github_artifact.py`](../../../Tools/_WF/Ci/publish_github_artifact.py)
 - [`Tools/_WF/Ci/test_merge.py`](../../../Tools/_WF/Ci/test_merge.py)
 
 ## Non-modular edits
@@ -31,9 +33,19 @@ entry ids from 100000).
   - Wolfgate entities sit in module folders
   - Wolfgate vessels and map prototypes sit in module folders
 - [`.github/workflows/changelog.yml`](../../../.github/workflows/changelog.yml)
+  - built-in token instead of bot PAT
   - our changes. Monolith.yml fills itself from upstream merges.
   - keep our ids above Monolith's so the client's read marker follows this file.
 - [`.github/workflows/discord-pr-notify.yml`](../../../.github/workflows/discord-pr-notify.yml)
+- [`.github/workflows/labeler-conflict.yml`](../../../.github/workflows/labeler-conflict.yml): default token permissions are read-only
+- [`.github/workflows/labeler-needsreview.yml`](../../../.github/workflows/labeler-needsreview.yml): default token permissions are read-only
+- [`.github/workflows/labeler-review.yml`](../../../.github/workflows/labeler-review.yml)
+  - our repo
+  - our team, was content-maintainers,junior-maintainers
+- [`.github/workflows/labeler-size.yml`](../../../.github/workflows/labeler-size.yml): default token permissions are read-only
+- [`.github/workflows/labeler-stable.yml`](../../../.github/workflows/labeler-stable.yml): default token permissions are read-only
+- [`.github/workflows/labeler-staging.yml`](../../../.github/workflows/labeler-staging.yml): default token permissions are read-only
+- [`.github/workflows/labeler-untriaged.yml`](../../../.github/workflows/labeler-untriaged.yml): default token permissions are read-only
 - [`.github/workflows/nf-mapchecker.yml`](../../../.github/workflows/nf-mapchecker.yml)
   - Wolfgate entities, vessels and map prototypes, which sit in module folders
   - Wolfgate ship grids
@@ -41,8 +53,14 @@ entry ids from 100000).
   - Wolfgate ship grids
   - Wolfgate vessels and entity prices, which sit in module folders
   - run when this workflow changes
+- [`.github/workflows/prtitlecase.yml`](../../../.github/workflows/prtitlecase.yml)
+  - built-in token instead of bot PAT
+  - needed since the built-in token replaces the bot PAT
+  - GITHUB_TOKEN is used instead, no PAT needed
 - [`.github/workflows/publish-changelog.yml`](../../../.github/workflows/publish-changelog.yml): re-enabled, posts Wolfgate and upstream Monolith changelogs
-- [`.github/workflows/publish-testing.yml`](../../../.github/workflows/publish-testing.yml): was wizards-testing
+- [`.github/workflows/publish-testing.yml`](../../../.github/workflows/publish-testing.yml)
+  - disabled, publish_multi_request.py has no real CDN; publish.yml's fork_id input replaces this
+  - was wizards-testing
 - [`.github/workflows/publish.yml`](../../../.github/workflows/publish.yml)
   - manual-only publishing
   - test merge, request id and fork id inputs
@@ -51,36 +69,19 @@ entry ids from 100000).
   - paramiko/lxml no longer needed by the publish script
   - full history for test merges
   - test merge step
-  - was Setup .NET Core
   - engine tag fetch removed
-  - was Install dependencies
-  - was Build Packaging
   - only the platform the server runs on. Add e.g. `--platform linux-x64` if a Linux host ever joins.
   - CDN pulls a build artifact, replacing publish_multi_request.py
   - a test merge or test fork build is not a release of main, so its entries are not announced
+  - Wolfgate copy that also posts Wolfgate.yml
 - [`.github/workflows/wf-modules.yml`](../../../.github/workflows/wf-modules.yml): checks the module docs and non-modular edits with Tools/_WF/Ci/modules.py (see AGENTS.md)
 - [`.gitignore`](../../../.gitignore): written by Tools/_WF/Ci/test_merge.py in a test merge build; never committed
-- [`Tools/actions_changelogs_since_last_run.py`](../../../Tools/actions_changelogs_since_last_run.py)
-  - docstring covers the Wolfgate and Monolith changelogs
-  - unused since the DEBUG local-testing path was removed
-  - DEBUG local-testing path removed, always uses the GitHub API
-  - one webhook per changelog, see CHANGELOGS
-  - two changelogs, Wolfgate and upstream Monolith
-  - main() loops over CHANGELOGS, session/sha helpers replace get_last_changelog()
-  - explicit fallthrough when no past runs are found
-  - replaced by make_github_session() and get_last_run_sha()
-  - per-changelog file, returns parsed YAML, missing file counts as empty
-  - tolerates a missing or empty changelog
-  - takes webhook_url, was the DISCORD_WEBHOOK_URL global
-  - was DISCORD_WEBHOOK_URL
-  - was send_discord_webhook(chunk_lines)
 - [`Tools/changelog/changelog.js`](../../../Tools/changelog/changelog.js)
   - was getHighestCLNumber() + 1
   - new entry ids never go below CHANGELOG_START_ID
   - an empty file counts as no entries, was data = yaml.load(file);
   - keep the top-level keys other than Entries (Order, Name, AdminOnly)
   - header kept, was "Entries:\n" + yaml.dump(data.Entries, ...)
-- [`Tools/publish_github_artifact.py`](../../../Tools/publish_github_artifact.py): rewritten for Wolfgate CDN publishing
 - [`Tools/publish_multi_request.py`](../../../Tools/publish_multi_request.py): Wolfgate CDN and fork ID
 
 <!-- WOLFGATE-GENERATED END -->

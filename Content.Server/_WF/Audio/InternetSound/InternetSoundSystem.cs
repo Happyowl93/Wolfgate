@@ -89,6 +89,12 @@ public sealed partial class InternetSoundSystem : EntitySystem
         /// <summary>Who asked for it, for the admin window and the logs.</summary>
         public string Requester = string.Empty;
 
+        /// <summary>Hides the requester from players and other admins; only the admin logs name them.</summary>
+        public bool Stealth;
+
+        /// <summary>The name players and admin windows see.</summary>
+        public string ShownRequester => Stealth ? string.Empty : Requester;
+
         /// <summary>The ship it plays on, or null for everyone at once.</summary>
         public EntityUid? Grid;
 
@@ -185,9 +191,9 @@ public sealed partial class InternetSoundSystem : EntitySystem
 
     /// <summary>
     /// Fetches a link and plays it to every connected player. Admin only; refused while another global sound
-    /// is in play.
+    /// is in play. A <paramref name="stealth"/> sound doesn't say who played it.
     /// </summary>
-    public void Play(ICommonSession? admin, string url)
+    public void Play(ICommonSession? admin, string url, bool stealth = false)
     {
         if (_global != 0)
         {
@@ -195,23 +201,23 @@ public sealed partial class InternetSoundSystem : EntitySystem
             return;
         }
 
-        Begin(admin, admin?.Name ?? Loc.GetString("wf-internet-sound-server-name"), url, null);
+        Begin(admin, admin?.Name ?? Loc.GetString("wf-internet-sound-server-name"), url, null, out _, stealth: stealth);
     }
 
     /// <summary>
     /// Fetches a link and plays it out of one ship's speakers, positioned and distorted like anything else
     /// its PA carries. Replaces whatever that ship was already playing.
     /// </summary>
-    public void PlayOverPa(ICommonSession? admin, string url, EntityUid grid)
+    public void PlayOverPa(ICommonSession? admin, string url, EntityUid grid, bool stealth = false)
     {
-        PlayOverPa(admin, admin?.Name ?? Loc.GetString("wf-internet-sound-server-name"), url, grid, out _);
+        PlayOverPa(admin, admin?.Name ?? Loc.GetString("wf-internet-sound-server-name"), url, grid, out _, stealth: stealth);
     }
 
     /// <summary>
     /// Fetches a link for one ship's PA on behalf of whoever asked. <paramref name="error"/> is a loc string
     /// for the caller to show when this returns false.
     /// </summary>
-    public bool PlayOverPa(ICommonSession? admin, string requester, string url, EntityUid grid, out string? error, ICommonSession? errorRecipient = null)
+    public bool PlayOverPa(ICommonSession? admin, string requester, string url, EntityUid grid, out string? error, ICommonSession? errorRecipient = null, bool stealth = false)
     {
         error = null;
 
@@ -239,15 +245,10 @@ public sealed partial class InternetSoundSystem : EntitySystem
             return false;
         }
 
-        return Begin(admin, requester, url, grid, out error, errorRecipient);
+        return Begin(admin, requester, url, grid, out error, errorRecipient, stealth);
     }
 
-    private void Begin(ICommonSession? admin, string requester, string url, EntityUid? grid)
-    {
-        Begin(admin, requester, url, grid, out _);
-    }
-
-    private bool Begin(ICommonSession? admin, string requester, string url, EntityUid? grid, out string? error, ICommonSession? errorRecipient = null)
+    private bool Begin(ICommonSession? admin, string requester, string url, EntityUid? grid, out string? error, ICommonSession? errorRecipient = null, bool stealth = false)
     {
         error = null;
 
@@ -288,6 +289,7 @@ public sealed partial class InternetSoundSystem : EntitySystem
             Id = id,
             Title = uri.AbsoluteUri,
             Requester = requester,
+            Stealth = stealth,
             Grid = grid,
             State = TrackState.Fetching,
             Fetch = fetch,
@@ -319,7 +321,7 @@ public sealed partial class InternetSoundSystem : EntitySystem
         Report(admin, Loc.GetString("wf-internet-sound-fetching", ("url", uri.AbsoluteUri)), false);
 
         _adminLogger.Add(LogType.AdminCommands, LogImpact.Low,
-            $"{requester} requested internet sound {uri.AbsoluteUri}{(grid is { } ship ? $" for {_shipPa.GetShipName(ship)}" : " for everyone")}");
+            $"{requester} requested {(stealth ? "stealth " : "")}internet sound {uri.AbsoluteUri}{(grid is { } ship ? $" for {_shipPa.GetShipName(ship)}" : " for everyone")}");
 
         SendState();
 
@@ -420,7 +422,7 @@ public sealed partial class InternetSoundSystem : EntitySystem
             return;
         }
 
-        track.Transfer = new InternetSoundTransfer(Encode(id, result.Title, track.Requester, track.IsPa, result.Audio));
+        track.Transfer = new InternetSoundTransfer(Encode(id, result.Title, track.ShownRequester, track.IsPa, result.Audio));
         track.Waiting.Clear();
 
         if (track.IsPa)
@@ -635,7 +637,7 @@ public sealed partial class InternetSoundSystem : EntitySystem
             entries.Add(new InternetSoundEntry(
                 track.Id,
                 track.Title,
-                track.Requester,
+                track.ShownRequester,
                 ship,
                 netGrid,
                 track.State == TrackState.Fetching,

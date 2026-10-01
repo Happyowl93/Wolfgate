@@ -8,15 +8,22 @@ namespace Content.Client._WF.Spawning;
 /// <summary>One spawnable prototype, with everything the menu needs precomputed.</summary>
 public sealed class WolfgateSpawnEntry
 {
+    /// <summary>The prototype placed when this entry is picked.</summary>
     public required EntityPrototype Prototype { get; init; }
+
+    /// <summary>Display name, or the id when the prototype has no name.</summary>
     public required string Name { get; init; }
+
+    /// <summary>Editor suffix, empty when there is none.</summary>
     public required string Suffix { get; init; }
 
     /// <summary>Lower-case name, id and suffix, matched against the search text.</summary>
     public required string Search { get; init; }
 
+    /// <summary>Category the classifier put this prototype in.</summary>
     public required WfSpawnCategory Category { get; init; }
 
+    /// <summary>The prototype id.</summary>
     public string Id => Prototype.ID;
 }
 
@@ -43,6 +50,7 @@ public sealed class WolfgateSpawnCatalog
         _factory = factory;
     }
 
+    /// <summary>Every entry, sorted by name then suffix.</summary>
     public IReadOnlyList<WolfgateSpawnEntry> All
     {
         get
@@ -52,24 +60,28 @@ public sealed class WolfgateSpawnCatalog
         }
     }
 
+    /// <summary>Entries in one category, in catalog order.</summary>
     public IReadOnlyList<WolfgateSpawnEntry> Category(WfSpawnCategory category)
     {
         EnsureBuilt();
         return _byCategory.TryGetValue(category, out var list) ? list : Array.Empty<WolfgateSpawnEntry>();
     }
 
+    /// <summary>Entries in every category of one group, in catalog order.</summary>
     public IReadOnlyList<WolfgateSpawnEntry> Group(WfSpawnGroup group)
     {
         EnsureBuilt();
         return _byGroup.TryGetValue(group, out var list) ? list : Array.Empty<WolfgateSpawnEntry>();
     }
 
+    /// <summary>The entry for a prototype id, or null if it is not spawnable.</summary>
     public WolfgateSpawnEntry? Find(string id)
     {
         EnsureBuilt();
         return _byId.GetValueOrDefault(id);
     }
 
+    /// <summary>Drops the cache so the next read rebuilds it.</summary>
     public void Invalidate()
     {
         _built = false;

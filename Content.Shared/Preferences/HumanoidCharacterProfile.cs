@@ -472,6 +472,7 @@ namespace Content.Shared.Preferences
         // WOLFGATE END
 
         // WOLFGATE(Genitals) START: replaces the creator anatomy
+        /// <summary>Copy of this profile with the creator anatomy replaced.</summary>
         public HumanoidCharacterProfile WithGenitals(GenitalProfile genitals)
         {
             return new(this) { Genitals = genitals };
@@ -756,7 +757,7 @@ namespace Content.Shared.Preferences
             // End Frontier
 
             // WOLFGATE(Species): the option widens the hair check
-            var appearance = HumanoidCharacterAppearance.EnsureValid(wfAppearance, Species, Sex, MismatchedParts); // WOLFGATE(Humanoid): wfAppearance
+            var appearance = HumanoidCharacterAppearance.EnsureValid(wfAppearance, Species, Sex, MismatchedParts); // WOLFGATE(Genitals): validates the appearance after legacy genital markings were migrated
 
             var prefsUnavailableMode = PreferenceUnavailable switch
             {

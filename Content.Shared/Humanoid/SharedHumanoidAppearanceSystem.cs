@@ -409,8 +409,8 @@ public abstract partial class SharedHumanoidAppearanceSystem : EntitySystem
         }
 
         humanoid.EyeColor = eyeColor;
-        humanoid.CustomSpeciesName = profile.CustomSpeciesName;
         // WOLFGATE END
+        humanoid.CustomSpeciesName = profile.CustomSpeciesName; // WOLFGATE(Humanoid): applies the profile's custom species name
 
         SetSkinColor(uid, profile.Appearance.SkinColor, false);
 

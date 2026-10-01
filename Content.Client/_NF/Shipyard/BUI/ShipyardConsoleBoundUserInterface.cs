@@ -14,7 +14,7 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
 {
     private ShipyardConsoleMenu? _menu;
     private ShipyardRulesPopup? _rulesWindow;
-    // WOLFGATE(ShipPreview): no longer used by PreviewShip; kept only for the Mono mind-visit preview flow this button used to trigger.
+    // WOLFGATE(ShipPreview): unused, the Wolfgate previewer replaces the Mono preview-map flow
     // [Dependency] private ShipyardPreviewSystem _preview = default!;
     // WOLFGATE(ShipPreview): one shared previewer window per BUI instance, reused across Preview button presses.
     private ShipPreviewWindow? _previewWindow;

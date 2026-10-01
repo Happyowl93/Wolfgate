@@ -1,4 +1,5 @@
-﻿thaven-mood-birthday-suit-name = Birthday Suit
+﻿# WOLFGATE(Species): ported from HardLight
+thaven-mood-birthday-suit-name = Birthday Suit
 thaven-mood-birthday-suit-desc = Jumpsuits are uncomfortable, your skin needs to breathe. You should strive to be nude at all times.
 
 thaven-mood-freaky-speak-name = Freaky Speak

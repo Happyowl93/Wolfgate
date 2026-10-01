@@ -1,3 +1,4 @@
+// WOLFGATE(Species): Avali stasis, ported from HardLight
 using Content.Shared.Actions;
 
 namespace Content.Shared._Starlight.Actions.Stasis;

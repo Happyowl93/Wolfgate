@@ -41,7 +41,7 @@ previews in a dev client. `VesselGridPathTest` checks every vessel.
 - [`Content.Client/_NF/Shipyard/BUI/ShipyardConsoleBoundUserInterface.cs`](../../_NF/Shipyard/BUI/ShipyardConsoleBoundUserInterface.cs)
   - unused now
   - the Wolfgate ship previewer replaces the Mono preview-map flow for this button.
-  - no longer used by PreviewShip; kept only for the Mono mind-visit preview flow this button used to trigger.
+  - unused, the Wolfgate previewer replaces the Mono preview-map flow
   - one shared previewer window per BUI instance, reused across Preview button presses.
   - close the shared previewer window along with the console menu, so it releases its preview map.
   - open the client-side ship previewer instead of visiting a server-side preview map.

@@ -66,6 +66,18 @@ public sealed class WFShipAccessSetDoorRuleMessage : BoundUserInterfaceMessage
     }
 }
 
+/// <summary>The owner sets every door on the ship to one rule.</summary>
+[Serializable, NetSerializable]
+public sealed class WFShipAccessSetAllDoorRulesMessage : BoundUserInterfaceMessage
+{
+    public WFDoorAccessRule Rule;
+
+    public WFShipAccessSetAllDoorRulesMessage(WFDoorAccessRule rule)
+    {
+        Rule = rule;
+    }
+}
+
 /// <summary>The owner ticks or unticks an allow-listed card on a door's own list.</summary>
 [Serializable, NetSerializable]
 public sealed class WFShipAccessSetDoorPlayerMessage : BoundUserInterfaceMessage

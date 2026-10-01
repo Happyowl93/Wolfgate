@@ -50,13 +50,22 @@ ship-access-rule-code-name = Code
 ship-access-rule-players-or-code-name = Chosen IDs or code
 ship-access-rule-public-name = Public
 ship-access-rule-sealed-name = Sealed
-ship-access-rule-default-desc = Follows the ship: while it is locked, the owner (the deed, or the ID card worn by a player the ship is registered to), the allowed ID cards and, on a faction ship, its company's access. Unlocked, the door keeps its own access.
+ship-access-rule-default-desc = Follows the ship: while it is locked, the owner (the deed, or the ID card worn by a player the ship is registered to), the allowed ID cards and, on a faction ship, its company's access. Unlocked, the door keeps its own access, and the owner and the allowed ID cards open it too.
 ship-access-rule-owner-only-desc = Only the owner opens this door, locked ship or not: the deed, or the ID card worn by a player the ship is registered to.
 ship-access-rule-players-desc = The owner and the ID cards ticked below.
 ship-access-rule-code-desc = The owner, or anyone who enters this door's code or the ship code at its keypad.
 ship-access-rule-players-or-code-desc = The owner, the ID cards ticked below, or a code at the keypad.
 ship-access-rule-public-desc = Anyone opens this door, even while the ship is locked, whatever access its electronics ask for.
 ship-access-rule-sealed-desc = Bolted shut for everyone, the owner included. Pick another rule to unseal it.
+ship-access-all-doors = All doors
+ship-access-all-doors-apply = Set all
+ship-access-all-doors-confirm = Confirm
+ship-access-all-doors-hint = Gives every door on the ship this rule. Firelocks are left alone; lockers and lockable buttons always follow the ship. { $desc }
+ship-access-all-doors-set = { $count ->
+        [0] No doors changed.
+        [one] 1 door set.
+       *[other] { $count } doors set.
+    }
 ship-access-door-not-on-ship = That door is not on this ship.
 ship-access-seal-pending = The door will bolt as soon as it is shut and powered.
 ship-access-no-owner-key = Neither the deed nor your ID card has a crew record, so no door can be keyed to you. Locking would shut you out.

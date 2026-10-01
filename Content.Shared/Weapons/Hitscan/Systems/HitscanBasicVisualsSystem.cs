@@ -78,6 +78,14 @@ public sealed partial class HitscanBasicVisualsSystem : EntitySystem
         }
 
         // WOLFGATE(Weapons) START: predicted hitscan beams
+        // upstream original, kept for merges:
+        // if (sprites.Count > 0)
+        // {
+        //     RaiseNetworkEvent(new SharedGunSystem.HitscanEvent
+        //     {
+        //         Sprites = sprites,
+        //     }, Filter.Pvs(fromCoordinates, entityMan: EntityManager));
+        // }
         if (sprites.Count == 0)
             return;
 

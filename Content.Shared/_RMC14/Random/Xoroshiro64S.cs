@@ -44,7 +44,7 @@ public record struct Xoroshiro64S
         _s0 = RotateLeft(s0, 26) ^ s1 ^ (s1 << 9);
         _s1 = RotateLeft(s1, 13);
 
-        // WOLFGATE START: Math.Abs(int.MinValue) throws, and folding negatives biased the low half of the range
+        // WOLFGATE(Weapons) START: Math.Abs(int.MinValue) throws, and folding negatives biased the low half of the range
         // return Math.Abs((int) result);
         return unchecked((int) (result >> 1));
         // WOLFGATE END

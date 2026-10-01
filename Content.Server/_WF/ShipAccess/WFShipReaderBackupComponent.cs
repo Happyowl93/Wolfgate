@@ -6,7 +6,7 @@ namespace Content.Server._WF.ShipAccess;
 
 /// <summary>
 /// The access a reader had before ship access took it over, put back when the ship is unlocked and the door has no
-/// rule, when the reader leaves the ship, or when the ship is resold. Lives on the reader itself (an airlock's door
+/// rule (with the crew's keys added if it asks for any), when the reader leaves the ship, or when the ship is resold. Lives on the reader itself (an airlock's door
 /// electronics), so it moves with the board. Server only; saved with the grid so a resale can restore it.
 /// </summary>
 [RegisterComponent]
@@ -23,6 +23,13 @@ public sealed partial class WFShipReaderBackupComponent : Component
     /// <summary>Whether the ship last wrote the locked-ship access into the reader.</summary>
     [DataField]
     public bool Locked;
+
+    /// <summary>
+    /// Set while the reader holds its own access lists with the crew's record keys added, on an unlocked ship. The
+    /// lists are then the reader's to change, and a change made to them replaces <see cref="Access"/>.
+    /// </summary>
+    [DataField]
+    public bool OwnLists;
 
     /// <summary>
     /// Set once something else rewrote a reader the ship had locked (an emag, an access configurator). The ship

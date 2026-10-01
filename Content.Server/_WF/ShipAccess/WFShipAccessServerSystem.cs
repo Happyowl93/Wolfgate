@@ -6,6 +6,7 @@ using Content.Shared._WF.CCVar;
 using Content.Shared._WF.ShipAccess;
 using Content.Shared.Access.Components;
 using Content.Shared.Database;
+using Content.Shared.DeviceLinking.Components;
 using Content.Shared.Doors.Components;
 using Content.Shared.Popups;
 using Robust.Server.Player;
@@ -15,8 +16,8 @@ using Robust.Shared.Network;
 namespace Content.Server._WF.ShipAccess;
 
 /// <summary>
-/// Owns every edit to <see cref="WFShipAccessComponent"/>: sets a ship up at purchase, keeps the airlock access
-/// reader of each door and locker on the grid in step with the lock, list and rules, and applies the console's
+/// Owns every edit to <see cref="WFShipAccessComponent"/>: sets a ship up at purchase, keeps the access reader of
+/// each door, locker and lockable button on the grid in step with the lock, list and rules, and applies the console's
 /// access tab and verbs. The allow list holds the record keys of ID cards; ownership is the deed, on a card or a
 /// voucher, or for a ship an admin tool spawned, the players it is registered to.
 /// </summary>
@@ -29,6 +30,9 @@ public sealed partial class WFShipAccessServerSystem : EntitySystem
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
 
+    /// <summary>Registered ships left unlocked at setup for want of an owner key; each locks once it has one.</summary>
+    private readonly HashSet<EntityUid> _lockWhenKeyed = new();
+
     public override void Initialize()
     {
         base.Initialize();
@@ -38,6 +42,8 @@ public sealed partial class WFShipAccessServerSystem : EntitySystem
         SubscribeLocalEvent<DoorComponent, AnchorStateChangedEvent>(OnDoorAnchorChanged);
         SubscribeLocalEvent<EntityStorageComponent, EntParentChangedMessage>(OnStorageParentChanged);
         SubscribeLocalEvent<EntityStorageComponent, AnchorStateChangedEvent>(OnStorageAnchorChanged);
+        SubscribeLocalEvent<SignalSwitchComponent, EntParentChangedMessage>(OnSwitchParentChanged);
+        SubscribeLocalEvent<SignalSwitchComponent, AnchorStateChangedEvent>(OnSwitchAnchorChanged);
         InitializeConsole();
         InitializeDoors();
         InitializeCodes();
@@ -75,7 +81,8 @@ public sealed partial class WFShipAccessServerSystem : EntitySystem
 
     /// <summary>
     /// Sets up a ship an admin tool spawned, registered to players' accounts rather than to a deed card, so it stays
-    /// theirs whatever body they play, a ghost included. It locks only once one of them wears a card with a crew record.
+    /// theirs whatever body they play, a ghost included. With no card to key yet it starts unlocked, and locks itself
+    /// as soon as one of them wears a card with a crew record, unless an owner set the lock by hand first.
     /// </summary>
     public Entity<WFShipAccessComponent> SetupRegisteredShip(EntityUid grid, string ownerName, IEnumerable<NetUserId> users)
     {
@@ -89,6 +96,9 @@ public sealed partial class WFShipAccessServerSystem : EntitySystem
         }
 
         FinishSetup(ship);
+        if (!comp.Locked && _cfg.GetCVar(ShipAccessCVars.LockNewShips))
+            _lockWhenKeyed.Add(grid);
+
         return ship;
     }
 
@@ -112,9 +122,23 @@ public sealed partial class WFShipAccessServerSystem : EntitySystem
 
         comp.OwnerUsers.Add(user);
         Dirty(grid, comp);
-        RefreshShip((grid, comp));
+        if (!TryLockWhenKeyed((grid, comp)))
+            RefreshShip((grid, comp));
+
         _adminLog.Add(LogType.Action, LogImpact.Low,
             $"{ToPrettyString(grid):grid} was registered to player {user}");
+        return true;
+    }
+
+    /// <summary>Locks a registered ship that was waiting for an owner key, once a card can be keyed to it. True when it locked.</summary>
+    private bool TryLockWhenKeyed(Entity<WFShipAccessComponent> ship)
+    {
+        if (!_lockWhenKeyed.Contains(ship) || !CanLock(ship))
+            return false;
+
+        SetLocked(ship, true);
+        _adminLog.Add(LogType.Action, LogImpact.Low,
+            $"{ToPrettyString(ship.Owner):grid} locked itself now that an owner's card can open it");
         return true;
     }
 
@@ -127,6 +151,7 @@ public sealed partial class WFShipAccessServerSystem : EntitySystem
     /// <summary>Sets the lock and rewrites every door and locker reader on the grid to match.</summary>
     public void SetLocked(Entity<WFShipAccessComponent> ship, bool locked)
     {
+        _lockWhenKeyed.Remove(ship);
         ship.Comp.Locked = locked;
         Dirty(ship);
         RefreshShip(ship);
@@ -251,6 +276,18 @@ public sealed partial class WFShipAccessServerSystem : EntitySystem
     private void OnStorageAnchorChanged(Entity<EntityStorageComponent> ent, ref AnchorStateChangedEvent args)
     {
         if (!args.Detaching)
+            QueueReader(ent);
+    }
+
+    private void OnSwitchParentChanged(Entity<SignalSwitchComponent> ent, ref EntParentChangedMessage args)
+    {
+        if (IsLockableSwitch(ent))
+            QueueReader(ent);
+    }
+
+    private void OnSwitchAnchorChanged(Entity<SignalSwitchComponent> ent, ref AnchorStateChangedEvent args)
+    {
+        if (!args.Detaching && IsLockableSwitch(ent))
             QueueReader(ent);
     }
 }

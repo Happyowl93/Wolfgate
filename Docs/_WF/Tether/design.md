@@ -117,7 +117,7 @@ lies loose. On embed the harpoon gains a `RopeAttachPoint` bound to the struck g
 out behind the harpoon; it is cut if it outruns `maxLength`.
 
 Operator controls (actions granted while manning, also verbs on the turret): Reel in, Pay out (hold to repeat;
-`SetLength` at `ReelRate` m/s, reel stalls when tension exceeds `ReelMaxTension`, looping `/Audio/Weapons/reel.ogg`),
+`SetLength` at `ReelRate` m/s, reel stalls when tension exceeds `ReelMaxTension` and stops once the two hulls touch, looping `/Audio/Weapons/reel.ogg`),
 Release (cuts the cable at the turret; harpoon stays embedded and can be pried out with a crowbar doafter). If the
 struck entity is destroyed the harpoon falls out and the cable goes slack-attached to the loose harpoon.
 Shot sound `/Audio/Weapons/Guns/Gunshots/harpoon.ogg`, break `/Audio/Items/snap.ogg`.

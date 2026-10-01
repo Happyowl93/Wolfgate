@@ -25,6 +25,7 @@ public sealed partial class ShuttleConsoleBoundUserInterface
     protected override void ReceiveMessage(BoundUserInterfaceMessage message)
     {
         base.ReceiveMessage(message);
+        WfShieldReceiveMessage(message); // WOLFGATE(ShipShields): update shield controls without refreshing navigation.
 
         if (message is ShipStatusMessage status)
             _window?.UpdateShipStatus(status);

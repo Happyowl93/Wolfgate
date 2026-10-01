@@ -1,4 +1,4 @@
-# Stage 2A owns the real rope types. This one exists so the rope core can be tried in game.
+# Debug rope type; the real ones are in ropes.yml. This one exists so the rope core can be tried in game.
 - type: ropeType
   id: WFRopeDebug
   name: rope-name-debug

@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (c) 2025 Space Wizards Federation
 // SPDX-License-Identifier: MIT
+// WOLFGATE(Genitals): ported from HardLight (consent system)
 
 using Content.Shared._Common.Consent;
 using Content.Shared._WF.Prototypes; // WOLFGATE(Prototypes)

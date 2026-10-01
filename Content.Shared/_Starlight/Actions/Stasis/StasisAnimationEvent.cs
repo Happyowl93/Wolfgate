@@ -1,3 +1,4 @@
+// WOLFGATE(Species): Avali stasis, ported from HardLight
 using Robust.Shared.Serialization;
 using Robust.Shared.Map;
 

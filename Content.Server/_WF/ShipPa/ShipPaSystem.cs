@@ -65,6 +65,7 @@ public sealed partial class ShipPaSystem : EntitySystem
         return StartBroadcast(grid, key, sound, false, ShipPaBroadcastKind.Announcement, priority, audioParams)?.Id;
     }
 
+    /// <summary>Chimes the PA and sends a text announcement to everyone in range of a speaker; false if no speaker is online or the chime can't play.</summary>
     public bool Announce(EntityUid grid, string message, SoundSpecifier? sound = null, string? sender = null, Color? color = null)
     {
         if (!Exists(grid) || CountSpeakers(grid).Online == 0)

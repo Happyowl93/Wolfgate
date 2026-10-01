@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight
 namespace Content.Shared.Humanoid;
 
 public static class EyeColor

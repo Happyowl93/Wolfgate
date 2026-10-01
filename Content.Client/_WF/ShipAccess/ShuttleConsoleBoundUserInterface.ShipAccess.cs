@@ -14,7 +14,8 @@ public sealed partial class ShuttleConsoleBoundUserInterface
         _window.ShipAccessRemoveRequested += key => SendMessage(new WFShipAccessRemoveMessage(key));
         _window.ShipAccessBuilderRequested += (key, builder) => SendMessage(new WFShipAccessSetBuilderMessage(key, builder));
         _window.ShipAccessDoorRuleRequested += (door, rule) => SendMessage(new WFShipAccessSetDoorRuleMessage(door, rule));
-        _window.ShipAccessDoorPlayerRequested += (door, key, listed) => SendMessage(new WFShipAccessSetDoorPlayerMessage(door, key, listed));
+        _window.ShipAccessAllDoorRulesRequested += rule => SendMessage(new WFShipAccessSetAllDoorRulesMessage(rule));
+        _window.ShipAccessDoorPlayerRequested +=(door, key, listed) => SendMessage(new WFShipAccessSetDoorPlayerMessage(door, key, listed));
         _window.ShipAccessCodesRequested += () => SendMessage(new WFShipAccessRequestCodesMessage());
         _window.ShipAccessShipCodeRequested += code => SendMessage(new WFShipAccessSetShipCodeMessage(code));
         _window.ShipAccessDoorCodeRequested += (door, code) => SendMessage(new WFShipAccessSetDoorCodeMessage(door, code));

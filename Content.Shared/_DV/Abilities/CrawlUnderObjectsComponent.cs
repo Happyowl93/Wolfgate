@@ -25,13 +25,31 @@ public sealed partial class CrawlUnderObjectsComponent : Component
     [DataField]
     public EntProtoId? ActionProto;
 
-    // WOLFGATE(Species) START: HardLight circle squeeze fields
+    // WOLFGATE(Species) START: sneak state is networked; HardLight circle squeezing replaces the fixture mask list
+    // upstream original, kept for merges:
+    // [DataField]
+    // public bool Enabled = false;
+    //
+    // /// <summary>
+    // ///     List of fixtures that had their collision mask changed.
+    // ///     Required for re-adding the collision mask.
+    // /// </summary>
+    // [DataField, AutoNetworkedField]
+    // public List<(string key, int originalMask)> ChangedFixtures = new();
+
     [DataField, AutoNetworkedField]
     public bool Enabled;
+    // WOLFGATE END
+
+    // WOLFGATE(Species): documents the client-only draw depth field
+    /// <summary>Client only: the draw depth the sprite had before it was dropped under the tables.</summary>
+    [DataField]
+    public int? OriginalDrawDepth;
 
     [DataField]
     public float SneakSpeedModifier = 0.7f;
 
+    // WOLFGATE(Species) START: HardLight circle squeeze fields
     /// <summary>
     /// Circle fixture radius multiplier while sneaking, relative to the unsqueezed radius.
     /// </summary>
@@ -61,12 +79,6 @@ public sealed partial class CrawlUnderObjectsComponent : Component
     public List<(string key, Vector2 position, float radius)> DownedCircles = new();
 
     public bool DownedScaleApplied;
-
-    /// <summary>
-    /// Client only: the draw depth the sprite had before it was dropped under the tables.
-    /// </summary>
-    [DataField]
-    public int? OriginalDrawDepth;
     // WOLFGATE END
 }
 

@@ -14,11 +14,13 @@ public sealed partial class HumanoidCharacterProfile
     [DataField]
     public ProtoId<EmoteVoicePrototype>? LaughVoice { get; private set; }
 
+    /// <summary>A copy with the given scream; null keeps the species' own.</summary>
     public HumanoidCharacterProfile WithScreamVoice(ProtoId<EmoteVoicePrototype>? voice)
     {
         return new(this) { ScreamVoice = voice };
     }
 
+    /// <summary>A copy with the given laugh; null keeps the species' own.</summary>
     public HumanoidCharacterProfile WithLaughVoice(ProtoId<EmoteVoicePrototype>? voice)
     {
         return new(this) { LaughVoice = voice };

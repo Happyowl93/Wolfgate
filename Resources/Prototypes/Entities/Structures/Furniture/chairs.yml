@@ -223,7 +223,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactWood
+        collection: WFBulletImpactWood # WOLFGATE(Weapons)
   - type: Sprite
     state: wooden
   - type: Construction
@@ -406,7 +406,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactWood
+        collection: WFBulletImpactWood # WOLFGATE(Weapons)
   - type: Sprite
     state: wooden-bench
   - type: Construction

@@ -201,6 +201,7 @@ piloted thrust/braking, crowded battles and the appearance of long beams.
 - [`Content.Client/_WF/TractorBeam/TractorBeamOverlay.cs`](../../../Content.Client/_WF/TractorBeam/TractorBeamOverlay.cs)
 - [`Content.Client/_WF/TractorBeam/TractorBeamRadarControl.cs`](../../../Content.Client/_WF/TractorBeam/TractorBeamRadarControl.cs)
 - [`Content.Client/_WF/TractorBeam/TractorBeamVisualizerSystem.cs`](../../../Content.Client/_WF/TractorBeam/TractorBeamVisualizerSystem.cs)
+- [`Content.Client/_WF/TractorBeam/UI/ShuttleConsoleWindow.TractorBeam.cs`](../../../Content.Client/_WF/TractorBeam/UI/ShuttleConsoleWindow.TractorBeam.cs)
 - [`Content.Client/_WF/TractorBeam/UI/TractorCaptureBanner.cs`](../../../Content.Client/_WF/TractorBeam/UI/TractorCaptureBanner.cs)
 
 ### Integration tests
@@ -259,11 +260,9 @@ piloted thrust/braking, crowded battles and the appearance of long beams.
 
 ## Non-modular edits
 
-- [`Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml`](../../../Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml)
-- [`Content.Server/Physics/Controllers/MoverController.cs`](../../Physics/Controllers/MoverController.cs)
-  - propulsion queued by the ordinary helm path this tick
-  - Track linear/angular braking and show the correct counterthrust directions.
-  - Powered station keeping after tractor recoil.
+- [`Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml`](../../../Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml): xmlns:tractor for the capture banner
+- [`Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml.cs`](../../../Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml.cs)
+- [`Content.Server/Physics/Controllers/MoverController.cs`](../../Physics/Controllers/MoverController.cs): Track linear/angular braking and show the correct counterthrust directions.
 - [`Content.Server/Shuttles/Systems/ShuttleConsoleSystem.cs`](../../Shuttles/Systems/ShuttleConsoleSystem.cs)
 - [`Content.Shared/Shuttles/BUIStates/ShuttleBoundUserInterfaceState.cs`](../../../Content.Shared/Shuttles/BUIStates/ShuttleBoundUserInterfaceState.cs): expose active tractor sources to the captured ship's helm
 

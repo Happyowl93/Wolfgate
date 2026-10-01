@@ -3,7 +3,7 @@ using Content.Server._Mono.Cleanup;
 
 namespace Content.IntegrationTests.Tests._WF.Cleanup;
 
-// Regression coverage for invalid cleanup protection radii.
+/// <summary>Invalid cleanup protection radii keep the entity instead of allowing cleanup.</summary>
 public sealed class CleanupRadiusTest : InteractionTest
 {
     [Test]

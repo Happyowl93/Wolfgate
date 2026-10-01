@@ -1,3 +1,4 @@
+// WOLFGATE(Species): synth surgery, ported from HardLight
 using Robust.Shared.GameStates;
 
 namespace Content.Shared._HL.Silicons.Synths.Surgery;

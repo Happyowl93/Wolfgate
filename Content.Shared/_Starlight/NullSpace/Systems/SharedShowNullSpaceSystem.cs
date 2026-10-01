@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight
 using Content.Shared.Interaction.Events;
 
 namespace Content.Shared._Starlight.NullSpace;

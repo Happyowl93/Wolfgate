@@ -12,7 +12,7 @@ jobs:
   add_label:
     # Change the repository name after you've made sure the team name is correct for your fork!
     # Frontier: repo changed (space-wizards/space-station-14 < new-frontiers-14/frontier-station-14)
-    if: ${{ (github.repository == 'Aphelion-Moon/Wolfgate') && (github.event.review.state == 'APPROVED') }} # WOLFGATE: our repo
+    if: ${{ (github.repository == 'VanguardControl/Wolfgate') && (github.event.review.state == 'APPROVED') }} # WOLFGATE(Ci): our repo
     permissions:
       contents: read
       pull-requests: write
@@ -22,7 +22,7 @@ jobs:
       id: checkUserMember
       with:
         username: ${{ github.actor }}
-        team: "maintainers" # WOLFGATE: Aphelion-Moon org team
+        team: "maintainers" # WOLFGATE(Ci): our team, was content-maintainers,junior-maintainers
         GITHUB_TOKEN: ${{ secrets.LABELER_PAT }}
     - if: ${{ steps.checkUserMember.outputs.isTeamMember == 'true' }}
       uses: actions-ecosystem/action-add-labels@v1

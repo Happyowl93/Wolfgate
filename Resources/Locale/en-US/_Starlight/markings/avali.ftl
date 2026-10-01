@@ -1,3 +1,4 @@
+# WOLFGATE(Species): ported from HardLight
 marking-AvaliEarsBase = (Base) Avali Ears 
 marking-AvaliEarsBase-ears_avalibase_primary = Top Ears
 marking-AvaliEarsBase-ears_avalibase_secondary = Bottom Ears

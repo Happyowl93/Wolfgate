@@ -37,6 +37,7 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 - [`Content.Client/_Crescent/DroneControl/DroneConsoleWindow.xaml.cs`](../../../Content.Client/_Crescent/DroneControl/DroneConsoleWindow.xaml.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Client/_FarHorizons/StarSystem/StarLightOverlay.cs`](../../../Content.Client/_FarHorizons/StarSystem/StarLightOverlay.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Client/_FarHorizons/StarSystem/StarSystemMapSystem.cs`](../../../Content.Client/_FarHorizons/StarSystem/StarSystemMapSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
+- [`Content.Client/_Mono/Economy/CreditReceiverSystem.cs`](../../../Content.Client/_Mono/Economy/CreditReceiverSystem.cs): Engine v291 serialization generation cannot use a namespace named Component.
 - [`Content.Client/_Mono/NaniteOverlay/NaniteOverlaySystem.cs`](../../../Content.Client/_Mono/NaniteOverlay/NaniteOverlaySystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Client/_Mono/Radar/RadarBlipsSystem.cs`](../../../Content.Client/_Mono/Radar/RadarBlipsSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Client/_Mono/ShipRepair/ShipRepairSystem.cs`](../../../Content.Client/_Mono/ShipRepair/ShipRepairSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
@@ -92,6 +93,7 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 - [`Content.Client/UserInterface/RichText/MonoTag.cs`](../../../Content.Client/UserInterface/RichText/MonoTag.cs): Engine v289 removed [ValidatePrototypeId]; its constants became ProtoId fields.
 - [`Content.Client/UserInterface/Systems/Chat/ChatUIController.cs`](../../../Content.Client/UserInterface/Systems/Chat/ChatUIController.cs): Engine v289 removed [ValidatePrototypeId]; its constants became ProtoId fields.
 - [`Content.Client/UserInterface/Systems/Info/InfoUIController.cs`](../../../Content.Client/UserInterface/Systems/Info/InfoUIController.cs): Engine v289 removed [ValidatePrototypeId]; its constants became ProtoId fields.
+- [`Content.Client/VendingMachines/VendingMachineBoundUserInterface.cs`](../../../Content.Client/VendingMachines/VendingMachineBoundUserInterface.cs): Engine v291 serialization generation cannot use a namespace named Component.
 - [`Content.Client/Weapons/Misc/TetherGunSystem.cs`](../../../Content.Client/Weapons/Misc/TetherGunSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.IntegrationTests/Tests/Body/LegTest.cs`](../../../Content.IntegrationTests/Tests/Body/LegTest.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.IntegrationTests/Tests/Body/LungTest.cs`](../../../Content.IntegrationTests/Tests/Body/LungTest.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
@@ -421,6 +423,8 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 - [`Content.Shared/_Impstation/Thaven/ThavenMoodPrototype.cs`](../../_Impstation/Thaven/ThavenMoodPrototype.cs): Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
 - [`Content.Shared/_Mono/AmmoLoader/AmmoLoaderComponent.cs`](../../_Mono/AmmoLoader/AmmoLoaderComponent.cs): Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
 - [`Content.Shared/_Mono/BlackFlash/BlackFlashSystem.cs`](../../_Mono/BlackFlash/BlackFlashSystem.cs): Engine v282 forbids [DataField] outside data definitions; system fields.
+- [`Content.Shared/_Mono/Economy/Component/CreditReceiverComponent.cs`](../../_Mono/Economy/Component/CreditReceiverComponent.cs): Engine v291 serialization generation cannot use a namespace named Component.
+- [`Content.Shared/_Mono/Economy/SharedCreditReceiverSystem.cs`](../../_Mono/Economy/SharedCreditReceiverSystem.cs): Engine v291 serialization generation cannot use a namespace named Component.
 - [`Content.Shared/_Mono/ShipRepair/SharedShipRepairSystem.cs`](../../_Mono/ShipRepair/SharedShipRepairSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Shared/_Mono/ShipRepair/SharedShipRepairSystem.Tool.cs`](../../_Mono/ShipRepair/SharedShipRepairSystem.Tool.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Shared/_Mono/Shipyard/SharedShipyardPreviewSystem.cs`](../../_Mono/Shipyard/SharedShipyardPreviewSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.

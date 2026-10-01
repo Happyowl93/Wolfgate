@@ -76,7 +76,12 @@ namespace Content.Client.Lobby.UI
         private readonly List<EntityUid> _savedItemEntities = [];
         // Mono end
 
-        private WolfgateDescriptionWindow? _descriptionWindow; // WOLFGATE(Humanoid)
+        // WOLFGATE(Humanoid) START: no flavor text tab; the description has its own editor window
+        // upstream original, kept for merges:
+        // private FlavorText.FlavorText? _flavorText;
+        // private TextEdit? _flavorTextEdit;
+        private WolfgateDescriptionWindow? _descriptionWindow;
+        // WOLFGATE END
         private AnatomySaveConfirmWindow? _anatomySaveConfirm; // WOLFGATE(Genitals)
 
         // One at a time.
@@ -221,7 +226,15 @@ namespace Content.Client.Lobby.UI
 
             #region Sex
 
-            SexSelector.OnSexSelected += SetSex; // WOLFGATE(Humanoid)
+            // WOLFGATE(Humanoid) START: sex icon selector replaces the dropdown
+            // upstream original, kept for merges:
+            // SexButton.OnItemSelected += args =>
+            // {
+            //     SexButton.SelectId(args.Id);
+            //     SetSex((Sex) args.Id);
+            // };
+            SexSelector.OnSexSelected += SetSex;
+            // WOLFGATE END
 
             // WOLFGATE(Humanoid) START: species name override; blank falls back to the species' own name
             CustomSpeciesNameEdit.IsValid = value => value.Length <= HumanoidCharacterProfile.MaxCustomSpeciesNameLength;
@@ -635,8 +648,34 @@ namespace Content.Client.Lobby.UI
         /// </summary>
         public void RefreshFlavorText()
         {
-            // WOLFGATE(Humanoid): the description lives under the preview now, so this only shows or hides that box.
+            // WOLFGATE(Humanoid) START: the description lives under the preview now, so this only shows or hides that box.
+            // upstream original, kept for merges:
+            // if (_cfgManager.GetCVar(CCVars.FlavorText))
+            // {
+            //     if (_flavorText != null)
+            //         return;
+            //
+            //     _flavorText = new FlavorText.FlavorText();
+            //     TabContainer.AddChild(_flavorText);
+            //     TabContainer.SetTabTitle(TabContainer.ChildCount - 1, Loc.GetString("humanoid-profile-editor-flavortext-tab"));
+            //     _flavorTextEdit = _flavorText.CFlavorTextInput;
+            //
+            //     _flavorText.OnFlavorTextChanged += OnFlavorTextChange;
+            // }
+            // else
+            // {
+            //     if (_flavorText == null)
+            //         return;
+            //
+            //     TabContainer.RemoveChild(_flavorText);
+            //     _flavorText.OnFlavorTextChanged -= OnFlavorTextChange;
+            //     _flavorText.Dispose();
+            //     _flavorTextEdit?.Dispose();
+            //     _flavorTextEdit = null;
+            //     _flavorText = null;
+            // }
             DescriptionBox.Visible = _cfgManager.GetCVar(CCVars.FlavorText);
+            // WOLFGATE END
         }
 
         /// <summary>
@@ -1864,8 +1903,8 @@ namespace Content.Client.Lobby.UI
 
             _loadoutWindow?.Dispose();
             _loadoutWindow = null;
-            // WOLFGATE(Genitals) START: also close the job title and anatomy confirm windows
-            CloseCustomJobTitle();
+            CloseCustomJobTitle(); // WOLFGATE(Roles): close the custom job title window
+            // WOLFGATE(Genitals) START: also close the anatomy confirm window
             _anatomySaveConfirm?.Close();
             _anatomySaveConfirm = null;
             // WOLFGATE END
@@ -2074,6 +2113,11 @@ namespace Content.Client.Lobby.UI
         private void UpdateFlavorTextEdit()
         {
             // WOLFGATE(Humanoid) START: keep the live description status in step when the profile reloads
+            // upstream original, kept for merges:
+            // if (_flavorTextEdit != null)
+            // {
+            //     _flavorTextEdit.TextRope = new Rope.Leaf(Profile?.FlavorText ?? "");
+            // }
             if (DescriptionBox.Visible)
             {
                 DescriptionEdit.TextRope = new Rope.Leaf(Profile?.FlavorText ?? "");
@@ -2102,6 +2146,11 @@ namespace Content.Client.Lobby.UI
         private void UpdateSexControls()
         {
             // WOLFGATE(Humanoid) START: otherwise the previous character's segments stay visible and lit
+            // upstream original, kept for merges:
+            // if (Profile == null)
+            //     return;
+            //
+            // SexButton.Clear();
             if (Profile == null)
             {
                 SexSelector.Visible = false;
@@ -2128,6 +2177,17 @@ namespace Content.Client.Lobby.UI
             // The old dropdown only moved its visual selection, because OptionButton.SelectId does not raise
             // OnItemSelected - so switching a Male character to Vox left Profile.Sex on Male while the box read
             // "None", and the markings were never revalidated.
+            // upstream original, kept for merges:
+            // // add button for each sex
+            // foreach (var sex in sexes)
+            // {
+            //     SexButton.AddItem(Loc.GetString($"humanoid-profile-editor-sex-{sex.ToString().ToLower()}-text"), (int) sex);
+            // }
+            //
+            // if (sexes.Contains(Profile.Sex))
+            //     SexButton.SelectId((int) Profile.Sex);
+            // else
+            //     SexButton.SelectId((int) sexes[0]);
             SexSelector.SetSexes(sexes);
 
             if (sexes.Contains(Profile.Sex))

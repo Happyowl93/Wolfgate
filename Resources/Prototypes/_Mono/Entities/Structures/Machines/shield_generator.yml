@@ -78,6 +78,15 @@
   - type: AnimationPlayer
   - type: LitOnPowered
   - type: PowerSwitch
+  # WOLFGATE(ShipShields) START: expose shared ship shield controls directly at every generator
+  - type: ActivatableUI
+    key: enum.WFShipShieldUiKey.Key
+  - type: ActivatableUIRequiresAccess
+  - type: UserInterface
+    interfaces:
+      enum.WFShipShieldUiKey.Key:
+        type: WFShipShieldGeneratorBoundUserInterface
+  # WOLFGATE END
   - type: ApcPowerReceiver
     powerLoad: 60000
   - type: Appearance
@@ -91,14 +100,20 @@
     unpoweredBonus: 7 # Base is 6
     shieldColor: "#FF3333"
     collisionResistanceMultiplier: 1.0
+    # WOLFGATE(ShipShields) START: use dedicated generator startup and shutdown sounds at their original pitch
+    # powerUpSound: !type:SoundPathSpecifier
+    #     path: "/Audio/Effects/teleport_arrival.ogg"
+    #     params:
+    #       pitch: 0.5
+    # powerDownSound: !type:SoundPathSpecifier
+    #     path: "/Audio/Effects/teleport_departure.ogg"
+    #     params:
+    #       pitch: 0.5
     powerUpSound: !type:SoundPathSpecifier
-        path: "/Audio/Effects/teleport_arrival.ogg"
-        params:
-          pitch: 0.5
+        path: "/Audio/_WF/ShipShields/shield_on.ogg"
     powerDownSound: !type:SoundPathSpecifier
-        path: "/Audio/Effects/teleport_departure.ogg"
-        params:
-          pitch: 0.5
+        path: "/Audio/_WF/ShipShields/shield_off.ogg"
+    # WOLFGATE END
   - type: Machine
     board: MachineShieldMS500Circuitboard
   - type: Construction

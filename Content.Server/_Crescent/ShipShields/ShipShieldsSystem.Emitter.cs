@@ -34,7 +34,10 @@ public partial class ShipShieldsSystem
         var parent = Transform(owner.Owner).GridUid;
         if (parent is null)
             return;
-        UnshieldEntity(parent.Value, null);
+        // WOLFGATE(ShipShields) START: removing a standby generator leaves the active field intact
+        // UnshieldEntity(parent.Value, null);
+        RemoveWolfgateEmitterShield(owner.Owner, owner.Comp);
+        // WOLFGATE END
     }
 
     private void OnShieldDeflected(EntityUid uid, ShipShieldEmitterComponent component, ShieldDeflectedEvent args)
@@ -42,7 +45,10 @@ public partial class ShipShieldsSystem
         if (TryComp<EmpOnTriggerComponent>(args.Deflected, out var emp))
         {
             component.Damage += Math.Clamp(emp.EnergyConsumption, 0f, MAX_EMP_DAMAGE);
-            _trigger.Trigger(args.Deflected);
+            // WOLFGATE(ShipShields) START: preserve the EMP while absorbing explosive and spawn payloads
+            // _trigger.Trigger(args.Deflected);
+            PulseWolfgateAbsorbedEmp(args.Deflected, emp);
+            // WOLFGATE END
         }
 
         if (TryComp<ExplosiveComponent>(args.Deflected, out var exp) && _prototypeManager.TryIndex(exp.ExplosionType, out var type))
@@ -61,6 +67,7 @@ public partial class ShipShieldsSystem
         if (!args.IsInDetailsRange)
             return;
 
+        ExamineWolfgateGeneratorStats(uid, component, args); // WOLFGATE(ShipShields): show runtime specifications for generator comparison.
         args.PushMarkup(Loc.GetString("shield-emitter-examine", ("basedraw", component.BaseDraw), ("additional", CalculateLoadDamage(component))));
         if (HasComp<ShipShieldDisabledGridComponent>(Transform(uid).GridUid))
             args.PushMarkup(Loc.GetString("shield-emitter-examine-invalid-grid"));

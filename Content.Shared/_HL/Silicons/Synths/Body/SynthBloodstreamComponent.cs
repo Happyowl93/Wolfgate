@@ -1,3 +1,4 @@
+// WOLFGATE(Species): synth body, ported from HardLight
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.FixedPoint;

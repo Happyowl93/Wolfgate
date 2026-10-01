@@ -11,7 +11,7 @@ namespace Content.Shared._WF.Tether.Harpoon;
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class ShipHarpoonTurretComponent : Component
 {
-    /// <summary>Rope type the embedded harpoon is tied off with. Stage 2A owns the prototype.</summary>
+    /// <summary>Rope type the embedded harpoon is tied off with.</summary>
     [DataField, AutoNetworkedField]
     public ProtoId<RopeTypePrototype> RopeType = "WFRopeTowCable";
 

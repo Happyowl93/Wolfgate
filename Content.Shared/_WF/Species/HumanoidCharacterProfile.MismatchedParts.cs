@@ -8,6 +8,7 @@ public sealed partial class HumanoidCharacterProfile
     [DataField]
     public bool MismatchedParts { get; set; }
 
+    /// <summary>Copy of this profile with the Mismatched parts option set.</summary>
     public HumanoidCharacterProfile WithMismatchedParts(bool enabled)
     {
         return new(this) { MismatchedParts = enabled };

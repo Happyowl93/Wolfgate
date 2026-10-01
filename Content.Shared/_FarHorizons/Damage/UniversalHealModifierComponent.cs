@@ -1,3 +1,4 @@
+// WOLFGATE(Species): heal modifiers, ported from HardLight
 using Robust.Shared.GameStates;
 
 namespace Content.Shared._FarHorizons.Damage;

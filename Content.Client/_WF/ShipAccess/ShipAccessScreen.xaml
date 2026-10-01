@@ -92,6 +92,19 @@
                                HorizontalAlignment="Center"
                                Margin="4 4 4 4"/>
                     </BoxContainer>
+                    <BoxContainer Name="AllDoorsBox" Orientation="Vertical" Visible="False">
+                        <controls:StripeBack MinSize="48 48" Margin="0 8 0 0">
+                            <Label Text="{Loc 'ship-access-all-doors'}" VerticalExpand="True" HorizontalAlignment="Center"/>
+                        </controls:StripeBack>
+                        <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="8 4 8 0">
+                            <OptionButton Name="AllDoorsRuleButton" HorizontalExpand="True"/>
+                            <controls:ConfirmButton Name="AllDoorsApplyButton"
+                                                    Text="{Loc 'ship-access-all-doors-apply'}"
+                                                    ConfirmationText="{Loc 'ship-access-all-doors-confirm'}"
+                                                    MinWidth="100"/>
+                        </BoxContainer>
+                        <RichTextLabel Name="AllDoorsHint" HorizontalExpand="True" Margin="8 4 8 4"/>
+                    </BoxContainer>
                     <controls:StripeBack MinSize="48 48" Margin="0 8 0 0">
                         <Label Text="{Loc 'ship-access-door'}" VerticalExpand="True" HorizontalAlignment="Center"/>
                     </controls:StripeBack>

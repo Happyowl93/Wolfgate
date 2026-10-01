@@ -31,6 +31,7 @@ namespace Content.Server.Symphony;
 /// </summary>
 public sealed partial class SymphonyHubSystem : EntitySystem
 {
+    /// <summary>Status host path: GET reads the hub switch, POST sets it.</summary>
     public const string HubPath = "/symphony/hub";
     private static readonly ResPath SwitchFile = new("/symphony_hub.json");
     private static readonly TimeSpan TickEvery = TimeSpan.FromSeconds(1);

@@ -1,4 +1,4 @@
-# Real rope types (stage 2A). Tuning is derived from the fork's own constants rather than
+# Real rope types. Tuning is derived from the fork's own constants rather than
 # guessed: Content.Server/Shuttles/Systems/ShuttleSystem.cs sets grid tile fixtures to
 # TileDensityMultiplier (0.5) of the engine's DefaultDensity (1), so a bare hull tile masses
 # ~0.5 kg/m2; walls, machines and cargo dwarf that. A "standard thruster" is the unit the

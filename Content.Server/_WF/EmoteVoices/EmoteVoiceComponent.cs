@@ -8,6 +8,7 @@ namespace Content.Server._WF.EmoteVoices;
 [Access(typeof(EmoteVoiceSystem))]
 public sealed partial class EmoteVoiceComponent : Component
 {
+    /// <summary>The chosen voices, laid over the species' emote sounds.</summary>
     [DataField]
     public List<ProtoId<EmoteVoicePrototype>> Voices = new();
 }

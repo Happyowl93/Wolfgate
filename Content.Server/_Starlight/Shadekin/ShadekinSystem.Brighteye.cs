@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight
 using Content.Shared._Starlight.Shadekin;
 using Content.Shared.Humanoid;
 using Content.Shared.Zombies;

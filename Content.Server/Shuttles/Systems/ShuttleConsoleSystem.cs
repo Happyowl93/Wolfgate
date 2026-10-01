@@ -423,8 +423,15 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
 
         if (_ui.HasUi(consoleUid, ShuttleConsoleUiKey.Key))
         {
+            // WOLFGATE(ShipShields) START: include directional shield settings in the helm state
+            // _ui.SetUiState(consoleUid, ShuttleConsoleUiKey.Key, new ShuttleBoundUserInterfaceState(navState, mapState, dockState,
+            //     GetTractorCaptureSources(shuttleGridUid))); // WOLFGATE(TractorBeam)
             _ui.SetUiState(consoleUid, ShuttleConsoleUiKey.Key, new ShuttleBoundUserInterfaceState(navState, mapState, dockState,
-                GetTractorCaptureSources(shuttleGridUid))); // WOLFGATE(TractorBeam)
+                GetTractorCaptureSources(shuttleGridUid))
+            {
+                ShieldShunt = GetWolfgateShieldShuntState(shuttleGridUid),
+            });
+            // WOLFGATE END
         }
     }
 
@@ -432,6 +439,7 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
     {
         base.Update(frameTime);
         UpdateTractorCaptureWarnings(frameTime); // WOLFGATE(TractorBeam)
+        UpdateWolfgateShieldHelms(frameTime); // WOLFGATE(ShipShields): refresh open helm shield status on visible changes
 
         var toRemove = new ValueList<(EntityUid, PilotComponent)>();
         var query = EntityQueryEnumerator<PilotComponent>();

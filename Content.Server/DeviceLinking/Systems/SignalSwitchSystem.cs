@@ -1,3 +1,4 @@
+using Content.Server._WF.LockableButtons; // WOLFGATE(LockableButtons)
 using Content.Shared.DeviceLinking.Components;
 using Content.Shared.Interaction;
 using Robust.Shared.Audio;
@@ -28,6 +29,17 @@ public sealed partial class SignalSwitchSystem : EntitySystem
     {
         if (args.Handled || !args.Complex)
             return;
+
+        // WOLFGATE(LockableButtons) START: a locked switch fires only for someone its reader admits
+        // Without this, the server could toggle the switch before or despite a denied unlock.
+        var attempt = new SwitchPressAttemptEvent(args.User);
+        RaiseLocalEvent(uid, ref attempt);
+        if (attempt.Cancelled)
+        {
+            args.Handled = attempt.Handled;
+            return;
+        }
+        // WOLFGATE END
 
         comp.State = !comp.State;
         _deviceLink.InvokePort(uid, comp.State ? comp.OnPort : comp.OffPort);

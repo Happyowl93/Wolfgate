@@ -1,3 +1,4 @@
+// WOLFGATE(Silicons): synth battery alert, ported from HardLight
 using Content.Shared.Alert;
 using Robust.Shared.Prototypes;
 

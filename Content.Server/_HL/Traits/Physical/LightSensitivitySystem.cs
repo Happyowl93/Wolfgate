@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight (Shadekin traits)
 using Content.Server._Starlight;
 using Content.Server._Starlight.Shadekin;
 using Content.Shared._HL.Traits.Physical;

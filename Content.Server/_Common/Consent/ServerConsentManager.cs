@@ -25,7 +25,7 @@ public sealed class ServerConsentManager : IServerConsentManager
     [Dependency] private readonly IServerNetManager _netManager = default!;
     [Dependency] private readonly IServerDbManager _db = default!;
     [Dependency] private readonly ISharedAdminLogManager _adminLogger = default!;
-    [Dependency] private readonly UserDbDataManager _userDb = default!; // WOLFGATE(Genitals)
+    [Dependency] private UserDbDataManager _userDb = default!; // WOLFGATE(Genitals)
 
     public event Action<ICommonSession, PlayerConsentSettings>? OnConsentUpdated;
 

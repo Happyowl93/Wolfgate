@@ -7,11 +7,11 @@ using Content.Server.Power.Components;
 using Content.Server.Power.EntitySystems;
 using Content.Server.Wires;
 using Content.Shared._Crescent.ShipShields;
+using Content.Shared._Mono.Economy.Components;
 using Content.Shared._WF.ShipPa;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.DeviceNetwork.Components;
 using Content.Shared.Pinpointer;
-using Content.Shared.VendingMachines;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -90,7 +90,7 @@ public sealed class UsedShipReinitSystem : EntitySystem
             _powerCharge.ReinitLoadedCharge(uid, charge);
 
         ResetUpgradeBaselines(uid);
-        EnsureVendingCashSlot(uid);
+        EnsureCashSlot(uid);
     }
 
     /// <summary>
@@ -141,19 +141,17 @@ public sealed class UsedShipReinitSystem : EntitySystem
     }
 
     /// <summary>
-    /// Puts a vending machine's cash slot back. The slot dictionary is a read-only data field, so a
+    /// Puts a credit receiver's cash slot back. The slot dictionary is a read-only data field, so a
     /// slot added at map init is never written out and the machine comes back taking no money.
     /// </summary>
-    private void EnsureVendingCashSlot(EntityUid uid)
+    private void EnsureCashSlot(EntityUid uid)
     {
-        if (!TryComp<VendingMachineComponent>(uid, out var vending)
-            || vending.CashSlot is not { } slot
-            || vending.CashSlotName is not { } slotName
-            || _itemSlots.TryGetSlot(uid, slotName, out _))
+        if (!TryComp<CreditReceiverComponent>(uid, out var receiver)
+            || _itemSlots.TryGetSlot(uid, receiver.CashSlotName, out _))
         {
             return;
         }
 
-        _itemSlots.AddItemSlot(uid, slotName, slot);
+        _itemSlots.AddItemSlot(uid, receiver.CashSlotName, receiver.CashSlot);
     }
 }

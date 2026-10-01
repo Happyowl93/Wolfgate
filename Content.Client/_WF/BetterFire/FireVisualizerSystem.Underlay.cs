@@ -63,6 +63,7 @@ public sealed partial class FireVisualizerSystem
     }
 }
 
+/// <summary>Layer key for the fire underlay drawn below a burning sprite.</summary>
 public enum FireUnderlayVisualLayers : byte
 {
     Underlay,

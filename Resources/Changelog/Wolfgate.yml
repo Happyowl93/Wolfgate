@@ -676,3 +676,141 @@ Entries:
   id: 100062
   time: '2026-09-30T01:02:59.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/127
+- author: Aphast
+  changes:
+    - type: Add
+      message: >-
+        Shadekin short hair, shadekin dual color ears, shadekin dual color big
+        tail, generic neckfur, and fae fox ears alt variant
+    - type: Fix
+      message: Minor sprite error with fae fox ears
+  id: 100063
+  time: '2026-09-30T16:18:06.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/129
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Only insurgency will be available below 20 pop.
+  id: 100064
+  time: '2026-10-01T01:44:17.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/134
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Shields have different animations and effects.
+    - type: Add
+      message: >-
+        Shield shunting, you can now direct your shield towards a certain
+        direction for better protection. See shield tab.
+  id: 100065
+  time: '2026-10-01T01:50:34.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/131
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Borers no longer take control of their host when removed.
+  id: 100066
+  time: '2026-10-01T01:50:49.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/133
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Engine version bumped to 277.2.1
+  id: 100067
+  time: '2026-10-01T02:10:31.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/116
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Buttons with access requirements now actually respect the access
+        requirements.
+    - type: Tweak
+      message: >-
+        A card with access now presses a locked button directly, and the button
+        stays locked.
+    - type: Tweak
+      message: >-
+        Lockable buttons on a ship follow ship access, so your crew can use
+        them.
+    - type: Tweak
+      message: >-
+        Crew on a ship's access list keep their access while the ship is
+        unlocked.
+    - type: Add
+      message: The Access tab can set every door on the ship to one rule at once.
+    - type: Fix
+      message: ERT teams can open the doors of their own faction ship.
+    - type: Tweak
+      message: >-
+        An ERT's ship locks itself once the first responder is aboard, and
+        responders always get an ID card.
+  id: 100068
+  time: '2026-10-01T06:18:01.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/136
+- author: Aphast
+  changes:
+    - type: Add
+      message: A new thicker accent 'neofrench'
+    - type: Tweak
+      message: Slimepeople can now select any color skin
+  id: 100069
+  time: '2026-10-01T07:02:48.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/138
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Harpoons fired square on at a hull no longer skip off when they land
+        beside the seam between two wall tiles.
+    - type: Fix
+      message: >-
+        Loaded harpoons no longer get pulled out of their turret while the ship
+        is moving, which left the turret unable to fire.
+    - type: Fix
+      message: >-
+        Loose harpoons are solid items again. They stay inside the hull and slow
+        down on the deck instead of sliding through walls and into space.
+    - type: Fix
+      message: >-
+        The harpoon turret's winch stops when the two hulls touch instead of
+        hauling them into each other.
+    - type: Fix
+      message: >-
+        Arrows and other reusable projectiles are no longer yanked out of hands
+        and containers or flung around on fast ships.
+    - type: Fix
+      message: >-
+        A recovered harpoon fired again from a fast ship no longer flies off
+        along its previous shot's path.
+  id: 100070
+  time: '2026-10-01T07:38:18.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/139
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Shield generator stats are now shown on examine and in the Shields
+        panel.
+    - type: Fix
+      message: >-
+        Shields absorb hull collision damage using shield health, with impact
+        effects.
+    - type: Fix
+      message: Explosive rounds no longer detonate after being absorbed by shields.
+    - type: Fix
+      message: Shields now intercept flak fragments, minelayer rounds and naval mines.
+    - type: Fix
+      message: >-
+        Absorbed payloads no longer trigger afterward, and outgoing payloads
+        pass through their own ship's shields.
+  id: 100071
+  time: '2026-10-01T07:39:05.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/140
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Admins can now teleport using the mass scanner.
+  id: 100072
+  time: '2026-10-01T08:14:20.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/141

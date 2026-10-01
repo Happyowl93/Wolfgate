@@ -1,3 +1,4 @@
+// WOLFGATE(Species): ported from HardLight
 using Content.Server.Explosion.EntitySystems;
 using Content.Shared.Stacks;
 using Robust.Shared.Map;

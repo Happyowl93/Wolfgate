@@ -35,10 +35,12 @@ public sealed partial class ShipShieldsSystem : EntitySystem
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
+        UpdateWolfgateShields(frameTime); // WOLFGATE(ShipShields): refresh hull geometry and shield health
 
         var query = EntityQueryEnumerator<ShipShieldEmitterComponent, ApcPowerReceiverComponent>();
         while (query.MoveNext(out var uid, out var emitter, out var power))
         {
+            ReconcileWolfgateShieldEmitter(uid, emitter); // WOLFGATE(ShipShields): recover stale handles and keep one owner per hull
             emitter.Accumulator += frameTime;
 
             if (emitter.Accumulator < EmitterUpdateRate)
@@ -62,7 +64,10 @@ public sealed partial class ShipShieldsSystem : EntitySystem
 
             emitter.Damage -= healed;
 
-            if (emitter.Damage < 0)
+            // WOLFGATE(ShipShields) START: complete recharge when healing lands exactly on zero damage
+            // if (emitter.Damage < 0)
+            if (emitter.Damage <= 0)
+            // WOLFGATE END
             {
                 emitter.Damage = 0;
                 if (power.Powered)
@@ -81,23 +86,40 @@ public sealed partial class ShipShieldsSystem : EntitySystem
             if (emitter.Damage > emitter.DamageLimit)
                 emitter.OverloadAccumulator = emitter.DamageOverloadTimePunishment;
 
-            if (!emitter.Recharging && emitter.Shield is null && emitter.OverloadAccumulator < 1)
+            // WOLFGATE(ShipShields) START: respect the ship's manual field switch
+            // if (!emitter.Recharging && emitter.Shield is null && emitter.OverloadAccumulator < 1)
+            if (!emitter.Recharging && emitter.Shield is null && emitter.OverloadAccumulator < 1 && IsWolfgateShieldEnabled(parent.Value))
+            // WOLFGATE END
             {
                 var shield = ShieldEntity(parent.Value, uid);
                 if (shield != EntityUid.Invalid)
                 {
                     emitter.Shield = shield;
                     emitter.Shielded = parent.Value;
+                    LogWolfgateShieldTransition(uid, parent.Value, emitter, true, "ready"); // WOLFGATE(ShipShields): record actual field transitions for diagnosis
                 }
-                _audio.PlayGlobal(emitter.PowerUpSound, filter, true, emitter.PowerUpSound.Params);
+                // WOLFGATE(ShipShields) START: only announce successful startup and rate-limit power transitions per hull
+                // _audio.PlayGlobal(emitter.PowerUpSound, filter, true, emitter.PowerUpSound.Params);
+                if (shield != EntityUid.Invalid)
+                    PlayWolfgateShieldPowerSound(uid, parent.Value, true);
+                // WOLFGATE END
             }
             else if ((emitter.Recharging || emitter.OverloadAccumulator > 0) && emitter.Shield is not null || HasComp<ShipShieldDisabledGridComponent>(Transform(uid).GridUid))
             {
-                UnshieldEntity(parent.Value);
+                // WOLFGATE(ShipShields) START: a standby emitter cannot remove another generator's field
+                // UnshieldEntity(parent.Value);
+                var removed = RemoveWolfgateEmitterShield(uid, emitter,
+                    !power.Powered ? "power lost" : emitter.OverloadAccumulator > 0 ? "overload" : "recharging or disabled grid");
+                // WOLFGATE END
                 emitter.Shield = null;
                 emitter.Shielded = null;
-                if (!HasComp<ShipShieldDisabledGridComponent>(Transform(uid).GridUid))
-                    _audio.PlayGlobal(emitter.PowerDownSound, filter, true, emitter.PowerUpSound.Params);
+                // WOLFGATE(ShipShields) START: share the startup cooldown and use shutdown audio parameters
+                if (removed && !HasComp<ShipShieldDisabledGridComponent>(Transform(uid).GridUid)) // WOLFGATE(ShipShields): announce only actual shutdown
+                {
+                    // _audio.PlayGlobal(emitter.PowerDownSound, filter, true, emitter.PowerUpSound.Params);
+                    PlayWolfgateShieldPowerSound(uid, parent.Value, false);
+                }
+                // WOLFGATE END
             }
         }
     }
@@ -112,15 +134,17 @@ public sealed partial class ShipShieldsSystem : EntitySystem
 
         InitializeCommands();
         InitializeEmitters();
+        InitializeWolfgateShields(); // WOLFGATE(ShipShields): track hull tile changes
     }
 
     private void OnPreventCollide(EntityUid uid, ShipShieldComponent component, ref PreventCollideEvent args)
     {
         // only handle ship weapons for now. engine update introduced physics regressions. Let's polish everything else and circle back yeah?
         // Ensuring projectiles coming froms same grid don't hit shield is handled by ProjectileGridPhaseComponent
-        if (!_shipWeaponProjectileQuery.HasComponent(args.OtherEntity) ||
+        // WOLFGATE(ShipShields): map-parented shield still phases its ship's outgoing shots
+        if (IsWolfgateShieldFriendlyProjectile(uid, args.OtherEntity) || !_shipWeaponProjectileQuery.HasComponent(args.OtherEntity) ||
         !_projectileQuery.TryGetComponent(args.OtherEntity, out var projectile) ||
-        projectile.ProjectileSpent)
+        projectile.ProjectileSpent || IsWolfgateShieldUnprotectedProjectile(uid, args.OtherEntity)) // WOLFGATE(ShipShields): unpowered sectors let shots pass without changing their shooter
         {
             args.Cancelled = true;
             return;
@@ -143,18 +167,23 @@ public sealed partial class ShipShieldsSystem : EntitySystem
         // why shoot the projectile again when you can just 180 its physics, tho?
         //_gun.ShootProjectile(args.OtherEntity, deflectionVector, _physicsSystem.GetMapLinearVelocity(uid), uid, null, velocity.Length());
 
-        if (component.Source is { } source)
-        {
-            var ev = new ShieldDeflectedEvent(args.OtherEntity, projectile);
-            RaiseLocalEvent(source, ref ev);
-        }
+        // WOLFGATE(ShipShields) START: apply damage only after a projectile contacts the perimeter
+        // if (component.Source is { } source)
+        // {
+        //     var ev = new ShieldDeflectedEvent(args.OtherEntity, projectile);
+        //     RaiseLocalEvent(source, ref ev);
+        // }
+        // WOLFGATE END
     }
 
     private void OnEmitterShutdown(EntityUid uid, ShipShieldEmitterComponent emitter, ComponentShutdown args) // Mono
     {
         if (emitter.Shielded != null)
         {
-            UnshieldEntity(emitter.Shielded.Value);
+            // WOLFGATE(ShipShields) START: remove only the field owned by this emitter
+            // UnshieldEntity(emitter.Shielded.Value);
+            RemoveWolfgateEmitterShield(uid, emitter);
+            // WOLFGATE END
             emitter.Shield = null;
             emitter.Shielded = null;
         }
@@ -169,8 +198,17 @@ public sealed partial class ShipShieldsSystem : EntitySystem
     /// <returns>The shield entity.</returns>
     private EntityUid ShieldEntity(EntityUid entity, EntityUid? source = null, MapGridComponent? mapGrid = null)
     {
+        // WOLFGATE(ShipShields) START: discard stale grid fields and reserve active fields for their owner
+        // if (TryComp<ShipShieldedComponent>(entity, out var existingShielded))
+        //     return existingShielded.Shield;
         if (TryComp<ShipShieldedComponent>(entity, out var existingShielded))
-            return existingShielded.Shield;
+        {
+            if (IsWolfgateShieldLive(existingShielded.Shield))
+                return source == null || existingShielded.Source == source ? existingShielded.Shield : EntityUid.Invalid;
+            TryQueueDel(existingShielded.Shield);
+            RemComp<ShipShieldedComponent>(entity);
+        }
+        // WOLFGATE END
 
         if (!Resolve(entity, ref mapGrid, false) || HasComp<ShipShieldDisabledGridComponent>(Transform(entity).GridUid))
             return EntityUid.Invalid;
@@ -191,31 +229,37 @@ public sealed partial class ShipShieldsSystem : EntitySystem
             Dirty(shield, shieldVisuals);
         }
 
-        var gridCenter = new EntityCoordinates(entity, mapGrid.LocalAABB.Center);
-        _transformSystem.SetCoordinates(shield, gridCenter);
-        _transformSystem.SetWorldRotation(shield, _transformSystem.GetWorldRotation(entity));
+        // WOLFGATE(ShipShields) START: replace oval and interior blocker with the padded hull perimeter
+        // var gridCenter = new EntityCoordinates(entity, mapGrid.LocalAABB.Center);
+        // _transformSystem.SetCoordinates(shield, gridCenter);
+        // _transformSystem.SetWorldRotation(shield, _transformSystem.GetWorldRotation(entity));
 
-        var chain = GenerateOvalFixture(shield, "shield", shieldPhysics, mapGrid, shieldVisuals.Padding);
+        // var chain = GenerateOvalFixture(shield, "shield", shieldPhysics, mapGrid, shieldVisuals.Padding);
 
-        List<Vector2> roughPoly = new();
+        // List<Vector2> roughPoly = new();
 
-        var interval = chain.Count / PhysicsConstants.MaxPolygonVertices;
+        // var interval = chain.Count / PhysicsConstants.MaxPolygonVertices;
 
-        int i = 0;
+        // int i = 0;
 
-        while (i < PhysicsConstants.MaxPolygonVertices)
-        {
-            roughPoly.Add(chain.Vertices[i * interval]);
-            i++;
-        }
+        // while (i < PhysicsConstants.MaxPolygonVertices)
+        // {
+        //     roughPoly.Add(chain.Vertices[i * interval]);
+        //     i++;
+        // }
 
-        var internalPoly = new PolygonShape();
-        internalPoly.Set(roughPoly);
+        // var internalPoly = new PolygonShape();
+        // internalPoly.Set(roughPoly);
 
-        _fixtureSystem.TryCreateFixture(shield, internalPoly, "internalShield",
-            hard: true,
-            collisionLayer: (int)CollisionGroup.BulletImpassable, // Mono - Only try to block bullets
-            body: shieldPhysics);
+        // _fixtureSystem.TryCreateFixture(shield, internalPoly, "internalShield",
+        //     hard: true,
+        //     collisionLayer: (int)CollisionGroup.BulletImpassable, // Mono - Only try to block bullets
+        //     body: shieldPhysics);
+
+
+        CreateWolfgateShieldHull(shield, entity, mapGrid, shieldPhysics);
+        BeginWolfgateShieldFormation(shield, entity);
+        // WOLFGATE END
 
         _physicsSystem.WakeBody(shield, body: shieldPhysics);
         _physicsSystem.SetSleepingAllowed(shield, shieldPhysics, false);
@@ -234,6 +278,11 @@ public sealed partial class ShipShieldsSystem : EntitySystem
         if (!Resolve(uid, ref component, false))
             return false;
 
+        // WOLFGATE(ShipShields) START: dissipate visually after protection stops immediately
+        EndWolfgateShieldAppearance(component.Shield, uid);
+        if (TryComp<PhysicsComponent>(component.Shield, out var physics))
+            _physicsSystem.SetCanCollide(component.Shield, false, body: physics);
+        // WOLFGATE END
         TryQueueDel(component.Shield);
         RemComp<ShipShieldedComponent>(uid);
         return true;

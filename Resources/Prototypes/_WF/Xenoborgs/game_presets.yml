@@ -3,6 +3,7 @@
   name: mono-Xeno-title
   description: mono-Xeno-description
   showInVote: true
+  minPlayers: 20
   rules:
   - NFAdventure
   - BasicStationEventScheduler

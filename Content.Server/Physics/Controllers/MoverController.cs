@@ -30,10 +30,6 @@ public sealed partial class MoverController : SharedMoverController
 
     private Dictionary<EntityUid, (ShuttleComponent, List<(EntityUid, PilotComponent, InputMoverComponent, TransformComponent)>)> _shuttlePilots = new();
 
-    // WOLFGATE(TractorBeam): propulsion queued by the ordinary helm path this tick
-    // Late station keeping can replace its braking after tractor recoil without doubling the same engine budget.
-    private readonly Dictionary<EntityUid, (Vector2 LinearInput, float AngularInput, Vector2 Force, float Torque)> _shuttlePropulsion = new();
-
     [Dependency] private EntityQuery<ActiveInputMoverComponent> _activeQuery = default!;
     [Dependency] private EntityQuery<DroneConsoleComponent> _droneQuery = default!;
     [Dependency] private EntityQuery<ShuttleComponent> _shuttleQuery = default!;
@@ -555,6 +551,90 @@ public sealed partial class MoverController : SharedMoverController
             var xform = Transform(uid);
 
             // WOLFGATE(TractorBeam) START: Track linear/angular braking and show the correct counterthrust directions.
+            // upstream original, kept for merges:
+            // // handle movement: brake
+            // if (brakeInput > 0f)
+            // {
+            //     if (body.LinearVelocity.Length() > 0f)
+            //     {
+            //         // Minimum brake velocity for a direction to show its thrust appearance.
+            //         const float appearanceThreshold = 0.1f;
+            //
+            //         // Get velocity relative to the shuttle so we know which thrusters to fire
+            //         var shuttleVelocity = (-shuttleNorthAngle).RotateVec(body.LinearVelocity);
+            //         var force = GetDirectionThrust(-shuttleVelocity, shuttle, body, xform);
+            //
+            //         if (force.X < 0f)
+            //         {
+            //             _thruster.DisableLinearThrustDirection(shuttle, DirectionFlag.West);
+            //             if (shuttleVelocity.X < -appearanceThreshold)
+            //                 _thruster.EnableLinearThrustDirection(shuttle, DirectionFlag.East);
+            //         }
+            //         else if (force.X > 0f)
+            //         {
+            //             _thruster.DisableLinearThrustDirection(shuttle, DirectionFlag.East);
+            //             if (shuttleVelocity.X > appearanceThreshold)
+            //                 _thruster.EnableLinearThrustDirection(shuttle, DirectionFlag.West);
+            //         }
+            //
+            //         if (shuttleVelocity.Y < 0f)
+            //         {
+            //             _thruster.DisableLinearThrustDirection(shuttle, DirectionFlag.South);
+            //             if (shuttleVelocity.Y < -appearanceThreshold)
+            //                 _thruster.EnableLinearThrustDirection(shuttle, DirectionFlag.North);
+            //         }
+            //         else if (shuttleVelocity.Y > 0f)
+            //         {
+            //             _thruster.DisableLinearThrustDirection(shuttle, DirectionFlag.North);
+            //             if (shuttleVelocity.Y > appearanceThreshold)
+            //                 _thruster.EnableLinearThrustDirection(shuttle, DirectionFlag.South);
+            //
+            //         }
+            //
+            //         var impulse = force * brakeInput * ShuttleComponent.BrakeCoefficient;
+            //         impulse = shuttleNorthAngle.RotateVec(impulse);
+            //         var maxForce = body.LinearVelocity.Length() * body.Mass / frameTime;
+            //
+            //         if (maxForce == 0f)
+            //             impulse = Vector2.Zero;
+            //         // Don't overshoot
+            //         else if (impulse.Length() > maxForce)
+            //             impulse = impulse.Normalized() * maxForce;
+            //
+            //         shuttle.LastThrust += impulse / body.FixturesMass;
+            //         PhysicsSystem.ApplyForce(uid, impulse, body: body);
+            //     }
+            //     else
+            //     {
+            //         _thruster.DisableLinearThrusters(shuttle);
+            //     }
+            //
+            //     if (body.AngularVelocity != 0f)
+            //     {
+            //         var torque = shuttle.AngularThrust * brakeInput * (body.AngularVelocity > 0f ? -1f : 1f) * ShuttleComponent.BrakeCoefficient;
+            //         var torqueMul = body.InvI * frameTime;
+            //
+            //         if (body.AngularVelocity > 0f)
+            //         {
+            //             torque = MathF.Max(-body.AngularVelocity / torqueMul, torque);
+            //         }
+            //         else
+            //         {
+            //             torque = MathF.Min(-body.AngularVelocity / torqueMul, torque);
+            //         }
+            //
+            //         if (!torque.Equals(0f))
+            //         {
+            //             PhysicsSystem.ApplyTorque(uid, torque, body: body);
+            //             _thruster.SetAngularThrust(shuttle, true);
+            //         }
+            //     }
+            //     else
+            //     {
+            //         _thruster.SetAngularThrust(shuttle, false);
+            //     }
+            // }
+
             // handle movement: brake
             if (linearBrakeInput > 0f || angularBrakeInput > 0f)
             {
@@ -729,71 +809,6 @@ public sealed partial class MoverController : SharedMoverController
             _shuttlePropulsion[uid] = (linearInput, angularInput, body.Force - forceBefore, body.Torque - torqueBefore); // WOLFGATE(TractorBeam)
         }
     }
-
-    // WOLFGATE(TractorBeam) START: Powered station keeping after tractor recoil.
-    /// <summary>
-    /// Recalculate normal powered braking after tractor impulses, including forces still
-    /// queued for this physics step. Manual steering retains control of each axis and any
-    /// earlier helm braking is replaced, so engines cannot spend their thrust budget twice.
-    /// </summary>
-    public void ApplyStationKeeping(EntityUid uid, float frameTime, ShuttleComponent shuttle, PhysicsComponent body)
-    {
-        if (frameTime <= 0 || !float.IsFinite(frameTime) || body.InvMass <= 0)
-            return;
-
-        _shuttlePropulsion.TryGetValue(uid, out var propulsion);
-        var rotation = _transform.GetWorldRotation(uid);
-        var xform = Transform(uid);
-        PhysicsSystem.SetSleepingAllowed(uid, body, false);
-
-        if (propulsion.LinearInput == Vector2.Zero)
-        {
-            // Exclude the brake force we are replacing. Tractor reaction impulses are
-            // already in LinearVelocity; gravity/other queued forces still need integration.
-            var velocity = body.LinearVelocity + (body.Force - propulsion.Force) * body.InvMass * frameTime;
-            var localVelocity = (-rotation).RotateVec(velocity);
-            var available = GetDirectionThrust(-localVelocity, shuttle, body, xform) * ShuttleComponent.BrakeCoefficient;
-            var required = velocity.Length() * body.Mass / frameTime;
-            var force = rotation.RotateVec(available);
-            if (force.LengthSquared() > required * required)
-                force = required > 0 ? force.Normalized() * required : Vector2.Zero;
-
-            var change = force - propulsion.Force;
-            PhysicsSystem.ApplyForce(uid, change, body: body);
-            shuttle.LastThrust += change / body.FixturesMass;
-            SetStationKeepingThrust(shuttle, (-rotation).RotateVec(force));
-        }
-
-        if (propulsion.AngularInput == 0f && body.InvI > 0)
-        {
-            var angularVelocity = body.AngularVelocity + (body.Torque - propulsion.Torque) * body.InvI * frameTime;
-            var limit = shuttle.AngularThrust * ShuttleComponent.BrakeCoefficient;
-            var torque = Math.Clamp(-angularVelocity / (body.InvI * frameTime), -limit, limit);
-            PhysicsSystem.ApplyTorque(uid, torque - propulsion.Torque, body: body);
-            _thruster.SetAngularThrust(shuttle, torque != 0f);
-        }
-    }
-
-    private void SetStationKeepingThrust(ShuttleComponent shuttle, Vector2 localForce)
-    {
-        // Even a slow resisting ship can require substantial thrust. Show actual force,
-        // not a velocity threshold, so a stationary arrestor's counterthrust remains visible.
-        SetDirection(DirectionFlag.East, localForce.X > 0);
-        SetDirection(DirectionFlag.West, localForce.X < 0);
-        SetDirection(DirectionFlag.North, localForce.Y > 0);
-        SetDirection(DirectionFlag.South, localForce.Y < 0);
-        return;
-
-        void SetDirection(DirectionFlag direction, bool firing)
-        {
-            if (firing)
-                _thruster.EnableLinearThrustDirection(shuttle, direction);
-            else
-                _thruster.DisableLinearThrustDirection(shuttle, direction);
-        }
-    }
-
-    // WOLFGATE END
 
     private void HandleShuttlePilot(float frameTime)
     {

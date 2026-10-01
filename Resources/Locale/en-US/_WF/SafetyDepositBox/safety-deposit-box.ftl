@@ -16,6 +16,7 @@ safety-deposit-console-owned-boxes = Your Safety Deposit Boxes:
 safety-deposit-console-no-boxes = You don't own any safety deposit boxes yet.
 safety-deposit-console-box-id = Box ID: {$id}... - {$status}
 safety-deposit-console-box-id-short = Box ID: {$id}...
+safety-deposit-console-box-unnamed = Box {$id}
 safety-deposit-console-box-deposited = Stored
 safety-deposit-console-box-not-deposited = Not Stored
 safety-deposit-console-box-in-world = In World

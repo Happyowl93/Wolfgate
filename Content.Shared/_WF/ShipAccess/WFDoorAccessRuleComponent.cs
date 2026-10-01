@@ -5,7 +5,7 @@ namespace Content.Shared._WF.ShipAccess;
 
 /// <summary>
 /// A door's own access rule, overriding the ship-wide one; the server writes it into the door's airlock access
-/// reader. Serialises with the grid. Doors only; lockers keep the ship rule. Codes never live here:
+/// reader. Serialises with the grid. Doors only; lockers and lockable buttons keep the ship rule. Codes never live here:
 /// <see cref="HasOwnCode"/> only says the server holds one.
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]

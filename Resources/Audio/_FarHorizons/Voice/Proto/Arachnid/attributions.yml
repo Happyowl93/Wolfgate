@@ -1,3 +1,4 @@
+# WOLFGATE(Species): ported from HardLight
 # This file, as well as contents of this directory in general, is a copy of Resources/Audio/Voice/Arachnid and Resources/Audio/_Starlight/Voice/Arachnid with minor edits
 - files: ["arachnid_scream.ogg", "arachnid_laugh.ogg"]
   license: "CC-BY-4.0"

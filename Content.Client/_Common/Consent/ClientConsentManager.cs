@@ -1,3 +1,4 @@
+// WOLFGATE(Genitals): ported from HardLight (consent system)
 // SPDX-FileCopyrightText: Copyright (c) 2024-2025 Space Wizards Federation
 // SPDX-License-Identifier: MIT
 

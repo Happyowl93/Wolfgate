@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Shared._WF.ShipShields; // WOLFGATE(ShipShields)
 using Content.Shared.Administration.Logs;
 using Content.Shared.Damage.Components;
 using Content.Shared.Database;
@@ -34,6 +35,9 @@ public sealed partial class HitscanBasicRaycastSystem : EntitySystem
         var ray = new CollisionRay(mapCords.Position, args.ShotDirection, (int) ent.Comp.CollisionMask);
         var rayCastResults = _physics.IntersectRay(mapCords.MapId, ray, ent.Comp.MaxDistance, shooter, false);
 
+        // WOLFGATE(ShipShields): resolve shield crossings against their visible perimeter
+        rayCastResults = rayCastResults.Where(hit => !HasComp<WFShipShieldVisualsComponent>(hit.HitEntity));
+
         var target = args.Target;
         // If you are in a container, use the raycast result
         // Otherwise:
@@ -61,11 +65,24 @@ public sealed partial class HitscanBasicRaycastSystem : EntitySystem
         {
             trace.HitEntities.Add(result.Value.HitEntity);
 
-            _log.Add(LogType.HitScanHit,
-                $"{ToPrettyString(shooter):user} hit {ToPrettyString(result.Value.HitEntity):target}"
-                + $" using {ToPrettyString(args.Gun):entity}.");
+            // WOLFGATE(ShipShields) START: log only the target remaining after shield interception
+            // _log.Add(LogType.HitScanHit,
+            //     $"{ToPrettyString(shooter):user} hit {ToPrettyString(result.Value.HitEntity):target}"
+            //     + $" using {ToPrettyString(args.Gun):entity}.");
+            // WOLFGATE END
         }
 
+        // WOLFGATE(ShipShields) START: intercept beams before their visuals and damage
+        var shieldTrace = new WFShipShieldHitscanTraceEvent(ent.Owner, trace);
+        RaiseLocalEvent(ref shieldTrace);
+        trace = shieldTrace.Trace;
+        foreach (var hitEntity in trace.HitEntities)
+        {
+            _log.Add(LogType.HitScanHit,
+                $"{ToPrettyString(shooter):user} hit {ToPrettyString(hitEntity):target}"
+                + $" using {ToPrettyString(args.Gun):entity}.");
+        }
+        // WOLFGATE END
         RaiseLocalEvent(ent, ref trace);
     }
 }

@@ -1,0 +1,15 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "https://github.com/VOREStation/VOREStation/commit/5cf2ba8be1b538636b7813bcca22c8f080191df3",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "Neckfur",
+            "directions": 4
+        }
+    ]
+}

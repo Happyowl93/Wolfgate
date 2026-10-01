@@ -13,15 +13,6 @@ wf-marking-remove = Remove
 wf-marking-layer-colour = { $layer } colour
 # Used instead when a marking has a single layer, so it does not read "Foo colour".
 wf-marking-colour = Colour
-wf-color-fine-tune = Fine tune
-wf-color-custom = Custom
-wf-color-red = R
-wf-color-green = G
-wf-color-blue = B
-wf-color-hue = H
-wf-color-saturation = S
-wf-color-value = V
-wf-color-hex = Hex
 wf-marking-points-category = { $category }: { $points } left
 
 # Body part toggles in the markings picker, keyed by HumanoidVisualLayers

@@ -395,6 +395,8 @@
   categories: [ HideSpawnMenu ]
   parent: BaseBullet
   components:
+  # WOLFGATE(ShipShields): intercept artillery payloads at the shield perimeter
+  - type: ShipWeaponProjectile
   - type: Sprite
     sprite: Objects/Weapons/Guns/Projectiles/projectiles2.rsi
     state: buckshot
@@ -436,6 +438,8 @@
   parent: BaseBullet
   categories: [ HideSpawnMenu ]
   components:
+  # WOLFGATE(ShipShields): intercept artillery payloads at the shield perimeter
+  - type: ShipWeaponProjectile
   - type: Projectile
     damage:
       types:
@@ -474,6 +478,8 @@
   name: naval mine
   categories: [ HideSpawnMenu ]
   components:
+  # WOLFGATE(ShipShields): intercept artillery payloads at the shield perimeter
+  - type: ShipWeaponProjectile
   - type: Sprite
     noRot: false
     sprite: _Mono/Objects/SpaceArtillery/shells.rsi
@@ -505,6 +511,7 @@
           radius: 2
         mask:
         - ItemMask # BulletImpassable
+        - BulletImpassable # WOLFGATE(ShipShields): let deployed mines contact shield fixtures
   - type: TriggerOnCollide
     fixtureID: projectile
   - type: TriggerOnProximity
@@ -897,6 +904,8 @@
   parent: BaseBullet
   categories: [ HideSpawnMenu ]
   components:
+  # WOLFGATE(ShipShields): intercept artillery payloads at the shield perimeter
+  - type: ShipWeaponProjectile
   - type: Projectile
     damage:
       types:
@@ -935,6 +944,8 @@
   name: naval mine
   categories: [ HideSpawnMenu ]
   components:
+  # WOLFGATE(ShipShields): intercept artillery payloads at the shield perimeter
+  - type: ShipWeaponProjectile
   - type: Sprite
     noRot: false
     sprite: _Mono/Objects/SpaceArtillery/shells.rsi
@@ -965,6 +976,7 @@
           radius: 2
         mask:
         - ItemMask # BulletImpassable
+        - BulletImpassable # WOLFGATE(ShipShields): let deployed mines contact shield fixtures
   - type: TriggerOnCollide
     fixtureID: projectile
   - type: TriggerOnProximity

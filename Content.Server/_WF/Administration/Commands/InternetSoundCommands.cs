@@ -19,21 +19,27 @@ public sealed partial class PlayInternetSoundCommand : LocalizedEntityCommands
 
     public override void Execute(IConsoleShell shell, string argStr, string[] args)
     {
-        if (args.Length != 1)
+        if (args.Length is < 1 or > 2)
         {
             shell.WriteError(Loc.GetString("cmd-playinternetsound-invalid-args"));
             shell.WriteLine(Help);
             return;
         }
 
-        _internetSound.Play(shell.Player, args[0]);
+        if (!InternetSoundCommandArgs.TryParseStealth(shell, args, 1, out var stealth))
+            return;
+
+        _internetSound.Play(shell.Player, args[0], stealth);
     }
 
     public override CompletionResult GetCompletion(IConsoleShell shell, string[] args)
     {
-        return args.Length == 1
-            ? CompletionResult.FromHint(Loc.GetString("cmd-playinternetsound-hint"))
-            : CompletionResult.Empty;
+        return args.Length switch
+        {
+            1 => CompletionResult.FromHint(Loc.GetString("cmd-playinternetsound-hint")),
+            2 => CompletionResult.FromHintOptions(CompletionHelper.Booleans, Loc.GetString("cmd-playinternetsound-hint-stealth")),
+            _ => CompletionResult.Empty,
+        };
     }
 }
 
@@ -50,7 +56,7 @@ public sealed partial class PlayInternetSoundPaCommand : LocalizedEntityCommands
 
     public override void Execute(IConsoleShell shell, string argStr, string[] args)
     {
-        if (args.Length != 2)
+        if (args.Length is < 2 or > 3)
         {
             shell.WriteError(Loc.GetString("cmd-playinternetsoundpa-invalid-args"));
             shell.WriteLine(Help);
@@ -65,7 +71,10 @@ public sealed partial class PlayInternetSoundPaCommand : LocalizedEntityCommands
             return;
         }
 
-        _internetSound.PlayOverPa(shell.Player, args[1], grid.Value);
+        if (!InternetSoundCommandArgs.TryParseStealth(shell, args, 2, out var stealth))
+            return;
+
+        _internetSound.PlayOverPa(shell.Player, args[1], grid.Value, stealth);
     }
 
     public override CompletionResult GetCompletion(IConsoleShell shell, string[] args)
@@ -76,8 +85,26 @@ public sealed partial class PlayInternetSoundPaCommand : LocalizedEntityCommands
                 CompletionHelper.Components<MapGridComponent>(args[0], EntityManager),
                 Loc.GetString("cmd-playinternetsoundpa-hint-grid")),
             2 => CompletionResult.FromHint(Loc.GetString("cmd-playinternetsound-hint")),
+            3 => CompletionResult.FromHintOptions(CompletionHelper.Booleans, Loc.GetString("cmd-playinternetsound-hint-stealth")),
             _ => CompletionResult.Empty,
         };
+    }
+}
+
+/// <summary>
+/// The optional stealth flag both play commands take.
+/// </summary>
+internal static class InternetSoundCommandArgs
+{
+    public static bool TryParseStealth(IConsoleShell shell, string[] args, int index, out bool stealth)
+    {
+        stealth = false;
+
+        if (args.Length <= index || bool.TryParse(args[index], out stealth))
+            return true;
+
+        shell.WriteError(Loc.GetString("cmd-playinternetsound-invalid-stealth", ("value", args[index])));
+        return false;
     }
 }
 

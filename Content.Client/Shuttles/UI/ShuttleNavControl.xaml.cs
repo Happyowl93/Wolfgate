@@ -621,6 +621,7 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
 
         // Draw shields
         DrawShields(handle, xform, worldToShuttle);
+        DrawWolfgateShields(handle, xform, worldToView); // WOLFGATE(ShipShields): hull contours and directional coverage on all radar views.
 
         // Frontier Corvax: north line drawing
         DrawNorthLine(handle, worldRot);

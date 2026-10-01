@@ -99,7 +99,7 @@ public sealed partial class SafetyDepositConsoleWindow : FancyWindow
                 // Box info label - shows nickname if available, otherwise box ID and size
                 var boxInfoText = !string.IsNullOrEmpty(box.Nickname)
                     ? $"{box.Nickname}"
-                    : $"Box {box.BoxId.ToString()[..8]}";
+                    : Loc.GetString("safety-deposit-console-box-unnamed", ("id", box.BoxId.ToString()[..8]));
 
                 var boxIdLabel = new Label
                 {

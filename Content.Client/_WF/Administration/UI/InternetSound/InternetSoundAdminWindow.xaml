@@ -17,6 +17,12 @@
             <Button Name="PlayButton"
                     Text="{Loc 'wf-internet-sound-admin-play'}"
                     StyleClasses="ButtonSquare"
+                    MinWidth="70"
+                    Margin="0 0 4 0" />
+            <Button Name="StealthPlayButton"
+                    Text="{Loc 'wf-internet-sound-admin-stealth-play'}"
+                    ToolTip="{Loc 'wf-internet-sound-admin-stealth-play-tooltip'}"
+                    StyleClasses="ButtonSquare"
                     MinWidth="70" />
         </BoxContainer>
         <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">

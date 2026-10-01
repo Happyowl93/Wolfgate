@@ -33,6 +33,7 @@ public sealed partial class WolfgateSpawnUIController : UIController
         _proto.PrototypesReloaded += _ => _window?.Reload();
     }
 
+    /// <summary>Opens the spawn window with the search focused, or closes it if open.</summary>
     public void ToggleWindow()
     {
         EnsureWindow();
@@ -48,6 +49,7 @@ public sealed partial class WolfgateSpawnUIController : UIController
         _window.FocusSearch();
     }
 
+    /// <summary>Closes the spawn window if it exists.</summary>
     public void CloseWindow()
     {
         if (_window is { Disposed: false })

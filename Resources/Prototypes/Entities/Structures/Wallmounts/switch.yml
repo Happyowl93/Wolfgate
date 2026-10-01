@@ -291,6 +291,7 @@
   components:
   - type: Appearance
   - type: Lock
+    unlockOnClick: false # WOLFGATE(LockableButtons): a card with access presses the button, and it stays locked
   - type: AccessReader
   - type: Sprite
     offset: 0, -0.25

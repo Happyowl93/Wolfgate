@@ -1,3 +1,4 @@
+// WOLFGATE(Silicons): ported from HardLight
 using Content.Shared._HL.Silicons.Synths.Battery;
 
 namespace Content.Server._HL.Silicons.Synths.Battery;

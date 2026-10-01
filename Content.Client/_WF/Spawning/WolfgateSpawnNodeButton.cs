@@ -94,6 +94,7 @@ public sealed class WolfgateSpawnNodeButton : ContainerButton
         SetExpanded(false);
     }
 
+    /// <summary>Shows the entry count; an empty node dims while searching.</summary>
     public void SetCount(int count, bool searching)
     {
         _count.Text = count.ToString();
@@ -103,12 +104,14 @@ public sealed class WolfgateSpawnNodeButton : ContainerButton
         _count.FontColorOverride = dim ? _skin.TextDisabled : _skin.TextMuted;
     }
 
+    /// <summary>Sets whether a folder node shows as open.</summary>
     public void SetExpanded(bool expanded)
     {
         Expanded = expanded;
         _label.Text = _folder ? $"{(expanded ? "▼" : "▶")} {_text}" : _text;
     }
 
+    /// <summary>Highlights the node as the one being browsed.</summary>
     public void SetActive(bool active)
     {
         Pressed = active;

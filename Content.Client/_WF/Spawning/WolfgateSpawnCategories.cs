@@ -212,11 +212,14 @@ public static class WfSpawnCategories
             .Select(g => (g.Key, g.Select(e => e.Category).ToArray()))
             .ToArray();
 
+    /// <summary>The sidebar group a category sits under.</summary>
     public static WfSpawnGroup GroupFor(WfSpawnCategory category) => GroupOf[(int) category];
 
+    /// <summary>Localized category name.</summary>
     public static string CategoryName(WfSpawnCategory category) =>
         Loc.GetString($"wf-spawn-category-{Kebab(category.ToString())}");
 
+    /// <summary>Localized group name.</summary>
     public static string GroupName(WfSpawnGroup group) =>
         Loc.GetString($"wf-spawn-group-{Kebab(group.ToString())}");
 

@@ -28,7 +28,7 @@ public sealed partial class InternetSoundPopup : DefaultWindow
 
         SoundLabel.Text = title;
         SoundLabel.ToolTip = title;
-        StatusLabel.Text = Loc.GetString("wf-internet-sound-popup-loading", ("admin", admin));
+        StatusLabel.Text = Status("wf-internet-sound-popup-loading");
 
         SetVolume(volume);
         VolumeSlider.OnValueChanged += _ =>
@@ -45,7 +45,17 @@ public sealed partial class InternetSoundPopup : DefaultWindow
     /// </summary>
     public void SetPlaying()
     {
-        StatusLabel.Text = Loc.GetString("wf-internet-sound-popup-played", ("admin", _admin));
+        StatusLabel.Text = Status("wf-internet-sound-popup-played");
+    }
+
+    /// <summary>
+    /// A stealth sound has no admin name, so it gets the line that doesn't credit anyone.
+    /// </summary>
+    private string Status(string key)
+    {
+        return _admin.Length > 0
+            ? Loc.GetString(key, ("admin", _admin))
+            : Loc.GetString($"{key}-stealth");
     }
 
     /// <summary>

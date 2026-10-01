@@ -224,21 +224,25 @@ public sealed partial class ShuttleSystem
             var totalInertia = ourVelocity * ourMass + otherVelocity * otherMass;
             var inelasticVel = totalInertia / (ourMass + otherMass);
 
-            // Mono Edit - partial credit to https://github.com/Sector-Crescent/Hullrot/pull/692
-            //ShipShieldedComp is removed when shields are broken, reduces both energies when shields are active. ShipShieldsSystem ln 256.
-            float shieldFactor = 1f;
-            if (TryComp<ShipShieldedComponent>(args.OurEntity, out var ShipShieldedComponent) //Our ship collision resistance
-                && TryComp<ShipShieldEmitterComponent>(ShipShieldedComponent.Source, out var ShipShieldEmitterComponent)
-            )
-                shieldFactor *= ShipShieldEmitterComponent.CollisionResistanceMultiplier;
-
-            if (TryComp<ShipShieldedComponent>(args.OtherEntity, out var OtherShipShieldedComponent) //Other ship collision resistance
-                && TryComp<ShipShieldEmitterComponent>(OtherShipShieldedComponent.Source, out var OtherShipShieldEmitterComponent)
-            )
-                shieldFactor *= OtherShipShieldEmitterComponent.CollisionResistanceMultiplier;
-            toUsEnergy *= shieldFactor;
-            toOtherEnergy *= shieldFactor;
-            // Mono Edit end
+            // WOLFGATE(ShipShields) START: debit each hull shield for absorbed collision damage
+            // // Mono Edit - partial credit to https://github.com/Sector-Crescent/Hullrot/pull/692
+            // //ShipShieldedComp is removed when shields are broken, reduces both energies when shields are active. ShipShieldsSystem ln 256.
+            // float shieldFactor = 1f;
+            // if (TryComp<ShipShieldedComponent>(args.OurEntity, out var ShipShieldedComponent) //Our ship collision resistance
+            // && TryComp<ShipShieldEmitterComponent>(ShipShieldedComponent.Source, out var ShipShieldEmitterComponent)
+            // )
+            // shieldFactor *= ShipShieldEmitterComponent.CollisionResistanceMultiplier;
+            //
+            // if (TryComp<ShipShieldedComponent>(args.OtherEntity, out var OtherShipShieldedComponent) //Other ship collision resistance
+            // && TryComp<ShipShieldEmitterComponent>(OtherShipShieldedComponent.Source, out var OtherShipShieldEmitterComponent)
+            // )
+            // shieldFactor *= OtherShipShieldEmitterComponent.CollisionResistanceMultiplier;
+            // toUsEnergy *= shieldFactor;
+            // toOtherEnergy *= shieldFactor;
+            // // Mono Edit end
+            toUsEnergy = AbsorbWolfgateHullCollision(args.OurEntity, worldPoint, toUsEnergy);
+            toOtherEnergy = AbsorbWolfgateHullCollision(args.OtherEntity, worldPoint, toOtherEnergy);
+            // WOLFGATE END
 
             DoGridImpact((args.OurEntity, ourGrid, ourXform, ourBody), args.OurFixture, inelasticVel, ourVelocity, ourTile, ourTiles, toUsEnergy);
             DoGridImpact((args.OtherEntity, otherGrid, otherXform, otherBody), args.OtherFixture, inelasticVel, otherVelocity, otherTile, otherTiles, toOtherEnergy);

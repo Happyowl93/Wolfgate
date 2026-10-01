@@ -15,11 +15,13 @@ public static class ClassicVessels
     /// <summary>Classic ships no shipyard sells; only admins spawn them.</summary>
     public static readonly ProtoId<TagPrototype> AdminOnlyTag = "WFAdminOnlyVessel";
 
+    /// <summary>Whether the vessel is a classic ship kept from before Monolith#4624.</summary>
     public static bool IsClassic(VesselPrototype vessel)
     {
         return vessel.Tags.Contains(ClassicTag);
     }
 
+    /// <summary>Whether the classic vessel is admin spawn only.</summary>
     public static bool IsAdminOnly(VesselPrototype vessel)
     {
         return vessel.Tags.Contains(AdminOnlyTag);

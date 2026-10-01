@@ -10,6 +10,8 @@ on:
 
 jobs:
   build:
+    # WOLFGATE(Ci): disabled, publish_multi_request.py has no real CDN; publish.yml's fork_id input replaces this
+    if: false
     runs-on: ubuntu-latest
 
     steps:

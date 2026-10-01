@@ -3,7 +3,9 @@
 ## Radio popup
 wf-internet-sound-popup-title = Admin Radio
 wf-internet-sound-popup-played = Played by {$admin}
+wf-internet-sound-popup-played-stealth = Now playing
 wf-internet-sound-popup-loading = Tuning in... (from {$admin})
+wf-internet-sound-popup-loading-stealth = Tuning in...
 wf-internet-sound-popup-volume = Volume
 wf-internet-sound-popup-stop = Mute
 
@@ -13,6 +15,9 @@ wf-internet-sound-admin-title = Play Internet Sound
 wf-internet-sound-admin-info = Plays a YouTube, SoundCloud or other link to every connected player, or out of one ship's PA speakers.
 wf-internet-sound-admin-url = https://...
 wf-internet-sound-admin-play = Play
+wf-internet-sound-admin-stealth-play = Stealth Play
+wf-internet-sound-admin-stealth-play-tooltip = Plays without showing anyone, other admins included, who played it. The admin logs still name you.
+wf-internet-sound-admin-stealth-requester = an unnamed admin
 wf-internet-sound-admin-stop = Stop for everyone
 wf-internet-sound-admin-pa = Over ship PA
 wf-internet-sound-admin-grid = Grid entity id
@@ -54,13 +59,16 @@ wf-internet-sound-error-unknown = Something went wrong fetching the sound. Check
 
 ## Commands
 cmd-playinternetsound-desc = Plays a YouTube, SoundCloud or other yt-dlp supported link to every connected player.
-cmd-playinternetsound-help = Usage: {$command} <link>
+cmd-playinternetsound-help = Usage: {$command} <link> [stealth]
+    With stealth true, nobody is shown who played it; only the admin logs record it.
 cmd-playinternetsound-hint = <link>
-cmd-playinternetsound-invalid-args = Expected exactly one link.
+cmd-playinternetsound-hint-stealth = [stealth]
+cmd-playinternetsound-invalid-args = Expected a link and an optional stealth flag.
+cmd-playinternetsound-invalid-stealth = {$value} isn't true or false.
 cmd-playinternetsoundpa-desc = Plays a yt-dlp supported link out of one ship's PA speakers.
-cmd-playinternetsoundpa-help = Usage: {$command} <grid> <link>
+cmd-playinternetsoundpa-help = Usage: {$command} <grid> <link> [stealth]
 cmd-playinternetsoundpa-hint-grid = <grid>
-cmd-playinternetsoundpa-invalid-args = Expected a grid entity id and a link.
+cmd-playinternetsoundpa-invalid-args = Expected a grid entity id, a link and an optional stealth flag.
 cmd-playinternetsoundpa-invalid-grid = {$grid} isn't a grid.
 cmd-stopinternetsound-desc = Stops the current internet sound for everyone.
 cmd-stopinternetsound-help = Usage: {$command}

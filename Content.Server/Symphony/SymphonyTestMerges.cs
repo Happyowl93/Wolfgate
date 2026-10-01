@@ -21,8 +21,10 @@ namespace Content.Server.Symphony;
 /// </summary>
 public static class SymphonyTestMerges
 {
+    /// <summary>The stamp test_merge.py writes into Resources.</summary>
     public const string StampPath = "/Symphony/testmerges.json";
 
+    /// <summary>A pull request merged into this build.</summary>
     public sealed record Merged(
         [property: JsonPropertyName("number")] int Number,
         [property: JsonPropertyName("title")] string Title,
@@ -30,6 +32,7 @@ public static class SymphonyTestMerges
         [property: JsonPropertyName("sha")] string Sha,
         [property: JsonPropertyName("url")] string Url);
 
+    /// <summary>A pull request asked for but not merged, with why.</summary>
     public sealed record Failed(
         [property: JsonPropertyName("number")] int Number,
         [property: JsonPropertyName("title")] string Title,
@@ -49,11 +52,13 @@ public static class SymphonyTestMerges
     private static IReadOnlyList<Failed> _failed = Array.Empty<Failed>();
     private static string _base = "";
 
+    /// <summary>Pull requests merged into this build.</summary>
     public static IReadOnlyList<Merged> MergedPullRequests
     {
         get { lock (Gate) return _merged; }
     }
 
+    /// <summary>Pull requests that were asked for but did not merge.</summary>
     public static IReadOnlyList<Failed> FailedPullRequests
     {
         get { lock (Gate) return _failed; }

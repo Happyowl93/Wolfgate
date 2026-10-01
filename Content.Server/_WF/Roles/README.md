@@ -29,6 +29,10 @@ loadout id), `CustomJobTitleRules` (cleaning and checks shared by client and ser
 - [`Content.Client/_WF/Roles/CustomJobTitleWindow.cs`](../../../Content.Client/_WF/Roles/CustomJobTitleWindow.cs)
 - [`Content.Client/_WF/Roles/HumanoidProfileEditor.CustomJobTitle.cs`](../../../Content.Client/_WF/Roles/HumanoidProfileEditor.CustomJobTitle.cs)
 
+### Unit tests
+
+- [`Content.Tests/_WF/Roles/CustomJobTitleRulesTest.cs`](../../../Content.Tests/_WF/Roles/CustomJobTitleRulesTest.cs)
+
 ### Prototypes
 
 - [`Resources/Prototypes/_WF/Roles/custom_job_titles.yml`](../../../Resources/Prototypes/_WF/Roles/custom_job_titles.yml)
@@ -41,7 +45,9 @@ loadout id), `CustomJobTitleRules` (cleaning and checks shared by client and ser
 
 - [`Content.Client/_NF/LateJoin/Controls/CrewPickerControl.xaml.cs`](../../../Content.Client/_NF/LateJoin/Controls/CrewPickerControl.xaml.cs): custom job title
 - [`Content.Client/_NF/LateJoin/Controls/StationPickerControl.xaml.cs`](../../../Content.Client/_NF/LateJoin/Controls/StationPickerControl.xaml.cs): custom job title
-- [`Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs`](../../../Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs): it edits the same role loadout
+- [`Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs`](../../../Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs)
+  - it edits the same role loadout
+  - close the custom job title window
 - [`Content.Server.Database/Model.cs`](../../../Content.Server.Database/Model.cs): custom job title
 - [`Content.Server/Administration/Systems/AdminSystem.cs`](../../Administration/Systems/AdminSystem.cs): real job plus custom title
 - [`Content.Server/Database/ServerDbBase.cs`](../../Database/ServerDbBase.cs)

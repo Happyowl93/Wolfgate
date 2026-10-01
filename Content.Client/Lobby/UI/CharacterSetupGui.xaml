@@ -8,6 +8,29 @@
         <PanelContainer Name="BackgroundPanel" />
         <BoxContainer Orientation="Vertical" SeparationOverride="0">
             <!-- WOLFGATE(Stylesheets) START: creator header laid out like a game-menu sub-screen; control names unchanged -->
+            <!-- upstream original, kept for merges:
+            <BoxContainer Orientation="Horizontal" MinSize="0 40">
+                <Label Text="{Loc 'character-setup-gui-character-setup-label'}"
+                       Margin="8 0 0 0" VAlign="Center"
+                       StyleClasses="LabelHeadingBigger" />
+
+                <Button Name="StatsButton" HorizontalExpand="True"
+                        Text="{Loc 'character-setup-gui-character-setup-stats-button'}"
+                        StyleClasses="ButtonBig"
+                        HorizontalAlignment="Right" />
+                <cc:CommandButton Name="AdminRemarksButton"
+                                  Command="adminremarks"
+                                  Text="{Loc 'character-setup-gui-character-setup-adminremarks-button'}"
+                                  StyleClasses="ButtonBig" />
+                <Button Name="RulesButton"
+                        Text="{Loc 'character-setup-gui-character-setup-rules-button'}"
+                        StyleClasses="ButtonBig"/>
+                <Button Name="CloseButton"
+                        Access="Public"
+                        Text="{Loc 'character-setup-gui-character-setup-close-button'}"
+                        StyleClasses="ButtonBig"/>
+            </BoxContainer>
+            -->
             <BoxContainer Orientation="Horizontal" Margin="24 14 24 8" SeparationOverride="6">
                 <Label Text="{Loc 'character-setup-gui-character-setup-label'}" StyleClasses="LobbyTitle" VAlign="Center" />
                 <Control HorizontalExpand="True" />
@@ -30,6 +53,11 @@
             <!-- WOLFGATE END -->
             <BoxContainer Orientation="Horizontal" VerticalExpand="True" SeparationOverride="0">
                 <!-- WOLFGATE(Stylesheets) START: slot list in a titled card, was a bare ScrollContainer -->
+                <!-- upstream original, kept for merges:
+                <ScrollContainer MinSize="325 0" Margin="5 5 0 0">
+                    <BoxContainer Name="Characters" Orientation="Vertical" />
+                </ScrollContainer>
+                -->
                 <PanelContainer StyleClasses="CreatorCard" MinWidth="320" Margin="24 12 0 12">
                     <BoxContainer Orientation="Vertical" SeparationOverride="6">
                         <Label Text="{Loc 'wf-creator-slots'}" StyleClasses="CreatorHeading" />

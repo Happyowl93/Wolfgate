@@ -31,8 +31,9 @@ public sealed partial class ThavenMoodUi : FancyWindow
         SetMoods(_moods);
     }
 
+    // WOLFGATE(Species) START: copies edited titles and text back onto the tracked moods, so rebuilding the list keeps them
     /// <summary>
-    /// WOLFGATE(Species): copies edited titles and text back onto the tracked moods, so rebuilding the list keeps them.
+    /// Copies edited titles and text back onto the tracked moods.
     /// </summary>
     private void SyncMoodsFromUi()
     {
@@ -56,6 +57,7 @@ public sealed partial class ThavenMoodUi : FancyWindow
                 mood.MoodDesc = text;
         }
     }
+    // WOLFGATE END
 
     public List<ThavenMood> GetMoods()
     {

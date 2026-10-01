@@ -8,7 +8,7 @@ without a module.
 
     python Tools/_WF/Ci/modules.py --write            regenerate the docs, creating missing READMEs
     python Tools/_WF/Ci/modules.py --check            fail if the docs are stale or a rule is broken
-    python Tools/_WF/Ci/modules.py --pr-check <ref>   fail if a file changed since <ref> outside _WF has no marker
+    python Tools/_WF/Ci/modules.py --pr-check <ref>   fail if an edit since <ref> outside _WF has no marker
 
 Reports are cut to 20 lines per section; --all prints everything. Needs PyYAML (pip install pyyaml).
 """
@@ -76,6 +76,21 @@ NOT_SCANNED = {"AGENTS.md", "CLAUDE.md"}
 # Changed files the pull request check ignores: generated files and the agent guidelines.
 PR_EXEMPT_PREFIXES = ("Resources/Changelog/", "Content.Server.Database/Migrations/")
 PR_EXEMPT_FILES = {"AGENTS.md", "CLAUDE.md"}
+# Files that can't carry a marker (binary, JSON, rich text) and maps, which the mapper rewrites.
+UNMARKABLE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".ogg", ".wav", ".mp3", ".ttf", ".otf",
+                       ".json", ".txt"}
+UNMARKABLE_PREFIXES = ("Resources/Maps/", "Resources/SharedMaps/")
+# Marker syntax by suffix, for the pull request hints; anything else uses //.
+HASH_SUFFIXES = {".yml", ".yaml", ".ftl", ".py", ".toml", ".sh", ".gitignore", ".gitattributes"}
+XML_SUFFIXES = {".xml", ".xaml", ".csproj", ".props", ".targets", ".svg", ".html", ".md"}
+# Placeholder in suggested unmarked entries; load_unmarked rejects it until it is filled in.
+PLACEHOLDER = "TODO"
+# The new-file start and length of a -U0 diff hunk.
+HUNK = re.compile(r"^@@ -\S+ \+(\d+)(?:,(\d+))? @@", re.M)
+# A line holding only attributes of an XML tag, possibly opening or closing it.
+XML_ATTRIBUTE = re.compile(r'\s*(?:<[\w:.]+\s+)?(?:[\w:.]+="[^"]*"\s*)+/?>?\s*$')
+# A marker alone on its line, after nothing but a comment opener: it covers the rest of its paragraph.
+STANDALONE = re.compile(r"\s*(?://+|#+|<!--|/\*+|\*|;|--)\s*WOLFGATE(?![\w-])")
 
 MODULE_NAME = re.compile(r"[A-Z][A-Za-z0-9]*")
 WORD = re.compile(r"(?<![\w-])WOLFGATE(?![\w-])")
@@ -128,10 +143,14 @@ class Report:
         "Changed files outside _WF without a marker": (
             "Mark the edit (// WOLFGATE(<Module>): reason) or, if the file can't hold a comment, list it under "
             f"unmarked in {CONFIG}."),
+        "Edits outside _WF without a marker": (
+            "Each added or changed block needs a marker on one of its lines, a marker alone on a line above it in "
+            "the same paragraph, or a START/END around it."),
     }
 
     def __init__(self):
         self.sections: dict[str, list[tuple[str, str | None, int | None]]] = {}
+        self.notes: list[str] = []
 
     def add(self, section, text, path=None, line=None):
         self.sections.setdefault(section, []).append((text, path, line))
@@ -155,6 +174,8 @@ class Report:
                 for text, path, line in shown:
                     where = f" file={escape(path, True)}" + (f",line={line}" if line else "") if path else ""
                     print(f"::error{where}::{escape(f'{title}: {text}')}")
+        for note in self.notes:
+            print(f"\n{note}")
 
 
 def escape(value, prop=False):
@@ -211,6 +232,27 @@ def in_wf(path):
 
 def sort_key(path):
     return path.lower(), path
+
+
+def unmarkable(path):
+    return path.startswith(UNMARKABLE_PREFIXES) or Path(path).suffix.lower() in UNMARKABLE_SUFFIXES
+
+
+def marker_example(path):
+    """A line marker in the comment syntax of the file at path."""
+    name = Path(path)
+    suffix = name.suffix.lower() or name.name.lower()
+    if suffix in HASH_SUFFIXES:
+        return "# WOLFGATE(<Module>): reason"
+    if suffix in XML_SUFFIXES:
+        return "<!-- WOLFGATE(<Module>): reason -->"
+    return "// WOLFGATE(<Module>): reason"
+
+
+def unmarked_entry_path(path):
+    """The path an unmarked entry would list: the whole RSI for a file inside one, else the file."""
+    match = re.match(r"(.*?\.rsi/)", path)
+    return match[1] if match else path
 
 
 def read_text(path):
@@ -284,6 +326,7 @@ class Modules:
         self.edits: dict[str | None, dict[str, list[str]]] = {}
         self.unmarked: list[Unmarked] = []
         self.external: list[Module] = []
+        self.fork_point: str | None = None
 
         # One listing and one grep, run side by side; untracked files outside modules are scanned in Python.
         listing = git("ls-files", "-z", "-t", "--cached", "--others", "--exclude-standard")
@@ -295,6 +338,7 @@ class Modules:
         hits = finish(grep, allowed=(0, 1))
 
         self.load_external(config)
+        self.load_fork_point(config)
         untracked = self.classify(entries)
         self.check_names()
         self.place_readmes()
@@ -315,6 +359,15 @@ class Modules:
         if not isinstance(config, dict):
             fatal(f"{CONFIG} must be a mapping")
         return config
+
+    def load_fork_point(self, config):
+        point = config.get("fork_point")
+        if point is None:
+            return
+        if not isinstance(point, str) or git("cat-file", "-e", f"{point}^{{commit}}").wait() != 0:
+            self.report.add("modules.yml", f"fork_point {point} is not a commit in this checkout", CONFIG)
+            return
+        self.fork_point = point
 
     def load_external(self, config):
         external = config.get("external") or {}
@@ -344,7 +397,9 @@ class Modules:
                 continue
             path, module, reason = entry["path"], entry.get("module"), str(entry.get("reason") or "").strip()
             problem = None
-            if module is not None and module not in self.modules:
+            if PLACEHOLDER in (module, reason):
+                problem = f"module or reason is still {PLACEHOLDER}"
+            elif module is not None and module not in self.modules:
                 problem = f"unknown module {module}"
             elif not reason:
                 problem = "no reason"
@@ -608,17 +663,106 @@ class Modules:
     def pr_check(self, base, report):
         changed = finish(git("diff", "--name-only", "-z", "--no-renames", "--diff-filter=d", f"{base}...HEAD"))
         merge_base = None
+        entries = {}
         for path in changed.decode("utf-8").split("\0"):
             if (not path or in_wf(path) or path in PR_EXEMPT_FILES or path.startswith(PR_EXEMPT_PREFIXES)
                     or path == "RobustToolbox" or self.external_module(path)):
                 continue
-            if path in self.marked or any(self.unmarked_matches(u, path) for u in self.unmarked):
+            if any(self.unmarked_matches(u, path) for u in self.unmarked):
+                continue
+            if not unmarkable(path):
+                uncovered = self.unmarked_hunks(base, "HEAD", path, self.fork_point)
+                if uncovered is not None:
+                    for line in uncovered:
+                        report.add("Edits outside _WF without a marker",
+                                   f"{path}:{line} (mark it: {marker_example(path)})", path, line)
+                    continue
+            # Nothing added: a deletion, or a binary file.
+            if path in self.marked:
                 continue
             if merge_base is None:
                 merge_base = finish(git("merge-base", base, "HEAD")).decode("utf-8").strip()
             if self.reverted(base, merge_base, path):
                 continue
-            report.add("Changed files outside _WF without a marker", path, path)
+            if unmarkable(path):
+                entries[unmarked_entry_path(path)] = None
+                hint = "can't hold a marker: needs an unmarked entry, suggested below"
+            else:
+                hint = f"mark it: {marker_example(path)}"
+            report.add("Changed files outside _WF without a marker", f"{path} ({hint})", path)
+        if entries:
+            lines = [f"Suggested unmarked entries for {CONFIG}; set module (or null) and reason in place of "
+                     f"{PLACEHOLDER}:"]
+            for path in entries:
+                lines += [f"  - path: {path}", f"    module: {PLACEHOLDER}", f"    reason: {PLACEHOLDER}"]
+            report.notes.append("\n".join(lines))
+
+    @staticmethod
+    def added_lines(old, new, path):
+        """The line numbers of new's version of path that differ from old's."""
+        diff = finish(git("diff", "-U0", "--no-color", "--no-ext-diff", "--no-renames", old, new, "--",
+                          path)).decode("utf-8", "replace")
+        return [n for m in HUNK.finditer(diff)
+                for n in range(int(m[1]), int(m[1]) + int(m[2] if m[2] is not None else 1))]
+
+    @staticmethod
+    def unmarked_hunks(base, head, path, fork_point=None):
+        """First lines of the blocks head added to path that no marker covers, or None when it added no lines."""
+        merge_base = finish(git("merge-base", base, head)).decode("utf-8").strip()
+        added = Modules.added_lines(merge_base, head, path)
+        if not added:
+            return None
+        # Lines that match Monolith at the fork point are upstream code, e.g. an upstream file put back.
+        if fork_point and git("cat-file", "-e", f"{fork_point}:{path}").wait() == 0:
+            changed = set(Modules.added_lines(fork_point, head, path))
+            added = [n for n in added if n in changed]
+        hunks, run = [], []
+        for n in added:
+            if run and n != run[-1] + 1:
+                hunks.append(run)
+                run = []
+            run.append(n)
+        if run:
+            hunks.append(run)
+        text = finish(git("show", f"{head}:{path}")).decode("utf-8-sig", "replace")
+        lines = re.sub(r"\r+\n", "\n", text).split("\n")
+        marked, standalone, blocks, start = set(), set(), [], None
+        for number, line in enumerate(lines, 1):
+            if "WOLFGATE" not in line:
+                continue
+            parsed = parse_marker(line)
+            if parsed is None or parsed == "broken":
+                continue
+            marked.add(number)
+            kind = parsed[1]
+            if kind == "START":
+                start = number
+            elif kind == "END" and start is not None:
+                blocks.append((start, number))
+                start = None
+            elif kind is None and STANDALONE.match(line):
+                standalone.add(number)
+        xml = Path(path).suffix.lower() in XML_SUFFIXES
+        uncovered = []
+        for hunk in hunks:
+            filled = [n for n in hunk if n <= len(lines) and lines[n - 1].strip()]
+            if not filled or any(n in marked for n in hunk):
+                continue
+            # A comment can't go inside an XML tag, so an added xmlns is named in a marker elsewhere in the file.
+            if xml and all(XML_ATTRIBUTE.match(lines[n - 1]) for n in filled):
+                names = re.findall(r"xmlns:[\w.]+", " ".join(lines[n - 1] for n in filled))
+                if any(re.search(re.escape(name) + r"(?![\w.])", lines[m - 1]) for name in names for m in marked):
+                    continue
+            if all(any(s <= n <= e for s, e in blocks) for n in filled):
+                continue
+            # A marker alone on a line above, with no blank line in between, covers the rest of its paragraph.
+            above = filled[0] - 1
+            while above >= 1 and lines[above - 1].strip() and above not in standalone:
+                above -= 1
+            if above >= 1 and above in standalone:
+                continue
+            uncovered.append(filled[0])
+        return uncovered
 
     @staticmethod
     def reverted(base, merge_base, path):
@@ -638,7 +782,7 @@ def main():
     mode.add_argument("--write", action="store_true", help="regenerate the module READMEs and NONMODULAR.md")
     mode.add_argument("--check", action="store_true", help="fail if the docs are stale or a rule is broken")
     parser.add_argument("--pr-check", metavar="BASE",
-                        help="fail if a file changed since BASE outside _WF has no marker")
+                        help="fail if an edit since BASE outside _WF has no marker")
     parser.add_argument("--all", action="store_true", help="list every problem instead of the first 20 per section")
     args = parser.parse_args()
     if not (args.write or args.check or args.pr_check):

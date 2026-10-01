@@ -12,7 +12,7 @@
   - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
     soundGroups:
       Brute:
-        collection: WolfgateBulletImpactGlass
+        collection: WFBulletImpactGlass # WOLFGATE(Weapons)
   - type: RCDDeconstructable
     deconstructable: false
   - type: MeleeSound
