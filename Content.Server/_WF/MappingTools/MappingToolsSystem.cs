@@ -112,7 +112,7 @@ public sealed partial class MappingToolsSystem : EntitySystem
         var result = new Resolved { Grid = (gridUid, grid) };
         Box2i? extent = null;
 
-        if (selection.Area is { } area && area.Width > 0 && area.Height > 0 && area.Area <= MaxArea)
+        if (selection.Area is { } area && area.Width > 0 && area.Height > 0 && (long) area.Width * area.Height <= MaxArea)
         {
             extent = area;
 
