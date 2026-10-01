@@ -1261,8 +1261,11 @@ public sealed partial class ShuttleSystem
                 else
                 {
                     var margin = _random.NextFloat(-maxMargin, maxMargin);
-                    targetAABB.Left += margin;
-                    targetAABB.Right += margin;
+                    // WOLFGATE(EngineCompat) START: Translate both bounds together for v291 Box2 validation.
+                    // targetAABB.Left += margin;
+                    // targetAABB.Right += margin;
+                    targetAABB = targetAABB.Translated(new Vector2(margin, 0f));
+                    // WOLFGATE END
                 }
 
                 if (positiveY == true)
@@ -1280,8 +1283,11 @@ public sealed partial class ShuttleSystem
                 else
                 {
                     var margin = _random.NextFloat(-maxMargin, maxMargin);
-                    targetAABB.Bottom += margin;
-                    targetAABB.Top += margin;
+                    // WOLFGATE(EngineCompat) START: Translate both bounds together for v291 Box2 validation.
+                    // targetAABB.Bottom += margin;
+                    // targetAABB.Top += margin;
+                    targetAABB = targetAABB.Translated(new Vector2(0f, margin));
+                    // WOLFGATE END
                 }
             }
             iteration++;

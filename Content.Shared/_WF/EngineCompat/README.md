@@ -25,6 +25,10 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 - [`Content.Shared/_WF/EngineCompat/PrototypeFlagsTypeSerializer.cs`](PrototypeFlagsTypeSerializer.cs)
 - [`Content.Shared/_WF/EngineCompat/PrototypeIdSerializers.cs`](PrototypeIdSerializers.cs)
 
+### Integration tests
+
+- [`Content.IntegrationTests/Tests/_WF/EngineCompat/ShuttleProximityTest.cs`](../../../Content.IntegrationTests/Tests/_WF/EngineCompat/ShuttleProximityTest.cs)
+
 ### Prototypes
 
 - [`Resources/Prototypes/_WF/EngineCompat/light_mask.yml`](../../../Resources/Prototypes/_WF/EngineCompat/light_mask.yml)
@@ -344,7 +348,9 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 - [`Content.Server/Shuttles/Systems/FTLAntiCollisionSystem.cs`](../../../Content.Server/Shuttles/Systems/FTLAntiCollisionSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Server/Shuttles/Systems/ShuttleConsoleSystem.FTL.cs`](../../../Content.Server/Shuttles/Systems/ShuttleConsoleSystem.FTL.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Server/Shuttles/Systems/ShuttleSystem.cs`](../../../Content.Server/Shuttles/Systems/ShuttleSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
-- [`Content.Server/Shuttles/Systems/ShuttleSystem.FasterThanLight.cs`](../../../Content.Server/Shuttles/Systems/ShuttleSystem.FasterThanLight.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
+- [`Content.Server/Shuttles/Systems/ShuttleSystem.FasterThanLight.cs`](../../../Content.Server/Shuttles/Systems/ShuttleSystem.FasterThanLight.cs)
+  - Translate both bounds together for v291 Box2 validation.
+  - Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Server/Shuttles/Systems/ShuttleSystem.GridFill.cs`](../../../Content.Server/Shuttles/Systems/ShuttleSystem.GridFill.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Server/Silicons/Borgs/BorgSystem.cs`](../../../Content.Server/Silicons/Borgs/BorgSystem.cs): Engine v289 removed [ValidatePrototypeId]; its constants became ProtoId fields.
 - [`Content.Server/Silicons/Laws/IonStormSystem.cs`](../../../Content.Server/Silicons/Laws/IonStormSystem.cs): Engine v289 removed [ValidatePrototypeId]; its constants became ProtoId fields.
