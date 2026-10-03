@@ -1,0 +1,160 @@
+# Asf
+
+The Astraeus Solar Federation (ASF): a noblebright, multispecies federation with a minor presence in the
+sector. It coexists with the TSF rather than replacing or fighting it. Purple is its colour, and its doctrine is
+good shields, lasers first and a few self-loading torpedoes.
+
+Players join at ASF Lantern Post (`WFAsfLantern`, `Resources/Prototypes/_WF/Asf/lantern.yml`) as Envoy, Enforcer,
+Field Researcher or Colonist. It is a base ship with a slim, 21-tile-wide pressure hull that spawns as a mobile POI
+(no ForceAnchor) with gyroscopes and a station anchor. Outside the pressure hull, swept delta wings continue the
+bow's taper, the waist stays clear for docking, and two engine nacelles and a central engine block carry eight
+large thrusters (`WFAsfThrusterLarge`) plus small manoeuvring ones. A pointed bow holds the bridge and a fire-control ready room;
+behind it come the envoy office, shipyard hall and quarters, then the post, a wardrobe room with the ASF drobe
+(`WFAsfDrobe`) and the commons. The public middle (consular office, atrium, clinic and the dock concourse) sits
+between them and the aft: farm, gyro and power rooms, R&D lab, stores, atmos and an anomaly testing pair (an
+observation room with the analysis console and anomaly vessel, looking through plasma glass into a test chamber
+with an artifact analyzer and an APE).
+
+- Built like the other faction stations: station-grade plastitanium walls and windows, a purple FS-421 station
+  shield (`WFAsfShieldGenerator`) and eight RTGs (320 kW against about 225 kW rated load with the shield's 80 kW
+  idle draw and the large thrusters). Room density was matched against Hokkaido, Camelot and the Halcyon (`wfmap.py stats`).
+- Self-defence: 10 guns on hull sponsons (2 Apollo heavy lasers, 4 Prometheus cannons, 2 Serpent torpedo launchers,
+  2 Phalanx point defence), fired from the bridge through the `GunneryServerStation` in the ready room. For scale,
+  Hokkaido mounts 22 guns and the Halcyon about 90. Guns recharge from their own batteries.
+- Fleet (`fleet.yml`), sold at `WFAsfComputerShipyard` in the shipyard hall (a purple recolour of the USSP
+  shipyard screen). Prices and loadouts were set against other factions' hulls of similar tile count, scoring
+  firepower by hardpoint size (light 1, medium 2, heavy 4):
+
+  | Hull | Tiles | Firepower | Shield | Price |
+  |---|---|---|---|---|
+  | Gleaner (mining pod) | 33 | - | - | 25k |
+  | Lamplighter (survey) | 95 | - | - | 38k |
+  | Porter (hauler) | 130 | - | - | 40k |
+  | Vigil (escort fighter) | 64 | 3: Prometheus, Phalanx | - | 40k |
+  | Bulwark (gunship) | 99 | 4: Prometheus, Serpent | small | 75k |
+  | Guardian (corvette) | 237 | 12: Apollo, 2 Prometheus, 2 Serpent | small | 120k |
+  | Lodestar (flagship frigate) | 479 | 22: 2 Apollo, 4 Prometheus, 2 Serpent, 2 Phalanx | MS-250 Aegis | 250k, voucher only |
+
+  Peers at those sizes: QJ340/Bazalt (fighters), QJ270/Strayk/Reaver (gunships), Paladin/Kite/Shiv (corvettes),
+  Calypso/Senkusha/Neptune (voucher frigates). Each hull's gunnery server is sized to its guns.
+- Purple LPCs redeem only at the ASF console: civilian (Gleaner, Porter, Lamplighter), escort (Vigil, Bulwark) and
+  Lodestar. Only the Envoy starts with one (escort), like the VG Commander's Wolf voucher. The rest are earned like
+  other factions' LPCs: research `WFAsfLPCCivilian`, `WFAsfLPCEscort` and `WFAsfLPCLodestar` (tier 2) on the lab's
+  `WFAsfResearchServer` (its own `WFAsf` discipline), then print them at `WFAsfLathe` (`research.yml`). The
+  fabricator also prints universal shipgun ammo.
+- Lantern Post clears drones within 1.5 km and keeps world-gen debris out of 800 m, like Hokkaido and Camelot.
+- Jobs are generated: edit the roster in `Tools/_WF/Asf/generate_roles.py` and re-run it.
+- The base is scripted: edit `Tools/_WF/Asf/build_lantern.py` (needs the ss14-mapping kit) and re-run it,
+  or edit the map in the in-game mapper and drop the script.
+- Official clothing: `WFAsfClothingUniformService`, `WFAsfClothingHeadBeret`, `WFAsfClothingOuterGreatcoat`.
+  `Entities/clothing_wardrobe.yml` adds 19 more pieces, including the backpack, satchel and duffel the drobe sells.
+
+## Ported from Hullrot: Eclipsion
+
+The wardrobe sprites and the seven hulls come from
+[Eclipsion](https://github.com/eclipsion-team/eclipsion)'s DSM faction, renamed and rewritten for the ASF.
+
+- Only assets whose `meta.json` gives an open licence (CC-BY-SA-3.0, Shiptest, tgstation and Baystation derived)
+  were taken. Anything marked "all rights reserved" or under the Eclipsion Restricted Asset License was left out;
+  don't port those without written permission from their team.
+- The hulls (DSM Peasant, Impel, Gnosis, Redemptor, Imparator, Dragoon and Praxis; AGPL-3.0) are converted by
+  `Tools/_WF/Asf/port_dsm_hulls.py`, which swaps prototypes Wolfgate lacks for local ones and arms each DSM mount from
+  its `LOADOUT` table. Re-running it needs an Eclipsion checkout.
+- The DSM thruster sprite was dropped: its fore and aft frames are 3/4 views, so no plume could leave the nozzle.
+  `WFAsfThruster` and `WFAsfThrusterLarge` are the plan-view vanilla (Baystation) and Mono large thrusters recoloured
+  to the ASF palette by `Tools/_WF/Asf/recolour_thrusters.py`.
+
+## Lore
+
+- The ASF spans the solar system and a collection of alien species. Humanity is one member, not the driver.
+- The moth fleet ended a human conflict and let humanity join.
+- The ASF comes from our SS13 server, so its history overlaps the TSF's. In-game the two are not rivals.
+
+<!-- WOLFGATE-GENERATED START -->
+<!-- Generated by python Tools/_WF/Ci/modules.py --write. Don't edit by hand. -->
+
+## Files
+
+### Integration tests
+
+- [`Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs)
+
+### Prototypes
+
+- [`Resources/Prototypes/_WF/Asf/Entities/banners.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/banners.yml)
+- [`Resources/Prototypes/_WF/Asf/Entities/clothing.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/clothing.yml)
+- [`Resources/Prototypes/_WF/Asf/Entities/clothing_wardrobe.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/clothing_wardrobe.yml)
+- [`Resources/Prototypes/_WF/Asf/Entities/devices.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/devices.yml)
+- [`Resources/Prototypes/_WF/Asf/Entities/drobe.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/drobe.yml)
+- [`Resources/Prototypes/_WF/Asf/Entities/vouchers.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/vouchers.yml)
+- [`Resources/Prototypes/_WF/Asf/faction.yml`](../../../Resources/Prototypes/_WF/Asf/faction.yml)
+- [`Resources/Prototypes/_WF/Asf/fleet.yml`](../../../Resources/Prototypes/_WF/Asf/fleet.yml)
+- [`Resources/Prototypes/_WF/Asf/lantern.yml`](../../../Resources/Prototypes/_WF/Asf/lantern.yml)
+- [`Resources/Prototypes/_WF/Asf/research.yml`](../../../Resources/Prototypes/_WF/Asf/research.yml)
+- [`Resources/Prototypes/_WF/Asf/Roles/jobs.yml`](../../../Resources/Prototypes/_WF/Asf/Roles/jobs.yml)
+
+### Localization
+
+- [`Resources/Locale/en-US/_WF/Asf/faction.ftl`](../../../Resources/Locale/en-US/_WF/Asf/faction.ftl)
+- [`Resources/Locale/en-US/_WF/Asf/roles.ftl`](../../../Resources/Locale/en-US/_WF/Asf/roles.ftl)
+- [`Resources/Locale/en-US/_WF/Asf/wardrobe.ftl`](../../../Resources/Locale/en-US/_WF/Asf/wardrobe.ftl)
+
+### Textures
+
+- [`Resources/Textures/_WF/Asf/Clothing/Back/backpack.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Back/backpack.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Back/duffel.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Back/duffel.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Back/satchel.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Back/satchel.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Hands/gloves.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Hands/gloves.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Head/beret.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/beret.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Head/beret_plumed.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/beret_plumed.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Head/cap.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/cap.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Head/eva.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/eva.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Head/hat.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/hat.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Neck/cape.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Neck/cape.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Neck/capelet.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Neck/capelet.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/eva.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/eva.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/greatcoat.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/greatcoat.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/parade.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/parade.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/robe.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/robe.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Shoes/boots.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Shoes/boots.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Uniforms/casual.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/casual.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Uniforms/colonist.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/colonist.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Uniforms/formal.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/formal.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Uniforms/medic.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/medic.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Uniforms/researcher.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/researcher.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/)
+- [`Resources/Textures/_WF/Asf/Interface/job_icons.rsi/`](../../../Resources/Textures/_WF/Asf/Interface/job_icons.rsi/)
+- [`Resources/Textures/_WF/Asf/Structures/Banners/federation.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/Banners/federation.rsi/)
+- [`Resources/Textures/_WF/Asf/Structures/Banners/marine.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/Banners/marine.rsi/)
+- [`Resources/Textures/_WF/Asf/Structures/drobe.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/drobe.rsi/)
+- [`Resources/Textures/_WF/Asf/Structures/fabricator.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/fabricator.rsi/)
+- [`Resources/Textures/_WF/Asf/Structures/shipyard_screen.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/shipyard_screen.rsi/)
+- [`Resources/Textures/_WF/Asf/Structures/thruster.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/thruster.rsi/)
+- [`Resources/Textures/_WF/Asf/Structures/thruster_large.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/thruster_large.rsi/)
+
+### Maps
+
+- [`Resources/Maps/_WF/Asf/lantern.yml`](../../../Resources/Maps/_WF/Asf/lantern.yml)
+
+### Shared maps
+
+- [`Resources/SharedMaps/_WF/Asf/bulwark.yml`](../../../Resources/SharedMaps/_WF/Asf/bulwark.yml)
+- [`Resources/SharedMaps/_WF/Asf/gleaner.yml`](../../../Resources/SharedMaps/_WF/Asf/gleaner.yml)
+- [`Resources/SharedMaps/_WF/Asf/guardian.yml`](../../../Resources/SharedMaps/_WF/Asf/guardian.yml)
+- [`Resources/SharedMaps/_WF/Asf/lamplighter.yml`](../../../Resources/SharedMaps/_WF/Asf/lamplighter.yml)
+- [`Resources/SharedMaps/_WF/Asf/lodestar.yml`](../../../Resources/SharedMaps/_WF/Asf/lodestar.yml)
+- [`Resources/SharedMaps/_WF/Asf/porter.yml`](../../../Resources/SharedMaps/_WF/Asf/porter.yml)
+- [`Resources/SharedMaps/_WF/Asf/vigil.yml`](../../../Resources/SharedMaps/_WF/Asf/vigil.yml)
+
+### Tools
+
+- [`Tools/_WF/Asf/build_lantern.py`](../../../Tools/_WF/Asf/build_lantern.py)
+- [`Tools/_WF/Asf/generate_roles.py`](../../../Tools/_WF/Asf/generate_roles.py)
+- [`Tools/_WF/Asf/port_dsm_hulls.py`](../../../Tools/_WF/Asf/port_dsm_hulls.py)
+- [`Tools/_WF/Asf/recolour_thrusters.py`](../../../Tools/_WF/Asf/recolour_thrusters.py)
+
+## Non-modular edits
+
+None.
+
+<!-- WOLFGATE-GENERATED END -->
