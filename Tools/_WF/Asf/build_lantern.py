@@ -358,11 +358,14 @@ m.add("GravityGeneratorMini", 3, 1)
 m.add("StationAnchorOff", -2, 1)
 m.add("ClosetToolFilled", -3, 2)
 
-# Power room (x -3..3, y -3..-1): RTGs feed the substation; the station shield draws from here
+# Power room (x -3..3, y -3..-1): RTGs feed the substation and five LAPCs. A 15 kW APC can't carry the station
+# shield (80 kW idle, up to 150 kW under fire) or the main engines (about 90 kW), so they get their own 60 kW LAPCs.
 gens = [m.add("GeneratorRTG", x, -3) for x in (-3, -2, -1, 1, 2, 3)] + [m.add("GeneratorRTG", x, -2) for x in (-2, 2)]
 sub = m.add("SubstationBasic", -3, -1)
-m.add("WFAsfShieldGenerator", 3, -1)
-m.add("ClosetFireFilled", -2, -1); m.add("ClosetRadiationSuitFilled", 2, -1)
+shield = m.add("WFAsfShieldGenerator", 3, -1)
+engine_lapcs = [m.add("LargeAPC", x, -1) for x in (-2, -1)]
+shield_lapcs = [m.add("LargeAPC", x, y) for x, y in ((1, -1), (2, -1), (3, -2))]
+m.add("ClosetFireFilled", -3, -2); m.add("ClosetRadiationSuitFilled", 3, -7)      # rad suits wait in atmos
 
 # R&D lab (x 5..9, y -3..2), door a from the concourse at (7, 3), door a to the observation room at (7, -4)
 console("ComputerResearchAndDevelopment", 6, 2, "N"); chair("ChairOfficeLight", 6, 1, "N")
@@ -436,7 +439,8 @@ for x, y, wall in ((0, 26, "S"), (-3, 24, "N"), (0, 18, "S"), (0, 14, "S"), (-7,
     light(x, y, wall, "EmergencyLight")
 
 # ---- 5. power: RTGs -> HV -> substation -> MV -> APCs -> LV ----------------------------------
-lay_cable(m, "HV", [(x, -3) for x in range(-3, 4)] + [(-3, -2), (-3, -1), (-2, -2), (2, -2)])
+lay_cable(m, "HV", [(x, -3) for x in range(-3, 4)] + [(-3, -2), (-3, -1), (-2, -2), (2, -2)]
+          + [(x, -1) for x in (-2, -1, 1, 2)] + [(3, -2)])
 apcs = [wm("APCBasic", -9, 23, "E"),      # bridge, ready room, forward engines
         wm("APCBasic", -4, 19, "E"),      # north block
         wm("APCBasic", -4, 14, "E"),      # post, wardrobe, commons
@@ -450,7 +454,11 @@ apcs = [wm("APCBasic", -9, 23, "E"),      # bridge, ready room, forward engines
 
 def tree(roots, targets, avoid=lambda t: False):
     net = {tuple(r) for r in roots}
-    todo = [tuple(t) for t in targets if tuple(t) not in net]
+    # a receiver on an avoided tile takes power from the nearest free tile instead (reception range 3)
+    free = lambda t: next((c for c in sorted(((t[0] + dx, t[1] + dy) for dx in range(-2, 3) for dy in range(-2, 3)),
+                                             key=lambda c: abs(c[0] - t[0]) + abs(c[1] - t[1]))
+                           if c in m.tiles and not avoid(c)), t)
+    todo = [t if not avoid(t) else free(t) for t in map(tuple, targets) if tuple(t) not in net]
     while todo:
         t = min(todo, key=lambda t: min(abs(t[0] - n[0]) + abs(t[1] - n[1]) for n in net))
         todo.remove(t)
@@ -555,7 +563,7 @@ for proto, x, y in (("Rack", 6, 23), ("PottedPlantRandom", 5, 23), ("SteelBench"
 m.add("ToolboxEmergencyFilled", 6, 23); m.add("SheetSteel", -8, -5); m.add("SheetGlass", -6, -5)
 for item, x, y in (("Bucket", -6, -3), ("Bucket", -8, -3), ("Beaker", 9, -2), ("LargeBeaker", 9, -2), ("Pen", 3, 19),
                    ("PaperBin5", 3, 19), ("DrinkMug", -5, 24), ("DrinkMugBlue", 9, 9), ("BoxFolderBlue", 9, 8),
-                   ("FoodTinPeaches", -8, -5), ("FoodTinPeaches", -6, -5), ("CableHVStack", -3, -2), ("DrinkMug", 4, 26),
+                   ("FoodTinPeaches", -8, -5), ("FoodTinPeaches", -6, -5), ("CableHVStack", 0, -2), ("DrinkMug", 4, 26),
                    ("PlushieLizard", 6, 21), ("Lamp", -6, 16), ("BoxFolderClipboard", 3, 18), ("ResearchDisk", 6, -5),
                    ("Beaker", 6, -5), ("DrinkMugBlue", 8, 15), ("Pen", -6, 16)):
     m.add(item, x, y)
@@ -571,9 +579,21 @@ for proto, x, y, side in (("RandomPainting", -7, 22, "S"), ("RandomPainting", -4
                           ("SignDirectionalMed", 4, 7, "S"), ("RandomPainting", -4, -8, "W"), ("StationMap", 3, 13, "S")):
     wall_art(proto, x, y, side)
 
-# LV last, so every receiver placed above is wired
-receivers = [e for e in m.on_grid() if info(e.proto).receiver]
-lay_cable(m, "LV", tree([a.tile for a in apcs], [r.tile for r in receivers]))
+# LV last, so every receiver placed above is wired. Three separate nets: the main engines (large thrusters and
+# the small aft ones) and the shield each on their LAPCs, everything else on the room APCs. Nets never touch.
+around = lambda tiles: {(x + dx, y + dy) for x, y in tiles for dx, dy in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1))}
+engines = [e for e in m.on_grid() if info(e.proto).thruster and e.tile[1] <= -10]
+shield_net = {e.tile for e in shield_lapcs} | {shield.tile}
+room_roots = {a.tile for a in apcs}
+keep_clear = around(shield_net | room_roots)
+engine_net = tree([e.tile for e in engine_lapcs], [e.tile for e in engines], avoid=lambda t: t in keep_clear)
+fenced = around(engine_net | shield_net)
+skip = {e.uid for e in engines} | {shield.uid}
+receivers = [e for e in m.on_grid() if info(e.proto).receiver and e.uid not in skip]
+# the room APCs share one LV net, so no single 15 kW APC carries the wing thrusters or the lab on its own
+room_net = tree([apcs[0].tile], [a.tile for a in apcs[1:]], avoid=lambda t: t in fenced)
+room_net = tree(room_net, [r.tile for r in receivers], avoid=lambda t: t in fenced)
+lay_cable(m, "LV", engine_net | shield_net | room_net)
 
 # ---- 7. decals ------------------------------------------------------------------------------
 for name in ("envoy", "hall", "quarters", "post", "wardrobe", "commons", "consular", "clinic", "lab", "obs"):

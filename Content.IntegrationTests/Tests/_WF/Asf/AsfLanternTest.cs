@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Content.Server._Mono.FireControl;
 using Content.Server._NF.Shipyard.Components;
+using Content.Server.Power.Components;
 using Content.Server.Shuttles.Components;
 using Content.Server.Spawners.Components;
 using Content.Shared._NF.Shipyard.Components;
@@ -14,6 +15,7 @@ using Content.Shared.Roles;
 using Content.Shared.Tag;
 using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 
@@ -180,6 +182,49 @@ public sealed class AsfLanternTest
             Assert.That(plastitanium, Is.Positive, "Lantern Post has no plastitanium walls.");
             Assert.That(weakWalls, Is.Empty, "Lantern Post's hull should be plastitanium throughout.");
 
+            maps.DeleteMap(mapId);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>Every anchored, LV-fed machine on Lantern Post, the shield and engines included, is powered once the nets settle.</summary>
+    [Test]
+    public async Task LanternIsPowered()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entities = server.ResolveDependency<IEntityManager>();
+        var loader = entities.System<MapLoaderSystem>();
+        var maps = entities.System<SharedMapSystem>();
+        MapId mapId = default;
+        EntityUid gridUid = default;
+
+        await server.WaitAssertion(() =>
+        {
+            maps.CreateMap(out mapId);
+            Assert.That(loader.TryLoadGrid(mapId, Lantern, out var grid), Is.True);
+            gridUid = grid!.Value.Owner;
+        });
+
+        // APC and LAPC supply ramps up over several seconds
+        await server.WaitRunTicks(1800);
+
+        await server.WaitAssertion(() =>
+        {
+            var unpowered = new List<string>();
+            var query = entities.EntityQueryEnumerator<ApcPowerReceiverComponent, TransformComponent>();
+            while (query.MoveNext(out var uid, out var receiver, out var xform))
+            {
+                if (xform.GridUid != gridUid || !xform.Anchored || !receiver.NeedsPower || receiver.PowerDisabled || receiver.Powered)
+                    continue;
+                // hardpoints take no LV; their guns run on their own batteries
+                if (!entities.HasComponent<ExtensionCableReceiverComponent>(uid))
+                    continue;
+                unpowered.Add($"{entities.GetComponent<MetaDataComponent>(uid).EntityPrototype?.ID} at {xform.Coordinates.Position}");
+            }
+
+            Assert.That(unpowered, Is.Empty, "Unpowered on Lantern Post: " + string.Join(", ", unpowered));
             maps.DeleteMap(mapId);
         });
 

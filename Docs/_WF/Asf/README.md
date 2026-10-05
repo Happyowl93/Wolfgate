@@ -18,6 +18,9 @@ with an artifact analyzer and an APE).
 - Built like the other faction stations: station-grade plastitanium walls and windows, a purple FS-421 station
   shield (`WFAsfShieldGenerator`) and eight RTGs (320 kW against about 225 kW rated load with the shield's 80 kW
   idle draw and the large thrusters). Room density was matched against Hokkaido, Camelot and the Halcyon (`wfmap.py stats`).
+- Power: a 15 kW APC can't carry the shield or the main engines, so the power room has five 60 kW LAPCs on HV: three
+  feed the shield alone, two feed the large thrusters and the small aft ones. The room APCs share one LV net for the
+  rest. The three nets never touch; `AsfLanternTest.LanternIsPowered` checks every LV machine has power.
 - Self-defence: 10 guns on hull sponsons (2 Apollo heavy lasers, 4 Prometheus cannons, 2 Serpent torpedo launchers,
   2 Phalanx point defence), fired from the bridge through the `GunneryServerStation` in the ready room. For scale,
   Hokkaido mounts 22 guns and the Halcyon about 90. Guns recharge from their own batteries.
@@ -28,7 +31,7 @@ with an artifact analyzer and an APE).
   | Hull | Tiles | Firepower | Shield | Price |
   |---|---|---|---|---|
   | Gleaner (mining pod) | 33 | - | - | 25k |
-  | Lamplighter (survey) | 95 | - | - | 38k |
+  | Lamplighter (survey, research bay) | 131 | - | - | 38k |
   | Porter (hauler) | 130 | - | - | 40k |
   | Vigil (escort fighter) | 64 | 3: Prometheus, Phalanx | - | 40k |
   | Bulwark (gunship) | 99 | 4: Prometheus, Serpent | small | 75k |
@@ -64,7 +67,9 @@ The wardrobe sprites and the seven hulls come from
   turned to fit the hull (Eclipsion's corner-specific diagonals all came in unrotated), cable nets pruned to loop-free
   trees that still reach every machine, and air supply added where the DSM layouts had none or too little (Porter,
   Bulwark, Lodestar, Guardian's gun bay, Lamplighter's engine room). Vigil and Gleaner stay without vents, like
-  other fighters and pods their size.
+  other fighters and pods their size. The Lamplighter also gained a research bay between the bridge corridor and the
+  engine room (R&D server, protolathe, circuit imprinter, R&D and analysis consoles, an artifact analyzer pad and two
+  extra APCs for the pad's 12 kW).
 - The DSM thruster sprite was dropped: its fore and aft frames are 3/4 views, so no plume could leave the nozzle.
   `WFAsfThruster` and `WFAsfThrusterLarge` are the plan-view vanilla (Baystation) and Mono large thrusters recoloured
   to the ASF palette by `Tools/_WF/Asf/recolour_thrusters.py`.

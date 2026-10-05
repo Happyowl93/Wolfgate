@@ -69,7 +69,7 @@
   id: WFAsfLamplighter
   parent: BaseVessel
   name: ASF Lamplighter
-  description: An unarmed Federation survey shuttle built for long watches. Field researchers take it out to observe, record and report back.
+  description: An unarmed Federation survey shuttle built for long watches, with a research bay behind the bridge (R&D server, protolathe, circuit imprinter and an artifact analyzer). Field researchers take it out to observe, record and report back.
   price: 38000
   category: Small
   group: Custom
