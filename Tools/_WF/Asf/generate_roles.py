@@ -7,35 +7,42 @@ from pathlib import Path
 OUT = Path("Resources/Prototypes/_WF/Asf/Roles/jobs.yml")
 
 # id, locale key, icon state, weight, overall playtime requirement (s), access group, extra equipment, backpack
+# contents, ASF loadout groups. Clothing a loadout group covers stays out of the starting gear: loadouts are
+# equipped first, so a starting-gear item for the same slot would land on the floor.
 JOBS = [
-    ("Envoy", "envoy", "Envoy", 40, 72000, "WFAsfCommand",
-     {"head": "WFAsfClothingHeadBeretPlumed", "outerClothing": "WFAsfClothingOuterGreatcoat",
-      "neck": "WFAsfClothingNeckCapelet"},
-     ["RadioHandheldNF", "WFAsfVoucherEscort"]),
-    ("Enforcer", "enforcer", "Enforcer", 30, 36000, "WFAsfSecurity",
-     {"head": "WFAsfClothingHeadBeret", "outerClothing": "ClothingOuterArmorBasic", "pocket1": "WeaponDisabler"},
-     ["RadioHandheldNF", "Handcuffs", "Handcuffs", "WFAsfWeaponPistolCoil", "WFAsfMagazinePistolCoil"]),
+    ("Envoy", "envoy", "Envoy", 40, 0, "WFAsfCommand",
+     {},
+     ["RadioHandheldNF", "WFAsfVoucherEscort"],
+     ["WFAsfJumpsuitService", "WFAsfHeadEnvoy", "WFAsfNeckEnvoy", "WFAsfOuterEnvoy", "WFAsfGloves"]),
+    ("Enforcer", "enforcer", "Enforcer", 30, 0, "WFAsfSecurity",
+     {"outerClothing": "ClothingOuterArmorBasic", "pocket1": "WeaponDisabler"},
+     ["RadioHandheldNF", "Handcuffs", "Handcuffs", "WFAsfWeaponPistolCoil", "WFAsfMagazinePistolCoil"],
+     ["WFAsfJumpsuitService", "WFAsfHeadEnforcer", "WFAsfNeck", "WFAsfGloves"]),
     ("FieldResearcher", "field-researcher", "Researcher", 20, 0, "WFAsfResearch",
-     {"jumpsuit": "WFAsfClothingUniformResearcher", "outerClothing": "ClothingOuterCoatLab"},
-     ["RadioHandheldNF", "HandheldHealthAnalyzer", "AnomalyScanner"]),
+     {"outerClothing": "ClothingOuterCoatLab"},
+     ["RadioHandheldNF", "HandheldHealthAnalyzer", "AnomalyScanner"],
+     ["WFAsfJumpsuitResearcher", "WFAsfHead", "WFAsfNeck", "WFAsfGloves"]),
     ("Colonist", "colonist", "Colonist", 10, 0, "WFAsfCrew",
-     {"jumpsuit": "WFAsfClothingUniformColonist", "belt": "ClothingBeltUtilityFilled",
-      "gloves": "ClothingHandsGlovesColorYellow"},
-     ["RadioHandheldNF"]),
+     {"belt": "ClothingBeltUtilityFilled"},
+     ["RadioHandheldNF"],
+     ["WFAsfJumpsuitColonist", "WFAsfHead", "WFAsfNeck", "WFAsfGlovesColonist"]),
 ]
 
 # PDA screen accent per icon state, matching the trim drawn by draw_ids.py.
 PDA_ACCENTS = {"Envoy": "#EBC913", "Enforcer": "#F2EEFB", "Researcher": "#C9BFE0"}
 
-LOADOUT_GROUPS = ["MercenaryBackpack", "ContractorNeck", "MercenaryGlasses", "ContractorBoxSurvival",
-                  "ContractorWallet", "ContractorCartridge", "ContractorTrinkets", "ContractorBureaucracy"]
+# Shared groups after each role's own: ASF bags, then the contractor extras other factions' roles offer.
+# NFSpeciesSpecific is hidden and gives Vox their nitrogen and Avali their auto-injector.
+LOADOUT_GROUPS = ["WFAsfBackpack", "MercenaryGlasses", "ContractorEncryptionKey", "ContractorBoxSurvival",
+                  "ContractorWallet", "ContractorCartridge", "ContractorImplanter", "ContractorUtility",
+                  "ContractorFun", "ContractorTrinkets", "ContractorBureaucracy", "NFSpeciesSpecific",
+                  "ContractorArmorPlates"]
 
 
-def job(jid, key, icon, weight, req, group, extra, storage):
+def job(jid, key, icon, weight, req, group, extra, storage, groups):
     j = "WFAsf" + jid
     supervisors = "wf-asf-job-supervisors-council" if jid == "Envoy" else "wf-asf-job-supervisors-envoy"
-    equipment = {"jumpsuit": "WFAsfClothingUniformService", "shoes": "WFAsfClothingShoesBoots",
-                 "ears": "WFAsfClothingHeadset", "id": j + "PDA", **extra}
+    equipment = {"shoes": "WFAsfClothingShoesBoots", "ears": "WFAsfClothingHeadset", "id": j + "PDA", **extra}
     lines = [
         "- type: job",
         f"  id: {j}",
@@ -68,7 +75,7 @@ def job(jid, key, icon, weight, req, group, extra, storage):
     ]
     lines += [f"    {slot}: {proto}" for slot, proto in equipment.items()]
     lines += ["  storage:", "    back:"] + [f"    - {s}" for s in storage]
-    lines += ["", "- type: roleLoadout", f"  id: Job{j}", "  groups:"] + [f"  - {g}" for g in LOADOUT_GROUPS]
+    lines += ["", "- type: roleLoadout", f"  id: Job{j}", "  groups:"] + [f"  - {g}" for g in groups + LOADOUT_GROUPS]
     lines += [
         "",
         "- type: jobIcon",

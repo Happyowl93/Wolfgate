@@ -5,9 +5,6 @@
   name: wf-asf-job-envoy
   description: wf-asf-job-envoy-description
   playTimeTracker: JobWFAsfEnvoy
-  requirements:
-  - !type:OverallPlaytimeRequirement
-    time: 72000 # 20 hrs
   startingGear: WFAsfEnvoyGear
   alwaysUseSpawner: true
   hideConsoleVisibility: true
@@ -27,13 +24,9 @@
 - type: startingGear
   id: WFAsfEnvoyGear
   equipment:
-    jumpsuit: WFAsfClothingUniformService
     shoes: WFAsfClothingShoesBoots
     ears: WFAsfClothingHeadset
     id: WFAsfEnvoyPDA
-    head: WFAsfClothingHeadBeretPlumed
-    outerClothing: WFAsfClothingOuterGreatcoat
-    neck: WFAsfClothingNeckCapelet
   storage:
     back:
     - RadioHandheldNF
@@ -42,14 +35,24 @@
 - type: roleLoadout
   id: JobWFAsfEnvoy
   groups:
-  - MercenaryBackpack
-  - ContractorNeck
+  - WFAsfJumpsuitService
+  - WFAsfHeadEnvoy
+  - WFAsfNeckEnvoy
+  - WFAsfOuterEnvoy
+  - WFAsfGloves
+  - WFAsfBackpack
   - MercenaryGlasses
+  - ContractorEncryptionKey
   - ContractorBoxSurvival
   - ContractorWallet
   - ContractorCartridge
+  - ContractorImplanter
+  - ContractorUtility
+  - ContractorFun
   - ContractorTrinkets
   - ContractorBureaucracy
+  - NFSpeciesSpecific
+  - ContractorArmorPlates
 
 - type: jobIcon
   parent: JobIcon
@@ -107,9 +110,6 @@
   name: wf-asf-job-enforcer
   description: wf-asf-job-enforcer-description
   playTimeTracker: JobWFAsfEnforcer
-  requirements:
-  - !type:OverallPlaytimeRequirement
-    time: 36000 # 10 hrs
   startingGear: WFAsfEnforcerGear
   alwaysUseSpawner: true
   hideConsoleVisibility: true
@@ -129,11 +129,9 @@
 - type: startingGear
   id: WFAsfEnforcerGear
   equipment:
-    jumpsuit: WFAsfClothingUniformService
     shoes: WFAsfClothingShoesBoots
     ears: WFAsfClothingHeadset
     id: WFAsfEnforcerPDA
-    head: WFAsfClothingHeadBeret
     outerClothing: ClothingOuterArmorBasic
     pocket1: WeaponDisabler
   storage:
@@ -147,14 +145,23 @@
 - type: roleLoadout
   id: JobWFAsfEnforcer
   groups:
-  - MercenaryBackpack
-  - ContractorNeck
+  - WFAsfJumpsuitService
+  - WFAsfHeadEnforcer
+  - WFAsfNeck
+  - WFAsfGloves
+  - WFAsfBackpack
   - MercenaryGlasses
+  - ContractorEncryptionKey
   - ContractorBoxSurvival
   - ContractorWallet
   - ContractorCartridge
+  - ContractorImplanter
+  - ContractorUtility
+  - ContractorFun
   - ContractorTrinkets
   - ContractorBureaucracy
+  - NFSpeciesSpecific
+  - ContractorArmorPlates
 
 - type: jobIcon
   parent: JobIcon
@@ -231,7 +238,6 @@
 - type: startingGear
   id: WFAsfFieldResearcherGear
   equipment:
-    jumpsuit: WFAsfClothingUniformResearcher
     shoes: WFAsfClothingShoesBoots
     ears: WFAsfClothingHeadset
     id: WFAsfFieldResearcherPDA
@@ -245,14 +251,23 @@
 - type: roleLoadout
   id: JobWFAsfFieldResearcher
   groups:
-  - MercenaryBackpack
-  - ContractorNeck
+  - WFAsfJumpsuitResearcher
+  - WFAsfHead
+  - WFAsfNeck
+  - WFAsfGloves
+  - WFAsfBackpack
   - MercenaryGlasses
+  - ContractorEncryptionKey
   - ContractorBoxSurvival
   - ContractorWallet
   - ContractorCartridge
+  - ContractorImplanter
+  - ContractorUtility
+  - ContractorFun
   - ContractorTrinkets
   - ContractorBureaucracy
+  - NFSpeciesSpecific
+  - ContractorArmorPlates
 
 - type: jobIcon
   parent: JobIcon
@@ -329,12 +344,10 @@
 - type: startingGear
   id: WFAsfColonistGear
   equipment:
-    jumpsuit: WFAsfClothingUniformColonist
     shoes: WFAsfClothingShoesBoots
     ears: WFAsfClothingHeadset
     id: WFAsfColonistPDA
     belt: ClothingBeltUtilityFilled
-    gloves: ClothingHandsGlovesColorYellow
   storage:
     back:
     - RadioHandheldNF
@@ -342,14 +355,23 @@
 - type: roleLoadout
   id: JobWFAsfColonist
   groups:
-  - MercenaryBackpack
-  - ContractorNeck
+  - WFAsfJumpsuitColonist
+  - WFAsfHead
+  - WFAsfNeck
+  - WFAsfGlovesColonist
+  - WFAsfBackpack
   - MercenaryGlasses
+  - ContractorEncryptionKey
   - ContractorBoxSurvival
   - ContractorWallet
   - ContractorCartridge
+  - ContractorImplanter
+  - ContractorUtility
+  - ContractorFun
   - ContractorTrinkets
   - ContractorBureaucracy
+  - NFSpeciesSpecific
+  - ContractorArmorPlates
 
 - type: jobIcon
   parent: JobIcon

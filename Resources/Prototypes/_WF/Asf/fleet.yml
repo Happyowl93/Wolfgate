@@ -31,7 +31,10 @@
           !type:NanotrasenNameGenerator
           prefixCreator: '14'
       - type: StationJobs
-        availableJobs: {}
+        availableJobs:
+          WFAsfEnforcer: [ 0, 0 ]
+          WFAsfFieldResearcher: [ 0, 0 ]
+          WFAsfColonist: [ 0, 0 ]
 
 - type: vessel
   id: WFAsfPorter
@@ -63,7 +66,10 @@
           !type:NanotrasenNameGenerator
           prefixCreator: '14'
       - type: StationJobs
-        availableJobs: {}
+        availableJobs:
+          WFAsfEnforcer: [ 0, 0 ]
+          WFAsfFieldResearcher: [ 0, 0 ]
+          WFAsfColonist: [ 0, 0 ]
 
 - type: vessel
   id: WFAsfLamplighter
@@ -95,7 +101,10 @@
           !type:NanotrasenNameGenerator
           prefixCreator: '14'
       - type: StationJobs
-        availableJobs: {}
+        availableJobs:
+          WFAsfEnforcer: [ 0, 0 ]
+          WFAsfFieldResearcher: [ 0, 0 ]
+          WFAsfColonist: [ 0, 0 ]
 
 # Armed hulls adapted from DSM Redemptor, Imparator, Dragoon and Praxis: plastitanium hulls, lasers first, a few
 # self-loading Serpent torpedoes, and shields from the gunship up.
@@ -130,7 +139,10 @@
           !type:NanotrasenNameGenerator
           prefixCreator: '14'
       - type: StationJobs
-        availableJobs: {}
+        availableJobs:
+          WFAsfEnforcer: [ 0, 0 ]
+          WFAsfFieldResearcher: [ 0, 0 ]
+          WFAsfColonist: [ 0, 0 ]
 
 - type: vessel
   id: WFAsfBulwark
@@ -162,7 +174,10 @@
           !type:NanotrasenNameGenerator
           prefixCreator: '14'
       - type: StationJobs
-        availableJobs: {}
+        availableJobs:
+          WFAsfEnforcer: [ 0, 0 ]
+          WFAsfFieldResearcher: [ 0, 0 ]
+          WFAsfColonist: [ 0, 0 ]
 
 - type: vessel
   id: WFAsfGuardian
@@ -195,7 +210,10 @@
           !type:NanotrasenNameGenerator
           prefixCreator: '14'
       - type: StationJobs
-        availableJobs: {}
+        availableJobs:
+          WFAsfEnforcer: [ 0, 0 ]
+          WFAsfFieldResearcher: [ 0, 0 ]
+          WFAsfColonist: [ 0, 0 ]
 
 - type: vessel
   id: WFAsfLodestar
@@ -228,4 +246,7 @@
           !type:NanotrasenNameGenerator
           prefixCreator: '14'
       - type: StationJobs
-        availableJobs: {}
+        availableJobs:
+          WFAsfEnforcer: [ 0, 0 ]
+          WFAsfFieldResearcher: [ 0, 0 ]
+          WFAsfColonist: [ 0, 0 ]

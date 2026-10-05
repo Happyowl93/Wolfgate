@@ -5,7 +5,7 @@ meta:
   forkId: ''
   forkVersion: ''
   time: 02/10/2026 15:04:00
-  entityCount: 553
+  entityCount: 558
 maps: []
 grids:
 - 1
@@ -1241,7 +1241,7 @@ entities:
   - uid: 432
     components:
     - type: Transform
-      pos: 11.5,8.5
+      pos: 11.5,9.5
       parent: 1
 - proto: BlastDoor
   entities:
@@ -1259,6 +1259,9 @@ entities:
     - type: Transform
       pos: 14.5,4.5
       parent: 1
+    - type: DeviceLinkSink
+      links:
+      - 714
   - uid: 87
     components:
     - type: Transform
@@ -1273,6 +1276,9 @@ entities:
     - type: Transform
       pos: 2.5,4.5
       parent: 1
+    - type: DeviceLinkSink
+      links:
+      - 712
   - uid: 89
     components:
     - type: Transform
@@ -1281,7 +1287,6 @@ entities:
     - type: DeviceLinkSink
       links:
       - 485
-      - 334
 - proto: BlastDoorOpen
   entities:
   - uid: 90
@@ -1328,6 +1333,18 @@ entities:
     - type: Transform
       rot: 3.141592653589793 rad
       pos: 14.5,1.5
+      parent: 1
+  - uid: 711
+    components:
+    - type: Transform
+      rot: 1.5707963267948966 rad
+      pos: 1.5,3.5
+      parent: 1
+  - uid: 713
+    components:
+    - type: Transform
+      rot: -1.5707963267948966 rad
+      pos: 15.5,3.5
       parent: 1
 - proto: CableApcExtension
   entities:
@@ -1980,7 +1997,7 @@ entities:
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 7.5,4.5
+      pos: 8.5,4.5
       parent: 1
 - proto: ChairWood
   entities:
@@ -1988,13 +2005,13 @@ entities:
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 6.5,9
+      pos: 6.5,8.5
       parent: 1
   - uid: 435
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 5.5,9
+      pos: 5.5,8.5
       parent: 1
 - proto: ClosetWall
   entities:
@@ -2057,11 +2074,6 @@ entities:
     - type: Transform
       pos: 9.5,5.5
       parent: 1
-    - type: DeviceLinkSource
-      linkedPorts:
-        89:
-        - - Group3
-          - Toggle
     - type: ContainerContainer
       containers:
         board: !type:Container
@@ -2996,7 +3008,7 @@ entities:
   - uid: 654
     components:
     - type: Transform
-      pos: 8.5,4.5
+      pos: 7.5,4.5
       parent: 1
 - proto: Gyroscope
   entities:
@@ -3458,6 +3470,28 @@ entities:
         85:
         - - Pressed
           - Toggle
+  - uid: 712
+    components:
+    - type: Transform
+      rot: 1.5707963267948966 rad
+      pos: 1.5,3.5
+      parent: 1
+    - type: DeviceLinkSource
+      linkedPorts:
+        88:
+        - - Pressed
+          - Toggle
+  - uid: 714
+    components:
+    - type: Transform
+      rot: -1.5707963267948966 rad
+      pos: 15.5,3.5
+      parent: 1
+    - type: DeviceLinkSource
+      linkedPorts:
+        86:
+        - - Pressed
+          - Toggle
 - proto: Sink
   entities:
   - uid: 488
@@ -3465,6 +3499,13 @@ entities:
     - type: Transform
       rot: 1.5707963267948966 rad
       pos: 10.5,11.5
+      parent: 1
+- proto: SpawnPointLatejoin
+  entities:
+  - uid: 715
+    components:
+    - type: Transform
+      pos: 10.5,9.5
       parent: 1
 - proto: StationMap
   entities:

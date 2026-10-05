@@ -5,7 +5,7 @@ meta:
   forkId: ''
   forkVersion: ''
   time: 01/29/2026 22:20:26
-  entityCount: 239
+  entityCount: 238
 maps: []
 grids:
 - 1
@@ -436,14 +436,14 @@ entities:
     - type: Transform
       pos: 1.5,-0.5
       parent: 1
-- proto: AirlockCommand
+- proto: AirlockMaint
   entities:
-  - uid: 5
+  - uid: 274
     components:
     - type: Transform
       pos: 2.5,-3.5
       parent: 1
-  - uid: 6
+  - uid: 275
     components:
     - type: Transform
       pos: -1.5,-3.5
@@ -1036,13 +1036,6 @@ entities:
           ent: null
     - type: DeviceLinkSource
       linkedPorts: {}
-- proto: CrateGenericSteel
-  entities:
-  - uid: 142
-    components:
-    - type: Transform
-      pos: 0.5,-0.5
-      parent: 1
 - proto: ExplosivesSignMed
   entities:
   - uid: 143
@@ -1255,14 +1248,14 @@ entities:
   - uid: 158
     components:
     - type: Transform
-      pos: 4.5,-3.5
+      pos: 3.5,-3.5
       parent: 1
 - proto: GunneryServerLow
   entities:
   - uid: 261
     components:
     - type: Transform
-      pos: -0.5,-0.5
+      pos: 0.5,-0.5
       parent: 1
 - proto: Gyroscope
   entities:
@@ -1386,12 +1379,6 @@ entities:
       rot: -1.5707963267948966 rad
       pos: -2.5,-3.5
       parent: 1
-  - uid: 175
-    components:
-    - type: Transform
-      rot: 1.5707963267948966 rad
-      pos: 3.5,-3.5
-      parent: 1
 - proto: RailingCorner
   entities:
   - uid: 176
@@ -1436,7 +1423,7 @@ entities:
   - uid: 262
     components:
     - type: Transform
-      pos: -0.5,-3.5
+      pos: 1.5,0.5
       parent: 1
 - proto: SignalButton
   entities:
@@ -1464,6 +1451,13 @@ entities:
         38:
         - - Pressed
           - Toggle
+- proto: SpawnPointLatejoin
+  entities:
+  - uid: 276
+    components:
+    - type: Transform
+      pos: -0.5,-3.5
+      parent: 1
 - proto: StairDark
   entities:
   - uid: 184

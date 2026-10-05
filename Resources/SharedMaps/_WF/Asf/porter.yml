@@ -5,7 +5,7 @@ meta:
   forkId: ''
   forkVersion: ''
   time: 01/30/2026 12:20:07
-  entityCount: 264
+  entityCount: 265
 maps: []
 grids:
 - 1
@@ -571,14 +571,6 @@ entities:
     - type: Transform
       pos: 3.5,-7.5
       parent: 1
-- proto: AirlockCommand
-  entities:
-  - uid: 3
-    components:
-    - type: Transform
-      rot: 3.141592653589793 rad
-      pos: 0.5,-1.5
-      parent: 1
 - proto: AirlockMaint
   entities:
   - uid: 4
@@ -773,7 +765,6 @@ entities:
     - type: DeviceLinkSink
       links:
       - 196
-      - 156
   - uid: 37
     components:
     - type: Transform
@@ -782,7 +773,6 @@ entities:
     - type: DeviceLinkSink
       links:
       - 196
-      - 156
   - uid: 38
     components:
     - type: Transform
@@ -791,7 +781,6 @@ entities:
     - type: DeviceLinkSink
       links:
       - 196
-      - 156
 - proto: ButtonFrameJanitor
   entities:
   - uid: 40
@@ -1154,17 +1143,6 @@ entities:
     - type: Transform
       pos: 0.5,1.5
       parent: 1
-    - type: DeviceLinkSource
-      linkedPorts:
-        36:
-        - - Group1
-          - Toggle
-        37:
-        - - Group1
-          - Toggle
-        38:
-        - - Group1
-          - Toggle
     - type: ContainerContainer
       containers:
         board: !type:Container
@@ -1856,6 +1834,13 @@ entities:
         31:
         - - Pressed
           - Toggle
+- proto: SpawnPointLatejoin
+  entities:
+  - uid: 319
+    components:
+    - type: Transform
+      pos: 0.5,-5.5
+      parent: 1
 - proto: SubstationWallBasic
   entities:
   - uid: 200
@@ -1912,6 +1897,14 @@ entities:
           - Reverse
         - - Middle
           - 'Off'
+- proto: WFAsfAirlock
+  entities:
+  - uid: 318
+    components:
+    - type: Transform
+      rot: 3.141592653589793 rad
+      pos: 0.5,-1.5
+      parent: 1
 - proto: WFAsfThruster
   entities:
   - uid: 206

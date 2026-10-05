@@ -24,3 +24,5 @@ ent-WFAsfPistolRackFilled = { ent-WFAsfPistolRack }
     .desc = { ent-WFAsfPistolRack.desc }
 ent-WFAsfSuitStoragePathfinder = ASF suit storage unit
     .desc = A Federation suit locker holding a charged Pathfinder modsuit, a breath mask and air tanks. Locked to ASF security.
+ent-WFAsfSuitStorageEVA = ASF EVA suit storage unit
+    .desc = A Federation suit locker holding a purple EVA softsuit and helmet, a breath mask and air tanks.

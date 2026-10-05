@@ -141,9 +141,11 @@ The wardrobe sprites and the seven hulls come from
 
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfAccessTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfAccessTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfCoilgunTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfCoilgunTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Asf/AsfFleetTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfFleetTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfGrantsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfGrantsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfModsuitTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfModsuitTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Asf/AsfRolesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfRolesTest.cs)
 
 ### Prototypes
 
@@ -163,6 +165,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Prototypes/_WF/Asf/lantern.yml`](../../../Resources/Prototypes/_WF/Asf/lantern.yml)
 - [`Resources/Prototypes/_WF/Asf/research.yml`](../../../Resources/Prototypes/_WF/Asf/research.yml)
 - [`Resources/Prototypes/_WF/Asf/Roles/jobs.yml`](../../../Resources/Prototypes/_WF/Asf/Roles/jobs.yml)
+- [`Resources/Prototypes/_WF/Asf/Roles/loadouts.yml`](../../../Resources/Prototypes/_WF/Asf/Roles/loadouts.yml)
 
 ### Localization
 

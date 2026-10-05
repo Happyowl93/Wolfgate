@@ -42,7 +42,7 @@ ent-WFAsfShieldGenerator = Federation bastion shield generator
 ent-WFAsfResearchServer = ASF R&D server
     .desc = Holds the Federation's research in the sector, including its ship procurement patterns.
 ent-WFAsfLathe = ASF fabricator
-    .desc = A Federation fabricator that prints ship procurement cards and shipgun ammunition from researched patterns.
+    .desc = A Federation fabricator that prints ship procurement cards, coilguns, field modsuits and shipgun ammunition from researched patterns.
 
 wf-asf-research-discipline = Astraeus Solar Federation
 wf-asf-research-lpc-civilian = ASF civilian LPCs
