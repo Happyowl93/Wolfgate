@@ -7267,11 +7267,13 @@ entities:
   - uid: 876
     components:
     - type: Transform
+      rot: 3.141592653589793 rad
       pos: -9.5,24.5
       parent: 1
   - uid: 879
     components:
     - type: Transform
+      rot: 3.141592653589793 rad
       pos: 10.5,24.5
       parent: 1
 - proto: HardpointEnergyLight
@@ -7279,13 +7281,13 @@ entities:
   - uid: 900
     components:
     - type: Transform
-      rot: 1.5707963267948966 rad
+      rot: -1.5707963267948966 rad
       pos: -10.5,10.5
       parent: 1
   - uid: 903
     components:
     - type: Transform
-      rot: -1.5707963267948966 rad
+      rot: 1.5707963267948966 rad
       pos: 11.5,10.5
       parent: 1
 - proto: HardpointEnergyMedium
@@ -7293,23 +7295,25 @@ entities:
   - uid: 882
     components:
     - type: Transform
-      rot: 1.5707963267948966 rad
+      rot: -1.5707963267948966 rad
       pos: -15.5,17.5
       parent: 1
   - uid: 885
     components:
     - type: Transform
-      rot: -1.5707963267948966 rad
+      rot: 1.5707963267948966 rad
       pos: 16.5,17.5
       parent: 1
   - uid: 888
     components:
     - type: Transform
+      rot: 3.141592653589793 rad
       pos: -11.5,0.5
       parent: 1
   - uid: 891
     components:
     - type: Transform
+      rot: 3.141592653589793 rad
       pos: 12.5,0.5
       parent: 1
 - proto: HardpointMissileMedium
@@ -7317,13 +7321,13 @@ entities:
   - uid: 894
     components:
     - type: Transform
-      rot: 1.5707963267948966 rad
+      rot: -1.5707963267948966 rad
       pos: -14.5,-6.5
       parent: 1
   - uid: 897
     components:
     - type: Transform
-      rot: -1.5707963267948966 rad
+      rot: 1.5707963267948966 rad
       pos: 15.5,-6.5
       parent: 1
 - proto: HydroponicsToolClippers
@@ -11345,11 +11349,13 @@ entities:
   - uid: 877
     components:
     - type: Transform
+      rot: 3.141592653589793 rad
       pos: -9.5,24.5
       parent: 1
   - uid: 880
     components:
     - type: Transform
+      rot: 3.141592653589793 rad
       pos: 10.5,24.5
       parent: 1
 - proto: WeaponLaserTurretL1Phalanx
@@ -11357,13 +11363,13 @@ entities:
   - uid: 901
     components:
     - type: Transform
-      rot: 1.5707963267948966 rad
+      rot: -1.5707963267948966 rad
       pos: -10.5,10.5
       parent: 1
   - uid: 904
     components:
     - type: Transform
-      rot: -1.5707963267948966 rad
+      rot: 1.5707963267948966 rad
       pos: 11.5,10.5
       parent: 1
 - proto: WeaponLaserTurretPrometheus
@@ -11371,23 +11377,25 @@ entities:
   - uid: 883
     components:
     - type: Transform
-      rot: 1.5707963267948966 rad
+      rot: -1.5707963267948966 rad
       pos: -15.5,17.5
       parent: 1
   - uid: 886
     components:
     - type: Transform
-      rot: -1.5707963267948966 rad
+      rot: 1.5707963267948966 rad
       pos: 16.5,17.5
       parent: 1
   - uid: 889
     components:
     - type: Transform
+      rot: 3.141592653589793 rad
       pos: -11.5,0.5
       parent: 1
   - uid: 892
     components:
     - type: Transform
+      rot: 3.141592653589793 rad
       pos: 12.5,0.5
       parent: 1
 - proto: WeaponTurretSerpentMissile
@@ -11395,13 +11403,13 @@ entities:
   - uid: 895
     components:
     - type: Transform
-      rot: 1.5707963267948966 rad
+      rot: -1.5707963267948966 rad
       pos: -14.5,-6.5
       parent: 1
   - uid: 898
     components:
     - type: Transform
-      rot: -1.5707963267948966 rad
+      rot: 1.5707963267948966 rad
       pos: 15.5,-6.5
       parent: 1
 - proto: WeldingFuelTankFull

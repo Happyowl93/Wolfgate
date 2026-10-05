@@ -5,7 +5,7 @@ meta:
   forkId: ''
   forkVersion: ''
   time: 05/26/2026 16:54:49
-  entityCount: 117
+  entityCount: 101
 maps: []
 grids:
 - 1
@@ -365,15 +365,9 @@ entities:
       version: 2
       data:
         tiles:
-          0,0:
-            0: 14323
-            1: 18444
-          1,0:
-            1: 257
-            0: 16
-          0,1:
-            0: 35
-            1: 596
+          -1,-1:
+            1: 9216
+            0: 51200
           -2,0:
             1: 3084
             0: 192
@@ -386,9 +380,15 @@ entities:
           0,-1:
             1: 8448
             0: 4096
-          -1,-1:
-            1: 9216
-            0: 51200
+          0,0:
+            0: 14323
+            1: 18444
+          1,0:
+            1: 257
+            0: 16
+          0,1:
+            0: 35
+            1: 596
         uniqueMixes:
         - volume: 2500
           temperature: 293.15
@@ -481,21 +481,6 @@ entities:
       parent: 1
 - proto: CableApcExtension
   entities:
-  - uid: 29
-    components:
-    - type: Transform
-      pos: -1.5,5.5
-      parent: 1
-  - uid: 30
-    components:
-    - type: Transform
-      pos: -0.5,5.5
-      parent: 1
-  - uid: 31
-    components:
-    - type: Transform
-      pos: -0.5,4.5
-      parent: 1
   - uid: 32
     components:
     - type: Transform
@@ -505,26 +490,6 @@ entities:
     components:
     - type: Transform
       pos: -0.5,3.5
-      parent: 1
-  - uid: 34
-    components:
-    - type: Transform
-      pos: -2.5,3.5
-      parent: 1
-  - uid: 35
-    components:
-    - type: Transform
-      pos: -3.5,1.5
-      parent: 1
-  - uid: 36
-    components:
-    - type: Transform
-      pos: -2.5,4.5
-      parent: 1
-  - uid: 37
-    components:
-    - type: Transform
-      pos: 1.5,1.5
       parent: 1
   - uid: 38
     components:
@@ -561,55 +526,10 @@ entities:
     - type: Transform
       pos: -1.5,2.5
       parent: 1
-  - uid: 45
-    components:
-    - type: Transform
-      pos: 1.5,5.5
-      parent: 1
-  - uid: 46
-    components:
-    - type: Transform
-      pos: 1.5,4.5
-      parent: 1
-  - uid: 47
-    components:
-    - type: Transform
-      pos: -2.5,5.5
-      parent: 1
   - uid: 48
     components:
     - type: Transform
       pos: 0.5,2.5
-      parent: 1
-  - uid: 49
-    components:
-    - type: Transform
-      pos: -2.5,1.5
-      parent: 1
-  - uid: 50
-    components:
-    - type: Transform
-      pos: 2.5,1.5
-      parent: 1
-  - uid: 51
-    components:
-    - type: Transform
-      pos: 1.5,3.5
-      parent: 1
-  - uid: 52
-    components:
-    - type: Transform
-      pos: -3.5,2.5
-      parent: 1
-  - uid: 53
-    components:
-    - type: Transform
-      pos: 2.5,2.5
-      parent: 1
-  - uid: 54
-    components:
-    - type: Transform
-      pos: 0.5,5.5
       parent: 1
 - proto: CableHV
   entities:

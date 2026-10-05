@@ -60,6 +60,11 @@ The wardrobe sprites and the seven hulls come from
 - The hulls (DSM Peasant, Impel, Gnosis, Redemptor, Imparator, Dragoon and Praxis; AGPL-3.0) are converted by
   `Tools/_WF/Asf/port_dsm_hulls.py`, which swaps prototypes Wolfgate lacks for local ones and arms each DSM mount from
   its `LOADOUT` table. Re-running it needs an Eclipsion checkout.
+- The converted hulls were then fixed by hand, so re-running the port script undoes this: diagonal corners
+  turned to fit the hull (Eclipsion's corner-specific diagonals all came in unrotated), cable nets pruned to loop-free
+  trees that still reach every machine, and air supply added where the DSM layouts had none or too little (Porter,
+  Bulwark, Lodestar, Guardian's gun bay, Lamplighter's engine room). Vigil and Gleaner stay without vents, like
+  other fighters and pods their size.
 - The DSM thruster sprite was dropped: its fore and aft frames are 3/4 views, so no plume could leave the nozzle.
   `WFAsfThruster` and `WFAsfThrusterLarge` are the plan-view vanilla (Baystation) and Mono large thrusters recoloured
   to the ASF palette by `Tools/_WF/Asf/recolour_thrusters.py`.
