@@ -113,7 +113,7 @@
   id: WFAsfVigil
   parent: BaseVessel
   name: ASFN Vigil
-  description: A small plastitanium escort fighter armed with a Prometheus laser cannon and an L-1 Phalanx for point defence. No shield.
+  description: A small escort fighter armed with a Prometheus laser cannon and an L-1 Phalanx for point defence. No shield.
   price: 40000
   category: Small
   group: Custom
@@ -148,7 +148,7 @@
   id: WFAsfBulwark
   parent: BaseVessel
   name: ASFN Bulwark
-  description: A plastitanium gunship with a Prometheus laser cannon, a self-loading Serpent torpedo launcher and a small shield. Good at keeping raiders off a hauler, less good at chasing them down.
+  description: A gunship with a Prometheus laser cannon, a self-loading Serpent torpedo launcher and a small shield. Good at keeping raiders off a hauler, less good at chasing them down.
   price: 75000
   category: Small
   group: Custom
@@ -219,7 +219,7 @@
   id: WFAsfLodestar
   parent: BaseVessel
   name: ASFN Lodestar
-  description: The Federation's flagship frigate, only released against a Lodestar LPC. Carries an MS-250 Aegis shield, 2 Apollo heavy lasers, 4 Prometheus laser cannons, 2 Serpent torpedo launchers and 2 L-1 Phalanx PD lasers, with a medbay, science wing and galley.
+  description: The Federation's flagship frigate, Carries an MS-250 Aegis shield, 2 Apollo heavy lasers, 4 Prometheus laser cannons, 2 Serpent torpedo launchers and 2 L-1 Phalanx PD lasers, with a medbay, science wing and galley.
   price: 250000
   purchasable: false # voucher only: WFAsfVoucherLodestar
   category: Medium
