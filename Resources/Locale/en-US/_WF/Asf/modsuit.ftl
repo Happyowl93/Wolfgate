@@ -1,26 +1,26 @@
 ent-WFAsfClothingModsuitField = ASF Pathfinder modsuit control unit
-    .desc = A Minerva-pattern research modsuit, re-plated by the Federation for survey work that turns hostile. Pearl armour over a plum undersuit and a dark visor, sealed against vacuum and rated against small arms. The chestplate takes armour plates.
+    .desc = An ASF field modsuit built on the Minerva research frame, with extra plating for survey work that goes wrong. Takes armor plates.
 ent-WFAsfClothingModsuitFieldPowerCell = { ent-WFAsfClothingModsuitField }
     .desc = { ent-WFAsfClothingModsuitField.desc }
 ent-WFAsfClothingModsuitHelmetField = Pathfinder modsuit helmet
-    .desc = A plated helmet with a lilac visor strip and a lamp for dark wrecks.
+    .desc = A plated modsuit helmet with a lilac visor and a headlamp.
 ent-WFAsfClothingModsuitGauntletsField = Pathfinder modsuit gauntlets
-    .desc = Armoured gauntlets, thick enough for salvage and fine enough for a sample tray.
+    .desc = Armored modsuit gauntlets.
 ent-WFAsfClothingModsuitChestplateField = Pathfinder modsuit chestplate
-    .desc = A pearl-white breastplate with lilac seams and a slot for armour plates.
+    .desc = A pearl-white modsuit chestplate with a slot for armor plates.
 ent-WFAsfClothingModsuitBootsField = Pathfinder modsuit boots
-    .desc = Sealed armoured boots with reinforced soles.
+    .desc = Sealed, armored modsuit boots.
 
 ent-WFAsfClothingModsuitAegis = ASF Aegis modsuit control unit
-    .desc = The Pathfinder in dark violet armour, with a hardlight emitter built into its control unit. Once the suit is sealed it throws a violet personal shield around the wearer that soaks up fire until it breaks, then respools.
+    .desc = A Pathfinder refitted with a hardlight emitter in the control unit. While the suit is sealed it can project a personal shield that absorbs fire until it breaks.
 ent-WFAsfClothingModsuitAegisPowerCell = { ent-WFAsfClothingModsuitAegis }
     .desc = { ent-WFAsfClothingModsuitAegis.desc }
 ent-WFAsfClothingModsuitHelmetAegis = Aegis modsuit helmet
-    .desc = A dark armoured helmet whose visor and seams glow with the emitter's field.
+    .desc = A dark armored modsuit helmet. The visor glows while the emitter runs.
 ent-WFAsfClothingModsuitGauntletsAegis = Aegis modsuit gauntlets
     .desc = { ent-WFAsfClothingModsuitGauntletsField.desc }
 ent-WFAsfClothingModsuitChestplateAegis = Aegis modsuit chestplate
-    .desc = A dark violet breastplate traced with hardlight seams, with a slot for armour plates.
+    .desc = A dark violet modsuit chestplate with hardlight seams and a slot for armor plates.
 ent-WFAsfClothingModsuitBootsAegis = Aegis modsuit boots
     .desc = { ent-WFAsfClothingModsuitBootsField.desc }
 

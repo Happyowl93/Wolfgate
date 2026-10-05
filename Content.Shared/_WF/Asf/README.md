@@ -39,7 +39,7 @@ and docks there and re-run it. The script places lights, vents, scrubbers, alarm
 - Self-defence: 10 guns on pads, trusses and pylons (2 Apollo heavy lasers, 4 Prometheus cannons, 2 Serpent torpedo launchers,
   2 Phalanx point defence), fired from the bridge through the `GunneryServerStation` in the ready room. For scale,
   Hokkaido mounts 22 guns and the Halcyon about 90. Guns recharge from their own batteries.
-- Fleet (`fleet.yml`), sold at `WFAsfComputerShipyard` in the shipyard hall (a purple recolour of the USSP
+- Fleet (`fleet.yml`; civilian hulls are "ASF", armed ones "ASFN" like the TSF's "TSFN"), sold at `WFAsfComputerShipyard` in the shipyard hall (a purple recolour of the USSP
   shipyard screen). Prices and loadouts were set against other factions' hulls of similar tile count, scoring
   firepower by hardpoint size (light 1, medium 2, heavy 4):
 

@@ -2,23 +2,23 @@ wf-asf-grant-currency = ARG
 wf-asf-grant-stack = Astraeus Reward Grants
 
 ent-WFAsfRewardGrant = Astraeus Reward Grant
-    .desc = A Federation research grant chit, redeemable at an ASF grant kiosk. The fine print thanks you, in eleven languages, for advancing the common understanding.
+    .desc = A research grant chit issued by the ASF. Redeemable at an ASF grant kiosk.
 ent-WFAsfRewardGrant1 = { ent-WFAsfRewardGrant }
     .desc = { ent-WFAsfRewardGrant.desc }
 ent-WFAsfRewardGrant10 = { ent-WFAsfRewardGrant }
     .desc = { ent-WFAsfRewardGrant.desc }
 
 ent-WFAsfGrantKiosk = ASF grant kiosk
-    .desc = Redeems Astraeus Reward Grants for Federation equipment and hull vouchers. Only ASF crew can draw on it.
+    .desc = Trades Astraeus Reward Grants for ASF gear and ship LPCs. ASF members only.
 wf-asf-grant-kiosk-store = ASF Grant Kiosk
-wf-asf-grant-category-vouchers = Hull vouchers
+wf-asf-grant-category-vouchers = Ship LPCs
 wf-asf-grant-category-arms = Arms
 wf-asf-grant-category-gear = Field gear
 wf-asf-grant-category-research = Research
 
-wf-asf-bounty-desc-crystal = Federation researchers are studying monolithic crystals. Ship them intact, and gently.
-wf-asf-bounty-desc-artifact = The Federation pays for alien artifacts with a proven, lasting property. Analyse it first; we only take what we asked for.
-wf-asf-bounty-desc-survey = A field survey set for the Lantern Post laboratory.
+wf-asf-bounty-desc-crystal = The Lantern Post lab wants monolithic crystals to study. Try not to chip them this time.
+wf-asf-bounty-desc-artifact = The Federation pays for alien artifacts with a useful, lasting effect. Analyze it before you ship it, the lab has enough mystery boxes already.
+wf-asf-bounty-desc-survey = The Lantern Post lab is restocking its field survey kits.
 wf-asf-bounty-name-crystal-small = Small monolithic crystals
 wf-asf-bounty-name-crystal-medium = Medium monolithic crystal
 wf-asf-bounty-name-crystal-large = Large monolithic crystal
