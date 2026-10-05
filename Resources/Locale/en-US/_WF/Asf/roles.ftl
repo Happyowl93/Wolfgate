@@ -9,13 +9,13 @@ wf-asf-radio = ASF
 wf-asf-job-supervisors-council = the Federation council
 wf-asf-job-supervisors-envoy = the Envoy
 wf-asf-job-envoy = ASF Envoy
-wf-asf-job-envoy-description = Run Lantern Post and speak for the Federation. Keep things civil with the neighbors, TSF included.
+wf-asf-job-envoy-description = Runs Lantern Post and speaks for the Federation.
 wf-asf-job-field-researcher = ASF Field Researcher
-wf-asf-job-field-researcher-description = Take a survey ship out, study whatever you find and bring the data back to the post.
+wf-asf-job-field-researcher-description = Takes survey ships out, studies what they find and brings the data back to the lab.
 wf-asf-job-colonist = ASF Colonist
-wf-asf-job-colonist-description = Keep Lantern Post running. Build, farm, repair and haul for the Federation.
+wf-asf-job-colonist-description = Keeps the post running and looks for expansion opportunities.
 wf-asf-job-enforcer = ASF Enforcer
-wf-asf-job-enforcer-description = Keep the post and its visitors safe. Talk first, shoot last.
+wf-asf-job-enforcer-description = Keeps the post and ASF members safe.
 
 wf-asf-lantern-subtext = A mobile outpost run by the ASF.
 wf-asf-lantern-description = Lantern Post is the ASF's base ship in the sector. Visitors can use the clinic, garden and cargo bay, and members also get a shipyard, an R&D lab and a farm. Not a combat faction, though the post can defend itself.
