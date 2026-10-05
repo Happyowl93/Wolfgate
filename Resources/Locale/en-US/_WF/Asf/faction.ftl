@@ -10,3 +10,5 @@ ent-WFAsfBanner = Astraeus Solar Federation banner
     .desc = The purple standard of the Astraeus Solar Federation.
 ent-WFAsfMarineBanner = ASF Marine Corps banner
     .desc = The standard of the ASF Marine Corps.
+
+guide-entry-wf-asf = Astraeus Solar Federation

@@ -164,6 +164,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Prototypes/_WF/Asf/faction.yml`](../../../Resources/Prototypes/_WF/Asf/faction.yml)
 - [`Resources/Prototypes/_WF/Asf/fleet.yml`](../../../Resources/Prototypes/_WF/Asf/fleet.yml)
 - [`Resources/Prototypes/_WF/Asf/grants.yml`](../../../Resources/Prototypes/_WF/Asf/grants.yml)
+- [`Resources/Prototypes/_WF/Asf/guidebook.yml`](../../../Resources/Prototypes/_WF/Asf/guidebook.yml)
 - [`Resources/Prototypes/_WF/Asf/lantern.yml`](../../../Resources/Prototypes/_WF/Asf/lantern.yml)
 - [`Resources/Prototypes/_WF/Asf/research.yml`](../../../Resources/Prototypes/_WF/Asf/research.yml)
 - [`Resources/Prototypes/_WF/Asf/Roles/jobs.yml`](../../../Resources/Prototypes/_WF/Asf/Roles/jobs.yml)
@@ -247,6 +248,10 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/SharedMaps/_WF/Asf/porter.yml`](../../../Resources/SharedMaps/_WF/Asf/porter.yml)
 - [`Resources/SharedMaps/_WF/Asf/vigil.yml`](../../../Resources/SharedMaps/_WF/Asf/vigil.yml)
 
+### Guidebook
+
+- [`Resources/ServerInfo/_WF/Asf/Guidebook/Factions/Asf.xml`](../../../Resources/ServerInfo/_WF/Asf/Guidebook/Factions/Asf.xml)
+
 ### Tools
 
 - [`Tools/_WF/Asf/build_lantern.py`](../../../Tools/_WF/Asf/build_lantern.py)
@@ -262,5 +267,6 @@ The wardrobe sprites and the seven hulls come from
 ## Non-modular edits
 
 - [`Resources/Prototypes/_Mono/Entities/Objects/Misc/loot.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Misc/loot.yml): ASF crystal bounties
+- [`Resources/Prototypes/_Mono/Guidebook/factions.yml`](../../../Resources/Prototypes/_Mono/Guidebook/factions.yml)
 
 <!-- WOLFGATE-GENERATED END -->
