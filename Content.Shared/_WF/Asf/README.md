@@ -63,7 +63,8 @@ and docks there and re-run it. The script places lights, vents, scrubbers, alarm
 - Astraeus Reward Grants (ARG, `grants.yml`, `bounties.yml`): the cargo bay's bounty console offers only ASF
   bounties, which pay ARG tickets (`WFAsfRewardGrant`, a purple recolour of the MMC ticket) instead of cash. They ask
   for monolithic crystals by size (tagged `WFMonolithicCrystal*` in Mono's `loot.yml`; about 1.25 ARG per 1,000 of
-  sale value) or for alien artifacts, either any artifact or one with a lasting utility effect (holds items, intercom,
+  sale value), for artifact fragments (six, a little over the four that craft an artifact) or for alien artifacts, either
+  any artifact or one with a lasting utility effect (holds items, intercom,
   instrument, holds liquid, wanders, speed, power, drill, multitool, gun). Like other bounties, items handed in are
   paid by the reward only. ASF crew spend ARG at the grant kiosk (`WFAsfGrantKiosk`, the MMC requisition kiosk in
   purple): hull vouchers (civilian 30, escort 60, Lodestar 250), coil arms and ammo, both modsuits and

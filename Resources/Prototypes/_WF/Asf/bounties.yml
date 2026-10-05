@@ -71,6 +71,21 @@
 
 # Artifacts
 
+# Four fragments craft into an artifact (15 ARG), so six pay a little more than crafting them first.
+- type: cargoBounty
+  id: WFAsfBountyArtifactFragments
+  reward: 20
+  rewardSuffix: ARG
+  rewardProto: WFAsfRewardGrant
+  description: wf-asf-bounty-desc-fragments
+  idPrefix: LTN
+  entries:
+  - name: wf-asf-bounty-name-artifact-fragments
+    amount: 6
+    whitelist:
+      tags:
+      - ArtifactFragment
+
 - type: cargoBounty
   id: WFAsfBountyArtifact
   reward: 15

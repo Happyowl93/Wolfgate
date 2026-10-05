@@ -18,10 +18,12 @@ wf-asf-grant-category-research = Research
 
 wf-asf-bounty-desc-crystal = The Lantern Post lab wants monolithic crystals to study. Try not to chip them this time.
 wf-asf-bounty-desc-artifact = The Federation pays for alien artifacts with a useful, lasting effect. Analyze it before you ship it, the lab has enough mystery boxes already.
+wf-asf-bounty-desc-fragments = The Lantern Post lab wants artifact fragments for its research cores. Broken pieces are fine, that's the point.
 wf-asf-bounty-desc-survey = The Lantern Post lab is restocking its field survey kits.
 wf-asf-bounty-name-crystal-small = Small monolithic crystals
 wf-asf-bounty-name-crystal-medium = Medium monolithic crystal
 wf-asf-bounty-name-crystal-large = Large monolithic crystal
+wf-asf-bounty-name-artifact-fragments = Artifact fragments
 wf-asf-bounty-name-artifact = Alien artifact (any)
 wf-asf-bounty-name-artifact-storage = Alien artifact that holds items
 wf-asf-bounty-name-artifact-intercom = Alien artifact that works as an intercom

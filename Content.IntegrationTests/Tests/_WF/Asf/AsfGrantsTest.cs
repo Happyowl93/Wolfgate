@@ -102,7 +102,7 @@ public sealed class AsfGrantsTest
         await pair.CleanReturnAsync();
     }
 
-    /// <summary>Crystal bounties tell crystal sizes apart, and an artifact in an artifact container counts.</summary>
+    /// <summary>Crystal bounties tell crystal sizes apart, an artifact in an artifact container counts, and fragment stacks count by size.</summary>
     [Test]
     public async Task BountiesMatchCrystalsAndArtifacts()
     {
@@ -137,6 +137,14 @@ public sealed class AsfGrantsTest
             Assert.That(cargo.IsBountyComplete(container, bounty("WFAsfBountyArtifact")), Is.False);
             Assert.That(storage.Insert(entities.SpawnEntity("SimpleXenoArtifact", at), container));
             Assert.That(cargo.IsBountyComplete(container, bounty("WFAsfBountyArtifact")), Is.True);
+
+            var fragments = entities.SpawnEntity("CrateGenericSteel", at);
+            var stack = entities.SpawnEntity("ArtifactFragment1", at);
+            entities.System<StackSystem>().SetCount(stack, 5);
+            Assert.That(storage.Insert(stack, fragments));
+            Assert.That(cargo.IsBountyComplete(fragments, bounty("WFAsfBountyArtifactFragments")), Is.False);
+            Assert.That(storage.Insert(entities.SpawnEntity("ArtifactFragment1", at), fragments));
+            Assert.That(cargo.IsBountyComplete(fragments, bounty("WFAsfBountyArtifactFragments")), Is.True);
 
             maps.DeleteMap(entities.GetComponent<TransformComponent>(mapUid).MapID);
         });
