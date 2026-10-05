@@ -461,6 +461,7 @@ lathes = [console("Protolathe", 8, 1, "N", comps=on_silo()),
           console("CircuitImprinter", 9, -1, "E", comps=on_silo())]
 silo.set_comp("OreSilo", clients=[e.uid for e in lathes])
 m.add("WFAsfResearchServer", 9, -3)
+m.add("DatafarmResearchFaction", 9, -2)                                          # the server earns points only from clients
 on_table("TableReinforced", 4, -1, "AnomalyScanner", "Beaker"); on_table("TableReinforced", 4, -2, "HandheldHealthAnalyzer")
 m.add("LockerScienceFilled", 4, -3); m.add("ShelfMetal", 9, 0)
 
