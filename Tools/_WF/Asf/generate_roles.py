@@ -24,6 +24,9 @@ JOBS = [
      ["RadioHandheldNF"]),
 ]
 
+# PDA screen accent per icon state, matching the trim drawn by draw_ids.py.
+PDA_ACCENTS = {"Envoy": "#EBC913", "Enforcer": "#F2EEFB", "Researcher": "#C9BFE0"}
+
 LOADOUT_GROUPS = ["MercenaryBackpack", "ContractorNeck", "MercenaryGlasses", "ContractorBoxSurvival",
                   "ContractorWallet", "ContractorCartridge", "ContractorTrinkets", "ContractorBureaucracy"]
 
@@ -82,9 +85,10 @@ def job(jid, key, icon, weight, req, group, extra, storage):
         f"  id: {j}IDCard",
         "  components:",
         "  - type: Sprite",
+        "    sprite: _WF/Asf/Objects/Misc/id_cards.rsi",
         "    layers:",
-        "    - state: default",
-        "    - state: idpassenger",
+        "    - state: asfbase",
+        f"    - state: idasf{icon.lower()}",
         "  - type: PresetIdCard",
         f"    job: {j}",
         "",
@@ -94,8 +98,22 @@ def job(jid, key, icon, weight, req, group, extra, storage):
         "  components:",
         "  - type: Pda",
         f"    id: {j}IDCard",
+        "  - type: Sprite",
+        "    sprite: _WF/Asf/Objects/Devices/pda.rsi",
+        "  - type: Icon",
+        "    sprite: _WF/Asf/Objects/Devices/pda.rsi",
+        f"    state: pda-{icon.lower()}",
+        "  - type: Appearance",
+        "    appearanceDataInit:",
+        "      enum.PdaVisuals.PdaType:",
+        "        !type:String",
+        f"        pda-{icon.lower()}",
         "  - type: PdaBorderColor",
         '    borderColor: "#7B52B8"',
+    ]
+    if icon in PDA_ACCENTS:
+        lines.append(f'    accentVColor: "{PDA_ACCENTS[icon]}"')
+    lines += [
         "",
         "- type: entity",
         "  parent: SpawnPointJobBase",

@@ -54,6 +54,8 @@ and docks there and re-run it. The script places lights, vents, scrubbers, alarm
   fabricator also prints universal shipgun ammo.
 - Lantern Post clears drones within 1.5 km and keeps world-gen debris out of 800 m, like Hokkaido and Camelot.
 - Jobs are generated: edit the roster in `Tools/_WF/Asf/generate_roles.py` and re-run it.
+- Each role has a purple PDA with its own trim and an ID card whose symbol copies its job icon; both are drawn by
+  `Tools/_WF/Asf/draw_ids.py`.
 - Official clothing: `WFAsfClothingUniformService`, `WFAsfClothingHeadBeret`, `WFAsfClothingOuterGreatcoat`.
   `Entities/clothing_wardrobe.yml` adds 19 more pieces, including the backpack, satchel and duffel the drobe sells.
 - Coilguns (`Entities/weapons.yml`): the Type-3 coil rifle (`WFAsfWeaponRifleCoil`) and Type-2 coil pistol
@@ -149,6 +151,8 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/researcher.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/researcher.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/)
 - [`Resources/Textures/_WF/Asf/Interface/job_icons.rsi/`](../../../Resources/Textures/_WF/Asf/Interface/job_icons.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/Devices/pda.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Devices/pda.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/Misc/id_cards.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Misc/id_cards.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_pistol_mag.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_pistol_mag.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_rifle_mag.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_rifle_mag.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_slug.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_slug.rsi/)
@@ -180,6 +184,7 @@ The wardrobe sprites and the seven hulls come from
 ### Tools
 
 - [`Tools/_WF/Asf/build_lantern.py`](../../../Tools/_WF/Asf/build_lantern.py)
+- [`Tools/_WF/Asf/draw_ids.py`](../../../Tools/_WF/Asf/draw_ids.py)
 - [`Tools/_WF/Asf/generate_roles.py`](../../../Tools/_WF/Asf/generate_roles.py)
 - [`Tools/_WF/Asf/port_dsm_hulls.py`](../../../Tools/_WF/Asf/port_dsm_hulls.py)
 - [`Tools/_WF/Asf/recolour_thrusters.py`](../../../Tools/_WF/Asf/recolour_thrusters.py)
