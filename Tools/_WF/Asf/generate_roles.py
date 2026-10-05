@@ -14,7 +14,7 @@ JOBS = [
      ["RadioHandheldNF", "WFAsfVoucherEscort"]),
     ("Enforcer", "enforcer", "Enforcer", 30, 36000, "WFAsfCrew",
      {"head": "WFAsfClothingHeadBeret", "outerClothing": "ClothingOuterArmorBasic", "pocket1": "WeaponDisabler"},
-     ["RadioHandheldNF", "Handcuffs", "Handcuffs"]),
+     ["RadioHandheldNF", "Handcuffs", "Handcuffs", "WFAsfWeaponPistolCoil", "WFAsfMagazinePistolCoil"]),
     ("FieldResearcher", "field-researcher", "Researcher", 20, 0, "WFAsfCrew",
      {"jumpsuit": "WFAsfClothingUniformResearcher", "outerClothing": "ClothingOuterCoatLab"},
      ["RadioHandheldNF", "HandheldHealthAnalyzer", "AnomalyScanner"]),

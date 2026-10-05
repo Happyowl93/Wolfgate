@@ -1,4 +1,4 @@
-# ASF ship vouchers are researched on Lantern Post's server and printed at its fabricator, like other factions' LPCs.
+# ASF ship vouchers and coilguns are researched on Lantern Post's server and printed at its fabricator, like other factions' LPCs.
 
 - type: techDiscipline
   id: WFAsf
@@ -53,6 +53,22 @@
   - UniversalMaterialResearchT2
   position: -6, -15
 
+- type: technology
+  id: WFAsfCoilArms
+  name: wf-asf-research-coil-arms
+  entityIcon: WFAsfWeaponRifleCoil
+  discipline: WFAsf
+  tier: 1
+  cost: 15000
+  recipeUnlocks:
+  - WFAsfWeaponPistolCoil
+  - WFAsfWeaponRifleCoil
+  - WFAsfMagazinePistolCoil
+  - WFAsfMagazineRifleCoil
+  technologyPrerequisites:
+  - UniversalMaterialResearchT1
+  position: -4, -7
+
 - type: latheRecipe
   parent: BaseVoucherRecipe
   id: WFAsfVoucherCivilian
@@ -92,12 +108,53 @@
     Silver: 5000
     Plastitanium: 1000
 
+- type: latheRecipe
+  parent: BaseWeaponRecipe
+  id: WFAsfWeaponPistolCoil
+  result: WFAsfWeaponPistolCoil
+  categories:
+  - Sidearms
+  - Ballistic
+  - Weapons
+  materials:
+    Steel: 600
+    Plastic: 300
+    Copper: 300 # the coil windings
+
+- type: latheRecipe
+  parent: BaseWeaponRecipeLong
+  id: WFAsfWeaponRifleCoil
+  result: WFAsfWeaponRifleCoil
+  categories:
+  - Rifles
+  - Ballistic
+  - Weapons
+  materials:
+    Steel: 1200
+    Plasteel: 1000
+    Plastic: 900
+    Copper: 800
+
+- type: latheRecipe
+  parent: BaseAmmoFMJPistolCaliberPistolMagazineRecipe
+  id: WFAsfMagazinePistolCoil
+  result: WFAsfMagazinePistolCoil
+
+- type: latheRecipe
+  parent: BaseAmmoFMJIntermediateMagazineRecipe
+  id: WFAsfMagazineRifleCoil
+  result: WFAsfMagazineRifleCoil
+
 - type: latheRecipePack
   id: WFAsfResearch
   recipes:
   - WFAsfVoucherCivilian
   - WFAsfVoucherEscort
   - WFAsfVoucherLodestar
+  - WFAsfWeaponPistolCoil
+  - WFAsfWeaponRifleCoil
+  - WFAsfMagazinePistolCoil
+  - WFAsfMagazineRifleCoil
 
 - type: entity
   id: WFAsfResearchServer

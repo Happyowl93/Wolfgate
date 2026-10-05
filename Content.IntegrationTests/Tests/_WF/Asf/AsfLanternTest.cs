@@ -30,6 +30,10 @@ public sealed class AsfLanternTest
     /// <summary>ASF voucher entities; each has a lathe recipe of the same ID.</summary>
     private static readonly string[] Vouchers = ["WFAsfVoucherCivilian", "WFAsfVoucherEscort", "WFAsfVoucherLodestar"];
 
+    /// <summary>Lathe recipes the post researches and prints besides vouchers.</summary>
+    private static readonly string[] Arms =
+        ["WFAsfWeaponPistolCoil", "WFAsfWeaponRifleCoil", "WFAsfMagazinePistolCoil", "WFAsfMagazineRifleCoil"];
+
     private static readonly ProtoId<TagPrototype> WallTag = "Wall";
 
     [Test]
@@ -95,7 +99,7 @@ public sealed class AsfLanternTest
                 Assert.That(vessel.Access, Is.Empty, $"{id} needs {vessel.Access} access.");
             }
 
-            // Members earn vouchers by research: the post's server must hold the unlocking tech and its lathe must print them.
+            // Members earn vouchers and coilguns by research: the post's server must hold the unlocking tech and its lathe must print them.
             var disciplines = new HashSet<string>();
             var serverQuery = entities.EntityQueryEnumerator<ResearchServerComponent, TechnologyDatabaseComponent, TransformComponent>();
             while (serverQuery.MoveNext(out _, out _, out var database, out var xform))
@@ -117,7 +121,7 @@ public sealed class AsfLanternTest
             }
 
             var technologies = prototypes.EnumeratePrototypes<TechnologyPrototype>().ToList();
-            foreach (var recipe in Vouchers)
+            foreach (var recipe in Vouchers.Concat(Arms))
             {
                 Assert.That(printable, Does.Contain(recipe), $"No lathe on Lantern Post can print {recipe}.");
                 Assert.That(technologies.Any(t => t.RecipeUnlocks.Contains(recipe) && disciplines.Contains(t.Discipline)),

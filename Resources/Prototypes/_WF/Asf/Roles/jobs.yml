@@ -129,6 +129,8 @@
     - RadioHandheldNF
     - Handcuffs
     - Handcuffs
+    - WFAsfWeaponPistolCoil
+    - WFAsfMagazinePistolCoil
 
 - type: roleLoadout
   id: JobWFAsfEnforcer

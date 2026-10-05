@@ -56,6 +56,13 @@ and docks there and re-run it. The script places lights, vents, scrubbers, alarm
 - Jobs are generated: edit the roster in `Tools/_WF/Asf/generate_roles.py` and re-run it.
 - Official clothing: `WFAsfClothingUniformService`, `WFAsfClothingHeadBeret`, `WFAsfClothingOuterGreatcoat`.
   `Entities/clothing_wardrobe.yml` adds 19 more pieces, including the backpack, satchel and duffel the drobe sells.
+- Coilguns (`Entities/weapons.yml`): the Type-3 coil rifle (`WFAsfWeaponRifleCoil`) and Type-2 coil pistol
+  (`WFAsfWeaponPistolCoil`), white frames after the Star Trek Type-3B phaser rifle. They are ballistic, but they fire
+  caseless 4mm ferrite slugs from a coil barrel: nothing is ejected (`deleteOnSpawn`) and there is no bolt
+  (`boltClosed: null`). Both share one slug (20 piercing, 0.15 AP). The rifle's longer coil gives x1.2 damage, speed 70,
+  semi or 3-round burst, 24 rounds; the pistol gives x0.9, semi, 12 rounds. Faction gear tier 2 and 1, allowed for the ASF
+  department. Research `WFAsfCoilArms` and print guns and magazines at `WFAsfLathe`. The Enforcer starts with a pistol
+  and a spare magazine.
 
 ## Ported from Hullrot: Eclipsion
 
@@ -92,6 +99,7 @@ The wardrobe sprites and the seven hulls come from
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/Asf/AsfCoilgunTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfCoilgunTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs)
 
 ### Prototypes
@@ -102,6 +110,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Prototypes/_WF/Asf/Entities/devices.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/devices.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/drobe.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/drobe.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/vouchers.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/vouchers.yml)
+- [`Resources/Prototypes/_WF/Asf/Entities/weapons.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/weapons.yml)
 - [`Resources/Prototypes/_WF/Asf/faction.yml`](../../../Resources/Prototypes/_WF/Asf/faction.yml)
 - [`Resources/Prototypes/_WF/Asf/fleet.yml`](../../../Resources/Prototypes/_WF/Asf/fleet.yml)
 - [`Resources/Prototypes/_WF/Asf/lantern.yml`](../../../Resources/Prototypes/_WF/Asf/lantern.yml)
@@ -113,6 +122,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Locale/en-US/_WF/Asf/faction.ftl`](../../../Resources/Locale/en-US/_WF/Asf/faction.ftl)
 - [`Resources/Locale/en-US/_WF/Asf/roles.ftl`](../../../Resources/Locale/en-US/_WF/Asf/roles.ftl)
 - [`Resources/Locale/en-US/_WF/Asf/wardrobe.ftl`](../../../Resources/Locale/en-US/_WF/Asf/wardrobe.ftl)
+- [`Resources/Locale/en-US/_WF/Asf/weapons.ftl`](../../../Resources/Locale/en-US/_WF/Asf/weapons.ftl)
 
 ### Textures
 
@@ -139,6 +149,12 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/researcher.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/researcher.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/)
 - [`Resources/Textures/_WF/Asf/Interface/job_icons.rsi/`](../../../Resources/Textures/_WF/Asf/Interface/job_icons.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_pistol_mag.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_pistol_mag.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_rifle_mag.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_rifle_mag.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_slug.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_slug.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_pistol.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_pistol.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_rifle.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_rifle.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_rifle_inhands_32x.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_rifle_inhands_32x.rsi/)
 - [`Resources/Textures/_WF/Asf/Structures/Banners/federation.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/Banners/federation.rsi/)
 - [`Resources/Textures/_WF/Asf/Structures/Banners/marine.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/Banners/marine.rsi/)
 - [`Resources/Textures/_WF/Asf/Structures/drobe.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/drobe.rsi/)
