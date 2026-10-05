@@ -40,7 +40,7 @@
         availableJobs:
           WFAsfEnvoy: [1, 1]
           WFAsfEnforcer: [-1, -1]
-          WFAsfFieldResearcher: [3, 3]
+          WFAsfFieldResearcher: [-1, -1]
           WFAsfColonist: [-1, -1]
       - type: StationDeadDropHintExempt
       - type: StationCargoBountyDatabase
