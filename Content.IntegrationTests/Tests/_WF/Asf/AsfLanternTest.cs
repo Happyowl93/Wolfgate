@@ -40,7 +40,8 @@ public sealed class AsfLanternTest
     private static readonly (string Id, int Count)[] Armoury =
     [
         ("WFAsfGunRackFilled", 1), ("WFAsfPistolRackFilled", 1), ("WFAsfWeaponRifleCoil", 3),
-        ("WFAsfWeaponPistolCoil", 4), ("WFAsfBoxCoilSlug", 4), ("WFAsfSuitStoragePathfinder", 3),
+        ("WFAsfWeaponPistolCoil", 4), ("WFAsfBoxCoilSlug", 4), ("WFAsfBoxMagazineRifleCoil", 1),
+        ("WFAsfBoxMagazinePistolCoil", 1), ("WFAsfSuitStoragePathfinder", 3),
         ("WFAsfClothingModsuitFieldPowerCell", 3),
     ];
 
@@ -196,7 +197,7 @@ public sealed class AsfLanternTest
             Assert.That(plastitanium, Is.Positive, "Lantern Post has no plastitanium walls.");
             Assert.That(weakWalls, Is.Empty, "Lantern Post's hull should be plastitanium throughout.");
 
-            // The post's armoury: racked coil rifles and pistols, a table of slug boxes and three stored Pathfinder modsuits.
+            // The post's armoury: racked coil rifles and pistols, a table of slug and magazine boxes and three stored Pathfinder modsuits.
             var armoury = new Dictionary<string, int>();
             var metaQuery = entities.EntityQueryEnumerator<MetaDataComponent, TransformComponent>();
             while (metaQuery.MoveNext(out var meta, out var xform))

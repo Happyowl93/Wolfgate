@@ -11,7 +11,7 @@ namespace Content.IntegrationTests.Tests._WF.Asf;
 public sealed class AsfCoilgunTest
 {
     private static readonly (string Gun, int Magazine)[] Guns =
-        [("WFAsfWeaponRifleCoil", 24), ("WFAsfWeaponPistolCoil", 12)];
+        [("WFAsfWeaponRifleCoil", 24), ("WFAsfWeaponPistolCoil", 15)];
 
     private static readonly EntProtoId Slug = "WFAsfCartridgeCoilSlug";
 

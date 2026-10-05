@@ -12,7 +12,7 @@ the outline is uneven and nothing is mirrored. From bow to stern:
 - A tapered bridge on a wide ready-room collar (fire control, EVA gear), with a sensor boom off the starboard bow.
 - A private north block: the envoy office, shipyard hall and quarters, then the post, the wardrobe room with the ASF
   drobe (`WFAsfDrobe`) and a commons that juts out to starboard, all off a short spine corridor. The post's west wall
-  is its armoury: a rifle rack (`WFAsfGunRackFilled`, three coil rifles), a table of four slug boxes and a sidearm
+  is its armoury: a rifle rack (`WFAsfGunRackFilled`, three coil rifles), a table with four slug boxes and a box each of rifle and pistol magazines, and a sidearm
   rack (`WFAsfPistolRackFilled`, four coil pistols). Three suit storage units (`WFAsfSuitStoragePathfinder`, ASF
   security access) along its north wall each hold a charged Pathfinder modsuit, a breath mask and tanks. Racks and suit
   units are in `Entities/armory.yml`.
@@ -82,8 +82,9 @@ and docks there and re-run it. The script places lights, vents, scrubbers, alarm
 - Coilguns (`Entities/weapons.yml`): the Type-3 coil rifle (`WFAsfWeaponRifleCoil`) and Type-2 coil pistol
   (`WFAsfWeaponPistolCoil`), white frames after the Star Trek Type-3B phaser rifle. They are ballistic, but they fire
   caseless 4mm ferrite slugs from a coil barrel: nothing is ejected (`deleteOnSpawn`) and there is no bolt
-  (`boltClosed: null`). Both share one slug (20 piercing, 0.15 AP). The rifle's longer coil gives x1.2 damage, speed 70,
-  semi or 3-round burst, 24 rounds; the pistol gives x0.9, semi, 12 rounds. Faction gear tier 2 and 1, allowed for the ASF
+  (`boltClosed: null`). Both share one slug (20 piercing, 0.15 AP). The rifle's longer coil gives x1.4 damage (28), speed 70,
+  semi or fast 3-round bursts (about 210 dps sustained against the TSF Lecter's 192), 24 rounds; the pistol gives x1.1
+  (22) at 5 shots a second, 15 rounds (about 110 dps against the TSF Mk58's 100). Faction gear tier 2 and 1, allowed for the ASF
   department. Research `WFAsfCoilArms` and print guns and magazines at `WFAsfLathe`. The pistol's item sprite and both
   magazines are drawn by `Tools/_WF/Asf/draw_coil_arms.py`. The Enforcer starts with a pistol
   and a spare magazine.

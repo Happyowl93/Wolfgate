@@ -74,7 +74,7 @@
     tags:
     - WFAsfMagazinePistolCoil
   - type: BallisticAmmoProvider
-    capacity: 12
+    capacity: 15
   - type: Sprite
     sprite: _WF/Asf/Objects/Weapons/Guns/Ammunition/coil_pistol_mag.rsi
 
@@ -105,8 +105,11 @@
     angleDecay: 16
     fireRate: 6
     projectileSpeed: 70 # a coil throws the slug well past powder rifles (55)
-    damageModifier: 1.2
+    damageModifier: 1.4 # 28 per slug
+    # 3 rounds at 12/s then 0.15 s: 7.5 rounds/s sustained, about 210 dps against the TSF Lecter's 192
     shotsPerBurst: 3
+    burstFireRate: 12
+    burstCooldown: 0.15
     selectedMode: SemiAuto
     availableModes:
     - SemiAuto
@@ -153,9 +156,9 @@
   - type: Clothing
     sprite: _WF/Asf/Objects/Weapons/Guns/coil_pistol.rsi
   - type: Gun
-    fireRate: 4
+    fireRate: 5
     projectileSpeed: 55
-    damageModifier: 0.9
+    damageModifier: 1.1 # 22 per slug at 5/s, about 110 dps against the TSF Mk58's 100
     selectedMode: SemiAuto
     availableModes:
     - SemiAuto
@@ -228,3 +231,21 @@
   - type: EmitSoundOnLand
     sound:
       path: /Audio/_Goobstation/Items/handling/ammobox_drop.ogg
+
+- type: entity
+  id: WFAsfBoxMagazineRifleCoil
+  parent: BoxMagazine
+  components:
+  - type: StorageFill
+    contents:
+    - id: WFAsfMagazineRifleCoil
+      amount: 4
+
+- type: entity
+  id: WFAsfBoxMagazinePistolCoil
+  parent: BoxMagazine
+  components:
+  - type: StorageFill
+    contents:
+    - id: WFAsfMagazinePistolCoil
+      amount: 4

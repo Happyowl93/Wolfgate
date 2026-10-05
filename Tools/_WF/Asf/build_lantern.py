@@ -357,10 +357,10 @@ m.add("WFAsfSpawnPointColonist", 8, 19)
 # Spine (x -1..1, y 13..16): the private corridor
 m.add("PottedPlantRandom", 1, 16); m.add("WFAsfBanner", -1, 16)
 
-# Post (x -9..-3, y 13..15): Enforcer desk, an armoury wall to the west (rifle rack, slug table, sidearm rack) and
+# Post (x -9..-3, y 13..15): Enforcer desk, an armoury wall to the west (rifle rack, ammo table, sidearm rack) and
 # three Pathfinder modsuits in suit storage along the north wall
 m.add("WFAsfGunRackFilled", -9, 15)
-on_table("TableReinforced", -9, 14, *["WFAsfBoxCoilSlug"] * 4)
+on_table("TableReinforced", -9, 14, *["WFAsfBoxCoilSlug"] * 4, "WFAsfBoxMagazineRifleCoil", "WFAsfBoxMagazinePistolCoil")
 m.add("WFAsfPistolRackFilled", -9, 13)
 for x in (-8, -7, -6):
     m.add("WFAsfSuitStoragePathfinder", x, 15)

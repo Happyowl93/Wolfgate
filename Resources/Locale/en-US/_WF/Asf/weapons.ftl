@@ -3,7 +3,7 @@ ent-WFAsfCartridgeCoilSlug = coil slug (4mm ferrite)
 ent-WFAsfMagazineRifleCoil = coil rifle magazine (4mm ferrite)
     .desc = A 24-round magazine for the Type-3 coil rifle.
 ent-WFAsfMagazinePistolCoil = coil pistol magazine (4mm ferrite)
-    .desc = A 12-round magazine for the Type-2 coil pistol.
+    .desc = A 15-round magazine for the Type-2 coil pistol.
 ent-WFAsfWeaponRifleCoil = ASF Type-3 coil rifle (4mm ferrite)
     .desc = The standard service rifle of the ASF. An electromagnetic coil fires caseless ferrite slugs in single shots or 3-round bursts.
 ent-WFAsfWeaponPistolCoil = ASF Type-2 coil pistol (4mm ferrite)
@@ -13,6 +13,10 @@ wf-asf-research-coil-arms = ASF coilguns
 
 ent-WFAsfBoxCoilSlug = ammunition box (4mm ferrite coil slugs)
     .desc = A box of 60 loose ferrite slugs for refilling ASF coilgun magazines.
+ent-WFAsfBoxMagazineRifleCoil = box of coil rifle magazines (4mm ferrite)
+    .desc = A box full of Type-3 coil rifle magazines.
+ent-WFAsfBoxMagazinePistolCoil = box of coil pistol magazines (4mm ferrite)
+    .desc = A box full of Type-2 coil pistol magazines.
 
 ent-WFAsfGunRack = ASF gun rack
     .desc = A rack for ASF rifles.
