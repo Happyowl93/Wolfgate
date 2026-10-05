@@ -213,6 +213,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/researcher.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/researcher.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/)
 - [`Resources/Textures/_WF/Asf/Interface/job_icons.rsi/`](../../../Resources/Textures/_WF/Asf/Interface/job_icons.rsi/)
+- [`Resources/Textures/_WF/Asf/Interface/research_disciplines.rsi/`](../../../Resources/Textures/_WF/Asf/Interface/research_disciplines.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Devices/pda.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Devices/pda.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/grant_ticket.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/grant_ticket.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Misc/id_cards.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Misc/id_cards.rsi/)

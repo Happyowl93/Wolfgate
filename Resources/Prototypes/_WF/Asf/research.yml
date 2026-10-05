@@ -5,8 +5,8 @@
   name: wf-asf-research-discipline
   color: "#A66BE0"
   icon:
-    sprite: _WF/Asf/Structures/Banners/federation.rsi
-    state: asf-federation-banner
+    sprite: _WF/Asf/Interface/research_disciplines.rsi
+    state: asf
   tierPrerequisites:
     1: 0
     2: 0.5
