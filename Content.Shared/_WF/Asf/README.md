@@ -17,7 +17,9 @@ the outline is uneven and nothing is mirrored. From bow to stern:
   security access) along its north wall each hold a charged Pathfinder modsuit, a breath mask and tanks. Racks and suit
   units are in `Entities/armory.yml`.
 - The public middle: consular office, atrium garden and clinic over the dock concourse. The concourse runs out into a
-  long port docking arm (3 docks) and a short starboard annex (2 docks).
+  long port docking arm (3 docks; a FuelVend and a FlatpackVend flank its bay) and a short starboard annex (2 docks)
+  with the public cargo bay behind it: four sell pallets and a sale console, the ASF bounty console, the grant kiosk,
+  two artifact containers and a hand labeler.
 - Aft: the farm with a stores pod off its flank, the gyro room, R&D lab, power room, atmos, and an anomaly pair (an
   observation room looking through plasma glass into a test chamber with an artifact analyzer and an APE). The lab's
   material silo is mapped linked to all three lathes (protolathe, `WFAsfLathe`, circuit imprinter), so they share
@@ -58,6 +60,15 @@ and docks there and re-run it. The script places lights, vents, scrubbers, alarm
   other factions' LPCs: research `WFAsfLPCCivilian`, `WFAsfLPCEscort` and `WFAsfLPCLodestar` (tier 2) on the lab's
   `WFAsfResearchServer` (its own `WFAsf` discipline), then print them at `WFAsfLathe` (`research.yml`). The
   fabricator also prints universal shipgun ammo.
+- Astraeus Reward Grants (ARG, `grants.yml`, `bounties.yml`): the cargo bay's bounty console offers only ASF
+  bounties, which pay ARG tickets (`WFAsfRewardGrant`, a purple recolour of the MMC ticket) instead of cash. They ask
+  for monolithic crystals by size (tagged `WFMonolithicCrystal*` in Mono's `loot.yml`; about 1.25 ARG per 1,000 of
+  sale value) or for alien artifacts, either any artifact or one with a lasting utility effect (holds items, intercom,
+  instrument, holds liquid, wanders, speed, power, drill, multitool, gun). Like other bounties, items handed in are
+  paid by the reward only. ASF crew spend ARG at the grant kiosk (`WFAsfGrantKiosk`, the MMC requisition kiosk in
+  purple): hull vouchers (civilian 30, escort 60, Lodestar 250), coil arms and ammo, both modsuits and
+  xenoarchaeology tools. ARG has no cash payout. Sprites by `Tools/_WF/Asf/recolour_grants.py`; checked by
+  `AsfGrantsTest`.
 - Lantern Post clears drones within 1.5 km and keeps world-gen debris out of 800 m, like Hokkaido and Camelot.
 - Jobs are generated: edit the roster in `Tools/_WF/Asf/generate_roles.py` and re-run it.
 - Access (`faction.yml`): every role has `WFAsf` (private rooms), all but the Colonist have `WFAsfBridge`, the
@@ -130,11 +141,13 @@ The wardrobe sprites and the seven hulls come from
 
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfAccessTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfAccessTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfCoilgunTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfCoilgunTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Asf/AsfGrantsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfGrantsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfModsuitTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfModsuitTest.cs)
 
 ### Prototypes
 
+- [`Resources/Prototypes/_WF/Asf/bounties.yml`](../../../Resources/Prototypes/_WF/Asf/bounties.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/armory.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/armory.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/banners.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/banners.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/clothing.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/clothing.yml)
@@ -146,6 +159,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Prototypes/_WF/Asf/Entities/weapons.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/weapons.yml)
 - [`Resources/Prototypes/_WF/Asf/faction.yml`](../../../Resources/Prototypes/_WF/Asf/faction.yml)
 - [`Resources/Prototypes/_WF/Asf/fleet.yml`](../../../Resources/Prototypes/_WF/Asf/fleet.yml)
+- [`Resources/Prototypes/_WF/Asf/grants.yml`](../../../Resources/Prototypes/_WF/Asf/grants.yml)
 - [`Resources/Prototypes/_WF/Asf/lantern.yml`](../../../Resources/Prototypes/_WF/Asf/lantern.yml)
 - [`Resources/Prototypes/_WF/Asf/research.yml`](../../../Resources/Prototypes/_WF/Asf/research.yml)
 - [`Resources/Prototypes/_WF/Asf/Roles/jobs.yml`](../../../Resources/Prototypes/_WF/Asf/Roles/jobs.yml)
@@ -153,6 +167,7 @@ The wardrobe sprites and the seven hulls come from
 ### Localization
 
 - [`Resources/Locale/en-US/_WF/Asf/faction.ftl`](../../../Resources/Locale/en-US/_WF/Asf/faction.ftl)
+- [`Resources/Locale/en-US/_WF/Asf/grants.ftl`](../../../Resources/Locale/en-US/_WF/Asf/grants.ftl)
 - [`Resources/Locale/en-US/_WF/Asf/modsuit.ftl`](../../../Resources/Locale/en-US/_WF/Asf/modsuit.ftl)
 - [`Resources/Locale/en-US/_WF/Asf/roles.ftl`](../../../Resources/Locale/en-US/_WF/Asf/roles.ftl)
 - [`Resources/Locale/en-US/_WF/Asf/wardrobe.ftl`](../../../Resources/Locale/en-US/_WF/Asf/wardrobe.ftl)
@@ -194,6 +209,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/)
 - [`Resources/Textures/_WF/Asf/Interface/job_icons.rsi/`](../../../Resources/Textures/_WF/Asf/Interface/job_icons.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Devices/pda.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Devices/pda.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/grant_ticket.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/grant_ticket.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Misc/id_cards.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Misc/id_cards.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_pistol_mag.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_pistol_mag.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_rifle_mag.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_rifle_mag.rsi/)
@@ -206,6 +222,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Textures/_WF/Asf/Structures/Banners/marine.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/Banners/marine.rsi/)
 - [`Resources/Textures/_WF/Asf/Structures/drobe.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/drobe.rsi/)
 - [`Resources/Textures/_WF/Asf/Structures/fabricator.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/fabricator.rsi/)
+- [`Resources/Textures/_WF/Asf/Structures/grant_kiosk.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/grant_kiosk.rsi/)
 - [`Resources/Textures/_WF/Asf/Structures/shipyard_screen.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/shipyard_screen.rsi/)
 - [`Resources/Textures/_WF/Asf/Structures/thruster.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/thruster.rsi/)
 - [`Resources/Textures/_WF/Asf/Structures/thruster_large.rsi/`](../../../Resources/Textures/_WF/Asf/Structures/thruster_large.rsi/)
@@ -232,11 +249,12 @@ The wardrobe sprites and the seven hulls come from
 - [`Tools/_WF/Asf/draw_slug_box.py`](../../../Tools/_WF/Asf/draw_slug_box.py)
 - [`Tools/_WF/Asf/generate_roles.py`](../../../Tools/_WF/Asf/generate_roles.py)
 - [`Tools/_WF/Asf/port_dsm_hulls.py`](../../../Tools/_WF/Asf/port_dsm_hulls.py)
+- [`Tools/_WF/Asf/recolour_grants.py`](../../../Tools/_WF/Asf/recolour_grants.py)
 - [`Tools/_WF/Asf/recolour_modsuit.py`](../../../Tools/_WF/Asf/recolour_modsuit.py)
 - [`Tools/_WF/Asf/recolour_thrusters.py`](../../../Tools/_WF/Asf/recolour_thrusters.py)
 
 ## Non-modular edits
 
-None.
+- [`Resources/Prototypes/_Mono/Entities/Objects/Misc/loot.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Misc/loot.yml): ASF crystal bounties
 
 <!-- WOLFGATE-GENERATED END -->

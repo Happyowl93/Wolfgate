@@ -43,3 +43,21 @@
           WFAsfFieldResearcher: [3, 3]
           WFAsfColonist: [-1, -1]
       - type: StationDeadDropHintExempt
+      - type: StationCargoBountyDatabase
+        availableBounties:
+        - WFAsfBountyCrystalSmall
+        - WFAsfBountyCrystalSmallBulk
+        - WFAsfBountyCrystalMedium
+        - WFAsfBountyCrystalLarge
+        - WFAsfBountyArtifact
+        - WFAsfBountySurvey
+        - WFAsfBountyArtifactStorage
+        - WFAsfBountyArtifactIntercom
+        - WFAsfBountyArtifactInstrument
+        - WFAsfBountyArtifactVessel
+        - WFAsfBountyArtifactWandering
+        - WFAsfBountyArtifactSpeed
+        - WFAsfBountyArtifactPower
+        - WFAsfBountyArtifactDrill
+        - WFAsfBountyArtifactMultitool
+        - WFAsfBountyArtifactGun

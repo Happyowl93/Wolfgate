@@ -6,11 +6,11 @@ Plan: rooms are rectangles of different sizes, offset from each other, so the hu
       (walls, chamfered outer corners, window runs) has an uneven outline. Bow north: a tapered bridge on a wide
       ready-room collar with a sensor boom off to starboard. A private north block (envoy office, shipyard hall,
       quarters, post with its armoury wall, wardrobe room, a commons that juts out to starboard) over a public middle (consular office,
-      atrium, clinic) and the dock concourse, which runs out into a long port docking arm and a short starboard
-      annex. Aft: farm with a stores pod off its flank, gyro room, R&D lab, power room, atmos and the anomaly rooms.
+      atrium, clinic) and the dock concourse, which runs out into a long port docking arm (fuel and flatpack vendors
+      at its bay) and a short starboard annex with the cargo bay behind it (sell pallets, ASF bounties, grant kiosk). Aft: farm with a stores pod off its flank, gyro room, R&D lab, power room, atmos and the anomaly rooms.
       Outside the pressure hull: engine pylons of different lengths on lattice trusses, a central engine block,
       gun pads and trusses, hull plating filling the notches. Nothing is mirrored.
-Zones: PUBLIC = concourse, docking arm and annex, atrium, clinic, consular office. Everything else needs ASF access.
+Zones: PUBLIC = concourse, docking arm and annex, cargo bay, atrium, clinic, consular office. Everything else needs ASF access.
        The bridge takes ASF bridge access (all but Colonists), the post ASF security, the envoy office ASF command.
 Power: RTGs -> HV. A substation feeds the room APCs (one pooled LV net); the shield and the main engines have
       their own LAPCs on HV, on LV nets that never touch the rooms' (AsfLanternTest.LanternIsPowered).
@@ -46,6 +46,7 @@ ROOMS = {   # interior rectangles (x0, y0, x1, y1) and floor
     "portarm": ((-19, 4, -11, 4), "FloorSteelPavement"),
     "portbay": ((-22, 3, -20, 5), "FloorSteelCheckerDark"),
     "annex": ((11, 3, 13, 5), "FloorSteelCheckerDark"),
+    "cargo": ((11, -2, 15, 1), "FloorSteelMono"),
     "farm": ((-10, -4, -4, 1), "FloorHydro"),
     "stores": ((-16, -6, -12, -2), "FloorSteelDirty"),
     "gyro": ((-2, -2, 2, 1), "FloorTechMaint"),
@@ -63,11 +64,11 @@ DOORS = {
     (-2, 14): SEC, (2, 14): PRIV, (7, 14): PRIV, (0, 12): ASF,
     (-3, 9): PUB, (3, 9): PUB, (0, 6): PUB, (-6, 6): PUB, (6, 6): PUB, (-10, 4): PUB, (10, 4): PUB,
     (0, 2): ASF, (-6, 2): ASF, (6, 2): ASF, (-11, -3): PRIV, (0, -3): PRIV, (6, -4): PRIV, (-4, -7): PRIV,
-    (5, -7): PRIV,
+    (5, -7): PRIV, (12, 2): PUB,
 }
 DOCKS = {(-23, 4): "W", (-15, 5): "N", (-13, 3): "S", (14, 4): "E", (12, 6): "N"}
 PLASMA = {(x, -7) for x in range(6, 10)}                                        # observation | test chamber
-WINDOWED = {"bridge", "envoy", "quarters", "commons", "consular", "clinic", "farm", "lab", "portarm", "ready"}
+WINDOWED = {"bridge", "envoy", "quarters", "commons", "consular", "clinic", "farm", "lab", "portarm", "ready", "cargo"}
 
 floor = {}
 for name, ((x0, y0, x1, y1), tile) in ROOMS.items():
@@ -419,6 +420,16 @@ for x, y in ((-2, 5), (2, 5), (-4, 3), (4, 3)):
 m.add("WarpPoint", 0, 4, comps=[{"type": "WarpPoint", "location": "ASF Lantern Post"}])
 m.add("DefaultStationBeaconArrivals", -1, 4)
 m.add("ClosetEmergencyFilledRandom", -22, 5); m.add("SteelBench", -22, 3); m.add("SteelBench", 13, 3)
+console("VendingMachineFuelVend", -21, 5, "N"); console("VendingMachineFlatpackVend", -21, 3, "S")   # by the docks
+
+# Cargo bay (x 11..15, y -2..1), public, behind the starboard annex at (12, 2): sell pallets, the ASF bounty console
+# (crystals and artifacts for ARG) and the grant kiosk that redeems ARG (ASF crew only)
+for x, y in ((14, -2), (15, -2), (14, -1), (15, -1)):
+    m.add("CargoPalletSell", x, y)
+console("ComputerCargoBounty", 14, 1, "N"); console("ComputerPalletConsoleNFNormalMarket", 15, 1, "N")
+console("WFAsfGrantKiosk", 11, 1, "N")
+m.add("CrateArtifactContainer", 11, -2); m.add("CrateArtifactContainer", 12, -2)
+on_table("TableReinforced", 11, -1, "HandLabeler", "Paper")
 
 # Farm (x -10..-4, y -4..1): trays either side of a path at x -6
 for x in (-9, -8, -4):
@@ -512,7 +523,7 @@ apcs = []
 # room APCs stay off the power room's walls, where the shield and engine LAPC nets run
 power_walls = {w for w in walls if any(nb(w, d) in room_tiles["power"] for d in "NSEW")}
 for room in ("ready", "hall", "spine", "consular", "concourse", "commons", "farm", "lab", "atmos", "obs", "portarm",
-             "gyro"):
+             "gyro", "cargo"):
     spot = wall_spot(room, skip=power_walls)
     if spot:
         apcs.append(wm("APCBasic", *spot))
@@ -591,15 +602,15 @@ for name in vents:
     spot = wall_spot(name)
     if spot and len(room_tiles[name]) >= 6:
         m.link_alarm(wm("AirAlarm", *spot), vents[name] + scrubs[name])
-for room in ("ready", "hall", "spine", "concourse", "farm", "power", "lab", "atmos", "stores"):
+for room in ("ready", "hall", "spine", "concourse", "farm", "power", "lab", "atmos", "stores", "cargo"):
     spot = wall_spot(room)
     if spot:
         wm("FireAlarm", *spot)
-for room in ("ready", "envoy", "post", "consular", "concourse", "clinic", "farm", "power", "lab", "stores", "commons"):
+for room in ("ready", "envoy", "post", "consular", "concourse", "clinic", "farm", "power", "lab", "stores", "commons", "cargo"):
     spot = wall_spot(room)
     if spot:
         wm("ExtinguisherCabinetFilled", *spot)
-for t in ((0, 12), (0, 6), (-6, 6), (6, 6), (0, 2), (-6, 2), (6, 2), (-10, 4), (10, 4)):
+for t in ((0, 12), (0, 6), (-6, 6), (6, 6), (0, 2), (-6, 2), (6, 2), (-10, 4), (10, 4), (12, 2)):
     m.add("FirelockGlass", *t)
 for proto, room in (("SignCryo", "quarters"), ("DefibrillatorCabinetFilled", "clinic"), ("SignMedical", "clinic"), ("StationMap", "concourse"),
                     ("SignShipDock", "portarm"), ("SignShipDock", "annex"), ("SignEngineering", "gyro"),
@@ -607,7 +618,7 @@ for proto, room in (("SignCryo", "quarters"), ("DefibrillatorCabinetFilled", "cl
                     ("WallmountTelevision", "commons"), ("RandomPainting", "envoy"), ("RandomPainting", "hall"),
                     ("RandomPainting", "consular"), ("RandomPainting", "quarters"), ("Mirror", "wardrobe"),
                     ("LockerWallMedicalFilled", "clinic"), ("ClosetWallEmergencyFilledRandom", "portarm"),
-                    ("ClosetWallFireFilledRandom", "lab"), ("RandomPainting", "concourse")):
+                    ("ClosetWallFireFilledRandom", "lab"), ("RandomPainting", "concourse"), ("SignCargo", "cargo")):
     spot = wall_spot(room)
     if spot:
         wm(proto, *spot)
@@ -632,7 +643,7 @@ for proto, x, y in (("Rack", 2, 24), ("PottedPlantRandom", -1, 24), ("SteelBench
                     ("Rack", -15, -6), ("ShelfMetal", -16, -3), ("SpaceHeaterAnchored", -6, -7), ("ChairFolding", -4, 13),
                     ("PottedPlantRandom", -9, 1), ("ChairWood", 5, 18),
                     ("Stool", 9, 13), ("PottedPlantRandom", 13, 5), ("PottedPlantRandom", -20, 3),
-                    ("ChairFolding", -21, 5), ("TableReinforced", 7, -6)):
+                    ("TableReinforced", 7, -6)):
     place(proto, x, y)
 for item, x, y in (("ToolboxMechanicalFilled", -2, -2), ("BoxLightMixed", -9, 3), ("CableApcStack", -12, -5),
                    ("Wrench", -3, -5), ("LargeBeaker", 4, -1), ("ResearchDisk", 7, -6), ("Paper", 2, 22),
@@ -656,7 +667,7 @@ for x, y in ((-15, -4), (-13, -3), (-14, -5)):
 # ---- 10. decals ------------------------------------------------------------------------------------
 TRIM = {"envoy": PURPLE, "hall": PURPLE, "quarters": PURPLE, "post": PURPLE, "wardrobe": PURPLE, "commons": PURPLE,
         "consular": PURPLE, "clinic": PURPLE, "lab": PURPLE, "obs": PURPLE, "concourse": LILAC, "ready": LILAC,
-        "spine": LILAC, "portarm": LILAC, "gyro": "#FFFFFFFF", "power": "#FFFFFFFF", "atmos": "#52B4E9FF",
+        "spine": LILAC, "portarm": LILAC, "cargo": LILAC, "gyro": "#FFFFFFFF", "power": "#FFFFFFFF", "atmos": "#52B4E9FF",
         "stores": "#FFFFFFFF", "chamber": "#DE3A3AFF"}
 for name, color in TRIM.items():
     (x0, y0, x1, y1), _ = ROOMS[name]
@@ -695,6 +706,10 @@ for x in range(-19, -15):
     m.add_decal("ArrowsGreyscale", x, 4, color=LILAC, q=dir_to_q("N", "W"))
 for x, y in ((-16, -6), (-15, -6), (-16, -5), (-12, -6), (-13, -6)):
     m.add_decal("Box", x, y)
+for x, y in ((14, -2), (15, -2), (14, -1), (15, -1), (11, -2), (12, -2)):
+    m.add_decal("WarnBox", x, y)
+for t in ((13, 0), (12, -1), (13, -2)):
+    m.add_decal("DirtLight", *t)
 for t in ((-4, 26), (-3, 26), (3, 26), (4, 26), (5, 26), (-5, 26), (3, -5), (1, -4), (2, -4), (-2, -4), (-1, -4)):
     m.add_decal("Bot", *t)
 for t in ((-10, -11), (-9, -11), (-8, -11), (-7, -11), (-6, -11), (-5, -11), (-10, -9)):

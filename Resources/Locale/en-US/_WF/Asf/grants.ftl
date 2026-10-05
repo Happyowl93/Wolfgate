@@ -1,0 +1,35 @@
+wf-asf-grant-currency = ARG
+wf-asf-grant-stack = Astraeus Reward Grants
+
+ent-WFAsfRewardGrant = Astraeus Reward Grant
+    .desc = A Federation research grant chit, redeemable at an ASF grant kiosk. The fine print thanks you, in eleven languages, for advancing the common understanding.
+ent-WFAsfRewardGrant1 = { ent-WFAsfRewardGrant }
+    .desc = { ent-WFAsfRewardGrant.desc }
+ent-WFAsfRewardGrant10 = { ent-WFAsfRewardGrant }
+    .desc = { ent-WFAsfRewardGrant.desc }
+
+ent-WFAsfGrantKiosk = ASF grant kiosk
+    .desc = Redeems Astraeus Reward Grants for Federation equipment and hull vouchers. Only ASF crew can draw on it.
+wf-asf-grant-kiosk-store = ASF Grant Kiosk
+wf-asf-grant-category-vouchers = Hull vouchers
+wf-asf-grant-category-arms = Arms
+wf-asf-grant-category-gear = Field gear
+wf-asf-grant-category-research = Research
+
+wf-asf-bounty-desc-crystal = Federation researchers are studying monolithic crystals. Ship them intact, and gently.
+wf-asf-bounty-desc-artifact = The Federation pays for alien artifacts with a proven, lasting property. Analyse it first; we only take what we asked for.
+wf-asf-bounty-desc-survey = A field survey set for the Lantern Post laboratory.
+wf-asf-bounty-name-crystal-small = Small monolithic crystals
+wf-asf-bounty-name-crystal-medium = Medium monolithic crystal
+wf-asf-bounty-name-crystal-large = Large monolithic crystal
+wf-asf-bounty-name-artifact = Alien artifact (any)
+wf-asf-bounty-name-artifact-storage = Alien artifact that holds items
+wf-asf-bounty-name-artifact-intercom = Alien artifact that works as an intercom
+wf-asf-bounty-name-artifact-instrument = Alien artifact that plays music
+wf-asf-bounty-name-artifact-vessel = Alien artifact that holds liquid
+wf-asf-bounty-name-artifact-wandering = Alien artifact that wanders on its own
+wf-asf-bounty-name-artifact-speed = Alien artifact that speeds its holder
+wf-asf-bounty-name-artifact-power = Alien artifact that generates power
+wf-asf-bounty-name-artifact-drill = Alien artifact that cuts like a drill
+wf-asf-bounty-name-artifact-multitool = Alien artifact that works as a multitool
+wf-asf-bounty-name-artifact-gun = Alien artifact that fires rounds
