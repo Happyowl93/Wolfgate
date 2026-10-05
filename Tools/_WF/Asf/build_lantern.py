@@ -155,7 +155,7 @@ def art(x0, y_top, rows):
 
 art(3, 37, [":a  ", ":.c ", ":.==", ":.  ", ":   ", ":   "])          # sensor boom off the starboard bow
 art(-9, 27, ["  .", "..k", ". ."])                                     # port bow gun pad on lattice
-art(7, 26, ["k)", "#}"])                                               # starboard bow gun on an armoured stub
+art(7, 26, [".k", "#}"])                                               # starboard bow gun on a pad beyond its stub
 art(-16, 11, ["(kk...", "kkk:::", "{kk..."])                           # port gun truss off the consular office
 art(13, 16, ["h", "h;", "hk", "h;", "h"])                              # plating and a gun pad on the commons
 art(-18, -3, ["k.", " ."])                                             # Phalanx pad on the stores pod
@@ -163,9 +163,9 @@ art(10, 8, ["k"])                                                      # Phalanx
 art(-11, 12, ["h", "h", "L", "h"])                                     # plating along the consular wall
 art(10, 22, ["h", "L", "h"])                                           # and along the quarters
 # port engine pylon: long, two large thrusters at its foot, a lattice truss to atmos, a torpedo pad on its flank
-art(-21, -7, ["    k  ",
+art(-21, -7, ["",
               "  (##) ",
-              " (####)...",
+              "k(####)...",
               " #::::#...",
               "k#::::#...",
               " #::::#",
@@ -193,13 +193,13 @@ for ax, ay in ((-18, -17), (-16, -17), (-2, -13), (0, -13), (2, -13), (4, -13), 
             m.add("Catwalk", x, y); m.add("AtmosFixBlockerMarker", x, y)
             THRUSTER_TILES.add((x, y))
     m.add("WFAsfThrusterLarge", ax, ay, q=2)
-for x, y, side in ((-7, 28, "N"), (6, 28, "N"), (-6, 29, "W"), (5, 30, "E"), (-21, -13, "W"), (15, -8, "E"),
+for x, y, side in ((-7, 28, "N"), (6, 28, "N"), (-6, 29, "W"), (5, 30, "E"), (-21, -13, "W"), (14, 12, "E"),
                    (-7, -13, "S"), (7, -11, "S")):
     thruster(x, y, side)
 
 GUNS = [
-    ("WeaponLaserTurretApollo", "HardpointEnergyHeavy", [(-7, 26, "N"), (7, 26, "N")]),
-    ("WeaponLaserTurretPrometheus", "HardpointEnergyMedium", [(-15, 10, "W"), (14, 14, "E"), (-17, -7, "W"), (12, -6, "N")]),
+    ("WeaponLaserTurretApollo", "HardpointEnergyHeavy", [(-7, 26, "N"), (8, 26, "N")]),
+    ("WeaponLaserTurretPrometheus", "HardpointEnergyMedium", [(-15, 10, "W"), (14, 14, "E"), (-21, -9, "W"), (12, -6, "N")]),
     ("WeaponTurretSerpentMissile", "HardpointMissileMedium", [(-21, -11, "W"), (15, -9, "E")]),
     ("WeaponLaserTurretL1Phalanx", "HardpointEnergyLight", [(-18, -3, "W"), (10, 8, "E")]),
 ]
@@ -344,7 +344,7 @@ m.add("WFAsfSpawnPointEnvoy", -7, 18)
 for x in (6, 8):
     m.add("Bed", x, 21); m.add("BedsheetPurple", x, 21)
 m.add("Dresser", 7, 21); m.add("WardrobeMixedFilled", 9, 21); m.add("WardrobeMixedFilled", 9, 20)
-m.add("CryogenicSleepUnit", 9, 18)
+m.add("MachineCryoSleepPod", 9, 18); m.add("DefaultStationBeaconCryosleep", 9, 18)
 on_table("TableWood", 5, 21, "LampGold"); m.add("PottedPlantRandom", 4, 18); m.add("PlushieMoth", 8, 21)
 for x in (6, 7, 8):
     m.add("CarpetPurple", x, 19)
@@ -404,6 +404,7 @@ for x in (-3, 3):
     m.add("SteelBench", x, 3)
 console("VendingMachineCoffee", -9, 5, "N"); console("VendingMachineCola", 9, 5, "N")
 console("VendingMachineSnack", 9, 3, "S"); m.add("ClosetEmergencyFilledRandom", -9, 3)
+m.add("MachineCryoSleepPod", -8, 3)                                       # public cryo for visitors
 m.add("ComputerBankATM", -8, 5); m.add("VendingMachineDiscount", 8, 5)
 for x, y in ((-2, 5), (2, 5), (-4, 3), (4, 3)):
     m.add("PottedPlantRandom", x, y)
@@ -587,7 +588,7 @@ for room in ("ready", "envoy", "post", "consular", "concourse", "clinic", "farm"
         wm("ExtinguisherCabinetFilled", *spot)
 for t in ((0, 12), (0, 6), (-6, 6), (6, 6), (0, 2), (-6, 2), (6, 2), (-10, 4), (10, 4)):
     m.add("FirelockGlass", *t)
-for proto, room in (("DefibrillatorCabinetFilled", "clinic"), ("SignMedical", "clinic"), ("StationMap", "concourse"),
+for proto, room in (("SignCryo", "quarters"), ("DefibrillatorCabinetFilled", "clinic"), ("SignMedical", "clinic"), ("StationMap", "concourse"),
                     ("SignShipDock", "portarm"), ("SignShipDock", "annex"), ("SignEngineering", "gyro"),
                     ("SignScience", "lab"), ("SignHydro1", "farm"), ("SignAnomaly2", "obs"),
                     ("WallmountTelevision", "commons"), ("RandomPainting", "envoy"), ("RandomPainting", "hall"),
