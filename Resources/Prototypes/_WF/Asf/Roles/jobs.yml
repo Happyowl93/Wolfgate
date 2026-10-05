@@ -241,7 +241,7 @@
     shoes: WFAsfClothingShoesBoots
     ears: WFAsfClothingHeadset
     id: WFAsfFieldResearcherPDA
-    outerClothing: ClothingOuterCoatLab
+    outerClothing: WFAsfClothingOuterCoatLab
   storage:
     back:
     - RadioHandheldNF

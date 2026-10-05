@@ -200,6 +200,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Textures/_WF/Asf/Clothing/Neck/capelet.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Neck/capelet.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/eva.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/eva.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/greatcoat.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/greatcoat.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/labcoat.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/labcoat.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/modsuit.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/modsuit.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/modsuit_aegis.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/modsuit_aegis.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/parade.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/parade.rsi/)

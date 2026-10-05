@@ -33,3 +33,16 @@
   - type: TemperatureProtection
     heatingCoefficient: 0.1
     coolingCoefficient: 0.1
+
+- type: entity
+  parent: ClothingOuterCoatLab
+  id: WFAsfClothingOuterCoatLab
+  components:
+  - type: Sprite
+    sprite: _WF/Asf/Clothing/OuterClothing/labcoat.rsi
+  - type: Clothing
+    sprite: _WF/Asf/Clothing/OuterClothing/labcoat.rsi
+
+- type: entity
+  parent: [ClothingOuterStorageFoldableBaseOpened, WFAsfClothingOuterCoatLab]
+  id: WFAsfClothingOuterCoatLabOpened
