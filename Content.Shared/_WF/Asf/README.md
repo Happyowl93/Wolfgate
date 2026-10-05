@@ -11,11 +11,17 @@ the outline is uneven and nothing is mirrored. From bow to stern:
 
 - A tapered bridge on a wide ready-room collar (fire control, EVA gear), with a sensor boom off the starboard bow.
 - A private north block: the envoy office, shipyard hall and quarters, then the post, the wardrobe room with the ASF
-  drobe (`WFAsfDrobe`) and a commons that juts out to starboard, all off a short spine corridor.
+  drobe (`WFAsfDrobe`) and a commons that juts out to starboard, all off a short spine corridor. The post's west wall
+  is its armoury: a rifle rack (`WFAsfGunRackFilled`, three coil rifles), a table of four slug boxes and a sidearm
+  rack (`WFAsfPistolRackFilled`, four coil pistols). Three suit storage units (`WFAsfSuitStoragePathfinder`, ASF
+  security access) along its north wall each hold a charged Pathfinder modsuit, a breath mask and tanks. Racks and suit
+  units are in `Entities/armory.yml`.
 - The public middle: consular office, atrium garden and clinic over the dock concourse. The concourse runs out into a
   long port docking arm (3 docks) and a short starboard annex (2 docks).
 - Aft: the farm with a stores pod off its flank, the gyro room, R&D lab, power room, atmos, and an anomaly pair (an
-  observation room looking through plasma glass into a test chamber with an artifact analyzer and an APE).
+  observation room looking through plasma glass into a test chamber with an artifact analyzer and an APE). The lab's
+  material silo is mapped linked to all three lathes (protolathe, `WFAsfLathe`, circuit imprinter), so they share
+  its materials.
 - Outside the pressure hull: engine pylons of different lengths on lattice trusses (seven large thrusters in all,
   `WFAsfThrusterLarge`), a central engine block, gun pads on trusses and stubs, and hull plating filling the notches.
 
@@ -67,8 +73,20 @@ and docks there and re-run it. The script places lights, vents, scrubbers, alarm
   caseless 4mm ferrite slugs from a coil barrel: nothing is ejected (`deleteOnSpawn`) and there is no bolt
   (`boltClosed: null`). Both share one slug (20 piercing, 0.15 AP). The rifle's longer coil gives x1.2 damage, speed 70,
   semi or 3-round burst, 24 rounds; the pistol gives x0.9, semi, 12 rounds. Faction gear tier 2 and 1, allowed for the ASF
-  department. Research `WFAsfCoilArms` and print guns and magazines at `WFAsfLathe`. The Enforcer starts with a pistol
+  department. Research `WFAsfCoilArms` and print guns and magazines at `WFAsfLathe`. The pistol's item sprite and both
+  magazines are drawn by `Tools/_WF/Asf/draw_coil_arms.py`. The Enforcer starts with a pistol
   and a spare magazine.
+  Loose slugs come in 60-round boxes (`WFAsfBoxCoilSlug`), printed under the same research.
+- Field modsuits (`Entities/modsuit.yml`), recolours of Goob's Minerva (RD) modsuit drawn by
+  `Tools/_WF/Asf/recolour_modsuit.py`, which also paints a visor (the Minerva's face is a plain plate). The Pathfinder
+  (`WFAsfClothingModsuitField`, research `WFAsfFieldModsuit`, tier 1) is pearl over plum with a dark visor and has the
+  TSF M82c's armour (0.65 blunt and slash, 0.6 piercing, 0.95 speed) with better radiation cover; its chestplate takes
+  armour plates like any modsuit, and it covers harpy and IPC wings (`HarpyHideWings`) as hardsuits do. The Aegis (`WFAsfClothingModsuitAegis`, `WFAsfAegisModsuit`, tier 2) is dark violet
+  with glowing hardlight seams and a lit visor, keeps that armour and adds an M86 Mk.4-class personal shield (250
+  charge, violet). The shield sits on the control unit (back slot), not the chestplate: a chestplate's item toggle also
+  drives its seal, so toggling a shield there would drop the suit's pressure protection. `ShieldRequiresSeal`
+  (`ShieldRequiresSealSystem`, the module's only C#) keeps the shield down until the suit is sealed and drops it when
+  the suit unseals.
 
 ## Ported from Hullrot: Eclipsion
 
@@ -103,19 +121,27 @@ The wardrobe sprites and the seven hulls come from
 
 ## Files
 
+### Shared
+
+- [`Content.Shared/_WF/Asf/ShieldRequiresSealComponent.cs`](ShieldRequiresSealComponent.cs)
+- [`Content.Shared/_WF/Asf/ShieldRequiresSealSystem.cs`](ShieldRequiresSealSystem.cs)
+
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfAccessTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfAccessTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfCoilgunTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfCoilgunTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Asf/AsfModsuitTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfModsuitTest.cs)
 
 ### Prototypes
 
+- [`Resources/Prototypes/_WF/Asf/Entities/armory.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/armory.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/banners.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/banners.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/clothing.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/clothing.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/clothing_wardrobe.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/clothing_wardrobe.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/devices.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/devices.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/drobe.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/drobe.yml)
+- [`Resources/Prototypes/_WF/Asf/Entities/modsuit.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/modsuit.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/vouchers.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/vouchers.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/weapons.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/weapons.yml)
 - [`Resources/Prototypes/_WF/Asf/faction.yml`](../../../Resources/Prototypes/_WF/Asf/faction.yml)
@@ -127,6 +153,7 @@ The wardrobe sprites and the seven hulls come from
 ### Localization
 
 - [`Resources/Locale/en-US/_WF/Asf/faction.ftl`](../../../Resources/Locale/en-US/_WF/Asf/faction.ftl)
+- [`Resources/Locale/en-US/_WF/Asf/modsuit.ftl`](../../../Resources/Locale/en-US/_WF/Asf/modsuit.ftl)
 - [`Resources/Locale/en-US/_WF/Asf/roles.ftl`](../../../Resources/Locale/en-US/_WF/Asf/roles.ftl)
 - [`Resources/Locale/en-US/_WF/Asf/wardrobe.ftl`](../../../Resources/Locale/en-US/_WF/Asf/wardrobe.ftl)
 - [`Resources/Locale/en-US/_WF/Asf/weapons.ftl`](../../../Resources/Locale/en-US/_WF/Asf/weapons.ftl)
@@ -135,20 +162,30 @@ The wardrobe sprites and the seven hulls come from
 
 - [`Resources/Textures/_WF/Asf/Clothing/Back/backpack.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Back/backpack.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Back/duffel.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Back/duffel.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Back/modsuit.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Back/modsuit.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Back/modsuit_aegis.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Back/modsuit_aegis.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Back/satchel.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Back/satchel.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Hands/gloves.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Hands/gloves.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Hands/modsuit.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Hands/modsuit.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Hands/modsuit_aegis.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Hands/modsuit_aegis.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Head/beret.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/beret.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Head/beret_plumed.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/beret_plumed.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Head/cap.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/cap.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Head/eva.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/eva.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Head/hat.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/hat.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Head/modsuit.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/modsuit.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Head/modsuit_aegis.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Head/modsuit_aegis.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Neck/cape.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Neck/cape.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Neck/capelet.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Neck/capelet.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/eva.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/eva.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/greatcoat.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/greatcoat.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/modsuit.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/modsuit.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/modsuit_aegis.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/modsuit_aegis.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/parade.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/parade.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/OuterClothing/robe.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/OuterClothing/robe.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Shoes/boots.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Shoes/boots.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Shoes/modsuit.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Shoes/modsuit.rsi/)
+- [`Resources/Textures/_WF/Asf/Clothing/Shoes/modsuit_aegis.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Shoes/modsuit_aegis.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/casual.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/casual.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/colonist.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/colonist.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/formal.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/formal.rsi/)
@@ -161,6 +198,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_pistol_mag.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_pistol_mag.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_rifle_mag.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_rifle_mag.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_slug.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_slug.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_slug_box.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_slug_box.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_pistol.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_pistol.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_rifle.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_rifle.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_rifle_inhands_32x.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/coil_rifle_inhands_32x.rsi/)
@@ -189,9 +227,12 @@ The wardrobe sprites and the seven hulls come from
 ### Tools
 
 - [`Tools/_WF/Asf/build_lantern.py`](../../../Tools/_WF/Asf/build_lantern.py)
+- [`Tools/_WF/Asf/draw_coil_arms.py`](../../../Tools/_WF/Asf/draw_coil_arms.py)
 - [`Tools/_WF/Asf/draw_ids.py`](../../../Tools/_WF/Asf/draw_ids.py)
+- [`Tools/_WF/Asf/draw_slug_box.py`](../../../Tools/_WF/Asf/draw_slug_box.py)
 - [`Tools/_WF/Asf/generate_roles.py`](../../../Tools/_WF/Asf/generate_roles.py)
 - [`Tools/_WF/Asf/port_dsm_hulls.py`](../../../Tools/_WF/Asf/port_dsm_hulls.py)
+- [`Tools/_WF/Asf/recolour_modsuit.py`](../../../Tools/_WF/Asf/recolour_modsuit.py)
 - [`Tools/_WF/Asf/recolour_thrusters.py`](../../../Tools/_WF/Asf/recolour_thrusters.py)
 
 ## Non-modular edits

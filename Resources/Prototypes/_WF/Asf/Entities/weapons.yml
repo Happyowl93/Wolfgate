@@ -196,3 +196,35 @@
 
 - type: Tag
   id: WFAsfMagazinePistolCoil
+
+- type: entity
+  id: WFAsfBoxCoilSlug
+  parent: [ BaseItem, RecyclableItemCardboard ]
+  components:
+  - type: BallisticAmmoProvider
+    mayTransfer: true
+    whitelist:
+      tags:
+      - WFAsfCartridgeCoilSlug
+    proto: WFAsfCartridgeCoilSlug
+    capacity: 60 # two and a half rifle magazines
+  - type: Item
+    size: Small
+  - type: ContainerContainer
+    containers:
+      ballistic-ammo: !type:Container
+  - type: Sprite
+    sprite: _WF/Asf/Objects/Weapons/Guns/Ammunition/coil_slug_box.rsi
+    layers:
+    - state: base
+      map: ["enum.GunVisualLayers.Base"]
+  - type: Appearance
+  - type: EmitSoundOnPickup
+    sound:
+      path: /Audio/_Goobstation/Items/handling/ammobox_pickup.ogg
+  - type: EmitSoundOnDrop
+    sound:
+      path: /Audio/_Goobstation/Items/handling/ammobox_drop.ogg
+  - type: EmitSoundOnLand
+    sound:
+      path: /Audio/_Goobstation/Items/handling/ammobox_drop.ogg

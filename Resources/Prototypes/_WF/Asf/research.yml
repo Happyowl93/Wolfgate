@@ -1,4 +1,4 @@
-# ASF ship vouchers and coilguns are researched on Lantern Post's server and printed at its fabricator, like other factions' LPCs.
+# ASF ship vouchers, coilguns and field modsuits are researched on Lantern Post's server and printed at its fabricator, like other factions' LPCs.
 
 - type: techDiscipline
   id: WFAsf
@@ -65,9 +65,37 @@
   - WFAsfWeaponRifleCoil
   - WFAsfMagazinePistolCoil
   - WFAsfMagazineRifleCoil
+  - WFAsfBoxCoilSlug
   technologyPrerequisites:
   - UniversalMaterialResearchT1
   position: -4, -7
+
+- type: technology
+  id: WFAsfFieldModsuit
+  name: wf-asf-research-field-modsuit
+  entityIcon: WFAsfClothingModsuitField
+  discipline: WFAsf
+  tier: 1
+  cost: 20000 # as the TSF M82c's basic equipment
+  recipeUnlocks:
+  - WFAsfClothingModsuitField
+  technologyPrerequisites:
+  - UniversalMaterialResearchT1
+  position: -3, -7
+
+- type: technology
+  id: WFAsfAegisModsuit
+  name: wf-asf-research-aegis-modsuit
+  entityIcon: WFAsfClothingModsuitAegis
+  discipline: WFAsf
+  tier: 2
+  cost: 45000
+  recipeUnlocks:
+  - WFAsfClothingModsuitAegis
+  technologyPrerequisites:
+  - WFAsfFieldModsuit
+  - UniversalMaterialResearchT2
+  position: -4, -15
 
 - type: latheRecipe
   parent: BaseVoucherRecipe
@@ -145,6 +173,38 @@
   id: WFAsfMagazineRifleCoil
   result: WFAsfMagazineRifleCoil
 
+- type: latheRecipe
+  parent: BaseAmmoFMJIntermediateAmmoBoxRecipe
+  id: WFAsfBoxCoilSlug
+  result: WFAsfBoxCoilSlug
+
+- type: latheRecipe
+  parent: MonoHardsuitT1Recipe
+  id: WFAsfClothingModsuitField
+  result: WFAsfClothingModsuitField
+  materials: # the M82c's T1 cost, plus the helmet, gauntlets and boots
+    Glass: 300
+    Steel: 3500
+    Plastic: 1250
+    Plasteel: 4500
+    Durathread: 2000
+    Silver: 500
+    Gold: 500
+
+- type: latheRecipe
+  parent: MonoHardsuitT2Recipe
+  id: WFAsfClothingModsuitAegis
+  result: WFAsfClothingModsuitAegis
+  materials: # T2 suit cost plus the shield emitter
+    Glass: 500
+    Steel: 3500
+    Plastic: 1250
+    Plasteel: 5000
+    Durathread: 2500
+    Silver: 1500
+    Gold: 1000
+    Plasma: 1000
+
 - type: latheRecipePack
   id: WFAsfResearch
   recipes:
@@ -155,6 +215,9 @@
   - WFAsfWeaponRifleCoil
   - WFAsfMagazinePistolCoil
   - WFAsfMagazineRifleCoil
+  - WFAsfBoxCoilSlug
+  - WFAsfClothingModsuitField
+  - WFAsfClothingModsuitAegis
 
 - type: entity
   id: WFAsfResearchServer

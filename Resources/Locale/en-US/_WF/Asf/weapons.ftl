@@ -10,3 +10,17 @@ ent-WFAsfWeaponPistolCoil = ASF Type-2 coil pistol (4mm ferrite)
     .desc = The Federation's sidearm, a short coil barrel in the same white frame as the rifle. It fires the rifle's slugs, but the shorter coil gives them less punch.
 
 wf-asf-research-coil-arms = ASF coilguns
+
+ent-WFAsfBoxCoilSlug = ammunition box (4mm ferrite coil slugs)
+    .desc = A purple-lidded box of 60 loose ferrite slugs for topping up ASF coilgun magazines.
+
+ent-WFAsfGunRack = ASF gun rack
+    .desc = A plum-and-lilac Federation rack for long arms.
+ent-WFAsfGunRackFilled = { ent-WFAsfGunRack }
+    .desc = { ent-WFAsfGunRack.desc }
+ent-WFAsfPistolRack = ASF sidearm rack
+    .desc = A small Federation stand for sidearms.
+ent-WFAsfPistolRackFilled = { ent-WFAsfPistolRack }
+    .desc = { ent-WFAsfPistolRack.desc }
+ent-WFAsfSuitStoragePathfinder = ASF suit storage unit
+    .desc = A Federation suit locker holding a charged Pathfinder modsuit, a breath mask and air tanks. Locked to ASF security.

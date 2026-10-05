@@ -1,0 +1,30 @@
+ent-WFAsfClothingModsuitField = ASF Pathfinder modsuit control unit
+    .desc = A Minerva-pattern research modsuit, re-plated by the Federation for survey work that turns hostile. Pearl armour over a plum undersuit and a dark visor, sealed against vacuum and rated against small arms. The chestplate takes armour plates.
+ent-WFAsfClothingModsuitFieldPowerCell = { ent-WFAsfClothingModsuitField }
+    .desc = { ent-WFAsfClothingModsuitField.desc }
+ent-WFAsfClothingModsuitHelmetField = Pathfinder modsuit helmet
+    .desc = A plated helmet with a lilac visor strip and a lamp for dark wrecks.
+ent-WFAsfClothingModsuitGauntletsField = Pathfinder modsuit gauntlets
+    .desc = Armoured gauntlets, thick enough for salvage and fine enough for a sample tray.
+ent-WFAsfClothingModsuitChestplateField = Pathfinder modsuit chestplate
+    .desc = A pearl-white breastplate with lilac seams and a slot for armour plates.
+ent-WFAsfClothingModsuitBootsField = Pathfinder modsuit boots
+    .desc = Sealed armoured boots with reinforced soles.
+
+ent-WFAsfClothingModsuitAegis = ASF Aegis modsuit control unit
+    .desc = The Pathfinder in dark violet armour, with a hardlight emitter built into its control unit. Once the suit is sealed it throws a violet personal shield around the wearer that soaks up fire until it breaks, then respools.
+ent-WFAsfClothingModsuitAegisPowerCell = { ent-WFAsfClothingModsuitAegis }
+    .desc = { ent-WFAsfClothingModsuitAegis.desc }
+ent-WFAsfClothingModsuitHelmetAegis = Aegis modsuit helmet
+    .desc = A dark armoured helmet whose visor and seams glow with the emitter's field.
+ent-WFAsfClothingModsuitGauntletsAegis = Aegis modsuit gauntlets
+    .desc = { ent-WFAsfClothingModsuitGauntletsField.desc }
+ent-WFAsfClothingModsuitChestplateAegis = Aegis modsuit chestplate
+    .desc = A dark violet breastplate traced with hardlight seams, with a slot for armour plates.
+ent-WFAsfClothingModsuitBootsAegis = Aegis modsuit boots
+    .desc = { ent-WFAsfClothingModsuitBootsField.desc }
+
+wf-asf-modsuit-aegis-shield-hint = Seal the suit, then use the shield action or alt-click the control unit to raise the hardlight shield.
+wf-asf-modsuit-shield-unsealed = Seal the suit first.
+wf-asf-research-field-modsuit = ASF Pathfinder modsuit
+wf-asf-research-aegis-modsuit = ASF Aegis hardlight modsuit

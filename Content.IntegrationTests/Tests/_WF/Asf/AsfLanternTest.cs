@@ -9,6 +9,7 @@ using Content.Shared._NF.Shipyard.Components;
 using Content.Shared._Crescent.ShipShields;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared.Lathe;
+using Content.Shared.Materials.OreSilo;
 using Content.Shared.Research.Components;
 using Content.Shared.Research.Prototypes;
 using Content.Shared.Roles;
@@ -32,7 +33,16 @@ public sealed class AsfLanternTest
 
     /// <summary>Lathe recipes the post researches and prints besides vouchers.</summary>
     private static readonly string[] Arms =
-        ["WFAsfWeaponPistolCoil", "WFAsfWeaponRifleCoil", "WFAsfMagazinePistolCoil", "WFAsfMagazineRifleCoil"];
+        ["WFAsfWeaponPistolCoil", "WFAsfWeaponRifleCoil", "WFAsfMagazinePistolCoil", "WFAsfMagazineRifleCoil",
+         "WFAsfBoxCoilSlug", "WFAsfClothingModsuitField", "WFAsfClothingModsuitAegis"];
+
+    /// <summary>The post's armoury: racks and their guns, the slug boxes on its table, and the Pathfinder suit units.</summary>
+    private static readonly (string Id, int Count)[] Armoury =
+    [
+        ("WFAsfGunRackFilled", 1), ("WFAsfPistolRackFilled", 1), ("WFAsfWeaponRifleCoil", 3),
+        ("WFAsfWeaponPistolCoil", 4), ("WFAsfBoxCoilSlug", 4), ("WFAsfSuitStoragePathfinder", 3),
+        ("WFAsfClothingModsuitFieldPowerCell", 3),
+    ];
 
     private static readonly ProtoId<TagPrototype> WallTag = "Wall";
 
@@ -186,13 +196,27 @@ public sealed class AsfLanternTest
             Assert.That(plastitanium, Is.Positive, "Lantern Post has no plastitanium walls.");
             Assert.That(weakWalls, Is.Empty, "Lantern Post's hull should be plastitanium throughout.");
 
+            // The post's armoury: racked coil rifles and pistols, a table of slug boxes and three stored Pathfinder modsuits.
+            var armoury = new Dictionary<string, int>();
+            var metaQuery = entities.EntityQueryEnumerator<MetaDataComponent, TransformComponent>();
+            while (metaQuery.MoveNext(out var meta, out var xform))
+            {
+                if (xform.GridUid == grid!.Value.Owner && meta.EntityPrototype?.ID is { } protoId)
+                    armoury[protoId] = armoury.GetValueOrDefault(protoId) + 1;
+            }
+
+            foreach (var (id, count) in Armoury)
+            {
+                Assert.That(armoury.GetValueOrDefault(id), Is.EqualTo(count), $"Lantern Post's post should hold {count} {id}.");
+            }
+
             maps.DeleteMap(mapId);
         });
 
         await pair.CleanReturnAsync();
     }
 
-    /// <summary>Every anchored, LV-fed machine on Lantern Post, the shield and engines included, is powered once the nets settle.</summary>
+    /// <summary>Every anchored, LV-fed machine on Lantern Post, the shield and engines included, is powered once the nets settle, and every lathe draws from the lab's material silo.</summary>
     [Test]
     public async Task LanternIsPowered()
     {
@@ -229,6 +253,22 @@ public sealed class AsfLanternTest
             }
 
             Assert.That(unpowered, Is.Empty, "Unpowered on Lantern Post: " + string.Join(", ", unpowered));
+
+            var silos = entities.System<SharedOreSiloSystem>();
+            var unlinked = new List<string>();
+            var latheQuery = entities.EntityQueryEnumerator<LatheComponent, OreSiloClientComponent, TransformComponent>();
+            while (latheQuery.MoveNext(out var uid, out _, out var client, out var xform))
+            {
+                if (xform.GridUid != gridUid)
+                    continue;
+                if (client.Silo is not { } silo
+                    || !entities.TryGetComponent<OreSiloComponent>(silo, out var siloComp)
+                    || !Enumerable.Contains(siloComp.Clients, uid)
+                    || !silos.CanTransmitMaterials(silo, uid))
+                    unlinked.Add($"{entities.GetComponent<MetaDataComponent>(uid).EntityPrototype?.ID} at {xform.Coordinates.Position}");
+            }
+
+            Assert.That(unlinked, Is.Empty, "Lathes on Lantern Post not drawing from the silo: " + string.Join(", ", unlinked));
             maps.DeleteMap(mapId);
         });
 

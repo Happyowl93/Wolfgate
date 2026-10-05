@@ -5,7 +5,7 @@
 Plan: rooms are rectangles of different sizes, offset from each other, so the hull that is generated around them
       (walls, chamfered outer corners, window runs) has an uneven outline. Bow north: a tapered bridge on a wide
       ready-room collar with a sensor boom off to starboard. A private north block (envoy office, shipyard hall,
-      quarters, post, wardrobe room, a commons that juts out to starboard) over a public middle (consular office,
+      quarters, post with its armoury wall, wardrobe room, a commons that juts out to starboard) over a public middle (consular office,
       atrium, clinic) and the dock concourse, which runs out into a long port docking arm and a short starboard
       annex. Aft: farm with a stores pod off its flank, gyro room, R&D lab, power room, atmos and the anomaly rooms.
       Outside the pressure hull: engine pylons of different lengths on lattice trusses, a central engine block,
@@ -36,7 +36,7 @@ ROOMS = {   # interior rectangles (x0, y0, x1, y1) and floor
     "envoy": ((-8, 18, -4, 21), "FloorWoodLarge"),
     "quarters": ((4, 18, 9, 21), "FloorWood"),
     "spine": ((-1, 13, 1, 16), "FloorDarkMono"),
-    "post": ((-6, 13, -3, 15), "FloorSteelMono"),
+    "post": ((-9, 13, -3, 15), "FloorSteelMono"),
     "wardrobe": ((3, 13, 6, 16), "FloorDarkPavement"),
     "commons": ((8, 12, 12, 16), "FloorWoodTile"),
     "consular": ((-9, 7, -4, 11), "FloorCarpetOffice"),
@@ -356,10 +356,16 @@ m.add("WFAsfSpawnPointColonist", 8, 19)
 # Spine (x -1..1, y 13..16): the private corridor
 m.add("PottedPlantRandom", 1, 16); m.add("WFAsfBanner", -1, 16)
 
-# Post (x -6..-3, y 13..15): Enforcer desk
-m.add("WFAsfLockerSecurity", -6, 15); m.add("WFAsfLockerSecurity", -6, 14)
+# Post (x -9..-3, y 13..15): Enforcer desk, an armoury wall to the west (rifle rack, slug table, sidearm rack) and
+# three Pathfinder modsuits in suit storage along the north wall
+m.add("WFAsfGunRackFilled", -9, 15)
+on_table("TableReinforced", -9, 14, *["WFAsfBoxCoilSlug"] * 4)
+m.add("WFAsfPistolRackFilled", -9, 13)
+for x in (-8, -7, -6):
+    m.add("WFAsfSuitStoragePathfinder", x, 15)
+m.add("WFAsfLockerSecurity", -5, 15); m.add("WFAsfLockerSecurity", -7, 13)
 on_table("TableReinforced", -4, 15, "WeaponCapacitorRecharger"); chair("ChairOfficeDark", -4, 14, "N")
-console("ComputerCrewMonitoring", -6, 13, "W"); m.add("CrateGenericSteel", -5, 13)
+console("ComputerCrewMonitoring", -6, 13, "S")
 
 # Wardrobe room (x 3..6, y 13..16): the ASF drobe
 console("WFAsfDrobe", 3, 16, "N"); console("WFAsfDrobe", 5, 16, "N")
@@ -437,8 +443,13 @@ m.add("GravityGeneratorMini", 2, -2); m.add("StationAnchorOff", -2, 1); m.add("C
 
 # R&D lab (x 4..9, y -3..1)
 console("ComputerResearchAndDevelopment", 4, 1, "N"); chair("ChairOfficeLight", 4, 0, "N")
-console("Protolathe", 8, 1, "N"); console("WFAsfLathe", 9, 1, "N")              # researched ASF vouchers
-console("CircuitImprinter", 9, -1, "E"); m.add("WFAsfResearchServer", 9, -3)
+silo = m.add("MachineMaterialSilo", 7, 1)                                        # every lathe draws from it
+on_silo = lambda: [{"type": "OreSiloClient", "silo": silo.uid}]
+lathes = [console("Protolathe", 8, 1, "N", comps=on_silo()),
+          console("WFAsfLathe", 9, 1, "N", comps=on_silo()),                   # researched ASF vouchers
+          console("CircuitImprinter", 9, -1, "E", comps=on_silo())]
+silo.set_comp("OreSilo", clients=[e.uid for e in lathes])
+m.add("WFAsfResearchServer", 9, -3)
 on_table("TableReinforced", 4, -1, "AnomalyScanner", "Beaker"); on_table("TableReinforced", 4, -2, "HandheldHealthAnalyzer")
 m.add("LockerScienceFilled", 4, -3); m.add("ShelfMetal", 9, 0)
 
@@ -619,13 +630,13 @@ lay_cable(m, "LV", engine_net | shield_net | room_net)
 # ---- 9b. dressing: clutter and floor variety ----------------------------------------------------------
 for proto, x, y in (("Rack", 2, 24), ("PottedPlantRandom", -1, 24), ("SteelBench", 1, 18), ("ShelfWood", 4, 21),
                     ("Rack", -15, -6), ("ShelfMetal", -16, -3), ("SpaceHeaterAnchored", -6, -7), ("ChairFolding", -4, 13),
-                    ("PottedPlantRandom", -9, 1), ("ChairWood", 5, 18), ("BoxFolderBlue", -6, 15),
+                    ("PottedPlantRandom", -9, 1), ("ChairWood", 5, 18),
                     ("Stool", 9, 13), ("PottedPlantRandom", 13, 5), ("PottedPlantRandom", -20, 3),
                     ("ChairFolding", -21, 5), ("TableReinforced", 7, -6)):
     place(proto, x, y)
 for item, x, y in (("ToolboxMechanicalFilled", -2, -2), ("BoxLightMixed", -9, 3), ("CableApcStack", -12, -5),
                    ("Wrench", -3, -5), ("LargeBeaker", 4, -1), ("ResearchDisk", 7, -6), ("Paper", 2, 22),
-                   ("DrinkMug", 5, 21), ("BoxFolderClipboard", -4, 15), ("FoodTinPeaches", -12, -6),
+                   ("DrinkMug", 5, 21), ("BoxFolderClipboard", -4, 15), ("BoxFolderBlue", -4, 15), ("FoodTinPeaches", -12, -6),
                    ("Bucket", -9, -4), ("HydroponicsToolScythe", -8, -4), ("CrowbarRed", -16, -6),
                    ("FlashlightLantern", 7, -6), ("BoxCardboard", 2, 24)):
     m.add(item, x, y)
@@ -713,7 +724,7 @@ for t in ((-2, -1), (0, -7), (-8, -8), (-16, -4)):
     m.add_decal("DirtMedium", *t)
 for x in range(-2, 3):
     m.add_decal("WarnLineS", x, -2)
-for t in ((-10, -6), (-9, -6), (8, 1), (9, 1), (9, -1), (9, -3), (-3, -5), (-3, -6)):
+for t in ((-10, -6), (-9, -6), (7, 1), (8, 1), (9, 1), (9, -1), (9, -3), (-3, -5), (-3, -6)):
     m.add_decal("Bot", *t)
 
 
