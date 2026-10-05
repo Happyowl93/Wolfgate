@@ -9898,18 +9898,6 @@ entities:
     - type: Transform
       pos: 9.5,-5.5
       parent: 1
-- proto: LockerSecurity
-  entities:
-  - uid: 750
-    components:
-    - type: Transform
-      pos: -5.5,15.5
-      parent: 1
-  - uid: 751
-    components:
-    - type: Transform
-      pos: -5.5,14.5
-      parent: 1
 - proto: LockerWallMedicalFilled
   entities:
   - uid: 1592
@@ -11154,11 +11142,6 @@ entities:
     - type: Transform
       pos: 0.5,17.5
       parent: 1
-  - uid: 401
-    components:
-    - type: Transform
-      pos: -1.5,14.5
-      parent: 1
   - uid: 402
     components:
     - type: Transform
@@ -11194,13 +11177,15 @@ entities:
     - type: Transform
       pos: 5.5,-6.5
       parent: 1
-- proto: WFAsfAirlockCommand
+- proto: WFAsfAirlockBridge
   entities:
   - uid: 396
     components:
     - type: Transform
       pos: 0.5,27.5
       parent: 1
+- proto: WFAsfAirlockCommand
+  entities:
   - uid: 398
     components:
     - type: Transform
@@ -11227,6 +11212,13 @@ entities:
     components:
     - type: Transform
       pos: 6.5,2.5
+      parent: 1
+- proto: WFAsfAirlockSecurity
+  entities:
+  - uid: 401
+    components:
+    - type: Transform
+      pos: -1.5,14.5
       parent: 1
 - proto: WFAsfBanner
   entities:
@@ -11290,6 +11282,18 @@ entities:
     components:
     - type: Transform
       pos: 9.5,1.5
+      parent: 1
+- proto: WFAsfLockerSecurity
+  entities:
+  - uid: 750
+    components:
+    - type: Transform
+      pos: -5.5,15.5
+      parent: 1
+  - uid: 751
+    components:
+    - type: Transform
+      pos: -5.5,14.5
       parent: 1
 - proto: WFAsfMarineBanner
   entities:

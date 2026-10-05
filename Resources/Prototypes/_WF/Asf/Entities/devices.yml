@@ -35,6 +35,22 @@
 
 - type: entity
   parent: DoorElectronics
+  id: WFAsfDoorElectronicsBridge
+  suffix: ASF Bridge, Locked
+  components:
+  - type: AccessReader
+    access: [["WFAsfBridge"]]
+
+- type: entity
+  parent: DoorElectronics
+  id: WFAsfDoorElectronicsSecurity
+  suffix: ASF Security, Locked
+  components:
+  - type: AccessReader
+    access: [["WFAsfSecurity"]]
+
+- type: entity
+  parent: DoorElectronics
   id: WFAsfDoorElectronicsCommand
   suffix: ASF Command, Locked
   components:
@@ -69,6 +85,31 @@
       board: [ WFAsfDoorElectronicsCommand ]
 
 - type: entity
+  parent: AirlockScience
+  id: WFAsfAirlockBridge
+  suffix: ASF Bridge, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ WFAsfDoorElectronicsBridge ]
+
+- type: entity
+  parent: AirlockScience
+  id: WFAsfAirlockSecurity
+  suffix: ASF Security, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ WFAsfDoorElectronicsSecurity ]
+
+- type: entity
+  parent: LockerSecurity
+  id: WFAsfLockerSecurity
+  components:
+  - type: AccessReader
+    access: [["WFAsfSecurity"]]
+
+- type: entity
   parent: BaseCarrierComputer
   id: WFAsfComputerShipyard
   suffix: ASF
@@ -94,8 +135,10 @@
     - WFAsfBulwark
     - WFAsfGuardian
     - WFAsfLodestar
-  - type: AccessReader
-    access: [["WFAsf"]]
+  # Checked by company, not ID: a buyer's only ID card is in the console's slot while they buy.
+  - type: CompanyAccessReader
+    requiredCompanies:
+    - WFAsf
 
 - type: entity
   parent: Thruster

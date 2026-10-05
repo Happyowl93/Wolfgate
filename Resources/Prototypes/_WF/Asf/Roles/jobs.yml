@@ -121,7 +121,7 @@
   displayWeight: 30
   accessGroups:
   - GeneralAccess
-  - WFAsfCrew
+  - WFAsfSecurity
 
 - type: playTimeTracker
   id: JobWFAsfEnforcer
@@ -223,7 +223,7 @@
   displayWeight: 20
   accessGroups:
   - GeneralAccess
-  - WFAsfCrew
+  - WFAsfResearch
 
 - type: playTimeTracker
   id: JobWFAsfFieldResearcher

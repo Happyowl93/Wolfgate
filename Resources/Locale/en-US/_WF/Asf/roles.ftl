@@ -1,6 +1,8 @@
 wf-asf-department = Astraeus Solar Federation
 wf-asf-department-description = Represent the Federation at Lantern Post: help whoever docks, study the sector and keep the door open.
 wf-asf-access-crew = ASF
+wf-asf-access-bridge = ASF Bridge
+wf-asf-access-security = ASF Security
 wf-asf-access-command = ASF Command
 wf-asf-radio = ASF
 
@@ -25,6 +27,10 @@ ent-WFAsfClothingHeadset = ASF headset
 ent-WFAsfAirlock = ASF airlock
 ent-WFAsfAirlockGlass = ASF glass airlock
 ent-WFAsfAirlockCommand = ASF command airlock
+ent-WFAsfAirlockBridge = ASF bridge airlock
+ent-WFAsfAirlockSecurity = ASF security airlock
+ent-WFAsfLockerSecurity = ASF enforcer's locker
+    .desc = A locker for an Enforcer's kit. Opens for ASF security access.
 ent-WFAsfVoucherCivilian = ASF civilian LPC
     .desc = A purple procurement card good for one Gleaner, Porter or Lamplighter from an ASF shipyard console. Destroyed on use.
 ent-WFAsfVoucherEscort = ASF escort LPC

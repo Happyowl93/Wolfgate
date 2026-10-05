@@ -54,6 +54,10 @@ and docks there and re-run it. The script places lights, vents, scrubbers, alarm
   fabricator also prints universal shipgun ammo.
 - Lantern Post clears drones within 1.5 km and keeps world-gen debris out of 800 m, like Hokkaido and Camelot.
 - Jobs are generated: edit the roster in `Tools/_WF/Asf/generate_roles.py` and re-run it.
+- Access (`faction.yml`): every role has `WFAsf` (private rooms), all but the Colonist have `WFAsfBridge`, the
+  Enforcer and Envoy have `WFAsfSecurity` (the post and its lockers), and only the Envoy has `WFAsfCommand` (the
+  envoy office). The shipyard console checks the ASF company, not ID access, since the buyer's ID sits in its
+  slot; `AsfAccessTest` covers this.
 - Each role has a purple PDA with its own trim and an ID card whose symbol copies its job icon; both are drawn by
   `Tools/_WF/Asf/draw_ids.py`.
 - Official clothing: `WFAsfClothingUniformService`, `WFAsfClothingHeadBeret`, `WFAsfClothingOuterGreatcoat`.
@@ -101,6 +105,7 @@ The wardrobe sprites and the seven hulls come from
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/Asf/AsfAccessTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfAccessTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfCoilgunTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfCoilgunTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs)
 

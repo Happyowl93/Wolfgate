@@ -11,6 +11,7 @@ Plan: rooms are rectangles of different sizes, offset from each other, so the hu
       Outside the pressure hull: engine pylons of different lengths on lattice trusses, a central engine block,
       gun pads and trusses, hull plating filling the notches. Nothing is mirrored.
 Zones: PUBLIC = concourse, docking arm and annex, atrium, clinic, consular office. Everything else needs ASF access.
+       The bridge takes ASF bridge access (all but Colonists), the post ASF security, the envoy office ASF command.
 Power: RTGs -> HV. A substation feeds the room APCs (one pooled LV net); the shield and the main engines have
       their own LAPCs on HV, on LV nets that never touch the rooms' (AsfLanternTest.LanternIsPowered).
 Lights, vents, scrubbers, alarms and cables are placed per room by rule, so the plan can change freely.
@@ -56,9 +57,10 @@ ROOMS = {   # interior rectangles (x0, y0, x1, y1) and floor
 }
 BRIDGE = [(28, -4, 4), (29, -4, 4), (30, -3, 3), (31, -2, 2), (32, -1, 1)]      # the nose: (y, x0, x1)
 PUB, PRIV, ASF, CMD = "AirlockGlass", "WFAsfAirlock", "WFAsfAirlockGlass", "WFAsfAirlockCommand"
+BRIDGE_DOOR, SEC = "WFAsfAirlockBridge", "WFAsfAirlockSecurity"     # bridge: all but Colonists; post: Enforcers
 DOORS = {
-    (0, 27): CMD, (0, 23): PRIV, (-3, 20): CMD, (3, 19): PRIV, (0, 17): PRIV,
-    (-2, 14): PRIV, (2, 14): PRIV, (7, 14): PRIV, (0, 12): ASF,
+    (0, 27): BRIDGE_DOOR, (0, 23): PRIV, (-3, 20): CMD, (3, 19): PRIV, (0, 17): PRIV,
+    (-2, 14): SEC, (2, 14): PRIV, (7, 14): PRIV, (0, 12): ASF,
     (-3, 9): PUB, (3, 9): PUB, (0, 6): PUB, (-6, 6): PUB, (6, 6): PUB, (-10, 4): PUB, (10, 4): PUB,
     (0, 2): ASF, (-6, 2): ASF, (6, 2): ASF, (-11, -3): PRIV, (0, -3): PRIV, (6, -4): PRIV, (-4, -7): PRIV,
     (5, -7): PRIV,
@@ -355,7 +357,7 @@ m.add("WFAsfSpawnPointColonist", 8, 19)
 m.add("PottedPlantRandom", 1, 16); m.add("WFAsfBanner", -1, 16)
 
 # Post (x -6..-3, y 13..15): Enforcer desk
-m.add("LockerSecurity", -6, 15); m.add("LockerSecurity", -6, 14)
+m.add("WFAsfLockerSecurity", -6, 15); m.add("WFAsfLockerSecurity", -6, 14)
 on_table("TableReinforced", -4, 15, "WeaponCapacitorRecharger"); chair("ChairOfficeDark", -4, 14, "N")
 console("ComputerCrewMonitoring", -6, 13, "W"); m.add("CrateGenericSteel", -5, 13)
 
