@@ -1282,7 +1282,7 @@ entities:
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 0.5,2.5
+      pos: 3.5,2.5
       parent: 1
 - proto: PortableGeneratorSuperPacmanShuttle
   entities:
@@ -1869,7 +1869,7 @@ entities:
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 0.5,2.5
+      pos: 3.5,2.5
       parent: 1
 - proto: WindoorSecure
   entities:
