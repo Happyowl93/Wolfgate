@@ -27,15 +27,6 @@ the outline is uneven and nothing is mirrored. From bow to stern:
 - Outside the pressure hull: engine pylons of different lengths on lattice trusses (seven large thrusters in all,
   `WFAsfThrusterLarge`), a central engine block, gun pads on trusses and stubs, and hull plating filling the notches.
 
-- Built like the other faction stations: station-grade plastitanium walls and windows, a purple FS-421 station
-  shield (`WFAsfShieldGenerator`) and eight RTGs (320 kW against about 210 kW rated load with the shield's 80 kW
-  idle draw and the large thrusters).
-- Power: a 15 kW APC can't carry the shield or the main engines, so the power room has five 60 kW LAPCs on HV: three
-  feed the shield alone, two feed the large thrusters and the small aft ones. The room APCs share one LV net for the
-  rest. The three nets never touch; `AsfLanternTest.LanternIsPowered` checks every LV machine has power.
-- Self-defence: 10 guns on pads, trusses and pylons (2 Apollo heavy lasers, 4 Prometheus cannons, 2 Serpent torpedo launchers,
-  2 Phalanx point defence), fired from the bridge through the `GunneryServerStation` in the ready room. For scale,
-  Hokkaido mounts 22 guns and the Halcyon about 90. Guns recharge from their own batteries.
 - Fleet (`fleet.yml`; civilian hulls are "ASF", armed ones "ASFN" like the TSF's "TSFN"), sold at `WFAsfComputerShipyard` in the shipyard hall (a purple recolour of the USSP
   shipyard screen). Prices and loadouts were set against other factions' hulls of similar tile count, scoring
   firepower by hardpoint size (light 1, medium 2, heavy 4):
@@ -45,10 +36,10 @@ the outline is uneven and nothing is mirrored. From bow to stern:
   | Gleaner (mining pod) | 33 | - | - | 25k |
   | Lamplighter (survey, research bay) | 131 | - | - | 38k |
   | Porter (hauler) | 130 | - | - | 40k |
-  | Vigil (escort fighter) | 64 | 3: Prometheus, Phalanx | - | 40k |
-  | Bulwark (gunship) | 99 | 4: Prometheus, Serpent | small | 75k |
-  | Guardian (corvette) | 237 | 12: Apollo, 2 Prometheus, 2 Serpent | small | 120k |
-  | Lodestar (flagship frigate) | 479 | 22: 2 Apollo, 4 Prometheus, 2 Serpent, 2 Phalanx | MS-250 Aegis | 250k, voucher only |
+  | Vigil (escort fighter) | 64 | 3: Hummingbird, Flutter | - | 40k |
+  | Bulwark (gunship) | 99 | 4: Hummingbird, Serpent | small | 75k |
+  | Guardian (corvette) | 237 | 12: Apollo, 2 Hummingbird, 2 Serpent | small | 120k |
+  | Lodestar (flagship frigate) | 479 | 22: 2 Apollo, 4 Hummingbird, 2 Serpent, 2 Flutter | MS-250 Aegis | 250k, voucher only |
 
   Peers at those sizes: QJ340/Bazalt (fighters), QJ270/Strayk/Reaver (gunships), Paladin/Kite/Shiv (corvettes),
   Calypso/Senkusha/Neptune (voucher frigates). Each hull's gunnery server is sized to its guns.
@@ -142,6 +133,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfLanternTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfModsuitTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfModsuitTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Asf/AsfRolesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfRolesTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Asf/AsfShipWeaponsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Asf/AsfShipWeaponsTest.cs)
 
 ### Prototypes
 
@@ -153,6 +145,7 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Prototypes/_WF/Asf/Entities/devices.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/devices.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/drobe.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/drobe.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/modsuit.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/modsuit.yml)
+- [`Resources/Prototypes/_WF/Asf/Entities/ship_weapons.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/ship_weapons.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/vouchers.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/vouchers.yml)
 - [`Resources/Prototypes/_WF/Asf/Entities/weapons.yml`](../../../Resources/Prototypes/_WF/Asf/Entities/weapons.yml)
 - [`Resources/Prototypes/_WF/Asf/faction.yml`](../../../Resources/Prototypes/_WF/Asf/faction.yml)
@@ -208,11 +201,14 @@ The wardrobe sprites and the seven hulls come from
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/medic.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/medic.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/researcher.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/researcher.rsi/)
 - [`Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/`](../../../Resources/Textures/_WF/Asf/Clothing/Uniforms/service.rsi/)
+- [`Resources/Textures/_WF/Asf/Effects/ship_beams.rsi/`](../../../Resources/Textures/_WF/Asf/Effects/ship_beams.rsi/)
 - [`Resources/Textures/_WF/Asf/Interface/job_icons.rsi/`](../../../Resources/Textures/_WF/Asf/Interface/job_icons.rsi/)
 - [`Resources/Textures/_WF/Asf/Interface/research_disciplines.rsi/`](../../../Resources/Textures/_WF/Asf/Interface/research_disciplines.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Devices/pda.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Devices/pda.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/grant_ticket.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/grant_ticket.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Misc/id_cards.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Misc/id_cards.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/ShuttleWeapons/flutter.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/ShuttleWeapons/flutter.rsi/)
+- [`Resources/Textures/_WF/Asf/Objects/ShuttleWeapons/hummingbird.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/ShuttleWeapons/hummingbird.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_pistol_mag.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_pistol_mag.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_rifle_mag.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_rifle_mag.rsi/)
 - [`Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_slug.rsi/`](../../../Resources/Textures/_WF/Asf/Objects/Weapons/Guns/Ammunition/coil_slug.rsi/)

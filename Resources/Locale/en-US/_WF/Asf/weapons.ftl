@@ -30,3 +30,8 @@ ent-WFAsfSuitStoragePathfinder = ASF suit storage unit
     .desc = Holds a Pathfinder modsuit, a breath mask and air tanks. Needs ASF security access.
 ent-WFAsfSuitStorageEVA = ASF EVA suit storage unit
     .desc = Holds an ASF EVA suit, a breath mask and air tanks.
+
+ent-WFAsfTurretFlutter = ASF Type-7 Flutter pulse array
+    .desc = A light ASF laser mount. Fires three heavy pulses, then pauses to recharge. Heavy pulses lose less to armor than a stream of light ones. Can be remotely activated, or linked up to a GCS.
+ent-WFAsfTurretHummingbird = ASF Type-12 Hummingbird laser array
+    .desc = A medium ASF laser mount. Its slow beam cuts through up to three walls or machines in a line, reaching whatever sits behind the armor. Can be remotely activated, or linked up to a GCS.

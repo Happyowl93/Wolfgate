@@ -13594,7 +13594,7 @@ entities:
       rot: 3.141592653589793 rad
       pos: 8.5,26.5
       parent: 1
-- proto: WeaponLaserTurretL1Phalanx
+- proto: WFAsfTurretFlutter
   entities:
   - uid: 674
     components:
@@ -13608,7 +13608,7 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 10.5,8.5
       parent: 1
-- proto: WeaponLaserTurretPrometheus
+- proto: WFAsfTurretHummingbird
   entities:
   - uid: 656
     components:

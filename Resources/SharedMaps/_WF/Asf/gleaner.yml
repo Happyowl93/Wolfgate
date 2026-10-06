@@ -5,7 +5,7 @@ meta:
   forkId: ''
   forkVersion: ''
   time: 08/30/2026 08:45:29
-  entityCount: 107
+  entityCount: 109
 maps: []
 grids:
 - 1
@@ -576,6 +576,22 @@ entities:
     - type: Transform
       pos: -1.5,-3.5
       parent: 1
+- proto: HardpointEnergyLight
+  entities:
+  - uid: 116
+    components:
+    - type: Transform
+      pos: 1.5,1.5
+      parent: 1
+    - type: Physics
+      canCollide: False
+  - uid: 117
+    components:
+    - type: Transform
+      pos: -0.5,1.5
+      parent: 1
+    - type: Physics
+      canCollide: False
 - proto: MachineOreMagnet
   entities:
   - uid: 72
@@ -722,34 +738,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 1.5,1.5
-- proto: ShuttleGunKinetic
-  entities:
-  - uid: 91
-    components:
-    - type: Transform
-      parent: 1
-      rot: 3.141592653589793 rad
-      pos: 1.5,1.5
-    - type: ApcPowerReceiver
-      needsPower: false
-      powerLoad: 0
-    - type: Battery
-      startingCharge: 6849.0244
-    - type: ApcPowerReceiverBattery
-      enabled: true
-  - uid: 92
-    components:
-    - type: Transform
-      parent: 1
-      rot: 3.141592653589793 rad
-      pos: -0.5,1.5
-    - type: ApcPowerReceiver
-      needsPower: false
-      powerLoad: 0
-    - type: Battery
-      startingCharge: 6847.193
-    - type: ApcPowerReceiverBattery
-      enabled: true
 - proto: SignalButton
   entities:
   - uid: 93
@@ -820,6 +808,20 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 2.5,-4.5
+- proto: WeaponTurretM25
+  entities:
+  - uid: 91
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 1.5,1.5
+  - uid: 92
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: -0.5,1.5
 - proto: WallSolid
   entities:
   - uid: 101
