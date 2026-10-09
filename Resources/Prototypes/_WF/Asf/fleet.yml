@@ -1,5 +1,5 @@
 # Hulls adapted from Hullrot: Eclipsion's DSM ships.
-# Prices and loadouts are set against other factions' hulls of similar tile count; see Docs/_WF/Asf/README.md.
+# Prices and loadouts are set against other factions' hulls of similar tile count; see Content.Shared/_WF/Asf/README.md.
 
 - type: vessel
   id: WFAsfGleaner
@@ -219,7 +219,7 @@
   id: WFAsfLodestar
   parent: BaseVessel
   name: ASFN Lodestar
-  description: The Federation's flagship frigate, Carries an MS-250 Aegis shield, 2 Apollo heavy lasers, 4 Type-12 Hummingbird cutting arrays, 2 Serpent torpedo launchers and 2 Type-7 Flutter pulse arrays, with a medbay, science wing and galley.
+  description: The Federation's flagship frigate. Carries an MS-250 Aegis shield, 2 Apollo heavy lasers, 4 Type-12 Hummingbird cutting arrays, 2 Serpent torpedo launchers and 2 Type-7 Flutter pulse arrays, with a medbay, science wing and galley.
   price: 250000
   purchasable: false # voucher only: WFAsfVoucherLodestar
   category: Medium

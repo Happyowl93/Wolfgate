@@ -32,7 +32,7 @@ public sealed class AsfRolesTest
         ]),
         ("WFAsfFieldResearcher",
         [
-            ("jumpsuit", "WFAsfClothingUniformResearcher"), ("outerClothing", "ClothingOuterCoatLab"),
+            ("jumpsuit", "WFAsfClothingUniformResearcher"), ("outerClothing", "WFAsfClothingOuterCoatLab"),
             ("back", "WFAsfClothingBackpack"), ("id", "WFAsfFieldResearcherPDA"),
         ]),
         ("WFAsfColonist",

@@ -1,4 +1,4 @@
-wf-asf-company-description = The Astraeus Solar Federation is a union of many species, Sol among them. Its moth fleets ended humanity's last great war and offered the survivors a seat on the Federation council, where humans now sit as one member of many. The ASF keeps only a small presence in the Colossus Sector: a handful of envoys, researchers and colonists working out of Lantern Post. Relations with the Trans-Solar Federation are cordial, if a little awkward given the names.
+wf-asf-company-description = The Astraeus Solar Federation is a union of many species, Sol among them. Its moth fleets ended humanity's last great war and offered the survivors a seat on the Federation council, where humans now sit as one member of many. The ASF keeps only a small presence in the Colossus Sector: a handful of envoys, researchers and colonists working out of Lantern Post. Relations with the Trans-Solarian Federation are cordial, if a little awkward given the names.
 
 ent-WFAsfClothingUniformService = ASF service uniform
     .desc = The standard duty uniform of the ASF. Purple tunic, dark trousers, tailored for most species.
