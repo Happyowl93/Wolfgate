@@ -10,8 +10,6 @@
   suffix: Large, T4
   description: A main battery with dual barrels, delivering rapid, punishing salvos at extreme range. Fires 130x820mm auto shells with slightly reduced brute strength. Can be remotely activated or linked up to a GCS.
   components:
-  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
-    radius: 2
   - type: StaticPrice
     price: 15000
   - type: Sprite
@@ -131,8 +129,6 @@
   suffix: Large, T4
   description: Large hard hitting naval gun for steady damage. Fires APHEDS rounds, allowing for enhanced penetration, but not as much explosive power as full-sized APHE rounds. Feeds from an 96 round internal magazine.
   components:
-  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
-    radius: 2
   - type: StaticPrice
     price: 16000
   - type: Sprite
@@ -234,7 +230,6 @@
   suffix: Large, T4
   description: A single-barrel, heavy artillery cannon designed for cruisers, delivering massive impact with each long-range shot. Can be remotely activated or linked up to a GCS.
   components:
-  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
   - type: StaticPrice
     price: 15000
   - type: Sprite
@@ -316,8 +311,6 @@
   suffix: Capital/Station, T4
   description: One of the largest chemical-based kinetic weapons in the sector. Its power is only rivaled by mass drivers such as the M381. Automatically reloads full-power 203x940mm shells.
   components:
-  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
-    radius: 2
   - type: StaticPrice
     price: 30000
   - type: Sprite
@@ -405,8 +398,6 @@
   description: A giant, stupid howitzer. A stupid low velocity, a stupid long reload, and a stupidly powerful explosion if you can get it to hit. No AP whatsover.
   abstract: true
   components:
-  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
-    radius: 2
   - type: StaticPrice
     price: 15000
   - type: Sprite
@@ -516,8 +507,6 @@
   suffix: Capital/Station, T4
   description: Fires 85mm shells in a 15 round burst from an internal autoloader.
   components:
-  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
-    radius: 2
   - type: StaticPrice
     price: 30000
   - type: Sprite

@@ -9,8 +9,6 @@
   suffix: Small, T1
   description: A light 14mm ballistic autocannon designed for rapid fire point defense and suppressing smaller targets at close range. Cheap, light, and can be remotely activated or linked up to a GCS.
   components:
-  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
-    radius: 2
   - type: StaticPrice
     price: 250
   - type: Sprite
@@ -105,7 +103,6 @@
   suffix: Medium, T2
   description: A heavy duty rapid fire 20x141mm autocannon, originally mounted as a dogfighting weapon on atmospheric craft. Low range, but devastating damage.
   components:
-  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
   - type: StaticPrice
     price: 1000
   - type: Sprite

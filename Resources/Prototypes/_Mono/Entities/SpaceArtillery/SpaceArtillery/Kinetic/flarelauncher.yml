@@ -7,7 +7,6 @@
   description: A relatively small flare flinging hardpoint used to fool heat seeking missiles. Also good for search and rescue.
   suffix: T1
   components:
-  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
   - type: StaticPrice
     price: 750
   - type: Sprite

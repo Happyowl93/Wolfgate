@@ -9,8 +9,6 @@
   suffix: Station, T5
   description: The charon's mean older brother, the Thanatos is a force to be reckoned with. It can be remotely activated or linked up to a GCS. This one feeds from an autoloader somewhere, and doesn't need manual reloads.
   components:
-  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
-    radius: 2
   - type: StaticPrice
     price: 120000
   - type: Sprite

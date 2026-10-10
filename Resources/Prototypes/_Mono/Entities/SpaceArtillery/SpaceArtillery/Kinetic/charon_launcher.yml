@@ -5,7 +5,6 @@
   suffix: Capital, T4
   abstract: true
   components:
-  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
   - type: StaticPrice
     price: 30000
   - type: Sprite
