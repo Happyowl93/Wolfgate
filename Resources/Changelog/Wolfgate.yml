@@ -1392,3 +1392,40 @@ Entries:
   id: 100107
   time: '2026-10-10T21:53:18.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/208
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        TSF and PDV now start each round under a ceasefire. Check your PDA for
+        the war level!
+    - type: Add
+      message: >-
+        War declarators can call a war off as well as start one. Both sides have
+        to agree either way.
+    - type: Add
+      message: >-
+        Conflict Rule 5 (declaring war) and a PDV standing orders page in the
+        guidebook.
+    - type: Tweak
+      message: >-
+        Faction vs faction needs an RP reason and escalation while the war level
+        is COLD.
+    - type: Tweak
+      message: >-
+        TSF and PDV NPC patrols warn the other faction's ships during the
+        ceasefire and only fire if fired on.
+    - type: Tweak
+      message: The default round is now called Standoff.
+    - type: Tweak
+      message: >-
+        Event POIs and Monolithic Fragments are conflict zones during the
+        ceasefire. TSF and PDV can fight there, but can't chase each other once
+        they leave.
+    - type: Tweak
+      message: >-
+        Event POIs and Monolithic Fragments are conflict zones during the
+        ceasefire. TSF and PDV can fight there, but can't chase each other once
+        they leave.
+  id: 100108
+  time: '2026-10-10T23:06:11.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/205
