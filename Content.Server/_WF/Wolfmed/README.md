@@ -409,6 +409,7 @@ Skipped ("dirty-disposed").
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMannitolTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMannitolTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMechanicalWoundTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMechanicalWoundTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMedicalPatchTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMedicalPatchTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedNecrosisSurgeryTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedNecrosisSurgeryTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedOrganTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedOrganTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedOverheatTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedOverheatTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPainTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPainTest.cs)
