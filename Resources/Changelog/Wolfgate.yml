@@ -1385,3 +1385,10 @@ Entries:
   id: 100106
   time: '2026-10-10T00:57:39.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/204
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: You can now fix necrotic chests and heads with surgery.
+  id: 100107
+  time: '2026-10-10T21:53:18.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/208
