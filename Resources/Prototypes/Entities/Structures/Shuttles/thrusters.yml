@@ -5,6 +5,7 @@
   description: A thruster that allows a shuttle to move.
   abstract: true
   components:
+    - type: WFArmorBacked # WOLFGATE(ShipArmor): thrusters shelter behind hull armor
     - type: Fixtures #Mono start
       fixtures:
         fix1:

@@ -7,6 +7,8 @@
   description: Heavy missile pod firing 250mm guided rockets in bursts of 4.
   suffix: Large, T4
   components:
+  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
+    radius: 2
   - type: StaticPrice
     price: 24500
   - type: Sprite

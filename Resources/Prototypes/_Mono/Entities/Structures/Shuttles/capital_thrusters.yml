@@ -5,6 +5,8 @@
   placement:
     mode: AlignTileAny
   components:
+  - type: WFArmorBacked # WOLFGATE(ShipArmor): thrusters shelter behind hull armor
+    radius: 2
   - type: Machine
     board: LargeThrusterMachineCircuitboard
   - type: Construction

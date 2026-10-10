@@ -6,6 +6,7 @@
   placement:
     mode: SnapgridCenter
   components:
+  - type: WFArmorBacked # WOLFGATE(ShipArmor): ship guns shelter behind hull armor
   - type: Damageable
     damageContainer: StructuralInorganic
     damageModifierSet: WallDefense2
