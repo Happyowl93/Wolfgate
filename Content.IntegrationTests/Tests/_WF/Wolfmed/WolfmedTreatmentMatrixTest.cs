@@ -34,7 +34,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WoundHealingSystem))]
-public sealed class WolfmedTreatmentMatrixTest : GameTest
+public sealed class WolfmedTreatmentMatrixTest : WolfmedGameTest
 {
     /// <summary>
     /// PLAN5 §6.2 T-P5-15. The six cells: <c>{Biological, Mechanical, Electrical}</c> against an organic wound
@@ -48,7 +48,7 @@ public sealed class WolfmedTreatmentMatrixTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -139,7 +139,7 @@ public sealed class WolfmedTreatmentMatrixTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -210,7 +210,7 @@ public sealed class WolfmedTreatmentMatrixTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

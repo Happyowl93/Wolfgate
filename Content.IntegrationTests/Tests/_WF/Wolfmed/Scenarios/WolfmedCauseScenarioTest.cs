@@ -48,7 +48,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedConsciousnessSystem))]
-public sealed class WolfmedCauseScenarioTest : GameTest
+public sealed class WolfmedCauseScenarioTest : WolfmedGameTest
 {
     private const float Band = 0.2f;
     private const float FaintSeconds = 20f;
@@ -131,7 +131,7 @@ public sealed class WolfmedCauseScenarioTest : GameTest
     public async Task PainScenarioTest()
     {
         await PinPain();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var alerts = SEntMan.System<WolfmedConditionAlertSystem>();
         EntityUid a = default;
@@ -335,7 +335,7 @@ public sealed class WolfmedCauseScenarioTest : GameTest
     {
         await PinPain();
         await OverrideCVar(Side.Server, WolfmedCVars.PainFaintCooldown, ShippedCooldown);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid a = default;
 
@@ -452,7 +452,7 @@ public sealed class WolfmedCauseScenarioTest : GameTest
         // the P13 arithmetic, not the decay.
         await OverrideCVar(Side.Server, WolfmedCVars.PainLooseRecovery, 0f);
         await PinPain();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid a = default;
 
         await Server.WaitPost(() => a = SEntMan.SpawnEntity("MobHuman", map.GridCoords));
@@ -520,7 +520,7 @@ public sealed class WolfmedCauseScenarioTest : GameTest
     public async Task OverlappingCausesTest()
     {
         await PinPain();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var alerts = SEntMan.System<WolfmedConditionAlertSystem>();
         EntityUid a = default;
@@ -749,7 +749,7 @@ public sealed class WolfmedCauseScenarioTest : GameTest
     public async Task IpcShutdownScenarioTest()
     {
         await PinPain();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var alerts = SEntMan.System<WolfmedConditionAlertSystem>();
         var slots = SEntMan.System<ItemSlotsSystem>();

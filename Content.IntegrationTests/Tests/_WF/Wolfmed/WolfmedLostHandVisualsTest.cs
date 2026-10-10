@@ -21,14 +21,14 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// hand goes with it, and the client must take the axe's in-hand layers off the body sprite with the hand.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedLostHandVisualsTest : GameTest
+public sealed class WolfmedLostHandVisualsTest : WolfmedGameTest
 {
     [Test]
     [TestCase(false)]
     [TestCase(true)]
     public async Task LosingTheHandTakesTheHeldItemOffTheSpriteTest(bool wielded)
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default, axe = default, arm = default;
         HandLocation location = default;
         await Server.WaitPost(() =>

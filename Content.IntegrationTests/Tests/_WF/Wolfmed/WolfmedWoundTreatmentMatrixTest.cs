@@ -41,7 +41,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WoundPrototype))]
-public sealed class WolfmedWoundTreatmentMatrixTest : GameTest
+public sealed class WolfmedWoundTreatmentMatrixTest : WolfmedGameTest
 {
     /// <summary>Items with a <see cref="HealingComponent"/> whose reach is under test, in matrix order.</summary>
     private static readonly string[] Topicals =
@@ -259,7 +259,7 @@ public sealed class WolfmedWoundTreatmentMatrixTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var prototypes = server.ResolveDependency<IPrototypeManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -377,7 +377,7 @@ public sealed class WolfmedWoundTreatmentMatrixTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

@@ -267,6 +267,8 @@ What buys time: [bold]CPR[/bold] holds an arrested brain at the damage line for 
 
 [bold]Brain death[/bold] is when the brain organ reaches zero: the patient is dead, with a body and a ghost like any other death. The way back is the same defibrillator, once the blood is up, and it never refuses a destroyed brain. The patient comes back with [bold]major brain damage[/bold]: blurred sight, slurred and stuttering speech and a grip that lets go, for as long as the brain stays damaged. Open the head and [bold]repair the brain[/bold] to clear it; a repaired brain then carries the trauma for about ten minutes, and the analyzer says so.
 
+A brain that is hurt but still working can also be brought back without a knife: [bold]mannitol[/bold] restores it a little with every dose. A [bold]slime[/bold] keeps its brain in its chest, where it is the core: aim at the torso, open the ribcage, and the same two surgeries are there as [bold]Heal Slime Core[/bold] and [bold]Repair Slime Core[/bold]. The pod's neuro disk does both.
+
 Nothing Wolfmed does makes a body permanently unrevivable. [bold]Rot[/bold] is still the one hard stop, so get a corpse cold.
   <Box>
     <GuideEntityEmbed Entity="Defibrillator"/>

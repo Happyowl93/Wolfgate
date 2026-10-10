@@ -110,6 +110,7 @@ wolfmed-cause-hypoxia-source-lungs = lungs failing
 wolfmed-cause-hypoxia-source-circulation = poor circulation
 wolfmed-cause-hypoxia-source-sepsis = sepsis
 wolfmed-cause-hypoxia-source-sedation = breathing slowed
+wolfmed-cause-hypoxia-source-vacuum = vacuum exposure
 wolfmed-cause-hypoxia-symptom = You cannot get your breath.
 wolfmed-cause-hypoxia-help = Get to air. Treat what starves you of oxygen.
 wolfmed-cause-hypoxia-help-out = You need air or internals, and the cause treated.

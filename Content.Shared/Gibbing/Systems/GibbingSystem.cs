@@ -6,9 +6,11 @@ using Content.Shared.Gibbing.Events;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
 using Robust.Shared.Map;
+using Robust.Shared.Physics.Components; // WOLFGATE: bodiless giblets are skipped when flung.
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
+using Content.Shared.Chemistry.Components.SolutionManager;
 
 namespace Content.Shared.Gibbing.Systems;
 
@@ -147,6 +149,9 @@ public sealed partial class GibbingSystem : EntitySystem
                 {
                     foreach (var ent in container.ContainedEntities.ToArray()) // WOLFGATE(Wolfmed): snapshot, DropEntity/GibEntity mutate the container
                     {
+                        // Do not gib solution entities
+                        if (HasComp<ContainedSolutionComponent>(ent))
+                            continue;
                         DropEntity(new Entity<GibbableComponent?>(ent, null), parentXform, randomSpreadMod,
                             ref droppedEntities, launchGibs,
                             launchDirection, launchImpulse, launchImpulseVariance, launchCone);
@@ -161,6 +166,9 @@ public sealed partial class GibbingSystem : EntitySystem
                 {
                     foreach (var ent in container.ContainedEntities.ToArray()) // WOLFGATE(Wolfmed): snapshot, DropEntity/GibEntity mutate the container
                     {
+                        // Do not gib solution entities
+                        if (HasComp<ContainedSolutionComponent>(ent))
+                            continue;
                         GibEntity(new Entity<GibbableComponent?>(ent, null), parentXform, randomSpreadMod,
                             ref droppedEntities, launchGibs,
                             launchDirection, launchImpulse, launchImpulseVariance, launchCone);
@@ -326,6 +334,12 @@ public sealed partial class GibbingSystem : EntitySystem
         var scatterAngle = direction?.ToAngle() ?? _random.NextAngle();
         var scatterVector = _random.NextAngle(scatterAngle - scatterConeAngle / 2, scatterAngle + scatterConeAngle / 2)
             .ToVec() * (impulse + _random.NextFloat(impulseVariance));
+        // WOLFGATE START: bodiless dropped contents are skipped instead of flung.
+        // Dropped container contents can be bodiless (an organ's solution entity); flinging one only logs a
+        // resolve error per giblet, which floods the log every time a landing grid crushes a mob.
+        if (!HasComp<PhysicsComponent>(target))
+            return;
+        // WOLFGATE END
         _physicsSystem.ApplyLinearImpulse(target, scatterVector);
     }
 

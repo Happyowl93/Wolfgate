@@ -33,7 +33,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedDownedSystem))]
-public sealed class WolfmedFireHelplessnessTest : GameTest
+public sealed class WolfmedFireHelplessnessTest : WolfmedGameTest
 {
     private static readonly (string Name, BodyPartType Type, BodyPartSymmetry Symmetry)[] Limbs =
     [
@@ -141,7 +141,7 @@ public sealed class WolfmedFireHelplessnessTest : GameTest
     public async Task FireHelplessnessTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid body = default;
 
@@ -149,7 +149,7 @@ public sealed class WolfmedFireHelplessnessTest : GameTest
         {
             s.SetAir(map.MapUid, true);
             s.KeepGrid(map.Grid);
-            body = SEntMan.SpawnEntity("MobHuman", map.GridCoords);
+            body = SEntMan.SpawnEntity(WolfmedScenario.BurnPatient, map.GridCoords);
         });
         await RunSeconds(2);
 

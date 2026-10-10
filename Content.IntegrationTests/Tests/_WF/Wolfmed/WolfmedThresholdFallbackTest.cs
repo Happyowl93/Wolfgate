@@ -20,7 +20,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(MobThresholdSystem))]
-public sealed class WolfmedThresholdFallbackTest : GameTest
+public sealed class WolfmedThresholdFallbackTest : WolfmedGameTest
 {
     [Test]
     public async Task NonWoundHostCritsAndDiesAtItsThresholdsTest()
@@ -29,7 +29,7 @@ public sealed class WolfmedThresholdFallbackTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var protos = server.ResolveDependency<IPrototypeManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

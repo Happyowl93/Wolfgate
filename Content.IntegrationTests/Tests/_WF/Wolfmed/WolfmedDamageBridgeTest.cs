@@ -31,7 +31,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WoundDamageRoutingSystem))]
-public sealed class WolfmedDamageBridgeTest : GameTest
+public sealed class WolfmedDamageBridgeTest : WolfmedGameTest
 {
     /// <summary>Two mobs on the same Shitmed body graph; the control is the bridge body minus WoundHost.</summary>
     [TestPrototypes]
@@ -152,7 +152,7 @@ public sealed class WolfmedDamageBridgeTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var prototypes = server.ResolveDependency<IPrototypeManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var missing = new List<string>();
 
         await server.WaitAssertion(() =>
@@ -191,7 +191,7 @@ public sealed class WolfmedDamageBridgeTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -214,7 +214,7 @@ public sealed class WolfmedDamageBridgeTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -249,7 +249,7 @@ public sealed class WolfmedDamageBridgeTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -278,7 +278,7 @@ public sealed class WolfmedDamageBridgeTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -304,7 +304,7 @@ public sealed class WolfmedDamageBridgeTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -335,7 +335,7 @@ public sealed class WolfmedDamageBridgeTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -364,7 +364,7 @@ public sealed class WolfmedDamageBridgeTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -418,7 +418,7 @@ public sealed class WolfmedDamageBridgeTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -490,7 +490,7 @@ public sealed class WolfmedDamageBridgeTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var leftArm = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
@@ -541,7 +541,7 @@ public sealed class WolfmedDamageBridgeTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var host = EntityUid.Invalid;
         var control = EntityUid.Invalid;
 

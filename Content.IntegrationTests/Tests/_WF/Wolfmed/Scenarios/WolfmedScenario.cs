@@ -28,6 +28,25 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 public sealed class WolfmedScenario
 {
+    /// <summary>
+    /// A human whose fire burns as hard as the one the burn route was tuned on. Monolith#4831 cut mob fire damage
+    /// to a third and stopped a burning body heating itself, so a real fire no longer carries a scenario that far.
+    /// </summary>
+    public const string BurnPatient = "WFWolfmedTestBurnPatient";
+
+    [TestPrototypes]
+    private const string Prototypes = @"
+- type: entity
+  id: WFWolfmedTestBurnPatient
+  parent: MobHuman
+  suffix: burn test
+  components:
+  - type: Flammable
+    damage:
+      types:
+        Heat: 3
+";
+
     public readonly IEntityManager Entities;
     public readonly WolfmedLifeSystem Life;
     public readonly WolfmedConsciousnessSystem Consciousness;

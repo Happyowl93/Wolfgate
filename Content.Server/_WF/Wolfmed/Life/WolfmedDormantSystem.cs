@@ -203,9 +203,9 @@ public sealed class WolfmedDormantSystem : EntitySystem
 
         body.Comp.Told |= fresh;
         var names = new List<string>();
-        for (var bit = 0; bit < 16; bit++)
+        for (var bit = 0; bit < 32; bit++)
         {
-            var route = (WolfmedRoutes) (1 << bit);
+            var route = (WolfmedRoutes) (1u << bit);
             if ((fresh & route) != 0)
                 names.Add(Loc.GetString($"wolfmed-dormant-route-{route.ToString().ToLowerInvariant()}"));
         }

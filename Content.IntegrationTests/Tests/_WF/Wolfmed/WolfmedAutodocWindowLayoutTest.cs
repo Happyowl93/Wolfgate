@@ -26,7 +26,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(AutodocWindow))]
-public sealed class WolfmedAutodocWindowLayoutTest : GameTest
+public sealed class WolfmedAutodocWindowLayoutTest : WolfmedGameTest
 {
     [Test]
     [TestCase(1f)]

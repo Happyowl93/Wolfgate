@@ -33,7 +33,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedWoundTraitSystem))]
-public sealed class WolfmedSlashBiteWoundTest : GameTest
+public sealed class WolfmedSlashBiteWoundTest : WolfmedGameTest
 {
     /// <summary>
     /// A deep cut to a limb opens an artery and severs a tendon on top of the cut itself; a shallow one
@@ -45,7 +45,7 @@ public sealed class WolfmedSlashBiteWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -88,7 +88,7 @@ public sealed class WolfmedSlashBiteWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -148,7 +148,7 @@ public sealed class WolfmedSlashBiteWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -195,7 +195,7 @@ public sealed class WolfmedSlashBiteWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -257,7 +257,7 @@ public sealed class WolfmedSlashBiteWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -290,7 +290,7 @@ public sealed class WolfmedSlashBiteWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -338,7 +338,7 @@ public sealed class WolfmedSlashBiteWoundTest : GameTest
         var entities = server.ResolveDependency<IEntityManager>();
         var locale = server.ResolveDependency<ILocalizationManager>();
         var prototypes = server.ResolveDependency<IPrototypeManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

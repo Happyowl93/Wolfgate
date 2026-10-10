@@ -23,7 +23,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// that keeps a chassis from reading as flesh.
 /// </remarks>
 [TestFixture]
-public sealed class WolfmedLocaleCoverageTest : GameTest
+public sealed class WolfmedLocaleCoverageTest : WolfmedGameTest
 {
     /// <summary>
     /// Enum-keyed families the panel builds: prefix, the enum type, and the members it never renders.

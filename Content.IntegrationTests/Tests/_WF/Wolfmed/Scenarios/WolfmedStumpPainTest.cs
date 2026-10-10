@@ -17,7 +17,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// one-time spike from the open stump (half its severity) and a floor from the untreated amputation (its severity).
 /// </summary>
 [TestFixture]
-public sealed class WolfmedStumpPainTest : GameTest
+public sealed class WolfmedStumpPainTest : WolfmedGameTest
 {
     [Test]
     public async Task LosingAnArmHurtsTest()
@@ -25,7 +25,7 @@ public sealed class WolfmedStumpPainTest : GameTest
         await OverrideCVar(Side.Server, WolfmedCVars.PainScale, 1f); // playtest 5: this test pins Onyx's figures
         await OverrideCVar(Side.Server, WolfmedCVars.PainFloorRest, 1f); // playtest 5: and the floor holding whole
 
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid a = default;
         await Server.WaitPost(() =>

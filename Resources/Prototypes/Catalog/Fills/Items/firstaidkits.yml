@@ -15,8 +15,11 @@
       - id: WFWolfmedSplint
       - id: WFWolfmedSuture
       - id: WFWolfmedAnalgesicPillCanister
-      # WOLFGATE END
+      # The kit is full, so the tricordrazine stays where Monolith#4822 put iron and copper (two cells for its one).
       - id: PillCanisterTricordrazine
+      # - id: PillCanisterIron # Mono
+      # - id: PillCanisterCopper # Mono
+      # WOLFGATE END
       # see https://github.com/tgstation/blob/master/code/game/objects/items/storage/firstaid.dm for example contents
 
 - type: entity

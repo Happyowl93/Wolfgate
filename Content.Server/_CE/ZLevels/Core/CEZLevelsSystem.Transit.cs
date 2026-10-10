@@ -89,6 +89,7 @@ public sealed partial class CEZLevelsSystem
         }
 
         EnsureComp<CEZPhysicsComponent>(grid);
+        WfRefreshOrbitParking(grid, mapUid); // WOLFGATE(Planets): a grid on a planet orbit layer holds its height instead of sinking.
 
         if (!HasComp<CEZGridFallerComponent>(grid))
         {
@@ -102,6 +103,9 @@ public sealed partial class CEZLevelsSystem
         Entity<CEZMapComponent, MapComponent> targetMap,
         int offset)
     {
+        if (WfRefusesLevelHop(grid, (targetMap.Owner, targetMap.Comp1))) // WOLFGATE(Planets): hulls leave orbit through transit and never hop below ground.
+            return false;
+
         var movedGrids = CollectGridSet(grid);
         MoveGridSetToMap(movedGrids, targetMap.Owner, offset, targetMap.Comp1.Depth);
 
@@ -352,6 +356,7 @@ public sealed partial class CEZLevelsSystem
             var worldPos = _transform.GetWorldPosition(xform);
             var worldRot = _transform.GetWorldRotation(xform);
 
+            WfDestroyRiderContacts(gridUid); // WOLFGATE(Planets): riders' contacts with the old map must not survive the move.
             // The map change wipes joints and can reset momentum, so save and restore it.
             var linVel = Vector2.Zero;
             var angVel = 0f;
@@ -425,7 +430,7 @@ public sealed partial class CEZLevelsSystem
         // the BOTTOM layer, climbing needs one above the TOP layer. Every interior
         // layer's gap is bounded by its neighbours' source maps, so only the two
         // extremes can fail.
-        var hasBelow = TryMapDown(layers[0].SourceMap, out _);
+        var hasBelow = TryMapDown(layers[0].SourceMap, out var wfBelow) && !WfClosedToHulls(wfBelow); // WOLFGATE(Planets): hulls never descend below a planet's ground.
         var hasAbove = TryMapUp(layers[^1].SourceMap, out _);
 
         var goDown = hasBelow && !(preferUpperGap && hasAbove);
@@ -541,6 +546,14 @@ public sealed partial class CEZLevelsSystem
 
             if (!TryMapUp(topUpper, out _))
             {
+                // WOLFGATE(Planets) START: a held climb pops out into a planet's orbit layer instead of pinning under it.
+                // Orbit tops a planet stack and is somewhere to arrive, not a ceiling to hang under: a held
+                // climb pops out into it instead of pinning the hull at the top of the last gap until the key is let
+                // go.
+                if (WfIsOrbitLayer(topUpper) && TryExitTransit(grid))
+                    return true;
+                // WOLFGATE END
+
                 // Top of the network: give on-demand generation a chance to extend it
                 // upward before clamping.
                 RaiseExpandEvent(topUpper, up: true);
@@ -706,7 +719,7 @@ public sealed partial class CEZLevelsSystem
             }
             else
             {
-                if (old.LowerMap is not { } newUpper || !TryMapDown(newUpper, out var below))
+                if (old.LowerMap is not { } newUpper || !TryMapDown(newUpper, out var below) || WfClosedToHulls(below)) // WOLFGATE(Planets): a descending convoy lands on the ground instead of hopping below it.
                     return false;
 
                 plans.Add((oldMap, below.Owner, newUpper, -1, below.Comp.Depth));
@@ -808,6 +821,7 @@ public sealed partial class CEZLevelsSystem
 
                 // Landing on a grid causes an explosion. Don't do that.
                 _shuttle.Smimsh(gridUid, explodeGrids: true, ignoredGrids: movedGrids);
+                WfClearLandingObstacles(gridUid, clearance: WFSetDownClearance, grownOnly: true); // WOLFGATE(Planets): a hull that sets down breaks the trees and rocks it would rest against
             }
 
             // The set has left; a transit map only ever hosts one set.

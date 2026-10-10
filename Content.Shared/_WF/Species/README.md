@@ -8,6 +8,10 @@ dexalin and iron poison Avali while ammonia heals their airloss), and guidebook 
 species to upstream marking, clothing and species prototypes, let Reptilians wear hair and facial hair, and make
 explicit clothing layers pick their species states so Avali wear Avali hardsuits. The creator UI is in Humanoid.
 
+Vulpkanin and Canine wear Starlight's Vulpkanin body (`Resources/Textures/_WF/Species/Mobs/Species/Vulpkanin`, written
+by `Tools/_WF/LegStyle/port.py`; Canine keeps its own head) and start with Starlight's fox tail and ears. They stand
+digitigrade by default; the LegStyle module holds both pairs of legs and the plantigrade option.
+
 Eye markings have their own `Eyes` category, so left and right eyes no longer compete with face markings for the
 head's points; no species limits it.
 
@@ -63,6 +67,7 @@ clone.
 - [`Content.IntegrationTests/Tests/_WF/Species/MismatchedPartsBodyTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Species/MismatchedPartsBodyTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Species/MismatchedPartsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Species/MismatchedPartsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Species/ShadekinNightVisionTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Species/ShadekinNightVisionTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Species/SpeciesLoadoutTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Species/SpeciesLoadoutTest.cs)
 
 ### Prototypes
 
@@ -90,6 +95,7 @@ clone.
 - [`Resources/Prototypes/_WF/Species/typing_indicator.yml`](../../../Resources/Prototypes/_WF/Species/typing_indicator.yml)
 - [`Resources/Prototypes/_WF/Species/Voice/speech_emote_sounds.yml`](../../../Resources/Prototypes/_WF/Species/Voice/speech_emote_sounds.yml)
 - [`Resources/Prototypes/_WF/Species/Voice/speech_verbs.yml`](../../../Resources/Prototypes/_WF/Species/Voice/speech_verbs.yml)
+- [`Resources/Prototypes/_WF/Species/vulpkanin.yml`](../../../Resources/Prototypes/_WF/Species/vulpkanin.yml)
 
 ### Localization
 
@@ -118,6 +124,7 @@ clone.
 
 - [`Resources/Textures/_WF/Species/Mobs/Customization/synthliz.rsi/`](../../../Resources/Textures/_WF/Species/Mobs/Customization/synthliz.rsi/)
 - [`Resources/Textures/_WF/Species/Mobs/Species/Canine/parts.rsi/`](../../../Resources/Textures/_WF/Species/Mobs/Species/Canine/parts.rsi/)
+- [`Resources/Textures/_WF/Species/Mobs/Species/Vulpkanin/parts.rsi/`](../../../Resources/Textures/_WF/Species/Mobs/Species/Vulpkanin/parts.rsi/)
 - [`Resources/Textures/_WF/Species/Objects/Specific/Medical/avalipen.rsi/`](../../../Resources/Textures/_WF/Species/Objects/Specific/Medical/avalipen.rsi/)
 
 ### Guidebook
@@ -279,6 +286,9 @@ clone.
   - ported from HardLight
   - ported from HardLight, unrestricted skin colour
 - [`Content.Shared/Preferences/HumanoidCharacterProfile.cs`](../../Preferences/HumanoidCharacterProfile.cs): the option widens the hair check
+- [`Content.Shared/Preferences/Loadouts/RoleLoadout.cs`](../../Preferences/Loadouts/RoleLoadout.cs)
+  - a loadout is held once, and a saved profile may carry the repeats the defaults used to add
+  - a default already held is not added again
 - [`Content.Shared/Teleportation/Components/PortalComponent.cs`](../../Teleportation/Components/PortalComponent.cs): ported from HardLight/Starlight - lets systems veto a portal teleport
 - [`Content.Shared/Teleportation/Systems/SharedPortalSystem.cs`](../../Teleportation/Systems/SharedPortalSystem.cs): lets a portal refuse a subject (the Shadekin dark portal)
 - [`Resources/Audio/_DEN/`](../../../Resources/Audio/_DEN/): The Den species voice sounds, ported in
@@ -389,6 +399,10 @@ clone.
   - was RMCSkrellWarble, which shared Warble's trigger words
 - [`Resources/Prototypes/_DV/Entities/Mobs/Species/vulpkanin.yml`](../../../Resources/Prototypes/_DV/Entities/Mobs/Species/vulpkanin.yml): this species has wag-capable tails but had no Wagging Tail action
 - [`Resources/Prototypes/_DV/Species/skrell.yml`](../../../Resources/Prototypes/_DV/Species/skrell.yml): ported from HardLight (Skrell)
+- [`Resources/Prototypes/_DV/Species/vulpkanin.yml`](../../../Resources/Prototypes/_DV/Species/vulpkanin.yml)
+  - was MobVulpkaninSprites; Starlight's body on digitigrade legs
+  - was VulpTail; Starlight's tail for Starlight's body
+  - was VulpEar; Starlight's ears for Starlight's body
 - [`Resources/Prototypes/_DV/Voice/speech_emotes.yml`](../../../Resources/Prototypes/_DV/Voice/speech_emotes.yml): was the default scream icon
 - [`Resources/Prototypes/_EE/Entities/Mobs/Customization/bishop.yml`](../../../Resources/Prototypes/_EE/Entities/Mobs/Customization/bishop.yml): added Canine
 - [`Resources/Prototypes/_EE/Entities/Mobs/Customization/hephiastos.yml`](../../../Resources/Prototypes/_EE/Entities/Mobs/Customization/hephiastos.yml): added Canine
@@ -617,6 +631,7 @@ clone.
 - [`Resources/Prototypes/Reagents/elements.yml`](../../../Resources/Prototypes/Reagents/elements.yml)
   - iron poisons Avali (Starlight)
   - iron doesn't build Avali blood either; it poisons them
+- [`Resources/Prototypes/Reagents/gases.yml`](../../../Resources/Prototypes/Reagents/gases.yml): thaven breathe every gas safely, as in HardLight; the port left these out and they suffocated in station air
 - [`Resources/Prototypes/Reagents/medicine.yml`](../../../Resources/Prototypes/Reagents/medicine.yml)
   - dexalin doesn't heal Avali; their blood is ammonia-based (Starlight)
   - dexalin poisons Avali (Starlight), scaled to Mono's 0.2 rate so a unit still does 3/2/2

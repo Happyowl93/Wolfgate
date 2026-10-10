@@ -263,6 +263,17 @@ public sealed partial class ExplosionSystem
                 tileBlocked |= IsBlockingTurf(entity);
             }
         }
+// ES START
+        if (!tileBlocked)
+        {
+            var explosionType = _prototypeManager.Index<ExplosionPrototype>(id);
+            if (_robustRandom.Prob(explosionType.FireChance))
+            {
+                _tileFire.TryDoTileFire(_map.ToCoordinates(grid, tile, grid),
+                    stage: _robustRandom.Next(explosionType.MinFireLevel, explosionType.MaxFireLevel + 1));
+            }
+        }
+// ES END
 
         // Next, we get the intersecting entities AGAIN, but purely for throwing. This way, glass shards spawned from
         // windows will be flung outwards, and not stay where they spawned. This is however somewhat unnecessary, and a
@@ -945,4 +956,13 @@ public sealed class QueuedExplosion
     public int MaxTileBreak;
     public bool CanCreateVacuum;
     public EntityUid? Cause; // The entity that exploded, for logging purposes.
+
+    // WOLFGATE(Planets) START: silent flag, so a crash's storm of blasts makes one bang.
+    /// <summary>
+    /// No sound and no camera shake for this one. For storms of explosions queued as a single event, where
+    /// one bang is wanted and a hundred would exhaust the client's audio sources. Combining clears it: an explosion
+    /// merged with an audible one is audible.
+    /// </summary>
+    public bool Silent;
+    // WOLFGATE END
 }

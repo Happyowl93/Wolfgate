@@ -16,7 +16,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// damage, a bleed that opens under one starts clamped, and the strap on a leg ties off the foot as well.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedTourniquetHoldsTest : GameTest
+public sealed class WolfmedTourniquetHoldsTest : WolfmedGameTest
 {
     private WoundDamageRoutingSystem Routing => SEntMan.System<WoundDamageRoutingSystem>();
     private static DamageSpecifier Spec(string type, float amount) => WolfmedScenario.Spec(type, amount);
@@ -24,7 +24,7 @@ public sealed class WolfmedTourniquetHoldsTest : GameTest
     [Test]
     public async Task TourniquetSurvivesNewDamageAndCoversTheFootTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid a = default, attacker = default;
         await Server.WaitPost(() =>

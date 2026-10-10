@@ -40,7 +40,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(AutodocSystem))]
-public sealed class PodAtmosphereTest : GameTest
+public sealed class PodAtmosphereTest : WolfmedGameTest
 {
     public override PoolSettings PoolSettings => PsDisconnected;
 
@@ -92,7 +92,7 @@ public sealed class PodAtmosphereTest : GameTest
     /// </summary>
     private async Task<(TestMapData Map, Entity<AutodocComponent> Pod, EntityUid Body)> PodIn(GasMixture? air)
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid body = default;
 
@@ -409,7 +409,7 @@ public sealed class PodAtmosphereTest : GameTest
     [Test]
     public async Task OrganicQueueCompletesInsideTheSealedPodTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid body = default;
 

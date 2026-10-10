@@ -21,7 +21,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// scales every gain and floor.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedPainSettleTest : GameTest
+public sealed class WolfmedPainSettleTest : WolfmedGameTest
 {
     private EntityUid Part(EntityUid body, BodyPartType type) =>
         SEntMan.System<SharedBodySystem>().GetBodyChildren(body).First(p => p.Component.PartType == type).Id;
@@ -33,7 +33,7 @@ public sealed class WolfmedPainSettleTest : GameTest
         await OverrideCVar(Side.Server, WolfmedCVars.PainScale, 1f);
         await OverrideCVar(Side.Server, WolfmedCVars.PainFloorRest, 0.6f);
         await OverrideCVar(Side.Server, WolfmedCVars.PainFloorSettleSeconds, 20f);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid a = default;
         EntityUid wound = default;
@@ -78,7 +78,7 @@ public sealed class WolfmedPainSettleTest : GameTest
     [Test]
     public async Task PainScaleScalesEveryGainTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid whole = default, half = default;
         var wholeFloor = 0f;
         await OverrideCVar(Side.Server, WolfmedCVars.PainScale, 1f);

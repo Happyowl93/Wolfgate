@@ -23,7 +23,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedConsciousnessSystem))]
-public sealed class WolfmedDownedTransitionTest : GameTest
+public sealed class WolfmedDownedTransitionTest : WolfmedGameTest
 {
     /// <summary>
     /// Inputs swung across the Downed threshold, hard, twenty times, with a stun holding the body down.
@@ -35,7 +35,7 @@ public sealed class WolfmedDownedTransitionTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -99,7 +99,7 @@ public sealed class WolfmedDownedTransitionTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default;
         EntityUid pen = default;
 

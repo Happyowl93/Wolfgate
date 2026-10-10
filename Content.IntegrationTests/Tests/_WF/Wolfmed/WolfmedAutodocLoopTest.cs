@@ -36,7 +36,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(AutodocSystem))]
-public sealed class WolfmedAutodocLoopTest : GameTest
+public sealed class WolfmedAutodocLoopTest : WolfmedGameTest
 {
     [TestPrototypes]
     private const string Prototypes = @"
@@ -182,7 +182,7 @@ public sealed class WolfmedAutodocLoopTest : GameTest
         await server.WaitIdleAsync();
         await server.WaitPost(() => server.System<WolfmedWoundRuleSystem>().ForcedRoll = 0f);
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid torso = default;
 
@@ -264,7 +264,7 @@ public sealed class WolfmedAutodocLoopTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid leg = default;
 
@@ -323,7 +323,7 @@ public sealed class WolfmedAutodocLoopTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid arm = default;
 
@@ -370,7 +370,7 @@ public sealed class WolfmedAutodocLoopTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
 
         await server.WaitAssertion(() =>
@@ -417,7 +417,7 @@ public sealed class WolfmedAutodocLoopTest : GameTest
         // while it pumps and is not what "tend a moderate cut" measures.
         await server.WaitPost(() => server.System<WolfmedWoundRuleSystem>().ForcedRoll = 1f);
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid torso = default;
         EntityUid hand = default;
@@ -478,7 +478,7 @@ public sealed class WolfmedAutodocLoopTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid body = default;
         EntityUid jug = default;
@@ -572,7 +572,7 @@ public sealed class WolfmedAutodocLoopTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid leg = default;
 
@@ -630,7 +630,7 @@ public sealed class WolfmedAutodocLoopTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid leg = default;
 
@@ -677,7 +677,7 @@ public sealed class WolfmedAutodocLoopTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid body = default;
 

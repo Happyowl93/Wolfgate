@@ -30,7 +30,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedSurgeryConditionSystem))]
-public sealed class WolfmedSurgeryClosingStepTest : GameTest
+public sealed class WolfmedSurgeryClosingStepTest : WolfmedGameTest
 {
     private static readonly (string Surgery, string Step, string Tool)[] OpenIncision =
     {
@@ -42,7 +42,7 @@ public sealed class WolfmedSurgeryClosingStepTest : GameTest
     [Test]
     public async Task GraftIsClosedByItsOwnSealStepTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default, torso = default, surgeon = default;
 
         await Server.WaitAssertion(() =>
@@ -81,7 +81,7 @@ public sealed class WolfmedSurgeryClosingStepTest : GameTest
     [Test]
     public async Task EmbeddedObjectRemovalIsClosedByItsOwnSealStepTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default, torso = default, surgeon = default;
 
         await Server.WaitAssertion(() =>
@@ -109,7 +109,7 @@ public sealed class WolfmedSurgeryClosingStepTest : GameTest
     [Test]
     public async Task OpenPartWithoutTheWoundDoesNotListTheProcedureTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default, torso = default, surgeon = default;
         await Server.WaitAssertion(() => (body, torso, surgeon) = Setup(map.GridCoords));
 

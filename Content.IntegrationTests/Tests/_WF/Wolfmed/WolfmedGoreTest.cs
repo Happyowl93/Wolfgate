@@ -46,7 +46,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedGoreSystem))]
-public sealed class WolfmedGoreTest : GameTest
+public sealed class WolfmedGoreTest : WolfmedGameTest
 {
     // --- G1 ---------------------------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ public sealed class WolfmedGoreTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var protoMan = server.ResolveDependency<IPrototypeManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         await server.WaitAssertion(() =>
         {
             var decals = entities.System<DecalSystem>();
@@ -100,7 +100,7 @@ public sealed class WolfmedGoreTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -163,7 +163,7 @@ public sealed class WolfmedGoreTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -201,7 +201,7 @@ public sealed class WolfmedGoreTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitPost(() => Floor(entities, map, 4));
 
@@ -246,7 +246,7 @@ public sealed class WolfmedGoreTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var prototypes = server.ProtoMan;
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -288,7 +288,7 @@ public sealed class WolfmedGoreTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var clientEntities = Pair.Client.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var spray = EntityUid.Invalid;
 
         await server.WaitPost(() => Floor(entities, map, 4));
@@ -341,7 +341,7 @@ public sealed class WolfmedGoreTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var clientEntities = Pair.Client.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var colour = Color.White;
         var wallSplat = EntityUid.Invalid;
 
@@ -432,7 +432,7 @@ public sealed class WolfmedGoreTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var prototypes = server.ProtoMan;
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitPost(() => Floor(entities, map, 4));
 
@@ -490,7 +490,7 @@ public sealed class WolfmedGoreTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -613,7 +613,7 @@ public sealed class WolfmedGoreTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var clientEntities = Pair.Client.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var body = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
@@ -705,7 +705,7 @@ public sealed class WolfmedGoreTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

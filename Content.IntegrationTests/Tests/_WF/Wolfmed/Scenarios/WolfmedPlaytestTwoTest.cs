@@ -28,7 +28,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// The 120 s fire itself is <see cref="WolfmedFireHelplessnessTest"/>.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedPlaytestTwoTest : GameTest
+public sealed class WolfmedPlaytestTwoTest : WolfmedGameTest
 {
     private const float FaintSeconds = 20f;
     private const float CrawlFloor = 0.35f;
@@ -83,7 +83,7 @@ public sealed class WolfmedPlaytestTwoTest : GameTest
     public async Task FaintCountdownTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var alerts = SEntMan.System<WolfmedConditionAlertSystem>();
         EntityUid a = default, b = default;
@@ -176,7 +176,7 @@ public sealed class WolfmedPlaytestTwoTest : GameTest
         // The pain of burns this deep faints a body; the faint is FaintCountdownTest's, not this test's.
         await OverrideCVar(Side.Server, WolfmedCVars.ConsciousnessPainOut, 0f);
         await OverrideCVar(Side.Server, WolfmedCVars.PainShockThreshold, 100000f);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid body = default, attacker = default, item = default;
         EntityUid leftArm = default, leftHand = default, rightArm = default;
@@ -250,7 +250,7 @@ public sealed class WolfmedPlaytestTwoTest : GameTest
         await Pin();
         await OverrideCVar(Side.Server, WolfmedCVars.ConsciousnessPainOut, 0f);
         await OverrideCVar(Side.Server, WolfmedCVars.PainShockThreshold, 100000f);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid body = default, attacker = default;
         var normal = 0f;

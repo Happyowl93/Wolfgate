@@ -25,7 +25,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedTreatmentAdvice))]
-public sealed class WolfmedTreatmentAdviceTest : GameTest
+public sealed class WolfmedTreatmentAdviceTest : WolfmedGameTest
 {
     /// <summary>Fixed strings the panel and the procedure window build without a prototype behind them.</summary>
     private static readonly string[] Chrome =
@@ -182,7 +182,7 @@ public sealed class WolfmedTreatmentAdviceTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

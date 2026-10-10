@@ -127,29 +127,35 @@
     - type: Preenable
       featherPrototype: AvaliFeather
     # WOLFGATE END
+    # WOLFGATE(Wolfmed) START: D22, OD12: the Blunt gib moves to 1500 and the Heat body ash is removed, as on every other wound host
+    # A wound host's body damage is the sum of its parts, so Blunt 400 came from routine limb damage and gibbed the
+    # avali where a human only bled: a medical bounty that rolled 400 was deleted as it spawned. The living per-part
+    # ceilings also sum past Heat 1500, so a long fire would have ashed the body, which OD12 rules out.
     - type: Destructible # HardLight: Avali now turn into fried chicken when ashed.
       thresholds:
       - trigger:
           !type:DamageTypeTrigger
           damageType: Blunt
-          damage: 400
-        behaviors:
-        - !type:GibBehavior { }
-      - trigger: # Frontier - Removed round remover
-          !type:DamageTypeTrigger
-          damageType: Heat
+          # damage: 400
           damage: 1500
         behaviors:
-        - !type:SpawnEntitiesBehavior
-          spawnInContainer: true
-          spawn:
-            FoodMeatChickenFriedMystery:
-              min: 2
-              max: 5
-        - !type:BurnBodyBehavior # HardLight: Parity with upstream changes to Vox.
-        - !type:PlaySoundBehavior
-          sound:
-            collection: MeatLaserImpact
+        - !type:GibBehavior { }
+      # - trigger: # Frontier - Removed round remover
+      #     !type:DamageTypeTrigger
+      #     damageType: Heat
+      #     damage: 1500
+      #   behaviors:
+      #   - !type:SpawnEntitiesBehavior
+      #     spawnInContainer: true
+      #     spawn:
+      #       FoodMeatChickenFriedMystery:
+      #         min: 2
+      #         max: 5
+      #   - !type:BurnBodyBehavior # HardLight: Parity with upstream changes to Vox.
+      #   - !type:PlaySoundBehavior
+      #     sound:
+      #       collection: MeatLaserImpact
+    # WOLFGATE END
     - type: DamageVisuals
       damageOverlayGroups:
         Brute:
@@ -185,6 +191,23 @@
       stasisEnterSound: /Audio/Effects/teleport_departure.ogg
       stasisExitSound: /Audio/Effects/teleport_arrival.ogg
       # WOLFGATE END
+      # WOLFGATE(Avali) START: stasis mends at a quarter of the stock rate and rests twice as long
+      # It also ends by itself and no longer softens a hit: wolfmed.stasis_max_seconds, wolfmed.stasis_damage_factor.
+      stasisCooldown: 600
+      stasisBluntHealPerSecond: 0.5
+      stasisSlashingHealPerSecond: 0.5
+      stasisPiercingHealPerSecond: 0.5
+      stasisHeatHealPerSecond: 0.5
+      stasisColdHealPerSecond: 0.5
+      # WOLFGATE END
+    # WOLFGATE(Avali) START: flight between z-levels, on the moth's numbers
+    - type: CEZFlyer
+      flightSpeed: 0.35
+      flightMoveSpeedModifier: 0.35
+      hoverStaminaDrain: 4
+    - type: CEControllableFlight
+      startFlightDoAfter: 2
+    # WOLFGATE END
     - type: Carriable  # Hardlight change they can be carry now
 # Chirp!
 

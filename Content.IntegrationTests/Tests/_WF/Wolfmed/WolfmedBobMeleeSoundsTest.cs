@@ -20,7 +20,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// own hit sounds.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedBobMeleeSoundsTest : GameTest
+public sealed class WolfmedBobMeleeSoundsTest : WolfmedGameTest
 {
     private static DamageSpecifier Damage(string type, float amount) =>
         new() { DamageDict = { [new ProtoId<DamageTypePrototype>(type)] = FixedPoint2.New(amount) } };

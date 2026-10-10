@@ -44,7 +44,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// <remarks>Times are asserted as order plus a ±20% band, with every CVar the arithmetic reads pinned.</remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedOrganThresholdSystem))]
-public sealed class WolfmedConsequencesTest : GameTest
+public sealed class WolfmedConsequencesTest : WolfmedGameTest
 {
     private const float Band = 0.2f;
     private const float Scale = 3.4f;
@@ -128,7 +128,7 @@ public sealed class WolfmedConsequencesTest : GameTest
     public async Task OrganCalibrationTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         string[] slots = ["lungs", "heart", "liver", "stomach", "kidneys"];
 
@@ -225,7 +225,7 @@ public sealed class WolfmedConsequencesTest : GameTest
     public async Task LungRouteTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
 
         await Server.WaitAssertion(() =>
@@ -280,7 +280,7 @@ public sealed class WolfmedConsequencesTest : GameTest
         await OverrideCVar(Side.Server, WolfmedCVars.ArrestBlood, 0.30f);
         await OverrideCVar(Side.Server, WolfmedCVars.DefibBlood, 0.25f);
         await OverrideCVar(Side.Server, WolfmedCVars.ArrestCauseMemorySeconds, 300f);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
 
         await Server.WaitAssertion(() =>
@@ -345,7 +345,7 @@ public sealed class WolfmedConsequencesTest : GameTest
     public async Task BrainInjuryInputTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var alerts = SEntMan.System<WolfmedConditionAlertSystem>();
         EntityUid attacker = default, struck = default, glancing = default;
@@ -435,7 +435,7 @@ public sealed class WolfmedConsequencesTest : GameTest
     public async Task IpcCoreInputTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid damaged = default, scratched = default;
 
@@ -495,7 +495,7 @@ public sealed class WolfmedConsequencesTest : GameTest
     public async Task ElectricalHeartBandTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
 
         await Server.WaitAssertion(() =>
@@ -521,7 +521,7 @@ public sealed class WolfmedConsequencesTest : GameTest
     public async Task CrushInternalBleedBandTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
 
         await Server.WaitAssertion(() =>
@@ -557,7 +557,7 @@ public sealed class WolfmedConsequencesTest : GameTest
     public async Task StumpTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
 
         await Server.WaitAssertion(() =>
@@ -638,7 +638,7 @@ public sealed class WolfmedConsequencesTest : GameTest
     public async Task BarotraumaPartTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateVacuumTestMap();
         var s = new WolfmedScenario(SEntMan);
         var hits = new Dictionary<EntityUid, int>();
         var hitSystem = SEntMan.System<WolfmedPartHitSystem>();
@@ -693,7 +693,7 @@ public sealed class WolfmedConsequencesTest : GameTest
     public async Task BlastHeadTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var explosion = SEntMan.System<WolfmedExplosionSystem>();
         EntityUid attacker = default, control = default;
@@ -755,7 +755,7 @@ public sealed class WolfmedConsequencesTest : GameTest
     public async Task HeartBandTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid healthy = default, weak = default;
 
@@ -804,7 +804,7 @@ public sealed class WolfmedConsequencesTest : GameTest
     public async Task IpcTorsoLastsAsLongAsAHumanChestTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
 
         await Server.WaitAssertion(() =>

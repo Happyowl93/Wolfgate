@@ -7,6 +7,7 @@ using System.Numerics;
 using Content.Client.Light;
 using Content.Shared._CE.ZLevels.Core.Components;
 using Content.Shared._CE.ZLevels.Core.EntitySystems;
+using Content.Shared._WF.Planets; // WOLFGATE(Planets)
 using Content.Shared.Maps;
 using Robust.Client.Graphics;
 using Robust.Shared.Enums;
@@ -76,6 +77,13 @@ public sealed partial class CEZLevelShadowOverlay : Overlay
         var gap = 1f;
         foreach (var aboveMap in _zLevel.GetAllMapsAbove((args.MapUid, zComp)))
         {
+            // WOLFGATE(Planets) START: orbit is above the atmosphere, not a storey up.
+            // A hull parked there shadowed the planet under it as a black patch at every zoom the projection happened
+            // to land on.
+            if (_entManager.HasComponent<WFOrbitLayerComponent>(aboveMap))
+                break;
+            // WOLFGATE END
+
             _shadowMapGaps[aboveMap] = gap;
             CollectShadowGrids(aboveMap, gap, args.WorldBounds, requireAirborne: false);
             gap += 1f;

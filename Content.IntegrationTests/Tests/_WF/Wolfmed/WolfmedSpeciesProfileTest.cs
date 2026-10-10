@@ -51,7 +51,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WoundDamageProjectionSystem))]
-public sealed class WolfmedSpeciesProfileTest : GameTest
+public sealed class WolfmedSpeciesProfileTest : WolfmedGameTest
 {
     /// <summary>
     /// PLAN5 §6.2 T-P5-1. The IPC chassis profile end to end: routing creates the mechanical wound, the wound
@@ -64,7 +64,7 @@ public sealed class WolfmedSpeciesProfileTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -122,7 +122,7 @@ public sealed class WolfmedSpeciesProfileTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -202,7 +202,7 @@ public sealed class WolfmedSpeciesProfileTest : GameTest
         var bleedRateBefore = server.CfgMan.GetCVar(Content.Shared._WF.Wolfmed.CCVar.WolfmedCVars.BleedRate);
         await server.WaitPost(() => server.CfgMan.SetCVar(Content.Shared._WF.Wolfmed.CCVar.WolfmedCVars.BleedRate, 1f));
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -282,7 +282,7 @@ public sealed class WolfmedSpeciesProfileTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -334,7 +334,7 @@ public sealed class WolfmedSpeciesProfileTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var slashed = EntityUid.Invalid;
         var burned = EntityUid.Invalid;
 
@@ -400,7 +400,7 @@ public sealed class WolfmedSpeciesProfileTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -464,7 +464,7 @@ public sealed class WolfmedSpeciesProfileTest : GameTest
         var bleedRateBefore = server.CfgMan.GetCVar(Content.Shared._WF.Wolfmed.CCVar.WolfmedCVars.BleedRate);
         await server.WaitPost(() => server.CfgMan.SetCVar(Content.Shared._WF.Wolfmed.CCVar.WolfmedCVars.BleedRate, 1f));
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -510,7 +510,7 @@ public sealed class WolfmedSpeciesProfileTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var body = EntityUid.Invalid;
         var arm = EntityUid.Invalid;
 

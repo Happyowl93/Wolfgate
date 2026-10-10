@@ -30,7 +30,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(AutodocSystem))]
-public sealed class PodAntibioticsTest : GameTest
+public sealed class PodAntibioticsTest : WolfmedGameTest
 {
     public override PoolSettings PoolSettings => PsDisconnected;
 
@@ -68,7 +68,7 @@ public sealed class PodAntibioticsTest : GameTest
     [TestCase(false)]
     public async Task PodDosesAnInfectedOccupantOutOfItsReservoirTest(bool loaded)
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid body = default, wound = default;
         var before = 0f;

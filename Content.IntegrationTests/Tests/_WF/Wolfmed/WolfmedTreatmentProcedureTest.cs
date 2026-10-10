@@ -17,7 +17,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedTreatmentProcedurePrototype))]
-public sealed class WolfmedTreatmentProcedureTest : GameTest
+public sealed class WolfmedTreatmentProcedureTest : WolfmedGameTest
 {
     /// <summary>
     /// Every wound prototype the game ships has a procedure. It iterates the prototypes rather than a list,

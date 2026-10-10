@@ -24,7 +24,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedLifeSystem))]
-public sealed class WolfmedArrestLooksDeadTest : GameTest
+public sealed class WolfmedArrestLooksDeadTest : WolfmedGameTest
 {
     [TestPrototypes]
     private const string Prototypes = @"
@@ -49,7 +49,7 @@ public sealed class WolfmedArrestLooksDeadTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -78,7 +78,7 @@ public sealed class WolfmedArrestLooksDeadTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid breathing = default;
         EntityUid arrested = default;
 
@@ -122,7 +122,7 @@ public sealed class WolfmedArrestLooksDeadTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var locale = server.ResolveDependency<ILocalizationManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

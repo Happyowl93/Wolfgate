@@ -30,7 +30,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(AutodocSystem))]
-public sealed class WolfmedAutodocFaintTest : GameTest
+public sealed class WolfmedAutodocFaintTest : WolfmedGameTest
 {
     [TestPrototypes]
     private const string Prototypes = @"
@@ -92,7 +92,7 @@ public sealed class WolfmedAutodocFaintTest : GameTest
     public async Task FaintedOccupantIsAnaesthetisedTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid body = default;
 
@@ -141,7 +141,7 @@ public sealed class WolfmedAutodocFaintTest : GameTest
     public async Task FaintDoesNotSoundTheCriticalAlarmTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         EntityUid body = default;
         await Server.WaitAssertion(() =>
@@ -175,7 +175,7 @@ public sealed class WolfmedAutodocFaintTest : GameTest
     public async Task PodRefusesRotAndHeartlessBodiesTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {

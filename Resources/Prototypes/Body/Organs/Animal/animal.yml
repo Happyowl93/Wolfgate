@@ -68,7 +68,8 @@
 
 - type: entity
   id: OrganAnimalStomach
-  parent: BaseAnimalOrgan
+  # WOLFGATE(Wolfmed): Wolfmed stomach data, so the organ can be hurt, scanned and treated
+  parent: [BaseAnimalOrgan, WFWolfmedOrganStomach]
   name: stomach
   categories: [ HideSpawnMenu ]
   components:
@@ -112,7 +113,8 @@
 
 - type: entity
   id: OrganAnimalLiver
-  parent: BaseAnimalOrgan
+  # WOLFGATE(Wolfmed): Wolfmed liver data, so the organ can be hurt, scanned and treated
+  parent: [BaseAnimalOrgan, WFWolfmedOrganLiver]
   name: liver
   categories: [ HideSpawnMenu ]
   components:
@@ -166,7 +168,8 @@
 
 - type: entity
   id: OrganAnimalKidneys
-  parent: BaseAnimalOrgan
+  # WOLFGATE(Wolfmed): Wolfmed kidneys data, so the organ can be hurt, scanned and treated
+  parent: [BaseAnimalOrgan, WFWolfmedOrganKidneys]
   name: kidneys
   categories: [ HideSpawnMenu ]
   components:

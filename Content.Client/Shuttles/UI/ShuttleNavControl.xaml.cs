@@ -147,6 +147,19 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
 
     public void SetMatrix(EntityCoordinates? coordinates, Angle? angle)
     {
+        _wfRadarOrigin = coordinates; // WOLFGATE(Planets): retain the moving origin while panned.
+        // WOLFGATE(Planets) START: a map-pinned radar must follow travel to another map.
+        // Otherwise panning in space permanently hides orbit terrain (and contacts) by retaining the old map.
+        if (_wasPanned && coordinates is { } next && _coordinates is { } previous &&
+            EntManager.TryGetComponent<TransformComponent>(next.EntityId, out var nextTransform) &&
+            (!EntManager.TryGetComponent<TransformComponent>(previous.EntityId, out var previousTransform) ||
+             nextTransform.MapUid != previousTransform.MapUid))
+        {
+            _wasPanned = false;
+            Offset = TargetOffset = Vector2.Zero;
+        }
+        // WOLFGATE END
+
         if (_wasPanned) // Mono hack
             return;
 
@@ -285,6 +298,7 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
         _radarModeButtons.AddChild(_radarResetButton);
 
         parent.AddChild(_radarModeButtons);
+        AddWfTerrainButton(parent); // WOLFGATE(Planets): terrain toggle overlays the radar, not the settings column.
         LayoutContainer.SetAnchorAndMarginPreset(_radarModeButtons, LayoutContainer.LayoutPreset.BottomLeft, margin: 10);
     }
 
@@ -559,6 +573,11 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
 
         DrawBacking(handle);
 
+        // WOLFGATE(Planets) START: a grid's map can change between BUI updates (FTL / planet layer travel).
+        if (_wasPanned && _wfRadarOrigin is { } radarOrigin)
+            SetMatrix(radarOrigin, _rotation);
+        // WOLFGATE END
+
         // No data
         if (_coordinates == null || _rotation == null)
         {
@@ -596,6 +615,7 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
         var worldToView = worldToShuttle * shuttleToView;
 
         DrawStarSystem(handle, worldToShuttle, shuttleToView, xform.MapUid); // Far Horizons
+        DrawWfTerrain(handle, worldToView, xform.MapUid); // WOLFGATE(Planets): cached planetary terrain beneath radar contacts.
 
         _grids.Clear();
         _mapManager.FindGridsIntersecting(xform.MapID, new Box2(mapPos.Position - MaxRadarRangeVector, mapPos.Position + MaxRadarRangeVector), ref _grids, approx: true, includeMap: false);
@@ -622,6 +642,8 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
         // Draw shields
         DrawShields(handle, xform, worldToShuttle);
         DrawWolfgateShields(handle, xform, worldToView); // WOLFGATE(ShipShields): hull contours and directional coverage on all radar views.
+        DrawCrewGroups(handle, xform, worldToView); // WOLFGATE(NpcCrew): Admin tags and battlegroup lines for NPC-crewed ships.
+        DrawEncounterMarkers(handle, xform, worldToView); // WOLFGATE(Encounters): Sector markers for visible encounters.
 
         // Frontier Corvax: north line drawing
         DrawNorthLine(handle, worldRot);

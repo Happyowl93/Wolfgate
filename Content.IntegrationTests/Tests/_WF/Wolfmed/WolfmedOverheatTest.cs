@@ -18,7 +18,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedOverheatSystem))]
-public sealed class WolfmedOverheatTest : GameTest
+public sealed class WolfmedOverheatTest : WolfmedGameTest
 {
     [Test]
     public async Task OverheatBurnsInsteadOfKillingTest()
@@ -26,7 +26,7 @@ public sealed class WolfmedOverheatTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -56,7 +56,7 @@ public sealed class WolfmedOverheatTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

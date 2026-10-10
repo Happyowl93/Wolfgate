@@ -87,7 +87,8 @@
 
 - type: entity
   id: OrganProtogenEyes
-  parent: BaseProtogenOrgan
+  # WOLFGATE(Wolfmed): Wolfmed eyes data, so the organ can be hurt, scanned and treated
+  parent: [BaseProtogenOrgan, WFWolfmedOrganEyes]
   name: eyes
   description: "Emits LED lights to resemble eyes."
   components:
@@ -199,7 +200,8 @@
 
 - type: entity
   id: OrganProtogenStomach
-  parent: BaseProtogenOrgan
+  # WOLFGATE(Wolfmed): Wolfmed stomach data, so the organ can be hurt, scanned and treated
+  parent: [BaseProtogenOrgan, WFWolfmedOrganStomach]
   name: stomach
   description: "Gross. This is hard to stomach."
   components:
@@ -233,7 +235,8 @@
 
 - type: entity
   id: OrganProtogenLiver
-  parent: BaseProtogenOrgan
+  # WOLFGATE(Wolfmed): Wolfmed liver data, so the organ can be hurt, scanned and treated
+  parent: [BaseProtogenOrgan, WFWolfmedOrganLiver]
   name: liver
   description: "Pairing suggestion: fermented RAM sticks and CPU drives."
   components:
@@ -254,7 +257,8 @@
 
 - type: entity
   id: OrganProtogenKidneys
-  parent: BaseProtogenOrgan
+  # WOLFGATE(Wolfmed): Wolfmed kidneys data, so the organ can be hurt, scanned and treated
+  parent: [BaseProtogenOrgan, WFWolfmedOrganKidneys]
   name: kidneys
   description: "Filters toxins and computer viruses from the bloodstream."
   components:

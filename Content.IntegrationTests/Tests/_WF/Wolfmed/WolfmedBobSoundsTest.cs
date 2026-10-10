@@ -35,7 +35,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedBodySoundSystem))]
-public sealed class WolfmedBobSoundsTest : GameTest
+public sealed class WolfmedBobSoundsTest : WolfmedGameTest
 {
     private const string GaspDir = "/Audio/_WF/Wolfmed/Gasp/";
 
@@ -94,7 +94,7 @@ public sealed class WolfmedBobSoundsTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -144,7 +144,7 @@ public sealed class WolfmedBobSoundsTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -204,7 +204,7 @@ public sealed class WolfmedBobSoundsTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -255,7 +255,7 @@ public sealed class WolfmedBobSoundsTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid light = default, heavy = default, ipc = default;
         var start = TimeSpan.Zero;
 

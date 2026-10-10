@@ -4,6 +4,17 @@ Ship shields use a symmetric oval fitted around the occupied hull, with a five-t
 
 The upstream ship shield emitter keeps its power, damage, recharge and projectile rules. Hitscan beams intersect the same perimeter and shunt sectors, charge emitter capacity, and trigger impact effects. Ship-fired projectiles sweep their full travel path each tick, including slow mining pulses. Collision-triggered ship warheads are absorbed before their explosion trigger runs, regardless of projectile collision subscriber order. Absorption also clears pending timers and proximity triggers before deletion. Ordinary hull contacts still detonate normally. Absorbed EMP warheads retain their area EMP pulse and capped EMP capacity cost without activating explosive or deployment payloads. Flak fragments, mine-laying shells and deployed naval mines are intercepted; deployed payloads inherit their launcher's grid so they pass through their own shields. Confirmed shield ray hits absorb the round immediately instead of waiting for a later thin-edge physics contact; the nearest obstacle and existing collision filters still apply. Shots from the protected ship pass outward. Emitter ownership and deleted-field handles are reconciled before each update; actual field transitions are logged for diagnosis. `ShipShieldsSystem.Wolfgate.cs` supplies hull fixtures and visual updates; `WFShipShieldGeometry` builds the shared contours. Collision edges retain a small physical radius to catch slower projectiles between physics steps.
 
+Confirmed damaging projectile and hitscan absorption raises `WFShipShieldAttackedEvent` with the protected grid,
+attacking grid, shooter and weapon. NPC escort crews use it to retaliate even when shields prevent all hull damage.
+Attribution prefers the launch grid, then the weapon and shooter grids. Collision probes, harmless shots, shield
+gaps and shots leaving the protected ship do not report attacks; a projectile cannot report the same absorption twice.
+`WFShipShieldInterceptAttemptEvent` allows crew friendly-fire rules to pass protected projectiles and beams
+through before clipping or absorption, preserving capacity and suppressing impact effects. Launched crew rounds
+retain their protection when the cannon changes hands. Explicit Attack orders and retaliation still penetrate
+normal faction protection after leaving an escort formation.
+
+FTL spool-up immediately lowers shields on the departing ship and docked ships travelling with it. Deployment remains locked through travel, arrival and the full jump cooldown, including manual and admin deployment attempts. Normal power, recharge and manual-switch rules resume when FTL ends; the lockout does not reset shield damage or recharge progress. The helm and generator Shields panels show the FTL lockout while it applies.
+
 Hull collisions spend the impacted ship's remaining shield capacity before damaging its hull. Absorption uses the existing collision energy-to-damage conversion and current local shunt strength; unpowered sectors and exhausted or offline fields let impact damage through. Each ship pays for its own protection, and excess energy reaches the hull when capacity runs out. The shield never becomes a solid barrier: normal hull contact, slowdown and occupant inertia remain. Absorbed collisions trigger the same localized, damage-scaled shield shimmer and rate-limited impact sound as weapons. Collision depletion immediately drops the field and starts its normal recharge/overload recovery.
 
 Healthy shields use the generator's configured shield colour for their faint edge and readable idle hexes, including radar outlines. Damage blends that colour through amber to red; local impact heat reddens both the surface and hex lattice while untouched areas retain the overall health colour. The helm integrity bar remains a standard health indicator. The field becomes more visible as health drops, and smooth traveling shimmer crests brighten it briefly. Hits reveal the surface and nearby hexes with a bright white flash confined to the impact zone. Traveling ripples brighten the shield in its health colour, followed by a broader red wake. Impact brightness and size scale with absorbed damage relative to full generator capacity, including explosive/EMP damage, hitscan modifiers and shunting. Small hits create compact dim patches and shorter ripples; hits consuming at least 5% of capacity reach the full visual response. The lower of the overload and power limits determines capacity, so stronger generators react less to the same round. Full-strength ripples travel for four seconds at 22 tiles per second; sustained fire leaves a brighter red patch that cools gradually over a sixteen-second lifetime. Untouched healthy surfaces remain faint without hiding the idle hex lattice. Surface and hex opacity are sampled separately without rebuilding meshes. Each vertex blends four cached samples to prevent square impact-lighting patches.
@@ -32,8 +43,10 @@ The impact bank is generated by `Tools/_WF/ShipShields/synthesize_impacts.py` us
 ### Server
 
 - [`Content.Server/_WF/ShipShields/ProjectileGrenadeSystem.ShipShields.cs`](ProjectileGrenadeSystem.ShipShields.cs)
+- [`Content.Server/_WF/ShipShields/ShipShieldsSystem.Attacks.cs`](ShipShieldsSystem.Attacks.cs)
 - [`Content.Server/_WF/ShipShields/ShipShieldsSystem.Audio.cs`](ShipShieldsSystem.Audio.cs)
 - [`Content.Server/_WF/ShipShields/ShipShieldsSystem.Collisions.cs`](ShipShieldsSystem.Collisions.cs)
+- [`Content.Server/_WF/ShipShields/ShipShieldsSystem.Ftl.cs`](ShipShieldsSystem.Ftl.cs)
 - [`Content.Server/_WF/ShipShields/ShipShieldsSystem.Hitscan.cs`](ShipShieldsSystem.Hitscan.cs)
 - [`Content.Server/_WF/ShipShields/ShipShieldsSystem.Lifecycle.cs`](ShipShieldsSystem.Lifecycle.cs)
 - [`Content.Server/_WF/ShipShields/ShipShieldsSystem.Recovery.cs`](ShipShieldsSystem.Recovery.cs)
@@ -44,7 +57,9 @@ The impact bank is generated by `Tools/_WF/ShipShields/synthesize_impacts.py` us
 - [`Content.Server/_WF/ShipShields/ShipShieldsSystem.Wolfgate.cs`](ShipShieldsSystem.Wolfgate.cs)
 - [`Content.Server/_WF/ShipShields/ShuttleConsoleSystem.Shunting.cs`](ShuttleConsoleSystem.Shunting.cs)
 - [`Content.Server/_WF/ShipShields/ShuttleSystem.Collisions.cs`](ShuttleSystem.Collisions.cs)
+- [`Content.Server/_WF/ShipShields/ShuttleSystem.FtlShields.cs`](ShuttleSystem.FtlShields.cs)
 - [`Content.Server/_WF/ShipShields/TriggerSystem.ShipShields.cs`](TriggerSystem.ShipShields.cs)
+- [`Content.Server/_WF/ShipShields/WFShipShieldAttackedEvent.cs`](WFShipShieldAttackedEvent.cs)
 - [`Content.Server/_WF/ShipShields/WFShipShieldHitscanDamageSystem.cs`](WFShipShieldHitscanDamageSystem.cs)
 - [`Content.Server/_WF/ShipShields/WFShipShieldImpactAudioComponent.cs`](WFShipShieldImpactAudioComponent.cs)
 - [`Content.Server/_WF/ShipShields/WFShipShieldProjectileRayHitEvent.cs`](WFShipShieldProjectileRayHitEvent.cs)
@@ -59,6 +74,7 @@ The impact bank is generated by `Tools/_WF/ShipShields/synthesize_impacts.py` us
 - [`Content.Shared/_WF/ShipShields/WFShipShieldHitscanEvents.cs`](../../../Content.Shared/_WF/ShipShields/WFShipShieldHitscanEvents.cs)
 - [`Content.Shared/_WF/ShipShields/WFShipShieldHitscanMath.cs`](../../../Content.Shared/_WF/ShipShields/WFShipShieldHitscanMath.cs)
 - [`Content.Shared/_WF/ShipShields/WFShipShieldHitscanSystem.cs`](../../../Content.Shared/_WF/ShipShields/WFShipShieldHitscanSystem.cs)
+- [`Content.Shared/_WF/ShipShields/WFShipShieldInterceptAttemptEvent.cs`](../../../Content.Shared/_WF/ShipShields/WFShipShieldInterceptAttemptEvent.cs)
 - [`Content.Shared/_WF/ShipShields/WFShipShieldMesh.cs`](../../../Content.Shared/_WF/ShipShields/WFShipShieldMesh.cs)
 - [`Content.Shared/_WF/ShipShields/WFShipShieldRadarGeometry.cs`](../../../Content.Shared/_WF/ShipShields/WFShipShieldRadarGeometry.cs)
 - [`Content.Shared/_WF/ShipShields/WFShipShieldShuntComponent.cs`](../../../Content.Shared/_WF/ShipShields/WFShipShieldShuntComponent.cs)
@@ -81,9 +97,11 @@ The impact bank is generated by `Tools/_WF/ShipShields/synthesize_impacts.py` us
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldAttackTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldAttackTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldCollisionTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldCollisionTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldControlsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldControlsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldFixturesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldFixturesTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldFtlTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldFtlTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldGeneratorControlTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldGeneratorControlTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldGeneratorStatsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldGeneratorStatsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldHitscanTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipShields/WFShipShieldHitscanTest.cs)
@@ -160,6 +178,7 @@ The impact bank is generated by `Tools/_WF/ShipShields/synthesize_impacts.py` us
   - unpowered sectors let shots pass without changing their shooter
   - apply damage only after a projectile contacts the perimeter
   - remove only the field owned by this emitter
+  - block normal and administrative shield deployment throughout FTL
   - discard stale grid fields and reserve active fields for their owner
   - replace oval and interior blocker with the padded hull perimeter
   - dissipate visually after protection stops immediately
@@ -175,6 +194,7 @@ The impact bank is generated by `Tools/_WF/ShipShields/synthesize_impacts.py` us
 - [`Content.Server/Shuttles/Systems/ShuttleConsoleSystem.cs`](../../Shuttles/Systems/ShuttleConsoleSystem.cs)
   - include directional shield settings in the helm state
   - refresh open helm shield status on visible changes
+- [`Content.Server/Shuttles/Systems/ShuttleSystem.FasterThanLight.cs`](../../Shuttles/Systems/ShuttleSystem.FasterThanLight.cs): drop departing shield fields immediately after successful spoolup.
 - [`Content.Server/Shuttles/Systems/ShuttleSystem.Impact.cs`](../../Shuttles/Systems/ShuttleSystem.Impact.cs): debit each hull shield for absorbed collision damage
 - [`Content.Shared/_Mono/Weapons/Hitscan/Systems/HitscanDiffractSystem.cs`](../../../Content.Shared/_Mono/Weapons/Hitscan/Systems/HitscanDiffractSystem.cs): an intervening shield stops beams before they can split behind it
 - [`Content.Shared/_Mono/Weapons/Hitscan/Systems/HitscanMultiRaycastSystem.cs`](../../../Content.Shared/_Mono/Weapons/Hitscan/Systems/HitscanMultiRaycastSystem.cs)

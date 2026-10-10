@@ -720,7 +720,9 @@
           Bloodloss: 1
       bloodlossHealDamage:
         types:
-          Bloodloss: -0.25
+          # WOLFGATE(Wolfmed): blood loss damage heals at every other species' rate; at a quarter of it the reading outlasted the bleed by half an hour
+          # Bloodloss: -0.25
+          Bloodloss: -1
     - type: Flammable
       damage:
         types:

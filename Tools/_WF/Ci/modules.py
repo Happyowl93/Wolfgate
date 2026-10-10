@@ -72,10 +72,10 @@ AREAS = (
 AREA_ORDER = [name for _, name in AREAS] + ["Other"]
 
 # Never scanned for markers: they describe the markers rather than carry them.
-NOT_SCANNED = {"AGENTS.md", "CLAUDE.md"}
+NOT_SCANNED = {"AGENTS.md", "CLAUDE.md", "Wolfgate Guidelines.md"}
 # Changed files the pull request check ignores: generated files and the agent guidelines.
 PR_EXEMPT_PREFIXES = ("Resources/Changelog/", "Content.Server.Database/Migrations/")
-PR_EXEMPT_FILES = {"AGENTS.md", "CLAUDE.md"}
+PR_EXEMPT_FILES = {"AGENTS.md", "CLAUDE.md", "Wolfgate Guidelines.md"}
 # Files that can't carry a marker (binary, JSON, rich text) and maps, which the mapper rewrites.
 UNMARKABLE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".ogg", ".wav", ".mp3", ".ttf", ".otf",
                        ".json", ".txt"}

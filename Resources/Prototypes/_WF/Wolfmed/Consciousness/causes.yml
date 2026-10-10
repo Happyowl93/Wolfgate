@@ -78,6 +78,7 @@
     Sedation: wolfmed-cause-hypoxia-source-sedation
     Toxin: wolfmed-cause-hypoxia-source-toxin # M5
     Heat: wolfmed-cause-hypoxia-source-heat
+    Vacuum: wolfmed-cause-hypoxia-source-vacuum
 
 - type: wolfmedConsciousnessCause
   id: Sedation

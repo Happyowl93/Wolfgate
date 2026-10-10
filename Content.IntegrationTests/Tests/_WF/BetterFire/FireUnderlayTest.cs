@@ -74,7 +74,7 @@ public sealed class FireUnderlayTest
             return (layer.Visible, sprites.LayerGetRsiState((uid, sprite), index).Name);
         }
 
-        async Task SetFire(bool onFire, float stacks)
+        async Task SetFire(bool onFire, int stacks)
         {
             await client.WaitPost(() =>
             {

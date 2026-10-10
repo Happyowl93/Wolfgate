@@ -36,7 +36,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedDoAfterInterruptSystem))]
-public sealed class WolfmedLeftoversTest : GameTest
+public sealed class WolfmedLeftoversTest : WolfmedGameTest
 {
     [TestPrototypes]
     private const string Prototypes = @"
@@ -102,7 +102,7 @@ public sealed class WolfmedLeftoversTest : GameTest
     public async Task HitInterruptsSelfTreatmentTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid patient = default, surgeon = default, attacker = default;
 
         await Server.WaitPost(() =>
@@ -160,7 +160,7 @@ public sealed class WolfmedLeftoversTest : GameTest
     public async Task PodRepairsACoreTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var life = SEntMan.System<WolfmedLifeSystem>();
         var mobState = SEntMan.System<MobStateSystem>();
         EntityUid ipc = default, synth = default;
@@ -252,7 +252,7 @@ public sealed class WolfmedLeftoversTest : GameTest
     public async Task PodClampProgressTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default, arm = default, wound = default;
         Entity<AutodocComponent> pod = default;
 
@@ -320,7 +320,7 @@ public sealed class WolfmedLeftoversTest : GameTest
     public async Task SynthTakesNoPoisonTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid synth = default, human = default;
 

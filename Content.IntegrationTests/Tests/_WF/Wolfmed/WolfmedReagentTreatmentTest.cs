@@ -33,7 +33,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(SuppressPain))]
-public sealed class WolfmedReagentTreatmentTest : GameTest
+public sealed class WolfmedReagentTreatmentTest : WolfmedGameTest
 {
     // WOLFGATE: a Shitmed body graph like every other Wolfmed fixture. The pain fixture needs `- type: MobState`
     // and an explicit `- type: StatusEffects` allow-list (P2-D24); the stamina fixture needs `- type: Stamina`,
@@ -96,7 +96,7 @@ public sealed class WolfmedReagentTreatmentTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -145,7 +145,7 @@ public sealed class WolfmedReagentTreatmentTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -185,7 +185,7 @@ public sealed class WolfmedReagentTreatmentTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -220,7 +220,7 @@ public sealed class WolfmedReagentTreatmentTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -297,7 +297,7 @@ public sealed class WolfmedReagentTreatmentTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -349,7 +349,7 @@ public sealed class WolfmedReagentTreatmentTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

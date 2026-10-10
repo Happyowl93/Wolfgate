@@ -47,6 +47,8 @@
     - WFSurgeryHealKidneys
     - WFSurgeryRepairBrain
     - WFSurgeryHealBrain
+    - WFSurgeryRepairSlimeCore
+    - WFSurgeryHealSlimeCore
     - WFSurgeryHealEyes
     - WFSurgeryRepairCore
     - WFSurgeryRepairSynthCore

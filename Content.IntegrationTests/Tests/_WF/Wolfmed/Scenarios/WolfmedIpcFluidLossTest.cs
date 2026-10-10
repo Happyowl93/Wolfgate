@@ -32,7 +32,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedConsciousnessSystem))]
-public sealed class WolfmedIpcFluidLossTest : GameTest
+public sealed class WolfmedIpcFluidLossTest : WolfmedGameTest
 {
     private const float Band = 0.2f;
     private const int Hits = 7;
@@ -74,7 +74,7 @@ public sealed class WolfmedIpcFluidLossTest : GameTest
         var bodies = new EntityUid[protos.Length];
         for (var i = 0; i < bodies.Length; i++)
         {
-            var map = await Pair.CreateTestMap();
+            var map = await CreateTestMap();
             var index = i;
             await Server.WaitPost(() =>
             {

@@ -18,7 +18,7 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 
 [TestFixture]
-public sealed class WolfmedHealingTargetTest : GameTest
+public sealed class WolfmedHealingTargetTest : WolfmedGameTest
 {
     public override PoolSettings PoolSettings => PsDisconnected;
 
@@ -34,7 +34,7 @@ public sealed class WolfmedHealingTargetTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid left = default, right = default;
 
         await server.WaitAssertion(() =>

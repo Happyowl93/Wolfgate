@@ -65,6 +65,11 @@ wolfmed-dormant-route-circulation = too little blood for your brain
 wolfmed-dormant-route-sepsis = sepsis
 wolfmed-dormant-route-sedation = an overdose is slowing your breathing
 wolfmed-dormant-route-tissueloss = your brain is starving of oxygen
+wolfmed-dormant-route-vacuum = you are out in vacuum with no suit
+
+## Space exposure
+
+wolfmed-vacuum-exposed = Vacuum! Without a pressure suit you will black out in seconds.
 
 ## Playtest 4, SEPSIS
 

@@ -24,7 +24,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedTourniquetSlipSystem))]
-public sealed class WolfmedMakeshiftTourniquetTest : GameTest
+public sealed class WolfmedMakeshiftTourniquetTest : WolfmedGameTest
 {
     private const string Makeshift = "WFWolfmedMakeshiftTourniquet";
 
@@ -32,7 +32,7 @@ public sealed class WolfmedMakeshiftTourniquetTest : GameTest
     [Test]
     public async Task JumpsuitTearsIntoAMakeshiftTourniquetTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid user = default, held = default, worn = default;
 
         await Server.WaitPost(() =>
@@ -76,7 +76,7 @@ public sealed class WolfmedMakeshiftTourniquetTest : GameTest
     [Test]
     public async Task MakeshiftTourniquetStopsTheBleedButSlipsOnAHardHitTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid patient = default, medic = default, attacker = default, strap = default;
         EntityUid right = default, left = default;
@@ -164,7 +164,7 @@ public sealed class WolfmedMakeshiftTourniquetTest : GameTest
     [Test]
     public async Task SlippedStrapReleasesTheFootTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid patient = default, attacker = default;
 
@@ -206,7 +206,7 @@ public sealed class WolfmedMakeshiftTourniquetTest : GameTest
     [Test]
     public async Task BleedStartingOnAnOldWoundUnderAStrapIsTiedOffTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid patient = default, attacker = default;
 

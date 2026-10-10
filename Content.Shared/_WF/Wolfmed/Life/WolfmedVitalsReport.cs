@@ -406,10 +406,14 @@ public static class WolfmedVitalsText
             return null;
 
         var aids = new List<string>();
+        // The vacuum first, out of the routes' order: nothing else on the list holds until the patient is out of it.
+        if ((report.Routes & WolfmedRoutes.Vacuum) != 0)
+            aids.Add(Aid(WolfmedRoutes.Vacuum, report.Mechanical));
+
         var refill = report.UnitsToLine > 0f && report.Blood >= 0f;
-        for (var bit = 0; bit < 16; bit++)
+        for (var bit = 0; bit < 32; bit++)
         {
-            var route = (WolfmedRoutes) (1 << bit);
+            var route = (WolfmedRoutes) (1u << bit);
             // Playtest 4 (SEPSIS): the organ-damage aid says antibiotics too, so the plain sepsis aid gives way to it.
             if (route == WolfmedRoutes.Sepsis && (report.Routes & WolfmedRoutes.SepsisOrgans) != 0)
                 continue;

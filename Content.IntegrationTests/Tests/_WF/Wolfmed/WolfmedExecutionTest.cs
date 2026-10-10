@@ -55,7 +55,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedExecutionSystem))]
-public sealed class WolfmedExecutionTest : GameTest
+public sealed class WolfmedExecutionTest : WolfmedGameTest
 {
     private const string Artery = "WFWolfmedArterialBleedWound";
     private const string Gunshot = "WFWolfmedGunshotWound";
@@ -147,7 +147,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task MeasureTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var execution = SEntMan.System<WolfmedExecutionSystem>();
         var weapons = new Dictionary<string, EntityUid>();
         var wielders = new Dictionary<string, EntityUid>();
@@ -342,7 +342,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task BluntTiersTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var mobState = SEntMan.System<MobStateSystem>();
         var body = SEntMan.System<SharedBodySystem>();
@@ -441,7 +441,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task BluntDoAfterTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var execution = SEntMan.System<WolfmedExecutionSystem>();
         var mobState = SEntMan.System<MobStateSystem>();
@@ -549,7 +549,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task BluntOnYourselfTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var execution = SEntMan.System<WolfmedExecutionSystem>();
         var fractures = SEntMan.System<WoundFractureSystem>();
@@ -604,7 +604,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task SuicideCommandElsewhereTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var mobState = SEntMan.System<MobStateSystem>();
         await Server.WaitPost(() => s.SetAir(map.MapUid, true));
@@ -684,7 +684,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task GunExecutionTiersTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var mobState = SEntMan.System<MobStateSystem>();
         var body = SEntMan.System<SharedBodySystem>();
@@ -755,7 +755,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task EnergyHeavyAshesTheHeadTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         await Server.WaitPost(() => s.SetAir(map.MapUid, true));
 
@@ -797,7 +797,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task BladeTiersTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var mobState = SEntMan.System<MobStateSystem>();
         var body = SEntMan.System<SharedBodySystem>();
@@ -850,7 +850,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task DownedIsExecutableTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var hands = SEntMan.System<SharedHandsSystem>();
         EntityUid downed = default, standing = default, knifer = default, gunner = default, batter = default;
@@ -899,7 +899,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task SpeciesTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var execution = SEntMan.System<WolfmedExecutionSystem>();
         var mobState = SEntMan.System<MobStateSystem>();
@@ -976,7 +976,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task OnYourselfKillsTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         await Server.WaitPost(() => s.SetAir(map.MapUid, true));
 
@@ -1029,7 +1029,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task BladeOnYourselfGhostsTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var execution = SEntMan.System<WolfmedExecutionSystem>();
         var mobState = SEntMan.System<MobStateSystem>();
@@ -1103,7 +1103,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task ConfirmationTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var execution = SEntMan.System<WolfmedExecutionSystem>();
         var hands = SEntMan.System<SharedHandsSystem>();
@@ -1247,7 +1247,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task NonLethalIsRefusedTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var execution = SEntMan.System<WolfmedExecutionSystem>();
         await Server.WaitPost(() => s.SetAir(map.MapUid, true));
@@ -1294,7 +1294,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task GunOnYourselfGhostsTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var execution = SEntMan.System<WolfmedExecutionSystem>();
         await Server.WaitPost(() => s.SetAir(map.MapUid, true));
@@ -1341,7 +1341,7 @@ public sealed class WolfmedExecutionTest : GameTest
     public async Task SuicideCommandWeaponTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var suicide = SEntMan.System<SuicideSystem>();
         var bodies = SEntMan.System<SharedBodySystem>();

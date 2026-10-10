@@ -1607,6 +1607,7 @@
         visualType: Medium
         messages: [ "mannitol-effect-enlightened" ]
         probability: 0.2
+      - !type:WolfmedMendBrain # WOLFGATE(Wolfmed): restores a damaged brain that still works, as its description says
 
 - type: reagent
   id: Psicodine

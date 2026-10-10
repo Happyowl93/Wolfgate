@@ -4499,6 +4499,12 @@ the owner's call; left as it plays.
   `WoundFractureComponent` outright. `WolfmedStasisTest` pins the hold, the half hit against a control, the topical
   close, the stored-damage thinning, the untouched fracture (same wound, grade, severity, no treatment) and the bleed's
   return after exit.
+- **Avali stasis cut down (owner, 2026-10-08): "MAJORLY nerfed".** The numbers are ours: the Avali prototype mends
+  0.5 a second of each type (was 2) and rests 600 s (was 300), `wolfmed.stasis_damage_factor` ships at 1 (a hit in
+  stasis lands whole, was half), and `wolfmed.stasis_max_seconds` (60, 0 for no limit) ends a hold by itself with a
+  popup, counted on `WolfmedStasisHoldComponent`. The bleed hold and the rule on bones are unchanged. A closing still
+  stabilises the cut it works on, which stops that cut's bleed for good, one wound at a time.
+  `WolfmedStasisTest` pins the knob at a half, the whole hit as shipped and the hold ending on its limit.
 - **A coagulant reaches the wounds (2026-09-29).** "Medicines don't do what they're advertised to, tranexamic acid in
   particular." `ModifyBleedAmount` wrote the bloodstream's bleed figure, which on a wound host is only the wounds'
   projection and refuses every other writer (GUARD E3). Tranexamic acid, bicaridine, inaprovaline, polypyrylium,
@@ -4903,3 +4909,137 @@ sweeps for the mechanical rules, no local build (CI is the build). What it chang
 Left for after the merge: the merge and trim list for the tests, the duplicated armour coverage and execution blocks,
 the Fluent pass over prototype names, the inert Onyx part-status and circulatory stream code, the paddles refusing a
 destroyed heart, and the gun suicide that spends a round the peek did not measure.
+
+## Space exposure (2026-10-04)
+
+"Let's make space a bit more dangerous, e.g. going out without oxygen, or going out without space suit. Currently takes
+a long time to die."
+
+**Measured before.** A naked human in space was untouched for 75 s: Downed at 75, Unconscious at 126 and in arrest at
+172, all three the cold's. Its brain never ran short out there (oxygenation 0.86 seven minutes in), so it did not die.
+With no oxygen at station pressure: Downed at 185 s, Unconscious at 202, in arrest at 256. Barotrauma filled the
+ambient ceiling (Blunt 168) and did nothing else. By its damage rates (barotrauma's 2.4 a second, the respirator's
+0.5) the same walk before Wolfmed was about 35 s to critical and a little over a minute to dead; derived, not measured.
+
+**Why.** The brain's cold protection read the surface temperature, which in space is under 20 C within two seconds:
+a tenth of every drain before the body was short of anything. And no air ran on the plan's first figures
+(`wolfmed.airloss_full` 100, `wolfmed.brain_airloss_seconds` 180), upstream's slow suffocation.
+
+**What changed.**
+- **The cold protection reads the core** (`WolfmedLifeSystem.ColdFactor`): the M5 core, or the surface if that is
+  warmer; inside a container that protects from cold (the cryo pod, which holds the core still) the surface as before.
+  A cold arrest keeps its tenth; a walk outside starts at full speed, is at half about 33 s in and at a tenth at 66.
+- **Hard vacuum with no pressure suit drains the brain on its own clock**, `wolfmed.brain_vacuum_seconds` 55: the air
+  is gone from the lungs at once, with no Asphyxiation ramp. `WolfmedVacuumSystem` reads exposure once a second with
+  barotrauma's own rule (the containing mixture through the suit's protection, at the low pressure hazard line), marks
+  the body (`WolfmedVacuumComponent`) and tells it once: "Vacuum! Without a pressure suit you will black out in
+  seconds." A body still breathing from internals takes `wolfmed.brain_vacuum_breathing_factor` 0.75 of it: a mask
+  keeps air in the lungs, not pressure on the body. Hypoxia names it (`WolfmedCauseSource.Vacuum`, "vacuum exposure"),
+  and it is a route (`WolfmedRoutes.Vacuum`, the enum widened to 32 bits): "Do first: get them into pressure or a
+  suit, now", ahead of every other aid on the line, and a waiting ghost is told.
+- **No air is faster**: `airloss_full` 30 (a minute of the respirator's 0.5 a second) and `brain_airloss_seconds` 90.
+  Damaged lungs and a sedative overdose keep the old clock under a new name, `wolfmed.brain_weak_breath_seconds` 180,
+  so neither became deadlier.
+- **A stopped heart keeps its own clock.** No air and the vacuum are not counted while in arrest: the respirator
+  suffocates through every arrest, and at the faster clock an arrested brain would drain at twice the arrest rate from
+  a minute in. With the old figures no air could never pass the arrest clock, so nothing moved.
+
+**Measured after** (`WolfmedSpaceExposureTest`, real time, real gear).
+
+| | Downed | Unconscious | Arrest |
+|---|---|---|---|
+| Space, nothing | 29 s | 36 s | 85 s, oxygen |
+| Space, mask and tank, no suit | 39 s | 52 s | 172 s, cold |
+| EVA suit and helmet, no air | 76 s | 84 s | 111 s, oxygen |
+| A room of nitrogen | 76 s | 84 s | 111 s, oxygen |
+| EVA suit, helmet, mask and tank | never | | |
+
+Twenty seconds of vacuum leaves 0.70; four seconds into air the exposure has ended, and half a minute later the brain
+is back to 0.79. After the arrest a body in space keeps for a long time: the core is under 20 C by then, and the
+arrested brain lost 0.11 in three and a half minutes.
+
+**Left alone.** The rescue window after an arrest (`brain_arrest_seconds` 180, `brain_damage_rate` 0.05), the cold
+route (`core_cooling_seconds` 900), barotrauma's damage and its ceiling. The space arrest sits just ahead of the
+brain's tenth at 66 s: a vacuum clock of 60 put it at 125 s, 55 at 85. Dexalin still eases a patient who is not
+breathing, a little later than it did: it has to bring the Asphyxiation under 30 first, not under 100.
+
+**Tests.** `WolfmedSpaceExposureTest` (seven cases). `SpaceColdSmokeTest` turns the vacuum drain off to keep measuring the
+cold alone; `ColdBrainTest` chills the core as well as the skin; `DexalinEasesSuffocationTest` reads the line instead
+of assuming 100. `PainkillerPenTest` and `ArteryOverlayTest` ran on the bare test map, which is a vacuum, and now have
+air.
+
+**Found on the way: the avali still gibbed at Blunt 400.** D22 moved the gib to 1500 on the base species, the IPC, the
+shadekin and the Proto subspecies; the avali's own `Destructible` kept 400 and its Heat 1500 body ash. A wound host's
+body damage is the sum of its parts, so an avali was gibbed by damage a human only bleeds from, and a medical bounty
+that rolled the top of a 400 Blunt range was deleted as it spawned (it failed `NoBountyComesUpFreeOnAnySpeciesTest`
+once in the verification run, on a 400 roll). Both now match the others: Blunt 1500, no Heat ash (OD12).
+`WorstRollKeepsItsBodyTest` gives every species every fitting bounty at the top of its ranges and finds every body
+still there; with the old threshold it names the avali.
+
+## The Wolfmed test map has air (2026-10-04)
+
+The pair's test map is hard vacuum, and about a hundred Wolfmed fixtures spawned their bodies on it. `BarotraumaSystem`
+runs on one global one-second timer, so a body took Blunt 2 and Heat 0.4, two dry wounds on some part, whenever that
+timer rolled over while it existed. A test that waited a few ticks and then asserted a part's exact damage, or walked
+its wounds, failed only when the rollover landed inside its window. The phase depends on how many ticks the pooled pair
+has already run, so it moved with every test added anywhere, and the failure looked like that pull request's fault:
+`ArteryOverlayTest` ("the clamp did not take") and `DamageCommandHitsTheNamedPartTest` on the Planets branch,
+`PartDamageProjectsToVisualsComponentTest` here. Since the space exposure change a vacuum also takes a body down in
+half a minute.
+
+- **`WolfmedGameTest`**, the base of all 118 fixtures. `CreateTestMap()` is the pair's map with station air on it;
+  `CreateVacuumTestMap()` is the bare one, for the two tests that are about the vacuum (`BarotraumaPartTest`,
+  `VacuumMessageSpamTest`). The two fixtures that run their own pair call the static `CreateTestMap(pair)`.
+- **Nothing is taken off the bodies.** A test about pressure, cold or breathing sets its own atmosphere after it
+  creates the map, as it always did.
+- **It cannot quietly come back.** A passing test that made its map with `Pair.CreateTestMap()` and left it bare
+  fails at teardown and says why; `WolfmedFixtureBaseTest` keeps every Wolfmed fixture on the base.
+- **`WolfmedTestMapTest`**: the timer rolls over once a second, so three seconds cover every phase a test can start
+  at. The body on the test map is untouched after them; the control on the bare map has been hit.
+
+The fixtures that already gave their map air, or took the body's `BarotraumaComponent` off, were left as they are:
+redundant now, and harmless. The whole suite (590) passed on its first run with air, nothing adjusted.
+
+## The pod's alt-click, slime cores, species that do not breathe (2026-10-04)
+
+**"Alt+clicking shouldn't put you into the autodoc."** Climb in was the pod's first alternative verb, above the item
+slots' own eject verbs, so alt-click on an empty pod, which is how a blood pack or a disk comes out of any other
+machine, put the medic inside. It is an ordinary verb now: in the menu, and by dragging yourself onto the pod. Eject
+occupant stays the alternative verb, as on a cryo pod; the pod is locked while it works, so that cannot interrupt a
+procedure. `AltClickDoesNotClimbInTest`.
+
+**"People can't figure out how to heal slime brains."** There was no way. A slime's brain is its core, in the torso's
+`core` slot, and `WFSurgeryHealBrain` and `WFSurgeryRepairBrain` list on a head with an organ in its `brain` slot.
+`Surgery/slime_core.yml` adds the same two on the torso, `WFSurgeryHealSlimeCore` and `WFSurgeryRepairSlimeCore`, behind
+the open ribcage like every other chest organ; the conditions and effects were already keyed on a slot, so it is
+prototypes only. The neuro disk, its category and the triage plan carry both. The brain injury help lines name
+mannitol beside surgery, and the guidebook says where a slime's brain is. `WolfmedSlimeCoreTest`.
+
+**"Races that don't breathe can't heal oxygen damage on their own like normal."** Measured, 40 of each on a body in
+station air with full blood, a minute later:
+
+| | Asphyxiation | Bloodloss |
+|---|---|---|
+| The breathing species | 11 | 21 |
+| Shadekin | holds none | 35.25 |
+| Proto shadekin | 40 | 37.72 |
+
+Only the respirator ever took suffocation damage back, one a cycle, so a body with no respirator kept what it was
+given; and the shadekin and its Proto subspecies healed blood loss at a quarter of everybody else's rate
+(`bloodlossHealDamage` 0.25 against 1).
+- `WolfmedBreathingSystem` sheds Asphyxiation from a living wound host with no respirator (or with breathing immunity)
+  while its heart beats, `wolfmed.breathless_recovery` 0.5 a second: the respirator's one a cycle.
+- Both species heal blood loss at 1, like the rest.
+- After: the shadekin is at 21. The Proto shadekin is at 25 and 30.5: its `UniversalHealModifier` halves all of its
+  healing, which is its trait and was left alone. The shadekin still holds no Asphyxiation, by its own damage hook.
+
+**Found on the way: the thaven could not breathe.** A healthy thaven standing in station air took 54 Asphyxiation in a
+minute. Its lungs metabolise as their own type, and no gas had an entry for it: the species port left out the entries
+HardLight carries in `Reagents/gases.yml`. With the faster no-air clock above, that is on the floor in about a minute.
+Ported: an `Oxygenate` for the thaven on every gas and its exclusion from each gas's harm, 20 marked conditions over
+seven gases ("thaven can breathe all gases safely"; HardLight's 21st sits on a Frezon effect Wolfgate does not have).
+As there, nitrous oxide still puts a thaven to sleep.
+
+`WolfmedAirlossRecoveryTest` stands every species a player can pick in station air for a minute: none takes
+suffocation damage, and each sheds what it was given. Before these changes it names the thaven, the shadekin and the
+Proto shadekin.

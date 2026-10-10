@@ -26,12 +26,12 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedReagentDamageSystem))]
-public sealed class WolfmedReagentDamageTest : GameTest
+public sealed class WolfmedReagentDamageTest : WolfmedGameTest
 {
     [Test]
     public async Task MetabolisedBruteIsToxinNotWoundsTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {
@@ -72,7 +72,7 @@ public sealed class WolfmedReagentDamageTest : GameTest
     [Test]
     public async Task MetabolisedAirlossIsToxinTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {

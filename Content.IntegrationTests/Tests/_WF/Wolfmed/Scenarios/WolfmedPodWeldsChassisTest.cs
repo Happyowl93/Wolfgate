@@ -33,7 +33,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(AutodocSystem))]
-public sealed class WolfmedPodWeldsChassisTest : GameTest
+public sealed class WolfmedPodWeldsChassisTest : WolfmedGameTest
 {
     [TestPrototypes]
     private const string Prototypes = @"
@@ -85,7 +85,7 @@ public sealed class WolfmedPodWeldsChassisTest : GameTest
     public async Task PodWeldsChassisTest()
     {
         await OverrideCVar(Side.Server, WolfmedCVars.Consciousness, true);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid ipc = default, battered = default, human = default;
         Entity<AutodocComponent> pod = default, batteredPod = default, humanPod = default;
 

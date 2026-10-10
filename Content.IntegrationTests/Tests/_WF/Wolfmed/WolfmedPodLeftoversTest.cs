@@ -25,7 +25,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(AutodocSystem))]
-public sealed class WolfmedPodLeftoversTest : GameTest
+public sealed class WolfmedPodLeftoversTest : WolfmedGameTest
 {
     public override PoolSettings PoolSettings => PsDisconnected;
 
@@ -48,7 +48,7 @@ public sealed class WolfmedPodLeftoversTest : GameTest
     [Test]
     public async Task LeftoversArePlannedAfterTheRunABoundedNumberOfTimesTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid body = default;
         var wounds = new List<EntityUid>();

@@ -63,6 +63,7 @@ public sealed partial class StarSystemMapSystem : SharedStarSystemMapSystem
                 var spawnedPlanet = SpawnAtPosition(planetEnt.ID, planetCoords);
                 _metadata.SetEntityName(spawnedPlanet, planet.Name);
                 _pvs.AddGlobalOverride(spawnedPlanet);
+                WfPlanetSpawned(ent, spawnedPlanet, planet); // WOLFGATE(Planets): register sector bodies that have a Wolfgate surface.
             }
         }
     }

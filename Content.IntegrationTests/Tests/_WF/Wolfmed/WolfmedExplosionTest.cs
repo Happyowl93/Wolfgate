@@ -30,7 +30,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedExplosionSystem))]
-public sealed class WolfmedExplosionTest : GameTest
+public sealed class WolfmedExplosionTest : WolfmedGameTest
 {
     // WOLFGATE: a bespoke carrier rather than a shipped vest. Every shipped plate carrier also has an `Armor`
     // component with its own coefficients, which would muddy "the plate is what made the difference"; parenting
@@ -62,7 +62,7 @@ public sealed class WolfmedExplosionTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -135,7 +135,7 @@ public sealed class WolfmedExplosionTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -177,7 +177,7 @@ public sealed class WolfmedExplosionTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var explosion = server.System<WolfmedExplosionSystem>();
 
         await server.WaitAssertion(() =>

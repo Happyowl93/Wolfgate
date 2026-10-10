@@ -9,11 +9,27 @@
       distance: 9400
       angle: 1.15
     - planet: PlanetAsclepiu
-      distance: 12800
+      # WOLFGATE(Planets) START: orbit well kept out of lock-on range of Monolith's drone belt.
+      # distance: 12800
+      distance: 11500
+      # WOLFGATE END
       angle: 2.4
     - planet: PlanetAerumna
-      distance: 17500
+      # WOLFGATE(Planets) START: orbit well moved out of Monolith's drone belt, a hazard world at its edge.
+      # distance: 17500
+      distance: 14000
+      # WOLFGATE END
       angle: 3.55
     - planet: PlanetThrascias
-      distance: 27500
+      # WOLFGATE(Planets) START: orbit well moved out of Monolith's drone belt, a hazard world at its edge.
+      # distance: 27500
+      distance: 14500
+      # WOLFGATE END
       angle: 4.6
+
+    # WOLFGATE(Planets) START: quarantined biothreat world, unsanctioned.
+    # At the drone belt's edge, on a bearing clear of the Wilds.
+    - planet: WFPlanetCarcinoma
+      distance: 14500
+      angle: 0.0
+    # WOLFGATE END

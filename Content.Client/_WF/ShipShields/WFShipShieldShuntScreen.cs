@@ -270,6 +270,7 @@ public sealed class WFShipShieldShuntScreen : BoxContainer
             WFShipShieldRecoveryStatus.NoPower => "wf-shield-recovery-no-power",
             WFShipShieldRecoveryStatus.Lowered => "wf-shield-recovery-lowered",
             WFShipShieldRecoveryStatus.Disabled => "wf-shield-recovery-disabled",
+            WFShipShieldRecoveryStatus.FtlLocked => "wf-shield-recovery-ftl-locked",
             _ => null,
         };
         if (waiting != null || state.RecoverySeconds < 0)

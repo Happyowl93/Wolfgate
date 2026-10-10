@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Numerics;
+using Content.Server._ES.TileFires;
 using Content.Server.Administration.Logs;
 using Content.Server.Atmos.Components;
 using Content.Server.Chat.Managers;
@@ -52,6 +53,10 @@ namespace Content.Server.Explosion.EntitySystems;
 
 public sealed partial class ExplosionSystem : SharedExplosionSystem
 {
+    // ES START
+    [Dependency] private readonly ESTileFireSystem _tileFire = default!;
+    // ES END
+
     [Dependency] private IMapManager _mapManager = default!;
     [Dependency] private IRobustRandom _robustRandom = default!;
     [Dependency] private ITileDefinitionManager _tileDefinitionManager = default!;
@@ -370,7 +375,10 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
         float tileBreakScale = 1f,
         int maxTileBreak = int.MaxValue,
         bool canCreateVacuum = true,
-        bool addLog = true)
+        // WOLFGATE(Planets) START: silent parameter, see QueuedExplosion.Silent.
+        bool addLog = true,
+        bool silent = false)
+        // WOLFGATE END
     {
         if (totalIntensity <= 0 || slope <= 0)
             return;
@@ -397,6 +405,7 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
 
             // they are close enough to combine so just add total intensity and prevent queuing another one
             queued.TotalIntensity += totalIntensity;
+            queued.Silent &= silent; // WOLFGATE(Planets): one audible contributor is enough to make the merged blast audible.
             return;
         }
 
@@ -410,7 +419,10 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
             TileBreakScale = tileBreakScale,
             MaxTileBreak = maxTileBreak,
             CanCreateVacuum = canCreateVacuum,
-            Cause = cause
+            // WOLFGATE(Planets) START: carries the silent flag into the queued explosion.
+            Cause = cause,
+            Silent = silent
+            // WOLFGATE END
         };
         _explosionQueue.Enqueue(boom);
         _queuedExplosions.Add(boom);
@@ -446,41 +458,49 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
 
         var visualEnt = CreateExplosionVisualEntity(pos, queued.Proto.ID, spaceMatrix, spaceData, gridData.Values, iterationIntensity);
 
-        // camera shake
-        CameraShake(iterationIntensity.Count * 4f, pos, queued.TotalIntensity);
+        // WOLFGATE(Planets) START: a silent blast still carves its crater, it just does not shake, push or sound.
+        // See QueuedExplosion.Silent. The upstream shake, shockwave and sound are only re-indented under this guard.
+        if (!queued.Silent)
+        {
+            // camera shake
+            CameraShake(iterationIntensity.Count * 4f, pos, queued.TotalIntensity);
+            // WOLFGATE END
 
-        // WOLFGATE(Explosion) START: lets the shockwave push shove entities out from the epicentre.
-        var shockwave = new ExplosionShockwaveEvent(pos, iterationIntensity.Count, queued.Cause);
-        RaiseLocalEvent(ref shockwave);
+            // WOLFGATE(Explosion) START: lets the shockwave push shove entities out from the epicentre.
+            var shockwave = new ExplosionShockwaveEvent(pos, iterationIntensity.Count, queued.Cause);
+            RaiseLocalEvent(ref shockwave);
+            // WOLFGATE END
+
+            // WOLFGATE(Planets) START: upstream sound, re-indented under the silent guard above.
+            // play sound.
+            // for the normal audio, we want everyone in pvs range
+            // + if the bomb is big enough, people outside of it too
+            // this is capped to 30 because otherwise really huge bombs
+            // will attempt to play regular audio for people who can't hear it anyway because the epicenter is so far away
+            //
+            // TODO EXPLOSION redo this.
+            // Use the Filter.Pvs range-multiplier option instead of AddInRange.
+            // Also the default PVS range is 25*2 = 50. So capping it at 30 makes no sense here.
+            // So actually maybe don't use Filter.Pvs at all and only use AddInRange?
+            var audioRange = Math.Min(iterationIntensity.Count * 2, MaxExplosionAudioRange);
+            var filter = Filter.Pvs(pos).AddInRange(pos, audioRange);
+            var sound = iterationIntensity.Count < queued.Proto.SmallSoundIterationThreshold
+                ? queued.Proto.SmallSound
+                : queued.Proto.Sound;
+
+            _audio.PlayStatic(sound, filter, entPos, true, sound.Params);
+
+            // play far sound
+            // far sound should play for anyone who wasn't in range of any of the effects of the bomb
+            var farAudioRange = iterationIntensity.Count * 5;
+            var farFilter = Filter.Empty().AddInRange(pos, farAudioRange).RemoveInRange(pos, audioRange);
+            var farSound = iterationIntensity.Count < queued.Proto.SmallSoundIterationThreshold
+                ? queued.Proto.SmallSoundFar
+                : queued.Proto.SoundFar;
+
+            _audio.PlayGlobal(farSound, farFilter, true, farSound.Params);
+        }
         // WOLFGATE END
-
-        // play sound.
-        // for the normal audio, we want everyone in pvs range
-        // + if the bomb is big enough, people outside of it too
-        // this is capped to 30 because otherwise really huge bombs
-        // will attempt to play regular audio for people who can't hear it anyway because the epicenter is so far away
-        //
-        // TODO EXPLOSION redo this.
-        // Use the Filter.Pvs range-multiplier option instead of AddInRange.
-        // Also the default PVS range is 25*2 = 50. So capping it at 30 makes no sense here.
-        // So actually maybe don't use Filter.Pvs at all and only use AddInRange?
-        var audioRange = Math.Min(iterationIntensity.Count * 2, MaxExplosionAudioRange);
-        var filter = Filter.Pvs(pos).AddInRange(pos, audioRange);
-        var sound = iterationIntensity.Count < queued.Proto.SmallSoundIterationThreshold
-            ? queued.Proto.SmallSound
-            : queued.Proto.Sound;
-
-        _audio.PlayStatic(sound, filter, entPos, true, sound.Params);
-
-        // play far sound
-        // far sound should play for anyone who wasn't in range of any of the effects of the bomb
-        var farAudioRange = iterationIntensity.Count * 5;
-        var farFilter = Filter.Empty().AddInRange(pos, farAudioRange).RemoveInRange(pos, audioRange);
-        var farSound = iterationIntensity.Count < queued.Proto.SmallSoundIterationThreshold
-            ? queued.Proto.SmallSoundFar
-            : queued.Proto.SoundFar;
-
-        _audio.PlayGlobal(farSound, farFilter, true, farSound.Params);
 
         return new Explosion(this,
             queued.Proto,

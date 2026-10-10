@@ -18,7 +18,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// a treated wound hurting for minutes), while the wound floor holds for as long as the wound is open.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedLoosePainTest : GameTest
+public sealed class WolfmedLoosePainTest : WolfmedGameTest
 {
     private EntityUid Part(EntityUid body, BodyPartType type, BodyPartSymmetry symmetry) =>
         SEntMan.System<SharedBodySystem>().GetBodyChildren(body)
@@ -28,7 +28,7 @@ public sealed class WolfmedLoosePainTest : GameTest
     public async Task TreatedPainFadesFastTest()
     {
         await OverrideCVar(Side.Server, WolfmedCVars.PainLooseRecovery, 3f);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid a = default;
         await Server.WaitPost(() =>

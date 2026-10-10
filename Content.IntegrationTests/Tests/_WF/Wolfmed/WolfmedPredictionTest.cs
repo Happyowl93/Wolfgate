@@ -23,7 +23,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedPredictedDamageSystem))]
-public sealed class WolfmedPredictionTest : GameTest
+public sealed class WolfmedPredictionTest : WolfmedGameTest
 {
     /// <summary>A damageable with no body and no WoundHostComponent: the client must still predict on it.</summary>
     [TestPrototypes]
@@ -38,7 +38,7 @@ public sealed class WolfmedPredictionTest : GameTest
     [Test]
     public async Task ClientDoesNotWritePredictedWoundHostDamageTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         EntityUid host = default;
         EntityUid control = default;

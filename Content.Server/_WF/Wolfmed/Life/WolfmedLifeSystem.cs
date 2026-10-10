@@ -85,6 +85,7 @@ public sealed class WolfmedLifeSystem : EntitySystem
     [Dependency] private WolfmedToxinSystem _toxin = default!; // M5
     [Dependency] private WolfmedRadiationSystem _radiation = default!;
     [Dependency] private WolfmedBodyTemperatureSystem _temperature = default!;
+    [Dependency] private WolfmedVacuumSystem _vacuum = default!;
     [Dependency] private Content.Shared.Popups.SharedPopupSystem _popup = default!; // Playtest 5
 
     private readonly List<EntityUid> _due = new();
@@ -441,24 +442,47 @@ public sealed class WolfmedLifeSystem : EntitySystem
         var worst = 0f;
         source = WolfmedCauseSource.None;
 
-        if (InArrest(body))
+        var arrest = InArrest(body);
+        if (arrest)
             worst = MathF.Max(worst, Per(_cfg.GetCVar(WolfmedCVars.BrainArrestSeconds)));
 
         // CPR is rescue breaths as well as compressions, so it answers for the airway while it lasts.
         if (!cpr)
         {
-            var suffocation = BreathingLevel(body);
-            var depression = _relief.GetRespiratoryDepression(body);
-            var lungs = LungDamageLevel(body); // M3: damaged lungs (plan §3.3)
-            var breath = Math.Clamp(MathF.Max(MathF.Max(suffocation, depression), lungs), 0f, 1f);
-            var rate = breath * Per(_cfg.GetCVar(WolfmedCVars.BrainAirlossSeconds));
+            // A stopped heart is the arrest clock's, which already has nothing breathing: no air is not counted again
+            // on its own faster clock, or every arrest would run short.
+            var suffocation = arrest ? 0f : Math.Clamp(BreathingLevel(body), 0f, 1f);
+            var depression = Math.Clamp(_relief.GetRespiratoryDepression(body), 0f, 1f);
+            var lungs = Math.Clamp(LungDamageLevel(body), 0f, 1f); // M3: damaged lungs (plan §3.3)
+
+            // No air at all runs on its own clock; breathing that falls short keeps the slower one.
+            var noAir = suffocation * Per(_cfg.GetCVar(WolfmedCVars.BrainAirlossSeconds));
+            var weak = Per(_cfg.GetCVar(WolfmedCVars.BrainWeakBreathSeconds));
+            var lungRate = lungs * weak;
+            var depressionRate = depression * weak;
+            var rate = MathF.Max(noAir, MathF.Max(lungRate, depressionRate));
             if (rate > worst)
             {
                 worst = rate;
-                source = lungs > suffocation && lungs >= depression ? WolfmedCauseSource.Lungs
-                    : depression > suffocation ? WolfmedCauseSource.Sedation
+                source = lungRate > noAir && lungRate >= depressionRate ? WolfmedCauseSource.Lungs
+                    : depressionRate > noAir ? WolfmedCauseSource.Sedation
                     : _breathing.Assess(body).Source == WolfmedBreathingSource.Lungs ? WolfmedCauseSource.Lungs
                     : WolfmedCauseSource.Airway;
+            }
+        }
+
+        // Hard vacuum with no pressure suit: the air is gone from the lungs at once, with no ramp. Internals only
+        // slow it. Not counted in arrest, like no air.
+        if (!arrest && _vacuum.IsExposed(body))
+        {
+            var level = _breathing.IsSuffocating(body)
+                ? 1f
+                : Math.Clamp(_cfg.GetCVar(WolfmedCVars.BrainVacuumBreathingFactor), 0f, 1f);
+            var rate = level * Per(_cfg.GetCVar(WolfmedCVars.BrainVacuumSeconds));
+            if (rate > worst)
+            {
+                worst = rate;
+                source = WolfmedCauseSource.Vacuum;
             }
         }
 
@@ -526,10 +550,17 @@ public sealed class WolfmedLifeSystem : EntitySystem
         if (!TryComp(body, out TemperatureComponent? temperature))
             return 1f;
 
+        // The core, which lags a cold surface: in space the skin is under 20 C within seconds, and read there the
+        // brain was protected before it was short of anything. A container that protects from cold (the cryo pod)
+        // holds the core still, so there the surface is the reading.
+        var kelvin = temperature.CurrentTemperature;
+        if (temperature.ParentColdDamageThreshold == null && _temperature.GetCore(body) is { } core)
+            kelvin = MathF.Max(kelvin, core);
+
         var factor = 1f;
         foreach (var step in brain.Comp.ColdSteps)
         {
-            if (temperature.CurrentTemperature < step.Below)
+            if (kelvin < step.Below)
             {
                 factor = step.Factor;
                 break;
@@ -869,6 +900,9 @@ public sealed class WolfmedLifeSystem : EntitySystem
 
         if (_temperature.InHeatStroke(body))
             routes |= WolfmedRoutes.HeatStroke;
+
+        if (_vacuum.IsExposed(body) && _cfg.GetCVar(WolfmedCVars.BrainVacuumSeconds) > 0f)
+            routes |= WolfmedRoutes.Vacuum;
 
         if (InArrest(body))
             routes |= WolfmedRoutes.Arrest;

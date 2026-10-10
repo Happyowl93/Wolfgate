@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Content.IntegrationTests.Fixtures;
+using Content.Server.Atmos.Components;
 using Content.Server._WF.Wolfmed.Damage;
 using Content.Server._WF.Wolfmed.Gore;
 using Content.Server._WF.Wolfmed.Wounds;
@@ -28,7 +29,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedWoundOverlaySystem))]
-public sealed class WolfmedWoundOverlayTest : GameTest
+public sealed class WolfmedWoundOverlayTest : WolfmedGameTest
 {
     /// <summary>
     /// A bleeding slash drips; dressed it stops and shows the still wound; a heavy bleed trickles; an unhurt limb and a
@@ -37,7 +38,7 @@ public sealed class WolfmedWoundOverlayTest : GameTest
     [Test]
     public async Task BleedingWoundOverlayTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default;
 
         await Server.WaitAssertion(() =>
@@ -117,7 +118,7 @@ public sealed class WolfmedWoundOverlayTest : GameTest
     [Test]
     public async Task RotOverlayTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default;
         EntityUid wound = default;
 
@@ -194,13 +195,16 @@ public sealed class WolfmedWoundOverlayTest : GameTest
     [Test]
     public async Task ArteryOverlayTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default;
         EntityUid head = default;
 
         await Server.WaitAssertion(() =>
         {
             body = SEntMan.SpawnEntity("MobHuman", map.GridCoords);
+
+            // The test map is a vacuum: a pressure tick part-way through bruises and burns the head, and no clamp takes on those.
+            SEntMan.RemoveComponent<BarotraumaComponent>(body);
             head = Part(body, BodyPartType.Head);
             Assert.That(SEntMan.System<WoundSystem>().CreateOrMergeWound(head, "WFWolfmedArterialBleedWound", FixedPoint2.New(10)),
                 Is.Not.Null);
@@ -367,7 +371,7 @@ public sealed class WolfmedWoundOverlayTest : GameTest
     [Test]
     public async Task StumpOverlayTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default;
 
         await Server.WaitAssertion(() =>

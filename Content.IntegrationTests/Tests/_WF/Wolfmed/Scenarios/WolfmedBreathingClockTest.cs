@@ -40,7 +40,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedBreathingSystem))]
-public sealed class WolfmedBreathingClockTest : GameTest
+public sealed class WolfmedBreathingClockTest : WolfmedGameTest
 {
     private const float Band = 0.2f;
 
@@ -84,7 +84,7 @@ public sealed class WolfmedBreathingClockTest : GameTest
     public async Task BleedingScenarioTest()
     {
         await PinClock();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid a = default;
         var bleedRate = 0f;
@@ -389,7 +389,7 @@ public sealed class WolfmedBreathingClockTest : GameTest
     {
         await PinClock();
         await OverrideCVar(Side.Server, WolfmedCVars.BleedRate, ShippedBleedRate);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid artery = default;
         EntityUid cut = default;
@@ -474,7 +474,7 @@ public sealed class WolfmedBreathingClockTest : GameTest
     public async Task RepeatedShockTest()
     {
         await PinClock();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         await Server.WaitPost(() => s.SetAir(map.MapUid, true));
 
@@ -576,7 +576,7 @@ public sealed class WolfmedBreathingClockTest : GameTest
     public async Task PostShockOxygenTest()
     {
         await PinClock();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid body = default;
 
@@ -651,7 +651,7 @@ public sealed class WolfmedBreathingClockTest : GameTest
     public async Task OxygenScenarioTest()
     {
         await PinClock();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid body = default;
 
@@ -776,7 +776,7 @@ public sealed class WolfmedBreathingClockTest : GameTest
     public async Task InternalBleedTickTest()
     {
         await PinClock();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid control = default, ten = default, twenty = default;
         float c0 = 0, t0 = 0, w0 = 0;
@@ -825,7 +825,7 @@ public sealed class WolfmedBreathingClockTest : GameTest
         await OverrideCVar(Side.Server, WolfmedCVars.PainScale, 1f); // playtest 5: Blunt 60 + 40 reaches the shock line at Onyx's figures
 
         await PinClock();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
 
         await Server.WaitAssertion(() =>
@@ -864,7 +864,7 @@ public sealed class WolfmedBreathingClockTest : GameTest
     public async Task NonWoundHostCriticalStillDoesNotBreatheTest()
     {
         await PinClock();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid stock = default, host = default;
         RespiratorStatus stockBefore = default;

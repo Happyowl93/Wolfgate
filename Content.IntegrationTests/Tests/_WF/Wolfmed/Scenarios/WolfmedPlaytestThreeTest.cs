@@ -41,7 +41,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// vitals block says less and rounds.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedPlaytestThreeTest : GameTest
+public sealed class WolfmedPlaytestThreeTest : WolfmedGameTest
 {
     private const float FaintSeconds = 20f;
 
@@ -88,7 +88,7 @@ public sealed class WolfmedPlaytestThreeTest : GameTest
     public async Task CardCountdownTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var alerts = SEntMan.System<WolfmedConditionAlertSystem>();
         var cards = SEntMan.System<WolfmedCardSystem>();
@@ -282,7 +282,7 @@ public sealed class WolfmedPlaytestThreeTest : GameTest
     public async Task DownedCannotClimbTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var climb = SEntMan.System<ClimbSystem>();
         EntityUid table = default, downed = default, standing = default, medic = default;

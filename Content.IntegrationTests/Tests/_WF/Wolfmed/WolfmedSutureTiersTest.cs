@@ -30,7 +30,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedDirtyTreatmentComponent))]
-public sealed class WolfmedSutureTiersTest : GameTest
+public sealed class WolfmedSutureTiersTest : WolfmedGameTest
 {
     private const string Medicated = "MedicatedSuture";
     private const string Plain = "WFWolfmedSuture";
@@ -40,7 +40,7 @@ public sealed class WolfmedSutureTiersTest : GameTest
     [Test]
     public async Task EachTierClosesLessPerUseAndTakesLongerTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
 
         await Server.WaitAssertion(() =>
@@ -93,7 +93,7 @@ public sealed class WolfmedSutureTiersTest : GameTest
     [Test]
     public async Task PlainSutureIsCleanAndMakeshiftSutureIsDirtyTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid cleanWound = default, dirtyWound = default;
 

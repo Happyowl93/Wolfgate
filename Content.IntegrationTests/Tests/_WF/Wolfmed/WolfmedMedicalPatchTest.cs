@@ -35,7 +35,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(MedicalPatchSystem))]
-public sealed class WolfmedMedicalPatchTest : GameTest
+public sealed class WolfmedMedicalPatchTest : WolfmedGameTest
 {
     // WOLFGATE: MedicalPatchSystem is server-only (P4-D13) and nothing here reads client state, but sticking and
     // then unsticking hands the patch between the target's `stickers_container` and the user's hands inside one
@@ -116,7 +116,7 @@ public sealed class WolfmedMedicalPatchTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var patch = EntityUid.Invalid;
         var target = EntityUid.Invalid;
         var user = EntityUid.Invalid;
@@ -195,7 +195,7 @@ public sealed class WolfmedMedicalPatchTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var patch = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>

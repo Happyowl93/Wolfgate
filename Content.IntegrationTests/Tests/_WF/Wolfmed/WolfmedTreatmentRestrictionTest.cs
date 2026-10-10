@@ -24,7 +24,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WoundHealingSystem))]
-public sealed class WolfmedTreatmentRestrictionTest : GameTest
+public sealed class WolfmedTreatmentRestrictionTest : WolfmedGameTest
 {
     /// <summary>A bruise pack works on bruises: it neither closes a cut nor slows the cut's bleeding.</summary>
     [Test]
@@ -33,7 +33,7 @@ public sealed class WolfmedTreatmentRestrictionTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -86,7 +86,7 @@ public sealed class WolfmedTreatmentRestrictionTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

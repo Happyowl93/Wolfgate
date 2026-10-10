@@ -18,12 +18,12 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// puts on stayed for good and the Wake action had nothing to end. Revived, the patient lay there forever.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedSleepThroughDeathTest : GameTest
+public sealed class WolfmedSleepThroughDeathTest : WolfmedGameTest
 {
     [Test]
     public async Task DyingAsleepWakesTheBodyTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {

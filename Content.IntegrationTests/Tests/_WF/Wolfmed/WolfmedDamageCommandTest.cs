@@ -2,11 +2,13 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Content.IntegrationTests.Fixtures;
+using Content.Server.Atmos.Components;
 using Content.Shared._WF.Wolfmed.Compat;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
 using Content.Shared.FixedPoint;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Map;
 
 namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 
@@ -18,16 +20,27 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// parses args[2] as <c>ignoreResistances</c> and goes through Wolfmed's routing instead of the flat path.
 /// </remarks>
 [TestFixture]
-public sealed class WolfmedDamageCommandTest : GameTest
+public sealed class WolfmedDamageCommandTest : WolfmedGameTest
 {
+    /// <summary>
+    /// Spawns a human the test map's vacuum can't bruise: a pressure tick lands 2 Blunt and 0.4 Heat on some part, and
+    /// these tests count damage part by part.
+    /// </summary>
+    private static EntityUid SpawnBody(IEntityManager entities, EntityCoordinates coords)
+    {
+        var body = entities.SpawnEntity("MobHuman", coords);
+        entities.RemoveComponent<BarotraumaComponent>(body);
+        return body;
+    }
+
     [Test]
     public async Task DamageCommandHitsTheNamedPartTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var entities = Server.EntMan;
 
         EntityUid body = default;
-        await Server.WaitPost(() => body = entities.SpawnEntity("MobHuman", map.GridCoords));
+        await Server.WaitPost(() => body = SpawnBody(entities, map.GridCoords));
 
         await Pair.WaitCommand($"damage Blunt 20 true {entities.GetNetEntity(body)} LeftArm");
 
@@ -58,14 +71,14 @@ public sealed class WolfmedDamageCommandTest : GameTest
     [Test]
     public async Task DamageCommandPassesTheAmbientCeilingTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var entities = Server.EntMan;
 
         EntityUid admin = default, ambient = default;
         await Server.WaitPost(() =>
         {
-            admin = entities.SpawnEntity("MobHuman", map.GridCoords);
-            ambient = entities.SpawnEntity("MobHuman", map.GridCoords);
+            admin = SpawnBody(entities, map.GridCoords);
+            ambient = SpawnBody(entities, map.GridCoords);
         });
 
         await Pair.WaitCommand($"damage Heat 200 true {entities.GetNetEntity(admin)} LeftArm");
@@ -99,11 +112,11 @@ public sealed class WolfmedDamageCommandTest : GameTest
     [Test]
     public async Task DamageCommandWithoutAPartStillWorksTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var entities = Server.EntMan;
 
         EntityUid body = default;
-        await Server.WaitPost(() => body = entities.SpawnEntity("MobHuman", map.GridCoords));
+        await Server.WaitPost(() => body = SpawnBody(entities, map.GridCoords));
 
         await Pair.WaitCommand($"damage Blunt 20 true {entities.GetNetEntity(body)}");
 

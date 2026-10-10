@@ -107,7 +107,12 @@ public sealed partial class CEZLevelsSystem
         if (grip <= 0f)
             return;
 
-        args.Modifier *= 1f + (GroundDragModifier - 1f) * grip;
+        // WOLFGATE(Planets) START: a crash skid scales down the landed body's tile friction instead of adding drag.
+        // A landed body already uses tile friction (not the much smaller air friction).
+        // Skids need less of that base damping, not an additional multiplier above one.
+        var skidFriction = WfCrashSkidFriction(ent.Owner);
+        args.Modifier *= skidFriction < 1f ? skidFriction : 1f + (GroundDragModifier - 1f) * grip;
+        // WOLFGATE END
     }
 
     /// <summary>

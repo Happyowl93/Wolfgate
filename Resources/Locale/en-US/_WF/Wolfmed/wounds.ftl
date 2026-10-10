@@ -136,6 +136,12 @@ reagent-effect-guidebook-cool-overheating =
        *[other] chance to cool
     } an overheated chassis
 
+reagent-effect-guidebook-mend-brain =
+    { $chance ->
+        [1] Restores
+       *[other] chance to restore
+    } { $amount } health to a damaged brain that still works
+
 # Splinting a fracture (V5).
 
 wolfmed-splint-start = { CAPITALIZE(THE($user)) } straps a splint around { THE($target) }'s limb.

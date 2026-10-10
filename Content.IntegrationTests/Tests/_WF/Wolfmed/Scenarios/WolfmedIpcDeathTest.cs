@@ -33,7 +33,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// <remarks>Times are asserted as order plus a ±20% band, with every CVar the route reads pinned.</remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedOverheatSystem))]
-public sealed class WolfmedIpcDeathTest : GameTest
+public sealed class WolfmedIpcDeathTest : WolfmedGameTest
 {
     private const float Band = 0.2f;
 
@@ -77,7 +77,7 @@ public sealed class WolfmedIpcDeathTest : GameTest
         var bodies = new EntityUid[3];
         for (var i = 0; i < bodies.Length; i++)
         {
-            var map = await Pair.CreateTestMap();
+            var map = await CreateTestMap();
             var index = i;
             await Server.WaitPost(() =>
             {
@@ -233,7 +233,7 @@ public sealed class WolfmedIpcDeathTest : GameTest
     public async Task PowerShutdownSuccumbTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid ipc = default, restored = default;
 
@@ -290,7 +290,7 @@ public sealed class WolfmedIpcDeathTest : GameTest
     public async Task ThermalShutdownSuccumbTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid ipc = default, pulsed = default;
 

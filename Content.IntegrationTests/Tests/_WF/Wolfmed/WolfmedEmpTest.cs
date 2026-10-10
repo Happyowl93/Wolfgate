@@ -21,7 +21,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedEmpSystem))]
-public sealed class WolfmedEmpTest : GameTest
+public sealed class WolfmedEmpTest : WolfmedGameTest
 {
     [Test]
     public async Task EmpBurnsMachinePartsOnlyTest()
@@ -29,7 +29,7 @@ public sealed class WolfmedEmpTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         EntityUid ipc = default, cyborg = default, human = default, leg = default;
         await server.WaitAssertion(() =>

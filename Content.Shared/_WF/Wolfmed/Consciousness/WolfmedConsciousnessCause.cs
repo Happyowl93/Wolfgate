@@ -116,6 +116,9 @@ public enum WolfmedCauseSource : byte
     Toxin = 10,
     Heat = 11,
 
+    /// <summary>Hard vacuum with no pressure suit.</summary>
+    Vacuum = 12,
+
     // Arrest: what stopped the heart.
     ArrestBlood = 20,
     ArrestOxygen = 21,

@@ -12,7 +12,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// Twice this was "fixed" by reasoning alone and was still wrong on screen, so the layout is measured here.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedAnalyzerDollLayoutTest : GameTest
+public sealed class WolfmedAnalyzerDollLayoutTest : WolfmedGameTest
 {
     private static readonly Dictionary<string, Vector2> Expected = new()
     {

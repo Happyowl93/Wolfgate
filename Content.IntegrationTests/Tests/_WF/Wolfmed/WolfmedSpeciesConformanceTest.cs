@@ -35,14 +35,14 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedLifeSystem))]
-public sealed class WolfmedSpeciesConformanceTest : GameTest
+public sealed class WolfmedSpeciesConformanceTest : WolfmedGameTest
 {
     [Test]
     public async Task EverySpeciesConformsOrIsExcusedTest()
     {
         await OverrideCVar(Side.Server, WolfmedCVars.Consciousness, true);
         await OverrideCVar(Side.Server, WolfmedCVars.ArrestBlood, 0.30f);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var failed = new Dictionary<string, HashSet<WolfmedSpeciesCheck>>();
         var ladders = new Dictionary<string, bool>();
         var machines = new List<(string Species, EntityUid Body)>();

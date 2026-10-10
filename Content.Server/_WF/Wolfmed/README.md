@@ -75,6 +75,7 @@ Skipped ("dirty-disposed").
 - [`Content.Server/_WF/Wolfmed/Life/WolfmedBodyTemperatureSystem.cs`](Life/WolfmedBodyTemperatureSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Life/WolfmedBreathingAlertSystem.cs`](Life/WolfmedBreathingAlertSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Life/WolfmedBreathingSystem.cs`](Life/WolfmedBreathingSystem.cs)
+- [`Content.Server/_WF/Wolfmed/Life/WolfmedBurningChassisSystem.cs`](Life/WolfmedBurningChassisSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Life/WolfmedCardSystem.cs`](Life/WolfmedCardSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Life/WolfmedChoiceEui.cs`](Life/WolfmedChoiceEui.cs)
 - [`Content.Server/_WF/Wolfmed/Life/WolfmedConditionEmoteComponent.cs`](Life/WolfmedConditionEmoteComponent.cs)
@@ -93,12 +94,15 @@ Skipped ("dirty-disposed").
 - [`Content.Server/_WF/Wolfmed/Life/WolfmedSpawnInjuryComponent.cs`](Life/WolfmedSpawnInjuryComponent.cs)
 - [`Content.Server/_WF/Wolfmed/Life/WolfmedSpawnInjurySystem.cs`](Life/WolfmedSpawnInjurySystem.cs)
 - [`Content.Server/_WF/Wolfmed/Life/WolfmedToxinSystem.cs`](Life/WolfmedToxinSystem.cs)
+- [`Content.Server/_WF/Wolfmed/Life/WolfmedVacuumComponent.cs`](Life/WolfmedVacuumComponent.cs)
+- [`Content.Server/_WF/Wolfmed/Life/WolfmedVacuumSystem.cs`](Life/WolfmedVacuumSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/HealingSystem.Wolfmed.cs`](Medical/HealingSystem.Wolfmed.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/HealthAnalyzerSystem.Autodoc.cs`](Medical/HealthAnalyzerSystem.Autodoc.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/HealthAnalyzerSystem.Vitals.cs`](Medical/HealthAnalyzerSystem.Vitals.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/HealthAnalyzerSystem.Wolfmed.cs`](Medical/HealthAnalyzerSystem.Wolfmed.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/WeldingHealableSystem.Wolfmed.cs`](Medical/WeldingHealableSystem.Wolfmed.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/WolfmedAntisepticSpraySystem.cs`](Medical/WolfmedAntisepticSpraySystem.cs)
+- [`Content.Server/_WF/Wolfmed/Medical/WolfmedBrainMendSystem.cs`](Medical/WolfmedBrainMendSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/WolfmedFluidPackSystem.cs`](Medical/WolfmedFluidPackSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/WolfmedIvDripSystem.cs`](Medical/WolfmedIvDripSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/WolfmedOralAbsorptionSystem.cs`](Medical/WolfmedOralAbsorptionSystem.cs)
@@ -195,6 +199,7 @@ Skipped ("dirty-disposed").
 - [`Content.Shared/_WF/Wolfmed/EntityEffects/WashChemicalBurns.cs`](../../../Content.Shared/_WF/Wolfmed/EntityEffects/WashChemicalBurns.cs)
 - [`Content.Shared/_WF/Wolfmed/EntityEffects/WolfmedCleanWounds.cs`](../../../Content.Shared/_WF/Wolfmed/EntityEffects/WolfmedCleanWounds.cs)
 - [`Content.Shared/_WF/Wolfmed/EntityEffects/WolfmedCoolOverheating.cs`](../../../Content.Shared/_WF/Wolfmed/EntityEffects/WolfmedCoolOverheating.cs)
+- [`Content.Shared/_WF/Wolfmed/EntityEffects/WolfmedMendBrain.cs`](../../../Content.Shared/_WF/Wolfmed/EntityEffects/WolfmedMendBrain.cs)
 - [`Content.Shared/_WF/Wolfmed/EntityEffects/WolfmedTreatInfection.cs`](../../../Content.Shared/_WF/Wolfmed/EntityEffects/WolfmedTreatInfection.cs)
 - [`Content.Shared/_WF/Wolfmed/Examine/WolfmedLookPrototypes.cs`](../../../Content.Shared/_WF/Wolfmed/Examine/WolfmedLookPrototypes.cs)
 - [`Content.Shared/_WF/Wolfmed/Examine/WolfmedLookReport.cs`](../../../Content.Shared/_WF/Wolfmed/Examine/WolfmedLookReport.cs)
@@ -351,11 +356,13 @@ Skipped ("dirty-disposed").
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedRevivalTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedRevivalTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedScenario.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedScenario.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedSepsisTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedSepsisTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedSpaceExposureTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedSpaceExposureTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedSpeciesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedSpeciesTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedStumpPainTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedStumpPainTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedTemperatureTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedTemperatureTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedTourniquetHoldsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/Scenarios/WolfmedTourniquetHoldsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedAimScatterTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedAimScatterTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedAirlossRecoveryTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedAirlossRecoveryTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedAmputationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedAmputationTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedAnalyzerDollLayoutTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedAnalyzerDollLayoutTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedAnalyzerTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedAnalyzerTest.cs)
@@ -384,10 +391,13 @@ Skipped ("dirty-disposed").
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedDebugCrateTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedDebugCrateTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedDownedTransitionTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedDownedTransitionTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedDyingLevelTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedDyingLevelTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedEdibleLimbTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedEdibleLimbTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedEmpTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedEmpTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedEviscerationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedEviscerationTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedExecutionTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedExecutionTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedExplosionTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedExplosionTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedFixtureBaseTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedFixtureBaseTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedGameTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedGameTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedGoreTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedGoreTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedHealingTargetTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedHealingTargetTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedInfectionSpreadTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedInfectionSpreadTest.cs)
@@ -396,6 +406,7 @@ Skipped ("dirty-disposed").
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedLocaleCoverageTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedLocaleCoverageTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedLostHandVisualsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedLostHandVisualsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMakeshiftTourniquetTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMakeshiftTourniquetTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMannitolTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMannitolTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMechanicalWoundTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMechanicalWoundTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMedicalPatchTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMedicalPatchTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedOrganTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedOrganTest.cs)
@@ -412,8 +423,10 @@ Skipped ("dirty-disposed").
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedReattachTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedReattachTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSlashBiteWoundTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSlashBiteWoundTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSleepThroughDeathTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSleepThroughDeathTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSlimeCoreTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSlimeCoreTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpawnedGearUnequipTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpawnedGearUnequipTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpeciesConformanceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpeciesConformanceTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpeciesOrganTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpeciesOrganTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpeciesOverlayTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpeciesOverlayTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpeciesProfileTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpeciesProfileTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpeciesSpawnTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSpeciesSpawnTest.cs)
@@ -423,6 +436,7 @@ Skipped ("dirty-disposed").
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSurgeryClosingStepTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSurgeryClosingStepTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSutureTiersTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSutureTiersTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSyntheticHudTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedSyntheticHudTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedTestMapTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedTestMapTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedThresholdFallbackTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedThresholdFallbackTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedTreatmentAdviceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedTreatmentAdviceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedTreatmentMatrixTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedTreatmentMatrixTest.cs)
@@ -498,6 +512,7 @@ Skipped ("dirty-disposed").
 - [`Resources/Prototypes/_WF/Wolfmed/Shaders/shaders.yml`](../../../Resources/Prototypes/_WF/Wolfmed/Shaders/shaders.yml)
 - [`Resources/Prototypes/_WF/Wolfmed/SoundCollections/bobmed.yml`](../../../Resources/Prototypes/_WF/Wolfmed/SoundCollections/bobmed.yml)
 - [`Resources/Prototypes/_WF/Wolfmed/SoundCollections/wounds.yml`](../../../Resources/Prototypes/_WF/Wolfmed/SoundCollections/wounds.yml)
+- [`Resources/Prototypes/_WF/Wolfmed/Surgery/slime_core.yml`](../../../Resources/Prototypes/_WF/Wolfmed/Surgery/slime_core.yml)
 - [`Resources/Prototypes/_WF/Wolfmed/Surgery/surgeries.yml`](../../../Resources/Prototypes/_WF/Wolfmed/Surgery/surgeries.yml)
 - [`Resources/Prototypes/_WF/Wolfmed/Surgery/surgery_steps.yml`](../../../Resources/Prototypes/_WF/Wolfmed/Surgery/surgery_steps.yml)
 - [`Resources/Prototypes/_WF/Wolfmed/Surgery/synth_core.yml`](../../../Resources/Prototypes/_WF/Wolfmed/Surgery/synth_core.yml)
@@ -545,6 +560,7 @@ Skipped ("dirty-disposed").
 - [`Resources/Locale/en-US/_WF/Wolfmed/repair.ftl`](../../../Resources/Locale/en-US/_WF/Wolfmed/repair.ftl)
 - [`Resources/Locale/en-US/_WF/Wolfmed/revival.ftl`](../../../Resources/Locale/en-US/_WF/Wolfmed/revival.ftl)
 - [`Resources/Locale/en-US/_WF/Wolfmed/species.ftl`](../../../Resources/Locale/en-US/_WF/Wolfmed/species.ftl)
+- [`Resources/Locale/en-US/_WF/Wolfmed/stasis.ftl`](../../../Resources/Locale/en-US/_WF/Wolfmed/stasis.ftl)
 - [`Resources/Locale/en-US/_WF/Wolfmed/surgery-popup.ftl`](../../../Resources/Locale/en-US/_WF/Wolfmed/surgery-popup.ftl)
 - [`Resources/Locale/en-US/_WF/Wolfmed/synthetic-hud.ftl`](../../../Resources/Locale/en-US/_WF/Wolfmed/synthetic-hud.ftl)
 - [`Resources/Locale/en-US/_WF/Wolfmed/treatment-advice.ftl`](../../../Resources/Locale/en-US/_WF/Wolfmed/treatment-advice.ftl)
@@ -1185,6 +1201,10 @@ Skipped ("dirty-disposed").
   - W0, on a wound host the refusal is about the selected part, not the whole patient.
   - HOOK 8, the do-after carries the part the heal resolved.
 - [`Content.Server/Medical/HealthAnalyzerSystem.cs`](../../Medical/HealthAnalyzerSystem.cs): HOOK 23
+- [`Content.Server/NPC/Systems/NPCUtilitySystem.cs`](../../NPC/Systems/NPCUtilitySystem.cs): animals leave severed limbs alone so they can be reattached
+- [`Content.Server/Nutrition/EntitySystems/FoodSystem.cs`](../../Nutrition/EntitySystems/FoodSystem.cs)
+  - using a severed limb in hand does not eat it
+  - clicking a severed limb on someone does not force-feed it to them
 - [`Content.Shared/_EinsteinEngines/Silicon/Components/SiliconComponent.cs`](../../../Content.Shared/_EinsteinEngines/Silicon/Components/SiliconComponent.cs)
   - playtest 1: ChargeState networked
   - playtest 1: the client predicts the low-power crawl from it; it sat at 10 there
@@ -1564,12 +1584,14 @@ Skipped ("dirty-disposed").
   - on a wound host it clots down to an artery's floor, and its overdose bloodloss is toxin load.
   - its overdose brute is toxin load on a wound host, more than the overdose still flushes.
 - [`Resources/Maps/_NF/POI/medical.yml`](../../../Resources/Maps/_NF/POI/medical.yml): An autodoc pod placed in the medical POI.
+- [`Resources/Prototypes/_DV/Body/Organs/chitinid.yml`](../../../Resources/Prototypes/_DV/Body/Organs/chitinid.yml): Wolfmed liver data, so the organ can be hurt, scanned and treated
 - [`Resources/Prototypes/_DV/Body/Organs/feroxi.yml`](../../../Resources/Prototypes/_DV/Body/Organs/feroxi.yml): M4: OD16 parity, Wolfmed lung data (plan 9.2 group A-prime)
 - [`Resources/Prototypes/_DV/Body/Organs/harpy.yml`](../../../Resources/Prototypes/_DV/Body/Organs/harpy.yml): M4: OD16 parity, Wolfmed lung data (plan 9.2 group A-prime)
 - [`Resources/Prototypes/_DV/Entities/Clothing/Eyes/glasses.yml`](../../../Resources/Prototypes/_DV/Entities/Clothing/Eyes/glasses.yml): playtest 3: the IPC's container, so its bar shows
 - [`Resources/Prototypes/_DV/Species/avali.yml`](../../../Resources/Prototypes/_DV/Species/avali.yml): the Starlight teleport sound never shipped here, and the client logged an error every stasis.
 - [`Resources/Prototypes/_EinsteinEngines/Body/Organs/ipc.yml`](../../../Resources/Prototypes/_EinsteinEngines/Body/Organs/ipc.yml)
   - playtest 3 IPC 2: the chassis's own fluid, not Oil
+  - Wolfmed eyes data, so the organ can be hurt, scanned and treated
   - BRAIN: organ health, so the pump can be broken
 - [`Resources/Prototypes/_EinsteinEngines/Body/Parts/ipc.yml`](../../../Resources/Prototypes/_EinsteinEngines/Body/Parts/ipc.yml)
   - P5-1: IPC chassis wound profile; WFWolfmedPartIpc must stay FIRST (RT first-parent-wins)
@@ -1578,6 +1600,7 @@ Skipped ("dirty-disposed").
   - P5-D8: 110 -> 190, MajorLimb parity
   - P5-D8: 150 -> 210, MajorLimb parity
   - EVISC: torso damage cap, see _WF/Wolfmed/Body/species_parts.yml
+  - metallic edible profile
 - [`Resources/Prototypes/_EinsteinEngines/Entities/Mobs/Player/ipc.yml`](../../../Resources/Prototypes/_EinsteinEngines/Entities/Mobs/Player/ipc.yml)
   - P5-1/P5-2, PROTO Q: IPCs become wound hosts.
   - P5-D10/U1: IPCs get pain shock, as Onyx's do.
@@ -1596,26 +1619,45 @@ Skipped ("dirty-disposed").
 - [`Resources/Prototypes/_Goobstation/Entities/Objects/Weapons/Melee/hammer.yml`](../../../Resources/Prototypes/_Goobstation/Entities/Objects/Weapons/Melee/hammer.yml): a blunt weapon can execute, with bludgeoning lines in place of the throat-slitting ones
 - [`Resources/Prototypes/_Goobstation/Reagents/medicine.yml`](../../../Resources/Prototypes/_Goobstation/Reagents/medicine.yml): PROTO H: Onyx's Stasizium fracture block, from _Onyx/Reagents/Medicine/first_aid.yml.
 - [`Resources/Prototypes/_HL/Body/Organs/skrell.yml`](../../../Resources/Prototypes/_HL/Body/Organs/skrell.yml)
+  - Wolfmed stomach data, so the organ can be hurt, scanned and treated
   - M4: OD16 parity, Wolfmed lung data (plan 9.2 group C)
   - M4: OD16 parity, Wolfmed heart data (plan 9.2 group C)
+  - Wolfmed liver data, so the organ can be hurt, scanned and treated
+  - Wolfmed kidneys data, so the organ can be hurt, scanned and treated
   - M4: OD16 parity, brain clock (plan 9.2 group C)
+  - Wolfmed eyes data, so the organ can be hurt, scanned and treated
 - [`Resources/Prototypes/_HL/Body/Organs/synth.yml`](../../../Resources/Prototypes/_HL/Body/Organs/synth.yml)
   - M4: OD16 Synth is mechanical, the ccu is its positronic core
+  - Wolfmed eyes data, so the organ can be hurt, scanned and treated
+  - Wolfmed lungs data, so the organ can be hurt, scanned and treated
+  - a destroyed synth organ leaves mechanical damage; a chassis part takes no internal bleeding, so the organic wound left nothing
   - M4: OD16 Synth is mechanical, the heart is its coolant pump
+  - Wolfmed stomach data, so the organ can be hurt, scanned and treated
+  - Wolfmed liver data, so the organ can be hurt, scanned and treated
+  - Wolfmed kidneys data, so the organ can be hurt, scanned and treated
 - [`Resources/Prototypes/_HL/Body/Parts/synth.yml`](../../../Resources/Prototypes/_HL/Body/Parts/synth.yml)
   - M4: OD16 Synth is mechanical, chassis wound profile; WFWolfmedPartIpc must stay FIRST (RT first-parent-wins)
   - playtest 5, the IPC part container (as PartIPCBase), so the welder and the applicator repair a synth
+  - metallic edible profile
 - [`Resources/Prototypes/_HL/Damage/modifier_sets.yml`](../../../Resources/Prototypes/_HL/Damage/modifier_sets.yml): Wolfmed: OD16, a Synth is mechanical and takes no poison, like the IPC set
 - [`Resources/Prototypes/_HL/Entities/Mobs/Species/protogen_subspecies.yml`](../../../Resources/Prototypes/_HL/Entities/Mobs/Species/protogen_subspecies.yml)
   - M4, OD16: a wound host, so Wolfmed decides its state (plan 9.2 group D). Not reparented to
+  - blood loss damage heals at every other species' rate; at a quarter of it the reading outlasted the bleed by half an hour
   - M4, D29: passive regen is neutralised on a wound host, as BaseMobSpeciesOrganic's is.
   - M4, D22, OD12: the Blunt gib moves to 1500 and the Heat body ash is removed.
 - [`Resources/Prototypes/_HL/Entities/Mobs/Species/synth.yml`](../../../Resources/Prototypes/_HL/Entities/Mobs/Species/synth.yml): M4, OD16: Synth is mechanical. A wound host on the machine ladder (plan 3.11, 9.3): the ccu is its
-- [`Resources/Prototypes/_Mono/Body/Organs/hydra.yml`](../../../Resources/Prototypes/_Mono/Body/Organs/hydra.yml): M4: OD16 parity, Wolfmed lung data (plan 9.2 group A-prime)
+- [`Resources/Prototypes/_Mono/Body/Organs/hydra.yml`](../../../Resources/Prototypes/_Mono/Body/Organs/hydra.yml)
+  - Wolfmed stomach data, so the organ can be hurt, scanned and treated
+  - Wolfmed liver data, so the organ can be hurt, scanned and treated
+  - M4: OD16 parity, Wolfmed lung data (plan 9.2 group A-prime)
 - [`Resources/Prototypes/_Mono/Body/Organs/protogen.yml`](../../../Resources/Prototypes/_Mono/Body/Organs/protogen.yml)
   - M4: OD16 parity, brain clock (plan 9.2 group C)
+  - Wolfmed eyes data, so the organ can be hurt, scanned and treated
   - M4: OD16 parity, Wolfmed lung data (plan 9.2 group C)
   - M4: OD16 parity, Wolfmed heart data (plan 9.2 group C)
+  - Wolfmed stomach data, so the organ can be hurt, scanned and treated
+  - Wolfmed liver data, so the organ can be hurt, scanned and treated
+  - Wolfmed kidneys data, so the organ can be hurt, scanned and treated
 - [`Resources/Prototypes/_Mono/borg_types.yml`](../../../Resources/Prototypes/_Mono/borg_types.yml): playtest 3: the IPC's container, so its bar shows
 - [`Resources/Prototypes/_Mono/Entities/Clothing/Eyes/glasses.yml`](../../../Resources/Prototypes/_Mono/Entities/Clothing/Eyes/glasses.yml)
   - P6, P3-D6: locational armour coverage
@@ -1630,6 +1672,7 @@ Skipped ("dirty-disposed").
 - [`Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/trauma.yml`](../../../Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/trauma.yml): P6, P3-D6: locational armour coverage
 - [`Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/tsfmc.yml`](../../../Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/tsfmc.yml): P6, P3-D6: locational armour coverage
 - [`Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/ui.yml`](../../../Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/ui.yml): P6, P3-D6: locational armour coverage
+- [`Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/underground.yml`](../../../Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/underground.yml): P6, P3-D6: locational armour coverage
 - [`Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/unsa.yml`](../../../Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/unsa.yml): P6, P3-D6: locational armour coverage
 - [`Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/ussp.yml`](../../../Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/ussp.yml): P6, P3-D6: locational armour coverage
 - [`Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/viper_group.yml`](../../../Resources/Prototypes/_Mono/Entities/Clothing/Head/Hardsuits/viper_group.yml): P6, P3-D6: locational armour coverage
@@ -1643,7 +1686,9 @@ Skipped ("dirty-disposed").
   - playtest 5, an IPC's parts sit in this container, as the welder lists
 - [`Resources/Prototypes/_Mono/Entities/Objects/Weapons/Guns/Ammunition/Projectiles/12_gauge.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Weapons/Guns/Ammunition/Projectiles/12_gauge.yml): W1: buckshot leaves fragments, not a clean channel.
 - [`Resources/Prototypes/_Mono/Entities/Objects/Weapons/Melee/shockmaul.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Weapons/Melee/shockmaul.yml): a blunt weapon can execute, with bludgeoning lines in place of the throat-slitting ones
-- [`Resources/Prototypes/_NF/Body/Organs/goblin_organs.yml`](../../../Resources/Prototypes/_NF/Body/Organs/goblin_organs.yml): M4: OD16 parity, Wolfmed lung data (plan 9.2 group A-prime)
+- [`Resources/Prototypes/_NF/Body/Organs/goblin_organs.yml`](../../../Resources/Prototypes/_NF/Body/Organs/goblin_organs.yml)
+  - M4: OD16 parity, Wolfmed lung data (plan 9.2 group A-prime)
+  - in the lungs slot; BaseHumanOrgan leaves it blank, so surgery and the analyzer missed it
 - [`Resources/Prototypes/_NF/Catalog/VendingMachines/Inventories/civimed.yml`](../../../Resources/Prototypes/_NF/Catalog/VendingMachines/Inventories/civimed.yml)
   - playtest 3 IPC 2: Infinite, a chassis's refill beside the blood packs.
   - V5: Infinite
@@ -1733,6 +1778,7 @@ Skipped ("dirty-disposed").
   - W0: exempt. A welder is the only thing that closes a chassis wound and it does so by removing damage; 0.15 would leave mechanical wounds permanently open.
   - playtest 4: the missing limb keeps hurting until the stump is treated, its severity
   - playtest 1: halved with wolfmed.bleed_rate, which this bleed does not read
+- [`Resources/Prototypes/_Shitmed/Body/Organs/Animal/animal.yml`](../../../Resources/Prototypes/_Shitmed/Body/Organs/Animal/animal.yml): Wolfmed eyes data, so the organ can be hurt, scanned and treated
 - [`Resources/Prototypes/_Shitmed/Body/Parts/base.yml`](../../../Resources/Prototypes/_Shitmed/Body/Parts/base.yml): WP7, D8: adds Wolfmed fracture/maxDamage data
 - [`Resources/Prototypes/_Shitmed/Body/Parts/cybernetic.yml`](../../../Resources/Prototypes/_Shitmed/Body/Parts/cybernetic.yml)
   - P5-1: cybernetic wound + frame-fracture profile; WFWolfmedPartCybernetic must stay FIRST (RT first-parent-wins)
@@ -1748,18 +1794,29 @@ Skipped ("dirty-disposed").
   - AUTODOC5: one close chain serves every part, so "ribcage" was on the head too
   - PROTO G, P4-D21: cauterise, close and roll surgery.scar_chance on the incision wound
   - PROTO G, P4-D21: the wound surgeries end here, so this closes the incision they opened
-- [`Resources/Prototypes/_StarLight/Entities/Mobs/Species/avali.yml`](../../../Resources/Prototypes/_StarLight/Entities/Mobs/Species/avali.yml): the Starlight teleport sound never shipped here, and the client logged an error every stasis.
+- [`Resources/Prototypes/_StarLight/Entities/Mobs/Species/avali.yml`](../../../Resources/Prototypes/_StarLight/Entities/Mobs/Species/avali.yml)
+  - D22, OD12: the Blunt gib moves to 1500 and the Heat body ash is removed, as on every other wound host
+  - the Starlight teleport sound never shipped here, and the client logged an error every stasis.
 - [`Resources/Prototypes/_StarLight/Entities/Mobs/Species/shadekin.yml`](../../../Resources/Prototypes/_StarLight/Entities/Mobs/Species/shadekin.yml)
   - M4, OD16: shadekin is a wound host, so Wolfmed decides its state.
+  - blood loss damage heals at every other species' rate; at a quarter of it the reading outlasted the bleed by half an hour
   - M4, D29: passive regen is neutralised on a wound host, as BaseMobSpeciesOrganic's is.
   - M4, D22, OD12: the Blunt gib moves to 1500 and the Heat body ash is removed.
 - [`Resources/Prototypes/Alerts/alerts.yml`](../../../Resources/Prototypes/Alerts/alerts.yml): VISUALS: the pain HUD sits under the health doll
 - [`Resources/Prototypes/Body/Organs/Animal/animal.yml`](../../../Resources/Prototypes/Body/Organs/Animal/animal.yml)
   - M4: OD16 parity, Wolfmed lung data (plan 9.2 group B, arachnid)
+  - Wolfmed stomach data, so the organ can be hurt, scanned and treated
+  - Wolfmed liver data, so the organ can be hurt, scanned and treated
   - M4: OD16 parity, the heart can arrest (plan 9.2 group B; balance change)
-- [`Resources/Prototypes/Body/Organs/arachnid.yml`](../../../Resources/Prototypes/Body/Organs/arachnid.yml): M4: OD16 parity, the heart can arrest (plan 9.2 group B; balance change)
+  - Wolfmed kidneys data, so the organ can be hurt, scanned and treated
+- [`Resources/Prototypes/Body/Organs/arachnid.yml`](../../../Resources/Prototypes/Body/Organs/arachnid.yml)
+  - M4: OD16 parity, the heart can arrest (plan 9.2 group B; balance change)
+  - Wolfmed liver data, so the organ can be hurt, scanned and treated
+  - Wolfmed kidneys data, so the organ can be hurt, scanned and treated
+  - Wolfmed eyes data, so the organ can be hurt, scanned and treated
 - [`Resources/Prototypes/Body/Organs/diona.yml`](../../../Resources/Prototypes/Body/Organs/diona.yml)
   - M4: OD16 parity, the nymph organ is the brain clock (plan 9.2 group C)
+  - Wolfmed stomach data, so the organ can be hurt, scanned and treated
   - M4: OD16 parity, Wolfmed lung data (plan 9.2 group C)
 - [`Resources/Prototypes/Body/Organs/human.yml`](../../../Resources/Prototypes/Body/Organs/human.yml)
   - WP11-2, D8: Wolfmed organ health + organ-damage policy
@@ -1912,6 +1969,7 @@ Skipped ("dirty-disposed").
 - [`Resources/Prototypes/Reagents/medicine.yml`](../../../Resources/Prototypes/Reagents/medicine.yml)
   - PROTO I: Onyx's \<Onyx-PartPain> block on Bicaridine. Group is Medicine, not Onyx's
   - CONSC: painkiller tier. Stimulant: this is what an emergency medipen already carries,
+  - restores a damaged brain that still works, as its description says
 - [`Resources/Prototypes/Reagents/narcotics.yml`](../../../Resources/Prototypes/Reagents/narcotics.yml)
   - PROTO J: Onyx's \<Onyx-PartPain> block on Desoxyephedrine. Group is Narcotic, not Onyx's
   - CONSC: painkiller tier. Stimulant: keeps a body on its feet however bad the pain is,

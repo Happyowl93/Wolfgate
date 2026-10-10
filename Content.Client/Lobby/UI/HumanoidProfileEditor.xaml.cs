@@ -613,7 +613,9 @@ namespace Content.Client.Lobby.UI
 
             RefreshFlavorText();
             InitializeHeadshot(); // WOLFGATE(Headshot)
+            InitializeCustomMarkings(); // WOLFGATE(CustomMarkings)
             InitializeMismatchedParts(); // WOLFGATE(Species)
+            InitializeLegStyle(); // WOLFGATE(LegStyle)
 
             #region Dummy
 
@@ -1298,7 +1300,9 @@ namespace Content.Client.Lobby.UI
             UpdateNameEdit();
             UpdateFlavorTextEdit();
             UpdateHeadshot(); // WOLFGATE(Headshot)
+            UpdateCustomMarkings(); // WOLFGATE(CustomMarkings)
             UpdateMismatchedParts(); // WOLFGATE(Species)
+            UpdateLegStyle(); // WOLFGATE(LegStyle)
             UpdateSexControls();
             UpdateGenderControls();
             UpdateSkinColor();
@@ -1910,6 +1914,7 @@ namespace Content.Client.Lobby.UI
             _anatomySaveConfirm = null;
             // WOLFGATE END
             CloseHeadshotWindow(); // WOLFGATE(Headshot)
+            CloseCustomMarkings(); // WOLFGATE(CustomMarkings)
 
             // Mono start
             foreach (var entity in _savedItemEntities)
@@ -1973,6 +1978,7 @@ namespace Content.Client.Lobby.UI
         private void SetSpecies(string newSpecies)
         {
             Profile = Profile?.WithSpecies(newSpecies);
+            UpdateLegStyle(); // WOLFGATE(LegStyle): legs the new species lacks fall back to its own
             // WOLFGATE(Humanoid) START: keep the species picker and dropdown in step, drop hair the new species lacks
             EnforceSpeciesHair();
             SpeciesPicker.SetSelected(newSpecies);
@@ -2524,6 +2530,7 @@ namespace Content.Client.Lobby.UI
             Markings.PreviewDirection = SpriteView.OverrideDirection.Value;
             GenitalEditor.PreviewDirection = SpriteView.OverrideDirection.Value;
             // WOLFGATE END
+            SetCustomMarkingsDirection(SpriteView.OverrideDirection.Value); // WOLFGATE(CustomMarkings): its tiles face that way too
         }
 
         private void RandomizeEverything()

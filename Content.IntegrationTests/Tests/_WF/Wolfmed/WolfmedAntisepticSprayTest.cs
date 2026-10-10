@@ -28,12 +28,12 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedAntisepticSpraySystem))]
-public sealed class WolfmedAntisepticSprayTest : GameTest
+public sealed class WolfmedAntisepticSprayTest : WolfmedGameTest
 {
     [Test]
     public async Task SprayOnYourselfCleansTheWoundInsteadOfDrinkingTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default, other = default, spray = default, wound = default, otherWound = default;
         FixedPoint2 full = default;
 

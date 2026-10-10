@@ -34,7 +34,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedToxinSystem))]
-public sealed class WolfmedRemainingCausesTest : GameTest
+public sealed class WolfmedRemainingCausesTest : WolfmedGameTest
 {
     private const float Band = 0.2f;
 
@@ -112,7 +112,7 @@ public sealed class WolfmedRemainingCausesTest : GameTest
         await OverrideCVar(Side.Server, WolfmedCVars.ConditionEmoteChance, 0f);
 
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid downed = default, liverless = default, cleared = default, impaired = default, coma = default, treated = default;
 
@@ -267,7 +267,7 @@ public sealed class WolfmedRemainingCausesTest : GameTest
     public async Task RadiationScenarioTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid control = default, stopped = default, failing = default, sick = default, ipc = default;
 
@@ -373,7 +373,7 @@ public sealed class WolfmedRemainingCausesTest : GameTest
     public async Task SepsisNotToxinTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid wounded = default, septic = default;
 
         await Server.WaitPost(() =>
@@ -410,7 +410,7 @@ public sealed class WolfmedRemainingCausesTest : GameTest
     public async Task AcidResidueTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid scalded = default, splashed = default;
 
         await Server.WaitPost(() =>

@@ -19,11 +19,11 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedLifeSystem))]
-public sealed class WolfmedArrestClockTest : GameTest
+public sealed class WolfmedArrestClockTest : WolfmedGameTest
 {
     private async Task<(WolfmedScenario Scenario, EntityUid Body)> Patient()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid body = default;
 

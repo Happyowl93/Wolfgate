@@ -25,7 +25,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// in rather than a brain drain, so the heart's failure is the only arrest in it.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedSepsisTest : GameTest
+public sealed class WolfmedSepsisTest : WolfmedGameTest
 {
     /// <summary>The torso's Wolfmed organs by slot, with their health.</summary>
     private Dictionary<string, (EntityUid Organ, WolfmedOrganComponent Health)> TorsoOrgans(WolfmedScenario s, EntityUid body)
@@ -47,7 +47,7 @@ public sealed class WolfmedSepsisTest : GameTest
     [Test]
     public async Task SepsisKillsTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var mobState = SEntMan.System<MobStateSystem>();
         var infection = SEntMan.System<WolfmedInfectionSystem>();
@@ -164,7 +164,7 @@ public sealed class WolfmedSepsisTest : GameTest
         await OverrideCVar(Side.Server, WolfmedCVars.InfectionRate, 1f);
         await OverrideCVar(Side.Server, WolfmedCVars.ArrestSepsis, 80f);
 
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid body = default, treated = default;
         await Server.WaitPost(() =>

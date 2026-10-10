@@ -26,7 +26,8 @@
 
 - type: entity
   id: OrganHydrakinStomach
-  parent: BaseHydrakinOrgan
+  # WOLFGATE(Wolfmed): Wolfmed stomach data, so the organ can be hurt, scanned and treated
+  parent: [BaseHydrakinOrgan, WFWolfmedOrganStomach]
   name: hydrakin stomach
   components:
   - type: Sprite
@@ -61,7 +62,8 @@
 
 - type: entity
   id: OrganHydrakinLiver
-  parent: [ BaseHydrakinOrgan ]
+  # WOLFGATE(Wolfmed): Wolfmed liver data, so the organ can be hurt, scanned and treated
+  parent: [ BaseHydrakinOrgan, WFWolfmedOrganLiver]
   name: hydrakin liver
   components:
   - type: Sprite

@@ -28,7 +28,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedVitalsText))]
-public sealed class WolfmedMedicLinesTest : GameTest
+public sealed class WolfmedMedicLinesTest : WolfmedGameTest
 {
     private async Task PinLines()
     {
@@ -73,7 +73,7 @@ public sealed class WolfmedMedicLinesTest : GameTest
     public async Task AnalyzerStateLinesTest()
     {
         await PinLines();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid up = default, pain = default, bled = default, faint = default, pale = default,
             bledOut = default, hypoxic = default, arrest = default, dead = default, ipc = default;

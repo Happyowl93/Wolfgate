@@ -72,7 +72,7 @@ public sealed partial class WolfmedCardComponent : Component
 /// them; "wait as a ghost" is offered only while there are none.
 /// </summary>
 [Flags, Serializable, NetSerializable]
-public enum WolfmedRoutes : ushort
+public enum WolfmedRoutes : uint
 {
     None = 0,
     Bleeding = 1 << 0,
@@ -118,4 +118,7 @@ public enum WolfmedRoutes : ushort
 
     /// <summary>A hypothermic core still cooling.</summary>
     Hypothermia = 1 << 14,
+
+    /// <summary>Out in hard vacuum with no pressure suit.</summary>
+    Vacuum = 1 << 16,
 }

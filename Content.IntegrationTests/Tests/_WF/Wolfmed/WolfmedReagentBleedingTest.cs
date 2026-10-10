@@ -28,13 +28,13 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WoundBleedingSystem))]
-public sealed class WolfmedReagentBleedingTest : GameTest
+public sealed class WolfmedReagentBleedingTest : WolfmedGameTest
 {
     /// <summary>Tranexamic acid's own effect stops an ordinary cut, at its dose times the bleed-rate knob per tick.</summary>
     [Test]
     public async Task CoagulantStopsAnOrdinaryBleedTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {
@@ -72,7 +72,7 @@ public sealed class WolfmedReagentBleedingTest : GameTest
     [Test]
     public async Task CoagulantSlowsAnArteryButNeverStopsItTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {
@@ -119,7 +119,7 @@ public sealed class WolfmedReagentBleedingTest : GameTest
     [Test]
     public async Task CoagulantKeepsEveryTreatmentTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {
@@ -176,7 +176,7 @@ public sealed class WolfmedReagentBleedingTest : GameTest
     [Test]
     public async Task WorseningDoseOpensASystemicBleedTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {

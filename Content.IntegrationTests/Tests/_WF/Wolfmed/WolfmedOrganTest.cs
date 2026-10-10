@@ -33,7 +33,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(OrganHealthSystem))]
-public sealed class WolfmedOrganTest : GameTest
+public sealed class WolfmedOrganTest : WolfmedGameTest
 {
     // WOLFGATE: the organ-damage roll is `chances[partType]` from the part's bodyPartProfile, which is
     // 0.04 for a torso on the shipped OrganicBodyPartProfile. T-ORG-CAP forces it to 1.0 in a bespoke
@@ -170,7 +170,7 @@ public sealed class WolfmedOrganTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -203,7 +203,7 @@ public sealed class WolfmedOrganTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -243,7 +243,7 @@ public sealed class WolfmedOrganTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         await OverrideCVar(Side.Server, Content.Shared._WF.Wolfmed.CCVar.WolfmedCVars.OrganDamageScale, 3.4f);
         await OverrideCVar(Side.Server, Content.Shared._WF.Wolfmed.CCVar.WolfmedCVars.OrganHitCap, 5f);
 
@@ -281,7 +281,7 @@ public sealed class WolfmedOrganTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var torso = EntityUid.Invalid;
         var lungs = EntityUid.Invalid;
 
@@ -331,7 +331,7 @@ public sealed class WolfmedOrganTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var body = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
@@ -361,7 +361,7 @@ public sealed class WolfmedOrganTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var body = EntityUid.Invalid;
         var brain = EntityUid.Invalid;
 
@@ -401,7 +401,7 @@ public sealed class WolfmedOrganTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var body = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
@@ -440,7 +440,7 @@ public sealed class WolfmedOrganTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var body = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
@@ -479,7 +479,7 @@ public sealed class WolfmedOrganTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

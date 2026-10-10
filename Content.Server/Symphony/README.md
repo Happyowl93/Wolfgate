@@ -4,8 +4,9 @@ The hooks for the SSymphony panel. It is the one module outside `_WF`: its files
 `*.Symphony.cs` and `Resources/Locale/en-US/symphony/`, as listed in `Tools/_WF/Ci/modules.yml`.
 
 - Status host endpoints, behind the admin API token: `/symphony/hub` switches hub advertising while the server runs,
-  `/symphony/players` lists who is connected with their character and job, and `/symphony/roles` and
-  `/symphony/roles/refresh` list the whitelisted roles to map and re-read a player's rows after the panel writes them.
+  `/symphony/players` lists who is connected with their character and job, `/symphony/roles` and
+  `/symphony/roles/refresh` list the whitelisted roles to map and re-read a player's rows after the panel writes them,
+  and `/symphony/cvars` lists every CVar and sets one while the server runs (confidential ones are never shown or set).
 - `/status` reports the hook version, the round clock and the test merges the build carries (`SymphonyTestMerges`,
   read from `Resources/Symphony/testmerges.json`, which `Tools/_WF/Ci/test_merge.py` writes). On a test merge build,
   `SymphonyTestMergeSystem` also announces the merged pull requests at round start and to each player joining the
@@ -25,6 +26,7 @@ ticket table or the roles endpoints change.
 
 - [`Content.Server/Connection/ConnectionManager.Symphony.cs`](../Connection/ConnectionManager.Symphony.cs)
 - [`Content.Server/Symphony/SymphonyApi.cs`](SymphonyApi.cs)
+- [`Content.Server/Symphony/SymphonyCVarsSystem.cs`](SymphonyCVarsSystem.cs)
 - [`Content.Server/Symphony/SymphonyHubSystem.cs`](SymphonyHubSystem.cs)
 - [`Content.Server/Symphony/SymphonyLinkTickets.cs`](SymphonyLinkTickets.cs)
 - [`Content.Server/Symphony/SymphonyPlayersSystem.cs`](SymphonyPlayersSystem.cs)

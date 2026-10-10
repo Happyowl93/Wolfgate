@@ -38,7 +38,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedInfectionSystem))]
-public sealed class WolfmedInfectionSpreadTest : GameTest
+public sealed class WolfmedInfectionSpreadTest : WolfmedGameTest
 {
     private const float Tick = 5f;
 
@@ -60,7 +60,7 @@ public sealed class WolfmedInfectionSpreadTest : GameTest
     public async Task HandInfectionTravelsToTheTorsoTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var log = string.Empty;
 
         await Server.WaitAssertion(() =>
@@ -133,7 +133,7 @@ public sealed class WolfmedInfectionSpreadTest : GameTest
     public async Task AmputationStopsTheTravelTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var log = string.Empty;
 
         await Server.WaitAssertion(() =>
@@ -188,7 +188,7 @@ public sealed class WolfmedInfectionSpreadTest : GameTest
     public async Task HeadInfectionStartsSepsisTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var log = string.Empty;
 
         await Server.WaitAssertion(() =>
@@ -233,7 +233,7 @@ public sealed class WolfmedInfectionSpreadTest : GameTest
     public async Task AntibioticsClearThePartsTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {
@@ -281,7 +281,7 @@ public sealed class WolfmedInfectionSpreadTest : GameTest
     public async Task InfectionNeedsAReasonTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {
@@ -357,7 +357,7 @@ public sealed class WolfmedInfectionSpreadTest : GameTest
     public async Task SepticShockTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default, medic = default;
 
         await Server.WaitAssertion(() =>
@@ -427,7 +427,7 @@ public sealed class WolfmedInfectionSpreadTest : GameTest
     public async Task MachineNeverCarriesAPartInfectionTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {

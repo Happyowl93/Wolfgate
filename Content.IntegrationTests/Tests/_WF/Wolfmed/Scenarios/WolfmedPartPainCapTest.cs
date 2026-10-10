@@ -22,7 +22,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedBodyPainSystem))]
-public sealed class WolfmedPartPainCapTest : GameTest
+public sealed class WolfmedPartPainCapTest : WolfmedGameTest
 {
     private void SetPain(EntityUid body, BodyPartType type, float value, BodyPartSymmetry symmetry = BodyPartSymmetry.None)
     {
@@ -54,7 +54,7 @@ public sealed class WolfmedPartPainCapTest : GameTest
         await OverrideCVar(Side.Server, WolfmedCVars.PartPainCapLeg, 90f);
         await OverrideCVar(Side.Server, WolfmedCVars.PartPainCapFoot, 50f);
 
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid a = default;
         await Server.WaitPost(() =>
@@ -105,7 +105,7 @@ public sealed class WolfmedPartPainCapTest : GameTest
         await OverrideCVar(Side.Server, WolfmedCVars.ConsciousnessPainDown, 0.95f);
         await OverrideCVar(Side.Server, WolfmedCVars.PartPainCapArm, 80f);
 
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid a = default;
         await Server.WaitPost(() =>

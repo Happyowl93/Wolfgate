@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Numerics;
+using Content.Server._WF.BloodTrail;
 using Content.Server.Body.Components;
 using Content.Server.Decals;
 using Content.Shared._WF.Wolfmed.Gore;
@@ -168,13 +169,12 @@ public sealed class WolfmedGoreSystem : EntitySystem
         }
 
         // Playtest 5: the floor half too, for a reagent that is no cleaner of decals in general (a mop's water). Only
-        // Wolfmed's own blood and gibs go, so a spilled cup never washes a mapper's paint.
+        // blood goes (Wolfmed's splats and gibs, BloodTrail's prints), so a spilled cup never washes a mapper's paint.
         if (TryComp(gridUid, out DecalGridComponent? decalGrid))
         {
-            var bounds = _lookup.GetLocalBounds(tile, grid.TileSize).Enlarged(0.5f).Translated(new Vector2(-0.5f, -0.5f));
-            foreach (var (index, decal) in _decals.GetDecalsIntersecting(gridUid, bounds, decalGrid).ToList())
+            foreach (var (index, decal) in _decals.GetDecalsIntersecting(gridUid, WashBounds(tile, grid), decalGrid).ToList())
             {
-                if (!decal.Cleanable || !decal.Id.StartsWith(WolfmedDecalPrefix) || spent + DecalCleanCost > budget)
+                if (!decal.Cleanable || !IsBloodDecal(decal.Id) || spent + DecalCleanCost > budget)
                     continue;
 
                 _decals.RemoveDecal(gridUid, index, decalGrid);
@@ -185,8 +185,36 @@ public sealed class WolfmedGoreSystem : EntitySystem
         return spent;
     }
 
+    /// <summary>Whether a wash of this tile would find a blood decal to take.</summary>
+    public bool HasBloodDecals(EntityUid gridUid, MapGridComponent grid, Vector2i tile)
+    {
+        if (!TryComp(gridUid, out DecalGridComponent? decalGrid))
+            return false;
+
+        foreach (var (_, decal) in _decals.GetDecalsIntersecting(gridUid, WashBounds(tile, grid), decalGrid))
+        {
+            if (decal.Cleanable && IsBloodDecal(decal.Id))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>The reach of one wash: the tile and half a tile around it, as CleanDecalsReaction has it.</summary>
+    private Box2 WashBounds(Vector2i tile, MapGridComponent grid)
+    {
+        return _lookup.GetLocalBounds(tile, grid.TileSize).Enlarged(0.5f).Translated(new Vector2(-0.5f, -0.5f));
+    }
+
     /// <summary>Every decal Wolfmed leaves starts with this: the floor splats and the gibs.</summary>
     public const string WolfmedDecalPrefix = "WFWolfmed";
+
+    /// <summary>A decal blood left: Wolfmed's splats and gibs, or a footprint or drag mark.</summary>
+    private static bool IsBloodDecal(string id)
+    {
+        return id.StartsWith(WolfmedDecalPrefix, StringComparison.Ordinal)
+               || id.StartsWith(FootPrintsSystem.DecalPrefix, StringComparison.Ordinal);
+    }
 
     /// <summary>Reagent units one Wolfmed decal costs to wash away, the same as CleanDecalsReaction charges.</summary>
     private const float DecalCleanCost = 0.25f;

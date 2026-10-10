@@ -25,7 +25,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// skin-coloured bits in the skin colour; a limb off leaves a few, a gibbed body leaves them all; a machine none.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedGibDecalTest : GameTest
+public sealed class WolfmedGibDecalTest : WolfmedGameTest
 {
     private int Count(EntityUid body, string? suffix = null)
     {
@@ -44,7 +44,7 @@ public sealed class WolfmedGibDecalTest : GameTest
         await OverrideCVar(Side.Server, WolfmedCVars.GibSpread, 1f);
         await OverrideCVar(Side.Server, WolfmedCVars.GibsDismemberment, 2);
         await OverrideCVar(Side.Server, WolfmedCVars.GibsGib, 7);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var minds = SEntMan.System<SharedMindSystem>();
         var session = Server.PlayerMan.GetSessionById(Client.Session!.UserId);
@@ -114,7 +114,7 @@ public sealed class WolfmedGibDecalTest : GameTest
     public async Task MachinesLeaveNoGibsTest()
     {
         await OverrideCVar(Side.Server, WolfmedCVars.GibDecals, true);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid ipc = default;
         await Server.WaitPost(() =>

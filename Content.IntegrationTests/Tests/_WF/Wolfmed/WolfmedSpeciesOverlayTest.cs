@@ -25,12 +25,12 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// where its flesh takes a slash (a slime or a plant takes its own wounds, a machine takes none of this by design).
 /// </summary>
 [TestFixture]
-public sealed class WolfmedSpeciesOverlayTest : GameTest
+public sealed class WolfmedSpeciesOverlayTest : WolfmedGameTest
 {
     [Test]
     public async Task EverySpeciesDrawsWoundsAndStumpsTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var species = SProtoMan.EnumeratePrototypes<SpeciesPrototype>()
             .Where(s => s.RoundStart)
             .OrderBy(s => s.ID)

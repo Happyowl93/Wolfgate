@@ -35,7 +35,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedIvDripSystem))]
-public sealed class WolfmedIvDripTest : GameTest
+public sealed class WolfmedIvDripTest : WolfmedGameTest
 {
     public override PoolSettings PoolSettings => PsDisconnected;
 
@@ -71,7 +71,7 @@ public sealed class WolfmedIvDripTest : GameTest
     private async Task<(TestMapData Map, Entity<WolfmedIvDripComponent> Drip, EntityUid Patient, EntityUid Hung)> Setup(
         string mob, string hung, int packs = 0, float blood = 1f)
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<WolfmedIvDripComponent> drip = default;
         EntityUid patient = default;
         EntityUid item = default;

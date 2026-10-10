@@ -38,8 +38,9 @@
   id: MdMedicPDA
   name: loadout-group-contractor-id
   loadouts:
-  - MedicalDoctorPDA
-  - ContractorSeniorPhysicianPDA
+  # WOLFGATE: the ER PDAs, was MedicalDoctorPDA and ContractorSeniorPhysicianPDA, whose ID resets to medical doctor access
+  - MdMedicMedicalPDA
+  - MdMedicSeniorPhysicianPDA
   fallbacks:
   - MdMedicMedicalPDA
 

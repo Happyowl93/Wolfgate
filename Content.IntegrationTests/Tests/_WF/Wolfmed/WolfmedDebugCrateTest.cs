@@ -6,7 +6,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 
 /// <summary>The debug crate spawns with every listed item; a renamed prototype id fails here, not in a playtest.</summary>
 [TestFixture]
-public sealed class WolfmedDebugCrateTest : GameTest
+public sealed class WolfmedDebugCrateTest : WolfmedGameTest
 {
     [Test]
     public async Task DebugCrateFillsTest()
@@ -14,7 +14,7 @@ public sealed class WolfmedDebugCrateTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

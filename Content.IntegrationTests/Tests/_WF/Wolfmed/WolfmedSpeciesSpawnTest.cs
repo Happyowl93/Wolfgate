@@ -41,7 +41,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WoundDamageProjectionSystem))]
-public sealed class WolfmedSpeciesSpawnTest : GameTest
+public sealed class WolfmedSpeciesSpawnTest : WolfmedGameTest
 {
     /// <summary>
     /// PLAN5 §6.2 T-P5-2. PROTO Q in one assertion block: an IPC is a wound host whose every limb carries the
@@ -54,7 +54,7 @@ public sealed class WolfmedSpeciesSpawnTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var body = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
@@ -113,7 +113,7 @@ public sealed class WolfmedSpeciesSpawnTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -177,7 +177,7 @@ public sealed class WolfmedSpeciesSpawnTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -229,7 +229,7 @@ public sealed class WolfmedSpeciesSpawnTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var slashed = EntityUid.Invalid;
         var blunted = EntityUid.Invalid;
 
@@ -282,7 +282,7 @@ public sealed class WolfmedSpeciesSpawnTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var body = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
@@ -326,7 +326,7 @@ public sealed class WolfmedSpeciesSpawnTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var hosts = new EntityUid[2];
 
         await server.WaitAssertion(() =>
@@ -350,16 +350,14 @@ public sealed class WolfmedSpeciesSpawnTest : GameTest
                             Is.EqualTo(new ProtoId<BodyPartProfilePrototype>("OrganicBodyPartProfile")),
                             $"protogen is organic, not cybernetic (U4(a)); {component.PartType} must prove it.");
 
-                    // P5-D19 / U12′, flipped by M4 (OD16 parity, plan §9.2 group C): the brain, heart and lungs
-                    // carry Wolfmed data now (marked parent edits in _Mono/Body/Organs/protogen.yml). The other
-                    // protogen organs still carry none, as the human's eyes-to-kidneys set is outside §9.1's checks.
-                    foreach (var (organ, _) in graph.GetBodyOrgans(host))
+                    // P5-D19 / U12′, flipped by M4 for the brain, heart and lungs and by the species organ fix for
+                    // the eyes, liver, kidneys and stomach (marked parent edits in _Mono/Body/Organs/protogen.yml).
+                    // Only the slotless tongue carries none, as on every species.
+                    foreach (var (organ, component) in graph.GetBodyOrgans(host))
                     {
-                        var vital = entities.HasComponent<BrainComponent>(organ) ||
-                                    entities.HasComponent<HeartComponent>(organ) ||
-                                    entities.HasComponent<LungComponent>(organ);
-                        Assert.That(entities.HasComponent<OrganDamageComponent>(organ), Is.EqualTo(vital),
-                            "protogen brain, heart and lungs carry OrganDamage (M4); the rest do not.");
+                        Assert.That(entities.HasComponent<OrganDamageComponent>(organ),
+                            Is.EqualTo(!string.IsNullOrEmpty(component.SlotId)),
+                            $"every slotted protogen organ carries OrganDamage; {component.SlotId} does not match.");
                     }
                 }
             });
@@ -390,7 +388,7 @@ public sealed class WolfmedSpeciesSpawnTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var arm = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
@@ -455,7 +453,7 @@ public sealed class WolfmedSpeciesSpawnTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -485,7 +483,7 @@ public sealed class WolfmedSpeciesSpawnTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -529,7 +527,7 @@ public sealed class WolfmedSpeciesSpawnTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

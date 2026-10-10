@@ -43,7 +43,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedLifeSystem))]
-public sealed class WolfmedSpeciesTest : GameTest
+public sealed class WolfmedSpeciesTest : WolfmedGameTest
 {
     private async Task Pin()
     {
@@ -71,7 +71,7 @@ public sealed class WolfmedSpeciesTest : GameTest
     public async Task SpeciesArrestTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var alerts = SEntMan.System<WolfmedConditionAlertSystem>();
         var mobState = SEntMan.System<MobStateSystem>();
@@ -178,7 +178,7 @@ public sealed class WolfmedSpeciesTest : GameTest
     public async Task SynthBranchTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var mobState = SEntMan.System<MobStateSystem>();
         var graph = SEntMan.System<SharedBodySystem>();

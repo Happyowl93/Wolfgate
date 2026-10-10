@@ -160,6 +160,7 @@
     unlitRunningState: unlit-building
     staticPacks:
     - ToolsStatic
+    - WFPlanetStatic # WOLFGATE(Planets): landing thruster kits and parachutes.
     - PartsStatic
     - AtmosStatic
     - CablesStatic
@@ -351,7 +352,8 @@
     - AiCoreBoard
     - S2MechBoards
     - EngineeringBoardsGoob #Goob Factorio port
-    - ReactorCircuitboards # FH edit
+    - ReactorCircuitboards # FH edit\
+    - ServiceBoardsGoob #Forge-Change
   - type: MaterialStorage
     whitelist:
       tags:
@@ -625,7 +627,8 @@
   - type: Machine
     board: MedicalTechFabCircuitboard
   - type: StealTarget
-    stealGroup: MedicalTechFabCircuitboard
+    stealGroup:
+    - MedicalTechFabCircuitboard
   - type: PirateBountyItem # Mono
     id: Techfab
 

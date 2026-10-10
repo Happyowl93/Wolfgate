@@ -41,7 +41,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedWoundSurgerySystem))]
-public sealed class WolfmedWoundSurgeryTest : GameTest
+public sealed class WolfmedWoundSurgeryTest : WolfmedGameTest
 {
     // WOLFGATE: the body fixture carries `- type: MobState` and an explicit `- type: StatusEffects` allow-list
     // (P2-D24) because T-SURG-PAIN moves real pain on a real mob. The bare step entities carry exactly one
@@ -176,7 +176,7 @@ public sealed class WolfmedWoundSurgeryTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -246,7 +246,7 @@ public sealed class WolfmedWoundSurgeryTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -324,7 +324,7 @@ public sealed class WolfmedWoundSurgeryTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -363,7 +363,7 @@ public sealed class WolfmedWoundSurgeryTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -417,7 +417,7 @@ public sealed class WolfmedWoundSurgeryTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -470,7 +470,7 @@ public sealed class WolfmedWoundSurgeryTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var body = EntityUid.Invalid;
         var organ = EntityUid.Invalid;
 
@@ -520,7 +520,7 @@ public sealed class WolfmedWoundSurgeryTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -584,7 +584,7 @@ public sealed class WolfmedWoundSurgeryTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var configuration = server.ResolveDependency<IConfigurationManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         try
         {
@@ -670,7 +670,7 @@ public sealed class WolfmedWoundSurgeryTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

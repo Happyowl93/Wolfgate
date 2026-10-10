@@ -15,8 +15,10 @@ public static class SharedSymphony
     /// /symphony/hub, the hub switch: whether the server advertises itself, read and set while it runs. Version 5 added
     /// /symphony/players: who is connected, with character, job, state and ping, which /admin/info does not carry. Version 6 added
     /// symphony_round_duration and symphony_paused in /status: the round clock as the game keeps it, which stops while paused.
+    /// Version 7 added /symphony/cvars: every registered CVar with its value, default and flags, and setting one while the
+    /// server runs.
     /// </summary>
-    public const int ModuleVersion = 6;
+    public const int ModuleVersion = 7;
 
     /// <summary>
     /// Key of the one-time Discord link URL in a whitelist refusal's structured properties.

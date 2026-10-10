@@ -38,7 +38,7 @@
   objectType: Structure
   canBuildInImpassable: false
   icon:
-    sprite: Structures/conveyor.rsi
+    sprite: _Impstation/Structures/conveyor.rsi # WOLFGATE(Resprites): Imp Sprite Ports
     state: switch-off
   conditions:
     - !type:TileNotBlocked

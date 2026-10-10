@@ -21,7 +21,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// the heart survives three hits on both bodies and goes between the seventh and twelfth.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedMacheteTest : GameTest
+public sealed class WolfmedMacheteTest : WolfmedGameTest
 {
     private WoundDamageRoutingSystem Routing => SEntMan.System<WoundDamageRoutingSystem>();
     private static DamageSpecifier Spec(string type, float amount) => WolfmedScenario.Spec(type, amount);
@@ -30,7 +30,7 @@ public sealed class WolfmedMacheteTest : GameTest
     [TestCase("RMCMobSkrell", 32f)]
     public async Task MacheteHitsToTheChestTest(string proto, float slash)
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid a = default, attacker = default;
         await Server.WaitPost(() =>

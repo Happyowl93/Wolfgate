@@ -37,7 +37,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// power, a rejuvenated IPC's missing cell, and the revolver casings that filled the server log.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedPlaytestOneTest : GameTest
+public sealed class WolfmedPlaytestOneTest : WolfmedGameTest
 {
     private async Task Pin()
     {
@@ -74,7 +74,7 @@ public sealed class WolfmedPlaytestOneTest : GameTest
     public async Task DefibAfterTransfusionTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
 
         await Server.WaitAssertion(() =>
@@ -168,7 +168,7 @@ public sealed class WolfmedPlaytestOneTest : GameTest
         await Pin();
         await OverrideCVar(Side.Server, Content.Shared.CCVar.CCVars.WoundsBleedingAutoStopEnabled, false);
         await OverrideCVar(Side.Server, WolfmedCVars.CauteryPopupSeconds, 0f);
-        var map = await Pair.CreateTestMap();
+        var map = await CreateVacuumTestMap();
         EntityUid body = default, bleeder = default;
         var lines = new List<string>();
         var states = new List<string>();
@@ -264,7 +264,7 @@ public sealed class WolfmedPlaytestOneTest : GameTest
     public async Task IpcLowPowerCrawlTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid ipc = default;
 
         await Server.WaitPost(() =>
@@ -308,7 +308,7 @@ public sealed class WolfmedPlaytestOneTest : GameTest
     public async Task RejuvenateRestoresMissingCellTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid ipc = default;
 
@@ -361,7 +361,7 @@ public sealed class WolfmedPlaytestOneTest : GameTest
     [Test]
     public async Task RevolverCasingKeepsItsSlotTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var guns = SEntMan.System<Content.Shared.Weapons.Ranged.Systems.SharedGunSystem>();
         EntityUid revolver = default, round = default;
 

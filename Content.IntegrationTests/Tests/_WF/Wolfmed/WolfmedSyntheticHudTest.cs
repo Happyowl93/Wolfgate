@@ -34,7 +34,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedSyntheticHudSystem))]
-public sealed class WolfmedSyntheticHudTest : GameTest
+public sealed class WolfmedSyntheticHudTest : WolfmedGameTest
 {
     /// <summary>
     /// A breach on the torso and a servo run cut in the left arm read as two lines, tagged by the data,
@@ -46,7 +46,7 @@ public sealed class WolfmedSyntheticHudTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -116,7 +116,7 @@ public sealed class WolfmedSyntheticHudTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -358,7 +358,7 @@ public sealed class WolfmedSyntheticHudTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid shut = default;
 
         await server.WaitAssertion(() =>
@@ -454,7 +454,7 @@ public sealed class WolfmedSyntheticHudTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

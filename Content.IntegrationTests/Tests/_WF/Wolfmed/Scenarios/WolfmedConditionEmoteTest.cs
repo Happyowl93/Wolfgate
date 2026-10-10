@@ -25,7 +25,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedConditionEmoteSystem))]
-public sealed class WolfmedConditionEmoteTest : GameTest
+public sealed class WolfmedConditionEmoteTest : WolfmedGameTest
 {
     private async Task Pin()
     {
@@ -79,7 +79,7 @@ public sealed class WolfmedConditionEmoteTest : GameTest
     public async Task FailedLungsCoughTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid body = default;
         await Server.WaitPost(() =>
@@ -112,7 +112,7 @@ public sealed class WolfmedConditionEmoteTest : GameTest
     public async Task SepsisRetchesAndVomitsOnceTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid body = default;
         await Server.WaitPost(() =>
@@ -141,7 +141,7 @@ public sealed class WolfmedConditionEmoteTest : GameTest
     public async Task NoEmoteWithoutACauseTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid healthy = default, dead = default, ipc = default;
         await Server.WaitPost(() =>
@@ -187,7 +187,7 @@ public sealed class WolfmedConditionEmoteTest : GameTest
     public async Task InfectedChestShiversTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid body = default;
         await Server.WaitPost(() =>

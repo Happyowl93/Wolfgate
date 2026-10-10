@@ -19,7 +19,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(AutodocSystem))]
-public sealed class WolfmedPodReagentSafetyTest : GameTest
+public sealed class WolfmedPodReagentSafetyTest : WolfmedGameTest
 {
     [TestPrototypes]
     private const string Prototypes = @"
@@ -48,7 +48,7 @@ public sealed class WolfmedPodReagentSafetyTest : GameTest
     [Test]
     public async Task PodStopsAtTheSafeLineTest()
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {

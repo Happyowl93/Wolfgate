@@ -198,6 +198,10 @@ public sealed partial class ShipShieldsSystem : EntitySystem
     /// <returns>The shield entity.</returns>
     private EntityUid ShieldEntity(EntityUid entity, EntityUid? source = null, MapGridComponent? mapGrid = null)
     {
+        // WOLFGATE(ShipShields) START: block normal and administrative shield deployment throughout FTL
+        if (IsWolfgateShieldFtlLocked(entity))
+            return EntityUid.Invalid;
+        // WOLFGATE END
         // WOLFGATE(ShipShields) START: discard stale grid fields and reserve active fields for their owner
         // if (TryComp<ShipShieldedComponent>(entity, out var existingShielded))
         //     return existingShielded.Shield;

@@ -47,7 +47,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(HealthAnalyzerSystem))]
-public sealed class WolfmedAnalyzerTest : GameTest
+public sealed class WolfmedAnalyzerTest : WolfmedGameTest
 {
     // WOLFGATE: WolfmedAnalyzerPlainTarget is the D2 control - Damageable and nothing else. The
     // SurgeryTarget-without-WoundHost case (a borg, a Protogen) is the shape §8.5 risk 20 is about: Onyx gates
@@ -75,7 +75,7 @@ public sealed class WolfmedAnalyzerTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -110,7 +110,7 @@ public sealed class WolfmedAnalyzerTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -169,7 +169,7 @@ public sealed class WolfmedAnalyzerTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -220,7 +220,7 @@ public sealed class WolfmedAnalyzerTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var timing = server.ResolveDependency<IGameTiming>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -291,7 +291,7 @@ public sealed class WolfmedAnalyzerTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -322,7 +322,7 @@ public sealed class WolfmedAnalyzerTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -372,7 +372,7 @@ public sealed class WolfmedAnalyzerTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -410,7 +410,7 @@ public sealed class WolfmedAnalyzerTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -462,7 +462,7 @@ public sealed class WolfmedAnalyzerTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var locale = server.ResolveDependency<ILocalizationManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -510,7 +510,7 @@ public sealed class WolfmedAnalyzerTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -637,7 +637,7 @@ public sealed class WolfmedAnalyzerTest : GameTest
         var client = Pair.Client;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         HealthAnalyzerScannedUserMessage? message = null;
         var expected = string.Empty;
 

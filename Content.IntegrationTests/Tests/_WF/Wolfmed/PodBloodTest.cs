@@ -25,7 +25,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(AutodocSystem))]
-public sealed class PodBloodTest : GameTest
+public sealed class PodBloodTest : WolfmedGameTest
 {
     public override PoolSettings PoolSettings => PsDisconnected;
 
@@ -58,7 +58,7 @@ public sealed class PodBloodTest : GameTest
     /// <summary>A pod holding a human bled to <paramref name="blood"/>, their own regeneration off, and optionally a stack.</summary>
     private async Task<(Entity<AutodocComponent> Pod, EntityUid Body, EntityUid? Pack)> PodWith(float blood, int packs)
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid body = default;
         EntityUid? pack = null;

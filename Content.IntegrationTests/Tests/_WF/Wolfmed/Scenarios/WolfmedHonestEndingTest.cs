@@ -50,7 +50,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedDyingActionsSystem))]
-public sealed class WolfmedHonestEndingTest : GameTest
+public sealed class WolfmedHonestEndingTest : WolfmedGameTest
 {
     [TestPrototypes]
     private const string Prototypes = @"
@@ -151,7 +151,7 @@ public sealed class WolfmedHonestEndingTest : GameTest
     public async Task HonestEndingScenarioTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var dying = SEntMan.System<WolfmedDyingActionsSystem>();
         var mobState = SEntMan.System<MobStateSystem>();
@@ -404,7 +404,7 @@ public sealed class WolfmedHonestEndingTest : GameTest
     public async Task CritSuccumbNeverGrantedToWoundHostsTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var factory = SEntMan.ComponentFactory;
         var woundHost = factory.GetComponentName(typeof(WoundHostComponent));
         var stateActions = factory.GetComponentName(typeof(MobStateActionsComponent));
@@ -442,7 +442,7 @@ public sealed class WolfmedHonestEndingTest : GameTest
     public async Task CriticalHearingTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var (listener, _) = await Possess("MobHuman", map);
         EntityUid speaker = default;
 

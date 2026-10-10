@@ -23,7 +23,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedPainAlertSystem))]
-public sealed class WolfmedPainHudTest : GameTest
+public sealed class WolfmedPainHudTest : WolfmedGameTest
 {
     private async Task Pin()
     {
@@ -54,7 +54,7 @@ public sealed class WolfmedPainHudTest : GameTest
     public async Task PainHudStepsThroughTheScaleTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid a = default, b = default, machine = default;
         await Server.WaitPost(() =>

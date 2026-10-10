@@ -11,7 +11,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 
 [TestFixture]
 [TestOf(typeof(WoundBleedingSystem))]
-public sealed class WolfmedBleedingLifecycleTest : GameTest
+public sealed class WolfmedBleedingLifecycleTest : WolfmedGameTest
 {
     [TestCase(false)]
     [TestCase(true)]
@@ -20,7 +20,7 @@ public sealed class WolfmedBleedingLifecycleTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -64,7 +64,7 @@ public sealed class WolfmedBleedingLifecycleTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -117,7 +117,7 @@ public sealed class WolfmedBleedingLifecycleTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -150,7 +150,7 @@ public sealed class WolfmedBleedingLifecycleTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

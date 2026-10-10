@@ -13,7 +13,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 
 /// <summary>Playtest 4: a Downed body fires a sidearm from the floor and nothing bigger.</summary>
 [TestFixture]
-public sealed class WolfmedDownedSidearmTest : GameTest
+public sealed class WolfmedDownedSidearmTest : WolfmedGameTest
 {
     [TestCase("WeaponPistolMk58", false)]
     [TestCase("WeaponRevolverInspector", false)]
@@ -21,7 +21,7 @@ public sealed class WolfmedDownedSidearmTest : GameTest
     [TestCase("WeaponShotgunKammerer", true)]
     public async Task DownedShotTest(string gunProto, bool cancelled)
     {
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         await Server.WaitAssertion(() =>
         {
             var body = SEntMan.SpawnEntity("MobHuman", map.GridCoords);

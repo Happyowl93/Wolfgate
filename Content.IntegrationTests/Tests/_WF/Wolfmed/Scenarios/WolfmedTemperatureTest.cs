@@ -26,7 +26,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedBodyTemperatureSystem))]
-public sealed class WolfmedTemperatureTest : GameTest
+public sealed class WolfmedTemperatureTest : WolfmedGameTest
 {
     private const float Band = 0.2f;
 
@@ -135,7 +135,7 @@ public sealed class WolfmedTemperatureTest : GameTest
         var airs = new float?[] { null, null, 293.15f, 273.15f, 253.15f, 233.15f, 213.15f, 173.15f };
         for (var i = 0; i < names.Length; i++)
         {
-            var map = await Pair.CreateTestMap();
+            var map = await CreateTestMap();
             var index = i;
             await Server.WaitPost(() =>
             {
@@ -149,7 +149,7 @@ public sealed class WolfmedTemperatureTest : GameTest
         }
 
         // Two fires: one left to burn out, one put out at its hottest (30 s), the case the fire grace has to cover.
-        var fireMap = await Pair.CreateTestMap();
+        var fireMap = await CreateTestMap();
         var doused = default(EntityUid);
         await Server.WaitPost(() =>
         {
@@ -226,7 +226,7 @@ public sealed class WolfmedTemperatureTest : GameTest
     public async Task HypothermiaScenarioTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid frozen = default, rewarmed = default;
 
@@ -329,7 +329,7 @@ public sealed class WolfmedTemperatureTest : GameTest
     public async Task HeatStrokeScenarioTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid hot = default, cooled = default, graced = default, stroke = default, relit = default, renewed = default;
 
@@ -447,7 +447,7 @@ public sealed class WolfmedTemperatureTest : GameTest
     public async Task SpeciesLinesTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid human = default, reptilian = default, avali = default;
 
@@ -492,7 +492,12 @@ public sealed class WolfmedTemperatureTest : GameTest
     public async Task SpaceColdSmokeTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        // The cold alone: hard vacuum starves a naked brain well before the cold takes it (WolfmedSpaceExposureTest),
+        // and the faster no-air clock would colour the first minute.
+        await OverrideCVar(Side.Server, WolfmedCVars.BrainVacuumSeconds, 0f);
+        await OverrideCVar(Side.Server, WolfmedCVars.BrainAirlossSeconds, 180f);
+        await OverrideCVar(Side.Server, WolfmedCVars.AirlossFull, 100f);
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid body = default;
 
@@ -573,7 +578,7 @@ public sealed class WolfmedTemperatureTest : GameTest
         await OverrideCVar(Side.Server, WolfmedCVars.CoreRecoverySeconds, 60f);
         try
         {
-            var map = await Pair.CreateTestMap();
+            var map = await CreateTestMap();
             var s = new WolfmedScenario(SEntMan);
             EntityUid body = default;
             await Server.WaitPost(() =>

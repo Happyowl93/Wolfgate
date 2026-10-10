@@ -28,7 +28,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// <remarks>PLAN3 §6.2 T-REATTACH.</remarks>
 [TestFixture]
 [TestOf(typeof(WoundDamageProjectionSystem))]
-public sealed class WolfmedReattachTest : GameTest
+public sealed class WolfmedReattachTest : WolfmedGameTest
 {
     // WOLFGATE: Shitmed body graph instead of Onyx's Nubody InitialBody; Chest→Torso is irrelevant here since
     // the only limb is an arm. MobBloodstream supplies BloodstreamComponent so BleedAmount is observable.
@@ -63,7 +63,7 @@ public sealed class WolfmedReattachTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -119,7 +119,7 @@ public sealed class WolfmedReattachTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -180,7 +180,7 @@ public sealed class WolfmedReattachTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -249,7 +249,7 @@ public sealed class WolfmedReattachTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

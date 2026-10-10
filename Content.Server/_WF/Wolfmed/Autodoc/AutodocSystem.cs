@@ -108,6 +108,7 @@ public sealed partial class AutodocSystem : EntitySystem
 
         SubscribeLocalEvent<AutodocComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<AutodocComponent, GetVerbsEvent<AlternativeVerb>>(OnGetVerbs);
+        SubscribeLocalEvent<AutodocComponent, GetVerbsEvent<Verb>>(OnGetEnterVerb);
         // Playtest 3 SAM: before construction's drag-drop and the climb, which both answer a drop on any machine.
         SubscribeLocalEvent<AutodocComponent, AutodocInsertDoAfterEvent>(OnInsertDoAfter);
         SubscribeLocalEvent<AutodocComponent, DragDropTargetEvent>(OnDragDrop,
@@ -281,23 +282,29 @@ public sealed partial class AutodocSystem : EntitySystem
         }
     }
 
+    /// <summary>
+    /// "Climb in" is an ordinary verb, in the menu and nowhere else. As the pod's first alternative verb it was what
+    /// alt-click did, so reaching for a blood pack or a disk in an empty pod put the medic inside it instead.
+    /// </summary>
+    private void OnGetEnterVerb(Entity<AutodocComponent> ent, ref GetVerbsEvent<Verb> args)
+    {
+        if (!args.CanAccess || !args.CanInteract || GetOccupant(ent) != null || !HasComp<BodyComponent>(args.User))
+            return;
+
+        var user = args.User;
+        args.Verbs.Add(new Verb
+        {
+            Act = () => EnterPod(ent, user),
+            Text = Loc.GetString("wolfmed-autodoc-verb-enter"),
+        });
+    }
+
     private void OnGetVerbs(Entity<AutodocComponent> ent, ref GetVerbsEvent<AlternativeVerb> args)
     {
         if (!args.CanAccess || !args.CanInteract)
             return;
 
-        var user = args.User;
         var occupant = GetOccupant(ent);
-
-        if (occupant == null && HasComp<BodyComponent>(user))
-        {
-            args.Verbs.Add(new AlternativeVerb
-            {
-                Act = () => EnterPod(ent, user),
-                Text = Loc.GetString("wolfmed-autodoc-verb-enter"),
-                Priority = 2,
-            });
-        }
 
         if (occupant != null && !ent.Comp.Locked)
         {

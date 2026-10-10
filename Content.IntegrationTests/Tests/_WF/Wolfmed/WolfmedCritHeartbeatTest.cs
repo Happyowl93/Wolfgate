@@ -36,7 +36,7 @@ public sealed class WolfmedCritHeartbeatTest
         var mindSys = sEntMan.System<SharedMindSystem>();
         var mobState = sEntMan.System<MobStateSystem>();
         var heartbeat = client.System<WolfmedCritHeartbeatSystem>();
-        var map = await pair.CreateTestMap();
+        var map = await WolfmedGameTest.CreateTestMap(pair);
 
         Assert.That(client.Session, Is.Not.Null, "These tests need a connected pair.");
         var session = server.PlayerMan.GetSessionById(client.Session!.UserId);
@@ -79,7 +79,7 @@ public sealed class WolfmedCritHeartbeatTest
         var sEntMan = server.EntMan;
         var mindSys = sEntMan.System<SharedMindSystem>();
         var heartbeat = client.System<WolfmedCritHeartbeatSystem>();
-        var map = await pair.CreateTestMap();
+        var map = await WolfmedGameTest.CreateTestMap(pair);
         var session = server.PlayerMan.GetSessionById(client.Session!.UserId);
 
         EntityUid human = default;
@@ -146,7 +146,7 @@ public sealed class WolfmedCritHeartbeatTest
         var mindSys = sEntMan.System<SharedMindSystem>();
         var life = sEntMan.System<WolfmedLifeSystem>();
         var heartbeat = client.System<WolfmedCritHeartbeatSystem>();
-        var map = await pair.CreateTestMap();
+        var map = await WolfmedGameTest.CreateTestMap(pair);
         var session = server.PlayerMan.GetSessionById(client.Session!.UserId);
 
         EntityUid body = default;

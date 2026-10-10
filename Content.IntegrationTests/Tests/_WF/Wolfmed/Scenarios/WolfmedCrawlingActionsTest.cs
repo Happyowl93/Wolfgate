@@ -31,7 +31,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedDownedSystem))]
-public sealed class WolfmedCrawlingActionsTest : GameTest
+public sealed class WolfmedCrawlingActionsTest : WolfmedGameTest
 {
     [TestPrototypes]
     private const string Prototypes = @"
@@ -110,7 +110,7 @@ public sealed class WolfmedCrawlingActionsTest : GameTest
     public async Task DownedPickupTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default, underfoot = default, gun = default, far = default;
 
         await Server.WaitPost(() =>
@@ -188,7 +188,7 @@ public sealed class WolfmedCrawlingActionsTest : GameTest
     public async Task CallForHelpTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var session = ServerSession!;
         var minds = SEntMan.System<SharedMindSystem>();
         var calls = SEntMan.System<WolfmedCallForHelpSystem>();

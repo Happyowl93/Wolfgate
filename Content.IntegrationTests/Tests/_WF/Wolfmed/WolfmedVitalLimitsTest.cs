@@ -30,7 +30,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// chance nothing on it could raise.
 /// </summary>
 [TestFixture]
-public sealed class WolfmedVitalLimitsTest : GameTest
+public sealed class WolfmedVitalLimitsTest : WolfmedGameTest
 {
     /// <summary>Systemic airloss stops at the cap however much suffocation is thrown at the body.</summary>
     [Test]
@@ -40,7 +40,7 @@ public sealed class WolfmedVitalLimitsTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var config = server.ResolveDependency<IConfigurationManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -66,7 +66,7 @@ public sealed class WolfmedVitalLimitsTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -98,7 +98,7 @@ public sealed class WolfmedVitalLimitsTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var config = server.ResolveDependency<IConfigurationManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -129,7 +129,7 @@ public sealed class WolfmedVitalLimitsTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         Entity<AutodocComponent> pod = default;
         EntityUid body = default;
 

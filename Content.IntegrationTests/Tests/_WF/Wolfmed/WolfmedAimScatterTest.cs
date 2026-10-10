@@ -22,7 +22,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// <summary>Bullets land on the aimed part by a roll against gun spread and range; melee always lands where aimed.</summary>
 [TestFixture]
 [TestOf(typeof(WolfmedAimScatterSystem))]
-public sealed class WolfmedAimScatterTest : GameTest
+public sealed class WolfmedAimScatterTest : WolfmedGameTest
 {
     [Test]
     public async Task BulletsStrayMeleeDoesNotTest()
@@ -30,7 +30,7 @@ public sealed class WolfmedAimScatterTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var aim = server.System<WolfmedAimScatterSystem>();
 
         await server.WaitAssertion(() =>

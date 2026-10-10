@@ -31,7 +31,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedPartArmorSystem))]
-public sealed class WolfmedArmorCoverageTest : GameTest
+public sealed class WolfmedArmorCoverageTest : WolfmedGameTest
 {
     /// <summary>Items whose armour must reach every part: suits that seal the whole body.</summary>
     private static readonly string[] FullBody =
@@ -58,7 +58,7 @@ public sealed class WolfmedArmorCoverageTest : GameTest
     {
         await Server.WaitIdleAsync();
         var entities = Server.EntMan;
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {
@@ -92,7 +92,7 @@ public sealed class WolfmedArmorCoverageTest : GameTest
     {
         await Server.WaitIdleAsync();
         var entities = Server.EntMan;
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await Server.WaitAssertion(() =>
         {

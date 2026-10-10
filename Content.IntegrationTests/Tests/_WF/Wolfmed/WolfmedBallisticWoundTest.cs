@@ -31,7 +31,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(WolfmedWoundRuleSystem))]
-public sealed class WolfmedBallisticWoundTest : GameTest
+public sealed class WolfmedBallisticWoundTest : WolfmedGameTest
 {
     /// <summary>A round that barely caught the limb grazes it; a rifle-weight one stays in.</summary>
     [Test]
@@ -42,7 +42,7 @@ public sealed class WolfmedBallisticWoundTest : GameTest
         // Lodging is a roll now; the heavy band below asserts the lodged outcome, so the roll is forced to land.
         await server.WaitPost(() => server.System<WolfmedWoundRuleSystem>().ForcedRoll = 0f);
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -84,7 +84,7 @@ public sealed class WolfmedBallisticWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -117,7 +117,7 @@ public sealed class WolfmedBallisticWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -151,7 +151,7 @@ public sealed class WolfmedBallisticWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -193,7 +193,7 @@ public sealed class WolfmedBallisticWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -235,7 +235,7 @@ public sealed class WolfmedBallisticWoundTest : GameTest
         // Lodging is a roll now; this test is about what a lodged round does, so the roll is forced to land.
         await server.WaitPost(() => server.System<WolfmedWoundRuleSystem>().ForcedRoll = 0f);
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -288,7 +288,7 @@ public sealed class WolfmedBallisticWoundTest : GameTest
         // Lodging is a roll now; this test is about what a lodged round does, so the roll is forced to land.
         await server.WaitPost(() => server.System<WolfmedWoundRuleSystem>().ForcedRoll = 0f);
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -340,7 +340,7 @@ public sealed class WolfmedBallisticWoundTest : GameTest
         // Lodging is a roll now; this test is about what a lodged round does, so the roll is forced to land.
         await server.WaitPost(() => server.System<WolfmedWoundRuleSystem>().ForcedRoll = 0f);
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -390,7 +390,7 @@ public sealed class WolfmedBallisticWoundTest : GameTest
         await server.WaitPost(() => server.System<WolfmedWoundRuleSystem>().ForcedRoll = 0f);
         var entities = server.ResolveDependency<IEntityManager>();
         var locale = server.ResolveDependency<ILocalizationManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -427,7 +427,7 @@ public sealed class WolfmedBallisticWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -482,7 +482,7 @@ public sealed class WolfmedBallisticWoundTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

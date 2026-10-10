@@ -138,7 +138,7 @@ public sealed class WolfmedConditionEmoteSystem : EntitySystem
         var sepsis = _infection.GetSepsis(body);
 
         // Airway blocked, or drowning in blood: a holed lung bleeding into the chest.
-        if (source == WolfmedCauseSource.Airway || chestBleed && LungsDamagedInPlace(body))
+        if (source is WolfmedCauseSource.Airway or WolfmedCauseSource.Vacuum || chestBleed && LungsDamagedInPlace(body))
             into.Add(Choke);
 
         if (lungs)

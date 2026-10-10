@@ -22,7 +22,7 @@ public sealed class WolfmedSpawnedGearUnequipTest
         var client = pair.Client;
         var sEntMan = server.EntMan;
         var inventory = sEntMan.System<InventorySystem>();
-        var map = await pair.CreateTestMap();
+        var map = await WolfmedGameTest.CreateTestMap(pair);
 
         EntityUid mob = default;
         EntityUid helmet = default;

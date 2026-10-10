@@ -3,6 +3,7 @@ using System.Linq;
 using System.Numerics;
 using Content.Client.DisplacementMap;
 using Content.Client.Inventory;
+using Content.Client._WF.LegStyle; // WOLFGATE(LegStyle)
 using Content.Shared.Clothing;
 using Content.Shared.Clothing.Components;
 using Content.Shared.Clothing.EntitySystems;
@@ -54,6 +55,7 @@ public sealed partial class ClientClothingSystem : ClothingSystem
     [Dependency] private IResourceCache _cache = default!;
     [Dependency] private InventorySystem _inventorySystem = default!;
     [Dependency] private DisplacementMapSystem _displacement = default!;
+    [Dependency] private LegStyleSystem _legStyle = default!; // WOLFGATE(LegStyle)
 
     public override void Initialize()
     {
@@ -290,6 +292,8 @@ public sealed partial class ClientClothingSystem : ClothingSystem
                     break;
             }
         }
+
+        displacementData = _legStyle.GetDisplacement(equipee, slot, displacementData); // WOLFGATE(LegStyle): picked legs decide the map for the slots they reshape
 
         // add the new layers
         foreach (var (key, layerData) in ev.Layers)

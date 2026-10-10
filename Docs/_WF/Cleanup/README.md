@@ -18,5 +18,6 @@ entity instead of letting cleanup delete it. The fix is a marked edit in
 - [`Content.Server/_Mono/Cleanup/CleanupHelperSystem.cs`](../../../Content.Server/_Mono/Cleanup/CleanupHelperSystem.cs)
   - fail closed, an invalid protection radius must not permit cleanup or reach the spatial query
   - price-scaled cleanup can produce zero or non-finite radii, preserve the entity in that case
+- [`Content.Server/_Mono/Cleanup/SpaceCleanupSystem.cs`](../../../Content.Server/_Mono/Cleanup/SpaceCleanupSystem.cs): floor the lookup radius, since a zero-price entity's zero radius asserted the server down.
 
 <!-- WOLFGATE-GENERATED END -->

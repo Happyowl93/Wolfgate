@@ -196,7 +196,8 @@ public sealed class WFShipShieldShuntSystem : EntitySystem
             ? ShipShieldsSystem.GetWolfgateShieldHealth(Comp<ShipShieldEmitterComponent>(emitterUid)) : 0f;
         EntityUid? statsEmitter = null;
         var active = false;
-        if (grid is { } activeGrid && TryComp<ShipShieldedComponent>(activeGrid, out var shielded) &&
+        var ftlLocked = grid is { } ftlGrid && _shields.IsWolfgateShieldFtlLocked(ftlGrid);
+        if (!ftlLocked && grid is { } activeGrid && TryComp<ShipShieldedComponent>(activeGrid, out var shielded) &&
             !TerminatingOrDeleted(shielded.Shield) && !EntityManager.IsQueuedForDeletion(shielded.Shield) &&
             TryComp<PhysicsComponent>(shielded.Shield, out var physics) && physics.CanCollide &&
             TryComp<WFShipShieldVisualsComponent>(shielded.Shield, out var visuals))
@@ -221,6 +222,11 @@ public sealed class WFShipShieldShuntSystem : EntitySystem
             statsEmitter = installed;
             health = installed is { } recoveringEmitter
                 ? ShipShieldsSystem.GetWolfgateShieldHealth(Comp<ShipShieldEmitterComponent>(recoveringEmitter)) : 0f;
+        }
+        if (installed != null && ftlLocked)
+        {
+            recoveryStatus = WFShipShieldRecoveryStatus.FtlLocked;
+            recoverySeconds = -1;
         }
         return new WFShipShieldShuntState(installed != null, active, health,
             allocation?.DirectionRadians ?? MathF.PI / 2f, allocation?.Concentration ?? 0f,

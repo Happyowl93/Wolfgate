@@ -29,7 +29,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// <remarks>PLAN3 §6.2 T-VISUALS. No sprite/screenshot assertion - this project prefers logic tests.</remarks>
 [TestFixture]
 [TestOf(typeof(WoundDamageProjectionSystem))]
-public sealed class WolfmedVisualsTest : GameTest
+public sealed class WolfmedVisualsTest : WolfmedGameTest
 {
     [Test]
     public async Task PartDamageProjectsToVisualsComponentTest()
@@ -38,7 +38,7 @@ public sealed class WolfmedVisualsTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var clientEntities = Pair.Client.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var body = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
@@ -118,7 +118,7 @@ public sealed class WolfmedVisualsTest : GameTest
         var entities = server.ResolveDependency<IEntityManager>();
         var prototypes = server.ResolveDependency<IPrototypeManager>();
         var clientEntities = Pair.Client.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var body = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
@@ -202,7 +202,7 @@ public sealed class WolfmedVisualsTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var prototypes = server.ResolveDependency<IPrototypeManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -244,7 +244,7 @@ public sealed class WolfmedVisualsTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var prototypes = server.ResolveDependency<IPrototypeManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

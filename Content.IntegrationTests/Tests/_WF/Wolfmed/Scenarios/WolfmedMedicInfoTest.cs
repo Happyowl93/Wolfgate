@@ -53,7 +53,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedVitalsText))]
-public sealed class WolfmedMedicInfoTest : GameTest
+public sealed class WolfmedMedicInfoTest : WolfmedGameTest
 {
     private async Task Pin()
     {
@@ -142,7 +142,7 @@ public sealed class WolfmedMedicInfoTest : GameTest
     public async Task AnalyzerVitalsTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         EntityUid calm = default, bleeder = default, septic = default, overdosed = default, arrest = default;
 
@@ -236,7 +236,7 @@ public sealed class WolfmedMedicInfoTest : GameTest
     public async Task ExplanationCardTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var alerts = SEntMan.System<WolfmedConditionAlertSystem>();
         var cards = SEntMan.System<WolfmedCardSystem>();
@@ -331,7 +331,7 @@ public sealed class WolfmedMedicInfoTest : GameTest
     public async Task SedationModelTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var relief = SEntMan.System<WolfmedPainReliefSystem>();
         var doses = new (string Reagent, float Units)[] { ("WFWolfmedOpiate", 3f), ("Tramadol", 5f), ("Oxycodone", 5f) };
@@ -464,7 +464,7 @@ public sealed class WolfmedMedicInfoTest : GameTest
     public async Task StimOnStrongTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid both = default, stimOnly = default;
 
         await Server.WaitPost(() =>
@@ -502,7 +502,7 @@ public sealed class WolfmedMedicInfoTest : GameTest
     public async Task WaitAsGhostTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var s = new WolfmedScenario(SEntMan);
         var dormant = SEntMan.System<WolfmedDormantSystem>();
         var minds = SEntMan.System<SharedMindSystem>();
@@ -629,7 +629,7 @@ public sealed class WolfmedMedicInfoTest : GameTest
     public async Task PlayDeadTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var crawl = SEntMan.System<WolfmedCrawlActionsSystem>();
         var inspection = SEntMan.System<WolfmedVisualInspectionSystem>();
         EntityUid body = default, medic = default;
@@ -698,7 +698,7 @@ public sealed class WolfmedMedicInfoTest : GameTest
     public async Task AdjacentDownedAidTest()
     {
         await Pin();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         var downed = SEntMan.System<WolfmedDownedSystem>();
         var blocker = SEntMan.System<ActionBlockerSystem>();
         EntityUid helper = default, patient = default, standing = default, far = default, gauze = default;
@@ -710,8 +710,11 @@ public sealed class WolfmedMedicInfoTest : GameTest
             standing = SEntMan.SpawnEntity("MobHuman", map.GridCoords);
             far = SEntMan.SpawnEntity("MobHuman", map.GridCoords.Offset(new System.Numerics.Vector2(3f, 0f)));
             gauze = SEntMan.SpawnEntity("Gauze1", map.GridCoords);
-            foreach (var body in new[] { helper, patient, far })
+            foreach (var body in new[] { helper, far })
                 SetPain(body, BodyPartType.Torso, 129);
+            // On the head, because the cut gives the torso its own wound floor in place of a set one: pain set there
+            // recovers, and the patient was back up six or seven seconds in, about when the gauze goes on.
+            SetPain(patient, BodyPartType.Head, 129);
             SEntMan.System<DamageableSystem>().TryChangeDamage(patient, Spec("Slash", 20), ignoreResistances: true,
                 targetPart: TargetBodyPart.Torso);
         });
@@ -739,6 +742,8 @@ public sealed class WolfmedMedicInfoTest : GameTest
 
         await Server.WaitAssertion(() =>
         {
+            Assert.That(Consc(patient).State, Is.EqualTo(WolfmedConsciousness.Downed),
+                "the neighbour did not stay Downed while the gauze went on.");
             var torso = new WolfmedScenario(SEntMan).Part(patient, BodyPartType.Torso);
             var treated = SEntMan.System<WoundSystem>().GetWounds((torso, SEntMan.GetComponent<WoundableComponent>(torso)))
                 .Any(wound => SEntMan.TryGetComponent(wound, out WoundBleedingComponent? bleeding) &&

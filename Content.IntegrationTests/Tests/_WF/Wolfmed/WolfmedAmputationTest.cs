@@ -31,7 +31,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </remarks>
 [TestFixture]
 [TestOf(typeof(AmputationSystem))]
-public sealed class WolfmedAmputationTest : GameTest
+public sealed class WolfmedAmputationTest : WolfmedGameTest
 {
     // WOLFGATE: Shitmed body graphs (PLAN3 §6.1 trap 9); Onyx's part-level datafields move to
     // `- type: WolfmedBodyPart` (D8). WolfmedAmputationTorso carries amputationConsequenceSeverity: 50
@@ -119,7 +119,7 @@ public sealed class WolfmedAmputationTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -204,7 +204,7 @@ public sealed class WolfmedAmputationTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -339,7 +339,7 @@ public sealed class WolfmedAmputationTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -421,7 +421,7 @@ public sealed class WolfmedAmputationTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -489,7 +489,7 @@ public sealed class WolfmedAmputationTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {

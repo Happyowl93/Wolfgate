@@ -19,7 +19,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WolfmedChoiceWindow))]
-public sealed class WolfmedChoiceWindowLayoutTest : GameTest
+public sealed class WolfmedChoiceWindowLayoutTest : WolfmedGameTest
 {
     [Test]
     [TestCase(1f)]

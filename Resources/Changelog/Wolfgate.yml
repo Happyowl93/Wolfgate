@@ -1013,3 +1013,320 @@ Entries:
   id: 100075
   time: '2026-10-01T19:28:54.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/32
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Shields now respect FTL cooldown again
+  id: 100076
+  time: '2026-10-02T00:39:43.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/144
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: >-
+        Caelestinus Central has received a substantial investment in their
+        medical department and has refurnished accordingly. The engineering
+        company is not liable for the damaged cryotube.
+  id: 100077
+  time: '2026-10-02T03:19:24.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/145
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Subtle emote. You can now use the subtle emote which only sends to those
+        within 1.5 tiles of your character and isn't visible to ghosts. Access
+        it via rightclick or /subtle in chat.
+  id: 100078
+  time: '2026-10-02T04:09:21.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/146
+- author: Balls2zawall
+  changes:
+    - type: Fix
+      message: Fixed the cryotubes in CC's medical wing not having a gas pump
+    - type: Fix
+      message: The catwalk tiles in the morgue at CC should no longer flicker
+    - type: Fix
+      message: Replaced a firelock that started closed in the back of CC medical
+  id: 100079
+  time: '2026-10-04T02:42:13.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/152
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Species will now actually come equipped with organs.
+    - type: Tweak
+      message: Mannitol actually fixes brain damage now.
+    - type: Tweak
+      message: >-
+        Space is a lot less forgiving. No suit in vacuum and you're on the floor
+        in about 30 seconds, and a mask on its own only buys a few more. Running
+        out of air takes you down in a bit over a minute instead of three.
+    - type: Fix
+      message: Avali no longer gib from damage every other species just bleeds from.
+    - type: Fix
+      message: >-
+        Alt-clicking the autodoc no longer puts you inside it. Climb in is in
+        the right click menu, or drag yourself onto it.
+    - type: Fix
+      message: >-
+        Slime brains can be fixed now. Their brain is the core in the chest:
+        Heal Slime Core and Repair Slime Core on the torso, and the autodoc's
+        neuro disk does both. Mannitol works on it too.
+    - type: Fix
+      message: >-
+        Shadekin and other races that don't breathe heal oxygen damage on their
+        own like everyone else.
+    - type: Fix
+      message: Thaven can breathe. They were suffocating in normal air.
+  id: 100080
+  time: '2026-10-05T05:37:14.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/150
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Planets! You can now orbit, fly down to, land on and crash into the
+        Kyphrus worlds.
+    - type: Add
+      message: >-
+        Every planet has a cavern under it with its own rock, ores and wildlife.
+        Find a hole or dig your own way down.
+    - type: Add
+      message: You can print shovels at the autolathe now.
+    - type: Add
+      message: >-
+        You can build stairs from a cavern up to the surface (construction menu,
+        10 steel). Whatever you're dragging comes with you, on the stairs or
+        climbing.
+    - type: Add
+      message: >-
+        You can build pressurised rooms on planets and in caverns. They need a
+        floor, bare ground counts as outside.
+    - type: Add
+      message: Planets have weather, day and night, storms and thunder.
+    - type: Add
+      message: >-
+        Atmospheric jetpacks. They burn welding fuel, fly in a planet's
+        atmosphere and climb between its air layers, but not above 1.5 g. Normal
+        jetpacks only work in orbit.
+    - type: Add
+      message: >-
+        Parachutes, planet timepieces, landing thruster kits and atmospheric
+        jetpacks are in the Wolfgate vendor.
+    - type: Add
+      message: Chimera can plant flesh pustules that burst into flesh ticks.
+    - type: Add
+      message: A fully charged SRD can snap a broken-off chunk of your ship back on.
+    - type: Add
+      message: Ships make an engine noise for their crew while the thrusters fire.
+    - type: Tweak
+      message: >-
+        Ships landing on a planet flatten the trees and rocks they come down on.
+        Anyone under one gets hurt and shoved aside instead of gibbed.
+    - type: Tweak
+      message: Moths and harpies can fly up and down between levels again.
+    - type: Tweak
+      message: >-
+        Planets were moved out of the drone belt, so you don't get jumped by
+        drones as soon as you arrive.
+    - type: Fix
+      message: Flying around planets no longer stutters while new terrain loads.
+    - type: Fix
+      message: Xeno turrets no longer fire two rounds per shot.
+  id: 100081
+  time: '2026-10-05T08:42:29.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/40
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Pest events trigger less now.
+  id: 100082
+  time: '2026-10-05T09:04:59.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/163
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Flaky wolfmed tests
+  id: 100083
+  time: '2026-10-05T09:05:13.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/161
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Admins now get access to a bigger radar for monitoring.
+  id: 100084
+  time: '2026-10-05T21:36:01.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/165
+- author: Gandalf2k15
+  changes:
+    - type: Remove
+      message: Hydrakin have been disabled at the request of the creator.
+  id: 100085
+  time: '2026-10-05T21:43:36.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/157
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: All of NovaSector's markings have been ported over.
+  id: 100086
+  time: '2026-10-06T03:06:57.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/169
+- author: Erol509
+  changes:
+    - type: Add
+      message: >-
+        Change various sprites for tiles, cryo tubes, hellfire freezers,
+        hydroponics and gas overlays.
+  id: 100087
+  time: '2026-10-06T06:53:50.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/162
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Faxing leopard, cecropia, lunar or rosy mothroaches no longer shows a
+        missing sprite.
+    - type: Tweak
+      message: Conveyor and fax machine menu icons use the new sprites.
+  id: 100088
+  time: '2026-10-06T06:59:48.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/170
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        You can now set your character to use digitigrade or plantigrade legs if
+        it supports it and doesn't already have a snowflake leg set.
+  id: 100089
+  time: '2026-10-06T19:28:48.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/171
+- author: Balls2zawall
+  changes:
+    - type: Fix
+      message: >-
+        turned the chemistry locker in CC medbay around, it should open into
+        chemistry now.
+    - type: Fix
+      message: 're-powered the memorial in CC by adding 1 LV cable '
+  id: 100090
+  time: '2026-10-07T06:05:25.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/175
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        NPC-crewed ships: patrols, freighters, pirates, traders and fleet
+        battles now roam the sector as random encounters.
+    - type: Add
+      message: >-
+        Faction patrols warn ships of enemy companies off their zones and fire
+        on those that come too close or shoot at them.
+    - type: Add
+      message: >-
+        Derelict hulks held by space dwellers can be cleared and claimed as your
+        own ship.
+    - type: Add
+      message: Wandering traders with randomised stock.
+  id: 100091
+  time: '2026-10-07T19:49:45.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/155
+- author: Erol509
+  changes:
+    - type: Add
+      message: 'Mapping only circuit floors with a much more modern look. '
+  id: 100092
+  time: '2026-10-07T19:53:03.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/172
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Engineer NPC.
+    - type: Fix
+      message: USSP now patrols properly
+    - type: Fix
+      message: Things should despawn less.
+  id: 100093
+  time: '2026-10-07T22:31:26.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/178
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        You can now make custom animated markings to your character, abuse of
+        the system will lead to your removal.
+  id: 100094
+  time: '2026-10-08T20:45:50.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/179
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: A camera pan view!
+  id: 100095
+  time: '2026-10-09T00:52:23.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/183
+- author: Balls2zawall
+  changes:
+    - type: Add
+      message: >-
+        Added Felinids back to the character creator species roster, rejoice!
+        or... meow or something.
+  id: 100096
+  time: '2026-10-09T04:23:00.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/189
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Avali stasis has been nerfed hard.
+    - type: Tweak
+      message: Avali only start with 1 pen now.
+    - type: Tweak
+      message: Avali can fly like moffs.
+  id: 100097
+  time: '2026-10-09T04:40:37.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/191
+- author: Erol509
+  changes:
+    - type: Add
+      message: Avali has new organ sprites, and they are now uniqure
+    - type: Add
+      message: Avali limbs can now be printed at the biogenerator
+    - type: Add
+      message: Avali can now get hydration from drinking ammonia.
+  id: 100098
+  time: '2026-10-09T05:36:26.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/181
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Naga tails now draw over legs properly.
+  id: 100099
+  time: '2026-10-09T15:05:17.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/194
+- author: Happyowl93
+  changes:
+    - type: Add
+      message: Adds ASF faction
+  id: 100100
+  time: '2026-10-09T15:45:20.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/168
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Added a wide, rounded hyperspace distortion cone with compact white
+        particles around departing and arriving ships.
+    - type: Tweak
+      message: >-
+        Ships now visually rush into and out of hyperspace for outside
+        observers.
+  id: 100101
+  time: '2026-10-09T16:30:16.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/195
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Players an NPC's are no longer visible in ship pan view.
+  id: 100102
+  time: '2026-10-09T17:06:45.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/196

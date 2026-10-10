@@ -35,6 +35,7 @@ wolfmed-vitals-source-lungs = lungs failing
 wolfmed-vitals-source-circulation = poor circulation
 wolfmed-vitals-source-sepsis = sepsis
 wolfmed-vitals-source-sedation = breathing depressed
+wolfmed-vitals-source-vacuum = vacuum exposure
 wolfmed-vitals-source-arrestblood = blood
 wolfmed-vitals-source-arrestoxygen = oxygen
 wolfmed-vitals-source-arrestheart = heart
@@ -118,6 +119,7 @@ wolfmed-vitals-aid-tissueloss = oxygen, now
 wolfmed-vitals-aid-coreheat = put the fire out, cool the chassis
 wolfmed-vitals-aid-toxin = antitoxin
 wolfmed-vitals-aid-heatstroke = cool them, now
+wolfmed-vitals-aid-vacuum = get them into pressure or a suit, now
 wolfmed-vitals-aid-marrow = anti-radiation drugs and blood
 wolfmed-vitals-aid-hypothermia = warm them
 

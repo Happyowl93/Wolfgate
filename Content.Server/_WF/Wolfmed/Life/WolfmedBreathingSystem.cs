@@ -4,15 +4,18 @@ using Content.Server._WF.Wolfmed.Consciousness;
 using Content.Shared._Shitmed.Body.Organ;
 using Content.Shared._WF.Wolfmed.Body;
 using Content.Shared._WF.Wolfmed.CCVar;
+using Content.Shared._WF.Wolfmed.Consciousness;
 using Content.Shared._WF.Wolfmed.Life;
 using Content.Shared._WF.Wolfmed.Reagents;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Systems;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
+using Content.Shared.FixedPoint;
 using Content.Shared.Mobs.Systems;
 using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Server._WF.Wolfmed.Life;
 
@@ -26,10 +29,52 @@ public sealed class WolfmedBreathingSystem : EntitySystem
     private static readonly ProtoId<DamageTypePrototype> Asphyxiation = "Asphyxiation";
 
     [Dependency] private IConfigurationManager _cfg = default!;
+    [Dependency] private DamageableSystem _damageable = default!;
+    [Dependency] private IGameTiming _timing = default!;
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private SharedBodySystem _body = default!;
     [Dependency] private WolfmedConsciousnessSystem _consciousness = default!;
     [Dependency] private WolfmedPainReliefSystem _relief = default!;
+
+    /// <summary>The respirator's own cycle: a breathing body recovers once in each.</summary>
+    private static readonly TimeSpan RecoveryInterval = TimeSpan.FromSeconds(2);
+
+    private readonly List<EntityUid> _breathless = new();
+    private TimeSpan _nextRecovery;
+
+    /// <summary>
+    /// A body that does not breathe sheds its Asphyxiation as a breathing one does. Only the respirator ever took
+    /// suffocation damage back, a cycle at a time, so a species without one kept whatever it was given for good.
+    /// </summary>
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        if (_timing.CurTime < _nextRecovery)
+            return;
+
+        _nextRecovery = _timing.CurTime + RecoveryInterval;
+        var rate = _cfg.GetCVar(WolfmedCVars.BreathlessRecovery);
+        if (rate <= 0f)
+            return;
+
+        _breathless.Clear();
+        var query = EntityQueryEnumerator<WolfmedConsciousnessComponent, DamageableComponent>();
+        while (query.MoveNext(out var uid, out _, out var damageable))
+        {
+            if (damageable.Damage.DamageDict.GetValueOrDefault(Asphyxiation) > FixedPoint2.Zero && IsBreathless(uid))
+                _breathless.Add(uid);
+        }
+
+        var recovery = new DamageSpecifier();
+        recovery.DamageDict[Asphyxiation] = FixedPoint2.New(-rate * (float) RecoveryInterval.TotalSeconds);
+        foreach (var body in _breathless)
+            _damageable.TryChangeDamage(body, recovery, ignoreResistances: true, interruptsDoAfters: false);
+    }
+
+    /// <summary>Alive with a beating heart, and with no respirator to do the recovering.</summary>
+    private bool IsBreathless(EntityUid body) =>
+        (!HasComp<RespiratorComponent>(body) || HasComp<BreathingImmunityComponent>(body)) &&
+        !_mobState.IsDead(body) && !HasComp<WolfmedCardiacArrestComponent>(body);
 
     /// <summary>
     /// The respirator's "does not inhale" rule. The one marked hook in <c>RespiratorSystem.Update</c> asks

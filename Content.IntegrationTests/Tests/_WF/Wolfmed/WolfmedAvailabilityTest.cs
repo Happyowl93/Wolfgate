@@ -32,7 +32,7 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 /// the medkit grid to 6x2 and put it back.
 /// </remarks>
 [TestFixture]
-public sealed class WolfmedAvailabilityTest : GameTest
+public sealed class WolfmedAvailabilityTest : WolfmedGameTest
 {
     /// <summary>
     /// Items Wolfmed added, or relies on, that a player has to be able to get hold of: vended, printed, or inside
@@ -247,7 +247,7 @@ public sealed class WolfmedAvailabilityTest : GameTest
         var entities = server.ResolveDependency<IEntityManager>();
         var prototypes = server.ResolveDependency<IPrototypeManager>();
         var factory = server.ResolveDependency<IComponentFactory>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -287,7 +287,7 @@ public sealed class WolfmedAvailabilityTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
@@ -339,7 +339,7 @@ public sealed class WolfmedAvailabilityTest : GameTest
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
         var prototypes = server.ResolveDependency<IPrototypeManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         foreach (var (flatpack, expected) in Flatpacks)
         {

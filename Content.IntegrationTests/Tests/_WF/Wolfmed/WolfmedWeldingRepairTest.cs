@@ -25,7 +25,7 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 
 [TestFixture]
-public sealed class WolfmedWeldingRepairTest : GameTest
+public sealed class WolfmedWeldingRepairTest : WolfmedGameTest
 {
     public override PoolSettings PoolSettings => PsDisconnected;
 
@@ -38,7 +38,7 @@ public sealed class WolfmedWeldingRepairTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default, part = default, tool = default;
         var mechanical = replacement != null || prototype == "MobIPC";
         var fuelBefore = 0f;
@@ -134,7 +134,7 @@ public sealed class WolfmedWeldingRepairTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default, leg = default, tool = default;
         var passes = toolId == "NaniteApplicator" ? 2 : 1;
 
@@ -186,7 +186,7 @@ public sealed class WolfmedWeldingRepairTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
         EntityUid body = default, user = default, leg = default, tool = default;
         var fuelBefore = 0f;
 
@@ -267,7 +267,7 @@ public sealed class WolfmedWeldingRepairTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entities = server.ResolveDependency<IEntityManager>();
-        var map = await Pair.CreateTestMap();
+        var map = await CreateTestMap();
 
         await server.WaitAssertion(() =>
         {
