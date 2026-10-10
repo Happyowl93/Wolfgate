@@ -32,6 +32,12 @@ worn through first.
 
 - [`Resources/Locale/en-US/_WF/ShipArmor/ship-armor.ftl`](../../../Resources/Locale/en-US/_WF/ShipArmor/ship-armor.ftl)
 
+### Textures
+
+- [`Resources/Textures/_WF/ShipArmor/shield.svg`](../../../Resources/Textures/_WF/ShipArmor/shield.svg)
+- [`Resources/Textures/_WF/ShipArmor/shield.svg.192dpi.png`](../../../Resources/Textures/_WF/ShipArmor/shield.svg.192dpi.png)
+- [`Resources/Textures/_WF/ShipArmor/shield.svg.192dpi.png.yml`](../../../Resources/Textures/_WF/ShipArmor/shield.svg.192dpi.png.yml)
+
 ## Non-modular edits
 
 - [`Resources/Prototypes/Entities/Structures/Walls/walls.yml`](../../../Resources/Prototypes/Entities/Structures/Walls/walls.yml): plastitanium counts as full hull armor

@@ -220,7 +220,7 @@ public sealed partial class WFArmorBackedSystem : EntitySystem
             return;
 
         _examine.AddDetailedExamineVerb(args, comp, GetCoverageMessage(uid),
-            Loc.GetString("wf-armor-backed-verb-text"), "/Textures/Interface/VerbIcons/dot.svg.192dpi.png",
+            Loc.GetString("wf-armor-backed-verb-text"), "/Textures/_WF/ShipArmor/shield.svg.192dpi.png",
             Loc.GetString("wf-armor-backed-verb-message"));
     }
 
