@@ -1,4 +1,5 @@
 using System.Numerics;
+using Content.Server._Mono.AlertLevel;
 using Content.Server._WF.Encounters.Components;
 using Content.Server._WF.NpcCrew.Systems;
 using Content.Shared._Mono.Company;
@@ -33,6 +34,7 @@ public sealed partial class WFEncounterZoneSystem : EntitySystem
     [Dependency] private WFCrewEscortSystem _escorts = default!;
     [Dependency] private MobStateSystem _mobs = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private WarLevelSystem _warLevel = default!;
 
     private static readonly TimeSpan Interval = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan WarnCooldown = TimeSpan.FromSeconds(45);
@@ -139,7 +141,9 @@ public sealed partial class WFEncounterZoneSystem : EntitySystem
                 var theirs = Company(rival.Grid);
                 if (WFCompanyFamily.Same(company, theirs))
                     continue;
-                if (ship.ZoneTargets == WFEncounterZoneTargets.AtWar && !AtWar(company, theirs))
+                // The sides of one encounter were set on each other when it was written, ceasefire or no.
+                var enemies = other == uid ? Opposed(company, theirs, true) : AtWar(company, theirs);
+                if (ship.ZoneTargets == WFEncounterZoneTargets.AtWar && !enemies)
                     continue;
 
                 var key = (ship.Grid, rival.Grid);
@@ -255,14 +259,45 @@ public sealed partial class WFEncounterZoneSystem : EntitySystem
         return CompOrNull<CompanyComponent>(uid)?.CompanyName.Id is { } id && id != "None" ? id : string.Empty;
     }
 
-    /// <summary>Whether two companies are at war: either one's standing lists the other.</summary>
+    /// <summary>
+    /// Whether two companies are at war: either one's standing lists the other, outright or as a war that has since
+    /// been declared.
+    /// </summary>
     public bool AtWar(string first, string second)
+    {
+        return Opposed(first, second, _warLevel.GetWarLevel(EntityUid.Invalid));
+    }
+
+    /// <summary>Whether only the ceasefire keeps two companies from war: they are at war once it is declared.</summary>
+    public bool UnderCeasefire(string first, string second)
+    {
+        return !_warLevel.GetWarLevel(EntityUid.Invalid) && !Opposed(first, second, false) && Opposed(first, second, true);
+    }
+
+    private bool UnderCeasefire(string company, List<string> flags)
+    {
+        foreach (var flag in flags)
+        {
+            if (UnderCeasefire(company, flag))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Whether either company's standing lists the other, counting declared wars if one has been.</summary>
+    private bool Opposed(string first, string second, bool declared)
     {
         if (first.Length == 0 || second.Length == 0 || first == second)
             return false;
 
-        return _prototypes.TryIndex<WFStandingPrototype>(first, out var mine) && mine.AtWar.Contains(second)
-            || _prototypes.TryIndex<WFStandingPrototype>(second, out var theirs) && theirs.AtWar.Contains(first);
+        return Lists(first, second, declared) || Lists(second, first, declared);
+    }
+
+    private bool Lists(string company, string other, bool declared)
+    {
+        return _prototypes.TryIndex<WFStandingPrototype>(company, out var standing)
+               && (standing.AtWar.Contains(other) || declared && standing.DeclaredWar.Contains(other));
     }
 
     private bool AtWar(string company, List<string> flags)
@@ -303,7 +338,11 @@ public sealed partial class WFEncounterZoneSystem : EntitySystem
             // told to show himself and shot across the bows in the warning zone, and fired on in the attack zone. With
             // it on, a patrol only minds its faction's enemies.
             var masked = IffMasked(intruder);
-            if (!masked && ship.ZoneTargets == WFEncounterZoneTargets.AtWar && !AtWar(company, crewed.Flags))
+            // Under the ceasefire the other navy's ships are warned off like any enemy, and fired on only once the
+            // ship has had to answer them.
+            var ceasefire = !masked && ship.ZoneTargets == WFEncounterZoneTargets.AtWar && !AtWar(company, crewed.Flags)
+                            && UnderCeasefire(company, crewed.Flags);
+            if (!masked && ship.ZoneTargets == WFEncounterZoneTargets.AtWar && !ceasefire && !AtWar(company, crewed.Flags))
                 continue;
 
             var there = CentreOfMass(intruder);
@@ -329,7 +368,8 @@ public sealed partial class WFEncounterZoneSystem : EntitySystem
             if (idle)
                 _alerts.EndZoneWarning(ship.Grid, intruder);
 
-            if (ship.AttackRange > 0f && distance <= ship.AttackRange && !idle)
+            if (ship.AttackRange > 0f && distance <= ship.AttackRange && !idle
+                && (!ceasefire || ship.Engaged.Contains(intruder) || _alerts.IsAttacker(ship.Grid, intruder)))
             {
                 _alerts.EndZoneWarning(ship.Grid, intruder);
                 if (ship.Engaged.Add(intruder))

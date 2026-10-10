@@ -27,6 +27,10 @@ and boarders, a hauler under attack, TSF and Dynasty backup requests, frigate an
 lying in wait, skirmishes (TSF or Dynasty against raiders, corsairs or each other; plain, and hostile ones that also
 fire on players who come close) and black market transports.
 
+The TSF and the Dynasty are under a ceasefire (see `ColdWar`): `standing.yml` lists them under `declaredWar`, which
+only counts while the sector's war level is hot. Until then their patrols warn each other's ships off and fire only
+when fired on, and the encounters marked `requiresWar` (the navy against navy fights) are not scheduled.
+
 Warships come in three tiers. Frigates (TSF Fujian, Altair, Andromeda; PDV Kortik, Europa, Saintie) are the common big
 ships, under attack or on patrol. Capitals (TSF Flyssa, PDV Saturn) are rare scheduled encounters. Supercapitals (the
 `WFChengdu` and `WFJupiter` vessels, grids in `Resources/SharedMaps/_WF/Encounters`) are admin-spawn only, as is the
