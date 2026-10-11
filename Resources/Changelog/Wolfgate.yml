@@ -1523,3 +1523,10 @@ Entries:
   id: 100116
   time: '2026-10-11T20:54:46.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/218
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Emergency responders now start with a jaws of life.
+  id: 100117
+  time: '2026-10-11T22:37:02.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/219
