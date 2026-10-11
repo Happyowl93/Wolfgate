@@ -5,9 +5,14 @@ first things a fight destroys. Each of them moves part of the damage it takes on
 armor (anything anchored with `ArmorThicknessComponent`) within one tile of its footprint, so the armor has to be
 worn through first.
 
-- Explosions move 80%, non-penetrating shell hits 40%, armor-piercing rounds (projectiles with a
+- Explosions move up to 100%, non-penetrating shell hits up to 80%, armor-piercing rounds (projectiles with a
   `PenetrationThreshold`) nothing. Hitscan, melee, heat and collisions are untouched.
-- The share scales with the armor's thickness up to 10: a shuttle wall (5) covers half, plastitanium (10) all of it.
+- The share scales linearly with the armor's thickness up to 13: a shuttle wall (5) moves 38% of explosions and 31%
+  of shell hits, plastitanium (10) 77% and 62%, and the PDV adamantite walls (13) and capital plastitanium (15) the
+  full 100% and 80%.
+- PDV adamantite walls (`WFWallAdamantite` and its diagonal and capital variants) are plastitanium walls built
+  from PDV composite with 75% more health than plastitanium that give full mount coverage. PDV hulls and the classic
+  PDV (BlackMarket) ships are refit with them.
 - Tuning lives in the `wf.ship_armor.*` server CVars. The examine window's hull armor verb shows current coverage.
 
 <!-- WOLFGATE-GENERATED START -->
@@ -28,18 +33,45 @@ worn through first.
 - [`Content.IntegrationTests/Tests/_WF/ShipArmor/WFArmorBackedTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipArmor/WFArmorBackedTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/ShipArmor/WFHullArmorThicknessTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipArmor/WFHullArmorThicknessTest.cs)
 
+### Prototypes
+
+- [`Resources/Prototypes/_WF/ShipArmor/construction.yml`](../../../Resources/Prototypes/_WF/ShipArmor/construction.yml)
+- [`Resources/Prototypes/_WF/ShipArmor/walls.yml`](../../../Resources/Prototypes/_WF/ShipArmor/walls.yml)
+
 ### Localization
 
 - [`Resources/Locale/en-US/_WF/ShipArmor/ship-armor.ftl`](../../../Resources/Locale/en-US/_WF/ShipArmor/ship-armor.ftl)
 
 ### Textures
 
+- [`Resources/Textures/_WF/ShipArmor/adamantite.rsi/`](../../../Resources/Textures/_WF/ShipArmor/adamantite.rsi/)
+- [`Resources/Textures/_WF/ShipArmor/adamantite_diagonal.rsi/`](../../../Resources/Textures/_WF/ShipArmor/adamantite_diagonal.rsi/)
+- [`Resources/Textures/_WF/ShipArmor/radamantite.rsi/`](../../../Resources/Textures/_WF/ShipArmor/radamantite.rsi/)
+- [`Resources/Textures/_WF/ShipArmor/radamantite_diagonal.rsi/`](../../../Resources/Textures/_WF/ShipArmor/radamantite_diagonal.rsi/)
 - [`Resources/Textures/_WF/ShipArmor/shield.svg`](../../../Resources/Textures/_WF/ShipArmor/shield.svg)
 - [`Resources/Textures/_WF/ShipArmor/shield.svg.192dpi.png`](../../../Resources/Textures/_WF/ShipArmor/shield.svg.192dpi.png)
 - [`Resources/Textures/_WF/ShipArmor/shield.svg.192dpi.png.yml`](../../../Resources/Textures/_WF/ShipArmor/shield.svg.192dpi.png.yml)
 
 ## Non-modular edits
 
-- [`Resources/Prototypes/Entities/Structures/Walls/walls.yml`](../../../Resources/Prototypes/Entities/Structures/Walls/walls.yml): plastitanium counts as full hull armor
+- [`Resources/Prototypes/Entities/Structures/Walls/walls.yml`](../../../Resources/Prototypes/Entities/Structures/Walls/walls.yml): plastitanium is near-full hull armor (10 of 13)
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/bazalt.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/bazalt.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/europa.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/europa.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/gadfly.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/gadfly.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_em.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_em.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_r.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_r.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/kresta.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/kresta.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/kynda.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/kynda.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/layak.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/layak.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/motleyanne.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/motleyanne.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/inertia.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/inertia.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/mock.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/mock.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/snakelet.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/snakelet.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/neptune.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/neptune.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/ontos.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/ontos.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/osa.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/osa.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/saturn.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/saturn.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/scorpion.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/scorpion.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/tethys.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/tethys.yml): PDV hull refit from plastitanium to adamantite walls.
 
 <!-- WOLFGATE-GENERATED END -->

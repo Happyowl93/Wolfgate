@@ -24,10 +24,10 @@ public sealed class WFArmorBackedTest
     /// <summary>Mount that moves part of its damage onto adjacent armor.</summary>
     private const string MountProto = "WFTestArmorBackedMount";
 
-    /// <summary>Armor of thickness 10, full coverage.</summary>
+    /// <summary>Armor of thickness 10, 10/13 coverage.</summary>
     private const string ThickWallProto = "WFTestArmorWallThick";
 
-    /// <summary>Armor of thickness 5, half coverage.</summary>
+    /// <summary>Armor of thickness 5, 5/13 coverage.</summary>
     private const string ThinWallProto = "WFTestArmorWallThin";
 
     /// <summary>Mount with a 2x2 hard fixture.</summary>
@@ -129,18 +129,18 @@ public sealed class WFArmorBackedTest
         await RunCase(null, explosion: true, projectile: false, expectMount: 100, expectWall: 0);
     }
 
-    /// <summary>A thick wall next to the mount takes 80% of an explosion, leaving 20% on the mount.</summary>
+    /// <summary>A thick wall next to the mount takes 10/13 of an explosion, leaving the rest on the mount.</summary>
     [Test]
     public async Task ThickWallTakesExplosionShare()
     {
-        await RunCase(ThickWallProto, explosion: true, projectile: false, expectMount: 20, expectWall: 80);
+        await RunCase(ThickWallProto, explosion: true, projectile: false, expectMount: 23.08f, expectWall: 76.92f);
     }
 
-    /// <summary>A thin wall takes half the explosion share, since its thickness is half of full coverage.</summary>
+    /// <summary>A thin wall takes its thickness share of the explosion (5 of 13).</summary>
     [Test]
     public async Task ThinWallTakesScaledExplosionShare()
     {
-        await RunCase(ThinWallProto, explosion: true, projectile: false, expectMount: 60, expectWall: 40);
+        await RunCase(ThinWallProto, explosion: true, projectile: false, expectMount: 61.54f, expectWall: 38.46f);
     }
 
     /// <summary>Plain damage without a tool is never shared with armor.</summary>
@@ -150,18 +150,18 @@ public sealed class WFArmorBackedTest
         await RunCase(ThickWallProto, explosion: false, projectile: false, expectMount: 100, expectWall: 0);
     }
 
-    /// <summary>A projectile hit takes 40% of the share onto a fully covering wall.</summary>
+    /// <summary>A projectile hit moves 80% times 10/13 of its damage onto the wall.</summary>
     [Test]
     public async Task ProjectileHitTakesShare()
     {
-        await RunCase(ThickWallProto, explosion: false, projectile: true, expectMount: 60, expectWall: 40);
+        await RunCase(ThickWallProto, explosion: false, projectile: true, expectMount: 38.46f, expectWall: 61.54f);
     }
 
     /// <summary>A 2x2 mount reaches armor two tiles away from its origin tile, past the old 3x3 box.</summary>
     [Test]
     public async Task MultiTileMountFindsArmorPastItsCenterTile()
     {
-        await RunCase(ThickWallProto, explosion: true, projectile: false, expectMount: 20, expectWall: 80,
+        await RunCase(ThickWallProto, explosion: true, projectile: false, expectMount: 23.08f, expectWall: 76.92f,
             mountProto: MultiTileMountProto, wallPos: new Vector2(2.5f, 0.5f), tiles: new[] { new Vector2i(0, 0), new Vector2i(1, 0), new Vector2i(2, 0) });
     }
 
