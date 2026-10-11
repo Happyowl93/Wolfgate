@@ -9,7 +9,7 @@ worn through first.
   untouched.
 - The share scales linearly with the armor's thickness up to 12.5: a shuttle wall (5) moves 40%, plastitanium (10)
   80%, and the PDV adamantite walls (13) and capital plastitanium (15) all of it.
-- With full coverage the mount also keeps its floor: explosions treat its tile as blocked until the armor falls,
+- Any backing armor also keeps the mount's floor: explosions treat its tile as blocked until the armor falls,
   so a breached tile can't unanchor the hardpoint and drop its gun first (`ExplosionSystem.ShipArmor.cs`).
 - PDV adamantite walls (`WFWallAdamantite` and its diagonal and capital variants) are plastitanium walls built
   from PDV composite. They take plastitanium's resistances on every variant and more than three times

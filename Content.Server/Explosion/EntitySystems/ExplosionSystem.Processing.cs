@@ -191,7 +191,7 @@ public sealed partial class ExplosionSystem
         if (EntityManager.IsQueuedForDeletion(uid))
             return false;
 
-        // WOLFGATE(ShipArmor): fully armored mounts keep their floor until the armor falls
+        // WOLFGATE(ShipArmor): armored mounts keep their floor until the armor falls
         if (WFArmorHoldsFloor(uid))
             return true;
 

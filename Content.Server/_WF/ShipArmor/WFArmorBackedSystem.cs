@@ -210,12 +210,12 @@ public sealed partial class WFArmorBackedSystem : EntitySystem
     }
 
     /// <summary>
-    /// True when a mount has full-coverage armor behind it, so explosions leave its floor tile alone until the armor
-    /// falls. Without this the tile breaks first and the hardpoint drops its gun.
+    /// True when a mount has armor behind it, so explosions leave its floor tile alone until the armor falls.
+    /// Without this the tile breaks first and the hardpoint drops its gun.
     /// </summary>
     public bool HoldsFloor(EntityUid uid)
     {
-        return IsMount(uid) && FindBacking(uid) is { } backing && Coverage(backing.Comp.Thickness) >= 1f;
+        return IsMount(uid) && FindBacking(uid) is not null;
     }
 
     private bool IsMount(EntityUid uid)

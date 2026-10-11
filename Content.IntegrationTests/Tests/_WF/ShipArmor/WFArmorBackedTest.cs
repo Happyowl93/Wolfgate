@@ -16,7 +16,7 @@ namespace Content.IntegrationTests.Tests._WF.ShipArmor;
 
 /// <summary>
 /// Armor-backed mounts hand part of blast, shell and beam damage to the thickest adjacent armor, scaled by that
-/// armor's thickness, and keep the rest. Plain damage stays on the mount. Full armor also keeps the mount's floor.
+/// armor's thickness, and keep the rest. Plain damage stays on the mount. Any backing armor keeps the mount's floor.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(Content.Server._WF.ShipArmor.WFArmorBackedSystem))]
@@ -230,10 +230,11 @@ public sealed class WFArmorBackedTest
             mountProto: HardFixtureMountProto, wallPos: new Vector2(0.5f, -1.5f), tiles: new[] { new Vector2i(0, 0), new Vector2i(0, -2) });
     }
 
-    /// <summary>Only full-coverage armor makes explosions treat the mount's floor as blocked.</summary>
+    /// <summary>Any backing armor makes explosions treat the mount's floor as blocked; a bare mount does not.</summary>
     [Test]
     [TestCase(FullWallProto, true)]
-    [TestCase(ThickWallProto, false)]
+    [TestCase(ThickWallProto, true)]
+    [TestCase(ThinWallProto, true)]
     [TestCase(null, false)]
     public async Task FullArmorHoldsMountFloor(string? wallProto, bool expectHeld)
     {
