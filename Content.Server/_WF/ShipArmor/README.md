@@ -5,14 +5,14 @@ first things a fight destroys. Each of them moves part of the damage it takes on
 armor (anything anchored with `ArmorThicknessComponent`) within one tile of its footprint, so the armor has to be
 worn through first.
 
-- Explosions move up to 100%, non-penetrating shell hits up to 80%, armor-piercing rounds (projectiles with a
-  `PenetrationThreshold`) nothing. Hitscan, melee, heat and collisions are untouched.
-- The share scales linearly with the armor's thickness up to 13: a shuttle wall (5) moves 38% of explosions and 31%
-  of shell hits, plastitanium (10) 77% and 62%, and the PDV adamantite walls (13) and capital plastitanium (15) the
-  full 100% and 80%.
+- Blasts, shell hits and hitscan beams move alike, armor-piercing rounds included. Melee and collisions are
+  untouched.
+- The share scales linearly with the armor's thickness up to 12.5: a shuttle wall (5) moves 40%, plastitanium (10)
+  80%, and the PDV adamantite walls (13) and capital plastitanium (15) all of it.
 - PDV adamantite walls (`WFWallAdamantite` and its diagonal and capital variants) are plastitanium walls built
-  from PDV composite with 75% more health than plastitanium that give full mount coverage. PDV hulls and the classic
-  PDV (BlackMarket) ships are refit with them.
+  from PDV composite. They take plastitanium's resistances on every variant and more than three times
+  plastitanium's health (9500, capital 11000), standing in for the shields PDV hulls lack. PDV hulls and the
+  classic PDV (BlackMarket) ships are refit with them.
 - Tuning lives in the `wf.ship_armor.*` server CVars. The examine window's hull armor verb shows current coverage.
 
 <!-- WOLFGATE-GENERATED START -->
@@ -54,7 +54,7 @@ worn through first.
 
 ## Non-modular edits
 
-- [`Resources/Prototypes/Entities/Structures/Walls/walls.yml`](../../../Resources/Prototypes/Entities/Structures/Walls/walls.yml): plastitanium is near-full hull armor (10 of 13)
+- [`Resources/Prototypes/Entities/Structures/Walls/walls.yml`](../../../Resources/Prototypes/Entities/Structures/Walls/walls.yml): plastitanium hull armor takes 80% of mount hits (10 of 12.5)
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/bazalt.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/bazalt.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/europa.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/europa.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/gadfly.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/gadfly.yml): PDV hull refit from plastitanium to adamantite walls.

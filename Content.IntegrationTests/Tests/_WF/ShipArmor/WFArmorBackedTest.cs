@@ -39,6 +39,12 @@ public sealed class WFArmorBackedTest
     /// <summary>Projectile used as the damage tool for a shot.</summary>
     private const string ProjectileProto = "WFTestArmorProjectile";
 
+    /// <summary>An armor-piercing projectile, shared like any other shell hit.</summary>
+    private const string PiercingProjectileProto = "WFTestArmorPiercingProjectile";
+
+    /// <summary>A hitscan beam, shared like a shell hit.</summary>
+    private const string BeamProto = "WFTestArmorBeam";
+
     [TestPrototypes]
     private const string Prototypes = @"
 - type: entity
@@ -120,6 +126,23 @@ public sealed class WFArmorBackedTest
     damage:
       types:
         Structural: 1
+
+- type: entity
+  id: WFTestArmorPiercingProjectile
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Structural: 1
+    penetrationThreshold: 1000
+
+- type: entity
+  id: WFTestArmorBeam
+  components:
+  - type: HitscanBasicDamage
+    damage:
+      types:
+        Structural: 1
 ";
 
     /// <summary>A mount with no armor next to it takes an explosion in full.</summary>
@@ -129,18 +152,18 @@ public sealed class WFArmorBackedTest
         await RunCase(null, explosion: true, projectile: false, expectMount: 100, expectWall: 0);
     }
 
-    /// <summary>A thick wall next to the mount takes 10/13 of an explosion, leaving the rest on the mount.</summary>
+    /// <summary>A thick wall next to the mount takes 10/12.5 of an explosion, leaving the rest on the mount.</summary>
     [Test]
     public async Task ThickWallTakesExplosionShare()
     {
-        await RunCase(ThickWallProto, explosion: true, projectile: false, expectMount: 23.08f, expectWall: 76.92f);
+        await RunCase(ThickWallProto, explosion: true, projectile: false, expectMount: 20, expectWall: 80);
     }
 
-    /// <summary>A thin wall takes its thickness share of the explosion (5 of 13).</summary>
+    /// <summary>A thin wall takes its thickness share of the explosion (5 of 12.5).</summary>
     [Test]
     public async Task ThinWallTakesScaledExplosionShare()
     {
-        await RunCase(ThinWallProto, explosion: true, projectile: false, expectMount: 61.54f, expectWall: 38.46f);
+        await RunCase(ThinWallProto, explosion: true, projectile: false, expectMount: 60, expectWall: 40);
     }
 
     /// <summary>Plain damage without a tool is never shared with armor.</summary>
@@ -150,18 +173,34 @@ public sealed class WFArmorBackedTest
         await RunCase(ThickWallProto, explosion: false, projectile: false, expectMount: 100, expectWall: 0);
     }
 
-    /// <summary>A projectile hit moves 80% times 10/13 of its damage onto the wall.</summary>
+    /// <summary>A projectile hit moves the same 10/12.5 of its damage onto the wall as a blast.</summary>
     [Test]
     public async Task ProjectileHitTakesShare()
     {
-        await RunCase(ThickWallProto, explosion: false, projectile: true, expectMount: 38.46f, expectWall: 61.54f);
+        await RunCase(ThickWallProto, explosion: false, projectile: true, expectMount: 20, expectWall: 80);
+    }
+
+    /// <summary>An armor-piercing hit is shared like any other shell hit.</summary>
+    [Test]
+    public async Task PiercingHitTakesShare()
+    {
+        await RunCase(ThickWallProto, explosion: false, projectile: true, expectMount: 20, expectWall: 80,
+            projectileProto: PiercingProjectileProto);
+    }
+
+    /// <summary>A hitscan beam is shared like a shell hit.</summary>
+    [Test]
+    public async Task BeamHitTakesShare()
+    {
+        await RunCase(ThickWallProto, explosion: false, projectile: true, expectMount: 20, expectWall: 80,
+            projectileProto: BeamProto);
     }
 
     /// <summary>A 2x2 mount reaches armor two tiles away from its origin tile, past the old 3x3 box.</summary>
     [Test]
     public async Task MultiTileMountFindsArmorPastItsCenterTile()
     {
-        await RunCase(ThickWallProto, explosion: true, projectile: false, expectMount: 23.08f, expectWall: 76.92f,
+        await RunCase(ThickWallProto, explosion: true, projectile: false, expectMount: 20, expectWall: 80,
             mountProto: MultiTileMountProto, wallPos: new Vector2(2.5f, 0.5f), tiles: new[] { new Vector2i(0, 0), new Vector2i(1, 0), new Vector2i(2, 0) });
     }
 
@@ -178,7 +217,7 @@ public sealed class WFArmorBackedTest
     /// Tolerance covers fixed-point rounding of the shared share.
     /// </summary>
     private static async Task RunCase(string? wallProto, bool explosion, bool projectile, float expectMount, float expectWall,
-        string mountProto = MountProto, Vector2? wallPos = null, Vector2i[]? tiles = null)
+        string mountProto = MountProto, Vector2? wallPos = null, Vector2i[]? tiles = null, string projectileProto = ProjectileProto)
     {
         await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
@@ -209,7 +248,7 @@ public sealed class WFArmorBackedTest
             }
 
             if (projectile)
-                tool = entMan.SpawnEntity(ProjectileProto, new EntityCoordinates(grid.Owner, new Vector2(0.5f, 0.5f)));
+                tool = entMan.SpawnEntity(projectileProto, new EntityCoordinates(grid.Owner, new Vector2(0.5f, 0.5f)));
         });
 
         await server.WaitAssertion(() =>
