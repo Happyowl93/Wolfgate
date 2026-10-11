@@ -148,7 +148,7 @@ public sealed partial class WFArmorBackedSystem : EntitySystem
 
         foreach (var maybeUid in _map.GetLocalAnchoredEntities(gridUid, grid, footprint))
         {
-            if (maybeUid == uid || IsMount(maybeUid))
+            if (maybeUid == uid || IsMount(maybeUid) || EntityManager.IsQueuedForDeletion(maybeUid))
                 continue;
 
             // Indestructible armor would make the mount nearly immune, so it is not a backing.
@@ -207,6 +207,15 @@ public sealed partial class WFArmorBackedSystem : EntitySystem
             local = new Box2(pos, pos);
 
         return local.Enlarged(FootprintMargin);
+    }
+
+    /// <summary>
+    /// True when a mount has full-coverage armor behind it, so explosions leave its floor tile alone until the armor
+    /// falls. Without this the tile breaks first and the hardpoint drops its gun.
+    /// </summary>
+    public bool HoldsFloor(EntityUid uid)
+    {
+        return IsMount(uid) && FindBacking(uid) is { } backing && Coverage(backing.Comp.Thickness) >= 1f;
     }
 
     private bool IsMount(EntityUid uid)

@@ -1,6 +1,7 @@
 #nullable enable
 using System.Numerics;
 using Content.IntegrationTests.Pair;
+using Content.Server.Explosion.EntitySystems;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
@@ -14,8 +15,8 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WF.ShipArmor;
 
 /// <summary>
-/// Armor-backed mounts hand part of explosion and projectile damage to the thickest adjacent armor,
-/// scaled by that armor's thickness, and keep the rest. Plain damage and penetrating shots stay on the mount.
+/// Armor-backed mounts hand part of blast, shell and beam damage to the thickest adjacent armor, scaled by that
+/// armor's thickness, and keep the rest. Plain damage stays on the mount. Full armor also keeps the mount's floor.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(Content.Server._WF.ShipArmor.WFArmorBackedSystem))]
@@ -29,6 +30,9 @@ public sealed class WFArmorBackedTest
 
     /// <summary>Armor of thickness 5, 5/13 coverage.</summary>
     private const string ThinWallProto = "WFTestArmorWallThin";
+
+    /// <summary>Armor thick enough for full coverage.</summary>
+    private const string FullWallProto = "WFTestArmorWallFull";
 
     /// <summary>Mount with a 2x2 hard fixture.</summary>
     private const string MultiTileMountProto = "WFTestMultiTileMount";
@@ -112,6 +116,20 @@ public sealed class WFArmorBackedTest
   - type: Damageable
   - type: ArmorThickness
     thickness: 5
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 100000
+      behaviors: []
+
+- type: entity
+  id: WFTestArmorWallFull
+  components:
+  - type: Transform
+  - type: Damageable
+  - type: ArmorThickness
+    thickness: 13
   - type: Destructible
     thresholds:
     - trigger:
@@ -210,6 +228,43 @@ public sealed class WFArmorBackedTest
     {
         await RunCase(ThickWallProto, explosion: true, projectile: false, expectMount: 100, expectWall: 0,
             mountProto: HardFixtureMountProto, wallPos: new Vector2(0.5f, -1.5f), tiles: new[] { new Vector2i(0, 0), new Vector2i(0, -2) });
+    }
+
+    /// <summary>Only full-coverage armor makes explosions treat the mount's floor as blocked.</summary>
+    [Test]
+    [TestCase(FullWallProto, true)]
+    [TestCase(ThickWallProto, false)]
+    [TestCase(null, false)]
+    public async Task FullArmorHoldsMountFloor(string? wallProto, bool expectHeld)
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+
+        var entMan = server.EntMan;
+        var mapSys = server.System<SharedMapSystem>();
+        var xformSys = server.System<SharedTransformSystem>();
+        var explosion = server.System<ExplosionSystem>();
+        var grid = map.Grid;
+
+        await server.WaitAssertion(() =>
+        {
+            mapSys.SetTile(grid.Owner, grid.Comp, new Vector2i(0, 0), new Tile(1));
+            mapSys.SetTile(grid.Owner, grid.Comp, new Vector2i(1, 0), new Tile(1));
+
+            var mount = entMan.SpawnEntity(MountProto, new EntityCoordinates(grid.Owner, new Vector2(0.5f, 0.5f)));
+            xformSys.AnchorEntity((mount, entMan.GetComponent<TransformComponent>(mount)));
+
+            if (wallProto is not null)
+            {
+                var wall = entMan.SpawnEntity(wallProto, new EntityCoordinates(grid.Owner, new Vector2(1.5f, 0.5f)));
+                xformSys.AnchorEntity((wall, entMan.GetComponent<TransformComponent>(wall)));
+            }
+
+            Assert.That(explosion.IsBlockingTurf(mount), Is.EqualTo(expectHeld));
+        });
+
+        await pair.CleanReturnAsync();
     }
 
     /// <summary>
