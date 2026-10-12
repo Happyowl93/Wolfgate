@@ -254,13 +254,6 @@ public sealed class MobileDrydockClientTest
         }
 
         var errors = pair.ClientLogHandler.FailingLogs.ToList();
-        TestContext.Out.WriteLine($"Client errors: {errors.Count}, full states: {fullStates}, job started: {jobStarted}, " +
-                                  $"arm samples: {arms.Count}, furthest arm: {furthest:F2}, arm drops: {drops}");
-        foreach (var problem in problems)
-        {
-            TestContext.Out.WriteLine("  " + problem);
-        }
-
         Assert.Multiple(() =>
         {
             Assert.That(problems, Is.Empty, "The client should keep one filled window and the same entities throughout.");

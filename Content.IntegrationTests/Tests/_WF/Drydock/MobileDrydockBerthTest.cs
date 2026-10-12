@@ -9,8 +9,6 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Maths;
 using Robust.Shared.Map.Components;
-using Robust.Shared.Physics.Components;
-using Robust.Shared.Physics.Systems;
 
 namespace Content.IntegrationTests.Tests._WF.Drydock;
 
@@ -26,10 +24,8 @@ public sealed class MobileDrydockBerthTest
     private sealed class Track
     {
         public readonly List<Vector2> Positions = new();
-        public readonly List<Vector2> Velocities = new();
         public readonly List<EntityUid> Parents = new();
         public readonly List<uint> GridTicks = new();
-        public readonly List<uint> MetaTicks = new();
         public readonly List<int> ComponentCounts = new();
         public readonly List<string> ComponentSets = new();
         public readonly List<uint> CraneTicks = new();
@@ -74,15 +70,13 @@ public sealed class MobileDrydockBerthTest
         return (host, crane, console, ship);
     }
 
-    /// <summary>Samples one entity's transform, physics, meta data and components into a track.</summary>
+    /// <summary>Samples one entity's transform, grid and components into a track.</summary>
     private static void Sample(TestPair pair, Track track, EntityUid uid)
     {
         var em = pair.Server.EntMan;
         var xforms = pair.Server.System<SharedTransformSystem>();
         track.Positions.Add(xforms.GetWorldPosition(uid));
         track.Parents.Add(em.GetComponent<TransformComponent>(uid).ParentUid);
-        track.Velocities.Add(em.TryGetComponent(uid, out PhysicsComponent? body) ? body.LinearVelocity : Vector2.Zero);
-        track.MetaTicks.Add(em.GetComponent<MetaDataComponent>(uid).EntityLastModifiedTick.Value);
         if (em.TryGetComponent(uid, out MapGridComponent? grid))
             track.GridTicks.Add(grid.LastModifiedTick.Value);
         track.ComponentCounts.Add(em.ComponentCount(uid));
@@ -119,7 +113,6 @@ public sealed class MobileDrydockBerthTest
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
         var ui = server.System<SharedUserInterfaceSystem>();
-        var xforms = server.System<SharedTransformSystem>();
 
         EntityUid host = default, crane = default, console = default, ship = default, mob = default;
         await server.WaitAssertion(() =>
@@ -138,10 +131,7 @@ public sealed class MobileDrydockBerthTest
         var consoleTrack = new Track();
         var shipTrack = new Track();
         var hostTrack = new Track();
-        var physics = server.System<SharedPhysicsSystem>();
         var uiClosedTicks = 0;
-        var craneContactTicks = 0;
-        var shipContactTotal = 0;
 
         for (var i = 0; i < MeasuredTicks; i++)
         {
@@ -155,27 +145,12 @@ public sealed class MobileDrydockBerthTest
                 Sample(pair, consoleTrack, console);
                 Sample(pair, shipTrack, ship);
                 Sample(pair, hostTrack, host);
-                if (physics.GetContactingEntities(crane).Count > 0)
-                    craneContactTicks++;
-                shipContactTotal += physics.GetContactingEntities(ship).Count;
                 craneTrack.CraneTicks.Add(em.GetComponent<WFDrydockCraneComponent>(crane).LastModifiedTick.Value);
             });
         }
 
         var craneSets = craneTrack.ComponentSets.Distinct().Count();
         var shipSets = shipTrack.ComponentSets.Distinct().Count();
-        var consoleSets = consoleTrack.ComponentSets.Distinct().Count();
-        var summary =
-            $"UI closed ticks: {uiClosedTicks}/{MeasuredTicks}, crane contact ticks: {craneContactTicks}, ship contacts summed: {shipContactTotal}\n" +
-            $"  ship: drift {MaxDrift(shipTrack.Positions):F4} m, velocity max {shipTrack.Velocities.Max(v => v.Length()):F4} m/s, " +
-            $"parent changes {Changes(shipTrack.Parents)}, grid dirty ticks {Changes(shipTrack.GridTicks)}, " +
-            $"meta dirty ticks {Changes(shipTrack.MetaTicks)}, component sets {shipSets}, component-count changes {Changes(shipTrack.ComponentCounts)}\n" +
-            $"  host: drift {MaxDrift(hostTrack.Positions):F4} m, grid dirty ticks {Changes(hostTrack.GridTicks)}, meta dirty ticks {Changes(hostTrack.MetaTicks)}\n" +
-            $"  console: drift {MaxDrift(consoleTrack.Positions):F4} m, component sets {consoleSets}, component-count changes {Changes(consoleTrack.ComponentCounts)}, " +
-            $"meta dirty ticks {Changes(consoleTrack.MetaTicks)}\n" +
-            $"  crane: drift {MaxDrift(craneTrack.Positions):F4} m, parent changes {Changes(craneTrack.Parents)}, " +
-            $"component sets {craneSets}, crane dirty ticks {Changes(craneTrack.CraneTicks)}, meta dirty ticks {Changes(craneTrack.MetaTicks)}";
-        TestContext.Out.WriteLine(summary);
 
         Assert.Multiple(() =>
         {

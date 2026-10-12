@@ -40,7 +40,7 @@ public sealed partial class HailingSystem
     }
 
     /// <summary>Opens a connected hail's service UI on the helm for the actor.</summary>
-    public void OpenService(EntityUid helm, EntityUid service, EntityUid actor)
+    private void OpenService(EntityUid helm, EntityUid service, EntityUid actor)
     {
         if (!TryComp<HailServiceComponent>(service, out var serviceComp) ||
             !_ui.TryGetInterfaceData(service, serviceComp.Key, out var serviceData) ||

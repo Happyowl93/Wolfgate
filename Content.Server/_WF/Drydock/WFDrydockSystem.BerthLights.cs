@@ -45,8 +45,7 @@ public sealed partial class WFDrydockSystem
     private void TurnOffBerthLights(EntityUid console, WFDrydockConsoleComponent comp)
     {
         comp.BerthLightsUntil = null;
-        if (HasComp<WFDrydockGuideComponent>(console))
-            RemComp<WFDrydockGuideComponent>(console);
+        RemComp<WFDrydockGuideComponent>(console);
     }
 
     /// <summary>Switches off berth lights whose time has run out.</summary>

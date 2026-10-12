@@ -18,7 +18,7 @@ namespace Content.Server._WF.Drydock;
 
 public sealed partial class WFDrydockSystem
 {
-    [Dependency] private IRobustRandom _jobRandom = default!;
+    [Dependency] private IRobustRandom _random = default!;
     [Dependency] private AmbientSoundSystem _ambient = default!;
     [Dependency] private PvsOverrideSystem _pvs = default!;
 
@@ -27,9 +27,6 @@ public sealed partial class WFDrydockSystem
 
     /// <summary>Pause after the cranes reach the ship before work starts.</summary>
     private const float DeploySettle = 0.75f;
-
-    /// <summary>Power ratio below which a crane is stalled: no work, sparks or tool sounds.</summary>
-    private const float PowerStallRatio = 0.25f;
 
     /// <summary>Time between re-aims of the cranes, so a drifting ship keeps its items under the heads.</summary>
     private static readonly TimeSpan AimInterval = TimeSpan.FromSeconds(0.5);
@@ -224,7 +221,7 @@ public sealed partial class WFDrydockSystem
             }
 
             // A crane whose arm lane is blocked stalls like an unpowered one.
-            slot.Stalled = ratio < PowerStallRatio || blocked;
+            slot.Stalled = ratio < WFDrydockCraneComponent.StallRatio || blocked;
             lowest = Math.Min(lowest, ratio);
             allStalled &= slot.Stalled;
 
@@ -255,13 +252,13 @@ public sealed partial class WFDrydockSystem
             return 1f;
 
         var ratio = Math.Clamp(consumer.ReceivedPower / consumer.DrawRate, 0f, 1f);
-        return ratio < PowerStallRatio ? 0f : ratio;
+        return ratio < WFDrydockCraneComponent.StallRatio ? 0f : ratio;
     }
 
     /// <summary>Publishes a crane's power ratio when it moved by 0.05 or crossed the stall line.</summary>
     private void SyncPower(EntityUid uid, WFDrydockCraneComponent crane, float ratio)
     {
-        var crossed = (crane.PowerRatio < PowerStallRatio) != (ratio < PowerStallRatio);
+        var crossed = (crane.PowerRatio < WFDrydockCraneComponent.StallRatio) != (ratio < WFDrydockCraneComponent.StallRatio);
         if (!crossed && MathF.Abs(ratio - crane.PowerRatio) < 0.05f)
             return;
 
@@ -275,7 +272,7 @@ public sealed partial class WFDrydockSystem
         foreach (var slot in job.Slots)
         {
             if (slot.Item is { } item && !slot.Unreachable)
-                PointCrane(comp, job.Ship, slot, item.LocalPos, true);
+                PointCrane(comp, job.Ship, slot, item.LocalPos, correction: true);
         }
     }
 
@@ -412,7 +409,7 @@ public sealed partial class WFDrydockSystem
     private void UpdateEstimate(WFDrydockJobComponent job, TimeSpan curTime)
     {
         var remaining = 0d;
-        var speed = Math.Max(PowerStallRatio, job.Power);
+        var speed = Math.Max(WFDrydockCraneComponent.StallRatio, job.Power);
         foreach (var item in job.Pending)
         {
             remaining += item.WorkTime / speed;
@@ -466,7 +463,7 @@ public sealed partial class WFDrydockSystem
             var extension = ClampBoom(craneUid, crane, position, Math.Clamp(maxAcross + 0.5f, crane.SectionLength, crane.MaxExtension));
             var trolley = Math.Clamp((Math.Max(minAcross, 0f) + Math.Min(maxAcross, extension)) / 2f, 1f, extension);
 
-            longest = Math.Max(longest, MoveCrane(craneUid, crane, comp, new CraneTarget(arm, position, trolley, extension, 0f), true));
+            longest = Math.Max(longest, MoveCrane(craneUid, crane, comp, new CraneTarget(arm, position, trolley, extension, 0f), active: true));
 
             var tool = Vector2.Transform(crane.ArmToLocal(trolley, position), _transform.GetWorldMatrix(craneUid));
             slot.ToolPos = Vector2.Transform(tool, worldToShip);
@@ -505,7 +502,7 @@ public sealed partial class WFDrydockSystem
 
         return MoveCrane(craneUid, crane, comp,
             new CraneTarget(arm, position, Math.Clamp(target.X, 1f, extension), extension, crane.Angle),
-            true,
+            active: true,
             correction);
     }
 
@@ -559,7 +556,7 @@ public sealed partial class WFDrydockSystem
                 continue;
 
             _boomBlock.Remove(craneUid);
-            MoveCrane(craneUid, crane, comp, new CraneTarget(0f, 0f, 0f, crane.SectionLength, crane.ParkAngle), false);
+            MoveCrane(craneUid, crane, comp, new CraneTarget(0f, 0f, 0f, crane.SectionLength, crane.ParkAngle), active: false);
         }
     }
 
@@ -591,21 +588,21 @@ public sealed partial class WFDrydockSystem
     /// <summary>A random ship-local tile center from the job's spark tiles.</summary>
     private Vector2 RandomTile(WFDrydockJobComponent job)
     {
-        return job.SparkTiles[_jobRandom.Next(job.SparkTiles.Count)];
+        return job.SparkTiles[_random.Next(job.SparkTiles.Count)];
     }
 
     /// <summary>The time an interval after <paramref name="from"/>, jittered by a random factor from 0.6 to 1.4.</summary>
     private TimeSpan Jittered(TimeSpan from, float interval)
     {
-        return from + TimeSpan.FromSeconds(interval * (0.6f + 0.8f * _jobRandom.NextFloat()));
+        return from + TimeSpan.FromSeconds(interval * (0.6f + 0.8f * _random.NextFloat()));
     }
 
     /// <summary>Random ship-local offset within a square of the given half-width.</summary>
     private Vector2 RandomOffset(float range)
     {
         return new Vector2(
-            (_jobRandom.NextFloat() * 2f - 1f) * range,
-            (_jobRandom.NextFloat() * 2f - 1f) * range);
+            (_random.NextFloat() * 2f - 1f) * range,
+            (_random.NextFloat() * 2f - 1f) * range);
     }
 
     /// <summary>Banks a refund to the job's payer, if the payer still exists.</summary>
@@ -633,17 +630,18 @@ public sealed partial class WFDrydockSystem
         else
         {
             var unfinished = job.Pending.Concat(job.Slots.Where(s => s.Item != null).Select(s => s.Item!)).ToList();
-            var abortKey = end == JobEnd.Unpowered ? "drydock-console-aborted-power" : "drydock-console-aborted";
+            var powerLost = end == JobEnd.Unpowered;
             if (job.PaidInMaterials)
             {
                 var returned = ReturnMaterials(console, JobCranes(job), unfinished);
-                Notify(console, job, Loc.GetString(abortKey + "-materials", ("refund", FormatMaterials(returned))));
+                Notify(console, job, Loc.GetString(powerLost ? "drydock-console-aborted-power-materials" : "drydock-console-aborted-materials",
+                    ("refund", FormatMaterials(returned))));
             }
             else
             {
                 var refund = unfinished.Sum(i => i.Cost);
                 Refund(job, refund);
-                Notify(console, job, Loc.GetString(abortKey, ("refund", refund)));
+                Notify(console, job, Loc.GetString(powerLost ? "drydock-console-aborted-power" : "drydock-console-aborted", ("refund", refund)));
             }
             _audio.PlayPvs(comp.DenySound, console);
         }

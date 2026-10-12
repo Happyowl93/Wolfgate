@@ -18,5 +18,4 @@ drydock-console-aborted = Ship left the berth. Unfinished work refunded: { $refu
 drydock-console-aborted-power = The cranes lost power. Unfinished work refunded: { $refund } cr.
 drydock-console-no-power = The cranes have no power.
 drydock-console-cranes-blocked = The cranes' arms are blocked.
-
 drydock-console-crane-busy = This crane is already working for another console.

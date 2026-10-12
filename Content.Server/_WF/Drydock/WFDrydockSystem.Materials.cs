@@ -216,9 +216,7 @@ public sealed partial class WFDrydockSystem
 
         var crane = cranes.FirstOrDefault(c => HasComp<MaterialStorageComponent>(c));
         if (!crane.Valid || !TryChangeLocal(CraneSilo(crane) ?? crane, bill))
-        {
-            _sawmill.Warning($"Could not return drydock materials to {ToPrettyString(console)}; its cranes or silo are gone or full.");
-        }
+            Log.Warning($"Could not return drydock materials to {ToPrettyString(console)}; its cranes or silo are gone or full.");
 
         return bill;
     }

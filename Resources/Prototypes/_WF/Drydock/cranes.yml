@@ -36,7 +36,7 @@
         - MachineLayer
   - type: Clickable
   - type: InteractionOutline
-  # High-voltage draw: 500 W idle for now. Working cranes will raise it.
+  # High-voltage draw; the drydock system switches it between the crane's idle and working loads.
   - type: PowerConsumer
     voltage: High
     drawRate: 500

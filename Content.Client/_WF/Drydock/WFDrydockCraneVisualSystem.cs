@@ -27,9 +27,6 @@ public sealed partial class WFDrydockCraneVisualSystem : EntitySystem
     /// <summary>Arm length below which the arm's end cap and the stowed head are hidden.</summary>
     private const float StowedArm = 0.05f;
 
-    /// <summary>Power ratio below which a crane stalls: it stops moving and its lights go out.</summary>
-    private const float StalledRatio = 0.25f;
-
     private readonly Dictionary<EntityUid, CraneLayers> _cranes = new();
 
     /// <summary>Cranes whose sprites are rebuilt after this frame's loop: mirrored, or their rig was deleted.</summary>
@@ -123,7 +120,7 @@ public sealed partial class WFDrydockCraneVisualSystem : EntitySystem
         var extension = Math.Clamp(crane.Extension, crane.SectionLength, crane.MaxExtension);
 
         // Every axis slows with the crane's power, and a stalled crane does not move at all.
-        var power = crane.PowerRatio < StalledRatio ? 0f : crane.PowerRatio;
+        var power = crane.PowerRatio < WFDrydockCraneComponent.StallRatio ? 0f : crane.PowerRatio;
         var step = frameTime * power;
 
         if (crane.Arm > crane.VisualArm || folded)
@@ -211,7 +208,7 @@ public sealed partial class WFDrydockCraneVisualSystem : EntitySystem
     /// <summary>Switches the beacons and machine lights on or off as the crane gains or loses power.</summary>
     private void UpdateBeacons(Entity<SpriteComponent?> body, Entity<SpriteComponent?> rig, WFDrydockCraneComponent crane, CraneLayers layers)
     {
-        var lit = crane.Active && crane.PowerRatio >= StalledRatio;
+        var lit = crane.Active && crane.PowerRatio >= WFDrydockCraneComponent.StallRatio;
         if (layers.BeaconOn == lit)
             return;
 

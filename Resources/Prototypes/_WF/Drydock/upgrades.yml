@@ -1,4 +1,4 @@
-# Drydock refit upgrades: each tier swaps a machine's stock parts for higher-rated ones
+# Drydock refit upgrades: each tier swaps a machine's stock parts for higher-rated ones.
 
 - type: wfDrydockUpgrade
   id: WFDrydockThrusters

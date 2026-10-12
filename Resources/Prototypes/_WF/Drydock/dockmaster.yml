@@ -42,7 +42,7 @@
   id: WFDrydockDockmaster
   parent: WFBaseTrader
   name: Ilse Brannock
-  description: The drydock's dockmaster, headset on and an eye on both bays.
+  description: The drydock's dockmaster, headset on and an eye on every bay.
   suffix: Drydock, Dockmaster
   components:
   - type: HumanoidAppearance

@@ -321,7 +321,7 @@ public sealed class DrydockTest
         await pair.CleanReturnAsync();
     }
 
-    /// <summary>Loads the drydock station away from the origin and returns it with its berth A and B consoles.</summary>
+    /// <summary>Loads the drydock station away from the origin and returns it with its South (A) and North (B) berth consoles.</summary>
     public static (EntityUid Station, EntityUid ConsoleA, EntityUid ConsoleB) LoadDrydock(TestPair pair, MapId map)
     {
         var server = pair.Server;
@@ -583,8 +583,6 @@ public sealed class DrydockTest
             if (ready)
                 seconds = s;
         }
-
-        TestContext.Out.WriteLine($"Berth A cranes reached 95% of working draw after {seconds} s.");
 
         await server.WaitAssertion(() =>
         {

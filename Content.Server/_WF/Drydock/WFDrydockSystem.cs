@@ -18,7 +18,6 @@ using Robust.Server.GameObjects;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Localization;
-using Robust.Shared.Log;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
@@ -35,7 +34,6 @@ namespace Content.Server._WF.Drydock;
 public sealed partial class WFDrydockSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototype = default!;
-    private static readonly ISawmill _sawmill = Logger.GetSawmill("drydock");
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private PopupSystem _popup = default!;
     [Dependency] private BankSystem _bank = default!;
@@ -48,7 +46,6 @@ public sealed partial class WFDrydockSystem : EntitySystem
     [Dependency] private WFDrydockUpgradeSystem _upgrade = default!;
     [Dependency] private WFHullSectionSystem _hull = default!;
     [Dependency] private IServerPreferencesManager _prefs = default!;
-    [Dependency] private ISharedPlayerManager _players = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IMapManager _mapManager = default!;
     [Dependency] private SharedPhysicsSystem _physics = default!;
@@ -335,13 +332,10 @@ public sealed partial class WFDrydockSystem : EntitySystem
     {
         if (item.Upgrade == null ||
             !_prototype.TryIndex<WFDrydockUpgradePrototype>(item.Upgrade, out var proto) ||
-            !Exists(item.Target) ||
             TerminatingOrDeleted(item.Target))
             return;
 
-        if (_upgrade.GetTier(item.Target, proto) >= item.Tier)
-            return;
-
+        // ApplyTier skips a part that already reached the tier.
         _upgrade.ApplyTier(item.Target, proto, item.Tier);
     }
 
@@ -358,9 +352,6 @@ public sealed partial class WFDrydockSystem : EntitySystem
         // During a job, report its ship even if it drifted, and count the queue instead of scanning the grid.
         var ship = job?.Ship ?? GetBerthedShip(console, comp);
         var state = BuildState(console, ship, comp, job);
-        state.PowerRatio = BerthPower(console, comp);
-        state.CraneCount = LinkedCranes(console).Count;
-        state.BlockedCranes = BlockedCraneCount(console);
         state.BerthLightsOn = comp.BerthLightsUntil != null;
 
         var key = StateKey(state);
@@ -396,34 +387,26 @@ public sealed partial class WFDrydockSystem : EntitySystem
         return string.Join(",", bill.OrderBy(kv => kv.Key).Select(kv => $"{kv.Key}={kv.Value}"));
     }
 
-    /// <summary>Lowest power ratio among the berth's cranes, or 1 without any.</summary>
-    private float BerthPower(EntityUid console, WFDrydockConsoleComponent comp)
-    {
-        if (!TryGetBerth(console, comp, out var berth) || berth.Cranes.Count == 0)
-            return 1f;
-
-        return berth.Cranes.Min(c => CranePower(c));
-    }
-
-    /// <summary>Whether every berth crane has at least half its power, so work can start.</summary>
-    private bool CranesPowered(EntityUid console, WFDrydockConsoleComponent comp)
-    {
-        return !TryGetBerth(console, comp, out var berth) || berth.Cranes.All(c => CranePower(c) >= 0.5f);
-    }
-
-    /// <summary>Builds the console state for a ship in or booked to a berth: its quote, job progress and refits.</summary>
+    /// <summary>
+    /// Builds the console state for a ship in or booked to a berth: its cranes, quote, job progress and refits.
+    /// </summary>
     private WFDrydockConsoleState BuildState(EntityUid console, EntityUid? ship, WFDrydockConsoleComponent comp, WFDrydockJobComponent? job)
     {
-        var state = new WFDrydockConsoleState();
+        var linked = LinkedCranes(console);
+        var working = WorkingCranes(console, comp);
+        var state = new WFDrydockConsoleState
+        {
+            PowerRatio = working.Count == 0 ? 1f : working.Min(CranePower),
+            CraneCount = linked.Count,
+            BlockedCranes = linked.Count(uid => Comp<WFDrydockCraneComponent>(uid).Blocked),
+        };
+
         var pay = CompOrNull<WFDrydockMaterialPaymentComponent>(console);
         if (pay != null)
         {
             state.PaysWithMaterials = true;
             // Same stock the job's charge draws from: the cranes' storage and their linked silos.
-            foreach (var (id, amount) in Availability(WorkingCranes(console, comp)))
-            {
-                state.StoredMaterials[id] = amount;
-            }
+            state.StoredMaterials = Availability(working);
         }
 
         if (ship is { } berthed)
@@ -503,15 +486,17 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
         var minTier = parts.Min(p => _upgrade.GetTier(p, proto));
         entry.MinTier = minTier;
-        if (minTier < proto.Tiers.Count)
-            entry.NextPrice = parts.Count(p => _upgrade.GetTier(p, proto) <= minTier) * proto.Tiers[minTier].Price;
+        if (minTier >= proto.Tiers.Count)
+            return entry;
 
-        if (pay != null && minTier < proto.Tiers.Count)
+        // Only the parts at the lowest tier are refitted next.
+        var tier = proto.Tiers[minTier];
+        var due = parts.Count(p => _upgrade.GetTier(p, proto) == minTier);
+        entry.NextPrice = due * tier.Price;
+        if (pay != null)
         {
-            var tier = proto.Tiers[minTier];
             var perPart = ItemBill(pay, tier.Price, tier.Materials);
-            var ready = parts.Count(p => _upgrade.GetTier(p, proto) <= minTier);
-            for (var i = 0; i < ready; i++)
+            for (var i = 0; i < due; i++)
             {
                 AddBill(entry.NextMaterials, perPart);
             }
@@ -557,13 +542,15 @@ public sealed partial class WFDrydockSystem : EntitySystem
             return Deny(console, comp, actor, denial);
 
         RefreshCranes(console);
-        if (LinkedCranes(console).Count > 0 && (!TryGetBerth(console, comp, out var working) || working.Cranes.Count == 0))
+        var cranes = WorkingCranes(console, comp);
+        if (cranes.Count == 0 && LinkedCranes(console).Count > 0)
             return Deny(console, comp, actor, Loc.GetString("drydock-console-cranes-blocked"));
 
-        if (!CranesPowered(console, comp))
+        // Every working crane needs half its power to start.
+        if (cranes.Any(c => CranePower(c) < 0.5f))
             return Deny(console, comp, actor, Loc.GetString("drydock-console-no-power"));
 
-        if (TryGetBerth(console, comp, out var berth) && berth.Cranes.Any(c => CraneBusyElsewhere(console, c)))
+        if (cranes.Any(c => CraneBusyElsewhere(console, c)))
             return Deny(console, comp, actor, Loc.GetString("drydock-console-crane-busy"));
 
         // Booked jobs are always paid in credits; walk-in material consoles pay from their storage.
@@ -647,7 +634,6 @@ public sealed partial class WFDrydockSystem : EntitySystem
     {
         return TryComp<ActorComponent>(actor, out var actorComp) &&
                _prefs.TryGetCachedPreferences(actorComp.PlayerSession.UserId, out var prefs) &&
-               _players.TryGetSessionByEntity(actor, out _) &&
                prefs.SelectedCharacter is HumanoidCharacterProfile;
     }
 
@@ -665,7 +651,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
     {
         if (IsShipyardGrid(console, comp, ship))
         {
-            _sawmill.Warning($"Refused a drydock job on its own grid {ToPrettyString(ship)} from {ToPrettyString(console)}.");
+            Log.Warning($"Refused a drydock job on its own grid {ToPrettyString(ship)} from {ToPrettyString(console)}.");
             return;
         }
 

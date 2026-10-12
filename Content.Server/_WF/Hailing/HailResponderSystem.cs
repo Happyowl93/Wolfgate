@@ -100,7 +100,7 @@ public sealed class HailResponderSystem : EntitySystem
             if (xform.GridUid != grid)
                 continue;
 
-            var ev = new HailAnsweredEvent(helm, hail.PeerGrid, lines);
+            var ev = new HailAnsweredEvent(hail.PeerGrid, lines);
             RaiseLocalEvent(service, ref ev);
         }
 

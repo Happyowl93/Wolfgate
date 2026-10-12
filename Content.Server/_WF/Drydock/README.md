@@ -1,13 +1,13 @@
 # Drydock
 
-The drydock is a POI station (`WFDrydock`, `Resources/Maps/_WF/Drydock/drydock.yml`) with two berths, A and B, each a
-bay that ships park in without docking. Each berth has a console (`WFComputerDrydockA` / `B`, labelled `berth`) and a
-set of cranes. Ships reach it two ways: walk up to a berth console, or hail the dockmaster from their own helm (Hailing
-module).
+The drydock is a POI station (`WFDrydock`, `Resources/Maps/_WF/Drydock/drydock.yml`) with four berths, North, East,
+South and West, each a bay that ships park in without docking. Each berth has a `WFComputerDrydock` (its `berth` field
+names it) and two cranes. Ships reach it two ways: walk up to a berth console, or hail the dockmaster from their own
+helm (Hailing module).
 
-Cranes (`WFDrydockCrane`, 36-tile arm, and `WFDrydockCraneLarge`, 60-tile arm, with `Mirrored` variants) are 2x2 HV
-machines. Each draws 500 W idle and 15 kW while working, and its speed scales with the power it receives. Below 25%
-it stalls. A job whose cranes stay stalled for `powerAbortTime` (60 s) aborts and refunds its unfinished work, and
+Cranes come in three sizes: `WFDrydockCrane` (36-tile arm), `WFDrydockCraneLarge` (60) and `WFDrydockCraneHuge` (80, the
+station's), each with a `Mirrored` variant. They are 2x2 HV machines. Each draws 500 W idle and 15 kW while working, and
+its speed scales with the power it receives. Below 25% it stalls. A job whose cranes stay stalled for `powerAbortTime` (60 s) aborts and refunds its unfinished work, and
 starting work needs every berth crane at half power. A crane works in two parts: the arm runs down the bay, then the
 telescopic boom swings across the ship. A multitool links the console's sender port to a crane's receiver port
 (`ports.yml`). A crane serves one console, so linking it elsewhere moves it. A console's berth is the cranes linked to
@@ -23,7 +23,10 @@ is still scanned for blockers.
 
 The dockmaster (`WFDrydockDockmaster`, HailResponder) mans `WFComputerDrydockTraffic` next to her desk and answers
 ringing hails. Her booking window is a per-caller hail service (`WFDrydockOperator`, HailService), so each caller gets
-their own window. The POI has `PreventPilot`. Walk-in consoles quote and sell work directly on the ship in their berth. A walk-in console's berth lights button frames its whole work area with the same guide for `BerthLightsTime` seconds, so a pilot can line up without a booking; a job or a second press turns it off.
+their own window. The POI has `PreventPilot`. Walk-in consoles quote and sell work directly on the ship in their berth.
+Their berth lights button frames the whole work area with a booking's guide lights for `BerthLightsTime` seconds, so a
+pilot can line up without a booking; a job or a second press turns it off.
+
 A booking, from either route, takes the smallest free berth whose area fits the ship, for 5 minutes. The ship gets a
 guide frame and approach lights (`WFDrydockGuideComponent`, drawn by `WFDrydockGuideOverlay`). Work starts once the ship
 has held still inside the berth for 2 s, and payment is taken then from the caller's bank account. A booking that
@@ -100,7 +103,6 @@ bills), `WFDrydockUpgradeSystem` (refit tiers), and the client `WFDrydockCraneVi
 
 ### Prototypes
 
-- [`Resources/Prototypes/_WF/Drydock/berth.yml`](../../../Resources/Prototypes/_WF/Drydock/berth.yml)
 - [`Resources/Prototypes/_WF/Drydock/consoles.yml`](../../../Resources/Prototypes/_WF/Drydock/consoles.yml)
 - [`Resources/Prototypes/_WF/Drydock/cranes.yml`](../../../Resources/Prototypes/_WF/Drydock/cranes.yml)
 - [`Resources/Prototypes/_WF/Drydock/dockmaster.yml`](../../../Resources/Prototypes/_WF/Drydock/dockmaster.yml)

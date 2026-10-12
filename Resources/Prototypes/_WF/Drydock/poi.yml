@@ -17,5 +17,5 @@
       prob: 0.0
     - maxDistance: 1500
       prob: 0.3
-  # Traffic console: no piloting or FTL of the grid.
+  # Has a shuttle console for the dockmaster's hails, but is not a ship: no piloting or FTL.
   - type: PreventPilot

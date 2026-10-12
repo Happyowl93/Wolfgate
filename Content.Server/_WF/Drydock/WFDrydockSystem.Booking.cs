@@ -248,9 +248,6 @@ public sealed partial class WFDrydockSystem
             job = Comp<WFDrydockJobComponent>(jobConsole);
 
         var state = BuildState(slot.Console, ship, slot.Comp, job);
-        state.PowerRatio = BerthPower(slot.Console, slot.Comp);
-        state.CraneCount = LinkedCranes(slot.Console).Count;
-        state.BlockedCranes = BlockedCraneCount(slot.Console);
         state.Booking = true;
         state.Notice = eval.Notice;
 
@@ -359,15 +356,14 @@ public sealed partial class WFDrydockSystem
                 RemoveBooking(console, booking);
         }
 
-        if (HasComp<WFDrydockGuideComponent>(ship))
-            RemComp<WFDrydockGuideComponent>(ship);
+        RemComp<WFDrydockGuideComponent>(ship);
     }
 
     /// <summary>Drops a booking from its berth console, and the guide from its ship.</summary>
     private void RemoveBooking(EntityUid console, WFDrydockBookingComponent booking)
     {
         RemComp<WFDrydockBookingComponent>(console);
-        if (!TerminatingOrDeleted(booking.Ship) && HasComp<WFDrydockGuideComponent>(booking.Ship))
+        if (!TerminatingOrDeleted(booking.Ship))
             RemComp<WFDrydockGuideComponent>(booking.Ship);
     }
 

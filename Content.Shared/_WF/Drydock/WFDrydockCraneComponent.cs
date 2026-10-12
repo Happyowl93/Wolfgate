@@ -14,6 +14,9 @@ namespace Content.Shared._WF.Drydock;
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class WFDrydockCraneComponent : Component
 {
+    /// <summary>Power ratio below which a crane stalls: no work, no movement, lights out.</summary>
+    public const float StallRatio = 0.25f;
+
     /// <summary>Console this crane is linked to with a multitool. The cranes linked to a console form its berth.</summary>
     [ViewVariables, AutoNetworkedField]
     public EntityUid? LinkedConsole;
@@ -109,13 +112,12 @@ public sealed partial class WFDrydockCraneComponent : Component
     [DataField, AutoNetworkedField]
     public bool Active;
 
-    /// <summary>Whether a solid entity blocks the arm lane; a blocked crane does no work.</summary>
-    [DataField, AutoNetworkedField]
-    public bool Blocked;
-
-    /// <summary>Name of the entity blocking the arm lane, when <see cref="Blocked"/>.</summary>
+    /// <summary>Name of the solid entity blocking the arm lane, or null when clear.</summary>
     [DataField, AutoNetworkedField]
     public string? Blocker;
+
+    /// <summary>Whether a solid entity blocks the arm lane; a blocked crane does no work.</summary>
+    public bool Blocked => Blocker != null;
 
     /// <summary>Longest boom: each extra section adds its length less one tile of overlap.</summary>
     public float MaxExtension => SectionLength + (Sections - 1) * (SectionLength - 1);

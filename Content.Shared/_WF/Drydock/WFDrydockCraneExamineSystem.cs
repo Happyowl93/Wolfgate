@@ -20,8 +20,8 @@ public sealed class WFDrydockCraneExamineSystem : EntitySystem
         args.PushMarkup(comp.LinkedConsole is { } console
             ? Loc.GetString("drydock-crane-examine-linked", ("console", MetaData(console).EntityName))
             : Loc.GetString("drydock-crane-examine-unlinked"));
-        if (comp.Blocked)
-            args.PushMarkup(Loc.GetString("drydock-crane-examine-blocked", ("blocker", comp.Blocker ?? string.Empty)));
+        if (comp.Blocker is { } blocker)
+            args.PushMarkup(Loc.GetString("drydock-crane-examine-blocked", ("blocker", blocker)));
 
         args.PushMarkup(Loc.GetString("drydock-crane-examine-power", ("percent", (int) MathF.Round(comp.PowerRatio * 100f))));
     }

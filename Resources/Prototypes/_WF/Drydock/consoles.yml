@@ -1,6 +1,4 @@
-# Drydock berth consoles. The dockmaster offers them to hailing ships.
-# A console's berth is the cranes multitool-linked to it.
-# Traffic console: the dockmaster's hail console, not a berth console.
+# Drydock berth console, whose berth is the cranes multitool-linked to it, and the dockmaster's traffic console for hails.
 
 - type: entity
   parent: BaseComputer

@@ -1,4 +1,4 @@
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Physics;
@@ -69,24 +69,11 @@ public sealed partial class WFDrydockSystem
         }
     }
 
-    /// <summary>Counts the cranes linked to a console whose arm lane is blocked.</summary>
-    private int BlockedCraneCount(EntityUid console)
-    {
-        return LinkedCranes(console).Count(uid => Comp<WFDrydockCraneComponent>(uid).Blocked);
-    }
-
     /// <summary>Finds the first solid entity in a crane's arm lane. Returns whether its blocker changed.</summary>
     private bool ScanArmLane(EntityUid uid, WFDrydockCraneComponent crane)
     {
-        var xform = Transform(uid);
-        if (xform.GridUid is not { } gridUid || !TryComp<MapGridComponent>(gridUid, out var grid))
-        {
-            _boomBlock.Remove(uid);
+        if (!TryStartScan(uid, out var gridUid, out var grid, out var toGrid))
             return SetBlocker(uid, crane, null);
-        }
-
-        var toGrid = Matrix3x2.CreateRotation((float) xform.LocalRotation.Theta) * Matrix3x2.CreateTranslation(xform.LocalPosition);
-        _tileMemo.Clear();
 
         string? blocker = null;
         var lane = (int) MathF.Ceiling(crane.MaxArm / BlockerStep);
@@ -105,15 +92,8 @@ public sealed partial class WFDrydockSystem
     /// <summary>Caches the nearest blocker on each arm row of a crane's boom path, reusing its array when the size matches.</summary>
     private void ScanBoomPaths(EntityUid uid, WFDrydockCraneComponent crane)
     {
-        var xform = Transform(uid);
-        if (xform.GridUid is not { } gridUid || !TryComp<MapGridComponent>(gridUid, out var grid))
-        {
-            _boomBlock.Remove(uid);
+        if (!TryStartScan(uid, out var gridUid, out var grid, out var toGrid))
             return;
-        }
-
-        var toGrid = Matrix3x2.CreateRotation((float) xform.LocalRotation.Theta) * Matrix3x2.CreateTranslation(xform.LocalPosition);
-        _tileMemo.Clear();
 
         var rows = (int) MathF.Ceiling(crane.MaxArm) + 1;
         var samples = (int) MathF.Ceiling(crane.MaxExtension / BlockerStep);
@@ -138,6 +118,26 @@ public sealed partial class WFDrydockSystem
         }
     }
 
+    /// <summary>
+    /// Resolves a crane's grid and its crane-to-grid transform, and clears the tile memo for a new scan.
+    /// Off a grid, drops the crane's cached boom paths and returns false.
+    /// </summary>
+    private bool TryStartScan(EntityUid uid, out EntityUid gridUid, [NotNullWhen(true)] out MapGridComponent? grid, out Matrix3x2 toGrid)
+    {
+        var xform = Transform(uid);
+        toGrid = Matrix3x2.CreateRotation((float) xform.LocalRotation.Theta) * Matrix3x2.CreateTranslation(xform.LocalPosition);
+        grid = null;
+        gridUid = xform.GridUid ?? EntityUid.Invalid;
+        if (!TryComp(gridUid, out grid))
+        {
+            _boomBlock.Remove(uid);
+            return false;
+        }
+
+        _tileMemo.Clear();
+        return true;
+    }
+
     /// <summary>Caches the boom paths of every crane a job works with.</summary>
     private void ScanJobBooms(WFDrydockJobComponent job)
     {
@@ -151,10 +151,9 @@ public sealed partial class WFDrydockSystem
     /// <summary>Stores a crane's blocker, dirtying it only when the blocker changed. Returns whether it changed.</summary>
     private bool SetBlocker(EntityUid uid, WFDrydockCraneComponent crane, string? blocker)
     {
-        if (crane.Blocked == (blocker != null) && crane.Blocker == blocker)
+        if (crane.Blocker == blocker)
             return false;
 
-        crane.Blocked = blocker != null;
         crane.Blocker = blocker;
         Dirty(uid, crane);
         return true;
