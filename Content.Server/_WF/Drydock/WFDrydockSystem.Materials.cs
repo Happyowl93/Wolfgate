@@ -223,7 +223,7 @@ public sealed partial class WFDrydockSystem
         return bill;
     }
 
-    /// <summary>Re-sends open material consoles' state about once a second, since a crane's or silo's stock changes off the console.</summary>
+    /// <summary>Re-sends open material consoles' state about once a second, since crane and silo stock change off the console.</summary>
     private void RefreshMaterialConsoles(float frameTime)
     {
         _materialRefresh += frameTime;

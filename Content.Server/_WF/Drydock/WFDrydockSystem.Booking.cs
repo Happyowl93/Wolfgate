@@ -14,8 +14,7 @@ using Robust.Shared.Maths;
 namespace Content.Server._WF.Drydock;
 
 /// <summary>
-/// Drydock operator: books a berth and its work for the caller's ship, then starts the work once the ship
-/// settles in the berth.
+/// Drydock operator: books a berth and its work for the caller's ship, then starts the work once it settles in the berth.
 /// </summary>
 public sealed partial class WFDrydockSystem
 {
@@ -28,7 +27,7 @@ public sealed partial class WFDrydockSystem
     /// <summary>A berth console with its bay area, station and approach lights.</summary>
     private readonly record struct BerthSlot(EntityUid Console, WFDrydockConsoleComponent Comp, EntityUid Station, Box2 Area, Vector2 Approach, float ApproachLength, string Label);
 
-    /// <summary>The berth a booking is priced at, the berth it would take, and the notice explaining a refusal.</summary>
+    /// <summary>The berth a booking is priced at, the berth it would take, and the refusal notice.</summary>
     private readonly record struct Evaluation(BerthSlot? Pricing, BerthSlot? Chosen, string? Notice);
 
     private void InitializeBooking()
@@ -42,7 +41,7 @@ public sealed partial class WFDrydockSystem
         SubscribeLocalEvent<WFDrydockOperatorComponent, HailAnsweredEvent>(OnOperatorHailAnswered);
     }
 
-    /// <summary>Gives the operator the drydock window interface, so a hail relay can copy it onto the helm.</summary>
+    /// <summary>Gives the operator the drydock window, so a hail relay can copy it onto the helm.</summary>
     private void OnOperatorStartup(EntityUid uid, WFDrydockOperatorComponent comp, ComponentStartup args)
     {
         if (!_ui.HasUi(uid, WFDrydockConsoleUiKey.Key))
@@ -57,7 +56,7 @@ public sealed partial class WFDrydockSystem
 
     private void OnOperatorClosed(EntityUid uid, WFDrydockOperatorComponent comp, BoundUIClosedEvent args)
     {
-        // The operator also has a trader window; only the drydock window's viewers are dropped here.
+        // The operator also has a trader window; only drydock viewers are dropped here.
         if (!Equals(args.UiKey, WFDrydockConsoleUiKey.Key))
             return;
 
@@ -190,7 +189,7 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>
-    /// Picks the berth a ship is booked into: a free fitting berth it already sits in, else the first free one in fitting order.
+    /// Picks the berth a ship is booked into: a free fitting berth it already sits in, else the first free fitting one.
     /// A berth is free when nothing works in it, nothing else is booked there, and no other ship sits in it.
     /// </summary>
     private BerthSlot? PickFreeBerth(EntityUid ship, List<BerthSlot> fitting)
@@ -319,22 +318,26 @@ public sealed partial class WFDrydockSystem
         booking.StillSince = null;
 
         var guide = EnsureComp<WFDrydockGuideComponent>(ship);
-        FillGuide(guide, slot, ship, comp.FrameMargin);
+        FillGuide(guide, slot, ShipFrame(ship, slot.Area, comp.FrameMargin));
         Dirty(ship, guide);
 
         Tell(actor, helm, Loc.GetString("drydock-booking-head-to", ("berth", slot.Label), ("ship", Name(ship))));
     }
 
-    /// <summary>Lays the parking frame and approach lights for a ship in a berth, in the station's local space.</summary>
-    private void FillGuide(WFDrydockGuideComponent guide, BerthSlot slot, EntityUid ship, float margin)
+    /// <summary>The parking frame for a ship: its size plus margin, turned to the bay's long side and clamped to the bay.</summary>
+    private Vector2 ShipFrame(EntityUid ship, Box2 area, float margin)
     {
         var shipSize = ShipSize(ship);
-        var area = slot.Area;
         var frameLong = shipSize.Y + 2 * margin;
         var frameShort = shipSize.X + 2 * margin;
         var frame = area.Width >= area.Height ? new Vector2(frameLong, frameShort) : new Vector2(frameShort, frameLong);
-        frame = Vector2.Min(frame, new Vector2(area.Width, area.Height));
+        return Vector2.Min(frame, new Vector2(area.Width, area.Height));
+    }
 
+    /// <summary>Lays the parking frame and approach lights for a ship in a berth, in the station's local space.</summary>
+    private void FillGuide(WFDrydockGuideComponent guide, BerthSlot slot, Vector2 frame)
+    {
+        var area = slot.Area;
         var approach = slot.Approach.LengthSquared() > 0f ? Vector2.Normalize(slot.Approach) : new Vector2(0, -1);
         var center = area.Center;
         var frameExtent = Math.Abs(approach.X) * frame.X + Math.Abs(approach.Y) * frame.Y;

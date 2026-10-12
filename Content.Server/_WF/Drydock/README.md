@@ -20,7 +20,7 @@ items beyond it are out of reach. Clients start cranes stowed and animate them o
 
 The dockmaster (`WFDrydockDockmaster`, HailResponder) mans `WFComputerDrydockTraffic` next to her desk and answers
 ringing hails. Her booking window is a per-caller hail service (`WFDrydockOperator`, HailService), so each caller gets
-their own window. The POI has `PreventPilot`. Walk-in consoles quote and sell work directly on the ship in their berth.
+their own window. The POI has `PreventPilot`. Walk-in consoles quote and sell work directly on the ship in their berth. A walk-in console's berth lights button frames its whole work area with the same guide for `BerthLightsTime` seconds, so a pilot can line up without a booking; a job or a second press turns it off.
 A booking, from either route, takes the smallest free berth whose area fits the ship, for 5 minutes. The ship gets a
 guide frame and approach lights (`WFDrydockGuideComponent`, drawn by `WFDrydockGuideOverlay`). Work starts once the ship
 has held still inside the berth for 2 s, and payment is taken then from the caller's bank account. A booking that
@@ -54,6 +54,7 @@ bills), `WFDrydockUpgradeSystem` (refit tiers), and the client `WFDrydockCraneVi
 - [`Content.Server/_WF/Drydock/WFDrydockBerth.cs`](WFDrydockBerth.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockBookingComponent.cs`](WFDrydockBookingComponent.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockJobComponent.cs`](WFDrydockJobComponent.cs)
+- [`Content.Server/_WF/Drydock/WFDrydockSystem.BerthLights.cs`](WFDrydockSystem.BerthLights.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Blockers.cs`](WFDrydockSystem.Blockers.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Booking.cs`](WFDrydockSystem.Booking.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.cs`](WFDrydockSystem.cs)
@@ -87,6 +88,7 @@ bills), `WFDrydockUpgradeSystem` (refit tiers), and the client `WFDrydockCraneVi
 
 - [`Content.IntegrationTests/Tests/_WF/Drydock/DrydockHailTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/DrydockHailTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Drydock/DrydockTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/DrydockTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockBerthTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockBerthTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockTest.cs)
 
 ### Prototypes
@@ -104,6 +106,7 @@ bills), `WFDrydockUpgradeSystem` (refit tiers), and the client `WFDrydockCraneVi
 
 ### Localization
 
+- [`Resources/Locale/en-US/_WF/Drydock/drydock-berth-lights.ftl`](../../../Resources/Locale/en-US/_WF/Drydock/drydock-berth-lights.ftl)
 - [`Resources/Locale/en-US/_WF/Drydock/drydock-booking.ftl`](../../../Resources/Locale/en-US/_WF/Drydock/drydock-booking.ftl)
 - [`Resources/Locale/en-US/_WF/Drydock/drydock-console-ui.ftl`](../../../Resources/Locale/en-US/_WF/Drydock/drydock-console-ui.ftl)
 - [`Resources/Locale/en-US/_WF/Drydock/drydock-console.ftl`](../../../Resources/Locale/en-US/_WF/Drydock/drydock-console.ftl)

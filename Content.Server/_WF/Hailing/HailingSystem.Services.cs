@@ -6,8 +6,7 @@ using Content.Shared.Shuttles.Components;
 namespace Content.Server._WF.Hailing;
 
 /// <summary>
-/// Hail services: a responder's grid offers its consoles over an open channel, and the caller's helm relays each
-/// one's window. The window is drawn from the service's own state and messages, as if the caller stood at it.
+/// Hail services: consoles on the other ship's grid, relayed onto the caller's helm and driven by their own state and messages.
 /// </summary>
 public sealed partial class HailingSystem
 {
@@ -58,7 +57,7 @@ public sealed partial class HailingSystem
         if (relay.Links.TryGetValue(key, out var linked) && linked != service)
             _ui.CloseUi((helm, helmUi), key);
 
-        // The window lives at the helm, so it closes when the caller walks away from it.
+        // Inherits the helm's interaction range, so the window closes when the caller walks away.
         var data = new InterfaceData(serviceData);
         if (_ui.TryGetInterfaceData((helm, helmUi), ShuttleConsoleUiKey.Key, out var helmData))
             data.InteractionRange = helmData.InteractionRange;
@@ -68,7 +67,7 @@ public sealed partial class HailingSystem
         relay.Links[key] = service;
         relay.Mirrored.Remove(key);
 
-        // The service builds its state as if it had been opened in person.
+        // Per-caller services build their state for this actor.
         if (serviceComp.PerCaller)
         {
             var ev = new HailServiceOpenedEvent(helm, Transform(helm).GridUid, actor, key);
@@ -83,9 +82,7 @@ public sealed partial class HailingSystem
         _ui.OpenUi((helm, helmUi), key, actor);
     }
 
-    /// <summary>
-    /// Speaks a line as the party at the far end of a helm's connected call. Returns false without a live call.
-    /// </summary>
+    /// <summary>Speaks a line to the far end of a helm's connected call. Returns false if there is no live call.</summary>
     public bool SayToCaller(EntityUid helm, string text)
     {
         if (!TryComp<HailConsoleComponent>(helm, out var hail) || hail.State != HailState.Connected ||
@@ -98,7 +95,7 @@ public sealed partial class HailingSystem
         return Say(peer, caller, text);
     }
 
-    /// <summary>Handles the pilot opening a service offered over the open channel.</summary>
+    /// <summary>Opens a service offered over the open channel.</summary>
     private void OnOpenService(Entity<ShuttleConsoleComponent> ent, ref HailOpenServiceMessage args)
     {
         var serviceId = args.Service;

@@ -23,6 +23,16 @@ public sealed partial class WFDrydockConsoleComponent : Component
     [DataField]
     public float ApproachLength = 16f;
 
+    /// <summary>Seconds the berth lights stay on after they are switched on.</summary>
+    [DataField]
+    public float BerthLightsTime = 120f;
+
+    /// <summary>When the berth lights go out, or null while they are off. Runtime only.</summary>
+    public TimeSpan? BerthLightsUntil;
+
+    /// <summary>Last console state pushed to viewers, as a key. Runtime only.</summary>
+    public string? LastPushed;
+
     /// <summary>Flat fee per repair job, never refunded.</summary>
     [DataField]
     public int BaseFee = 2500;
@@ -63,11 +73,11 @@ public sealed partial class WFDrydockConsoleComponent : Component
     [DataField]
     public float MaxDuration = 1800f;
 
-    /// <summary>Seconds every berth crane may stay unpowered during a job before the job is aborted and refunded.</summary>
+    /// <summary>Seconds every berth crane may stay unpowered during a job before it is aborted and refunded.</summary>
     [DataField]
     public float PowerAbortTime = 60f;
 
-    /// <summary>Seconds a crane keeps trying for an item out of its reach before the item is skipped and refunded.</summary>
+    /// <summary>Seconds a crane keeps trying for an out-of-reach item before it is skipped and refunded.</summary>
     [DataField]
     public float ReachTimeout = 10f;
 

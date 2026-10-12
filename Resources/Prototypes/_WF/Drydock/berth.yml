@@ -1,4 +1,4 @@
-# Drydock berth airlocks, where crews walk on and off a berth. A berth's work area comes from its cranes' reach.
+# Drydock berth airlocks. A berth's work area comes from its cranes' reach.
 - type: entity
   parent: AirlockGlassShuttle
   id: WFDrydockAirlockA

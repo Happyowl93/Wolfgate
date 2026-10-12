@@ -17,7 +17,7 @@ using Robust.Shared.Map;
 namespace Content.IntegrationTests.Tests._WF.Drydock;
 
 /// <summary>
-/// A ship hails the drydock, the dockmaster answers and greets, and the pilot opens the drydock window over the call.
+/// A ship hails the drydock; the dockmaster answers and greets, and the pilot opens the drydock window over the call.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(HailingSystem))]

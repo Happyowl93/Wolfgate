@@ -3,8 +3,7 @@ using Robust.Shared.ViewVariables;
 namespace Content.Shared._WF.Drydock;
 
 /// <summary>
-/// Drydock operator: an NPC or terminal that books berths on its grid for callers and starts the work at the berth's
-/// own console once the ship arrives.
+/// Drydock operator: an NPC or terminal that books berths for callers. Work starts at the berth's console once the ship arrives.
 /// </summary>
 [RegisterComponent]
 public sealed partial class WFDrydockOperatorComponent : Component

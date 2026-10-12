@@ -3,8 +3,8 @@ using Robust.Shared.Serialization.TypeSerializers.Implementations;
 namespace Content.Shared._WF.Hailing;
 
 /// <summary>
-/// A console whose UI a hail contact on the same grid can open remotely for the caller. The UI is relayed through the
-/// caller's helm, so it must work from its state and messages alone.
+/// A console whose UI a hail contact on the same grid can open for the caller. It is relayed through the caller's
+/// helm, so it must work from its state and messages alone.
 /// </summary>
 [RegisterComponent]
 public sealed partial class HailServiceComponent : Component
@@ -18,8 +18,7 @@ public sealed partial class HailServiceComponent : Component
     public Enum Key = default!;
 
     /// <summary>
-    /// The service sets its state on the helm for each caller (see HailServiceOpenedEvent) instead of having the
-    /// console's state mirrored.
+    /// The service sets its state on the helm per caller (see HailServiceOpenedEvent) instead of mirroring the console.
     /// </summary>
     [DataField]
     public bool PerCaller;

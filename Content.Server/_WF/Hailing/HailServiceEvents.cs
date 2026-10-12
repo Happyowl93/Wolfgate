@@ -1,7 +1,7 @@
 namespace Content.Server._WF.Hailing;
 
 /// <summary>
-/// Raised on each hail service of an answering responder's grid. Lines added are spoken by the responder after its greeting.
+/// Raised on each hail service on a responder's grid. Lines added are spoken after the greeting.
 /// </summary>
 [ByRefEvent]
 public readonly record struct HailAnsweredEvent(EntityUid Helm, EntityUid? Ship, List<string> Lines);

@@ -1,8 +1,7 @@
 namespace Content.Server._WF.Hailing;
 
 /// <summary>
-/// An NPC that mans a shuttle console on its grid and answers hails there, greeting the caller and opening the
-/// hail services on its grid.
+/// An NPC that mans a shuttle console and answers hails there, greeting the caller and opening its grid's hail services.
 /// </summary>
 [RegisterComponent]
 public sealed partial class HailResponderComponent : Component
@@ -11,11 +10,11 @@ public sealed partial class HailResponderComponent : Component
     [DataField]
     public List<LocId> Greetings = new();
 
-    /// <summary>Time a ringing hail is answered after it starts.</summary>
+    /// <summary>Delay before a ringing hail is answered.</summary>
     [DataField]
     public float AnswerDelay = 2f;
 
-    /// <summary>Metres to the console it mans.</summary>
+    /// <summary>Range to the console it mans, in metres.</summary>
     [DataField]
     public float ConsoleRange = 1.5f;
 
@@ -23,7 +22,7 @@ public sealed partial class HailResponderComponent : Component
     [ViewVariables]
     public EntityUid? Console;
 
-    /// <summary>Whether it has greeted the current caller.</summary>
+    /// <summary>Whether the current caller has been greeted.</summary>
     [ViewVariables]
     public bool Greeted;
 }

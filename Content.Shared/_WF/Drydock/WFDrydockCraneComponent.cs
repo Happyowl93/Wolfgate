@@ -4,17 +4,17 @@ using Robust.Shared.GameStates;
 namespace Content.Shared._WF.Drydock;
 
 /// <summary>
-/// Two-by-two crane machine. A straight arm runs from its root down the bay (along the arm, the local -Y side) to the
-/// ship's far end, and a telescopic boom slews from a carriage riding that arm. Units are tiles.
+/// Two-by-two crane. A straight arm runs from its root down the bay to the ship's far end, and a telescopic boom
+/// slews from a carriage riding that arm. Units are tiles.
 /// </summary>
 /// <remarks>
 /// Arm frame: <c>across</c> is the local X (negated when mirrored) and <c>along</c> is the distance down the arm from
-/// its root, <c>-0.5 - local.Y</c>. The boom's angle 0 points across into the bay; 90 folds it along the arm.
+/// its root, <c>ArmRoot - local.Y</c>. The boom's angle 0 points across into the bay; 90 folds it along the arm.
 /// </remarks>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class WFDrydockCraneComponent : Component
 {
-    /// <summary>Drydock console this crane is linked to with a multitool. Its berth is the cranes linked to that console.</summary>
+    /// <summary>Console this crane is linked to with a multitool. The cranes linked to a console form its berth.</summary>
     [ViewVariables, AutoNetworkedField]
     public EntityUid? LinkedConsole;
 
@@ -45,6 +45,10 @@ public sealed partial class WFDrydockCraneComponent : Component
     /// <summary>Whether the machine is flipped: the arm stays put, but the body and boom face toward -X.</summary>
     [DataField]
     public bool Mirrored;
+
+    /// <summary>Local Y where the arm leaves the body. The body's centre sits one tile above it.</summary>
+    [DataField]
+    public float ArmRoot = -0.5f;
 
     /// <summary>Number of nested boom sections.</summary>
     [DataField]
@@ -90,7 +94,7 @@ public sealed partial class WFDrydockCraneComponent : Component
     [DataField, AutoNetworkedField]
     public float Angle = 90f;
 
-    /// <summary>Whether the crane is working; drives the beacons, the machine lights and the motor hum.</summary>
+    /// <summary>Whether the crane is working; drives the beacons, machine lights and motor hum.</summary>
     [DataField, AutoNetworkedField]
     public bool Active;
 
@@ -128,12 +132,12 @@ public sealed partial class WFDrydockCraneComponent : Component
     /// <summary>Converts an arm-frame point to crane-local coordinates.</summary>
     public Vector2 ArmToLocal(float across, float along)
     {
-        return new Vector2(Mirrored ? -across : across, -0.5f - along);
+        return new Vector2(Mirrored ? -across : across, ArmRoot - along);
     }
 
     /// <summary>Converts a crane-local point to arm-frame coordinates, as (across, along).</summary>
     public Vector2 LocalToArm(Vector2 local)
     {
-        return new Vector2(Mirrored ? -local.X : local.X, -0.5f - local.Y);
+        return new Vector2(Mirrored ? -local.X : local.X, ArmRoot - local.Y);
     }
 }

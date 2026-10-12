@@ -1,15 +1,26 @@
-# Mobile drydock: a ship-buildable console and crane pair. The crane is a short, MV-powered, constructible machine
-# that reaches a ship's bay from its own grid; the console pays in stored materials instead of credits (WFDrydockMaterialPayment).
-# The mirrored crane shares the plain crane's board, so deconstructing it yields the plain board.
+# Mobile drydock: a buildable console and crane pair. The console pays in stored materials, not credits (WFDrydockMaterialPayment).
+# The mirrored crane shares the plain crane's board.
+#
+# The crane is a Machine2x2 graph machine on the same four tiles as MachineFrame2x2 (origin, +X, and the two below -Y),
+# so a frame on its tile fits it. The arm root sits at ArmRoot -1.5, the body's edge.
+# The mirrored crane is the -X image. Deconstructing it yields a frame on the plain footprint, so rebuilding gives the plain crane.
 
 - type: entity
   parent: WFComputerDrydock
   id: WFComputerMobileDrydock
   name: mobile drydock console
-  description: A drydock console that fits on a ship. Work is paid in materials held by its linked cranes, or drawn from a linked material silo.
+  description: A drydock console for ships. Work is paid from materials in its linked cranes or a linked material silo.
   components:
   - type: Computer
     board: WFComputerMobileDrydockCircuitboard
+  # Wrenchable and rotatable while unanchored, like a ship machine.
+  - type: Anchorable
+    flags:
+    - Anchorable
+    - Unanchorable
+  - type: Rotatable
+    rotateWhileAnchored: false
+  - type: WiresPanel
   - type: WFDrydockConsole
     baseFee: 0
     upgrades:
@@ -34,16 +45,23 @@
   parent: [WFDrydockCrane, ConstructibleMachine]
   id: WFMobileDrydockCrane
   name: mobile drydock crane
-  description: A short two-by-two crane for a ship's bay. Its arm and boom work the nearby hull with welders, grinders and bolt drivers.
+  description: A short two-by-two crane for a ship's bay. Works the nearby hull with welders, grinders and bolt drivers.
   components:
   - type: Transform
     anchored: false
   - type: Physics
     bodyType: Dynamic
+  # Wrenchable both ways. Restores the flags the station crane base removes.
   - type: Anchorable
     delay: 2
+    flags:
+    - Anchorable
+    - Unanchorable
+  - type: Rotatable
+    rotateWhileAnchored: false
   - type: WFDrydockCrane
     maxArm: 20
+    armRoot: -1.5
     sections: 3
     sectionLength: 4
     extension: 4
@@ -51,7 +69,31 @@
     workingLoad: 6000
   - type: Machine
     board: WFMobileDrydockCraneMachineCircuitboard
-  # Holds the sheets the console's jobs pay with. Like a lathe, it can also draw from a linked material silo.
+  # Two-by-two graph, so deconstruction and breakage give a MachineFrame2x2 on the same tiles.
+  # Pries only with the panel open, as on other machines.
+  - type: WiresPanel
+  - type: Construction
+    graph: Machine2x2
+    node: machine
+  - type: Sprite
+    sprite: _WF/Drydock/crane_machine.rsi
+    drawdepth: Effects
+    noRot: false
+    layers:
+    - state: machine
+      offset: 0.5,-0.5
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-1.5,1.5,0.5"
+        density: 190
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  # Holds the sheets jobs pay with. Like a lathe, can also draw from a linked material silo.
   - type: MaterialStorage
     whitelist:
       tags:
@@ -59,7 +101,7 @@
       - RawMaterial
       - Ingot
   - type: OreSiloClient
-  # Medium-voltage draw, so a ship's MV network can feed it.
+  # Medium-voltage draw, for a ship's MV network.
   - type: PowerConsumer
     voltage: Medium
     drawRate: 200
@@ -105,13 +147,13 @@
     noRot: false
     layers:
     - state: machine
-      offset: -0.5,0.5
+      offset: -0.5,-0.5
   - type: Fixtures
     fixtures:
       fix1:
         shape:
           !type:PhysShapeAabb
-          bounds: "-1.5,-0.5,0.5,1.5"
+          bounds: "-1.5,-1.5,0.5,0.5"
         density: 190
         mask:
         - MachineMask

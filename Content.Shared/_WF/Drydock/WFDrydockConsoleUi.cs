@@ -12,7 +12,7 @@ public enum WFDrydockConsoleUiKey : byte
 }
 
 /// <summary>
-/// State of the drydock window: the caller's berthed ship, its damage, repair price, job progress, refit options and booking.
+/// State of the drydock window: the caller's berthed ship, damage, repair price, job progress, refits and booking.
 /// </summary>
 [Serializable, NetSerializable]
 public sealed class WFDrydockConsoleState : BoundUserInterfaceState
@@ -76,6 +76,9 @@ public sealed class WFDrydockConsoleState : BoundUserInterfaceState
 
     /// <summary>Materials held in the console's storage.</summary>
     public Dictionary<string, int> StoredMaterials = new();
+
+    /// <summary>Whether the console's berth lights are on.</summary>
+    public bool BerthLightsOn;
 }
 
 /// <summary>
@@ -111,6 +114,12 @@ public sealed class WFDrydockUpgradeEntry
 /// </summary>
 [Serializable, NetSerializable]
 public sealed class WFDrydockRepairMessage : BoundUserInterfaceMessage;
+
+/// <summary>
+/// Turns the console's berth lights on or off.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class WFDrydockToggleBerthLightsMessage : BoundUserInterfaceMessage;
 
 /// <summary>
 /// Cancels the booking held for the caller's ship.

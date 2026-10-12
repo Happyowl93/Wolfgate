@@ -14,7 +14,7 @@ public enum WFDrydockUpgradeTarget : byte
 }
 
 /// <summary>
-/// A refit line the drydock sells: each tier swaps the stock machine parts of the target category for higher-rated ones.
+/// A refit line the drydock sells: each tier swaps the target category's stock machine parts for higher-rated ones.
 /// </summary>
 [Prototype("wfDrydockUpgrade")]
 public sealed partial class WFDrydockUpgradePrototype : IPrototype

@@ -5,9 +5,13 @@ using System.Numerics;
 using Content.IntegrationTests.Pair;
 using Content.Server._NF.Bank;
 using Content.Server._WF.Drydock;
+using Content.Server.Construction;
+using Content.Server.Construction.Components;
 using Content.Server.Power.Components;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Construction.Components;
+using Content.Shared.Rotatable;
+using Content.Shared.Wires;
 using Content.Shared.Materials;
 using Content.Shared.Materials.OreSilo;
 using Content.Shared.Power.EntitySystems;
@@ -15,6 +19,9 @@ using Content.Shared.Research.Prototypes;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Maths;
 using Robust.Shared.Map;
+using Robust.Shared.Physics;
+using Robust.Shared.Physics.Components;
+using Robust.Shared.Physics.Collision.Shapes;
 using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Drydock;
@@ -300,5 +307,211 @@ public sealed class MobileDrydockTest
         });
 
         await pair.CleanReturnAsync();
+    }
+
+    /// <summary>Raises the walk-in berth light toggle from an actor, as the console's own UI would.</summary>
+    private static void ToggleBerthLights(TestPair pair, EntityUid console, EntityUid actor)
+    {
+        var em = pair.Server.EntMan;
+        var message = new WFDrydockToggleBerthLightsMessage
+        {
+            Actor = actor,
+            UiKey = WFDrydockConsoleUiKey.Key,
+            Entity = em.GetNetEntity(console),
+        };
+        em.EventBus.RaiseLocalEvent(console, (object) message);
+    }
+
+    /// <summary>Berth lights frame the console's berth on its grid, toggle off on a second press, and go out when a job starts.</summary>
+    [Test]
+    public async Task BerthLightsFrameTheBerthUntilAJobStarts()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+        var materials = server.System<SharedMaterialStorageSystem>();
+
+        EntityUid console = default, crane = default, ship = default, payer = default;
+        WFDrydockBerth berth = default;
+
+        await server.WaitAssertion(() =>
+        {
+            (console, crane, ship, payer) = SetUpMobileRepair(pair, map.MapId);
+            var storage = em.GetComponent<MaterialStorageComponent>(crane);
+            Assert.That(materials.TryChangeMaterialAmount((crane, storage),
+                StockMaterials.ToDictionary(m => m, _ => 10_000)), Is.True, "The crane should take its stock.");
+
+            var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
+            Assert.That(drydock.TryGetBerth(console, comp, out berth), Is.True, "The console should have a berth.");
+        });
+
+        await DrydockTest.RunUntil(pair, 100, 10, () => CraneHasPower(pair, crane));
+
+        await server.WaitAssertion(() =>
+        {
+            ToggleBerthLights(pair, console, payer);
+            Assert.That(em.TryGetComponent(console, out WFDrydockGuideComponent? guide), Is.True, "Lights on should add a guide to the console.");
+            Assert.Multiple(() =>
+            {
+                Assert.That(guide!.Station, Is.EqualTo(berth.Grid), "The guide should sit on the berth's grid.");
+                Assert.That(guide.Center, Is.EqualTo(berth.Area.Center), "The frame should center on the berth.");
+                Assert.That(guide.Size, Is.EqualTo(berth.Area.Size), "The frame should cover the berth.");
+            });
+
+            ToggleBerthLights(pair, console, payer);
+            Assert.That(em.HasComponent<WFDrydockGuideComponent>(console), Is.False, "A second press should turn the lights off.");
+
+            ToggleBerthLights(pair, console, payer);
+            Assert.That(em.HasComponent<WFDrydockGuideComponent>(console), Is.True, "The lights should come back on.");
+
+            var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
+            Assert.That(drydock.TryStartRepair(console, comp, ship, payer), Is.True, "The repair should start.");
+            Assert.Multiple(() =>
+            {
+                Assert.That(em.HasComponent<WFDrydockJobComponent>(console), Is.True, "The job should exist.");
+                Assert.That(em.HasComponent<WFDrydockGuideComponent>(console), Is.False, "Starting a job should turn the lights off.");
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>Mobile crane construction graph: the crane is a 2x2 machine, so its frame is MachineFrame2x2.</summary>
+    [Test]
+    public async Task MobileCraneUsesMachine2x2Graph()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        EntityUid crane = default;
+
+        await server.WaitAssertion(() =>
+        {
+            (_, crane, _) = SpawnMobileYard(pair, map.MapId);
+            var construction = em.GetComponent<ConstructionComponent>(crane);
+            Assert.Multiple(() =>
+            {
+                Assert.That(construction.Graph, Is.EqualTo("Machine2x2"), "The crane should use the 2x2 machine graph.");
+                Assert.That(construction.Node, Is.EqualTo("machine"), "The crane should start on the machine node.");
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>Breaking the crane down to its frame keeps the four tiles its body covered.</summary>
+    [Test]
+    public async Task MobileCraneFrameCoversCraneTiles()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        EntityUid crane = default;
+
+        await server.WaitAssertion(() =>
+        {
+            (_, crane, _) = SpawnMobileYard(pair, map.MapId);
+            var craneBox = BodyBox(em, crane);
+            // Collision boxes carry a polygon skin of about 0.01 tile, hence the 0.02 tolerance.
+            Assert.That(craneBox.Left, Is.EqualTo(-0.5f).Within(0.02f), "The crane body should span the origin tile and the tile to +X.");
+            Assert.That(craneBox.Right, Is.EqualTo(1.5f).Within(0.02f));
+            Assert.That(craneBox.Bottom, Is.EqualTo(-1.5f).Within(0.02f), "The crane body should span the two tiles below the origin.");
+            Assert.That(craneBox.Top, Is.EqualTo(0.5f).Within(0.02f));
+
+            Assert.That(server.System<ConstructionSystem>().ChangeNode(crane, null, "machineFrame"), Is.True,
+                "The crane should turn into its frame.");
+
+            var frame = EntityUid.Invalid;
+            var query = em.EntityQueryEnumerator<MetaDataComponent>();
+            while (query.MoveNext(out var uid, out var meta))
+            {
+                if (meta.EntityPrototype?.ID == "MachineFrame2x2")
+                    frame = uid;
+            }
+
+            Assert.That(frame.IsValid(), Is.True, "The crane should leave a MachineFrame2x2.");
+            // The frame's box is inset a quarter tile from the crane's, so compare centres and the four tile centres.
+            var frameBox = BodyBox(em, frame);
+            Assert.Multiple(() =>
+            {
+                Assert.That(frameBox.Center.X, Is.EqualTo(craneBox.Center.X).Within(0.001f), "The frame should sit on the crane's footprint.");
+                Assert.That(frameBox.Center.Y, Is.EqualTo(craneBox.Center.Y).Within(0.001f));
+                foreach (var tile in new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, -1), new Vector2(1, -1) })
+                    Assert.That(frameBox.Contains(tile), Is.True, $"The frame should cover the tile at {tile}.");
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>Mobile crane and console are wrenchable and rotatable, with a wires panel, like a ship machine.</summary>
+    [Test]
+    public async Task MobileMachinesUnanchorRotateAndOpenPanel()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var crane = EntityUid.Invalid;
+        var console = EntityUid.Invalid;
+
+        await server.WaitAssertion(() =>
+        {
+            (_, crane, console) = SpawnMobileYard(pair, map.MapId);
+            Assert.Multiple(() =>
+            {
+                foreach (var uid in new[] { crane, console })
+                {
+                    Assert.That(em.HasComponent<RotatableComponent>(uid), Is.True, $"{em.GetComponent<MetaDataComponent>(uid).EntityPrototype?.ID} should rotate.");
+#pragma warning disable RA0002
+                    Assert.That(em.GetComponent<AnchorableComponent>(uid).Flags.HasFlag(AnchorableFlags.Unanchorable), Is.True,
+                        $"{em.GetComponent<MetaDataComponent>(uid).EntityPrototype?.ID} should be unwrenchable.");
+#pragma warning restore RA0002
+                    Assert.That(em.HasComponent<WiresPanelComponent>(uid), Is.True, "The machine should have a wires panel for the screwdriver.");
+                }
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>Station cranes and the berth and traffic consoles cannot be unwrenched.</summary>
+    [Test]
+    public async Task StationDrydockMachinesCannotBeUnwrenched()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+
+        await server.WaitAssertion(() =>
+        {
+            foreach (var proto in new[] { "WFDrydockCrane", "WFDrydockCraneMirrored", "WFComputerDrydock", "WFComputerDrydockTraffic" })
+            {
+                var uid = em.SpawnEntity(proto, new MapCoordinates(0, 0, map.MapId));
+#pragma warning disable RA0002
+                var flags = em.GetComponent<AnchorableComponent>(uid).Flags;
+#pragma warning restore RA0002
+                Assert.Multiple(() =>
+                {
+                    Assert.That(flags.HasFlag(AnchorableFlags.Anchorable), Is.True, $"{proto} should stay anchorable.");
+                    Assert.That(flags.HasFlag(AnchorableFlags.Unanchorable), Is.False, $"{proto} should not be unwrenchable.");
+                });
+            }
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>The body's collision box in tile units, relative to the entity's origin.</summary>
+    private static Box2 BodyBox(IEntityManager em, EntityUid uid)
+    {
+        var shape = (PolygonShape) em.GetComponent<FixturesComponent>(uid).Fixtures["fix1"].Shape;
+        var box = shape.ComputeAABB(new Robust.Shared.Physics.Transform(Vector2.Zero, 0f), 0);
+        return Box2.FromTwoPoints(box.BottomLeft, box.TopRight);
     }
 }

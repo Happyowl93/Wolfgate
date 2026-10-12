@@ -22,7 +22,7 @@ public sealed partial class WFDrydockSystem
     /// <summary>Sample spacing along the arm and across the boom, in tiles.</summary>
     private const float BlockerStep = 0.25f;
 
-    /// <summary>Per crane, the across distance of the nearest blocker on each integer arm row of its boom; MaxValue where clear.</summary>
+    /// <summary>Per crane, the across distance to the nearest blocker on each integer arm row of its boom; MaxValue where clear.</summary>
     private readonly Dictionary<EntityUid, float[]> _boomBlock = new();
 
     /// <summary>Solid-entity name per tile for the scan in progress. Cleared before each scan.</summary>
@@ -202,7 +202,7 @@ public sealed partial class WFDrydockSystem
         return false;
     }
 
-    /// <summary>The across distance of the nearest blocker on the boom path at an along row, or MaxValue when clear. Scans the boom on first use outside a job.</summary>
+    /// <summary>Across distance to the nearest blocker on the boom path at an arm row, or MaxValue when clear. Scans on first use outside a job.</summary>
     private float BoomBlockAt(EntityUid uid, WFDrydockCraneComponent crane, float along)
     {
         if (!_boomBlock.ContainsKey(uid))

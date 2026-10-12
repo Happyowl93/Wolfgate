@@ -1,12 +1,12 @@
 namespace Content.Server._WF.Hailing;
 
 /// <summary>
-/// Relayed service windows on a helm, added the first time a service opens on it. Not saved.
+/// Service windows relayed onto a helm. Not saved.
 /// </summary>
 [RegisterComponent, UnsavedComponent]
 public sealed partial class HailRelayComponent : Component
 {
-    /// <summary>UI keys this system added to the helm.</summary>
+    /// <summary>UI keys added to the helm.</summary>
     public HashSet<Enum> RelayKeys = new();
 
     /// <summary>Open relayed UI keys and the service each relays.</summary>

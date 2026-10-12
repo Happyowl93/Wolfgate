@@ -154,17 +154,13 @@ public sealed partial class WFDrydockGuideOverlay : Overlay
         return horizontal ? new Vector2(along, across) : new Vector2(across, along);
     }
 
-    /// <summary>
-    /// Box spanning two corner points in any order.
-    /// </summary>
+    /// <summary>Box spanning two corner points, in any order.</summary>
     private static Box2 Bar(float x0, float y0, float x1, float y1)
     {
         return new Box2(MathF.Min(x0, x1), MathF.Min(y0, y1), MathF.Max(x0, x1), MathF.Max(y0, y1));
     }
 
-    /// <summary>
-    /// Box spanning two corner points in any order.
-    /// </summary>
+    /// <summary>Box spanning two corner points, in any order.</summary>
     private static Box2 Bar(Vector2 a, Vector2 b)
     {
         return Bar(a.X, a.Y, b.X, b.Y);

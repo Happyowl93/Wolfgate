@@ -32,6 +32,11 @@
                Margin="0 0 0 15"
                StyleClasses="LabelDanger"/>
 
+        <Button Name="BerthLightsButton"
+                HorizontalAlignment="Center"
+                Margin="0 0 0 15"
+                MinSize="180 30"/>
+
         <!-- Booking -->
         <PanelContainer Name="BookingPanel" Visible="False" StyleClasses="AngleRect" Margin="0 0 0 15">
             <BoxContainer Orientation="Vertical" Margin="15">

@@ -28,10 +28,10 @@ public sealed partial class WFDrydockSystem
     /// <summary>Pause after the cranes reach the ship before work starts.</summary>
     private const float DeploySettle = 0.75f;
 
-    /// <summary>Power ratio below which a crane is stalled: it does no work and makes no sparks or tool sounds.</summary>
+    /// <summary>Power ratio below which a crane is stalled: no work, sparks or tool sounds.</summary>
     private const float PowerStallRatio = 0.25f;
 
-    /// <summary>Time between re-aims of the cranes at their items, so a drifting ship keeps its items under the heads.</summary>
+    /// <summary>Time between re-aims of the cranes, so a drifting ship keeps its items under the heads.</summary>
     private static readonly TimeSpan AimInterval = TimeSpan.FromSeconds(0.5);
 
     /// <summary>Jobs that ended this tick, ended after the loop so the query is not disturbed.</summary>
@@ -46,16 +46,17 @@ public sealed partial class WFDrydockSystem
         Unpowered,
     }
 
-    /// <summary>Where a crane's motion ends: arm, carriage, tool head and boom lengths in tiles, and boom angle in degrees.</summary>
+    /// <summary>Crane motion targets: arm, carriage, tool head and boom lengths in tiles, boom angle in degrees.</summary>
     private readonly record struct CraneTarget(float Arm, float Position, float Trolley, float Extension, float Angle);
 
-    /// <summary>Advances every running job one frame, then ends the ones that finished, left the berth or ran out of power.</summary>
+    /// <summary>Advances every running job one frame, then ends those that finished, left the berth or ran out of power.</summary>
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
 
         var curTime = _timing.CurTime;
         UpdateBookings(curTime);
+        UpdateBerthLights(curTime);
         UpdateBlockers(curTime);
         RefreshMaterialConsoles(frameTime);
 
@@ -91,7 +92,7 @@ public sealed partial class WFDrydockSystem
         if (job.Unpowered >= comp.PowerAbortTime)
             return JobEnd.Unpowered;
 
-        // The cranes are still swinging out over the ship; their travel slows with their power.
+        // Cranes still swing out over the ship; their travel slows with their power.
         if (curTime < job.WorkStarts)
         {
             job.WorkStarts += TimeSpan.FromSeconds((1 - job.Power) * frameTime);
@@ -147,8 +148,8 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>
-    /// Advances one crane slot: applies a finished item, gives up an unreachable one, takes the next item and works the
-    /// current one. Returns whether the job's queue changed.
+    /// Advances one crane slot: applies a finished item, gives up an unreachable one, and takes and works the next.
+    /// Returns whether the job's queue changed.
     /// </summary>
     private bool TickSlot(EntityUid console, WFDrydockConsoleComponent comp, WFDrydockJobComponent job, WFDrydockJobSlot slot, TimeSpan curTime)
     {
@@ -202,8 +203,7 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>
-    /// Refreshes each crane's power ratio, pushes the timers of every slot back by the power its crane lacks, and tracks
-    /// how long every crane has been stalled.
+    /// Refreshes each crane's power ratio, delays its slots by the power it lacks, and tracks how long it has been stalled.
     /// </summary>
     private void UpdatePower(WFDrydockConsoleComponent comp, WFDrydockJobComponent job, float frameTime)
     {
@@ -248,7 +248,7 @@ public sealed partial class WFDrydockSystem
         slot.NextSound += lag;
     }
 
-    /// <summary>Share of its working power a crane receives, 0 to 1; below the stall ratio it counts as 0. No power consumer is 1.</summary>
+    /// <summary>Share of working power a crane receives, 0 to 1; below the stall ratio it is 0. No power consumer is 1.</summary>
     private float CranePower(EntityUid uid)
     {
         if (!TryComp<PowerConsumerComponent>(uid, out var consumer) || consumer.DrawRate <= 0f)
@@ -313,9 +313,7 @@ public sealed partial class WFDrydockSystem
         slot.NextSound = slot.WorkFrom;
     }
 
-    /// <summary>
-    /// Skips the item a slot gave up on, and every pending item no crane in the job can reach, and refunds them to the payer.
-    /// </summary>
+    /// <summary>Skips the item a slot gave up on and every pending item no crane can reach, refunding them to the payer.</summary>
     private void GiveUpReach(EntityUid console, WFDrydockConsoleComponent comp, WFDrydockJobComponent job, WFDrydockJobSlot slot)
     {
         var returned = new List<WFDrydockWorkItem>();
@@ -356,9 +354,8 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>
-    /// Removes and returns the pending item for a slot: among the earliest kind left (hull tiles before the parts on them),
-    /// the nearest one the slot's crane reaches, otherwise the nearest one no crane reaches. Null when only items another
-    /// crane reaches remain.
+    /// Removes and returns the slot's next pending item: the earliest kind first (hull tiles before parts on them), then the
+    /// nearest one its crane reaches, else the nearest one no crane reaches. Null when only items another crane reaches remain.
     /// </summary>
     private WFDrydockWorkItem? TakeNearest(WFDrydockConsoleComponent comp, WFDrydockJobComponent job, WFDrydockJobSlot slot)
     {
@@ -434,10 +431,7 @@ public sealed partial class WFDrydockSystem
         job.EstimatedEnd = start + TimeSpan.FromSeconds(remaining / Math.Max(1, job.Slots.Count));
     }
 
-    /// <summary>
-    /// Extends each crane's arm down the bay to the ship's far end, swings its boom over the ship and spreads the cranes
-    /// along the ship's length. Returns the seconds until every crane is in place.
-    /// </summary>
+    /// <summary>Extends each crane's arm down the bay, swings its boom over the ship and spreads the cranes along its length. Returns the seconds until all are in place.</summary>
     private float DeployCranes(WFDrydockConsoleComponent comp, WFDrydockJobComponent job)
     {
         if (!TryComp<MapGridComponent>(job.Ship, out var grid))
@@ -522,8 +516,7 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>
-    /// Sets a crane's targets and returns how long the client animation takes to reach them. The arm moves first; the
-    /// head then moves while the slowest of its axes decides.
+    /// Sets a crane's targets and returns how long the client animation takes. The arm moves first, then the head, paced by its slowest axis.
     /// </summary>
     private float MoveCrane(EntityUid uid, WFDrydockCraneComponent crane, WFDrydockConsoleComponent comp, CraneTarget target, bool active, bool correction = false)
     {
@@ -622,8 +615,8 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>
-    /// Ends a job: a finished one notifies and confirms, an aborted or unpowered one refunds its unfinished items and
-    /// denies. Then the cranes park and the UI refreshes.
+    /// Ends a job. A finished one notifies and confirms; an aborted or unpowered one refunds its unfinished items and denies.
+    /// Then the cranes park and the UI refreshes.
     /// </summary>
     private void EndJob(EntityUid console, WFDrydockConsoleComponent comp, WFDrydockJobComponent job, JobEnd end)
     {

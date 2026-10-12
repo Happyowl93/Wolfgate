@@ -495,7 +495,7 @@ public sealed class DrydockTest
 
             Assert.Multiple(() =>
             {
-                // The work area is the reach of the berth's cranes: it covers the bay, with the approach out of its open end.
+                // The work area is the cranes' reach: the bay plus the approach out of its open end.
                 Assert.That(drydock.TryGetBerth(consoleA, compA, out var berthA), "Berth A needs cranes.");
                 Assert.That(berthA.Area.Contains(new Vector2(-20f, -100f)) && berthA.Area.Contains(new Vector2(20f, -30f)),
                     "Berth A's area should cover its bay.");

@@ -1,4 +1,4 @@
-# Drydock station POI. Loads from gridPath only; no gameMap entry, so it has no station jobs or bounties of its own.
+# Drydock POI. Loads from gridPath only, so it has no station jobs or bounties.
 
 - type: pointOfInterest
   id: WFDrydock
@@ -17,5 +17,5 @@
       prob: 0.0
     - maxDistance: 1500
       prob: 0.3
-  # Traffic console must not fly the station: blocks piloting and FTL of the grid.
+  # Traffic console: no piloting or FTL of the grid.
   - type: PreventPilot

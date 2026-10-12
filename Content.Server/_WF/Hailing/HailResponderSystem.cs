@@ -10,8 +10,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.Hailing;
 
 /// <summary>
-/// Runs the NPCs that answer hails from the console they man: each answers a ringing hail after its delay, greets
-/// the caller and opens the hail services on its grid to the call.
+/// Runs the NPCs that answer hails: each answers after its delay, greets the caller and opens its grid's hail services.
 /// </summary>
 public sealed class HailResponderSystem : EntitySystem
 {
@@ -47,7 +46,7 @@ public sealed class HailResponderSystem : EntitySystem
             if (FindConsole(uid, responder) is not { } console)
                 continue;
 
-            // A call only lasts while its operator has the console open, and the responder never leaves it.
+            // Keeps the responder on the console; the call ends when its operator closes it.
             _ui.OpenUi(console, ShuttleConsoleUiKey.Key, uid);
 
             if (!TryComp<HailConsoleComponent>(console, out var hail))
@@ -104,7 +103,7 @@ public sealed class HailResponderSystem : EntitySystem
         }
     }
 
-    /// <summary>Keeps the console it mans if it still can, otherwise takes the nearest powered one in range.</summary>
+    /// <summary>Keeps the console it mans if still valid, otherwise takes the nearest powered one in range.</summary>
     private EntityUid? FindConsole(EntityUid uid, HailResponderComponent responder)
     {
         if (responder.Console is { } cached && IsManned(uid, cached, responder.ConsoleRange))
@@ -136,7 +135,7 @@ public sealed class HailResponderSystem : EntitySystem
         return responder.Console;
     }
 
-    /// <summary>Whether a console is still a powered one on the responder's grid within reach.</summary>
+    /// <summary>Whether the console is still powered, on the responder's grid, and in range.</summary>
     private bool IsManned(EntityUid uid, EntityUid console, float range)
     {
         if (TerminatingOrDeleted(console) || !HasComp<ShuttleConsoleComponent>(console) ||

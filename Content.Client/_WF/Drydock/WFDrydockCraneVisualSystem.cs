@@ -8,8 +8,8 @@ using Robust.Shared.Utility;
 namespace Content.Client._WF.Drydock;
 
 /// <summary>
-/// Builds a crane machine's sprite layers and eases its arm, boom, carriage and tool head toward their targets. The arm
-/// extends first; the head unfolds once the arm has settled and folds again before the arm retracts.
+/// Builds a crane's sprite layers and eases its arm, boom, carriage and tool head toward their targets. The arm extends
+/// first; the head unfolds once it settles and folds before the arm retracts.
 /// </summary>
 public sealed partial class WFDrydockCraneVisualSystem : EntitySystem
 {
@@ -188,7 +188,7 @@ public sealed partial class WFDrydockCraneVisualSystem : EntitySystem
             _sprite.RemoveLayer((ent.Owner, sprite), i);
         }
 
-        // Start stowed so a crane that arrives mid-job animates out to its targets instead of popping in extended.
+        // Start stowed so a crane arriving mid-job animates out to its targets instead of popping in.
         var comp = ent.Comp;
         comp.VisualArm = 0f;
         comp.VisualPosition = 0f;
@@ -228,7 +228,7 @@ public sealed partial class WFDrydockCraneVisualSystem : EntitySystem
 
         // The machine body goes last so it draws over the arm and the stowed head.
         // Mirrored cranes use their own body states, facing -X.
-        var body = new Vector2(comp.Mirrored ? -0.5f : 0.5f, 0.5f);
+        var body = new Vector2(comp.Mirrored ? -0.5f : 0.5f, comp.ArmRoot + 1f);
         var machine = AddLayer(owner, MachineRsi, comp.Mirrored ? "machine_mirrored" : "machine");
         layers.MachineLights = AddLayer(owner, MachineRsi, comp.Mirrored ? "machine_lights_mirrored" : "machine_lights");
         _sprite.LayerSetOffset(owner, machine, body);

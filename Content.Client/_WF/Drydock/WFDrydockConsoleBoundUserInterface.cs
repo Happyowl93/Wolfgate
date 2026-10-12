@@ -23,6 +23,12 @@ public sealed class WFDrydockConsoleBoundUserInterface : BoundUserInterface
         _window.OnRepairPressed += OnRepairPressed;
         _window.OnUpgradePressed += OnUpgradePressed;
         _window.OnCancelBookingPressed += OnCancelBookingPressed;
+        _window.OnBerthLightsPressed += OnBerthLightsPressed;
+    }
+
+    private void OnBerthLightsPressed()
+    {
+        SendMessage(new WFDrydockToggleBerthLightsMessage());
     }
 
     private void OnRepairPressed()

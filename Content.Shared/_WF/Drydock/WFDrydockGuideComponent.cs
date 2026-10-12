@@ -4,8 +4,7 @@ using Robust.Shared.GameStates;
 namespace Content.Shared._WF.Drydock;
 
 /// <summary>
-/// Holographic parking frame and approach lights shown for a ship's booked berth. Coordinates are in the station grid's
-/// local space.
+/// Holographic parking frame and approach lights for a ship's booked berth, in the station grid's local space.
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class WFDrydockGuideComponent : Component

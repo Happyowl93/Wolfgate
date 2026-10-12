@@ -1,6 +1,6 @@
-# Drydock berth consoles. The dockmaster offers each one to ships that hail the drydock.
-# A console's berth is the cranes multitool-linked to it; the berth label is set per console.
-# The traffic console is the dockmaster's shuttle console for hails; it is not a berth console.
+# Drydock berth consoles. The dockmaster offers them to hailing ships.
+# A console's berth is the cranes multitool-linked to it.
+# Traffic console: the dockmaster's hail console, not a berth console.
 
 - type: entity
   parent: BaseComputer
@@ -18,6 +18,10 @@
       state: shipyard
     - map: ["computerLayerKeys"]
       state: telesci_key
+  # Anchored, no unwrenching, like station cranes.
+  - type: Anchorable
+    flags:
+    - Anchorable
   - type: WFDrydockConsole
     upgrades:
     - WFDrydockThrusters
@@ -37,4 +41,8 @@
   parent: ComputerShuttle
   id: WFComputerDrydockTraffic
   name: drydock traffic console
-  description: The dockmaster's console for hails from approaching ships.
+  description: The dockmaster's console for hails.
+  components:
+  - type: Anchorable
+    flags:
+    - Anchorable

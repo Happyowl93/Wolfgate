@@ -66,6 +66,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         SubscribeLocalEvent<WFDrydockConsoleComponent, BoundUIOpenedEvent>(OnUiOpened);
         SubscribeLocalEvent<WFDrydockConsoleComponent, WFDrydockRepairMessage>(OnRepair);
         SubscribeLocalEvent<WFDrydockConsoleComponent, WFDrydockUpgradeMessage>(OnUpgrade);
+        InitializeBerthLights();
         SubscribeLocalEvent<WFDrydockCraneComponent, MapInitEvent>(OnCraneMapInit);
         SubscribeLocalEvent<WFDrydockCraneComponent, ComponentShutdown>(OnCraneShutdown);
         InitializeBooking();
@@ -105,9 +106,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         return best;
     }
 
-    /// <summary>
-    /// Resolves the berth a console serves: the cranes linked to it on its grid, and the area that covers their reach.
-    /// </summary>
+    /// <summary>Resolves a console's berth from its linked cranes: the area covering their reach.</summary>
     public bool TryGetBerth(EntityUid console, WFDrydockConsoleComponent comp, out WFDrydockBerth berth)
     {
         berth = default;
@@ -148,7 +147,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
                 ? new Vector2(MathF.Sign(arms.X), 0)
                 : new Vector2(0, MathF.Sign(arms.Y));
 
-        // The area covers every linked crane; only the working ones (not blocked) take jobs.
+        // Covers every linked crane; only working (unblocked) cranes take jobs.
         var working = cranes.Where(uid => !Comp<WFDrydockCraneComponent>(uid).Blocked).ToList();
         var label = !string.IsNullOrEmpty(comp.Berth) ? comp.Berth : MetaData(console).EntityName;
         berth = new WFDrydockBerth(grid, label, new Box2(min, max), approach, working);
@@ -346,21 +345,55 @@ public sealed partial class WFDrydockSystem : EntitySystem
         _upgrade.ApplyTier(item.Target, proto, item.Tier);
     }
 
-    /// <summary>Pushes the current console state to every viewer.</summary>
-    public void UpdateUi(EntityUid console, WFDrydockConsoleComponent? comp = null)
+    /// <summary>
+    /// Pushes the console state to viewers, skipping unchanged states unless forced (a viewer just opened the window).
+    /// </summary>
+    public void UpdateUi(EntityUid console, WFDrydockConsoleComponent? comp = null, bool force = false)
     {
         if (!Resolve(console, ref comp))
             return;
 
         var job = CompOrNull<WFDrydockJobComponent>(console);
 
-        // While a job runs, report its ship even if it drifted, and count the remaining queue instead of scanning the grid.
+        // During a job, report its ship even if it drifted, and count the queue instead of scanning the grid.
         var ship = job?.Ship ?? GetBerthedShip(console, comp);
         var state = BuildState(console, ship, comp, job);
         state.PowerRatio = BerthPower(console, comp);
         state.CraneCount = LinkedCranes(console).Count;
         state.BlockedCranes = BlockedCraneCount(console);
+        state.BerthLightsOn = comp.BerthLightsUntil != null;
+
+        var key = StateKey(state);
+        if (!force && key == comp.LastPushed)
+            return;
+
+        comp.LastPushed = key;
         _ui.SetUiState(console, WFDrydockConsoleUiKey.Key, state);
+    }
+
+    /// <summary>Flattens a console state into a string, so unchanged states compare equal.</summary>
+    private static string StateKey(WFDrydockConsoleState s)
+    {
+        var parts = new List<string>
+        {
+            s.ShipName ?? "-",
+            $"{s.MissingTiles}/{s.MissingParts}/{s.DamagedParts}/{s.RepairPrice}",
+            $"{s.Working}/{s.PowerRatio}/{s.CraneCount}/{s.BlockedCranes}/{s.Deploying}/{s.Progress}/{s.RemainingSeconds}",
+            $"{s.Booking}/{s.BookedBerth}/{s.BookingSeconds}/{s.Notice}/{s.PaysWithMaterials}/{s.BerthLightsOn}",
+            DictKey(s.RepairMaterials),
+            DictKey(s.StoredMaterials),
+        };
+        foreach (var u in s.Upgrades)
+        {
+            parts.Add($"{u.Id}:{u.Name}:{u.Parts}:{u.MinTier}:{u.MaxTier}:{u.NextPrice}:{DictKey(u.NextMaterials)}");
+        }
+
+        return string.Join("|", parts);
+    }
+
+    private static string DictKey(Dictionary<string, int> bill)
+    {
+        return string.Join(",", bill.OrderBy(kv => kv.Key).Select(kv => $"{kv.Key}={kv.Value}"));
     }
 
     /// <summary>Lowest power ratio among the berth's cranes, or 1 without any.</summary>
@@ -386,7 +419,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         if (pay != null)
         {
             state.PaysWithMaterials = true;
-            // The same stock the job's charge draws from: the berth cranes' own storage and their linked silos.
+            // Same stock the job's charge draws from: the cranes' storage and their linked silos.
             foreach (var (id, amount) in Availability(WorkingCranes(console, comp)))
             {
                 state.StoredMaterials[id] = amount;
@@ -458,7 +491,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
             MaxTier = proto.Tiers.Count,
         };
 
-        // Part scans are skipped during a job; the upgrade buttons are disabled while working.
+        // Skipped during a job, when the upgrade buttons are disabled.
         if (ship is not { } shipUid || !scanParts)
             return entry;
 
@@ -489,7 +522,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
     private void OnUiOpened(EntityUid uid, WFDrydockConsoleComponent comp, BoundUIOpenedEvent args)
     {
-        UpdateUi(uid, comp);
+        UpdateUi(uid, comp, force: true);
     }
 
     private void OnRepair(EntityUid uid, WFDrydockConsoleComponent comp, WFDrydockRepairMessage args)
@@ -555,8 +588,8 @@ public sealed partial class WFDrydockSystem : EntitySystem
     }
 
     /// <summary>
-    /// Finds the berthed ship and checks the drydock can start on it: idle, unreserved for someone else, and held still.
-    /// On success, clears the console's booking.
+    /// Finds the berthed ship and checks the drydock can start on it: idle, unreserved for others, and held still.
+    /// Clears the console's booking on success.
     /// </summary>
     private bool TryGetWorkableShip(EntityUid console, WFDrydockConsoleComponent comp, EntityUid actor, out EntityUid ship)
     {
@@ -636,6 +669,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
             return;
         }
 
+        TurnOffBerthLights(console, comp);
         var job = AddComp<WFDrydockJobComponent>(console);
         job.Ship = ship;
         job.Payer = payer;
@@ -683,7 +717,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
             job.Slots.Add(new WFDrydockJobSlot());
     }
 
-    /// <summary>Sets each item's crane work time, scales the job down if its span would exceed MaxDuration, and queues it.</summary>
+    /// <summary>Sets each item's crane work time, scales the job to fit MaxDuration, and queues it.</summary>
     private static void QueueItems(WFDrydockConsoleComponent comp, WFDrydockJobComponent job, List<WFDrydockWorkItem> items)
     {
         var workTotal = 0f;

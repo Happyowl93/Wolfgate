@@ -1,14 +1,12 @@
-# Drydock crane machines: a 2x2 body on the berth edge with a straight arm that runs down the bay to the ship's far end,
-# then a telescopic boom on a carriage that works the ship's width. Decorative apart from the body's collision: anchored,
-# not damageable or deconstructable. Local +X points into the bay for the plain crane; the Mirrored variants face -X and
-# take the body's collision box on the other side of the tile. A multitool link to a drydock console (ports.yml) makes
-# the crane work that console's berth; an unlinked crane works nothing.
+# Drydock crane: a 2x2 body on the berth edge. The arm runs down the bay to the ship's far end, and the boom works the ship's width.
+# Anchored, not damageable or deconstructable. Local +X points into the bay; Mirrored variants face -X.
+# A multitool link to a drydock console (ports.yml) sets the berth it works. Unlinked, it works nothing.
 
 - type: entity
   abstract: true
   id: WFDrydockCraneBase
   name: drydock crane
-  description: A two-by-two crane machine. Its arm runs down the bay, and its boom works the ship's width with welders, grinders and bolt drivers.
+  description: A two-by-two crane. Its arm runs down the bay, and its boom works the hull with welders, grinders and bolt drivers.
   components:
   - type: Transform
     anchored: true
@@ -19,6 +17,10 @@
     layers:
     - state: machine
       offset: 0.5,0.5
+  # Anchored, no unwrenching, so a station crane stays on its berth.
+  - type: Anchorable
+    flags:
+    - Anchorable
   - type: Physics
     bodyType: Static
   - type: Fixtures
@@ -34,7 +36,7 @@
         - MachineLayer
   - type: Clickable
   - type: InteractionOutline
-  # High-voltage draw: idle 500 W for now; working cranes will raise it.
+  # High-voltage draw: 500 W idle for now. Working cranes will raise it.
   - type: PowerConsumer
     voltage: High
     drawRate: 500
@@ -55,7 +57,7 @@
     sound:
       path: /Audio/Ambience/Objects/engine_hum.ogg
 
-# 15 tiles of bay plus the walls: 4 sections of 5 reach 17 tiles; the arm reaches 36 tiles down the bay.
+# 15-tile bay plus walls: 4 sections of 5 reach 17 tiles. Arm reaches 36 tiles down the bay.
 - type: entity
   parent: WFDrydockCraneBase
   id: WFDrydockCrane
@@ -92,7 +94,7 @@
   - type: WFDrydockCrane
     mirrored: true
 
-# 23 tiles of bay plus the walls: 5 sections of 6 reach 26 tiles; the arm reaches 60 tiles down the bay.
+# 23-tile bay plus walls: 5 sections of 6 reach 26 tiles. Arm reaches 60 tiles down the bay.
 - type: entity
   parent: WFDrydockCraneBase
   id: WFDrydockCraneLarge
@@ -130,7 +132,7 @@
   - type: WFDrydockCrane
     mirrored: true
 
-# 33 tiles of bay plus the walls: 5 sections of 7 reach 35 tiles; the arm reaches 80 tiles down the bay.
+# 33-tile bay plus walls: 5 sections of 7 reach 35 tiles. Arm reaches 80 tiles down the bay.
 - type: entity
   parent: WFDrydockCraneBase
   id: WFDrydockCraneHuge
