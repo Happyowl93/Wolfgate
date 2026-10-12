@@ -127,7 +127,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
             var rotation = Matrix3x2.CreateRotation((float) xform.LocalRotation.Theta);
             var toGrid = rotation * Matrix3x2.CreateTranslation(xform.LocalPosition);
 
-            var a = crane.ArmToLocal(0f, 0f);
+            var a = crane.ArmToLocal(0f, crane.BerthGap);
             var b = crane.ArmToLocal(crane.MaxExtension, crane.MaxArm);
             var corners = new[] { new Vector2(a.X, a.Y), new Vector2(b.X, a.Y), new Vector2(a.X, b.Y), new Vector2(b.X, b.Y) };
             foreach (var corner in corners)

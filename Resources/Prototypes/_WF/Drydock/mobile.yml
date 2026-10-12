@@ -1,9 +1,9 @@
 # Mobile drydock: a buildable console and crane pair. The console pays in stored materials, not credits (WFDrydockMaterialPayment).
-# The mirrored crane shares the plain crane's board.
 #
 # The crane is a Machine2x2 graph machine on the same four tiles as MachineFrame2x2 (origin, +X, and the two below -Y),
-# so a frame on its tile fits it. The arm root sits at ArmRoot -1.5, the body's edge.
-# The mirrored crane is the -X image. Deconstructing it yields a frame on the plain footprint, so rebuilding gives the plain crane.
+# so a frame on its tile fits it. The arm root sits at ArmRoot -1.5, the body's edge, and the berth starts berthGap
+# tiles further down the arm. Wirecutters, with the panel open and the crane unbolted, mirror it in place: the body keeps
+# its tiles and the arm moves to its other column.
 
 - type: entity
   parent: WFComputerDrydock
@@ -59,8 +59,11 @@
     - Unanchorable
   - type: Rotatable
     rotateWhileAnchored: false
+  # 20 tiles of berth after a 3-tile gap.
   - type: WFDrydockCrane
-    maxArm: 20
+    maxArm: 23
+    berthGap: 3
+    mirrorInPlace: true
     armRoot: -1.5
     sections: 3
     sectionLength: 4
@@ -135,32 +138,6 @@
             collection: MetalBreak
         - !type:ChangeConstructionNodeBehavior
           node: machineFrame
-
-- type: entity
-  parent: WFMobileDrydockCrane
-  id: WFMobileDrydockCraneMirrored
-  suffix: Mirrored
-  components:
-  - type: Sprite
-    sprite: _WF/Drydock/crane_machine.rsi
-    drawdepth: Effects
-    noRot: false
-    layers:
-    - state: machine
-      offset: -0.5,-0.5
-  - type: Fixtures
-    fixtures:
-      fix1:
-        shape:
-          !type:PhysShapeAabb
-          bounds: "-1.5,-1.5,0.5,0.5"
-        density: 190
-        mask:
-        - MachineMask
-        layer:
-        - MachineLayer
-  - type: WFDrydockCrane
-    mirrored: true
 
 - type: entity
   parent: BaseMachineCircuitboard

@@ -10,6 +10,8 @@ using Content.Server.Construction.Components;
 using Content.Server.Power.Components;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Construction.Components;
+using Content.Shared.Hands.EntitySystems;
+using Content.Shared.Interaction;
 using Content.Shared.Rotatable;
 using Content.Shared.Wires;
 using Content.Shared.Materials;
@@ -30,10 +32,10 @@ namespace Content.IntegrationTests.Tests._WF.Drydock;
 [TestFixture]
 public sealed class MobileDrydockTest
 {
-    private static readonly string[] StockMaterials = { "Steel", "Glass", "Plastic" };
+    internal static readonly string[] StockMaterials = { "Steel", "Glass", "Plastic" };
 
     /// <summary>Spawns a host grid with a mobile crane, a material console, and MV power from a substation on the HV debug generator.</summary>
-    private static (EntityUid Grid, EntityUid Crane, EntityUid Console) SpawnMobileYard(TestPair pair, MapId map)
+    internal static (EntityUid Grid, EntityUid Crane, EntityUid Console) SpawnMobileYard(TestPair pair, MapId map)
     {
         var host = DrydockTest.CreateShip(pair, map, new Vector2(-300f, 0f));
         DrydockTest.SetFloor(pair, host, 6);
@@ -69,7 +71,7 @@ public sealed class MobileDrydockTest
     }
 
     /// <summary>Whether a crane has at least half its draw, the power a job needs to start.</summary>
-    private static bool CraneHasPower(TestPair pair, EntityUid crane)
+    internal static bool CraneHasPower(TestPair pair, EntityUid crane)
     {
         var consumer = pair.Server.EntMan.GetComponent<PowerConsumerComponent>(crane);
         return consumer.ReceivedPower >= 0.5f * consumer.DrawRate;
@@ -503,6 +505,126 @@ public sealed class MobileDrydockTest
                 });
             }
         });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>The mobile crane's berth starts past its gap: nothing in the gap is in reach, but a wall there still blocks the arm.</summary>
+    [Test]
+    public async Task MobileBerthStartsPastTheGap()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+        EntityUid host = default, crane = default;
+
+        await server.WaitAssertion(() =>
+        {
+            (host, crane, var console) = SpawnMobileYard(pair, map.MapId);
+            var craneComp = em.GetComponent<WFDrydockCraneComponent>(crane);
+            var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
+            Assert.That(drydock.TryGetBerth(console, comp, out var berth), Is.True, "The crane should make a berth.");
+
+            // The crane on tile (0, 5) has its arm root at grid y 4, and its arm runs toward -Y.
+            var gapEnd = 4f - craneComp.BerthGap;
+            Assert.Multiple(() =>
+            {
+                Assert.That(craneComp.BerthGap, Is.EqualTo(3f), "The mobile crane should leave a three-tile gap.");
+                Assert.That(berth.Area.Top, Is.EqualTo(gapEnd).Within(0.01f), "The berth should start at the end of the gap.");
+                Assert.That(berth.Area.Height, Is.EqualTo(20f).Within(0.01f), "The berth should keep its 20 tiles of depth.");
+                Assert.That(drydock.CanReach(comp, host, crane, new Vector2(1.5f, gapEnd + 1.5f)), Is.False, "A point in the gap should be out of reach.");
+                Assert.That(drydock.CanReach(comp, host, crane, new Vector2(1.5f, gapEnd - 1f)), Is.True, "A point past the gap should be in reach.");
+            });
+
+            DrydockTest.SpawnAnchored(pair, host, "WallSolid", new Vector2i(0, 2));
+        });
+
+        // Arm lanes are rescanned every two seconds.
+        await DrydockTest.RunUntil(pair, 20, 10, () => em.GetComponent<WFDrydockCraneComponent>(crane).Blocked);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(em.GetComponent<WFDrydockCraneComponent>(crane).Blocked, Is.True, "A wall in the gap should still block the arm.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// Wirecutters mirror an unbolted mobile crane with its panel open. Its body keeps its tiles while its arm and berth move
+    /// to the other side. Bolted, closed or station cranes refuse.
+    /// </summary>
+    [Test]
+    public async Task WirecuttersMirrorUnboltedMobileCrane()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+        var interaction = server.System<SharedInteractionSystem>();
+        var xforms = server.System<SharedTransformSystem>();
+        var wires = server.System<SharedWiresSystem>();
+        var cutTicks = pair.SecondsToTicks(3f);
+
+        EntityUid host = default, crane = default, console = default, user = default, cutters = default, station = default;
+        Box2 bodyBefore = default;
+        WFDrydockBerth berthBefore = default;
+
+        bool Mirrored(EntityUid uid) => em.GetComponent<WFDrydockCraneComponent>(uid).Mirrored;
+
+        async Task Cut(EntityUid target)
+        {
+            await server.WaitPost(() => interaction.InteractUsing(user, cutters, target, em.GetComponent<TransformComponent>(target).Coordinates));
+            await server.WaitRunTicks(cutTicks);
+        }
+
+        await server.WaitAssertion(() =>
+        {
+            (host, crane, console) = SpawnMobileYard(pair, map.MapId);
+            station = DrydockTest.SpawnAnchored(pair, host, "WFDrydockCrane", new Vector2i(2, 1));
+            user = em.SpawnEntity("MobHuman", new EntityCoordinates(host, 2.5f, 3.5f));
+            cutters = em.SpawnEntity("Wirecutter", new EntityCoordinates(host, 2.5f, 3.5f));
+            Assert.That(server.System<SharedHandsSystem>().TryPickupAnyHand(user, cutters), Is.True, "The user should hold the wirecutters.");
+
+            bodyBefore = BodyBox(em, crane);
+            Assert.That(drydock.TryGetBerth(console, em.GetComponent<WFDrydockConsoleComponent>(console), out berthBefore), Is.True);
+        });
+
+        await Cut(crane);
+        await server.WaitAssertion(() => Assert.That(Mirrored(crane), Is.False, "A closed crane should refuse."));
+
+        await server.WaitPost(() => wires.TogglePanel(crane, em.GetComponent<WiresPanelComponent>(crane), true));
+        await Cut(crane);
+        await server.WaitAssertion(() => Assert.That(Mirrored(crane), Is.False, "A bolted crane should refuse."));
+
+        await server.WaitPost(() => xforms.Unanchor(crane));
+        await Cut(crane);
+        await server.WaitAssertion(() =>
+        {
+            var craneComp = em.GetComponent<WFDrydockCraneComponent>(crane);
+            Assert.That(craneComp.Mirrored, Is.True, "An unbolted crane with its panel open should mirror.");
+            Assert.That(drydock.TryGetBerth(console, em.GetComponent<WFDrydockConsoleComponent>(console), out var berth), Is.True);
+
+            var body = BodyBox(em, crane);
+            Assert.Multiple(() =>
+            {
+                Assert.That(body.BottomLeft, Is.EqualTo(bodyBefore.BottomLeft), "The body should keep its tiles.");
+                Assert.That(body.TopRight, Is.EqualTo(bodyBefore.TopRight), "The body should keep its tiles.");
+                Assert.That(craneComp.ArmToLocal(0f, 0f).X, Is.EqualTo(1f), "The arm should leave from the body's other column.");
+                Assert.That(berth.Area.Right, Is.EqualTo(1.5f).Within(0.01f), "The berth should end at the arm's new column.");
+                Assert.That(berth.Area.Width, Is.EqualTo(berthBefore.Area.Width).Within(0.01f), "The berth should keep its width.");
+                Assert.That(berth.Area.Top, Is.EqualTo(berthBefore.Area.Top).Within(0.01f), "The berth should keep its gap.");
+            });
+        });
+
+        await Cut(crane);
+        await server.WaitAssertion(() => Assert.That(Mirrored(crane), Is.False, "A second cut should mirror it back."));
+
+        await server.WaitPost(() => xforms.Unanchor(station));
+        await Cut(station);
+        await server.WaitAssertion(() => Assert.That(Mirrored(station), Is.False, "Station cranes should not mirror with a tool."));
 
         await pair.CleanReturnAsync();
     }

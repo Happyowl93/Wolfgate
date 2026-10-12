@@ -461,8 +461,8 @@ public sealed partial class WFDrydockSystem
             var minAlong = footprint.Min(p => p.Y);
             var maxAlong = footprint.Max(p => p.Y);
 
-            var arm = Math.Clamp(maxAlong + 0.5f, 1f, crane.MaxArm);
-            var position = Math.Clamp(minAlong + (k + 0.5f) / cranes.Count * (maxAlong - minAlong), 0f, arm);
+            var arm = Math.Clamp(maxAlong + 0.5f, crane.BerthGap + 1f, crane.MaxArm);
+            var position = Math.Clamp(minAlong + (k + 0.5f) / cranes.Count * (maxAlong - minAlong), crane.BerthGap, arm);
             var extension = ClampBoom(craneUid, crane, position, Math.Clamp(maxAcross + 0.5f, crane.SectionLength, crane.MaxExtension));
             var trolley = Math.Clamp((Math.Max(minAcross, 0f) + Math.Min(maxAcross, extension)) / 2f, 1f, extension);
 
@@ -483,8 +483,8 @@ public sealed partial class WFDrydockSystem
 
         var arm = ArmPoint(ship, craneUid, craneComp, shipLocal);
         var tol = comp.ReachTolerance;
-        // Points past a solid blocker on their arm row lie beyond the boom's path.
-        return arm.Y >= -tol && arm.Y <= craneComp.MaxArm + tol
+        // Points in the gap before the berth, or past a solid blocker on their arm row, lie beyond the boom's path.
+        return arm.Y >= craneComp.BerthGap - tol && arm.Y <= craneComp.MaxArm + tol
             && arm.X >= -tol && arm.X <= craneComp.MaxExtension + tol
             && arm.X < BoomBlockAt(craneUid, craneComp, arm.Y) - 0.5f;
     }
@@ -498,8 +498,9 @@ public sealed partial class WFDrydockSystem
 
         var target = ArmPoint(ship, craneUid, crane, shipLocal);
         var along = target.Y;
-        var arm = along > crane.Arm ? Math.Clamp(along + 0.5f, 1f, crane.MaxArm) : crane.Arm;
-        var position = Math.Clamp(along, 0f, arm);
+        var arm = along > crane.Arm ? Math.Clamp(along + 0.5f, crane.BerthGap + 1f, crane.MaxArm) : crane.Arm;
+        // The carriage works from the berth's start, unless the arm is still shorter than the gap.
+        var position = Math.Clamp(along, Math.Min(crane.BerthGap, arm), arm);
         var extension = ClampBoom(craneUid, crane, position, ClampExtension(crane, Math.Max(crane.Extension, target.X)));
 
         return MoveCrane(craneUid, crane, comp,

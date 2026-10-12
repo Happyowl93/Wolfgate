@@ -8,8 +8,8 @@ namespace Content.Shared._WF.Drydock;
 /// slews from a carriage riding that arm. Units are tiles.
 /// </summary>
 /// <remarks>
-/// Arm frame: <c>across</c> is the local X (negated when mirrored) and <c>along</c> is the distance down the arm from
-/// its root, <c>ArmRoot - local.Y</c>. The boom's angle 0 points across into the bay; 90 folds it along the arm.
+/// Arm frame: <c>across</c> is the local X (mirrored about <see cref="ArmX"/>) and <c>along</c> is the distance down the
+/// arm from its root, <c>ArmRoot - local.Y</c>. The boom's angle 0 points across into the bay; 90 folds it along the arm.
 /// </remarks>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class WFDrydockCraneComponent : Component
@@ -21,6 +21,10 @@ public sealed partial class WFDrydockCraneComponent : Component
     /// <summary>Longest arm, in tiles.</summary>
     [DataField]
     public float MaxArm = 36f;
+
+    /// <summary>Tiles of arm between the root and the start of the berth, so the work area stands clear of the machine.</summary>
+    [DataField]
+    public float BerthGap;
 
     /// <summary>Target arm length, in tiles.</summary>
     [DataField, AutoNetworkedField]
@@ -42,9 +46,16 @@ public sealed partial class WFDrydockCraneComponent : Component
     [DataField, AutoNetworkedField]
     public float PowerRatio = 1f;
 
-    /// <summary>Whether the machine is flipped: the arm stays put, but the body and boom face toward -X.</summary>
-    [DataField]
+    /// <summary>Whether the machine is flipped: the boom swings toward -X. See <see cref="MirrorInPlace"/>.</summary>
+    [DataField, AutoNetworkedField]
     public bool Mirrored;
+
+    /// <summary>
+    /// Whether mirroring keeps the body on its tiles and moves the arm to the body's other column. Such a crane is
+    /// mirrored with a Cutting tool; otherwise the arm stays put and the body shifts to -X.
+    /// </summary>
+    [DataField]
+    public bool MirrorInPlace;
 
     /// <summary>Local Y where the arm leaves the body. The body's centre sits one tile above it.</summary>
     [DataField]
@@ -129,15 +140,18 @@ public sealed partial class WFDrydockCraneComponent : Component
     [ViewVariables]
     public float VisualAngle;
 
+    /// <summary>Local X of the arm: the body's first column, or its second when mirrored in place.</summary>
+    public float ArmX => Mirrored && MirrorInPlace ? 1f : 0f;
+
     /// <summary>Converts an arm-frame point to crane-local coordinates.</summary>
     public Vector2 ArmToLocal(float across, float along)
     {
-        return new Vector2(Mirrored ? -across : across, ArmRoot - along);
+        return new Vector2(Mirrored ? ArmX - across : across, ArmRoot - along);
     }
 
     /// <summary>Converts a crane-local point to arm-frame coordinates, as (across, along).</summary>
     public Vector2 LocalToArm(Vector2 local)
     {
-        return new Vector2(Mirrored ? -local.X : local.X, ArmRoot - local.Y);
+        return new Vector2(Mirrored ? ArmX - local.X : local.X, ArmRoot - local.Y);
     }
 }

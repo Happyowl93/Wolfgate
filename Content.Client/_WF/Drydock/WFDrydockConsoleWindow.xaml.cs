@@ -39,6 +39,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
     public WFDrydockConsoleWindow()
     {
         RobustXamlLoader.Load(this);
+        IoCManager.InjectDependencies(this);
 
         RepairButton.OnPressed += _ => OnRepairPressed?.Invoke();
         CancelBookingButton.OnPressed += _ => OnCancelBookingPressed?.Invoke();
