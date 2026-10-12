@@ -20,7 +20,6 @@ public sealed partial class WFDrydockUpgradeSystem : EntitySystem
     [Dependency] private ConstructionSystem _construction = default!;
     [Dependency] private SharedContainerSystem _container = default!;
     [Dependency] private IPrototypeManager _prototype = default!;
-    [Dependency] private IComponentFactory _factory = default!;
 
     /// <summary>Replacement part prototype for a (part type, rating) pair.</summary>
     private readonly Dictionary<(string Part, int Rating), EntProtoId> _replacements = new();
@@ -172,7 +171,7 @@ public sealed partial class WFDrydockUpgradeSystem : EntitySystem
     private void RebuildReplacements()
     {
         _replacements.Clear();
-        var machinePartName = _factory.GetComponentName<MachinePartComponent>();
+        var machinePartName = Factory.GetComponentName<MachinePartComponent>();
 
         foreach (var proto in _prototype.EnumeratePrototypes<EntityPrototype>())
         {
@@ -209,6 +208,7 @@ public sealed partial class WFDrydockUpgradeSystem : EntitySystem
 
     private bool IsAnchoredOn(EntityUid uid, EntityUid ship)
     {
-        return TryComp(uid, out TransformComponent? xform) && xform.ParentUid == ship && xform.Anchored;
+        var xform = Transform(uid);
+        return xform.ParentUid == ship && xform.Anchored;
     }
 }

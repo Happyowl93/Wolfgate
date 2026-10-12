@@ -51,9 +51,8 @@ public sealed partial class WFDrydockConsoleComponent : Component
     public float EntityPriceFactor = 2f;
 
     /// <summary>
-    /// Share of the market value of an entity's construction materials charged to rebuild it, when that is more than its
-    /// price rule, as for a plastitanium wall: four sheets to build, but priced low so it doesn't sell. Ships come with
-    /// these walls in their shipyard price, so a full share would put a plastitanium hull past its cap at once.
+    /// Share of an entity's construction material value charged to rebuild it, when more than its price rule. Below 1,
+    /// so a plastitanium hull (priced far under its sheets) doesn't hit the repair cap at once.
     /// </summary>
     [DataField]
     public float MaterialPriceFactor = 0.35f;

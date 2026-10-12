@@ -1,14 +1,13 @@
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using Content.Server.Audio;
 using Content.Server.Power.Components;
 using Content.Server.Radio.EntitySystems;
-using Robust.Server.GameStates;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Popups;
 using Content.Shared.Radio.Components;
+using Robust.Server.GameStates;
 using Robust.Shared.Audio;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Localization;
@@ -687,7 +686,7 @@ public sealed partial class WFDrydockSystem
         if (job.Payer is { } payer && !TerminatingOrDeleted(payer) && Transform(payer).GridUid != Transform(console).GridUid)
             _popup.PopupEntity(message, payer, payer, PopupType.Medium);
 
-        // Heard without a telecom server, as an intercom is, so a crew that left to do something else is called back.
+        // Telecom exempt like an intercom, so a crew that went elsewhere still hears it.
         if (comp.NoticeChannel is { } channel)
         {
             EnsureComp<TelecomExemptComponent>(console);

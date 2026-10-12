@@ -1,76 +1,70 @@
 # Drydock
 
-Anvilhold Drydock is a POI station (`WFDrydock`, `Resources/Maps/_WF/Drydock/drydock.yml`) with four berths, North, East,
-South and West, each a bay that ships park in without docking. Each berth has a `WFComputerDrydock` (its `berth` field
-names it) and two cranes. Ships reach it two ways: walk up to a berth console, or hail the dockmaster from their own
-helm (Hailing module).
+Anvilhold Drydock is a POI station (`WFDrydock`, `Resources/Maps/_WF/Drydock/drydock.yml`) with four berths, North,
+East, South and West, each a bay that ships park in without docking. Each berth has a `WFComputerDrydock` (its `berth`
+field names it) and two cranes. Ships reach it two ways: walk up to a berth console, or hail the dockmaster from their
+own helm (Hailing module).
 
-Cranes come in three sizes: `WFDrydockCrane` (36-tile arm), `WFDrydockCraneLarge` (60) and `WFDrydockCraneHuge` (80, the
-station's), each with a `Mirrored` variant. They are 2x2 HV machines. Each draws 500 W idle and 15 kW while working, and
-its speed scales with the power it receives. Below 25% it stalls. A job whose cranes stay stalled for `powerAbortTime` (60 s) aborts and refunds its unfinished work, and
-starting work needs every berth crane at half power. A crane works in two parts: the arm runs down the bay, then the
-telescopic boom swings across the ship. A multitool links the console's sender port to a crane's receiver port
-(`ports.yml`). A crane serves one console, so linking it elsewhere moves it. A console's berth is the cranes linked to
-it, and its work area is the union of their reach, approached from the arms' direction.
+Cranes come in three sizes: `WFDrydockCrane` (36-tile arm), `WFDrydockCraneLarge` (60) and `WFDrydockCraneHuge` (80,
+the station's), each with a `Mirrored` variant. They are 2x2 HV machines that draw 500 W idle and 15 kW while working,
+and their speed scales with the power they receive. Below 25% a crane stalls; a job whose cranes stay stalled for
+`powerAbortTime` (60 s) aborts and refunds its unfinished work, and starting work needs every berth crane at half
+power. The arm runs down the bay, then the telescopic boom swings across the ship. A multitool links the console's
+sender port to a crane's receiver port (`ports.yml`); a crane serves one console, so linking it elsewhere moves it. A
+console's berth is its linked cranes, and its work area is the union of their reach, approached from the arms'
+direction. A crane's `BerthGap` starts its work area that many tiles down the arm.
 
-Each crane's arm lane (the column its arm runs down) is scanned every 2 s. A solid entity there (walls, windows,
-machines; not cables, pipes or decals) blocks the crane: a blocked crane is left out of its berth's working cranes,
-refuses work, and stalls its slot if it blocks mid-job. Its boom also stops short of a solid entity on its arm row, so
-items beyond it are out of reach. Clients start cranes stowed and animate them out to their targets. The arm and boom
-draw on a client-only rig parented to the map, since sprites are culled per grid and an arm reaching past its grid would
-vanish once the camera left that grid. A crane's `BerthGap` starts its work area that many tiles down the arm; the gap
-is still scanned for blockers.
+Each crane's arm lane is scanned every 2 s, gap included. A solid entity there (walls, windows, machines; not cables,
+pipes or decals) blocks the crane: it is left out of the berth's working cranes, refuses work, and stalls its slot if
+it blocks mid-job. The boom also stops short of a solid entity on its row, so items beyond it are out of reach.
+Clients start cranes stowed and animate them out. The arm and boom draw on a client-only rig parented to the map,
+since sprites are culled per grid and an arm reaching past its grid would vanish when the camera left that grid.
 
-The dockmaster, Hammer Ironstrike (`WFDrydockDockmaster`, a dwarf with HailResponder), mans `WFComputerDrydockTraffic` by the desk and answers
-ringing hails. The booking window is a per-caller hail service (`WFDrydockOperator`, HailService), so each caller gets
-their own window. The POI has `PreventPilot`. Walk-in consoles quote and sell work directly on the ship in their berth.
-Their berth lights button frames the whole work area with a booking's guide lights for `BerthLightsTime` seconds, so a
-pilot can line up without a booking; a job or a second press turns it off.
+The dockmaster, Hammer Ironstrike (`WFDrydockDockmaster`, a dwarf with HailResponder), mans
+`WFComputerDrydockTraffic` by the desk and answers ringing hails. The booking window is a per-caller hail service
+(`WFDrydockOperator`, HailService), so each caller gets their own. The POI has `PreventPilot`. Walk-in consoles quote
+and sell work directly on the ship in their berth, and their berth lights button frames the work area with guide
+lights for `BerthLightsTime` seconds, so a pilot can line up without a booking.
 
-A booking, from either route, takes the smallest free berth whose area fits the ship, for 5 minutes. The ship gets a
-guide frame and approach lights (`WFDrydockGuideComponent`, drawn by `WFDrydockGuideOverlay`). Work starts once the ship
-has held still inside the berth for 2 s, and payment is taken then from the caller's bank account. A booking that
-lapses or is cancelled releases its berth and guide without charge.
+A booking, from either route, takes the smallest free berth that fits the ship, for 5 minutes. The ship gets a guide
+frame and approach lights (`WFDrydockGuideComponent`, drawn by `WFDrydockGuideOverlay`). Work starts once the ship has
+held still in the berth for 2 s, and is paid then from the caller's bank account. A booking that lapses or is
+cancelled releases its berth without charge.
 
 Jobs restore missing hull tiles and entities and heal damage from the ship's repair snapshot
-(`ShipRepairDataComponent`). A repair costs 120 cr per hull tile, and 60 cr labor plus the more of twice an entity's
-estimated price and 35% of its construction materials' value (`WFDrydockSystem.Construction.cs`) to rebuild it. A
-plastitanium wall, built from four 600 cr sheets but priced low so it doesn't sell, comes to about 960 cr, three times
-a shuttle wall. Healing costs that rebuild price times the share of health lost. The work is capped at 50% of the ship's
-shipyard price (`VesselComponent`), or 40% of its full rebuild price for ships not bought at one, so a wreck never costs
-a new ship. A fee of 2.5% of that value (at least 1,500 cr) comes on top and is never refunded. Losing 15% of a ship
-costs about a quarter of its price. A job runs at most 10 minutes (`maxDuration`); longer work is sped up to fit. When
-it ends, the console says so on its radio channel (`noticeChannel`, Common; the mobile console has none) as well as at
-the console and to a payer elsewhere. Refits swap the machine parts of thrusters, gyroscopes and power systems for
-higher-rated stock parts, one tier at a time (`upgrades.yml`), priced per stock part swapped: 1,000 cr for Mk II, 4,000
-for Mk III and 10,000 for Mk IV, so an 8-part SMES costs eight times a 1-part thruster. Cranes take the nearest item and skip any item they cannot reach within 10 s,
-refunding its cost.
+(`ShipRepairDataComponent`). A hull tile costs 120 cr. Rebuilding an entity costs 60 cr labor plus the more of twice its
+estimated price and 35% of its construction materials' value (`WFDrydockSystem.Construction.cs`), so a plastitanium
+wall, priced low but built from four 600 cr sheets, comes to about 960 cr. Healing costs the rebuild price times the
+share of health lost. Work is capped at 50% of the ship's shipyard price (`VesselComponent`), or 40% of its full
+rebuild price for ships not bought at one. A fee of 2.5% of that value (at least 1,500 cr) comes on top and is never
+refunded. A job runs at most 10 minutes (`maxDuration`); longer work is sped up to fit. When it ends, the console says
+so on its radio channel (`noticeChannel`, Common), at the console, and to a payer elsewhere. Cranes take the nearest
+item and skip any they cannot reach within 10 s, refunding its cost.
+
+Refits swap the machine parts of thrusters, gyroscopes and power systems for higher-rated stock parts, one tier at a
+time (`upgrades.yml`), priced per stock part swapped: 1,000 cr for Mk II, 4,000 for Mk III and 10,000 for Mk IV.
 
 The console window is an instrument deck in the cockpit style (CombatConsole's instrument kit). A live berth plot
-(`WFDrydockBerthPlot`) draws the bay with its mouth at the bottom, the station around it, the ship's hull, the work
-left on it (missing hull red, missing parts as red diamonds, damage amber), and each crane's arm, boom and tool head
-as the client animates them. A ship outside the plot, such as one booked from afar, gets an edge pointer with its
-range. Status lamps, a crane power gauge, work counters, the quote and refit mark lamps sit beside it. Open consoles
-refresh once a second.
+(`WFDrydockBerthPlot`) draws the bay, the station around it, the ship's hull, the work left on it (missing hull red,
+missing parts as red diamonds, damage amber) and each crane as the client animates it. A ship outside the plot gets
+an edge pointer with its range. Open consoles refresh once a second.
 
-A mobile drydock is a ship-mounted version, buildable on any ship: `WFComputerMobileDrydock` (board
-`WFComputerMobileDrydockCircuitboard`) and cranes `WFMobileDrydockCrane` (board `WFMobileDrydockCraneMachineCircuitboard`,
-MV power, a 26-tile berth starting 3 tiles past the machine, 13 tiles across). The boards print at the circuit imprinter after
-Shuttlecraft research. To mirror a mobile crane, unbolt it, open its panel and cut with wirecutters for 2 s
-(`WFDrydockCraneMirrorSystem`, `MirrorInPlace`): the body keeps its tiles, and the arm moves to the body's other column
-with the boom swinging the other way. It works walk-in only and never on its own grid, serving ships cruising
-alongside. It pays from materials, not credits: each crane holds its own sheets (like a lathe) or draws from a linked
-material silo, and the console pays from its working cranes (`WFDrydockMaterialPaymentComponent`: material units per
-credit of work, with refit tiers using their `materials` per stock part, about twice the lathe recipes for those
-parts, Mk III and Mk IV adding silver, gold and uranium). Rates are pegged to a T2 ship voucher (100 steel, 50 plasteel, 50 glass, 10 plastitanium sheets for a 150k to
-500k ship): 25k cr of station work takes about 14 steel sheets, and `maxBill` caps any one repair at about 60% of the
-voucher for a 250k ship, scaled by the ship's price as bigger ships' vouchers cost more. A rebuild or heal also takes 1% of any construction material the rates don't charge, so
-a plastitanium wall adds 4 units of plastitanium. It charges no fee. Refunds go back into the job's first crane.
+A mobile drydock can be built on any ship: `WFComputerMobileDrydock` (board `WFComputerMobileDrydockCircuitboard`)
+and `WFMobileDrydockCrane` (board `WFMobileDrydockCraneMachineCircuitboard`, MV power, a 26-tile berth starting 3
+tiles past the machine, 13 tiles across). Both boards print at the circuit imprinter after Shuttlecraft research. To
+mirror a mobile crane, unbolt it, open its panel and cut with wirecutters for 2 s (`WFDrydockCraneMirrorSystem`): the
+body keeps its tiles and the arm moves to its other column. It works walk-in only and never on its own grid.
 
-Entry points: `WFDrydockSystem` (berths, quotes, payment; `WFDrydockSystem.Job.cs` for jobs and cranes,
-`WFDrydockSystem.Booking.cs` for the hail service, bookings and guides, `WFDrydockSystem.Materials.cs` for material
-bills), `WFDrydockUpgradeSystem` (refit tiers), and the client `WFDrydockCraneVisualSystem` (crane animation and rig)
-and `WFDrydockConsoleWindow` (the console deck and its berth plot).
+The mobile console charges no fee and pays in materials (`WFDrydockMaterialPaymentComponent`), from its cranes' own
+storage or their linked material silo. Work is billed at material units per credit; refits use their tier's
+`materials` per part instead. Rates are pegged to a T2 ship voucher (100 steel, 50 plasteel, 50 glass and 10
+plastitanium sheets for a 150k to 500k ship): 25k cr of work takes about 14 steel sheets, and `maxBill` caps a repair
+at about 60% of the voucher for a 250k ship, scaled by ship price. A rebuild also takes 1% of any construction material
+the rates don't cover, so a plastitanium wall adds 4 units of plastitanium. Refunds go back into the job's first crane.
+
+Entry points: `WFDrydockSystem` (berths, quotes, payment; `.Job.cs` for jobs and cranes, `.Booking.cs` for the hail
+service, bookings and guides, `.Materials.cs` for material bills), `WFDrydockUpgradeSystem` (refit tiers), and the
+client `WFDrydockCraneVisualSystem` (crane animation and rig) and `WFDrydockConsoleWindow` (the console deck).
 
 <!-- WOLFGATE-GENERATED START -->
 <!-- Generated by python Tools/_WF/Ci/modules.py --write. Don't edit by hand. -->

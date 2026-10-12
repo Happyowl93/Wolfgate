@@ -1,9 +1,5 @@
-# Mobile drydock: a buildable console and crane pair. The console pays in stored materials, not credits (WFDrydockMaterialPayment).
-#
-# The crane is a Machine2x2 graph machine on the same four tiles as MachineFrame2x2 (origin, +X, and the two below -Y),
-# so a frame on its tile fits it. The arm root sits at ArmRoot -1.5, the body's edge, and the berth starts berthGap
-# tiles further down the arm. Wirecutters, with the panel open and the crane unbolted, mirror it in place: the body keeps
-# its tiles and the arm moves to its other column.
+# Mobile drydock: a buildable console and crane pair that pays in stored materials, not credits.
+# The crane is a Machine2x2 graph machine on the same four tiles as MachineFrame2x2 (origin, +X, and the two below -Y).
 
 - type: entity
   parent: WFComputerDrydock
@@ -21,29 +17,24 @@
   - type: Rotatable
     rotateWhileAnchored: false
   - type: WiresPanel
-  # No fee. A T2 ship voucher (ships of 150k to 500k) takes 100 steel, 50 plasteel, 50 glass and 10 plastitanium
-  # sheets, so a repair costs a share of that: about 14 steel sheets for 25k cr of station work. The limits below are
-  # about 60% of that voucher for a 250k ship and scale with the ship's price, as vouchers for bigger ships cost more
-  # (a 750k Luda's takes 300 steel and 30 plastitanium). A plastitanium wall adds 4 units of plastitanium.
+  # No fee, and no radio notice since the crew is aboard.
   - type: WFDrydockConsole
     minFee: 0
     feeFraction: 0
-    # The crew is aboard; no radio notice.
     noticeChannel: null
+  # Rates and limits are pegged to a T2 ship voucher; see the Drydock README.
   - type: WFDrydockMaterialPayment
     rates:
       Steel: 0.055
       Plasteel: 0.025
       Glass: 0.025
       Plastic: 0.01
-    inKindFactor: 0.01
     maxBill:
       Steel: 6000
       Plasteel: 3000
       Glass: 3000
       Plastic: 1500
       Plastitanium: 600
-    defaultMaxBill: 500
     referenceValue: 250000
 
 - type: entity

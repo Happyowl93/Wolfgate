@@ -9,8 +9,6 @@ namespace Content.Server._WF.Drydock;
 
 public sealed partial class WFDrydockSystem
 {
-    [Dependency] private IComponentFactory _factory = default!;
-
     /// <summary>Construction materials by entity prototype, in material units.</summary>
     private readonly Dictionary<string, Dictionary<string, int>> _constructionMaterials = new();
 
@@ -26,7 +24,7 @@ public sealed partial class WFDrydockSystem
 
         var materials = new Dictionary<string, int>();
         _constructionMaterials[proto.ID] = materials;
-        if (!proto.TryGetComponent<ConstructionComponent>(out var construction, _factory) ||
+        if (!proto.TryGetComponent<ConstructionComponent>(out var construction, Factory) ||
             !_prototype.TryIndex<ConstructionGraphPrototype>(construction.Graph, out var graph) ||
             graph.Start is not { } start ||
             !graph.TryPath(start, construction.Node, out var path))
@@ -47,7 +45,7 @@ public sealed partial class WFDrydockSystem
                 if (step is not MaterialConstructionGraphStep materialStep ||
                     !_prototype.TryIndex<StackPrototype>(materialStep.MaterialPrototypeId, out var stack) ||
                     !_prototype.TryIndex(stack.Spawn, out var sheet) ||
-                    !sheet.TryGetComponent<PhysicalCompositionComponent>(out var composition, _factory))
+                    !sheet.TryGetComponent<PhysicalCompositionComponent>(out var composition, Factory))
                 {
                     continue;
                 }

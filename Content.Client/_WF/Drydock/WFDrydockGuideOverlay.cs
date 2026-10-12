@@ -72,7 +72,6 @@ public sealed partial class WFDrydockGuideOverlay : Overlay
         var bottom = frame.Bottom;
         var top = frame.Top;
 
-        // Translucent fill with a slow pulse.
         var pulse = MathF.Sin(time * MathF.Tau) * 0.04f;
         handle.DrawRect(frame, GuideColor(0.10f + pulse));
 
@@ -91,7 +90,6 @@ public sealed partial class WFDrydockGuideOverlay : Overlay
         var sweep = longMin + (time % ScanSweepPeriod) / ScanSweepPeriod * (longMax - longMin);
         handle.DrawRect(Bar(Point(horizontal, sweep - 0.1f, shortMin), Point(horizontal, sweep + 0.1f, shortMax)), GuideColor(0.35f));
 
-        // Crisp outline.
         var outline = GuideColor(0.85f);
         var t = FrameThickness / 2f;
         handle.DrawRect(new Box2(left - t, top - t, right + t, top + t), outline);
@@ -99,7 +97,6 @@ public sealed partial class WFDrydockGuideOverlay : Overlay
         handle.DrawRect(new Box2(left - t, bottom - t, left + t, top + t), outline);
         handle.DrawRect(new Box2(right - t, bottom - t, right + t, top + t), outline);
 
-        // Thicker corner brackets, inset from the outline.
         var length = MathF.Min(BracketLength, MathF.Min(frame.Width, frame.Height) / 3f);
         DrawBracket(handle, left, top, 1f, -1f, length, outline);
         DrawBracket(handle, right, top, -1f, -1f, length, outline);

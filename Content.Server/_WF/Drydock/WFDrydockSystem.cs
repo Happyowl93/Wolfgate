@@ -61,6 +61,8 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
     private List<Entity<MapGridComponent>> _grids = new();
 
+    private TimeSpan _nextConsoleRefresh;
+
     /// <summary>
     /// Estimated price and construction material value by entity prototype, since a quote prices every part a ship was
     /// built with.
@@ -463,6 +465,23 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
         comp.LastPushed = key;
         _ui.SetUiState(console, WFDrydockConsoleUiKey.Key, state);
+    }
+
+    /// <summary>
+    /// Re-sends open consoles' state once a second, since ships, crane power and material stock change off the console.
+    /// </summary>
+    private void RefreshOpenConsoles(TimeSpan curTime)
+    {
+        if (curTime < _nextConsoleRefresh)
+            return;
+
+        _nextConsoleRefresh = curTime + TimeSpan.FromSeconds(1);
+        var query = EntityQueryEnumerator<WFDrydockConsoleComponent>();
+        while (query.MoveNext(out var uid, out var comp))
+        {
+            if (_ui.IsUiOpen(uid, WFDrydockConsoleUiKey.Key))
+                UpdateUi(uid, comp);
+        }
     }
 
     /// <summary>Flattens a console state into a string, so unchanged states compare equal.</summary>

@@ -136,16 +136,16 @@ public sealed class WFDrydockBerthPlot : Control
         }
 
         DrawGrid(handle, skin, frame.ToScreen(Vector2.Zero), frame.Scale);
-        DrawTris(handle, frame, _stationFill, null, skin.TextMuted.WithAlpha(0.2f));
-        DrawLines(handle, frame, _stationEdges, null, skin.TextMuted.WithAlpha(0.7f));
+        DrawPoints(handle, frame, DrawPrimitiveTopology.TriangleList, _stationFill, null, skin.TextMuted.WithAlpha(0.2f));
+        DrawPoints(handle, frame, DrawPrimitiveTopology.LineList, _stationEdges, null, skin.TextMuted.WithAlpha(0.7f));
         DrawLane(handle, frame, state, skin, time);
         DrawBerth(handle, frame, state, skin);
 
         var shipMatrix = ShipMatrix(state, station);
         if (shipMatrix is { } toStation)
         {
-            DrawTris(handle, frame, _shipFill, toStation, skin.Text.WithAlpha(0.14f));
-            DrawLines(handle, frame, _shipEdges, toStation, skin.Text.WithAlpha(0.85f));
+            DrawPoints(handle, frame, DrawPrimitiveTopology.TriangleList, _shipFill, toStation, skin.Text.WithAlpha(0.14f));
+            DrawPoints(handle, frame, DrawPrimitiveTopology.LineList, _shipEdges, toStation, skin.Text.WithAlpha(0.85f));
             DrawMarks(handle, frame, state, toStation, skin, time);
         }
 
@@ -372,34 +372,18 @@ public sealed class WFDrydockBerthPlot : Control
             : frame.ViewToScreen(point);
     }
 
-    private void DrawTris(DrawingHandleScreen handle, PlotFrame frame, List<Vector2> points, Matrix3x2? toStation, Color color)
+    /// <summary>Draws triangles or lines, in slices that fit the renderer's batch.</summary>
+    private void DrawPoints(DrawingHandleScreen handle, PlotFrame frame, DrawPrimitiveTopology topology, List<Vector2> points,
+        Matrix3x2? toStation, Color color)
     {
-        if (points.Count == 0)
-            return;
         if (_vertices.Length < points.Count)
             _vertices = new Vector2[points.Count];
         for (var i = 0; i < points.Count; i++)
             _vertices[i] = Screen(frame, points[i], toStation);
-        Primitives(handle, DrawPrimitiveTopology.TriangleList, points.Count, color);
-    }
 
-    private void DrawLines(DrawingHandleScreen handle, PlotFrame frame, List<Vector2> points, Matrix3x2? toStation, Color color)
-    {
-        if (points.Count == 0)
-            return;
-        if (_vertices.Length < points.Count)
-            _vertices = new Vector2[points.Count];
-        for (var i = 0; i < points.Count; i++)
-            _vertices[i] = Screen(frame, points[i], toStation);
-        Primitives(handle, DrawPrimitiveTopology.LineList, points.Count, color);
-    }
-
-    /// <summary>Draws the first vertices in slices that fit the renderer's batch, whole triangles and lines each.</summary>
-    private void Primitives(DrawingHandleScreen handle, DrawPrimitiveTopology topology, int count, Color color)
-    {
-        for (var start = 0; start < count; start += MaxDrawVertices)
+        for (var start = 0; start < points.Count; start += MaxDrawVertices)
         {
-            var length = Math.Min(MaxDrawVertices, count - start);
+            var length = Math.Min(MaxDrawVertices, points.Count - start);
             handle.DrawPrimitives(topology, new ReadOnlySpan<Vector2>(_vertices, start, length), color);
         }
     }
@@ -620,7 +604,7 @@ public sealed class WFDrydockBerthPlot : Control
         handle.DrawPrimitives(DrawPrimitiveTopology.TriangleList, new ReadOnlySpan<Vector2>(_quad, 0, 3), skin.Good);
 
         var distance = (shipCenter - frame.Center).Length();
-        var text = Loc.GetString("drydock-plot-distance", ("meters", (int) MathF.Round(distance)));
+        var text = Loc.GetString("drydock-plot-meters", ("meters", (int) MathF.Round(distance)));
         var width = handle.GetDimensions(_digits, text, UIScale).X;
         var labelAt = edge - unit * (size * 2.4f) - new Vector2(width / 2, _digits.GetHeight(UIScale) / 2);
         labelAt = Vector2.Clamp(labelAt, new Vector2(2 * UIScale), new Vector2(PixelWidth - width - 2 * UIScale, PixelHeight - 14 * UIScale));
@@ -646,7 +630,7 @@ public sealed class WFDrydockBerthPlot : Control
         handle.DrawLine(new Vector2(right - length, y), new Vector2(right, y), color);
         handle.DrawLine(new Vector2(right - length, y - 4 * UIScale), new Vector2(right - length, y), color);
         handle.DrawLine(new Vector2(right, y - 4 * UIScale), new Vector2(right, y), color);
-        var scaleText = Loc.GetString("drydock-plot-scale", ("meters", tiles));
+        var scaleText = Loc.GetString("drydock-plot-meters", ("meters", tiles));
         var scaleWidth = handle.GetDimensions(_digits, scaleText, UIScale).X;
         handle.DrawString(_digits, new Vector2(right - length / 2 - scaleWidth / 2, y - 6 * UIScale - _digits.GetHeight(UIScale)),
             scaleText, UIScale, color);

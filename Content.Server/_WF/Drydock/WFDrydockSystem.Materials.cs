@@ -12,8 +12,6 @@ public sealed partial class WFDrydockSystem
 {
     [Dependency] private SharedOreSiloSystem _oreSilo = default!;
 
-    private TimeSpan _nextConsoleRefresh;
-
     /// <summary>Sets each item's material bill for a console that pays in materials, within the ship's limits.</summary>
     private void AssignMaterials(EntityUid ship, WFDrydockConsoleComponent comp, WFDrydockMaterialPaymentComponent pay, List<WFDrydockWorkItem> items)
     {
@@ -300,23 +298,6 @@ public sealed partial class WFDrydockSystem
             Log.Warning($"Could not return drydock materials to {ToPrettyString(console)}; its cranes or silo are gone or full.");
 
         return bill;
-    }
-
-    /// <summary>
-    /// Re-sends open consoles' state once a second, since ships come and go, and crane and silo stock change, off the console.
-    /// </summary>
-    private void RefreshOpenConsoles(TimeSpan curTime)
-    {
-        if (curTime < _nextConsoleRefresh)
-            return;
-
-        _nextConsoleRefresh = curTime + TimeSpan.FromSeconds(1);
-        var query = EntityQueryEnumerator<WFDrydockConsoleComponent>();
-        while (query.MoveNext(out var uid, out var comp))
-        {
-            if (_ui.IsUiOpen(uid, WFDrydockConsoleUiKey.Key))
-                UpdateUi(uid, comp);
-        }
     }
 
     /// <summary>Lists a material bill as localized names and sheet amounts, comma separated.</summary>

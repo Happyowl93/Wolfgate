@@ -149,7 +149,7 @@ public sealed class WFDrydockUpgradeEntry
 }
 
 /// <summary>
-/// Books a repair for the caller's ship.
+/// Starts a repair on the berthed ship, or books one through a dockmaster.
 /// </summary>
 [Serializable, NetSerializable]
 public sealed class WFDrydockRepairMessage : BoundUserInterfaceMessage;
@@ -167,7 +167,7 @@ public sealed class WFDrydockToggleBerthLightsMessage : BoundUserInterfaceMessag
 public sealed class WFDrydockCancelBookingMessage : BoundUserInterfaceMessage;
 
 /// <summary>
-/// Books a refit of all parts for one upgrade line, one tier up.
+/// Starts or books a refit of one upgrade line, one tier up.
 /// </summary>
 [Serializable, NetSerializable]
 public sealed class WFDrydockUpgradeMessage(string upgrade) : BoundUserInterfaceMessage

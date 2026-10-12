@@ -16,7 +16,10 @@ drydock-ui-booked = Berth { $berth } is booked. Follow the green lights in and h
 drydock-ui-cancel-booking = Cancel booking
 drydock-ui-power-none = Cranes have no power
 
-drydock-ui-cranes-blocked = { $count } blocked. Clear their arm lanes.
+drydock-ui-cranes-blocked = { $count } { $count ->
+    [one] crane
+   *[other] cranes
+} blocked. Clear the arm lanes.
 drydock-ui-no-cranes = No cranes linked. Link them with a multitool.
 
 drydock-ui-plot = Berth plot
@@ -68,8 +71,7 @@ drydock-lamp-lights-on = The berth's guide lights are on.
 drydock-lamp-lights-off = The berth's guide lights are off.
 
 drydock-plot-berth = Berth { $berth }
-drydock-plot-distance = { $meters } m
-drydock-plot-scale = { $meters } m
+drydock-plot-meters = { $meters } m
 drydock-plot-no-cranes = No cranes linked
 drydock-plot-no-berth = No berth assigned
 drydock-plot-awaiting = Awaiting vessel

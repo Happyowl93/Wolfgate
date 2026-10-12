@@ -28,6 +28,9 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
     /// <summary>Width of the right-hand instrument column.</summary>
     private const float ColumnWidth = 370;
 
+    /// <summary>Crane power ratio below which the cranes read as short of power.</summary>
+    private const float FullPower = 0.95f;
+
     [Dependency] private IPrototypeManager _prototypeManager = default!;
     [Dependency] private IEntityManager _entMan = default!;
 
@@ -201,7 +204,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
     {
         if (_state.PowerRatio < WFDrydockCraneComponent.StallRatio)
             return Red;
-        return _state.PowerRatio < 0.95f ? Skin.Caution : null;
+        return _state.PowerRatio < FullPower ? Skin.Caution : null;
     }
 
     private void UpdateBooking(WFDrydockConsoleState state)
@@ -236,6 +239,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         _quote.Visible = !state.Working;
         _progress.Visible = state.Working;
         _eta.Visible = state.Working;
+        RepairButton.Text = Loc.GetString(state.Booking ? "drydock-ui-book-repair-key" : "drydock-ui-repair-key");
 
         if (state.PaysWithMaterials)
         {
@@ -243,7 +247,6 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
             _quote.Lit = state.RepairMaterials.Count > 0;
             var covered = Covers(state.RepairMaterials, state.StoredMaterials);
             _quote.Tint = covered ? null : Red;
-            RepairButton.Text = Loc.GetString(state.Booking ? "drydock-ui-book-repair-key" : "drydock-ui-repair-key");
             RepairButton.Disabled = state.ShipName is null || state.Working || state.RepairMaterials.Count == 0 || !covered || blocked;
         }
         else
@@ -251,7 +254,6 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
             _quote.Value = Loc.GetString("drydock-ui-credits", ("price", state.RepairPrice.ToString("N0", CultureInfo.InvariantCulture)));
             _quote.Lit = state.RepairPrice > 0;
             _quote.Tint = null;
-            RepairButton.Text = Loc.GetString(state.Booking ? "drydock-ui-book-repair-key" : "drydock-ui-repair-key");
             RepairButton.Disabled = state.ShipName is null || state.Working || state.RepairPrice <= 0 || blocked;
         }
 
@@ -439,7 +441,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         if (_state.PowerRatio < WFDrydockCraneComponent.StallRatio)
             return new(WFCockpitLampState.Fault, "drydock-lamp-power-none");
 
-        return _state.PowerRatio < 0.95f
+        return _state.PowerRatio < FullPower
             ? new(WFCockpitLampState.Caution, "drydock-lamp-power-low")
             : new(WFCockpitLampState.Good, "drydock-lamp-power-good");
     }
