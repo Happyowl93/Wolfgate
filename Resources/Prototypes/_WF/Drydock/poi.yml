@@ -4,8 +4,8 @@
   id: WFDrydock
   parent: BasePOI
   name: 'Drydock'
-  minimumDistance: 3500
-  maximumDistance: 5500
+  minimumDistance: 8000
+  maximumDistance: 9500
   spawnGroup: Required
   gridPath: /Maps/_WF/Drydock/drydock.yml
   addComponents:
