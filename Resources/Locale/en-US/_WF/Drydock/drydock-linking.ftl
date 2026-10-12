@@ -1,0 +1,9 @@
+drydock-port-name-crane-sender = Drydock crane link
+drydock-port-description-crane-sender = Links the cranes that work this console's berth.
+drydock-port-name-crane-receiver = Drydock console link
+drydock-port-description-crane-receiver = Links the drydock console whose berth this crane works.
+
+drydock-crane-examine-linked = Linked to { $console }.
+drydock-crane-examine-unlinked = Not linked to a drydock console.
+drydock-crane-examine-blocked = Its arm is blocked by { $blocker }.
+drydock-crane-examine-power = Receiving { $percent }% of its power.

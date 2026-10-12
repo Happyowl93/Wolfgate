@@ -27,7 +27,7 @@ namespace Content.Server._WF.Hailing;
 /// Ship-to-ship hailing from the shuttle console. One ship rings another's consoles and pages its PA, and
 /// whoever answers gets the caller on a screen with a chat line between the two helms.
 /// </summary>
-public sealed class HailingSystem : EntitySystem
+public sealed partial class HailingSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
@@ -91,6 +91,8 @@ public sealed class HailingSystem : EntitySystem
         Subs.CVar(_cfg, HailingCVars.RingTimeout, value => _ringTimeout = value, true);
         Subs.CVar(_cfg, HailingCVars.RetryDelay, value => _retryDelay = value, true);
 
+        InitializeServices();
+
         SubscribeLocalEvent<HailConsoleComponent, ComponentShutdown>(OnShutdown);
 
         // ShuttleConsoleSystem owns the open and close subscriptions for these consoles; only new message
@@ -102,6 +104,7 @@ public sealed class HailingSystem : EntitySystem
             subs.Event<HailAnswerMessage>(OnAnswer);
             subs.Event<HailEndMessage>(OnEnd);
             subs.Event<HailSayMessage>(OnSay);
+            subs.Event<HailOpenServiceMessage>(OnOpenService);
         });
     }
 
@@ -196,6 +199,8 @@ public sealed class HailingSystem : EntitySystem
         }
 
         _ending.Clear();
+
+        UpdateRelays();
 
         if (!check)
             return;
@@ -616,6 +621,7 @@ public sealed class HailingSystem : EntitySystem
         hail.StateTime = _timing.CurTime;
         hail.Log.Clear();
         hail.NextLine = 0;
+        FillServices(hail);
 
         // God has no face: the admin behind the voice is never named, shown or sent to the pilot.
         hail.Divine = TryComp<HailConsoleComponent>(peer, out var peerHail) && peerHail.Remote;
@@ -699,6 +705,9 @@ public sealed class HailingSystem : EntitySystem
 
     private void Remove(EntityUid console, HailConsoleComponent hail, HailEndReason? reason)
     {
+        if (TryComp<HailRelayComponent>(console, out var relay))
+            CloseRelays((console, relay));
+
         if (hail.State == HailState.Calling)
         {
             var delay = reason is HailEndReason.Declined or HailEndReason.NoAnswer

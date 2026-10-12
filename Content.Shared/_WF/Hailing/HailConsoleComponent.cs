@@ -36,6 +36,10 @@ public sealed partial class HailConsoleComponent : Component
     [ViewVariables, AutoNetworkedField]
     public List<HailLine> Log = new();
 
+    /// <summary>Hail services on the other end's grid, offered for the length of the call.</summary>
+    [ViewVariables, AutoNetworkedField]
+    public List<HailServiceEntry> Services = new();
+
     /// <summary>The other end is an admin speaking as God: there is no ship and nobody to show.</summary>
     [ViewVariables, AutoNetworkedField]
     public bool Divine;
@@ -87,6 +91,14 @@ public enum HailState : byte
     Ringing,
 
     Connected,
+}
+
+/// <summary>A hail service the other end offers, with its localized name.</summary>
+[Serializable, NetSerializable]
+public struct HailServiceEntry
+{
+    public NetEntity Service;
+    public string Name;
 }
 
 /// <summary>One line of a hail's chat, as one end sees it.</summary>

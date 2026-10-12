@@ -42,9 +42,13 @@ public sealed partial class HailWindow : FancyWindow
     /// <summary>The pilot sent a line.</summary>
     public event Action<string>? SayRequested;
 
+    /// <summary>The pilot asked for a service the far end offers.</summary>
+    public event Action<NetEntity>? ServiceRequested;
+
     private readonly Dictionary<NetEntity, ContactRow> _rows = new();
     private readonly HashSet<NetEntity> _listed = new();
     private readonly List<NetEntity> _gone = new();
+    private readonly List<HailServiceEntry> _services = new();
 
     private EntityUid? _console;
     private NetEntity? _netConsole;
@@ -250,6 +254,8 @@ public sealed partial class HailWindow : FancyWindow
             Apply(hail);
         }
 
+        UpdateServices(hail);
+
         if (hail == null)
             return;
 
@@ -327,6 +333,56 @@ public sealed partial class HailWindow : FancyWindow
 
         SayRequested?.Invoke(text);
         ChatEntry.Clear();
+    }
+
+    /// <summary>Lists the far end's services under the chat, rebuilt only when they change.</summary>
+    private void UpdateServices(HailConsoleComponent? hail)
+    {
+        var offered = hail is { State: HailState.Connected } ? hail.Services : null;
+        var any = offered is { Count: > 0 };
+        ServiceBox.Visible = any;
+
+        if (!any)
+        {
+            _services.Clear();
+            ServiceList.RemoveAllChildren();
+            return;
+        }
+
+        if (!SameServices(offered!))
+        {
+            _services.Clear();
+            _services.AddRange(offered!);
+            ServiceList.RemoveAllChildren();
+
+            foreach (var entry in _services)
+            {
+                var service = entry.Service;
+                var button = new Button { Text = entry.Name, StyleClasses = { "ButtonSquare" }, HorizontalExpand = true };
+                button.OnPressed += _ => ServiceRequested?.Invoke(service);
+                ServiceList.AddChild(button);
+            }
+        }
+
+        foreach (var child in ServiceList.Children)
+        {
+            if (child is Button button)
+                button.Disabled = !_transmit;
+        }
+    }
+
+    private bool SameServices(List<HailServiceEntry> offered)
+    {
+        if (offered.Count != _services.Count)
+            return false;
+
+        for (var i = 0; i < offered.Count; i++)
+        {
+            if (offered[i].Service != _services[i].Service || offered[i].Name != _services[i].Name)
+                return false;
+        }
+
+        return true;
     }
 
     private void AddLine(HailLine line)

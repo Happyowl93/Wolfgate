@@ -1,0 +1,85 @@
+# Drydock refit upgrades: each tier swaps a machine's stock parts for higher-rated ones
+
+- type: wfDrydockUpgrade
+  id: WFDrydockThrusters
+  name: drydock-upgrade-thrusters
+  target: LinearThruster
+  tiers:
+  - rating: 3
+    price: 8000
+    materials:
+      Steel: 250
+      Plastic: 250
+      Plasma: 150
+      Gold: 100
+  - rating: 4
+    price: 18000
+    materials:
+      Steel: 300
+      Plastic: 300
+      Plasma: 150
+      Gold: 150
+      UraniumFissile: 20
+  - rating: 6
+    price: 40000
+    materials:
+      Plastic: 200
+      Gold: 100
+      Plasma: 100
+      Bluespace: 200
+
+- type: wfDrydockUpgrade
+  id: WFDrydockGyroscopes
+  name: drydock-upgrade-gyroscopes
+  target: Gyroscope
+  tiers:
+  - rating: 3
+    price: 6000
+    materials:
+      Steel: 250
+      Plastic: 250
+      Plasma: 150
+      Gold: 100
+  - rating: 4
+    price: 14000
+    materials:
+      Steel: 300
+      Plastic: 300
+      Plasma: 150
+      Gold: 150
+      UraniumFissile: 20
+  - rating: 6
+    price: 30000
+    materials:
+      Plastic: 200
+      Gold: 100
+      Plasma: 100
+      Bluespace: 200
+
+- type: wfDrydockUpgrade
+  id: WFDrydockPower
+  name: drydock-upgrade-power
+  target: Power
+  tiers:
+  - rating: 3
+    price: 10000
+    materials:
+      Steel: 250
+      Plastic: 250
+      Plasma: 150
+      Gold: 100
+  - rating: 4
+    price: 22000
+    materials:
+      Steel: 300
+      Plastic: 300
+      Plasma: 150
+      Gold: 150
+      UraniumFissile: 20
+  - rating: 6
+    price: 48000
+    materials:
+      Plastic: 200
+      Gold: 100
+      Plasma: 100
+      Bluespace: 200

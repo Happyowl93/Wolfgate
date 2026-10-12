@@ -1,0 +1,22 @@
+drydock-console-no-ship = No ship is in the berth.
+drydock-console-reserved = Berth { $berth } is reserved for the { $ship }.
+drydock-console-busy = The drydock is already working on a ship.
+drydock-console-ship-moving = Hold the ship still in the berth first.
+drydock-console-nothing-to-repair = Nothing to repair.
+drydock-console-insufficient-funds = Insufficient funds: { $price } cr required.
+drydock-console-no-bank-account = No bank account found.
+drydock-console-no-character = No character data found.
+drydock-console-transaction-failed = The transaction failed.
+drydock-console-started = Repair started: { $count } items for { $price } cr.
+drydock-console-refit-started = Refit started: { $count } parts.
+drydock-console-unknown-refit = Unknown refit.
+drydock-console-no-parts = No parts to refit.
+drydock-console-refit-maxed = Fully refitted.
+drydock-console-finished = Work complete on { $ship }.
+drydock-console-finished-skipped = Work complete on { $ship }. { $count } items were out of the cranes' reach and were refunded: { $refund } cr.
+drydock-console-aborted = Ship left the berth. Unfinished work refunded: { $refund } cr.
+drydock-console-aborted-power = The cranes lost power. Unfinished work refunded: { $refund } cr.
+drydock-console-no-power = The cranes have no power.
+drydock-console-cranes-blocked = The cranes' arms are blocked.
+
+drydock-console-crane-busy = A crane here is already working for another drydock console.

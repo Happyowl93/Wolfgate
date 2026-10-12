@@ -1,0 +1,64 @@
+# Ilse Brannock, the drydock's dockmaster. Answers hails from ships in range and books berths and work for them.
+
+- type: humanoidProfile
+  id: WFDrydockDockmasterProfile
+  profile:
+    name: Ilse Brannock
+    species: Human
+    age: 52
+    sex: Female
+    gender: Female
+    appearance:
+      hair: HumanHairBun
+      hairColor: "#6E6259"
+      facialHair: FacialHairShaved
+      facialHairColor: "#6E6259"
+      eyeColor: "#5B7A6E"
+      skinColor: "#B98563"
+
+- type: startingGear
+  id: WFDrydockDockmasterGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitChiefEngineer
+    outerClothing: ClothingOuterVestHazard
+    head: ClothingHeadHatHardhatOrange
+    ears: ClothingHeadsetEngineering
+    shoes: ClothingShoesBootsWork
+    gloves: ClothingHandsGlovesColorBlack
+
+- type: traderDialogue
+  id: WFDrydockDockmasterDialogue
+  greeting: drydock-dockmaster-greeting
+  farewell: drydock-dockmaster-farewell
+  options:
+  - prompt: drydock-dockmaster-prompt-how
+    response: drydock-dockmaster-response-how
+  - prompt: drydock-dockmaster-prompt-hail
+    response: drydock-dockmaster-response-hail
+  - prompt: drydock-dockmaster-prompt-who
+    response: drydock-dockmaster-response-who
+
+- type: entity
+  id: WFDrydockDockmaster
+  parent: WFBaseTrader
+  name: Ilse Brannock
+  description: The drydock's dockmaster, headset on and an eye on both bays.
+  suffix: Drydock, Dockmaster
+  components:
+  - type: HumanoidAppearance
+    species: Human
+    initial: WFDrydockDockmasterProfile
+  - type: Loadout
+    prototypes: [ WFDrydockDockmasterGear ]
+  - type: Trader
+    dialogue: WFDrydockDockmasterDialogue
+  - type: HailResponder
+    greetings:
+    - drydock-hail-greeting-1
+    - drydock-hail-greeting-2
+    - drydock-hail-greeting-3
+  - type: WFDrydockOperator
+  - type: HailService
+    name: drydock-hail-service
+    key: enum.WFDrydockConsoleUiKey.Key
+    perCaller: true

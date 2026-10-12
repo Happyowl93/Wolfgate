@@ -85,3 +85,15 @@ public sealed class HailEndedMessage : BoundUserInterfaceMessage
         Ship = ship;
     }
 }
+
+/// <summary>The pilot opened a service offered over the open channel.</summary>
+[Serializable, NetSerializable]
+public sealed class HailOpenServiceMessage : BoundUserInterfaceMessage
+{
+    public NetEntity Service;
+
+    public HailOpenServiceMessage(NetEntity service)
+    {
+        Service = service;
+    }
+}

@@ -1,0 +1,135 @@
+# Mobile drydock: a ship-buildable console and crane pair. The crane is a short, MV-powered, constructible machine
+# that reaches a ship's bay from its own grid; the console pays in stored materials instead of credits (WFDrydockMaterialPayment).
+# The mirrored crane shares the plain crane's board, so deconstructing it yields the plain board.
+
+- type: entity
+  parent: WFComputerDrydock
+  id: WFComputerMobileDrydock
+  name: mobile drydock console
+  description: A drydock console that fits on a ship. Work is paid in materials held by its linked cranes, or drawn from a linked material silo.
+  components:
+  - type: Computer
+    board: WFComputerMobileDrydockCircuitboard
+  - type: WFDrydockConsole
+    baseFee: 0
+    upgrades:
+    - WFDrydockThrusters
+    - WFDrydockGyroscopes
+    - WFDrydockPower
+  - type: WFDrydockMaterialPayment
+    rates:
+      Steel: 0.2
+      Glass: 0.03
+      Plastic: 0.03
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: WFComputerMobileDrydockCircuitboard
+  name: mobile drydock console board
+  components:
+  - type: ComputerBoard
+    prototype: WFComputerMobileDrydock
+
+- type: entity
+  parent: [WFDrydockCrane, ConstructibleMachine]
+  id: WFMobileDrydockCrane
+  name: mobile drydock crane
+  description: A short two-by-two crane for a ship's bay. Its arm and boom work the nearby hull with welders, grinders and bolt drivers.
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: Anchorable
+    delay: 2
+  - type: WFDrydockCrane
+    maxArm: 20
+    sections: 3
+    sectionLength: 4
+    extension: 4
+    idleLoad: 200
+    workingLoad: 6000
+  - type: Machine
+    board: WFMobileDrydockCraneMachineCircuitboard
+  # Holds the sheets the console's jobs pay with. Like a lathe, it can also draw from a linked material silo.
+  - type: MaterialStorage
+    whitelist:
+      tags:
+      - Sheet
+      - RawMaterial
+      - Ingot
+  - type: OreSiloClient
+  # Medium-voltage draw, so a ship's MV network can feed it.
+  - type: PowerConsumer
+    voltage: Medium
+    drawRate: 200
+  - type: NodeContainer
+    examinable: true
+    nodes:
+      input:
+        !type:CableDeviceNode
+        nodeGroupID: MVPower
+  - type: Damageable
+    damageContainer: StructuralInorganic
+    damageModifierSet: StructuralMetallic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 400
+      behaviors:
+        - !type:TriggerBehavior
+        - !type:DoActsBehavior
+          acts: ["Destruction"]
+    - trigger:
+        !type:DamageTrigger
+        damage: 200
+      behaviors:
+        - !type:TriggerBehavior
+        - !type:DoActsBehavior
+          acts: ["Destruction"]
+        - !type:PlaySoundBehavior
+          sound:
+            collection: MetalBreak
+        - !type:ChangeConstructionNodeBehavior
+          node: machineFrame
+
+- type: entity
+  parent: WFMobileDrydockCrane
+  id: WFMobileDrydockCraneMirrored
+  suffix: Mirrored
+  components:
+  - type: Sprite
+    sprite: _WF/Drydock/crane_machine.rsi
+    drawdepth: Effects
+    noRot: false
+    layers:
+    - state: machine
+      offset: -0.5,0.5
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-1.5,-0.5,0.5,1.5"
+        density: 190
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: WFDrydockCrane
+    mirrored: true
+
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: WFMobileDrydockCraneMachineCircuitboard
+  name: mobile drydock crane machine board
+  components:
+  - type: MachineBoard
+    prototype: WFMobileDrydockCrane
+    requirements:
+      Manipulator: 2
+      Capacitor: 1
+    stackRequirements:
+      Steel: 10
+      Cable: 5
