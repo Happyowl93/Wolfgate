@@ -34,12 +34,6 @@ public sealed partial class WFDrydockSystem
     /// <summary>Time between re-aims of the cranes at their items, so a drifting ship keeps its items under the heads.</summary>
     private static readonly TimeSpan AimInterval = TimeSpan.FromSeconds(0.5);
 
-    /// <summary>Cranes still folding up, with the time each stops being sent to every client.</summary>
-    private readonly Dictionary<EntityUid, TimeSpan> _parking = new();
-
-    /// <summary>Scratch list for <see cref="ReleaseParkedCranes"/>.</summary>
-    private readonly List<EntityUid> _released = new();
-
     /// <summary>Jobs that ended this tick, ended after the loop so the query is not disturbed.</summary>
     private readonly List<(EntityUid Console, WFDrydockConsoleComponent Comp, WFDrydockJobComponent Job, JobEnd End)> _ends = new();
 
@@ -62,7 +56,6 @@ public sealed partial class WFDrydockSystem
 
         var curTime = _timing.CurTime;
         UpdateBookings(curTime);
-        ReleaseParkedCranes(curTime);
         UpdateBlockers(curTime);
         RefreshMaterialConsoles(frameTime);
 
@@ -77,23 +70,6 @@ public sealed partial class WFDrydockSystem
 
         foreach (var (console, comp, job, end) in _ends)
             EndJob(console, comp, job, end);
-    }
-
-    /// <summary>Lifts the global PVS override of each crane that has finished folding up.</summary>
-    private void ReleaseParkedCranes(TimeSpan curTime)
-    {
-        _released.Clear();
-        foreach (var (uid, until) in _parking)
-        {
-            if (curTime >= until)
-                _released.Add(uid);
-        }
-
-        foreach (var uid in _released)
-        {
-            _parking.Remove(uid);
-            _pvs.RemoveGlobalOverride(uid);
-        }
     }
 
     /// <summary>Advances one job by a frame and returns how it ends, or None while it keeps running.</summary>
@@ -567,14 +543,6 @@ public sealed partial class WFDrydockSystem
         crane.Extension = target.Extension;
         crane.Angle = target.Angle;
 
-        // A working crane is sent to every client; ReleaseParkedCranes lifts that once a parked crane has folded up.
-        if (active)
-        {
-            _parking.Remove(uid);
-            if (!crane.Active)
-                _pvs.AddGlobalOverride(uid);
-        }
-
         if (crane.Active != active)
         {
             crane.Active = active;
@@ -591,22 +559,25 @@ public sealed partial class WFDrydockSystem
     /// <summary>Folds every crane of the console's berth to its parked pose and stops it working.</summary>
     private void ParkCranes(EntityUid console, WFDrydockConsoleComponent comp)
     {
-        var curTime = _timing.CurTime;
         foreach (var craneUid in LinkedCranes(console))
         {
             if (!TryComp<WFDrydockCraneComponent>(craneUid, out var crane))
                 continue;
 
             _boomBlock.Remove(craneUid);
-            var time = MoveCrane(craneUid, crane, comp, new CraneTarget(0f, 0f, 0f, crane.SectionLength, crane.ParkAngle), false);
-            _parking[craneUid] = curTime + TimeSpan.FromSeconds(time + 1f);
+            MoveCrane(craneUid, crane, comp, new CraneTarget(0f, 0f, 0f, crane.SectionLength, crane.ParkAngle), false);
         }
+    }
+
+    /// <summary>Sends a crane to every client for its whole life, so its arm and boom render from afar.</summary>
+    private void OnCraneMapInit(Entity<WFDrydockCraneComponent> ent, ref MapInitEvent args)
+    {
+        _pvs.AddGlobalOverride(ent.Owner);
     }
 
     /// <summary>Stops tracking a crane that is removed, and lifts its global PVS override.</summary>
     private void OnCraneShutdown(Entity<WFDrydockCraneComponent> ent, ref ComponentShutdown args)
     {
-        _parking.Remove(ent.Owner);
         _boomBlock.Remove(ent.Owner);
         _pvs.RemoveGlobalOverride(ent.Owner);
     }
