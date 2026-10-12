@@ -16,7 +16,6 @@ using Content.Server.Power.Components;
 using Content.Server.Shuttles.Components;
 using Content.Shared._Mono.Ships.Components;
 using Content.Shared._NF.Bank.Components;
-using Content.Shared._NF.Shipyard.Components;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared._WF.Drydock;
 using Content.Shared._WF.Hailing;
@@ -411,11 +410,6 @@ public sealed class DrydockTest
                     Is.EqualTo(Math.Max(comp.MinFee, (int) Math.Round(vessel.Price * comp.FeeFraction / 10) * 10)),
                     "The fee should be a share of the ship's price.");
             });
-
-            // A voucher hull is valued at a share of its price, so its repair undercuts printing another card.
-            em.EnsureComponent<ShuttleDeedComponent>(ship).PurchasedWithVoucher = true;
-            Assert.That(drydock.ShipValue(ship, comp).Value, Is.EqualTo((int) (vessel.Price * comp.VoucherValueFraction)),
-                "A voucher hull should be valued at its voucher share of the price.");
         });
 
         await pair.CleanReturnAsync();

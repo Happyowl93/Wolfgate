@@ -74,13 +74,6 @@ public sealed partial class WFDrydockConsoleComponent : Component
     public float CapFraction = 0.5f;
 
     /// <summary>
-    /// Share of its shipyard price a ship bought with a voucher is valued at, since its faction paid a lathe recipe for
-    /// the hull, not the price. A repair has to undercut printing another card.
-    /// </summary>
-    [DataField]
-    public float VoucherValueFraction = 0.2f;
-
-    /// <summary>
     /// Most a repair's work may cost, as a share of its full rebuild price, for ships not bought at a shipyard. A full
     /// rebuild runs about 1.3 to 1.9 times a ship's shipyard price.
     /// </summary>

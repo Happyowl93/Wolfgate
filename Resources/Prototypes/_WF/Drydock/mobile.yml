@@ -72,13 +72,13 @@
     - Unanchorable
   - type: Rotatable
     rotateWhileAnchored: false
-  # 20 tiles of berth after a 3-tile gap.
+  # 26 tiles of berth after a 3-tile gap; 4 sections of 4 reach 13 tiles across.
   - type: WFDrydockCrane
-    maxArm: 23
+    maxArm: 29
     berthGap: 3
     mirrorInPlace: true
     armRoot: -1.5
-    sections: 3
+    sections: 4
     sectionLength: 4
     extension: 4
     idleLoad: 200

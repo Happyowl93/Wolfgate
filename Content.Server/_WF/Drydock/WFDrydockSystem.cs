@@ -9,7 +9,6 @@ using Content.Server.Shuttles.Components;
 using Content.Shared._Crescent.Hardpoints;
 using Content.Shared._Mono.ShipRepair.Components;
 using Content.Shared._Mono.Ships.Components;
-using Content.Shared._NF.Shipyard.Components;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared._NF.Bank.Components;
 using Content.Shared._WF.Drydock;
@@ -206,18 +205,15 @@ public sealed partial class WFDrydockSystem : EntitySystem
     }
 
     /// <summary>
-    /// The ship's value for fees and caps: its shipyard price when it was bought at one (a share of it when bought with a
-    /// voucher), else the price of rebuilding it whole from its repair snapshot. Vessel is false for the rebuild price,
-    /// or 0 without a snapshot.
+    /// The ship's value for fees and caps: its shipyard price when it was bought at one, else the price of rebuilding
+    /// it whole from its repair snapshot. Vessel is false for the rebuild price, or 0 without a snapshot.
     /// </summary>
     public (int Value, bool Vessel) ShipValue(EntityUid ship, WFDrydockConsoleComponent comp)
     {
         if (TryComp<VesselComponent>(ship, out var vessel) &&
             _prototype.TryIndex<VesselPrototype>(vessel.VesselId, out var proto) && proto.Price > 0)
         {
-            // A voucher hull cost its faction a lathe recipe, not the price, so a repair has to undercut another card.
-            var voucher = TryComp<ShuttleDeedComponent>(ship, out var deed) && deed.PurchasedWithVoucher;
-            return (voucher ? (int) (proto.Price * comp.VoucherValueFraction) : proto.Price, true);
+            return (proto.Price, true);
         }
 
         if (!TryComp<ShipRepairDataComponent>(ship, out var data))

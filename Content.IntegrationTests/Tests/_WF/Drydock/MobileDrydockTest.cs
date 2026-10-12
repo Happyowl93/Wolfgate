@@ -590,7 +590,7 @@ public sealed class MobileDrydockTest
             {
                 Assert.That(craneComp.BerthGap, Is.EqualTo(3f), "The mobile crane should leave a three-tile gap.");
                 Assert.That(berth.Area.Top, Is.EqualTo(gapEnd).Within(0.01f), "The berth should start at the end of the gap.");
-                Assert.That(berth.Area.Height, Is.EqualTo(20f).Within(0.01f), "The berth should keep its 20 tiles of depth.");
+                Assert.That(berth.Area.Height, Is.EqualTo(craneComp.MaxArm - craneComp.BerthGap).Within(0.01f), "The berth should run from the gap to the end of the arm.");
                 Assert.That(drydock.CanReach(comp, host, crane, new Vector2(1.5f, gapEnd + 1.5f)), Is.False, "A point in the gap should be out of reach.");
                 Assert.That(drydock.CanReach(comp, host, crane, new Vector2(1.5f, gapEnd - 1f)), Is.True, "A point past the gap should be in reach.");
             });
