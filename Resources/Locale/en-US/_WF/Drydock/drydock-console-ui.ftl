@@ -79,7 +79,10 @@ drydock-plot-inbound = Proceed to berth { $berth }
 drydock-plot-deploying = Cranes deploying
 drydock-plot-working = Work in progress { $percent }%
 drydock-plot-sound = Hull sound
-drydock-plot-surveyed = Survey: { $count } items
+drydock-plot-surveyed = Survey: { $count } { $count ->
+    [one] item
+   *[other] items
+}
 
 drydock-upgrade-thrusters = Thrusters
 drydock-upgrade-gyroscopes = Gyroscopes

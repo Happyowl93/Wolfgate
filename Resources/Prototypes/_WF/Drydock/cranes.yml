@@ -78,7 +78,7 @@
     drawdepth: Effects
     noRot: false
     layers:
-    - state: machine
+    - state: machine_mirrored
       offset: -0.5,0.5
   - type: Fixtures
     fixtures:
@@ -116,7 +116,7 @@
     drawdepth: Effects
     noRot: false
     layers:
-    - state: machine
+    - state: machine_mirrored
       offset: -0.5,0.5
   - type: Fixtures
     fixtures:
@@ -154,7 +154,7 @@
     drawdepth: Effects
     noRot: false
     layers:
-    - state: machine
+    - state: machine_mirrored
       offset: -0.5,0.5
   - type: Fixtures
     fixtures:

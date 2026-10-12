@@ -1,7 +1,7 @@
 namespace Content.Server._WF.Hailing;
 
 /// <summary>
-/// An NPC that mans a shuttle console and answers hails there, greeting the caller and opening its grid's hail services.
+/// An NPC that mans a shuttle console and answers hails there, greeting the caller.
 /// </summary>
 [RegisterComponent]
 public sealed partial class HailResponderComponent : Component

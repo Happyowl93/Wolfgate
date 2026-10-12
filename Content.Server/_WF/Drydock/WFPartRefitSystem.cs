@@ -143,32 +143,6 @@ public sealed class WFPartRefitSystem : EntitySystem
         return rating == int.MaxValue ? 0 : TierOf(effect, rating);
     }
 
-    /// <summary>
-    /// Parts a machine would swap to reach a tier of a refit line: those rated below it that have a replacement. A stack
-    /// of parts, as a machine built in a frame holds them, counts each part in it.
-    /// </summary>
-    public int PartsToSwap(EntityUid machine, WFShipRefitPrototype refit, int tier)
-    {
-        if (refit.Effect is not WFPartRatingRefit effect || !TryComp<MachineComponent>(machine, out var comp) ||
-            tier < 1 || tier > effect.Ratings.Count)
-        {
-            return 0;
-        }
-
-        var rating = effect.Ratings[tier - 1];
-        var count = 0;
-        foreach (var part in comp.PartContainer.ContainedEntities)
-        {
-            if (TryComp<MachinePartComponent>(part, out var partComp) && partComp.Rating < rating &&
-                _replacements.ContainsKey((partComp.PartType.Id, rating)))
-            {
-                count += PartCount(part);
-            }
-        }
-
-        return count;
-    }
-
     /// <summary>Swaps a machine's parts rated below a rating for parts of that rating.</summary>
     private void ApplyRating(EntityUid machine, int rating)
     {

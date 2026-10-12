@@ -6,7 +6,7 @@ using Content.Shared.Shuttles.Components;
 namespace Content.Server._WF.Hailing;
 
 /// <summary>
-/// Hail services: consoles on the other ship's grid, relayed onto the caller's helm and driven by their own state and messages.
+/// Hail services: UIs on the other ship's grid, relayed onto the caller's helm and driven by their own state and messages.
 /// </summary>
 public sealed partial class HailingSystem
 {

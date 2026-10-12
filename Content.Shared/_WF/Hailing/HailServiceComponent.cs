@@ -3,8 +3,8 @@ using Robust.Shared.Serialization.TypeSerializers.Implementations;
 namespace Content.Shared._WF.Hailing;
 
 /// <summary>
-/// A console whose UI a hail contact on the same grid can open for the caller. It is relayed through the caller's
-/// helm, so it must work from its state and messages alone.
+/// An entity whose UI a caller can open over a hail to its grid. It is relayed through the caller's helm, so it must
+/// work from its state and messages alone.
 /// </summary>
 [RegisterComponent]
 public sealed partial class HailServiceComponent : Component

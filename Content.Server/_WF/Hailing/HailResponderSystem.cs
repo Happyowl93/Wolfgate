@@ -11,7 +11,8 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.Hailing;
 
 /// <summary>
-/// Runs the NPCs that answer hails: each answers after its delay, greets the caller and opens its grid's hail services.
+/// Runs the NPCs that answer hails: each answers after its delay, greets the caller and speaks what its grid's hail
+/// services add.
 /// </summary>
 public sealed partial class HailResponderSystem : EntitySystem
 {

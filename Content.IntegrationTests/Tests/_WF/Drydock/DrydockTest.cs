@@ -435,7 +435,7 @@ public sealed class DrydockTest
             stacks.SetCount(stack, 2);
             containers.Insert(stack, parts);
 
-            Assert.That(upgrades.PartsToSwap(gyroscope, gyros, 1), Is.EqualTo(3),
+            Assert.That(WFShipRefitSystem.Units(refits.Survey(grid, gyros, 1)), Is.EqualTo(3),
                 "A stack of two manipulators and a capacitor should count as three parts.");
 
             refits.Apply(gyros, gyroscope, 1);
@@ -459,7 +459,7 @@ public sealed class DrydockTest
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
         var drydock = server.System<WFDrydockSystem>();
-        var upgrades = server.System<WFPartRefitSystem>();
+        var refits = server.System<WFShipRefitSystem>();
         var destructible = server.System<DestructibleSystem>();
         var damageable = server.System<DamageableSystem>();
         var ui = server.System<SharedUserInterfaceSystem>();
@@ -467,14 +467,14 @@ public sealed class DrydockTest
         var thrusters = protoMan.Index(ThrusterRefit);
         var gyros = protoMan.Index(GyroscopeRefit);
 
-        EntityUid console = default, ship = default, thruster = default, wall = default, gyroscope = default;
+        EntityUid console = default, ship = default, wall = default;
 
         await server.WaitAssertion(() =>
         {
             (_, console, _) = LoadDrydock(pair, map.MapId);
             ship = CreateShip(pair, map.MapId);
-            (thruster, wall) = BuildHull(pair, ship);
-            gyroscope = SpawnAnchored(pair, ship, "Gyroscope", new Vector2i(2, 1));
+            (_, wall) = BuildHull(pair, ship);
+            SpawnAnchored(pair, ship, "Gyroscope", new Vector2i(2, 1));
             server.System<ShipRepairSystem>().GenerateRepairData(ship);
         });
 
@@ -485,8 +485,8 @@ public sealed class DrydockTest
         {
             Assert.Multiple(() =>
             {
-                Assert.That(upgrades.PartsToSwap(thruster, thrusters, 1), Is.EqualTo(1), "A thruster holds one capacitor.");
-                Assert.That(upgrades.PartsToSwap(gyroscope, gyros, 1), Is.EqualTo(3), "A gyroscope holds three parts.");
+                Assert.That(WFShipRefitSystem.Units(refits.Survey(ship, thrusters, 1)), Is.EqualTo(1), "A thruster holds one capacitor.");
+                Assert.That(WFShipRefitSystem.Units(refits.Survey(ship, gyros, 1)), Is.EqualTo(3), "A gyroscope holds three parts.");
             });
 
             var comp = em.GetComponent<WFDrydockConsoleComponent>(console);

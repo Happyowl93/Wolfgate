@@ -76,16 +76,17 @@ public sealed partial class WFDrydockSystem : EntitySystem
         SubscribeLocalEvent<WFDrydockConsoleComponent, BoundUIOpenedEvent>(OnUiOpened);
         SubscribeLocalEvent<WFDrydockConsoleComponent, WFDrydockRepairMessage>(OnRepair);
         SubscribeLocalEvent<WFDrydockConsoleComponent, WFDrydockUpgradeMessage>(OnUpgrade);
-        InitializeBerthLights();
         SubscribeLocalEvent<WFDrydockCraneComponent, MapInitEvent>(OnCraneMapInit);
         SubscribeLocalEvent<WFDrydockCraneComponent, ComponentShutdown>(OnCraneShutdown);
-        InitializeBooking();
-        InitializeLinking();
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(_ =>
         {
             _estimates.Clear();
             _constructionMaterials.Clear();
         });
+
+        InitializeBerthLights();
+        InitializeBooking();
+        InitializeLinking();
     }
 
     /// <summary>The largest ship grid whose center lies in the console's berth area, or null.</summary>
