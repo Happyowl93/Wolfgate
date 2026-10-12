@@ -361,7 +361,7 @@ public sealed class DrydockTest
             var parts = em.GetComponent<MachineComponent>(gyroscope).PartContainer;
             foreach (var part in parts.ContainedEntities.ToList())
             {
-                if (em.GetComponent<MachinePartComponent>(part).PartType.Id != "Manipulator")
+                if (!em.TryGetComponent<MachinePartComponent>(part, out var partComp) || partComp.PartType.Id != "Manipulator")
                     continue;
 
                 containers.Remove(part, parts);
