@@ -15,4 +15,4 @@ drydock-dockmaster-response-how = Hail me or use the console at my desk and I'll
 drydock-dockmaster-prompt-hail = Do I have to come in person?
 drydock-dockmaster-response-hail = Not at all. Hail me from your helm and pick drydock services.
 drydock-dockmaster-prompt-who = Who are you?
-drydock-dockmaster-response-who = Ilse Brannock, dockmaster. I keep the bays turning and the cranes off people's heads.
+drydock-dockmaster-response-who = Hammer Ironstrike, dockmaster of Anvilhold. Forty years swinging cranes and I've not dropped a hull yet.

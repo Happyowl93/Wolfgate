@@ -1,6 +1,6 @@
 # Drydock
 
-The drydock is a POI station (`WFDrydock`, `Resources/Maps/_WF/Drydock/drydock.yml`) with four berths, North, East,
+Anvilhold Drydock is a POI station (`WFDrydock`, `Resources/Maps/_WF/Drydock/drydock.yml`) with four berths, North, East,
 South and West, each a bay that ships park in without docking. Each berth has a `WFComputerDrydock` (its `berth` field
 names it) and two cranes. Ships reach it two ways: walk up to a berth console, or hail the dockmaster from their own
 helm (Hailing module).
@@ -21,8 +21,8 @@ draw on a client-only rig parented to the map, since sprites are culled per grid
 vanish once the camera left that grid. A crane's `BerthGap` starts its work area that many tiles down the arm; the gap
 is still scanned for blockers.
 
-The dockmaster (`WFDrydockDockmaster`, HailResponder) mans `WFComputerDrydockTraffic` next to her desk and answers
-ringing hails. Her booking window is a per-caller hail service (`WFDrydockOperator`, HailService), so each caller gets
+The dockmaster, Hammer Ironstrike (`WFDrydockDockmaster`, a dwarf with HailResponder), mans `WFComputerDrydockTraffic` by the desk and answers
+ringing hails. The booking window is a per-caller hail service (`WFDrydockOperator`, HailService), so each caller gets
 their own window. The POI has `PreventPilot`. Walk-in consoles quote and sell work directly on the ship in their berth.
 Their berth lights button frames the whole work area with a booking's guide lights for `BerthLightsTime` seconds, so a
 pilot can line up without a booking; a job or a second press turns it off.

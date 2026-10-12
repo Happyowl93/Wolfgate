@@ -1,20 +1,20 @@
-# Ilse Brannock, dockmaster. Answers hails and books berths and work.
+# Hammer Ironstrike, dwarf dockmaster. Answers hails and books berths and work.
 
 - type: humanoidProfile
   id: WFDrydockDockmasterProfile
   profile:
-    name: Ilse Brannock
-    species: Human
-    age: 52
-    sex: Female
-    gender: Female
+    name: Hammer Ironstrike
+    species: Dwarf
+    age: 97
+    sex: Male
+    gender: Male
     appearance:
-      hair: HumanHairBun
-      hairColor: "#6E6259"
-      facialHair: FacialHairShaved
-      facialHairColor: "#6E6259"
-      eyeColor: "#5B7A6E"
-      skinColor: "#B98563"
+      hair: HumanHairBalding
+      hairColor: "#8A3B1C"
+      facialHair: HumanFacialHairDwarf
+      facialHairColor: "#8A3B1C"
+      eyeColor: "#4A5D7A"
+      skinColor: "#C9926B"
 
 - type: startingGear
   id: WFDrydockDockmasterGear
@@ -41,13 +41,27 @@
 - type: entity
   id: WFDrydockDockmaster
   parent: WFBaseTrader
-  name: Ilse Brannock
-  description: The drydock's dockmaster, headset on and an eye on every bay.
+  name: Hammer Ironstrike
+  description: The drydock's dwarf dockmaster, beard tucked into his hazard vest.
   suffix: Drydock, Dockmaster
   components:
   - type: HumanoidAppearance
-    species: Human
+    species: Dwarf
     initial: WFDrydockDockmasterProfile
+  # Dwarf parts over the human trader base, as in BaseMobDwarf.
+  - type: Body
+    prototype: Dwarf
+  - type: Sprite
+    scale: 1, 0.8
+  - type: Vocal
+    sounds:
+      Male: UnisexDwarf
+      Female: FemaleDwarf
+      Unsexed: UnisexDwarf
+  - type: Speech
+    speechSounds: Bass
+  - type: ReplacementAccent
+    accent: dwarf
   - type: Loadout
     prototypes: [ WFDrydockDockmasterGear ]
   - type: Trader

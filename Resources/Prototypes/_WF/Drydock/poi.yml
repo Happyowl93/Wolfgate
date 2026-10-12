@@ -3,7 +3,7 @@
 - type: pointOfInterest
   id: WFDrydock
   parent: BasePOI
-  name: 'Drydock'
+  name: 'Anvilhold Drydock'
   minimumDistance: 8000
   maximumDistance: 9500
   spawnGroup: Required
