@@ -94,8 +94,13 @@ public sealed class DrydockHailTest
 
             var heard = hail.Log.Where(l => !l.Own).Select(l => l.Text).ToList();
             var greetings = new[] { "drydock-hail-greeting-1", "drydock-hail-greeting-2", "drydock-hail-greeting-3" }
-                .Select(key => Loc.GetString(key)).ToList();
-            Assert.That(heard.Any(text => greetings.Contains(text)), "The dockmaster should greet the caller.");
+                .Select(key => Loc.GetString(key,
+                    ("name", em.GetComponent<MetaDataComponent>(dockmaster).EntityName),
+                    ("location", hailing.ShipLabel(console, station)),
+                    ("ship", hailing.ShipLabel(traffic, map.Grid))))
+                .ToList();
+            Assert.That(heard.Any(text => greetings.Contains(text)), $"The dockmaster should greet the caller by name. Heard: {string.Join(" | ", heard)}");
+            Assert.That(heard.Where(text => text.Contains('{')), Is.Empty, "No spoken line should keep a raw placeholder.");
             Assert.That(heard, Does.Contain(Loc.GetString("drydock-hail-offer")),
                 "A ship with no booking should be offered the drydock's services.");
         });

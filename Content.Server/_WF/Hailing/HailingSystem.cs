@@ -845,7 +845,7 @@ public sealed partial class HailingSystem : EntitySystem
     /// <summary>
     /// A ship's name as a console's radar would give it, so a ship running dark stays unnamed.
     /// </summary>
-    private string ShipLabel(EntityUid console, EntityUid ship)
+    public string ShipLabel(EntityUid console, EntityUid ship)
     {
         if (TryComp<IFFComponent>(ship, out var iff))
         {

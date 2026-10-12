@@ -1,6 +1,7 @@
 using Content.Server.Power.EntitySystems;
 using Content.Server.Shuttles.Components;
 using Content.Shared._WF.Hailing;
+using Content.Shared.IdentityManagement;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Shuttles.Components;
 using Robust.Server.GameObjects;
@@ -81,11 +82,17 @@ public sealed class HailResponderSystem : EntitySystem
         if (hail.Peer is not { } helm)
             return;
 
+        var grid = Transform(console).GridUid;
         if (responder.Greetings.Count > 0)
-            _hailing.Say(console, uid, Loc.GetString(_random.Pick(responder.Greetings)));
+        {
+            // Each side is named as its radar shows the other, so a ship running dark stays unnamed.
+            _hailing.Say(console, uid, Loc.GetString(_random.Pick(responder.Greetings),
+                ("name", Identity.Name(uid, EntityManager)),
+                ("location", grid is { } station ? _hailing.ShipLabel(helm, station) : Loc.GetString("hail-unknown-vessel")),
+                ("ship", hail.PeerGrid is { } ship ? _hailing.ShipLabel(console, ship) : Loc.GetString("hail-unknown-vessel"))));
+        }
 
         var lines = new List<string>();
-        var grid = Transform(console).GridUid;
         var query = EntityQueryEnumerator<HailServiceComponent, TransformComponent>();
 
         while (query.MoveNext(out var service, out _, out var xform))

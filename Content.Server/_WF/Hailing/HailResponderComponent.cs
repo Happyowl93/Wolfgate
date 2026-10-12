@@ -6,7 +6,7 @@ namespace Content.Server._WF.Hailing;
 [RegisterComponent]
 public sealed partial class HailResponderComponent : Component
 {
-    /// <summary>Greetings spoken on answering, picked at random.</summary>
+    /// <summary>Greetings spoken on answering, picked at random. Given $name (the responder), $location (its grid) and $ship (the caller's).</summary>
     [DataField]
     public List<LocId> Greetings = new();
 
