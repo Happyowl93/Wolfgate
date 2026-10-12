@@ -27,6 +27,8 @@ using Content.Shared.Damage.Systems;
 using Content.Shared.FixedPoint;
 using Content.Shared.Mind;
 using Content.Shared.Players;
+using Content.Shared.Stacks;
+using Robust.Shared.Containers;
 using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
@@ -324,6 +326,59 @@ public sealed class DrydockTest
             Assert.That(upgrades.GetTier(gyroscope, gyros), Is.EqualTo(1));
             Assert.That(gyro.Thrust, Is.EqualTo(stockGyro * MathF.Pow(gyro.PartRatingThrustMultiplier, 2)).Within(0.01f),
                 "Gyroscope thrust should follow the rating-3 manipulator.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>A machine built in a frame holds its parts as stacks; a refit counts and replaces every part in them.</summary>
+    [Test]
+    public async Task RefitSwapsStackedParts()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var grid = map.Grid;
+        var upgrades = server.System<WFDrydockUpgradeSystem>();
+        var stacks = server.System<SharedStackSystem>();
+        var containers = server.System<SharedContainerSystem>();
+        var gyros = server.ResolveDependency<IPrototypeManager>().Index(GyroscopeRefit);
+
+        EntityUid gyroscope = default;
+
+        await server.WaitAssertion(() =>
+        {
+            BuildHull(pair, grid);
+            gyroscope = SpawnAnchored(pair, grid, "Gyroscope", new Vector2i(2, 1));
+        });
+
+        await server.WaitRunTicks(2);
+
+        await server.WaitAssertion(() =>
+        {
+            // Swap the two single manipulators for one stack of two, as a machine frame inserts them.
+            var parts = em.GetComponent<MachineComponent>(gyroscope).PartContainer;
+            foreach (var part in parts.ContainedEntities.ToList())
+            {
+                if (em.GetComponent<MachinePartComponent>(part).PartType.Id != "Manipulator")
+                    continue;
+
+                containers.Remove(part, parts);
+                em.DeleteEntity(part);
+            }
+
+            var stack = em.SpawnEntity("MicroManipulatorStockPart", em.GetComponent<TransformComponent>(gyroscope).Coordinates);
+            stacks.SetCount(stack, 2);
+            containers.Insert(stack, parts);
+
+            Assert.That(upgrades.PartsToSwap(gyroscope, gyros, 1), Is.EqualTo(3),
+                "A stack of two manipulators and a capacitor should count as three parts.");
+
+            upgrades.ApplyTier(gyroscope, gyros, 1);
+            Assert.That(PartsOf(pair, gyroscope).Count(p => p.StartsWith("NanoManipulatorStockPart:3")), Is.EqualTo(2),
+                "The stack of two manipulators should become two nano manipulators.");
+            Assert.That(upgrades.GetTier(gyroscope, gyros), Is.EqualTo(1));
         });
 
         await pair.CleanReturnAsync();

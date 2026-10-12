@@ -4,6 +4,7 @@ using Content.Server._NF.Power.Components;
 using Content.Server.Shuttles.Components;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Construction.Components;
+using Content.Shared.Stacks;
 using Robust.Shared.Containers;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map.Components;
@@ -107,7 +108,10 @@ public sealed partial class WFDrydockUpgradeSystem : EntitySystem
         return tier;
     }
 
-    /// <summary>Stock parts a refit to a tier would swap in a machine: those rated below it that have a replacement.</summary>
+    /// <summary>
+    /// Stock parts a refit to a tier would swap in a machine: those rated below it that have a replacement. A stack of
+    /// parts, as a machine built in a frame holds them, counts each part in it.
+    /// </summary>
     public int PartsToSwap(EntityUid machine, WFDrydockUpgradePrototype proto, int tier)
     {
         if (!TryComp<MachineComponent>(machine, out var comp) || tier < 1 || tier > proto.Tiers.Count)
@@ -120,7 +124,7 @@ public sealed partial class WFDrydockUpgradeSystem : EntitySystem
             if (TryComp<MachinePartComponent>(part, out var partComp) && partComp.Rating < target &&
                 _replacements.ContainsKey((partComp.PartType.Id, target)))
             {
-                count++;
+                count += PartCount(part);
             }
         }
 
@@ -152,11 +156,14 @@ public sealed partial class WFDrydockUpgradeSystem : EntitySystem
                 continue;
             }
 
+            var count = PartCount(part);
             _container.Remove(part, comp.PartContainer);
             QueueDel(part);
 
-            var spawned = Spawn(replacement, coords);
-            _container.Insert(spawned, comp.PartContainer);
+            for (var i = 0; i < count; i++)
+            {
+                _container.Insert(Spawn(replacement, coords), comp.PartContainer);
+            }
         }
 
         _construction.RefreshParts(machine, comp);
@@ -193,6 +200,12 @@ public sealed partial class WFDrydockUpgradeSystem : EntitySystem
             return candidateStock;
 
         return string.CompareOrdinal(candidate, existing) < 0;
+    }
+
+    /// <summary>Parts in a part entity: its stack count, or 1 when it doesn't stack.</summary>
+    private int PartCount(EntityUid part)
+    {
+        return TryComp<StackComponent>(part, out var stack) ? stack.Count : 1;
     }
 
     private bool HasMachineParts(MachineComponent machine)
