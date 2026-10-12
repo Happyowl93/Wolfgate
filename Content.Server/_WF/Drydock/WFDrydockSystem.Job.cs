@@ -12,6 +12,7 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Localization;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
+using Robust.Shared.Maths;
 using Robust.Shared.Random;
 
 namespace Content.Server._WF.Drydock;
@@ -346,12 +347,13 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>
-    /// Removes and returns the slot's next pending item: the earliest kind first (hull tiles before parts on them), then the
-    /// nearest one its crane reaches, else the nearest one no crane reaches. Null when only items another crane reaches remain.
+    /// Removes and returns the slot's next pending item: the earliest rank first (hull tiles, then parts on them, then guns
+    /// on their hardpoints), then the nearest one its crane reaches, else the nearest one no crane reaches. Skips tiles
+    /// another crane is working. Null when only items another crane reaches or works on remain.
     /// </summary>
     private WFDrydockWorkItem? TakeNearest(WFDrydockConsoleComponent comp, WFDrydockJobComponent job, WFDrydockJobSlot slot)
     {
-        var kind = job.Pending.Min(i => i.Kind);
+        var rank = job.Pending.Min(Rank);
         var reach = -1;
         var reachDistance = float.MaxValue;
         var stranded = -1;
@@ -359,7 +361,7 @@ public sealed partial class WFDrydockSystem
         for (var i = 0; i < job.Pending.Count; i++)
         {
             var candidate = job.Pending[i];
-            if (candidate.Kind != kind)
+            if (Rank(candidate) != rank || TileBusy(job, slot, candidate))
                 continue;
 
             var distance = (candidate.LocalPos - slot.ToolPos).LengthSquared();
@@ -386,6 +388,28 @@ public sealed partial class WFDrydockSystem
         job.Pending[best] = job.Pending[^1];
         job.Pending.RemoveAt(job.Pending.Count - 1);
         return item;
+    }
+
+    /// <summary>Order in which work is taken: by kind, with guns that mount on hardpoints after the other parts.</summary>
+    private static int Rank(WFDrydockWorkItem item)
+    {
+        return (int) item.Kind * 2 + (item.Mounted ? 1 : 0);
+    }
+
+    /// <summary>
+    /// Whether another crane works the item's tile. One crane per tile keeps the tile's work in rank order: a part never
+    /// lands before its floor, nor a gun before its hardpoint.
+    /// </summary>
+    private static bool TileBusy(WFDrydockJobComponent job, WFDrydockJobSlot slot, WFDrydockWorkItem item)
+    {
+        var tile = item.LocalPos.Floored();
+        foreach (var other in job.Slots)
+        {
+            if (other != slot && other.Item is { } working && working.LocalPos.Floored() == tile)
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>Whether any crane of the job reaches a ship-local point.</summary>

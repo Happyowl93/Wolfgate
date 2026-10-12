@@ -49,6 +49,9 @@ public sealed class WFDrydockWorkItem
     /// <summary>Prototype a rebuild or heal works on, for its construction materials.</summary>
     public EntProtoId? Prototype;
 
+    /// <summary>Whether a rebuild mounts on a hardpoint, so it is built after the other parts.</summary>
+    public bool Mounted;
+
     /// <summary>Share of a full rebuild a rebuild or heal takes, after any repair cap.</summary>
     public float Share = 1f;
 

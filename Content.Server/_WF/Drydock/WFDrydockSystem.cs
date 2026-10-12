@@ -6,6 +6,7 @@ using Content.Server.Destructible;
 using Content.Server.Popups;
 using Content.Server.Preferences.Managers;
 using Content.Server.Shuttles.Components;
+using Content.Shared._Crescent.Hardpoints;
 using Content.Shared._Mono.ShipRepair.Components;
 using Content.Shared._Mono.Ships.Components;
 using Content.Shared._NF.Shipyard.Prototypes;
@@ -310,6 +311,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
                     Target = target,
                     Cost = RebuildPrice(comp, proto),
                     Prototype = proto.ID,
+                    Mounted = proto.TryGetComponent<HardpointAnchorableOnlyComponent>(out _, Factory),
                     LocalPos = spec.LocalPosition,
                 });
             }
