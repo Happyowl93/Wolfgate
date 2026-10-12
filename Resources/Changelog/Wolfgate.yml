@@ -1530,3 +1530,42 @@ Entries:
   id: 100117
   time: '2026-10-11T22:37:02.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/219
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Boarders no longer light a ship up unless fired upon by the ship guns.
+  id: 100118
+  time: '2026-10-11T23:00:36.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/221
+- author: Happyowl93
+  changes:
+    - type: Tweak
+      message: Fixes mob pathing with SmashNav.
+  id: 100119
+  time: '2026-10-12T01:07:26.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/224
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: NPC's now fight more smartly.
+    - type: Tweak
+      message: NPC's now spawn with hardsuits if they are exposed to space.
+  id: 100120
+  time: '2026-10-12T02:40:01.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/225
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: You can now edit characters in-game.
+  id: 100121
+  time: '2026-10-12T04:26:10.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/226
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Ship hailing! this should be your go-to for talking to a ship you wish
+        to escelate with.
+  id: 100122
+  time: '2026-10-12T07:36:19.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/227
