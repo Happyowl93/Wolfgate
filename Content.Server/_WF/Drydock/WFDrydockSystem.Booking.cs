@@ -237,25 +237,34 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>Builds the booking window state for a caller's ship, with its booking and any running job.</summary>
-    private WFDrydockConsoleState BuildOperatorState(EntityUid op, EntityUid? ship)
+    public WFDrydockConsoleState BuildOperatorState(EntityUid op, EntityUid? ship)
     {
         var eval = Evaluate(ship, GetBerths(op));
         if (eval.Pricing is not { } slot)
             return new WFDrydockConsoleState { Booking = true, Notice = eval.Notice };
 
+        // Shows the berth working on or booked for the ship; only otherwise the berth a booking would take.
+        var console = slot.Console;
+        var comp = slot.Comp;
         WFDrydockJobComponent? job = null;
-        if (ship is { } caller && TryFindJob(caller, out var jobConsole))
-            job = Comp<WFDrydockJobComponent>(jobConsole);
+        if (ship is { } caller &&
+            (TryFindJob(caller, out var shown) || TryFindBooking(caller, out shown)) &&
+            TryComp<WFDrydockConsoleComponent>(shown, out var shownComp))
+        {
+            console = shown;
+            comp = shownComp;
+            job = CompOrNull<WFDrydockJobComponent>(shown);
+        }
 
-        var state = BuildState(slot.Console, ship, slot.Comp, job);
+        var state = BuildState(console, ship, comp, job);
         state.Booking = true;
         state.Notice = eval.Notice;
 
-        if (ship is { } booked && TryFindBooking(booked, out var console) &&
-            TryComp<WFDrydockBookingComponent>(console, out var booking) &&
-            TryComp<WFDrydockConsoleComponent>(console, out var bookedComp))
+        if (ship is { } booked && TryFindBooking(booked, out var bookedConsole) &&
+            TryComp<WFDrydockBookingComponent>(bookedConsole, out var booking) &&
+            TryComp<WFDrydockConsoleComponent>(bookedConsole, out var bookedComp))
         {
-            state.BookedBerth = BerthLabel(console, bookedComp);
+            state.BookedBerth = BerthLabel(bookedConsole, bookedComp);
             state.BookingSeconds = (float) Math.Max(0d, (booking.Expires - _timing.CurTime).TotalSeconds);
         }
 

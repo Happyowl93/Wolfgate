@@ -71,7 +71,6 @@ public sealed partial class WFDrydockSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<WFDrydockConsoleComponent, BoundUIOpenedEvent>(OnUiOpened);
-        SubscribeLocalEvent<WFDrydockConsoleComponent, BoundUIClosedEvent>(OnUiClosed);
         SubscribeLocalEvent<WFDrydockConsoleComponent, WFDrydockRepairMessage>(OnRepair);
         SubscribeLocalEvent<WFDrydockConsoleComponent, WFDrydockUpgradeMessage>(OnUpgrade);
         InitializeBerthLights();
@@ -638,23 +637,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
     private void OnUiOpened(EntityUid uid, WFDrydockConsoleComponent comp, BoundUIOpenedEvent args)
     {
-        // The berth plot draws the cranes, which can stand beyond the viewer's PVS range of the console.
-        if (TryComp<ActorComponent>(args.Actor, out var actor))
-        {
-            foreach (var crane in LinkedCranes(uid))
-                _pvs.AddSessionOverride(crane, actor.PlayerSession);
-        }
-
         UpdateUi(uid, comp, force: true);
-    }
-
-    private void OnUiClosed(EntityUid uid, WFDrydockConsoleComponent comp, BoundUIClosedEvent args)
-    {
-        if (!TryComp<ActorComponent>(args.Actor, out var actor))
-            return;
-
-        foreach (var crane in LinkedCranes(uid))
-            _pvs.RemoveSessionOverride(crane, actor.PlayerSession);
     }
 
     private void OnRepair(EntityUid uid, WFDrydockConsoleComponent comp, WFDrydockRepairMessage args)
