@@ -1,97 +1,16 @@
 <controls:FancyWindow xmlns="https://spacestation14.io"
                       xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
-                      MinSize="460 420"
+                      xmlns:drydock="clr-namespace:Content.Client._WF.Drydock"
+                      MinSize="860 560"
                       Title="{Loc 'drydock-ui-title'}">
-    <BoxContainer Orientation="Vertical" Margin="15">
-        <!-- Berthed ship -->
-        <Label Name="ShipLabel"
-               HorizontalAlignment="Center"
-               Margin="0 0 0 15"
-               StyleClasses="LabelHeading"/>
-        <Label Name="NoticeLabel"
-               Visible="False"
-               HorizontalAlignment="Center"
-               Margin="0 0 0 15"
-               StyleClasses="LabelSecondaryColor"/>
-        <Label Name="PowerLabel"
-               Visible="False"
-               HorizontalAlignment="Center"
-               Margin="0 0 0 15"
-               StyleClasses="LabelDanger"/>
-        <Label Name="CranesLabel"
-               HorizontalAlignment="Center"
-               Margin="0 0 0 15"/>
-        <Label Name="BlockedCranesLabel"
-               Visible="False"
-               HorizontalAlignment="Center"
-               Margin="0 0 0 15"
-               StyleClasses="LabelDanger"/>
-        <Label Name="NoCranesLabel"
-               Text="{Loc 'drydock-ui-no-cranes'}"
-               Visible="False"
-               HorizontalAlignment="Center"
-               Margin="0 0 0 15"
-               StyleClasses="LabelDanger"/>
-
-        <Button Name="BerthLightsButton"
-                HorizontalAlignment="Center"
-                Margin="0 0 0 15"
-                MinSize="180 30"/>
-
-        <!-- Booking -->
-        <PanelContainer Name="BookingPanel" Visible="False" StyleClasses="AngleRect" Margin="0 0 0 15">
-            <BoxContainer Orientation="Vertical" Margin="15">
-                <Label Name="BookedLabel" Margin="0 0 0 4"/>
-                <Label Name="BookingLeftLabel"
-                       StyleClasses="LabelSecondaryColor LabelSubText"
-                       Margin="0 0 0 10"/>
-                <Button Name="CancelBookingButton"
-                        HorizontalAlignment="Stretch"
-                        MinSize="0 30"
-                        Text="{Loc 'drydock-ui-cancel-booking'}"
-                        StyleClasses="OpenBoth"/>
-            </BoxContainer>
-        </PanelContainer>
-
-        <!-- Repairs -->
-        <PanelContainer StyleClasses="AngleRect" Margin="0 0 0 15">
-            <BoxContainer Orientation="Vertical" Margin="15">
-                <Label Text="{Loc 'drydock-ui-repairs'}"
-                       StyleClasses="LabelSubHeading"
-                       Margin="0 0 0 10"/>
-                <Label Name="MissingTilesLabel" Margin="0 0 0 4"/>
-                <Label Name="MissingPartsLabel" Margin="0 0 0 4"/>
-                <Label Name="DamagedPartsLabel" Margin="0 0 0 10"/>
-                <Label Name="StoredMaterialsLabel"
-                       Visible="False"
-                       StyleClasses="LabelSecondaryColor"
-                       Margin="0 0 0 10"/>
-                <Button Name="RepairButton"
-                        HorizontalAlignment="Stretch"
-                        MinSize="0 35"
-                        StyleClasses="OpenBoth"/>
-                <ProgressBar Name="RepairProgressBar"
-                             Visible="False"
-                             MinSize="0 14"
-                             Margin="0 10 0 4"/>
-                <Label Name="RepairProgressLabel"
-                       Visible="False"
-                       StyleClasses="LabelSecondaryColor LabelSubText"
-                       HorizontalAlignment="Center"/>
-            </BoxContainer>
-        </PanelContainer>
-
-        <!-- Refits -->
-        <PanelContainer StyleClasses="AngleRect" VerticalExpand="True">
-            <BoxContainer Orientation="Vertical" Margin="15" VerticalExpand="True">
-                <Label Text="{Loc 'drydock-ui-refits'}"
-                       StyleClasses="LabelSubHeading"
-                       Margin="0 0 0 10"/>
-                <BoxContainer Name="RefitContainer"
-                              Orientation="Vertical"
-                              VerticalExpand="True"
-                              SeparationOverride="6"/>
-            </BoxContainer>
-        </PanelContainer>
+    <!-- Bound controls; the constructor houses them in the instrument deck. -->
+    <BoxContainer Name="Body" Orientation="Horizontal" Margin="10" SeparationOverride="6">
+        <drydock:WFDrydockBerthPlot Name="Plot"/>
+        <Label Name="NoticeLabel" ClipText="True" HorizontalExpand="True"/>
+        <Button Name="RepairButton" HorizontalExpand="True" MinSize="0 38"/>
+        <BoxContainer Name="RefitContainer" Orientation="Vertical" SeparationOverride="10"/>
+        <Button Name="BerthLightsButton" ToggleMode="True" HorizontalExpand="True"/>
+        <Label Name="BookedLabel" ClipText="True" HorizontalExpand="True"/>
+        <Button Name="CancelBookingButton" HorizontalExpand="True" Text="{Loc 'drydock-ui-cancel-booking'}"/>
     </BoxContainer>
 </controls:FancyWindow>

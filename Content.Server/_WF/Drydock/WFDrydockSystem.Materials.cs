@@ -12,10 +12,10 @@ public sealed partial class WFDrydockSystem
 {
     [Dependency] private SharedOreSiloSystem _oreSilo = default!;
 
-    private TimeSpan _nextMaterialRefresh;
+    private TimeSpan _nextConsoleRefresh;
 
-    /// <summary>Sets each item's material bill for a console that pays in materials.</summary>
-    private void AssignMaterials(WFDrydockMaterialPaymentComponent pay, List<WFDrydockWorkItem> items)
+    /// <summary>Sets each item's material bill for a console that pays in materials, within the ship's limits.</summary>
+    private void AssignMaterials(EntityUid ship, WFDrydockConsoleComponent comp, WFDrydockMaterialPaymentComponent pay, List<WFDrydockWorkItem> items)
     {
         foreach (var item in items)
         {
@@ -27,18 +27,99 @@ public sealed partial class WFDrydockSystem
                 own = proto.Tiers[item.Tier - 1].Materials;
             }
 
-            item.Materials = ItemBill(pay, item.Cost, own);
+            if (own == null && item.Prototype is { } protoId && _prototype.TryIndex(protoId, out var entityProto))
+            {
+                item.Materials = InKindBill(pay, item, ConstructionMaterials(entityProto));
+                continue;
+            }
+
+            item.Materials = ItemBill(pay, item.Cost, own, item.Parts);
+        }
+
+        LimitBill(pay, items, BillScale(ship, comp, pay));
+    }
+
+    /// <summary>
+    /// How the material limits scale for a ship: its shipyard price over the reference price. A ship not bought at a
+    /// shipyard uses its full rebuild price, brought to a shipyard price by the ratio of the two repair caps.
+    /// </summary>
+    private double BillScale(EntityUid ship, WFDrydockConsoleComponent comp, WFDrydockMaterialPaymentComponent pay)
+    {
+        var (value, vessel) = ShipValue(ship, comp);
+        if (value <= 0 || pay.ReferenceValue <= 0)
+            return 1;
+
+        var price = vessel ? value : value * comp.SnapshotCapFraction / comp.CapFraction;
+        return price / pay.ReferenceValue;
+    }
+
+    /// <summary>Scales each repair item's share of a material down so the repair bills no more of it than its limit.</summary>
+    private static void LimitBill(WFDrydockMaterialPaymentComponent pay, List<WFDrydockWorkItem> items, double limitScale)
+    {
+        var totals = new Dictionary<string, long>();
+        foreach (var item in items)
+        {
+            if (item.Kind == WFDrydockWorkKind.Upgrade || item.Materials == null)
+                continue;
+
+            foreach (var (id, amount) in item.Materials)
+                totals[id] = totals.GetValueOrDefault(id) + amount;
+        }
+
+        foreach (var (id, total) in totals)
+        {
+            var limit = (long) ((pay.MaxBill.TryGetValue(id, out var max) ? max : pay.DefaultMaxBill) * limitScale);
+            if (total <= limit)
+                continue;
+
+            var scale = (double) limit / total;
+            foreach (var item in items)
+            {
+                if (item.Kind == WFDrydockWorkKind.Upgrade || item.Materials == null || !item.Materials.TryGetValue(id, out var amount))
+                    continue;
+
+                // Rounded down, so the scaled shares never add up past the limit.
+                var scaled = (int) (amount * scale);
+                if (scaled > 0)
+                    item.Materials[id] = scaled;
+                else
+                    item.Materials.Remove(id);
+            }
         }
     }
 
-    /// <summary>A work item's material bill: its tier's per-part bill, or its cost times each rate.</summary>
-    private static Dictionary<string, int> ItemBill(WFDrydockMaterialPaymentComponent pay, int cost, Dictionary<ProtoId<MaterialPrototype>, int>? own)
+    /// <summary>
+    /// A rebuild or heal's bill: the rates on its cost, plus a little of each construction material the rates don't
+    /// charge, such as a plastitanium wall's plastitanium.
+    /// </summary>
+    private static Dictionary<string, int> InKindBill(WFDrydockMaterialPaymentComponent pay, WFDrydockWorkItem item, Dictionary<string, int> construction)
+    {
+        var bill = ItemBill(pay, item.Cost, null, 0);
+        foreach (var (id, amount) in construction)
+        {
+            if (pay.Rates.ContainsKey(id))
+                continue;
+
+            var units = (int) Math.Ceiling(amount * pay.InKindFactor * item.Share);
+            if (units > 0)
+                bill[id] = bill.GetValueOrDefault(id) + units;
+        }
+
+        return bill;
+    }
+
+    /// <summary>A work item's material bill: its tier's per-part bill times its parts, or its cost times each rate.</summary>
+    private static Dictionary<string, int> ItemBill(WFDrydockMaterialPaymentComponent pay, int cost, Dictionary<ProtoId<MaterialPrototype>, int>? own, int parts)
     {
         var bill = new Dictionary<string, int>();
         if (own is { Count: > 0 })
         {
             foreach (var (id, amount) in own)
-                bill[id] = amount;
+            {
+                if (parts > 0)
+                    bill[id] = amount * parts;
+            }
+
             return bill;
         }
 
@@ -221,15 +302,17 @@ public sealed partial class WFDrydockSystem
         return bill;
     }
 
-    /// <summary>Re-sends open material consoles' state once a second, since crane and silo stock change off the console.</summary>
-    private void RefreshMaterialConsoles(TimeSpan curTime)
+    /// <summary>
+    /// Re-sends open consoles' state once a second, since ships come and go, and crane and silo stock change, off the console.
+    /// </summary>
+    private void RefreshOpenConsoles(TimeSpan curTime)
     {
-        if (curTime < _nextMaterialRefresh)
+        if (curTime < _nextConsoleRefresh)
             return;
 
-        _nextMaterialRefresh = curTime + TimeSpan.FromSeconds(1);
-        var query = EntityQueryEnumerator<WFDrydockConsoleComponent, WFDrydockMaterialPaymentComponent>();
-        while (query.MoveNext(out var uid, out var comp, out _))
+        _nextConsoleRefresh = curTime + TimeSpan.FromSeconds(1);
+        var query = EntityQueryEnumerator<WFDrydockConsoleComponent>();
+        while (query.MoveNext(out var uid, out var comp))
         {
             if (_ui.IsUiOpen(uid, WFDrydockConsoleUiKey.Key))
                 UpdateUi(uid, comp);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Content.IntegrationTests.Pair;
+using Content.Server._Mono.ShipRepair;
 using Content.Server._NF.Bank;
 using Content.Server._WF.Drydock;
 using Content.Server.Construction;
@@ -32,7 +33,9 @@ namespace Content.IntegrationTests.Tests._WF.Drydock;
 [TestFixture]
 public sealed class MobileDrydockTest
 {
-    internal static readonly string[] StockMaterials = { "Steel", "Glass", "Plastic" };
+    internal static readonly string[] StockMaterials = { "Steel", "Plasteel", "Glass", "Plastic" };
+    private static readonly EntProtoId PlastitaniumWall = "WallPlastitanium";
+    private static readonly EntProtoId ShuttleWall = "WallShuttle";
 
     private static readonly ProtoId<TechnologyPrototype> Shuttlecraft = "Shuttlecraft";
     private static readonly ProtoId<LatheRecipePrototype> ConsoleBoardRecipe = "WFComputerMobileDrydockCircuitboard";
@@ -155,6 +158,56 @@ public sealed class MobileDrydockTest
                 Assert.That(bank.TryGetBalance(payer, out var bankAfter) && bankAfter == bankBefore, Is.True,
                     "The bank balance should be unchanged.");
             });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// A missing plastitanium wall is quoted in plastitanium on a material console, and priced well above a shuttle wall
+    /// in credits.
+    /// </summary>
+    [Test]
+    public async Task PlastitaniumWallBilledInKind()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+        var protoMan = server.ResolveDependency<IPrototypeManager>();
+
+        await server.WaitAssertion(() =>
+        {
+            var (console, _, ship, _) = SetUpMobileRepair(pair, map.MapId);
+            var wall = DrydockTest.SpawnAnchored(pair, ship, PlastitaniumWall, new Vector2i(2, 2));
+            server.System<ShipRepairSystem>().GenerateRepairData(ship);
+            em.DeleteEntity(wall);
+
+            var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
+            drydock.UpdateUi(console, comp, force: true);
+            Assert.That(server.System<SharedUserInterfaceSystem>().TryGetUiState<WFDrydockConsoleState>(console,
+                WFDrydockConsoleUiKey.Key, out var state), Is.True, "The console should have a state.");
+
+            var station = new WFDrydockConsoleComponent();
+            Assert.Multiple(() =>
+            {
+                Assert.That(state!.RepairMaterials.GetValueOrDefault("Plastitanium"), Is.GreaterThan(0),
+                    "The wall should be rebuilt from plastitanium.");
+                Assert.That(drydock.RebuildPrice(station, protoMan.Index(PlastitaniumWall)),
+                    Is.GreaterThan(2 * drydock.RebuildPrice(station, protoMan.Index(ShuttleWall))),
+                    "A plastitanium wall should cost well over a shuttle wall to rebuild.");
+            });
+
+            // A repair never bills more of a material than the console's limit, here set for a ship of this one's price.
+            var pay = em.GetComponent<WFDrydockMaterialPaymentComponent>(console);
+            var (value, vessel) = drydock.ShipValue(ship, comp);
+            pay.ReferenceValue = (int) (vessel ? value : value * comp.SnapshotCapFraction / comp.CapFraction);
+            pay.MaxBill["Steel"] = 10;
+            drydock.UpdateUi(console, comp, force: true);
+            server.System<SharedUserInterfaceSystem>().TryGetUiState<WFDrydockConsoleState>(console, WFDrydockConsoleUiKey.Key, out state);
+            Assert.That(state!.RepairMaterials.GetValueOrDefault("Steel"), Is.InRange(1, 10),
+                "The repair's steel should be cut to the limit.");
         });
 
         await pair.CleanReturnAsync();

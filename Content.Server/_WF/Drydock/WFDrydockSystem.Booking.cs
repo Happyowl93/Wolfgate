@@ -290,7 +290,7 @@ public sealed partial class WFDrydockSystem
             return;
         }
 
-        var price = WorkPrice(slot.Comp, upgrade, items);
+        var price = WorkPrice(ship, slot.Comp, upgrade, items);
         if (!TryComp<BankAccountComponent>(actor, out var bank))
         {
             Tell(actor, helm, Loc.GetString("drydock-console-no-bank-account"));
@@ -529,13 +529,15 @@ public sealed partial class WFDrydockSystem
             if (_upgrade.GetTier(part, proto) > minTier)
                 continue;
 
+            var swapped = _upgrade.PartsToSwap(part, proto, minTier + 1);
             items.Add(new WFDrydockWorkItem
             {
                 Kind = WFDrydockWorkKind.Upgrade,
                 Target = part,
                 Upgrade = proto.ID,
                 Tier = minTier + 1,
-                Cost = tierPrice,
+                Parts = swapped,
+                Cost = tierPrice * swapped,
                 LocalPos = Transform(part).LocalPosition,
             });
         }
@@ -543,10 +545,10 @@ public sealed partial class WFDrydockSystem
         return null;
     }
 
-    /// <summary>Price of a repair (with its base fee) or a refit.</summary>
-    private static int WorkPrice(WFDrydockConsoleComponent comp, string? upgrade, List<WFDrydockWorkItem> items)
+    /// <summary>Price of a repair (with its fee) or a refit.</summary>
+    private int WorkPrice(EntityUid ship, WFDrydockConsoleComponent comp, string? upgrade, List<WFDrydockWorkItem> items)
     {
-        return upgrade == null ? comp.BaseFee + items.Sum(i => i.Cost) : items.Sum(i => i.Cost);
+        return upgrade == null ? RepairFee(ship, comp) + items.Sum(i => i.Cost) : items.Sum(i => i.Cost);
     }
 
     /// <summary>Orders two extents as (short, long).</summary>

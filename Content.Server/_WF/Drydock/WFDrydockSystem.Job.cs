@@ -55,7 +55,7 @@ public sealed partial class WFDrydockSystem
         UpdateBookings(curTime);
         UpdateBerthLights(curTime);
         UpdateBlockers(curTime);
-        RefreshMaterialConsoles(curTime);
+        RefreshOpenConsoles(curTime);
 
         _ends.Clear();
         var query = EntityQueryEnumerator<WFDrydockJobComponent, WFDrydockConsoleComponent>();

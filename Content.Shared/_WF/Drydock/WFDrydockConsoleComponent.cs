@@ -33,25 +33,51 @@ public sealed partial class WFDrydockConsoleComponent : Component
     /// <summary>Last console state pushed to viewers, as a key. Runtime only.</summary>
     public string? LastPushed;
 
-    /// <summary>Flat fee per repair job, never refunded.</summary>
+    /// <summary>Least fee per repair job, never refunded.</summary>
     [DataField]
-    public int BaseFee = 2500;
+    public int MinFee = 1500;
+
+    /// <summary>Repair fee as a share of the ship's value (its shipyard price, else its full rebuild price).</summary>
+    [DataField]
+    public float FeeFraction = 0.025f;
 
     /// <summary>Price per missing hull tile.</summary>
     [DataField]
-    public int TilePrice = 150;
+    public int TilePrice = 120;
 
-    /// <summary>Share of an entity's estimated prototype price charged to restore it.</summary>
+    /// <summary>Multiple of an entity's estimated prototype price charged to rebuild it.</summary>
     [DataField]
-    public float EntityPriceFactor = 1.0f;
+    public float EntityPriceFactor = 2f;
 
-    /// <summary>Minimum price for restoring one entity.</summary>
+    /// <summary>
+    /// Share of the market value of an entity's construction materials charged to rebuild it, when that is more than its
+    /// price rule, as for a plastitanium wall: four sheets to build, but priced low so it doesn't sell. Ships come with
+    /// these walls in their shipyard price, so a full share would put a plastitanium hull past its cap at once.
+    /// </summary>
     [DataField]
-    public int MinEntityPrice = 600;
+    public float MaterialPriceFactor = 0.35f;
 
-    /// <summary>Price per point of damage healed.</summary>
+    /// <summary>Labor added to the price of rebuilding each entity.</summary>
     [DataField]
-    public float DamagePrice = 5f;
+    public int EntityLabor = 60;
+
+    /// <summary>
+    /// Price per point of damage healed, for parts without a destruction threshold. Parts with one cost their rebuild
+    /// price times the share of their health lost.
+    /// </summary>
+    [DataField]
+    public float DamagePrice = 1f;
+
+    /// <summary>Most a repair's work may cost, as a share of the ship's shipyard price; the fee comes on top.</summary>
+    [DataField]
+    public float CapFraction = 0.7f;
+
+    /// <summary>
+    /// Most a repair's work may cost, as a share of its full rebuild price, for ships not bought at a shipyard. A full
+    /// rebuild runs about 1.3 to 1.9 times a ship's shipyard price.
+    /// </summary>
+    [DataField]
+    public float SnapshotCapFraction = 0.4f;
 
     /// <summary>Seconds one crane needs to restore a hull tile.</summary>
     [DataField]

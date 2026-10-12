@@ -1,4 +1,7 @@
 # Drydock refit upgrades: each tier swaps a machine's stock parts for higher-rated ones.
+# Price and materials are per stock part swapped (a thruster has 1, a gyroscope 3, a SMES 8). Materials run about
+# twice the advanced and super part lathe recipes; Mk III and Mk IV add silver, gold and uranium, and Mk IV two
+# bluespace crystals per part.
 
 - type: wfDrydockUpgrade
   id: WFDrydockThrusters
@@ -6,26 +9,30 @@
   target: LinearThruster
   tiers:
   - rating: 3
-    price: 8000
-    materials:
-      Steel: 250
-      Plastic: 250
-      Plasma: 150
-      Gold: 100
-  - rating: 4
-    price: 18000
+    price: 1000
     materials:
       Steel: 300
       Plastic: 300
-      Plasma: 150
+      Plasma: 200
       Gold: 150
-      UraniumFissile: 20
-  - rating: 6
-    price: 40000
+  - rating: 4
+    price: 4000
     materials:
-      Plastic: 200
-      Gold: 100
-      Plasma: 100
+      Steel: 400
+      Plastic: 400
+      Plasma: 200
+      Gold: 200
+      Silver: 200
+      Uranium: 200
+      UraniumFissile: 12
+  - rating: 6
+    price: 10000
+    materials:
+      Plastic: 400
+      Plasma: 200
+      Gold: 300
+      Silver: 300
+      Uranium: 300
       Bluespace: 200
 
 - type: wfDrydockUpgrade
@@ -34,26 +41,30 @@
   target: Gyroscope
   tiers:
   - rating: 3
-    price: 6000
-    materials:
-      Steel: 250
-      Plastic: 250
-      Plasma: 150
-      Gold: 100
-  - rating: 4
-    price: 14000
+    price: 1000
     materials:
       Steel: 300
       Plastic: 300
-      Plasma: 150
+      Plasma: 200
       Gold: 150
-      UraniumFissile: 20
-  - rating: 6
-    price: 30000
+  - rating: 4
+    price: 4000
     materials:
-      Plastic: 200
-      Gold: 100
-      Plasma: 100
+      Steel: 400
+      Plastic: 400
+      Plasma: 200
+      Gold: 200
+      Silver: 200
+      Uranium: 200
+      UraniumFissile: 12
+  - rating: 6
+    price: 10000
+    materials:
+      Plastic: 400
+      Plasma: 200
+      Gold: 300
+      Silver: 300
+      Uranium: 300
       Bluespace: 200
 
 - type: wfDrydockUpgrade
@@ -62,24 +73,28 @@
   target: Power
   tiers:
   - rating: 3
-    price: 10000
-    materials:
-      Steel: 250
-      Plastic: 250
-      Plasma: 150
-      Gold: 100
-  - rating: 4
-    price: 22000
+    price: 1000
     materials:
       Steel: 300
       Plastic: 300
-      Plasma: 150
+      Plasma: 200
       Gold: 150
-      UraniumFissile: 20
-  - rating: 6
-    price: 48000
+  - rating: 4
+    price: 4000
     materials:
-      Plastic: 200
-      Gold: 100
-      Plasma: 100
+      Steel: 400
+      Plastic: 400
+      Plasma: 200
+      Gold: 200
+      Silver: 200
+      Uranium: 200
+      UraniumFissile: 12
+  - rating: 6
+    price: 10000
+    materials:
+      Plastic: 400
+      Plasma: 200
+      Gold: 300
+      Silver: 300
+      Uranium: 300
       Bluespace: 200

@@ -21,13 +21,28 @@
   - type: Rotatable
     rotateWhileAnchored: false
   - type: WiresPanel
+  # No fee. A T2 ship voucher (ships of 150k to 500k) takes 100 steel, 50 plasteel, 50 glass and 10 plastitanium
+  # sheets, so a repair costs a share of that: about 14 steel sheets for 25k cr of station work. The limits below are
+  # about 60% of that voucher for a 250k ship and scale with the ship's price, as vouchers for bigger ships cost more
+  # (a 750k Luda's takes 300 steel and 30 plastitanium). A plastitanium wall adds 4 units of plastitanium.
   - type: WFDrydockConsole
-    baseFee: 0
+    minFee: 0
+    feeFraction: 0
   - type: WFDrydockMaterialPayment
     rates:
-      Steel: 0.2
-      Glass: 0.03
-      Plastic: 0.03
+      Steel: 0.055
+      Plasteel: 0.025
+      Glass: 0.025
+      Plastic: 0.01
+    inKindFactor: 0.01
+    maxBill:
+      Steel: 6000
+      Plasteel: 3000
+      Glass: 3000
+      Plastic: 1500
+      Plastitanium: 600
+    defaultMaxBill: 500
+    referenceValue: 250000
 
 - type: entity
   parent: BaseComputerCircuitboard

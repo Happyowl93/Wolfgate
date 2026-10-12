@@ -9,11 +9,14 @@ using Content.Server._NF.GameRule;
 using Content.Server._NF.Bank;
 using Content.Server._WF.Drydock;
 using Content.Server._WF.Hailing;
+using Content.Server.Destructible;
 using Content.Server.Construction.Components;
 using Content.Server.DeviceLinking.Systems;
 using Content.Server.Power.Components;
 using Content.Server.Shuttles.Components;
+using Content.Shared._Mono.Ships.Components;
 using Content.Shared._NF.Bank.Components;
+using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared._WF.Drydock;
 using Content.Shared._WF.Hailing;
 using Content.Shared.Construction.Components;
@@ -74,6 +77,7 @@ public sealed class DrydockTest
     private static readonly ProtoId<DamageTypePrototype> Blunt = "Blunt";
     private static readonly ProtoId<WFDrydockUpgradePrototype> ThrusterRefit = "WFDrydockThrusters";
     private static readonly ProtoId<WFDrydockUpgradePrototype> GyroscopeRefit = "WFDrydockGyroscopes";
+    private static readonly EntProtoId WallProto = "WallSolid";
 
     /// <summary>A host grid with its crane and console, as a mobile shipyard.</summary>
     private readonly record struct Shipyard(EntityUid Grid, EntityUid Crane, EntityUid Console);
@@ -320,6 +324,92 @@ public sealed class DrydockTest
             Assert.That(upgrades.GetTier(gyroscope, gyros), Is.EqualTo(1));
             Assert.That(gyro.Thrust, Is.EqualTo(stockGyro * MathF.Pow(gyro.PartRatingThrustMultiplier, 2)).Within(0.01f),
                 "Gyroscope thrust should follow the rating-3 manipulator.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// The console quotes refits per stock part swapped and never charges more to heal a part than to rebuild it, and
+    /// sends the berth plot its berth, ship and work marks.
+    /// </summary>
+    [Test]
+    public async Task QuotePricesPerPartAndCapsHeals()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+        var upgrades = server.System<WFDrydockUpgradeSystem>();
+        var destructible = server.System<DestructibleSystem>();
+        var damageable = server.System<DamageableSystem>();
+        var ui = server.System<SharedUserInterfaceSystem>();
+        var protoMan = server.ResolveDependency<IPrototypeManager>();
+        var thrusters = protoMan.Index(ThrusterRefit);
+        var gyros = protoMan.Index(GyroscopeRefit);
+
+        EntityUid console = default, ship = default, thruster = default, wall = default, gyroscope = default;
+
+        await server.WaitAssertion(() =>
+        {
+            (_, console, _) = LoadDrydock(pair, map.MapId);
+            ship = CreateShip(pair, map.MapId);
+            (thruster, wall) = BuildHull(pair, ship);
+            gyroscope = SpawnAnchored(pair, ship, "Gyroscope", new Vector2i(2, 1));
+            server.System<ShipRepairSystem>().GenerateRepairData(ship);
+        });
+
+        // Machines fill their stock parts on map init.
+        await server.WaitRunTicks(2);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(upgrades.PartsToSwap(thruster, thrusters, 1), Is.EqualTo(1), "A thruster holds one capacitor.");
+                Assert.That(upgrades.PartsToSwap(gyroscope, gyros, 1), Is.EqualTo(3), "A gyroscope holds three parts.");
+            });
+
+            var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
+            var blunt = new DamageSpecifier(protoMan.Index(Blunt), FixedPoint2.New(100));
+            damageable.TryChangeDamage(wall, blunt);
+
+            var heal = drydock.BuildRepairItems(ship, comp).Single(i => i.Kind == WFDrydockWorkKind.Heal);
+            var rebuild = drydock.RebuildPrice(comp, protoMan.Index(WallProto));
+            var destroyedAt = destructible.DestroyedAt(wall).Float();
+            Assert.That(heal.Cost, Is.EqualTo((int) Math.Ceiling(rebuild * Math.Min(1f, em.GetComponent<DamageableComponent>(wall).TotalDamage.Float() / destroyedAt))),
+                "Healing should cost the rebuild price times the share of health lost.");
+
+            drydock.UpdateUi(console, comp, force: true);
+            Assert.That(ui.TryGetUiState<WFDrydockConsoleState>(console, WFDrydockConsoleUiKey.Key, out var state), Is.True,
+                "The console should have a state.");
+            var thrusterLine = state!.Upgrades.Single(u => u.Id == ThrusterRefit.Id);
+            var gyroLine = state.Upgrades.Single(u => u.Id == GyroscopeRefit.Id);
+            Assert.Multiple(() =>
+            {
+                Assert.That(thrusterLine.NextPrice, Is.EqualTo(thrusters.Tiers[0].Price), "One thruster part costs one part's price.");
+                Assert.That(gyroLine.NextPrice, Is.EqualTo(gyros.Tiers[0].Price * 3), "A gyroscope's three parts cost three parts' price.");
+                Assert.That(state.Ship, Is.EqualTo(em.GetNetEntity(ship)), "The plot should get the berthed ship.");
+                Assert.That(state.BerthLabel, Is.Not.Null, "The plot should get the berth.");
+                Assert.That(state.Marks.Count(m => m.Kind == WFDrydockMarkKind.Damage), Is.EqualTo(1),
+                    "The plot should mark the damaged wall.");
+            });
+
+            // A shipyard ship's repair never costs more than its cap share of the ship's price, plus the fee.
+            var vessel = protoMan.EnumeratePrototypes<VesselPrototype>().Where(v => !v.Abstract && v.Price > 0).MinBy(v => v.Price)!;
+            em.EnsureComponent<VesselComponent>(ship).VesselId = vessel.ID;
+            CutHole(pair, ship, HoleTile);
+            comp.TilePrice = 10_000_000;
+            var capped = drydock.BuildRepairItems(ship, comp);
+            Assert.Multiple(() =>
+            {
+                Assert.That(capped.Sum(i => (long) i.Cost), Is.LessThanOrEqualTo((long) (vessel.Price * comp.CapFraction)),
+                    "A repair's work should be capped at a share of the ship's price.");
+                Assert.That(drydock.RepairFee(ship, comp),
+                    Is.EqualTo(Math.Max(comp.MinFee, (int) Math.Round(vessel.Price * comp.FeeFraction / 10) * 10)),
+                    "The fee should be a share of the ship's price.");
+            });
         });
 
         await pair.CleanReturnAsync();

@@ -1,6 +1,7 @@
 using System.Numerics;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Maths;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.Drydock;
 
@@ -41,6 +42,15 @@ public sealed class WFDrydockWorkItem
 
     /// <summary>Tier a refit raises the part to.</summary>
     public int Tier;
+
+    /// <summary>Stock parts a refit swaps in its machine; its price and material bill are per part.</summary>
+    public int Parts;
+
+    /// <summary>Prototype a rebuild or heal works on, for its construction materials.</summary>
+    public EntProtoId? Prototype;
+
+    /// <summary>Share of a full rebuild a rebuild or heal takes, after any repair cap.</summary>
+    public float Share = 1f;
 
     /// <summary>Ship-local position used for effects and crane targeting.</summary>
     public Vector2 LocalPos;

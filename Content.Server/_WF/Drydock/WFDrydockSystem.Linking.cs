@@ -35,6 +35,7 @@ public sealed partial class WFDrydockSystem
         }
 
         crane.LinkedConsole = uid;
+        Dirty(args.Sink, crane);
         UpdateUi(uid, comp);
     }
 
@@ -50,6 +51,7 @@ public sealed partial class WFDrydockSystem
                 _deviceLink.GetLinks(uid, sink, source).Any(link => link.source.Id == WFDrydockConsoleComponent.CranePort))
             {
                 crane.LinkedConsole = uid;
+                Dirty(sink, crane);
             }
         }
     }
@@ -61,6 +63,7 @@ public sealed partial class WFDrydockSystem
             return;
 
         crane.LinkedConsole = null;
+        Dirty(uid, crane);
         if (TryComp<WFDrydockConsoleComponent>(console, out var comp))
             UpdateUi(console, comp);
     }

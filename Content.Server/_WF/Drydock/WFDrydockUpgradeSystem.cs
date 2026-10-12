@@ -108,6 +108,26 @@ public sealed partial class WFDrydockUpgradeSystem : EntitySystem
         return tier;
     }
 
+    /// <summary>Stock parts a refit to a tier would swap in a machine: those rated below it that have a replacement.</summary>
+    public int PartsToSwap(EntityUid machine, WFDrydockUpgradePrototype proto, int tier)
+    {
+        if (!TryComp<MachineComponent>(machine, out var comp) || tier < 1 || tier > proto.Tiers.Count)
+            return 0;
+
+        var target = proto.Tiers[tier - 1].Rating;
+        var count = 0;
+        foreach (var part in comp.PartContainer.ContainedEntities)
+        {
+            if (TryComp<MachinePartComponent>(part, out var partComp) && partComp.Rating < target &&
+                _replacements.ContainsKey((partComp.PartType.Id, target)))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
     /// <summary>Raises a machine to a refit tier by swapping its lower-rated parts for the tier's rating.</summary>
     public void ApplyTier(EntityUid machine, WFDrydockUpgradePrototype proto, int tier)
     {

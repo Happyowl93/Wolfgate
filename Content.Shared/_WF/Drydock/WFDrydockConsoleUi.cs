@@ -1,3 +1,4 @@
+using System.Numerics;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._WF.Drydock;
@@ -79,7 +80,45 @@ public sealed class WFDrydockConsoleState : BoundUserInterfaceState
 
     /// <summary>Whether the console's berth lights are on.</summary>
     public bool BerthLightsOn;
+
+    /// <summary>Grid the berth stands on; the berth plot draws in its frame.</summary>
+    public NetEntity? Station;
+
+    /// <summary>Berth console whose linked cranes the berth plot draws.</summary>
+    public NetEntity? BerthConsole;
+
+    /// <summary>Name of the berth shown on the plot, or null when there is no berth.</summary>
+    public string? BerthLabel;
+
+    /// <summary>Berth work area in the station grid's frame.</summary>
+    public Box2 BerthArea;
+
+    /// <summary>Direction from the berth's centre toward its mouth, in the station grid's frame.</summary>
+    public Vector2 Approach;
+
+    /// <summary>Ship in or booked to the berth.</summary>
+    public NetEntity? Ship;
+
+    /// <summary>Outstanding work on the ship, in the ship's frame, at most <see cref="MaxMarks"/>.</summary>
+    public List<WFDrydockPlotMark> Marks = new();
+
+    /// <summary>Most work marks sent to the berth plot.</summary>
+    public const int MaxMarks = 512;
 }
+
+/// <summary>What a berth plot mark shows.</summary>
+[Serializable, NetSerializable]
+public enum WFDrydockMarkKind : byte
+{
+    Tile,
+    Part,
+    Damage,
+    Refit,
+}
+
+/// <summary>One piece of outstanding work on the berth plot, in the ship's frame.</summary>
+[Serializable, NetSerializable]
+public readonly record struct WFDrydockPlotMark(Vector2 Position, WFDrydockMarkKind Kind);
 
 /// <summary>
 /// One refit line in the console state.
@@ -102,7 +141,7 @@ public sealed class WFDrydockUpgradeEntry
     /// <summary>Highest tier available for this upgrade.</summary>
     public int MaxTier;
 
-    /// <summary>Price per part for the next tier; 0 when maxed or no parts.</summary>
+    /// <summary>Price of the next tier across all its machines; 0 when maxed or no parts.</summary>
     public int NextPrice;
 
     /// <summary>Bill for the next tier across all parts when paying with materials.</summary>

@@ -37,7 +37,7 @@ public sealed partial class WFDrydockUpgradePrototype : IPrototype
 }
 
 /// <summary>
-/// One refit tier: the part rating it installs and its price per part.
+/// One refit tier: the part rating it installs and its price per stock part swapped.
 /// </summary>
 [DataDefinition]
 public sealed partial class WFDrydockUpgradeTier
@@ -46,11 +46,11 @@ public sealed partial class WFDrydockUpgradeTier
     [DataField(required: true)]
     public int Rating;
 
-    /// <summary>Price charged per machine part.</summary>
+    /// <summary>Price charged per stock part swapped, so a machine with more parts costs more.</summary>
     [DataField(required: true)]
     public int Price;
 
-    /// <summary>Materials per part for a console that pays in materials; empty falls back to the console's rates.</summary>
+    /// <summary>Materials per stock part swapped for a console that pays in materials; empty falls back to the console's rates.</summary>
     [DataField]
     public Dictionary<ProtoId<MaterialPrototype>, int> Materials = new();
 }

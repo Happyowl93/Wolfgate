@@ -1,5 +1,8 @@
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
+using Content.Client._WF.Cockpit;
+using Content.Client._WF.CombatConsole;
 using Content.Client.UserInterface.Controls;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Materials;
@@ -9,16 +12,21 @@ using Robust.Client.UserInterface.Controls;
 using Robust.Client.UserInterface.XAML;
 using Robust.Shared.IoC;
 using Robust.Shared.Prototypes;
+using static Content.Client._WF.CombatConsole.WFInstrumentTheme;
 
 namespace Content.Client._WF.Drydock;
 
 /// <summary>
-/// Drydock console window: repairs, job progress, refits and, on a dockmaster's booking window, the booking panel.
+/// Drydock console: a live berth plot beside the hull survey, repair and refit keys, and on a dockmaster's booking
+/// window, the booking.
 /// </summary>
 [GenerateTypedNameReferences]
 public sealed partial class WFDrydockConsoleWindow : FancyWindow
 {
-    private static readonly string[] Numerals = { "I", "II", "III", "IV", "V" };
+    private static readonly string[] Numerals = { "I", "II", "III", "IV", "V", "VI" };
+
+    /// <summary>Width of the right-hand instrument column.</summary>
+    private const float ColumnWidth = 370;
 
     [Dependency] private IPrototypeManager _prototypeManager = default!;
     [Dependency] private IEntityManager _entMan = default!;
@@ -35,41 +43,230 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
     /// <summary>Raised when the berth lights button is pressed.</summary>
     public event Action? OnBerthLightsPressed;
 
+    private readonly WFDrydockReadout _vessel = new("drydock-ui-vessel");
+    private readonly WFDrydockReadout _tiles = new("drydock-ui-count-tiles", counter: true);
+    private readonly WFDrydockReadout _parts = new("drydock-ui-count-parts", counter: true);
+    private readonly WFDrydockReadout _damage = new("drydock-ui-count-damage", counter: true);
+    private readonly WFDrydockReadout _quote = new("drydock-ui-quote");
+    private readonly WFDrydockReadout _stock = new("drydock-ui-stock");
+    private readonly WFDrydockReadout _eta = new("drydock-ui-eta");
+    private readonly WFDrydockReadout _expires = new("drydock-ui-expires");
+    private readonly WFGlassGauge _progress;
+    private readonly WFGlassGauge _power;
+    private readonly WFGlassReadout _notice;
+    private readonly WFGlassReadout _booked;
+    private readonly WFInstrumentPanel _bookingPanel;
+    private readonly WFInstrumentPanel _berthPanel;
+
+    private WFDrydockConsoleState _state = new();
+
     /// <summary>Refit rows in display order, kept across state updates so their buttons aren't rebuilt.</summary>
-    private readonly List<(string Id, Label Parts, Button Button)> _refitRows = new();
+    private readonly List<RefitRow> _refitRows = new();
 
     public WFDrydockConsoleWindow()
     {
         RobustXamlLoader.Load(this);
         IoCManager.InjectDependencies(this);
+        FitWindow(this, new Vector2(1060, 690));
 
         RepairButton.OnPressed += _ => OnRepairPressed?.Invoke();
         CancelBookingButton.OnPressed += _ => OnCancelBookingPressed?.Invoke();
         BerthLightsButton.OnPressed += _ => OnBerthLightsPressed?.Invoke();
+        BerthLightsButton.Text = Loc.GetString("drydock-ui-berth-lights");
+
+        _progress = new WFGlassGauge("drydock-gauge-progress", () => WFGaugeReading.Number(
+            _state.Working ? _state.Progress * 100f : null, 0, 100, "wf-gauge-unit-percent"), strip: true)
+        {
+            CompactStrip = true,
+            SetHeight = 44,
+        };
+        _power = new WFGlassGauge("drydock-gauge-power", () => WFGaugeReading.Number(
+            _state.CraneCount > 0 ? _state.PowerRatio * 100f : null, 0, 100, "wf-gauge-unit-percent",
+            tint: PowerTint()), strip: true)
+        {
+            CompactStrip = true,
+            SetHeight = 44,
+        };
+        NoticeLabel.FontColorOverride = Skin.Caution;
+        _notice = new WFGlassReadout(NoticeLabel);
+        _booked = new WFGlassReadout(BookedLabel);
+
+        // Left: the berth scope over the vessel readout, crane power and the status lamps.
+        var lamps = new GridContainer { Columns = 3, HSeparationOverride = 4, VSeparationOverride = 4, MinWidth = 300 };
+        lamps.AddChild(new WFCockpitStatusLamp("drydock-lamp-vessel", VesselLamp));
+        lamps.AddChild(new WFCockpitStatusLamp("drydock-lamp-cranes", CranesLamp));
+        lamps.AddChild(new WFCockpitStatusLamp("drydock-lamp-lanes", LanesLamp));
+        lamps.AddChild(new WFCockpitStatusLamp("drydock-lamp-power", PowerLamp));
+        lamps.AddChild(new WFCockpitStatusLamp("drydock-lamp-work", WorkLamp));
+        lamps.AddChild(new WFCockpitStatusLamp("drydock-lamp-lights", LightsLamp));
+        lamps.VerticalAlignment = VAlignment.Center;
+        var scope = Scope("drydock-ui-plot", Plot, new Vector2(300, 240));
+        var readings = Column(_vessel, _power);
+        readings.HorizontalExpand = true;
+        var status = Panel("drydock-ui-status", Row(readings, lamps), padding: 10, gap: 4);
+        var left = Column(scope, status, _notice);
+        left.HorizontalExpand = left.VerticalExpand = true;
+
+        // Right: the hull survey and repair key, the refit bay, and the berth's lights and booking.
+        var counters = Row(_tiles, _parts, _damage);
+        var survey = Panel("drydock-ui-repairs", Column(counters, _quote, _stock, _progress, _eta, RepairButton), padding: 10, gap: 4);
+        var refits = Panel("drydock-ui-refits", RefitContainer, padding: 10, gap: 4);
+        _bookingPanel = Panel("drydock-ui-booking", Column(_booked, _expires, CancelBookingButton), padding: 10, gap: 4);
+        _berthPanel = Panel("drydock-ui-berth", BerthLightsButton, padding: 10, gap: 4);
+        var column = Column(survey, refits, _bookingPanel, _berthPanel);
+        column.HorizontalExpand = true;
+        var right = Scroll(column);
+        right.HorizontalExpand = false;
+        right.SetWidth = ColumnWidth;
+
+        Body.RemoveAllChildren();
+        Body.AddChild(left);
+        Body.AddChild(right);
+        Install(this);
+        WindowTitle.FontColorOverride = Accent;
     }
 
     /// <summary>
-    /// Refreshes every panel from the console state.
+    /// Refreshes every instrument from the console state.
     /// </summary>
     public void UpdateState(WFDrydockConsoleState state)
     {
+        _state = state;
         Title = Loc.GetString(state.Booking ? "drydock-ui-booking-title" : "drydock-ui-title");
 
         // A booking window with a notice cannot book anything, and work needs a crane linked to this console.
         var blocked = (state.Booking && state.Notice != null) || state.CraneCount == 0;
 
         UpdateStatus(state);
+        UpdatePlot(state);
         UpdateBooking(state);
         UpdateRepairs(state, blocked);
         UpdateRefits(state, blocked);
         UpdateBerthLights(state, blocked);
     }
 
+    private void UpdateStatus(WFDrydockConsoleState state)
+    {
+        _vessel.Value = state.ShipName ?? Loc.GetString("drydock-ui-no-ship");
+        _vessel.Tint = Cream;
+        _vessel.Lit = state.ShipName != null;
+
+        var warning = state.Notice;
+        if (warning == null && state.CraneCount == 0 && !state.Booking)
+            warning = Loc.GetString("drydock-ui-no-cranes");
+        else if (warning == null && state.BlockedCranes > 0)
+            warning = Loc.GetString("drydock-ui-cranes-blocked", ("count", state.BlockedCranes));
+        else if (warning == null && state.CraneCount > 0 && state.PowerRatio < WFDrydockCraneComponent.StallRatio)
+            warning = Loc.GetString("drydock-ui-power-none");
+
+        _notice.Visible = warning != null;
+        NoticeLabel.Text = warning;
+    }
+
+    /// <summary>Hands the plot its berth and ship, and the line along its foot.</summary>
+    private void UpdatePlot(WFDrydockConsoleState state)
+    {
+        Plot.SetState(state);
+        var (text, tint) = PlotStatus(state);
+        Plot.Status = text;
+        Plot.StatusTint = tint;
+    }
+
+    /// <summary>The plot's status line and its color, null for the accent.</summary>
+    private static (string Text, Color? Tint) PlotStatus(WFDrydockConsoleState state)
+    {
+        if (state.CraneCount == 0 && !state.Booking)
+            return (Loc.GetString("drydock-plot-no-cranes"), Red);
+        if (state.BerthLabel == null)
+            return (state.Notice ?? Loc.GetString("drydock-plot-no-berth"), Skin.Caution);
+        if (state.Working)
+        {
+            return state.Deploying
+                ? (Loc.GetString("drydock-plot-deploying"), Skin.Caution)
+                : (Loc.GetString("drydock-plot-working", ("percent", (int) MathF.Round(state.Progress * 100f))), Skin.Caution);
+        }
+        if (state.Booking && state.BookedBerth != null)
+            return (Loc.GetString("drydock-plot-inbound", ("berth", state.BookedBerth)), Green);
+        if (state.ShipName == null)
+            return (Loc.GetString("drydock-plot-awaiting"), null);
+
+        var marks = state.MissingTiles + state.MissingParts + state.DamagedParts;
+        return marks == 0
+            ? (Loc.GetString("drydock-plot-sound"), Green)
+            : (Loc.GetString("drydock-plot-surveyed", ("count", marks)), null);
+    }
+
+    /// <summary>Crane power gauge tint: red when stalled, amber when short, else the accent.</summary>
+    private Color? PowerTint()
+    {
+        if (_state.PowerRatio < WFDrydockCraneComponent.StallRatio)
+            return Red;
+        return _state.PowerRatio < 0.95f ? Skin.Caution : null;
+    }
+
+    private void UpdateBooking(WFDrydockConsoleState state)
+    {
+        _bookingPanel.Visible = state.BookedBerth != null;
+        if (state.BookedBerth == null)
+            return;
+
+        var left = (int) MathF.Ceiling(state.BookingSeconds);
+        BookedLabel.Text = Loc.GetString("drydock-ui-booked", ("berth", state.BookedBerth));
+        _expires.Value = Loc.GetString("drydock-ui-clock", ("minutes", left / 60), ("seconds", (left % 60).ToString("D2")));
+        _expires.Tint = left <= 60 ? Red : null;
+    }
+
     private void UpdateBerthLights(WFDrydockConsoleState state, bool blocked)
     {
-        BerthLightsButton.Visible = !state.Booking;
-        BerthLightsButton.Text = Loc.GetString(state.BerthLightsOn ? "drydock-console-berth-lights-off" : "drydock-console-berth-lights-on");
+        _berthPanel.Visible = !state.Booking;
+        BerthLightsButton.Pressed = state.BerthLightsOn;
         BerthLightsButton.Disabled = blocked && !state.BerthLightsOn;
+    }
+
+    private void UpdateRepairs(WFDrydockConsoleState state, bool blocked)
+    {
+        Count(_tiles, state.MissingTiles, Red);
+        Count(_parts, state.MissingParts, Red);
+        Count(_damage, state.DamagedParts, Skin.Caution);
+
+        _stock.Visible = state.PaysWithMaterials;
+        _stock.Value = FormatMaterials(state.StoredMaterials);
+        _stock.Tint = Cream;
+
+        _quote.Visible = !state.Working;
+        _progress.Visible = state.Working;
+        _eta.Visible = state.Working;
+
+        if (state.PaysWithMaterials)
+        {
+            _quote.Value = FormatMaterials(state.RepairMaterials);
+            _quote.Lit = state.RepairMaterials.Count > 0;
+            var covered = Covers(state.RepairMaterials, state.StoredMaterials);
+            _quote.Tint = covered ? null : Red;
+            RepairButton.Text = Loc.GetString(state.Booking ? "drydock-ui-book-repair-key" : "drydock-ui-repair-key");
+            RepairButton.Disabled = state.ShipName is null || state.Working || state.RepairMaterials.Count == 0 || !covered || blocked;
+        }
+        else
+        {
+            _quote.Value = Loc.GetString("drydock-ui-credits", ("price", state.RepairPrice.ToString("N0", CultureInfo.InvariantCulture)));
+            _quote.Lit = state.RepairPrice > 0;
+            _quote.Tint = null;
+            RepairButton.Text = Loc.GetString(state.Booking ? "drydock-ui-book-repair-key" : "drydock-ui-repair-key");
+            RepairButton.Disabled = state.ShipName is null || state.Working || state.RepairPrice <= 0 || blocked;
+        }
+
+        var remaining = (int) MathF.Ceiling(state.RemainingSeconds);
+        _eta.Value = state.Deploying
+            ? Loc.GetString("drydock-ui-deploying")
+            : Loc.GetString("drydock-ui-clock", ("minutes", remaining / 60), ("seconds", (remaining % 60).ToString("D2")));
+    }
+
+    /// <summary>Shows a work count as three digits, lit in its color while there is work of that kind.</summary>
+    private static void Count(WFDrydockReadout readout, int count, Color color)
+    {
+        readout.Value = Math.Min(count, 999).ToString("D3", CultureInfo.InvariantCulture);
+        readout.Lit = count > 0;
+        readout.Tint = color;
     }
 
     /// <summary>
@@ -110,77 +307,6 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         return string.Join(", ", parts);
     }
 
-    private void UpdateStatus(WFDrydockConsoleState state)
-    {
-        ShipLabel.Text = state.ShipName is null
-            ? Loc.GetString("drydock-ui-no-ship")
-            : Loc.GetString("drydock-ui-ship", ("name", state.ShipName));
-
-        NoticeLabel.Visible = state.Notice != null;
-        NoticeLabel.Text = state.Notice;
-
-        // Warns when the berth's cranes run short of power; no warning at full power.
-        PowerLabel.Visible = state.PowerRatio < 0.95f;
-        PowerLabel.Text = state.PowerRatio < WFDrydockCraneComponent.StallRatio
-            ? Loc.GetString("drydock-ui-power-none")
-            : Loc.GetString("drydock-ui-power-low", ("percent", (int) MathF.Round(state.PowerRatio * 100f)));
-
-        CranesLabel.Text = Loc.GetString("drydock-ui-cranes", ("count", state.CraneCount));
-        BlockedCranesLabel.Visible = state.BlockedCranes > 0;
-        BlockedCranesLabel.Text = Loc.GetString("drydock-ui-cranes-blocked", ("count", state.BlockedCranes));
-        NoCranesLabel.Visible = state.CraneCount == 0;
-    }
-
-    private void UpdateBooking(WFDrydockConsoleState state)
-    {
-        BookingPanel.Visible = state.BookedBerth != null;
-        if (state.BookedBerth == null)
-            return;
-
-        var left = (int) MathF.Ceiling(state.BookingSeconds);
-        BookedLabel.Text = Loc.GetString("drydock-ui-booked", ("berth", state.BookedBerth));
-        BookingLeftLabel.Text = Loc.GetString("drydock-ui-booking-left",
-            ("minutes", left / 60),
-            ("seconds", (left % 60).ToString("D2")));
-    }
-
-    private void UpdateRepairs(WFDrydockConsoleState state, bool blocked)
-    {
-        MissingTilesLabel.Text = Loc.GetString("drydock-ui-missing-tiles", ("count", state.MissingTiles));
-        MissingPartsLabel.Text = Loc.GetString("drydock-ui-missing-parts", ("count", state.MissingParts));
-        DamagedPartsLabel.Text = Loc.GetString("drydock-ui-damaged-parts", ("count", state.DamagedParts));
-
-        StoredMaterialsLabel.Visible = state.PaysWithMaterials;
-        StoredMaterialsLabel.Text = Loc.GetString("drydock-console-stored-materials",
-            ("materials", FormatMaterials(state.StoredMaterials)));
-
-        if (state.PaysWithMaterials)
-        {
-            RepairButton.Text = Loc.GetString(state.Booking ? "drydock-console-book-repair-materials" : "drydock-console-repair-materials",
-                ("materials", FormatMaterials(state.RepairMaterials)));
-            RepairButton.Disabled = state.ShipName is null || state.Working || state.RepairMaterials.Count == 0
-                                    || !Covers(state.RepairMaterials, state.StoredMaterials) || blocked;
-        }
-        else
-        {
-            RepairButton.Text = Loc.GetString(state.Booking ? "drydock-ui-book-repair-button" : "drydock-ui-repair-button",
-                ("price", state.RepairPrice));
-            RepairButton.Disabled = state.ShipName is null || state.Working || state.RepairPrice <= 0 || blocked;
-        }
-
-        RepairProgressBar.Visible = state.Working;
-        RepairProgressLabel.Visible = state.Working;
-        RepairProgressBar.Value = state.Progress;
-
-        var remaining = (int) MathF.Ceiling(state.RemainingSeconds);
-        RepairProgressLabel.Text = state.Deploying
-            ? Loc.GetString("drydock-ui-deploying")
-            : Loc.GetString("drydock-ui-progress",
-                ("percent", (int) MathF.Round(state.Progress * 100f)),
-                ("minutes", remaining / 60),
-                ("seconds", remaining % 60));
-    }
-
     /// <summary>
     /// Builds refit rows when the set changes, otherwise updates the existing rows in place.
     /// </summary>
@@ -194,9 +320,10 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
             _refitRows.Clear();
             foreach (var entry in state.Upgrades)
             {
-                var (row, parts, button) = BuildRefitRow(entry);
-                RefitContainer.AddChild(row);
-                _refitRows.Add((entry.Id, parts, button));
+                var row = BuildRefitRow(entry);
+                RefitContainer.AddChild(row.Root);
+                Apply(row.Root);
+                _refitRows.Add(row);
             }
         }
 
@@ -206,63 +333,41 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         }
     }
 
+    /// <summary>One refit line's controls: name and machine count, mark lamps and key, and a material bill.</summary>
+    private sealed record RefitRow(string Id, BoxContainer Root, Label Units, WFDrydockTierPips Pips, Button Button, Label Bill);
+
     /// <summary>Builds one refit row's controls. Their text and state are set by <see cref="UpdateRefitRow"/>.</summary>
-    private (BoxContainer Row, Label Parts, Button Button) BuildRefitRow(WFDrydockUpgradeEntry entry)
+    private RefitRow BuildRefitRow(WFDrydockUpgradeEntry entry)
     {
-        var row = new BoxContainer
-        {
-            Orientation = BoxContainer.LayoutOrientation.Horizontal,
-            HorizontalExpand = true,
-            VerticalAlignment = Control.VAlignment.Center,
-            SeparationOverride = 8
-        };
-
-        var nameLabel = new Label
-        {
-            Text = entry.Name,
-            HorizontalExpand = true,
-            VerticalAlignment = Control.VAlignment.Center
-        };
-
-        var partsLabel = new Label
-        {
-            StyleClasses = { "LabelSecondaryColor" },
-            VerticalAlignment = Control.VAlignment.Center
-        };
-
-        var button = new Button
-        {
-            MinWidth = 180,
-            VerticalAlignment = Control.VAlignment.Center
-        };
+        var name = new Label { Text = entry.Name.ToUpperInvariant(), HorizontalExpand = true, FontColorOverride = Accent };
+        var units = new Label { FontColorOverride = Muted };
+        var pips = new WFDrydockTierPips { MaxTier = entry.MaxTier, VerticalAlignment = VAlignment.Center, SetWidth = 112 };
+        var button = new Button { HorizontalExpand = true };
+        button.AddStyleClass("WfCompact");
+        var bill = new Label { FontColorOverride = Muted, ClipText = true, HorizontalExpand = true, Visible = false };
 
         var id = entry.Id;
         button.OnPressed += _ => OnUpgradePressed?.Invoke(id);
 
-        row.AddChild(nameLabel);
-        row.AddChild(partsLabel);
-        row.AddChild(button);
-        return (row, partsLabel, button);
+        var root = Column(Row(name, units), Row(pips, button), bill);
+        root.SeparationOverride = 3;
+        return new RefitRow(entry.Id, root, units, pips, button, bill);
     }
 
-    /// <summary>Sets a refit row's texts and disabled flags from the console state.</summary>
-    private void UpdateRefitRow((string Id, Label Parts, Button Button) row, WFDrydockUpgradeEntry entry, WFDrydockConsoleState state, bool blocked)
+    /// <summary>Sets a refit row's texts, lamps and disabled flags from the console state.</summary>
+    private void UpdateRefitRow(RefitRow row, WFDrydockUpgradeEntry entry, WFDrydockConsoleState state, bool blocked)
     {
         var button = row.Button;
-
-        row.Parts.Visible = !state.Working;
-        row.Parts.Text = Loc.GetString("drydock-ui-refit-parts",
-            ("parts", entry.Parts),
-            ("mark", Mark(entry.MinTier)));
+        row.Units.Text = Loc.GetString("drydock-ui-refit-units", ("parts", entry.Parts));
+        row.Units.Visible = !state.Working && entry.Parts > 0;
+        row.Pips.MaxTier = entry.MaxTier;
+        row.Pips.Tier = entry.MinTier;
+        row.Pips.Lit = entry.Parts > 0;
+        row.Bill.Visible = false;
 
         if (state.Working)
         {
             button.Text = Loc.GetString("drydock-ui-refit-busy");
-            button.Disabled = true;
-        }
-        else if (entry.MinTier >= entry.MaxTier)
-        {
-            button.Text = Loc.GetString("drydock-ui-refit-maxed");
             button.Disabled = true;
         }
         else if (entry.Parts == 0)
@@ -270,20 +375,90 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
             button.Text = Loc.GetString("drydock-ui-refit-no-parts");
             button.Disabled = true;
         }
+        else if (entry.MinTier >= entry.MaxTier)
+        {
+            button.Text = Loc.GetString("drydock-ui-refit-maxed");
+            button.Disabled = true;
+        }
         else if (state.PaysWithMaterials)
         {
-            button.Text = Loc.GetString(state.Booking ? "drydock-console-book-refit-materials" : "drydock-console-refit-materials",
-                ("mark", Mark(entry.MinTier + 1)),
-                ("materials", FormatMaterials(entry.NextMaterials)));
+            var bill = FormatMaterials(entry.NextMaterials);
+            button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-key" : "drydock-ui-refit-key", ("mark", Mark(entry.MinTier + 1)));
             button.Disabled = blocked || !Covers(entry.NextMaterials, state.StoredMaterials);
+            row.Bill.Text = bill;
+            row.Bill.ToolTip = bill;
+            row.Bill.Visible = true;
         }
         else
         {
             button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-button" : "drydock-ui-refit-button",
                 ("mark", Mark(entry.MinTier + 1)),
-                ("price", entry.NextPrice));
+                ("price", entry.NextPrice.ToString("N0", CultureInfo.InvariantCulture)));
             button.Disabled = blocked;
         }
+    }
+
+    private WFCockpitStatusReading VesselLamp()
+    {
+        if (_state.Booking)
+            return _state.BookedBerth != null
+                ? new(WFCockpitLampState.Active, "drydock-lamp-vessel-booked")
+                : new(WFCockpitLampState.Off, "drydock-lamp-vessel-unbooked");
+
+        return _state.ShipName != null
+            ? new(WFCockpitLampState.Good, "drydock-lamp-vessel-in")
+            : new(WFCockpitLampState.Off, "drydock-lamp-vessel-none");
+    }
+
+    private WFCockpitStatusReading CranesLamp()
+    {
+        if (_state.Booking && _state.BerthLabel == null)
+            return new(WFCockpitLampState.Unavailable, "drydock-lamp-unavailable");
+
+        return _state.CraneCount > 0
+            ? new(WFCockpitLampState.Good, "drydock-lamp-cranes-linked")
+            : new(WFCockpitLampState.Fault, "drydock-lamp-cranes-none");
+    }
+
+    private WFCockpitStatusReading LanesLamp()
+    {
+        if (_state.CraneCount == 0)
+            return new(WFCockpitLampState.Unavailable, "drydock-lamp-unavailable");
+        if (_state.BlockedCranes == 0)
+            return new(WFCockpitLampState.Good, "drydock-lamp-lanes-clear");
+
+        return _state.BlockedCranes < _state.CraneCount
+            ? new(WFCockpitLampState.Caution, "drydock-lamp-lanes-some")
+            : new(WFCockpitLampState.Fault, "drydock-lamp-lanes-blocked");
+    }
+
+    private WFCockpitStatusReading PowerLamp()
+    {
+        if (_state.CraneCount == 0)
+            return new(WFCockpitLampState.Unavailable, "drydock-lamp-unavailable");
+        if (_state.PowerRatio < WFDrydockCraneComponent.StallRatio)
+            return new(WFCockpitLampState.Fault, "drydock-lamp-power-none");
+
+        return _state.PowerRatio < 0.95f
+            ? new(WFCockpitLampState.Caution, "drydock-lamp-power-low")
+            : new(WFCockpitLampState.Good, "drydock-lamp-power-good");
+    }
+
+    private WFCockpitStatusReading WorkLamp()
+    {
+        if (!_state.Working)
+            return new(WFCockpitLampState.Off, "drydock-lamp-work-idle");
+
+        return _state.Deploying
+            ? new(WFCockpitLampState.Caution, "drydock-lamp-work-deploying")
+            : new(WFCockpitLampState.Active, "drydock-lamp-work-active");
+    }
+
+    private WFCockpitStatusReading LightsLamp()
+    {
+        return _state.BerthLightsOn || _state.BookedBerth != null
+            ? new(WFCockpitLampState.Active, "drydock-lamp-lights-on")
+            : new(WFCockpitLampState.Off, "drydock-lamp-lights-off");
     }
 
     /// <summary>

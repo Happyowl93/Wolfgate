@@ -2,10 +2,13 @@ using System.Linq;
 using System.Numerics;
 using Content.Server._NF.Bank;
 using Content.Server.Cargo.Systems;
+using Content.Server.Destructible;
 using Content.Server.Popups;
 using Content.Server.Preferences.Managers;
 using Content.Server.Shuttles.Components;
 using Content.Shared._Mono.ShipRepair.Components;
+using Content.Shared._Mono.Ships.Components;
+using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared._NF.Bank.Components;
 using Content.Shared._WF.Drydock;
 using Content.Shared._WF.ShipRepair;
@@ -50,17 +53,25 @@ public sealed partial class WFDrydockSystem : EntitySystem
     [Dependency] private IMapManager _mapManager = default!;
     [Dependency] private SharedPhysicsSystem _physics = default!;
     [Dependency] private SharedMaterialStorageSystem _materials = default!;
+    [Dependency] private DestructibleSystem _destructible = default!;
 
     /// <summary>Upper bound on ship tiles kept for ambient sparks.</summary>
     private const int MaxSparkTiles = 512;
 
     private List<Entity<MapGridComponent>> _grids = new();
 
+    /// <summary>
+    /// Estimated price and construction material value by entity prototype, since a quote prices every part a ship was
+    /// built with.
+    /// </summary>
+    private readonly Dictionary<string, (double Estimate, double Materials)> _estimates = new();
+
     public override void Initialize()
     {
         base.Initialize();
 
         SubscribeLocalEvent<WFDrydockConsoleComponent, BoundUIOpenedEvent>(OnUiOpened);
+        SubscribeLocalEvent<WFDrydockConsoleComponent, BoundUIClosedEvent>(OnUiClosed);
         SubscribeLocalEvent<WFDrydockConsoleComponent, WFDrydockRepairMessage>(OnRepair);
         SubscribeLocalEvent<WFDrydockConsoleComponent, WFDrydockUpgradeMessage>(OnUpgrade);
         InitializeBerthLights();
@@ -68,6 +79,11 @@ public sealed partial class WFDrydockSystem : EntitySystem
         SubscribeLocalEvent<WFDrydockCraneComponent, ComponentShutdown>(OnCraneShutdown);
         InitializeBooking();
         InitializeLinking();
+        SubscribeLocalEvent<PrototypesReloadedEventArgs>(_ =>
+        {
+            _estimates.Clear();
+            _constructionMaterials.Clear();
+        });
     }
 
     /// <summary>The largest ship grid whose center lies in the console's berth area, or null.</summary>
@@ -184,7 +200,65 @@ public sealed partial class WFDrydockSystem : EntitySystem
         AddMissingTiles(ship, grid, data, comp, items);
         AddMissingEntities(ship, data, comp, items);
         AddHeals(ship, grid, comp, items);
+        CapRepair(ship, comp, items);
         return items;
+    }
+
+    /// <summary>
+    /// The ship's value for fees and caps: its shipyard price when it was bought at one, else the price of rebuilding
+    /// it whole from its repair snapshot. Vessel is false for the rebuild price, or 0 without a snapshot.
+    /// </summary>
+    public (int Value, bool Vessel) ShipValue(EntityUid ship, WFDrydockConsoleComponent comp)
+    {
+        if (TryComp<VesselComponent>(ship, out var vessel) &&
+            _prototype.TryIndex<VesselPrototype>(vessel.VesselId, out var proto) && proto.Price > 0)
+        {
+            return (proto.Price, true);
+        }
+
+        if (!TryComp<ShipRepairDataComponent>(ship, out var data))
+            return (0, false);
+
+        var value = 0d;
+        foreach (var chunk in data.Chunks.Values)
+        {
+            foreach (var tile in chunk.Tiles)
+            {
+                if (tile != Tile.Empty.TypeId)
+                    value += comp.TilePrice;
+            }
+
+            foreach (var spec in chunk.Entities.Values)
+            {
+                value += RebuildPrice(comp, _prototype.Index<EntityPrototype>(data.EntityPalette[spec.ProtoIndex].Id));
+            }
+        }
+
+        return ((int) Math.Min(value, int.MaxValue), false);
+    }
+
+    /// <summary>The repair fee: a share of the ship's value, at least the console's minimum.</summary>
+    public int RepairFee(EntityUid ship, WFDrydockConsoleComponent comp)
+    {
+        var (value, _) = ShipValue(ship, comp);
+        return Math.Max(comp.MinFee, (int) Math.Round(value * comp.FeeFraction / 10) * 10);
+    }
+
+    /// <summary>Scales every item down so the work costs no more than its cap, so a wreck never costs a new ship.</summary>
+    private void CapRepair(EntityUid ship, WFDrydockConsoleComponent comp, List<WFDrydockWorkItem> items)
+    {
+        var (value, vessel) = ShipValue(ship, comp);
+        var cap = (long) (value * (vessel ? comp.CapFraction : comp.SnapshotCapFraction));
+        var total = items.Sum(i => (long) i.Cost);
+        if (cap <= 0 || total <= cap)
+            return;
+
+        var scale = (double) cap / total;
+        foreach (var item in items)
+        {
+            item.Cost = Math.Max(1, (int) (item.Cost * scale));
+            item.Share *= (float) scale;
+        }
     }
 
     /// <summary>Adds a tile item for each stored hull tile the ship no longer has.</summary>
@@ -227,7 +301,6 @@ public sealed partial class WFDrydockSystem : EntitySystem
                     continue;
 
                 var proto = _prototype.Index<EntityPrototype>(data.EntityPalette[spec.ProtoIndex].Id);
-                var price = _pricing.GetEstimatedPrice(proto);
                 var target = TryGetOriginal(spec, out var original) ? original : EntityUid.Invalid;
 
                 items.Add(new WFDrydockWorkItem
@@ -236,7 +309,8 @@ public sealed partial class WFDrydockSystem : EntitySystem
                     ChunkPos = chunkPos,
                     SpecId = specId,
                     Target = target,
-                    Cost = (int) Math.Max(comp.MinEntityPrice, price * comp.EntityPriceFactor),
+                    Cost = RebuildPrice(comp, proto),
+                    Prototype = proto.ID,
                     LocalPos = spec.LocalPosition,
                 });
             }
@@ -261,14 +335,42 @@ public sealed partial class WFDrydockSystem : EntitySystem
             if (total <= FixedPoint2.Zero)
                 continue;
 
+            // Patching a part costs its rebuild price times the share of its health lost, never more than rebuilding it.
+            var proto = MetaData(ent).EntityPrototype;
+            int? rebuild = proto != null ? RebuildPrice(comp, proto) : null;
+            int cost;
+            if (rebuild is { } full && _destructible.TryGetDestroyedAt(ent.Owner, out var destroyedAt) && destroyedAt > FixedPoint2.Zero)
+                cost = (int) Math.Ceiling(full * Math.Min(1f, total.Float() / destroyedAt.Value.Float()));
+            else
+                cost = Math.Min((int) Math.Ceiling(total.Float() * comp.DamagePrice), rebuild ?? int.MaxValue);
+            cost = Math.Max(1, cost);
+
             items.Add(new WFDrydockWorkItem
             {
                 Kind = WFDrydockWorkKind.Heal,
                 Target = ent,
-                Cost = (int) Math.Ceiling(total.Float() * comp.DamagePrice),
+                Cost = cost,
+                Prototype = proto?.ID,
+                Share = rebuild is > 0 ? Math.Min(1f, cost / (float) rebuild.Value) : 1f,
                 LocalPos = xform.LocalPosition,
             });
         }
+    }
+
+    /// <summary>
+    /// Price of rebuilding one entity, plus labor: its estimated price times the factor, or the value of its construction
+    /// materials times theirs, whichever is more.
+    /// </summary>
+    public int RebuildPrice(WFDrydockConsoleComponent comp, EntityPrototype proto)
+    {
+        if (!_estimates.TryGetValue(proto.ID, out var prices))
+        {
+            prices = (_pricing.GetEstimatedPrice(proto), MaterialValue(ConstructionMaterials(proto)));
+            _estimates[proto.ID] = prices;
+        }
+
+        var price = Math.Max(prices.Estimate * comp.EntityPriceFactor, prices.Materials * comp.MaterialPriceFactor);
+        return (int) Math.Min(price + comp.EntityLabor, int.MaxValue);
     }
 
     /// <summary>Applies one work item to the ship. Re-checks the item first, so repeats are harmless.</summary>
@@ -371,6 +473,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
             $"{s.MissingTiles}/{s.MissingParts}/{s.DamagedParts}/{s.RepairPrice}",
             $"{s.Working}/{s.PowerRatio}/{s.CraneCount}/{s.BlockedCranes}/{s.Deploying}/{s.Progress}/{s.RemainingSeconds}",
             $"{s.Booking}/{s.BookedBerth}/{s.BookingSeconds}/{s.Notice}/{s.PaysWithMaterials}/{s.BerthLightsOn}",
+            $"{s.Station}/{s.BerthConsole}/{s.BerthLabel}/{s.BerthArea}/{s.Approach}/{s.Ship}/{s.Marks.Count}",
             DictKey(s.RepairMaterials),
             DictKey(s.StoredMaterials),
         };
@@ -401,6 +504,15 @@ public sealed partial class WFDrydockSystem : EntitySystem
             BlockedCranes = linked.Count(uid => Comp<WFDrydockCraneComponent>(uid).Blocked),
         };
 
+        if (TryGetBerth(console, comp, out var berth))
+        {
+            state.Station = GetNetEntity(berth.Grid);
+            state.BerthConsole = GetNetEntity(console);
+            state.BerthLabel = berth.Label;
+            state.BerthArea = berth.Area;
+            state.Approach = berth.Approach;
+        }
+
         var pay = CompOrNull<WFDrydockMaterialPaymentComponent>(console);
         if (pay != null)
         {
@@ -412,17 +524,19 @@ public sealed partial class WFDrydockSystem : EntitySystem
         if (ship is { } berthed)
         {
             state.ShipName = MetaData(berthed).EntityName;
+            state.Ship = GetNetEntity(berthed);
 
             var items = job != null ? UnfinishedItems(job) : BuildRepairItems(berthed, comp);
             CountWork(state, items);
+            AddMarks(state, items);
 
             if (pay != null && job == null && items.Count > 0)
             {
-                AssignMaterials(pay, items);
+                AssignMaterials(berthed, comp, pay, items);
                 state.RepairMaterials = SumBills(items);
             }
             else if (job == null && items.Count > 0)
-                state.RepairPrice = WorkPrice(comp, null, items);
+                state.RepairPrice = WorkPrice(berthed, comp, null, items);
         }
 
         if (job != null)
@@ -462,6 +576,25 @@ public sealed partial class WFDrydockSystem : EntitySystem
         }
     }
 
+    /// <summary>Lists the work items' positions for the berth plot, up to its limit.</summary>
+    private static void AddMarks(WFDrydockConsoleState state, List<WFDrydockWorkItem> items)
+    {
+        foreach (var item in items)
+        {
+            if (state.Marks.Count >= WFDrydockConsoleState.MaxMarks)
+                break;
+
+            var kind = item.Kind switch
+            {
+                WFDrydockWorkKind.Tile => WFDrydockMarkKind.Tile,
+                WFDrydockWorkKind.Entity => WFDrydockMarkKind.Part,
+                WFDrydockWorkKind.Heal => WFDrydockMarkKind.Damage,
+                _ => WFDrydockMarkKind.Refit,
+            };
+            state.Marks.Add(new WFDrydockPlotMark(item.LocalPos, kind));
+        }
+    }
+
     /// <summary>One refit line for the console: the ship's part count and the price of its next tier.</summary>
     private WFDrydockUpgradeEntry BuildUpgradeEntry(WFDrydockUpgradePrototype proto, EntityUid? ship, WFDrydockMaterialPaymentComponent? pay, bool scanParts)
     {
@@ -487,17 +620,17 @@ public sealed partial class WFDrydockSystem : EntitySystem
         if (minTier >= proto.Tiers.Count)
             return entry;
 
-        // Only the parts at the lowest tier are refitted next.
+        // Only the machines at the lowest tier are refitted next, priced per stock part swapped.
         var tier = proto.Tiers[minTier];
-        var due = parts.Count(p => _upgrade.GetTier(p, proto) == minTier);
-        entry.NextPrice = due * tier.Price;
-        if (pay != null)
+        foreach (var part in parts)
         {
-            var perPart = ItemBill(pay, tier.Price, tier.Materials);
-            for (var i = 0; i < due; i++)
-            {
-                AddBill(entry.NextMaterials, perPart);
-            }
+            if (_upgrade.GetTier(part, proto) != minTier)
+                continue;
+
+            var swapped = _upgrade.PartsToSwap(part, proto, minTier + 1);
+            entry.NextPrice += swapped * tier.Price;
+            if (pay != null)
+                AddBill(entry.NextMaterials, ItemBill(pay, swapped * tier.Price, tier.Materials, swapped));
         }
 
         return entry;
@@ -505,7 +638,23 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
     private void OnUiOpened(EntityUid uid, WFDrydockConsoleComponent comp, BoundUIOpenedEvent args)
     {
+        // The berth plot draws the cranes, which can stand beyond the viewer's PVS range of the console.
+        if (TryComp<ActorComponent>(args.Actor, out var actor))
+        {
+            foreach (var crane in LinkedCranes(uid))
+                _pvs.AddSessionOverride(crane, actor.PlayerSession);
+        }
+
         UpdateUi(uid, comp, force: true);
+    }
+
+    private void OnUiClosed(EntityUid uid, WFDrydockConsoleComponent comp, BoundUIClosedEvent args)
+    {
+        if (!TryComp<ActorComponent>(args.Actor, out var actor))
+            return;
+
+        foreach (var crane in LinkedCranes(uid))
+            _pvs.RemoveSessionOverride(crane, actor.PlayerSession);
     }
 
     private void OnRepair(EntityUid uid, WFDrydockConsoleComponent comp, WFDrydockRepairMessage args)
@@ -555,7 +704,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         var pay = booked ? null : CompOrNull<WFDrydockMaterialPaymentComponent>(console);
         if (pay != null)
         {
-            AssignMaterials(pay, items);
+            AssignMaterials(ship, comp, pay, items);
             if (!TryPayMaterials(console, comp, actor, items))
                 return false;
 
@@ -564,7 +713,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
             return true;
         }
 
-        var price = WorkPrice(comp, upgrade, items);
+        var price = WorkPrice(ship, comp, upgrade, items);
         if (!TryCharge(console, comp, actor, price))
             return false;
 
