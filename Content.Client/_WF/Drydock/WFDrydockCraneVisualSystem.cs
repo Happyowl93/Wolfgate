@@ -3,7 +3,6 @@ using System.Numerics;
 using Content.Shared._WF.Drydock;
 using Robust.Client.GameObjects;
 using Robust.Shared.Map;
-using Robust.Shared.Maths;
 using Robust.Shared.Utility;
 
 namespace Content.Client._WF.Drydock;
@@ -140,8 +139,7 @@ public sealed partial class WFDrydockCraneVisualSystem : EntitySystem
     private void PlaceBoom(Entity<SpriteComponent?> rig, WFDrydockCraneComponent crane, CraneLayers layers)
     {
         var pivot = crane.ArmToLocal(0f, crane.VisualPosition);
-        var rad = crane.VisualAngle * (MathF.PI / 180f);
-        var dir = crane.ArmToLocal(MathF.Cos(rad), MathF.Sin(rad)) - crane.ArmToLocal(0f, 0f);
+        var dir = crane.VisualBoomDirection;
         var slide = crane.Sections > 1 ? (crane.VisualExtension - crane.SectionLength) / (crane.Sections - 1) : 0f;
 
         foreach (var (layer, section, tile) in layers.Boom)

@@ -10,7 +10,6 @@ using Content.Server.Power.Components;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Materials;
 using Content.Shared.Materials.OreSilo;
-using Content.Shared.Power.EntitySystems;
 using Robust.Client.GameObjects;
 using Robust.Client.GameStates;
 using Robust.Client.UserInterface;
@@ -18,7 +17,6 @@ using Robust.Client.UserInterface.Controls;
 using Robust.Shared;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
-using Robust.Shared.Maths;
 using Robust.Shared.Timing;
 
 namespace Content.IntegrationTests.Tests._WF.Drydock;
@@ -119,16 +117,14 @@ public sealed class MobileDrydockClientTest
             Assert.That(materials.TryChangeMaterialAmount((crane, em.GetComponent<MaterialStorageComponent>(crane)),
                 new Dictionary<string, int> { ["Steel"] = 500 }), Is.True, "The crane should take its stock.");
 
-            silo = DrydockTest.SpawnAnchored(pair, host, "MachineMaterialSilo", new Vector2i(5, 2));
-            server.System<SharedPowerReceiverSystem>().SetNeedsPower(silo, false);
-
+            silo = MobileDrydockTest.SpawnSilo(pair, host);
             ship = DrydockTest.CreateDamagedShip(pair, map.MapId, ShipWaiting);
             payer = DrydockTest.CreatePayer(pair, map.MapId);
             xforms.SetCoordinates(payer, new EntityCoordinates(host, 4.5f, 0.5f));
         });
 
         await pair.RunTicksSync(5);
-        await DrydockTest.RunUntil(pair, 100, 10, () => MobileDrydockTest.CraneHasPower(pair, crane));
+        await MobileDrydockTest.WaitForCranePower(pair, crane);
         await DrydockTest.RunUntil(pair, 100, 10, () => em.GetComponent<ApcPowerReceiverComponent>(silo).Powered);
 
         await server.WaitAssertion(() =>
@@ -181,11 +177,7 @@ public sealed class MobileDrydockClientTest
         await Watch("Ship arrived", 60);
 
         // The silo is refilled.
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(materials.TryChangeMaterialAmount((silo, em.GetComponent<MaterialStorageComponent>(silo)),
-                MobileDrydockTest.StockMaterials.ToDictionary(m => m, _ => 10_000)), Is.True, "The silo should take its stock.");
-        });
+        await server.WaitAssertion(() => MobileDrydockTest.Stock(pair, silo));
         await Watch("Silo refilled", 60);
 
         // The payer presses repair in whichever window the client has now.

@@ -82,7 +82,7 @@ public sealed partial class HailingSystem
         _ui.OpenUi((helm, helmUi), key, actor);
     }
 
-    /// <summary>Speaks a line to the far end of a helm's connected call. Returns false if there is no live call.</summary>
+    /// <summary>Has the far end of a helm's connected call speak a line to it. Returns false if there is no live call.</summary>
     public bool SayToCaller(EntityUid helm, string text)
     {
         if (!TryComp<HailConsoleComponent>(helm, out var hail) || hail.State != HailState.Connected ||

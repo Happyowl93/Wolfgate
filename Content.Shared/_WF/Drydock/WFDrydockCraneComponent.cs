@@ -142,6 +142,16 @@ public sealed partial class WFDrydockCraneComponent : Component
     [ViewVariables]
     public float VisualAngle;
 
+    /// <summary>Crane-local unit direction of the boom at its animated angle.</summary>
+    public Vector2 VisualBoomDirection
+    {
+        get
+        {
+            var rad = VisualAngle * (MathF.PI / 180f);
+            return ArmToLocal(MathF.Cos(rad), MathF.Sin(rad)) - ArmToLocal(0f, 0f);
+        }
+    }
+
     /// <summary>Local X of the arm: the body's first column, or its second when mirrored in place.</summary>
     public float ArmX => Mirrored && MirrorInPlace ? 1f : 0f;
 

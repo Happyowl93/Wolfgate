@@ -13,11 +13,10 @@ public sealed partial class WFDrydockSystem
     private readonly Dictionary<string, Dictionary<string, int>> _constructionMaterials = new();
 
     /// <summary>
-    /// The materials it takes to build an entity by hand: every material step on its construction graph from the start
-    /// node to its node, such as the girder's steel and the plating's plastitanium of a plastitanium wall. Empty for
-    /// entities with no construction graph.
+    /// Materials to build an entity by hand: every material step on its construction graph from the start node to its
+    /// node. Empty without a graph.
     /// </summary>
-    public Dictionary<string, int> ConstructionMaterials(EntityPrototype proto)
+    private Dictionary<string, int> ConstructionMaterials(EntityPrototype proto)
     {
         if (_constructionMaterials.TryGetValue(proto.ID, out var cached))
             return cached;

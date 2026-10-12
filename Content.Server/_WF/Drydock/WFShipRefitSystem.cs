@@ -88,7 +88,7 @@ public sealed class WFShipRefitSystem : EntitySystem
     }
 
     /// <summary>Units in a survey that reach a tier at or below the surveyed one.</summary>
-    public static int UnitsReaching(WFRefitSurvey survey, int tier)
+    private static int UnitsReaching(WFRefitSurvey survey, int tier)
     {
         var units = survey.UnitsAtTier;
         foreach (var target in survey.Below)

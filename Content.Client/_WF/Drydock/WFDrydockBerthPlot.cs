@@ -39,6 +39,9 @@ public sealed class WFDrydockBerthPlot : Control
     /// <summary>Most tiles of the station drawn around the berth.</summary>
     private const int MaxStationTiles = 12000;
 
+    /// <summary>Scale bar lengths to pick from, in tiles.</summary>
+    private static readonly int[] ScaleSteps = { 1, 2, 5, 10, 20, 50 };
+
     [Dependency] private IEntityManager _entMan = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IResourceCache _cache = default!;
@@ -229,12 +232,17 @@ public sealed class WFDrydockBerthPlot : Control
 
         var min = new Vector2(float.MaxValue);
         var max = new Vector2(float.MinValue);
-        foreach (var corner in new[] { _shipBounds.BottomLeft, _shipBounds.BottomRight, _shipBounds.TopLeft, _shipBounds.TopRight })
+        void Include(Vector2 corner)
         {
             var view = unit.ToView(Vector2.Transform(corner, toStation));
             min = Vector2.Min(min, view);
             max = Vector2.Max(max, view);
         }
+
+        Include(_shipBounds.BottomLeft);
+        Include(_shipBounds.BottomRight);
+        Include(_shipBounds.TopLeft);
+        Include(_shipBounds.TopRight);
 
         var center = (min + max) / 2f;
         var berth = BerthView(unit, state).Enlarged(FocusMargin);
@@ -421,6 +429,7 @@ public sealed class WFDrydockBerthPlot : Control
         var halfWidth = MathF.Min(berth.Width * 0.3f, 3f);
         var lit = state.BerthLightsOn || state.BookedBerth != null;
         var pulse = (1f - time / 1.6f % 1f) * LaneLength;
+        var width = MathF.Max(1.5f * UIScale, frame.Scale * 0.18f);
         for (var distance = 1f; distance <= LaneLength; distance += 1.5f)
         {
             var reach = MathF.Max(0f, 1f - MathF.Abs(distance - pulse) / 2.5f);
@@ -428,8 +437,8 @@ public sealed class WFDrydockBerthPlot : Control
             var tip = frame.ViewToScreen(new Vector2(0, mouth + distance - 0.6f));
             var left = frame.ViewToScreen(new Vector2(-halfWidth, mouth + distance + 0.4f));
             var right = frame.ViewToScreen(new Vector2(halfWidth, mouth + distance + 0.4f));
-            Thick(handle, left, tip, MathF.Max(1.5f * UIScale, frame.Scale * 0.18f), color);
-            Thick(handle, tip, right, MathF.Max(1.5f * UIScale, frame.Scale * 0.18f), color);
+            Thick(handle, left, tip, width, color);
+            Thick(handle, tip, right, width, color);
         }
     }
 
@@ -450,22 +459,23 @@ public sealed class WFDrydockBerthPlot : Control
         var box = new UIBox2(frame.ViewToScreen(view.BottomLeft), frame.ViewToScreen(view.TopRight));
         var dash = MathF.Max(4 * UIScale, frame.Scale * 0.8f);
         var color = skin.Accent.WithAlpha(0.55f);
-        Dashed(handle, box.TopLeft, new Vector2(box.Right, box.Top), dash, color);
-        Dashed(handle, new Vector2(box.Right, box.Top), box.BottomRight, dash, color);
-        Dashed(handle, box.BottomRight, new Vector2(box.Left, box.Bottom), dash, color);
-        Dashed(handle, new Vector2(box.Left, box.Bottom), box.TopLeft, dash, color);
+        Dashed(handle, box.TopLeft, box.TopRight, dash, color);
+        Dashed(handle, box.TopRight, box.BottomRight, dash, color);
+        Dashed(handle, box.BottomRight, box.BottomLeft, dash, color);
+        Dashed(handle, box.BottomLeft, box.TopLeft, dash, color);
 
         var length = MathF.Min(MathF.Min(box.Width, box.Height) / 4f, 3f * frame.Scale);
         var width = 2 * UIScale;
-        foreach (var (corner, dx, dy) in new[]
-                 {
-                     (box.TopLeft, 1f, 1f), (new Vector2(box.Right, box.Top), -1f, 1f),
-                     (box.BottomRight, -1f, -1f), (new Vector2(box.Left, box.Bottom), 1f, -1f),
-                 })
+        void Bracket(Vector2 corner, float dx, float dy)
         {
             Thick(handle, corner, corner + new Vector2(dx * length, 0), width, skin.Accent);
             Thick(handle, corner, corner + new Vector2(0, dy * length), width, skin.Accent);
         }
+
+        Bracket(box.TopLeft, 1f, 1f);
+        Bracket(box.TopRight, -1f, 1f);
+        Bracket(box.BottomRight, -1f, -1f);
+        Bracket(box.BottomLeft, 1f, -1f);
 
         var label = Loc.GetString("drydock-plot-berth", ("berth", state.BerthLabel ?? string.Empty)).ToUpperInvariant();
         Text(handle, _small!, label, box.TopLeft + new Vector2(4 * UIScale, 3 * UIScale), skin.Accent, center: false);
@@ -552,8 +562,7 @@ public sealed class WFDrydockBerthPlot : Control
             var armWidth = MathF.Max(2 * UIScale, size * 0.32f);
             Thick(handle, laneStart, At(crane.ArmToLocal(0f, crane.VisualArm)), armWidth, skin.TextMuted);
             var pivotLocal = crane.ArmToLocal(0f, crane.VisualPosition);
-            var rad = crane.VisualAngle * (MathF.PI / 180f);
-            var dir = crane.ArmToLocal(MathF.Cos(rad), MathF.Sin(rad)) - crane.ArmToLocal(0f, 0f);
+            var dir = crane.VisualBoomDirection;
             var pivot = At(pivotLocal);
             var tip = At(pivotLocal + dir * crane.VisualExtension);
             Thick(handle, pivot, tip, MathF.Max(1.5f * UIScale, size * 0.2f), skin.Accent.WithAlpha(0.85f));
@@ -592,8 +601,8 @@ public sealed class WFDrydockBerthPlot : Control
         var dir = at - mid;
         if (dir.LengthSquared() < 1f)
             return;
-        var t = MathF.Min(MathF.Abs((inner.Width / 2) / MathF.Max(1e-3f, MathF.Abs(dir.X))),
-            MathF.Abs((inner.Height / 2) / MathF.Max(1e-3f, MathF.Abs(dir.Y))));
+        var t = MathF.Min(inner.Width / 2 / MathF.Max(1e-3f, MathF.Abs(dir.X)),
+            inner.Height / 2 / MathF.Max(1e-3f, MathF.Abs(dir.Y)));
         var edge = mid + dir * t;
         var unit = Vector2.Normalize(dir);
         var side = new Vector2(-unit.Y, unit.X);
@@ -616,7 +625,7 @@ public sealed class WFDrydockBerthPlot : Control
     {
         // A round number of tiles that spans 60 to 150 pixels.
         var tiles = 1;
-        foreach (var candidate in new[] { 1, 2, 5, 10, 20, 50 })
+        foreach (var candidate in ScaleSteps)
         {
             tiles = candidate;
             if (candidate * frame.Scale >= 60 * UIScale)

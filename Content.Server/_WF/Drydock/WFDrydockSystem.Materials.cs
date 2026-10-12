@@ -3,8 +3,6 @@ using System.Linq;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Materials;
 using Content.Shared.Materials.OreSilo;
-using Robust.Shared.Localization;
-using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.Drydock;
 
@@ -220,10 +218,7 @@ public sealed partial class WFDrydockSystem
         return _materials.TryChangeMaterialAmount((uid, storage), change, localOnly: true);
     }
 
-    /// <summary>
-    /// Takes a material job's bill from the console's cranes, silos first, or denies with the materials short.
-    /// All-or-nothing: nothing is taken unless the whole bill is covered.
-    /// </summary>
+    /// <summary>Takes the items' bill from the console's silos, then its cranes, all or nothing; denies with the shortfall.</summary>
     private bool TryPayMaterials(EntityUid console, WFDrydockConsoleComponent comp, EntityUid actor, List<WFDrydockWorkItem> items)
     {
         var bill = SumBills(items);
@@ -276,10 +271,7 @@ public sealed partial class WFDrydockSystem
         return true;
     }
 
-    /// <summary>
-    /// Puts the material bills of unfinished items back into the job's first crane, through its linked silo when it
-    /// can transmit, and returns the bill.
-    /// </summary>
+    /// <summary>Returns the items' bill to the first crane with storage, or to its linked silo, and gives the bill.</summary>
     private Dictionary<string, int> ReturnMaterials(EntityUid console, List<EntityUid> cranes, List<WFDrydockWorkItem> items)
     {
         var bill = SumBills(items);

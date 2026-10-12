@@ -23,9 +23,6 @@ namespace Content.IntegrationTests.Tests._WF.Drydock;
 [TestOf(typeof(HailingSystem))]
 public sealed class DrydockHailTest
 {
-    /// <summary>Hailing range is 3072 m; the drydock sits about 500 m from the test map's origin.</summary>
-    private static readonly Vector2 StationPos = new(500f, 0f);
-
     [Test]
     public async Task PilotOpensDrydockServiceOverHail()
     {
@@ -76,12 +73,13 @@ public sealed class DrydockHailTest
             Assert.That(hailing.GetTargets(console).Select(t => t.Ship), Does.Contain(em.GetNetEntity(station)),
                 "The drydock should be on the pilot's hail list.");
             hailing.ClearCooldowns(console, station);
-            Assert.That(hailing.TryHail(console, pilot, station), Is.True);
+            Assert.That(hailing.TryHail(console, pilot, station), Is.True, "The hail should go out.");
         });
 
         // The dockmaster answers after its delay, within a few seconds of game time.
-        var answered = await UntilConnected(pair, console, 40);
-        Assert.That(answered, Is.True, "The dockmaster should answer the hail within a few seconds.");
+        bool Connected() => em.TryGetComponent(console, out HailConsoleComponent? hail) && hail.State == HailState.Connected;
+        await DrydockTest.RunUntil(pair, 40, 10, Connected);
+        Assert.That(Connected(), Is.True, "The dockmaster should answer the hail within a few seconds.");
 
         await server.WaitRunTicks(20);
 
@@ -107,7 +105,7 @@ public sealed class DrydockHailTest
 
         await server.WaitAssertion(() =>
         {
-            Raise(pair, console, new HailOpenServiceMessage(em.GetNetEntity(dockmaster)), pilot);
+            DrydockTest.RaiseUiMessage(pair, console, ShuttleConsoleUiKey.Key, new HailOpenServiceMessage(em.GetNetEntity(dockmaster)), pilot);
 
             Assert.That(em.TryGetComponent(console, out HailRelayComponent? relay), "Opening a service should add a relay to the helm.");
             Assert.That(relay!.Links.TryGetValue(WFDrydockConsoleUiKey.Key, out var linked) && linked == dockmaster,
@@ -163,34 +161,5 @@ public sealed class DrydockHailTest
         var power = pair.Server.EntMan.GetComponent<ApcPowerReceiverComponent>(console);
         power.NeedsPower = false;
         power.Powered = true;
-    }
-
-    /// <summary>Ticks the server until the console is connected, within a step budget.</summary>
-    private static async Task<bool> UntilConnected(TestPair pair, EntityUid console, int steps)
-    {
-        var em = pair.Server.EntMan;
-        for (var i = 0; i < steps; i++)
-        {
-            var connected = false;
-            await pair.Server.WaitAssertion(() =>
-                connected = em.TryGetComponent(console, out HailConsoleComponent? hail) && hail.State == HailState.Connected);
-
-            if (connected)
-                return true;
-
-            await pair.Server.WaitRunTicks(10);
-        }
-
-        return false;
-    }
-
-    /// <summary>Sends a BUI message from an actor on a console, as the console's own UI would.</summary>
-    private static void Raise(TestPair pair, EntityUid console, BoundUserInterfaceMessage message, EntityUid actor)
-    {
-        var em = pair.Server.EntMan;
-        message.Actor = actor;
-        message.UiKey = ShuttleConsoleUiKey.Key;
-        message.Entity = em.GetNetEntity(console);
-        em.EventBus.RaiseLocalEvent(console, (object) message);
     }
 }

@@ -6,10 +6,7 @@ using Content.Shared._NF.Bank.Components;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared._WF.Drydock;
-using Robust.Shared.GameObjects;
-using Robust.Shared.Localization;
 using Robust.Shared.Map.Components;
-using Robust.Shared.Maths;
 
 namespace Content.Server._WF.Drydock;
 
@@ -243,7 +240,7 @@ public sealed partial class WFDrydockSystem
         if (eval.Pricing is not { } slot)
             return new WFDrydockConsoleState { Booking = true, Notice = eval.Notice };
 
-        // Shows the berth working on or booked for the ship; only otherwise the berth a booking would take.
+        // Prefer the berth working on or booked for the ship over the one a booking would take.
         var console = slot.Console;
         var comp = slot.Comp;
         WFDrydockJobComponent? job = null;
@@ -525,7 +522,8 @@ public sealed partial class WFDrydockSystem
     /// <summary>Price of a repair (with its fee) or a refit.</summary>
     private int WorkPrice(EntityUid ship, WFDrydockConsoleComponent comp, string? upgrade, List<WFDrydockWorkItem> items)
     {
-        return upgrade == null ? RepairFee(ship, comp) + items.Sum(i => i.Cost) : items.Sum(i => i.Cost);
+        var cost = items.Sum(i => i.Cost);
+        return upgrade == null ? RepairFee(ship, comp) + cost : cost;
     }
 
     /// <summary>Orders two extents as (short, long).</summary>

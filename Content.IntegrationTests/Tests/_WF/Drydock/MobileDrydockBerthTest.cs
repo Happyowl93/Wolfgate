@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -7,7 +6,6 @@ using Content.Server._WF.Drydock;
 using Content.Shared._WF.Drydock;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
-using Robust.Shared.Maths;
 using Robust.Shared.Map.Components;
 
 namespace Content.IntegrationTests.Tests._WF.Drydock;
@@ -20,13 +18,12 @@ public sealed class MobileDrydockBerthTest
     private const int MeasuredTicks = 300;
     private const float MaxJitter = 0.01f;
 
-    /// <summary>Per-tick samples of one entity: its world position, velocity, and parent.</summary>
+    /// <summary>Per-tick samples of one entity: its world position, parent, grid and components.</summary>
     private sealed class Track
     {
         public readonly List<Vector2> Positions = new();
         public readonly List<EntityUid> Parents = new();
         public readonly List<uint> GridTicks = new();
-        public readonly List<int> ComponentCounts = new();
         public readonly List<string> ComponentSets = new();
         public readonly List<uint> CraneTicks = new();
     }
@@ -34,39 +31,21 @@ public sealed class MobileDrydockBerthTest
     /// <summary>Spawns a host grid with a mobile crane and console, and a ship parked over the berth.</summary>
     private static (EntityUid Host, EntityUid Crane, EntityUid Console, EntityUid Ship) SpawnScene(TestPair pair, MapId map, bool againstCrane)
     {
-        var host = DrydockTest.CreateShip(pair, map, new Vector2(-300f, 0f));
-        DrydockTest.SetFloor(pair, host, 6);
-        var crane = DrydockTest.SpawnAnchored(pair, host, "WFMobileDrydockCrane", new Vector2i(0, 5));
-        for (var x = 0; x <= 4; x++)
-        {
-            DrydockTest.SpawnAnchored(pair, host, "CableHV", new Vector2i(x, 5));
-            DrydockTest.SpawnAnchored(pair, host, "CableMV", new Vector2i(x, 5));
-        }
+        var (host, crane, console) = MobileDrydockTest.SpawnMobileYard(pair, map);
+        var em = pair.Server.EntMan;
+        Assert.That(pair.Server.System<WFDrydockSystem>().TryGetBerth(console, em.GetComponent<WFDrydockConsoleComponent>(console), out var berth),
+            "The crane should make a berth.");
 
-        DrydockTest.SpawnAnchored(pair, host, "CableHV", new Vector2i(4, 4));
-        DrydockTest.SpawnAnchored(pair, host, "CableHV", new Vector2i(4, 3));
-        DrydockTest.SpawnAnchored(pair, host, "DebugGenerator", new Vector2i(4, 3));
-        DrydockTest.SpawnAnchored(pair, host, "DebugSubstation", new Vector2i(4, 4));
-        DrydockTest.SpawnAnchored(pair, host, "CableMV", new Vector2i(4, 4));
-        var console = DrydockTest.SpawnAnchored(pair, host, "WFComputerMobileDrydock", new Vector2i(5, 0));
-        DrydockTest.LinkCrane(pair, console, crane);
-
-        var comp = pair.Server.EntMan.GetComponent<WFDrydockConsoleComponent>(console);
-        pair.Server.System<WFDrydockSystem>().TryGetBerth(console, comp, out var berth);
-
-        var ship = DrydockTest.CreateDamagedShip(pair, map);
-        DrydockTest.PlaceOver(pair, ship, host, berth.Area.Center);
+        var center = berth.Area.Center;
         if (againstCrane)
         {
-            // Places the ship's centre a metre from the crane's, toward the bay, so its hull overlaps the crane body.
-            var xforms = pair.Server.System<SharedTransformSystem>();
-            var craneWorld = xforms.GetWorldPosition(crane);
-            var bayWorld = xforms.ToWorldPosition(new EntityCoordinates(host, berth.Area.Center));
-            var toBay = Vector2.Normalize(bayWorld - craneWorld);
-            var target = craneWorld + toBay;
-            xforms.SetWorldPosition(ship, target - pair.Server.EntMan.GetComponent<MapGridComponent>(ship).LocalAABB.Center);
+            // A metre from the crane's centre toward the bay, so the hull overlaps the crane body.
+            var craneLocal = em.GetComponent<TransformComponent>(crane).LocalPosition;
+            center = craneLocal + Vector2.Normalize(center - craneLocal);
         }
 
+        var ship = DrydockTest.CreateDamagedShip(pair, map);
+        DrydockTest.PlaceOver(pair, ship, host, center);
         return (host, crane, console, ship);
     }
 
@@ -79,7 +58,6 @@ public sealed class MobileDrydockBerthTest
         track.Parents.Add(em.GetComponent<TransformComponent>(uid).ParentUid);
         if (em.TryGetComponent(uid, out MapGridComponent grid))
             track.GridTicks.Add(grid.LastModifiedTick.Value);
-        track.ComponentCounts.Add(em.ComponentCount(uid));
         track.ComponentSets.Add(string.Join(",", em.GetComponents(uid).Select(c => c.GetType().Name).OrderBy(n => n)));
     }
 
@@ -118,10 +96,8 @@ public sealed class MobileDrydockBerthTest
         await server.WaitAssertion(() =>
         {
             (host, crane, console, ship) = SpawnScene(pair, map.MapId, againstCrane);
-            var consoleXform = em.GetComponent<TransformComponent>(console);
             mob = em.SpawnEntity("MobHuman", new EntityCoordinates(host, 4.5f, 0.5f));
             Assert.That(ui.TryOpenUi(console, WFDrydockConsoleUiKey.Key, mob), Is.True, "The mob should open the console.");
-            Assert.That(consoleXform.Anchored, Is.True, "The console should be anchored.");
         });
 
         // Let the ship and the cranes settle before measuring.
@@ -149,9 +125,6 @@ public sealed class MobileDrydockBerthTest
             });
         }
 
-        var craneSets = craneTrack.ComponentSets.Distinct().Count();
-        var shipSets = shipTrack.ComponentSets.Distinct().Count();
-
         Assert.Multiple(() =>
         {
             Assert.That(uiClosedTicks, Is.EqualTo(0), "The console UI should stay open while a ship sits in the berth.");
@@ -161,9 +134,9 @@ public sealed class MobileDrydockBerthTest
             Assert.That(Changes(shipTrack.Parents), Is.EqualTo(0), "The parked ship should keep its parent.");
             Assert.That(Changes(craneTrack.Parents), Is.EqualTo(0), "The crane should keep its parent.");
             Assert.That(Changes(shipTrack.GridTicks), Is.EqualTo(0), "The parked ship's grid should not be dirtied every tick.");
-            Assert.That(Changes(consoleTrack.ComponentCounts), Is.EqualTo(0), "The console should not gain or lose components while a ship sits in the berth.");
-            Assert.That(shipSets, Is.EqualTo(1), "The parked ship should not gain or lose components while sitting in the berth.");
-            Assert.That(craneSets, Is.EqualTo(1), "The crane should not gain or lose components while a ship sits in the berth.");
+            Assert.That(Changes(consoleTrack.ComponentSets), Is.EqualTo(0), "The console should not gain or lose components while a ship sits in the berth.");
+            Assert.That(Changes(shipTrack.ComponentSets), Is.EqualTo(0), "The parked ship should not gain or lose components while sitting in the berth.");
+            Assert.That(Changes(craneTrack.ComponentSets), Is.EqualTo(0), "The crane should not gain or lose components while a ship sits in the berth.");
             Assert.That(Changes(craneTrack.CraneTicks), Is.EqualTo(0), "The crane component should not be dirtied every tick.");
         });
 

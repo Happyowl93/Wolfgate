@@ -28,13 +28,13 @@ public sealed class WFDrydockWorkItem
     /// <summary>Stored tile type to restore.</summary>
     public int TileType;
 
-    /// <summary>Repair snapshot chunk the item belongs to.</summary>
+    /// <summary>Repair snapshot chunk of a rebuild's entity spec.</summary>
     public Vector2i ChunkPos;
 
     /// <summary>Key of the entity spec in its chunk.</summary>
     public int SpecId;
 
-    /// <summary>Entity to heal or refit, or the original entity of a missing one.</summary>
+    /// <summary>Entity to heal or refit.</summary>
     public EntityUid Target;
 
     /// <summary>Refit prototype id of a refit item.</summary>

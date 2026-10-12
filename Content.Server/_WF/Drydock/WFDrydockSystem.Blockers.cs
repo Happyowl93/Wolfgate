@@ -2,10 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Physics;
-using Robust.Shared.GameObjects;
-using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
-using Robust.Shared.Maths;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Components;
 
@@ -79,6 +76,7 @@ public sealed partial class WFDrydockSystem
         var lane = (int) MathF.Ceiling(crane.MaxArm / BlockerStep);
         for (var i = 0; i <= lane && blocker == null; i++)
         {
+            // Five samples across the arm, 0.4 tiles each side of its line.
             for (var j = -2; j <= 2 && blocker == null; j++)
             {
                 var tile = ArmTile(crane, toGrid, j * 0.2f, i * BlockerStep);
@@ -126,7 +124,6 @@ public sealed partial class WFDrydockSystem
     {
         var xform = Transform(uid);
         toGrid = Matrix3x2.CreateRotation((float) xform.LocalRotation.Theta) * Matrix3x2.CreateTranslation(xform.LocalPosition);
-        grid = null;
         gridUid = xform.GridUid ?? EntityUid.Invalid;
         if (!TryComp(gridUid, out grid))
         {

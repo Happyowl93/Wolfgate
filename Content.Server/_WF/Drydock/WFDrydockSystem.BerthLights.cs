@@ -1,5 +1,4 @@
 using Content.Shared._WF.Drydock;
-using Robust.Shared.Localization;
 
 namespace Content.Server._WF.Drydock;
 

@@ -35,7 +35,6 @@
       Glass: 3000
       Plastic: 1500
       Plastitanium: 600
-    referenceValue: 250000
 
 - type: entity
   parent: BaseComputerCircuitboard
@@ -83,9 +82,6 @@
     graph: Machine2x2
     node: machine
   - type: Sprite
-    sprite: _WF/Drydock/crane_machine.rsi
-    drawdepth: Effects
-    noRot: false
     layers:
     - state: machine
       offset: 0.5,-0.5

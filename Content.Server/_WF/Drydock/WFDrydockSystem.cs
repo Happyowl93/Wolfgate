@@ -63,10 +63,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
     private TimeSpan _nextConsoleRefresh;
 
-    /// <summary>
-    /// Estimated price and construction material value by entity prototype, since a quote prices every part a ship was
-    /// built with.
-    /// </summary>
+    /// <summary>Cached estimated price and construction material value per entity prototype.</summary>
     private readonly Dictionary<string, (double Estimate, double Materials)> _estimates = new();
 
     public override void Initialize()
@@ -163,10 +160,10 @@ public sealed partial class WFDrydockSystem : EntitySystem
                 ? new Vector2(MathF.Sign(arms.X), 0)
                 : new Vector2(0, MathF.Sign(arms.Y));
 
-        // Covers every linked crane; only working (unblocked) cranes take jobs.
-        var working = cranes.Where(uid => !Comp<WFDrydockCraneComponent>(uid).Blocked).ToList();
+        // The area covers every linked crane; only unblocked cranes take jobs.
+        cranes.RemoveAll(uid => Comp<WFDrydockCraneComponent>(uid).Blocked);
         var label = !string.IsNullOrEmpty(comp.Berth) ? comp.Berth : MetaData(console).EntityName;
-        berth = new WFDrydockBerth(grid, label, new Box2(min, max), approach, working);
+        berth = new WFDrydockBerth(grid, label, new Box2(min, max), approach, cranes);
         return true;
     }
 
@@ -184,7 +181,8 @@ public sealed partial class WFDrydockSystem : EntitySystem
                 result.Add(uid);
         }
 
-        return result.OrderBy(uid => uid.Id).ToList();
+        result.Sort((a, b) => a.Id.CompareTo(b.Id));
+        return result;
     }
 
     /// <summary>The name a console's berth goes by in messages.</summary>
@@ -210,7 +208,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
     /// <summary>
     /// The ship's value for fees and caps: its shipyard price when it was bought at one, else the price of rebuilding
-    /// it whole from its repair snapshot. Vessel is false for the rebuild price, or 0 without a snapshot.
+    /// it whole from its repair snapshot. Vessel is false for the rebuild price; (0, false) without a snapshot.
     /// </summary>
     public (int Value, bool Vessel) ShipValue(EntityUid ship, WFDrydockConsoleComponent comp)
     {
@@ -248,10 +246,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         return Math.Max(comp.MinFee, (int) Math.Round(value * comp.FeeFraction / 10) * 10);
     }
 
-    /// <summary>
-    /// Scales every item down so the work costs no more than its cap, so a wreck never costs a new ship. Restored refits
-    /// were bought separately and are charged in full, outside the cap.
-    /// </summary>
+    /// <summary>Scales items down so the repair costs no more than its cap. Refit shares are charged in full, outside it.</summary>
     private void CapRepair(EntityUid ship, WFDrydockConsoleComponent comp, List<WFDrydockWorkItem> items)
     {
         var (value, vessel) = ShipValue(ship, comp);
@@ -293,7 +288,6 @@ public sealed partial class WFDrydockSystem : EntitySystem
                     Kind = WFDrydockWorkKind.Tile,
                     TileIndex = index,
                     TileType = stored,
-                    ChunkPos = chunkPos,
                     Cost = comp.TilePrice,
                     LocalPos = new Vector2(index.X + 0.5f, index.Y + 0.5f),
                 });
@@ -312,14 +306,11 @@ public sealed partial class WFDrydockSystem : EntitySystem
                     continue;
 
                 var proto = _prototype.Index<EntityPrototype>(data.EntityPalette[spec.ProtoIndex].Id);
-                var target = TryGetOriginal(spec, out var original) ? original : EntityUid.Invalid;
-
                 items.Add(new WFDrydockWorkItem
                 {
                     Kind = WFDrydockWorkKind.Entity,
                     ChunkPos = chunkPos,
                     SpecId = specId,
-                    Target = target,
                     Cost = RebuildPrice(comp, proto),
                     Prototype = proto.ID,
                     Mounted = proto.TryGetComponent<HardpointAnchorableOnlyComponent>(out _, Factory),
@@ -428,7 +419,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
         var entity = Spawn(data.EntityPalette[spec.ProtoIndex].Id, new EntityCoordinates(ship, spec.LocalPosition));
         _transform.SetLocalRotation(entity, spec.Rotation);
-        // A rebuild comes back stock; the refits the ship owns bring it back to tier, as its quote charged.
+        // Rebuilds spawn stock; reapply the ship's owned refits, which the quote charged for.
         foreach (var (refit, owned) in _refits.Owned(ship))
         {
             _refits.Apply(refit, entity, owned.Tier);
@@ -564,13 +555,18 @@ public sealed partial class WFDrydockSystem : EntitySystem
             CountWork(state, items);
             AddMarks(state, items);
 
-            if (pay != null && job == null && items.Count > 0)
+            if (job == null && items.Count > 0)
             {
-                AssignMaterials(berthed, comp, pay, items);
-                state.RepairMaterials = SumBills(items);
+                if (pay != null)
+                {
+                    AssignMaterials(berthed, comp, pay, items);
+                    state.RepairMaterials = SumBills(items);
+                }
+                else
+                {
+                    state.RepairPrice = WorkPrice(berthed, comp, null, items);
+                }
             }
-            else if (job == null && items.Count > 0)
-                state.RepairPrice = WorkPrice(berthed, comp, null, items);
         }
 
         if (job != null)
@@ -779,7 +775,6 @@ public sealed partial class WFDrydockSystem : EntitySystem
         job.Payer = payer;
         job.PaidInMaterials = paidInMaterials;
         job.Total = items.Count;
-        job.Done = 0;
 
         AddSlots(console, comp, job);
         CollectSparkTiles(ship, job);
@@ -787,7 +782,6 @@ public sealed partial class WFDrydockSystem : EntitySystem
         // Boom paths are cached before the cranes swing out, so their first targets use them.
         ScanJobBooms(job);
 
-        // The cranes swing out over the ship and extend to its size before any work begins.
         var curTime = _timing.CurTime;
         var deploy = DeployCranes(comp, job);
         var maxDuration = items[0].Kind == WFDrydockWorkKind.Upgrade ? comp.MaxRefitDuration : comp.MaxDuration;

@@ -1,5 +1,4 @@
 using Content.Shared.Examine;
-using Robust.Shared.Localization;
 
 namespace Content.Shared._WF.Drydock;
 
@@ -17,8 +16,9 @@ public sealed class WFDrydockCraneExamineSystem : EntitySystem
 
     private void OnExamined(EntityUid uid, WFDrydockCraneComponent comp, ExaminedEvent args)
     {
-        args.PushMarkup(comp.LinkedConsole is { } console
-            ? Loc.GetString("drydock-crane-examine-linked", ("console", MetaData(console).EntityName))
+        // The console can be outside the examiner's PVS.
+        args.PushMarkup(comp.LinkedConsole is { } console && TryComp(console, out MetaDataComponent? meta)
+            ? Loc.GetString("drydock-crane-examine-linked", ("console", meta.EntityName))
             : Loc.GetString("drydock-crane-examine-unlinked"));
         if (comp.Blocker is { } blocker)
             args.PushMarkup(Loc.GetString("drydock-crane-examine-blocked", ("blocker", blocker)));

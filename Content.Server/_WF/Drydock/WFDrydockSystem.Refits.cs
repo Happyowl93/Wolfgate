@@ -1,6 +1,5 @@
 using System.Linq;
 using Content.Shared._WF.Drydock;
-using Robust.Shared.Localization;
 
 namespace Content.Server._WF.Drydock;
 
@@ -47,7 +46,7 @@ public sealed partial class WFDrydockSystem
     private string? BuildRefitWork(EntityUid ship, WFDrydockConsoleComponent comp, string refitId, out List<WFDrydockWorkItem> items)
     {
         items = new List<WFDrydockWorkItem>();
-        if (!comp.Refits.Any(r => r.Id == refitId) || !_prototype.TryIndex<WFShipRefitPrototype>(refitId, out var refit))
+        if (!comp.Refits.Contains(refitId) ||!_prototype.TryIndex<WFShipRefitPrototype>(refitId, out var refit))
             return Loc.GetString("drydock-console-unknown-refit");
 
         var tier = _refits.NextTier(ship, refit, out var survey);

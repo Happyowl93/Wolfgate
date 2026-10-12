@@ -53,7 +53,7 @@ public sealed partial class WFDrydockJobComponent : Component
     [ViewVariables]
     public EntityUid Ship;
 
-    /// <summary>Player who paid for the job; refunded on abort.</summary>
+    /// <summary>Player who paid for the job; refunded for skipped and unfinished items.</summary>
     [ViewVariables]
     public EntityUid? Payer;
 
@@ -79,7 +79,7 @@ public sealed partial class WFDrydockJobComponent : Component
     [ViewVariables]
     public int SkippedRefund;
 
-    /// <summary>Whether the job was paid in materials, so refunds go back into its first crane.</summary>
+    /// <summary>Whether the job was paid in materials, so refunds return materials instead of credits.</summary>
     [ViewVariables]
     public bool PaidInMaterials;
 

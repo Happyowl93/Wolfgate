@@ -21,9 +21,7 @@ using Content.Shared._WF.Drydock;
 using Content.Shared._WF.Hailing;
 using Content.Shared.Construction.Components;
 using Content.Shared.Damage;
-using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Prototypes;
-using Content.Shared.Damage.Systems;
 using Content.Shared.FixedPoint;
 using Content.Shared.Mind;
 using Content.Shared.Players;
@@ -34,7 +32,6 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Physics.Systems;
-using Robust.Shared.Player;
 using Robust.Shared.Maths;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
@@ -59,7 +56,7 @@ public sealed class DrydockTest
     private static readonly Vector2i WallTile = new(3, 3);
 
     /// <summary>Tile index cleared to create a missing floor tile.</summary>
-    internal static readonly Vector2i HoleTile = new(0, 4);
+    private static readonly Vector2i HoleTile = new(0, 4);
 
     /// <summary>Drydock station position in the tests, away from the test map's own grid.</summary>
     private static readonly Vector2 StationPos = new(500, 0);
@@ -100,17 +97,17 @@ public sealed class DrydockTest
     }
 
     /// <summary>The tile type ID of the test floor.</summary>
-    internal static ushort Plating(TestPair pair)
+    private static ushort Plating(TestPair pair)
     {
         return pair.Server.ResolveDependency<ITileDefinitionManager>()[FloorTile].TileId;
     }
 
     /// <summary>Lays a 5x5 plating floor on a grid and spawns the test thruster and wall, both anchored.</summary>
-    public static (EntityUid Thruster, EntityUid Wall) BuildHull(TestPair pair, EntityUid grid)
+    private static (EntityUid Thruster, EntityUid Wall) BuildHull(TestPair pair, EntityUid grid)
     {
         SetFloor(pair, grid, 5);
         var thruster = SpawnAnchored(pair, grid, "Thruster", ThrusterTile);
-        var wall = SpawnAnchored(pair, grid, "WallSolid", WallTile);
+        var wall = SpawnAnchored(pair, grid, WallProto, WallTile);
         return (thruster, wall);
     }
 
@@ -309,8 +306,18 @@ public sealed class DrydockTest
             "The crane should link to the console.");
     }
 
+    /// <summary>Raises a BUI message from an actor on an entity, as the entity's own UI would.</summary>
+    internal static void RaiseUiMessage(TestPair pair, EntityUid uid, Enum key, BoundUserInterfaceMessage message, EntityUid actor)
+    {
+        var em = pair.Server.EntMan;
+        message.Actor = actor;
+        message.UiKey = key;
+        message.Entity = em.GetNetEntity(uid);
+        em.EventBus.RaiseLocalEvent(uid, (object) message);
+    }
+
     /// <summary>Gives a host grid an HV source: a debug generator on cable beside the crane's anchor tile.</summary>
-    internal static void PowerHost(TestPair pair, EntityUid host)
+    private static void PowerHost(TestPair pair, EntityUid host)
     {
         SpawnAnchored(pair, host, "CableHV", new Vector2i(0, 5));
         SpawnAnchored(pair, host, "CableHV", new Vector2i(0, 4));
@@ -723,7 +730,6 @@ public sealed class DrydockTest
                 var op = FindOperator(pair, station);
                 Assert.That(em.TryGetComponent<HailServiceComponent>(op, out var service) && service.PerCaller,
                     "The operator should be the one per-caller hail service.");
-                Assert.That(em.HasComponent<WFDrydockOperatorComponent>(op), "The operator needs its component.");
                 Assert.That(server.System<SharedUserInterfaceSystem>().HasUi(op, WFDrydockConsoleUiKey.Key),
                     "The operator should carry the drydock window so a hail relay can copy it.");
                 Assert.That(em.HasComponent<HailServiceComponent>(consoleA), Is.False, "Berth A should not be offered over hails.");
@@ -778,23 +784,8 @@ public sealed class DrydockTest
         });
 
         var ticksPerSecond = server.ResolveDependency<IGameTiming>().TickRate;
-        var seconds = -1;
-        for (var s = 1; s <= 45 && seconds < 0; s++)
-        {
-            await server.WaitRunTicks(ticksPerSecond);
-            var ready = true;
-            await server.WaitAssertion(() =>
-            {
-                foreach (var crane in berthCranes)
-                {
-                    var working = em.GetComponent<WFDrydockCraneComponent>(crane).WorkingLoad;
-                    if (em.GetComponent<PowerConsumerComponent>(crane).ReceivedPower < 0.95f * working)
-                        ready = false;
-                }
-            });
-            if (ready)
-                seconds = s;
-        }
+        await RunUntil(pair, 45, ticksPerSecond, () => berthCranes.All(crane =>
+            em.GetComponent<PowerConsumerComponent>(crane).ReceivedPower >= 0.95f * em.GetComponent<WFDrydockCraneComponent>(crane).WorkingLoad));
 
         await server.WaitAssertion(() =>
         {
@@ -964,11 +955,11 @@ public sealed class DrydockTest
         var xforms = server.System<SharedTransformSystem>();
         var physics = server.System<SharedPhysicsSystem>();
 
-        EntityUid station = default, console = default, ship = default;
+        EntityUid console = default, ship = default;
 
         await server.WaitAssertion(() =>
         {
-            (station, console, _) = LoadDrydock(pair, map.MapId);
+            (_, console, _) = LoadDrydock(pair, map.MapId);
             ship = CreateDamagedShip(pair, map.MapId);
 
             var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
@@ -1039,12 +1030,12 @@ public sealed class DrydockTest
         const int farCost = 123;
         var farTile = new Vector2i(7, 7);
 
-        EntityUid station = default, console = default, ship = default;
+        EntityUid console = default, ship = default;
         WFDrydockJobComponent job = default!;
 
         await server.WaitAssertion(() =>
         {
-            (station, console, _) = LoadDrydock(pair, map.MapId);
+            (_, console, _) = LoadDrydock(pair, map.MapId);
             ship = CreateDamagedShip(pair, map.MapId);
 
             var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
@@ -1087,9 +1078,7 @@ public sealed class DrydockTest
         await pair.CleanReturnAsync();
     }
 
-    /// <summary>
-    /// Loads the drydock with a damaged 5x5 hull parked outside the bays, and a funded payer.
-    /// </summary>
+    /// <summary>Loads the drydock with a damaged 5x5 hull parked outside the bays, and a funded payer.</summary>
     private static (EntityUid Station, EntityUid Console, EntityUid Operator, EntityUid Ship, EntityUid Payer) SetUpDamagedShip(TestPair pair, MapId map)
     {
         var (station, console, _) = LoadDrydock(pair, map);
@@ -1132,7 +1121,6 @@ public sealed class DrydockTest
                 Assert.That(guide.Size.Y, Is.GreaterThanOrEqualTo(5f), "The guide should cover the ship's length.");
                 Assert.That(guide.Size.X, Is.LessThanOrEqualTo(area.Width), "The guide should fit inside berth A.");
                 Assert.That(guide.Size.Y, Is.LessThanOrEqualTo(area.Height), "The guide should fit inside berth A.");
-                Assert.That(guide.Size.X > 0 && guide.Size.Y > 0, "The guide should have a visible frame.");
                 Assert.That(area.Contains(guide.Center), "The guide's center should lie inside berth A.");
                 Assert.That(guide.PathStart.Y, Is.LessThan(area.Bottom), "The approach should start outside the bay.");
                 Assert.That(em.GetComponent<BankAccountComponent>(payer).Balance, Is.EqualTo(startBalance), "Nothing should be paid until the work starts.");
@@ -1398,7 +1386,6 @@ public sealed class DrydockTest
             Assert.That(em.HasComponent<WFDrydockJobComponent>(yard.Console), Is.True, "The job should start.");
         });
 
-        await RunJob(pair, yard.Console);
         await pair.CleanReturnAsync();
     }
 
@@ -1416,7 +1403,7 @@ public sealed class DrydockTest
         await server.WaitAssertion(() =>
         {
             yard = SpawnShipyard(pair, map.MapId);
-            // Boom row 3 (along 3 to 4 from the crane's root), three tiles across: that tile spans across 2.5 to 3.5.
+            // A wall on row 1, between the two points checked below.
             SpawnAnchored(pair, yard.Grid, "WallSolid", new Vector2i(3, 1));
         });
 

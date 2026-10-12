@@ -13,7 +13,7 @@ public sealed partial class HailServiceComponent : Component
     [DataField(required: true)]
     public LocId Name;
 
-    /// <summary>UI key of the console's interface to relay.</summary>
+    /// <summary>UI key of the service's interface to relay.</summary>
     [DataField(required: true, customTypeSerializer: typeof(EnumSerializer))]
     public Enum Key = default!;
 

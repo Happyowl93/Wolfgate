@@ -60,6 +60,8 @@ public sealed partial class HailResponderSystem : EntitySystem
             switch (hail.State)
             {
                 case HailState.Ringing:
+                    // A new call can ring before a tick sees the last one end.
+                    responder.Greeted = false;
                     if (now >= hail.StateTime + TimeSpan.FromSeconds(responder.AnswerDelay))
                         _hailing.Answer(console, uid, true);
 

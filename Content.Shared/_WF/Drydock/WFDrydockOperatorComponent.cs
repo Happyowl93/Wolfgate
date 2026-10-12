@@ -1,5 +1,3 @@
-using Robust.Shared.ViewVariables;
-
 namespace Content.Shared._WF.Drydock;
 
 /// <summary>

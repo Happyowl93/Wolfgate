@@ -1,7 +1,7 @@
 namespace Content.Server._WF.Hailing;
 
 /// <summary>
-/// Service windows relayed onto a helm. Not saved.
+/// Hail service windows relayed onto a helm.
 /// </summary>
 [RegisterComponent, UnsavedComponent]
 public sealed partial class HailRelayComponent : Component

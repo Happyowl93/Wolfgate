@@ -1,7 +1,5 @@
-# Ship refits sold at the drydock. A ship owns a line's tier; each tier swaps the line's machine parts for higher-rated
-# ones, so the effect counts machine parts as units. Price and materials are per part (a thruster has 1, a gyroscope 3,
-# a SMES 8). Materials run about twice the advanced and super part lathe recipes; Mk III and Mk IV add silver, gold and
-# uranium, and Mk IV two bluespace crystals per part.
+# Ship refits sold at the drydock. Each tier swaps the line's machine parts for higher-rated ones; price and materials
+# are per part (a thruster has 1, a gyroscope 3, a SMES 8), at about twice the matching part lathe recipes.
 
 - type: wfShipRefit
   id: WFRefitThrusters

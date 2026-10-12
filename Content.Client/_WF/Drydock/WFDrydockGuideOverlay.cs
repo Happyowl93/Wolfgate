@@ -2,8 +2,6 @@ using System.Numerics;
 using Content.Shared._WF.Drydock;
 using Robust.Client.Graphics;
 using Robust.Shared.Enums;
-using Robust.Shared.GameObjects;
-using Robust.Shared.Maths;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 

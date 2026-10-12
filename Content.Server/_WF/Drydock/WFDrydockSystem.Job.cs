@@ -175,7 +175,6 @@ public sealed partial class WFDrydockSystem
         if (slot.Item == null && job.Pending.Count > 0)
             StartSlot(comp, job, slot, curTime);
 
-        // Still travelling to the item, the crane cannot reach it, or it is stalled.
         if (slot.Item is { } item && curTime >= slot.WorkFrom && !slot.Unreachable && !slot.Stalled)
             WorkItem(comp, job.Ship, slot, item, curTime);
 
@@ -211,13 +210,15 @@ public sealed partial class WFDrydockSystem
     private void UpdatePower(WFDrydockConsoleComponent comp, WFDrydockJobComponent job, float frameTime)
     {
         var lowest = 1f;
-        var allStalled = job.Slots.Any(s => s.Crane != null);
+        var anyCrane = false;
+        var allStalled = true;
         foreach (var slot in job.Slots)
         {
             var ratio = 1f;
             var blocked = false;
             if (slot.Crane is { } craneUid)
             {
+                anyCrane = true;
                 ratio = CranePower(craneUid);
                 if (TryComp<WFDrydockCraneComponent>(craneUid, out var crane))
                 {
@@ -237,7 +238,7 @@ public sealed partial class WFDrydockSystem
         }
 
         job.Power = lowest;
-        job.Unpowered = allStalled ? job.Unpowered + frameTime : 0f;
+        job.Unpowered = anyCrane && allStalled ? job.Unpowered + frameTime : 0f;
         job.Deadline += TimeSpan.FromSeconds((1 - lowest) * frameTime);
     }
 

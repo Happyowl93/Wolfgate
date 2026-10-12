@@ -7,7 +7,6 @@ using Content.Shared.Construction.Components;
 using Content.Shared.Construction.Prototypes;
 using Content.Shared.Stacks;
 using Robust.Shared.Containers;
-using Robust.Shared.GameObjects;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Prototypes;
 
@@ -225,7 +224,8 @@ public sealed class WFPartRefitSystem : EntitySystem
 
     private void OnPrototypesReloaded(PrototypesReloadedEventArgs args)
     {
-        RebuildReplacements();
+        if (args.WasModified<EntityPrototype>())
+            RebuildReplacements();
     }
 
     /// <summary>Maps each (part type, rating) to a stock part prototype, preferring "StockPart" IDs for determinism.</summary>

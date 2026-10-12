@@ -23,7 +23,6 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Maths;
 using Robust.Shared.Map;
 using Robust.Shared.Physics;
-using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Collision.Shapes;
 using Robust.Shared.Prototypes;
 
@@ -33,7 +32,7 @@ namespace Content.IntegrationTests.Tests._WF.Drydock;
 [TestFixture]
 public sealed class MobileDrydockTest
 {
-    internal static readonly string[] StockMaterials = { "Steel", "Plasteel", "Glass", "Plastic" };
+    private static readonly string[] StockMaterials = { "Steel", "Plasteel", "Glass", "Plastic" };
     private static readonly EntProtoId PlastitaniumWall = "WallPlastitanium";
     private static readonly EntProtoId ShuttleWall = "WallShuttle";
 
@@ -78,10 +77,33 @@ public sealed class MobileDrydockTest
     }
 
     /// <summary>Whether a crane has at least half its draw, the power a job needs to start.</summary>
-    internal static bool CraneHasPower(TestPair pair, EntityUid crane)
+    private static bool CraneHasPower(TestPair pair, EntityUid crane)
     {
         var consumer = pair.Server.EntMan.GetComponent<PowerConsumerComponent>(crane);
         return consumer.ReceivedPower >= 0.5f * consumer.DrawRate;
+    }
+
+    /// <summary>Ticks until a crane has the power a job needs, failing if it never does.</summary>
+    internal static async Task WaitForCranePower(TestPair pair, EntityUid crane)
+    {
+        await DrydockTest.RunUntil(pair, 100, 10, () => CraneHasPower(pair, crane));
+        Assert.That(CraneHasPower(pair, crane), Is.True, "The mobile crane should be powered.");
+    }
+
+    /// <summary>Fills a material storage with 10,000 of each stock material.</summary>
+    internal static void Stock(TestPair pair, EntityUid uid)
+    {
+        var em = pair.Server.EntMan;
+        Assert.That(pair.Server.System<SharedMaterialStorageSystem>().TryChangeMaterialAmount((uid, em.GetComponent<MaterialStorageComponent>(uid)),
+            StockMaterials.ToDictionary(m => m, _ => 10_000)), Is.True, $"{em.ToPrettyString(uid)} should take its stock.");
+    }
+
+    /// <summary>Spawns a material silo on a yard, off the arm column and clear of the console, always powered so it needs no APC.</summary>
+    internal static EntityUid SpawnSilo(TestPair pair, EntityUid host)
+    {
+        var silo = DrydockTest.SpawnAnchored(pair, host, "MachineMaterialSilo", new Vector2i(5, 2));
+        pair.Server.System<SharedPowerReceiverSystem>().SetNeedsPower(silo, false);
+        return silo;
     }
 
     /// <summary>The material bill a console quotes for a ship's repair: each item's cost times the console's rates.</summary>
@@ -104,6 +126,7 @@ public sealed class MobileDrydockTest
 
         return bill;
     }
+
     /// <summary>A mobile crane holds the sheets a repair's bill is paid in, and the console holds none.</summary>
     [Test]
     public async Task MaterialConsoleChargesMaterials()
@@ -124,20 +147,17 @@ public sealed class MobileDrydockTest
         await server.WaitAssertion(() =>
         {
             (console, crane, ship, payer) = SetUpMobileRepair(pair, map.MapId);
-            var storage = em.GetComponent<MaterialStorageComponent>(crane);
-            Assert.That(materials.TryChangeMaterialAmount((crane, storage),
-                StockMaterials.ToDictionary(m => m, _ => 10_000)), Is.True, "The crane should take its stock.");
+            Stock(pair, crane);
 
             bill = QuotedBill(pair, console, ship);
             Assert.That(bill.GetValueOrDefault("Steel"), Is.GreaterThan(0), "The repair should quote steel.");
             Assert.That(bank.TryGetBalance(payer, out bankBefore), Is.True, "The payer should have an account.");
         });
 
-        await DrydockTest.RunUntil(pair, 100, 10, () => CraneHasPower(pair, crane));
+        await WaitForCranePower(pair, crane);
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(CraneHasPower(pair, crane), Is.True, "The mobile crane should be powered.");
             var storage = em.GetComponent<MaterialStorageComponent>(crane);
             foreach (var id in bill.Keys)
                 before[id] = materials.GetMaterialAmount(crane, id, storage, localOnly: true);
@@ -234,27 +254,19 @@ public sealed class MobileDrydockTest
         await server.WaitAssertion(() =>
         {
             (console, crane, ship, payer) = SetUpMobileRepair(pair, map.MapId);
-            var grid = server.System<SharedTransformSystem>().GetGrid(console)!.Value;
-
-            // Off the arm column (x = 0) and clear of the console at (5, 0).
-            silo = DrydockTest.SpawnAnchored(pair, grid, "MachineMaterialSilo", new Vector2i(5, 2));
-            // Always powered, so the test does not need an APC on the grid.
-            server.System<SharedPowerReceiverSystem>().SetNeedsPower(silo, false);
-            var siloStorage = em.GetComponent<MaterialStorageComponent>(silo);
-            Assert.That(materials.TryChangeMaterialAmount((silo, siloStorage),
-                StockMaterials.ToDictionary(m => m, _ => 10_000)), Is.True, "The silo should take its stock.");
+            silo = SpawnSilo(pair, server.System<SharedTransformSystem>().GetGrid(console)!.Value);
+            Stock(pair, silo);
 
             bill = QuotedBill(pair, console, ship);
             Assert.That(bill.GetValueOrDefault("Steel"), Is.GreaterThan(0), "The repair should quote steel.");
             Assert.That(bank.TryGetBalance(payer, out bankBefore), Is.True, "The payer should have an account.");
         });
 
-        await DrydockTest.RunUntil(pair, 100, 10, () => CraneHasPower(pair, crane));
+        await WaitForCranePower(pair, crane);
         await DrydockTest.RunUntil(pair, 100, 10, () => em.GetComponent<ApcPowerReceiverComponent>(silo).Powered);
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(CraneHasPower(pair, crane), Is.True, "The mobile crane should be powered.");
             Assert.That(em.GetComponent<ApcPowerReceiverComponent>(silo).Powered, Is.True, "The silo should be powered.");
 
             // Link the crane with the silo's toggle message, as its window sends it.
@@ -317,11 +329,10 @@ public sealed class MobileDrydockTest
             Assert.That(bank.TryGetBalance(payer, out bankBefore), Is.True, "The payer should have an account.");
         });
 
-        await DrydockTest.RunUntil(pair, 100, 10, () => CraneHasPower(pair, crane));
+        await WaitForCranePower(pair, crane);
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(CraneHasPower(pair, crane), Is.True, "The mobile crane should be powered.");
             var storage = em.GetComponent<MaterialStorageComponent>(crane);
             var steelBefore = materials.GetMaterialAmount(crane, "Steel", storage, localOnly: true);
 
@@ -355,11 +366,11 @@ public sealed class MobileDrydockTest
             Assert.That(em.GetComponent<MachineBoardComponent>(board).Prototype.Id, Is.EqualTo("WFMobileDrydockCrane"),
                 "The crane board should build a mobile drydock crane.");
 
-            var unlocks = protos.Index(Shuttlecraft).RecipeUnlocks.Select(r => r.ToString()).ToList();
+            var unlocks = protos.Index(Shuttlecraft).RecipeUnlocks;
             Assert.Multiple(() =>
             {
-                Assert.That(unlocks, Does.Contain("WFComputerMobileDrydockCircuitboard"), "Shuttlecraft should unlock the console board.");
-                Assert.That(unlocks, Does.Contain("WFMobileDrydockCraneMachineCircuitboard"), "Shuttlecraft should unlock the crane board.");
+                Assert.That(unlocks, Does.Contain(ConsoleBoardRecipe), "Shuttlecraft should unlock the console board.");
+                Assert.That(unlocks, Does.Contain(CraneBoardRecipe), "Shuttlecraft should unlock the crane board.");
                 Assert.That(protos.HasIndex(ConsoleBoardRecipe), Is.True, "The console board recipe should exist.");
                 Assert.That(protos.HasIndex(CraneBoardRecipe), Is.True, "The crane board recipe should exist.");
             });
@@ -371,14 +382,7 @@ public sealed class MobileDrydockTest
     /// <summary>Raises the walk-in berth light toggle from an actor, as the console's own UI would.</summary>
     private static void ToggleBerthLights(TestPair pair, EntityUid console, EntityUid actor)
     {
-        var em = pair.Server.EntMan;
-        var message = new WFDrydockToggleBerthLightsMessage
-        {
-            Actor = actor,
-            UiKey = WFDrydockConsoleUiKey.Key,
-            Entity = em.GetNetEntity(console),
-        };
-        em.EventBus.RaiseLocalEvent(console, (object) message);
+        DrydockTest.RaiseUiMessage(pair, console, WFDrydockConsoleUiKey.Key, new WFDrydockToggleBerthLightsMessage(), actor);
     }
 
     /// <summary>Berth lights frame the console's berth on its grid, toggle off on a second press, and go out when a job starts.</summary>
@@ -390,7 +394,6 @@ public sealed class MobileDrydockTest
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
         var drydock = server.System<WFDrydockSystem>();
-        var materials = server.System<SharedMaterialStorageSystem>();
 
         EntityUid console = default, crane = default, ship = default, payer = default;
         WFDrydockBerth berth = default;
@@ -398,15 +401,13 @@ public sealed class MobileDrydockTest
         await server.WaitAssertion(() =>
         {
             (console, crane, ship, payer) = SetUpMobileRepair(pair, map.MapId);
-            var storage = em.GetComponent<MaterialStorageComponent>(crane);
-            Assert.That(materials.TryChangeMaterialAmount((crane, storage),
-                StockMaterials.ToDictionary(m => m, _ => 10_000)), Is.True, "The crane should take its stock.");
+            Stock(pair, crane);
 
             var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
             Assert.That(drydock.TryGetBerth(console, comp, out berth), Is.True, "The console should have a berth.");
         });
 
-        await DrydockTest.RunUntil(pair, 100, 10, () => CraneHasPower(pair, crane));
+        await WaitForCranePower(pair, crane);
 
         await server.WaitAssertion(() =>
         {
@@ -441,7 +442,7 @@ public sealed class MobileDrydockTest
     [Test]
     public async Task MobileCraneUsesMachine2x2Graph()
     {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
@@ -465,7 +466,7 @@ public sealed class MobileDrydockTest
     [Test]
     public async Task MobileCraneFrameCoversCraneTiles()
     {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
@@ -511,7 +512,7 @@ public sealed class MobileDrydockTest
     [Test]
     public async Task MobileMachinesUnanchorRotateAndOpenPanel()
     {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
@@ -542,7 +543,7 @@ public sealed class MobileDrydockTest
     [Test]
     public async Task StationDrydockMachinesCannotBeUnwrenched()
     {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
@@ -570,7 +571,7 @@ public sealed class MobileDrydockTest
     [Test]
     public async Task MobileBerthStartsPastTheGap()
     {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
@@ -615,7 +616,7 @@ public sealed class MobileDrydockTest
     [Test]
     public async Task WirecuttersMirrorUnboltedMobileCrane()
     {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
