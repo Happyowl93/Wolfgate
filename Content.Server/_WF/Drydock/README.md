@@ -36,10 +36,13 @@ Jobs restore missing hull tiles and entities and heal damage from the ship's rep
 (`ShipRepairDataComponent`). A repair costs 120 cr per hull tile, and 60 cr labor plus the more of twice an entity's
 estimated price and 35% of its construction materials' value (`WFDrydockSystem.Construction.cs`) to rebuild it. A
 plastitanium wall, built from four 600 cr sheets but priced low so it doesn't sell, comes to about 960 cr, three times
-a shuttle wall. Healing costs that rebuild price times the share of health lost. The work is capped at 70% of the ship's
+a shuttle wall. Healing costs that rebuild price times the share of health lost. The work is capped at 50% of the ship's
 shipyard price (`VesselComponent`), or 40% of its full rebuild price for ships not bought at one, so a wreck never costs
-a new ship. A fee of 2.5% of that value (at least 1,500 cr) comes on top and is never refunded. Losing 15% of a ship
-costs about a quarter of its price. Refits swap the machine parts of thrusters, gyroscopes and power systems for
+a new ship. A ship bought with a voucher (`ShuttleDeedComponent`) is valued at 20% of its price, since its faction paid
+a lathe recipe for the hull and a repair has to undercut printing another card. A fee of 2.5% of that value (at least
+1,500 cr) comes on top and is never refunded. Losing 15% of a ship costs about a quarter of its price. A job runs at
+most 10 minutes (`maxDuration`); longer work is sped up to fit. When it ends, the console says so on its radio channel
+(`noticeChannel`, Common; the mobile console has none) as well as at the console and to a payer elsewhere. Refits swap the machine parts of thrusters, gyroscopes and power systems for
 higher-rated stock parts, one tier at a time (`upgrades.yml`), priced per stock part swapped: 1,000 cr for Mk II, 4,000
 for Mk III and 10,000 for Mk IV, so an 8-part SMES costs eight times a 1-part thruster. Cranes take the nearest item and skip any item they cannot reach within 10 s,
 refunding its cost.
@@ -160,6 +163,7 @@ and `WFDrydockConsoleWindow` (the console deck and its berth plot).
 
 ## Non-modular edits
 
+- [`Resources/Prototypes/_Mono/Entities/Objects/Devices/ship_vouchers.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Devices/ship_vouchers.yml): single use, so a drydock repair undercuts printing another card
 - [`Resources/Prototypes/Recipes/Lathes/Packs/science.yml`](../../../Resources/Prototypes/Recipes/Lathes/Packs/science.yml): mobile drydock boards
 - [`Resources/Prototypes/Research/industrial.yml`](../../../Resources/Prototypes/Research/industrial.yml): mobile drydock boards
 

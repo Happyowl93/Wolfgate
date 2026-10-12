@@ -28,6 +28,8 @@
   - type: WFDrydockConsole
     minFee: 0
     feeFraction: 0
+    # The crew is aboard; no radio notice.
+    noticeChannel: null
   - type: WFDrydockMaterialPayment
     rates:
       Steel: 0.055

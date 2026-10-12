@@ -4,9 +4,11 @@ using System.Linq;
 using System.Numerics;
 using Content.Server.Audio;
 using Content.Server.Power.Components;
+using Content.Server.Radio.EntitySystems;
 using Robust.Server.GameStates;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Popups;
+using Content.Shared.Radio.Components;
 using Robust.Shared.Audio;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Localization;
@@ -22,6 +24,7 @@ public sealed partial class WFDrydockSystem
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private AmbientSoundSystem _ambient = default!;
     [Dependency] private PvsOverrideSystem _pvs = default!;
+    [Dependency] private RadioSystem _radio = default!;
 
     /// <summary>Time between checks that a worked ship still sits in its berth.</summary>
     private static readonly TimeSpan BerthCheckInterval = TimeSpan.FromSeconds(1);
@@ -639,7 +642,7 @@ public sealed partial class WFDrydockSystem
     {
         if (end == JobEnd.Finished)
         {
-            Notify(console, job, job.Skipped == 0
+            Notify(console, comp, job, job.Skipped == 0
                 ? Loc.GetString("drydock-console-finished", ("ship", Name(job.Ship)))
                 : job.PaidInMaterials
                     ? Loc.GetString("drydock-console-finished-skipped-materials", ("ship", Name(job.Ship)), ("count", job.Skipped), ("refund", FormatMaterials(job.SkippedMaterials)))
@@ -653,14 +656,14 @@ public sealed partial class WFDrydockSystem
             if (job.PaidInMaterials)
             {
                 var returned = ReturnMaterials(console, JobCranes(job), unfinished);
-                Notify(console, job, Loc.GetString(powerLost ? "drydock-console-aborted-power-materials" : "drydock-console-aborted-materials",
+                Notify(console, comp, job, Loc.GetString(powerLost ? "drydock-console-aborted-power-materials" : "drydock-console-aborted-materials",
                     ("refund", FormatMaterials(returned))));
             }
             else
             {
                 var refund = unfinished.Sum(i => i.Cost);
                 Refund(job, refund);
-                Notify(console, job, Loc.GetString(powerLost ? "drydock-console-aborted-power" : "drydock-console-aborted", ("refund", refund)));
+                Notify(console, comp, job, Loc.GetString(powerLost ? "drydock-console-aborted-power" : "drydock-console-aborted", ("refund", refund)));
             }
             _audio.PlayPvs(comp.DenySound, console);
         }
@@ -676,12 +679,19 @@ public sealed partial class WFDrydockSystem
         return job.Pending.Concat(job.Slots.Where(s => s.Item != null).Select(s => s.Item!)).ToList();
     }
 
-    /// <summary>Pops a job message at the console, and on the payer when they ordered it from their own ship.</summary>
-    private void Notify(EntityUid console, WFDrydockJobComponent job, string message)
+    /// <summary>Pops a job message at the console, on a payer who ordered it from their own ship, and on the console's radio channel.</summary>
+    private void Notify(EntityUid console, WFDrydockConsoleComponent comp, WFDrydockJobComponent job, string message)
     {
         _popup.PopupEntity(message, console, PopupType.Medium);
 
         if (job.Payer is { } payer && !TerminatingOrDeleted(payer) && Transform(payer).GridUid != Transform(console).GridUid)
             _popup.PopupEntity(message, payer, payer, PopupType.Medium);
+
+        // Heard without a telecom server, as an intercom is, so a crew that left to do something else is called back.
+        if (comp.NoticeChannel is { } channel)
+        {
+            EnsureComp<TelecomExemptComponent>(console);
+            _radio.SendRadioMessage(console, message, channel, console);
+        }
     }
 }

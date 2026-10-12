@@ -1,3 +1,4 @@
+using Content.Shared.Radio;
 using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
 
@@ -70,7 +71,14 @@ public sealed partial class WFDrydockConsoleComponent : Component
 
     /// <summary>Most a repair's work may cost, as a share of the ship's shipyard price; the fee comes on top.</summary>
     [DataField]
-    public float CapFraction = 0.7f;
+    public float CapFraction = 0.5f;
+
+    /// <summary>
+    /// Share of its shipyard price a ship bought with a voucher is valued at, since its faction paid a lathe recipe for
+    /// the hull, not the price. A repair has to undercut printing another card.
+    /// </summary>
+    [DataField]
+    public float VoucherValueFraction = 0.2f;
 
     /// <summary>
     /// Most a repair's work may cost, as a share of its full rebuild price, for ships not bought at a shipyard. A full
@@ -97,7 +105,11 @@ public sealed partial class WFDrydockConsoleComponent : Component
 
     /// <summary>Longest job duration in seconds; longer jobs scale every item's work time down.</summary>
     [DataField]
-    public float MaxDuration = 1800f;
+    public float MaxDuration = 600f;
+
+    /// <summary>Radio channel a finished or aborted job is announced on, so a crew can leave and come back. Null for none.</summary>
+    [DataField]
+    public ProtoId<RadioChannelPrototype>? NoticeChannel = "Common";
 
     /// <summary>Seconds every berth crane may stay unpowered during a job before it is aborted and refunded.</summary>
     [DataField]
