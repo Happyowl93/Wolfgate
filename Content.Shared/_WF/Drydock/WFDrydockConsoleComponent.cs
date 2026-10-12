@@ -95,9 +95,15 @@ public sealed partial class WFDrydockConsoleComponent : Component
     [DataField]
     public float UpgradeWorkTime = 60f;
 
-    /// <summary>Longest job duration in seconds; longer jobs scale every item's work time down.</summary>
+    /// <summary>
+    /// Longest repair in seconds at full power, crane deploy and travel included; longer work is sped up to fit.
+    /// </summary>
     [DataField]
     public float MaxDuration = 600f;
+
+    /// <summary>Longest refit in seconds at full power, as <see cref="MaxDuration"/> is for repairs.</summary>
+    [DataField]
+    public float MaxRefitDuration = 180f;
 
     /// <summary>Radio channel a finished or aborted job is announced on, so a crew can leave and come back. Null for none.</summary>
     [DataField]

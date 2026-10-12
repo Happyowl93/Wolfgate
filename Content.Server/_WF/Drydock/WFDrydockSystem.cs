@@ -815,7 +815,6 @@ public sealed partial class WFDrydockSystem : EntitySystem
         job.Done = 0;
 
         AddSlots(console, comp, job);
-        QueueItems(comp, job, items);
         CollectSparkTiles(ship, job);
 
         // Boom paths are cached before the cranes swing out, so their first targets use them.
@@ -823,7 +822,11 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
         // The cranes swing out over the ship and extend to its size before any work begins.
         var curTime = _timing.CurTime;
-        job.WorkStarts = curTime + TimeSpan.FromSeconds(DeployCranes(comp, job));
+        var deploy = DeployCranes(comp, job);
+        var maxDuration = items[0].Kind == WFDrydockWorkKind.Upgrade ? comp.MaxRefitDuration : comp.MaxDuration;
+        job.WorkStarts = curTime + TimeSpan.FromSeconds(deploy);
+        job.Deadline = curTime + TimeSpan.FromSeconds(maxDuration);
+        QueueItems(comp, job, items, maxDuration - deploy);
         job.NextSpark = job.WorkStarts;
         job.NextIndustry = curTime;
         job.NextBerthCheck = curTime;
@@ -854,8 +857,8 @@ public sealed partial class WFDrydockSystem : EntitySystem
             job.Slots.Add(new WFDrydockJobSlot());
     }
 
-    /// <summary>Sets each item's crane work time, scales the job to fit MaxDuration, and queues it.</summary>
-    private static void QueueItems(WFDrydockConsoleComponent comp, WFDrydockJobComponent job, List<WFDrydockWorkItem> items)
+    /// <summary>Sets each item's crane work time, scales the work to fit the budget in seconds, and queues it.</summary>
+    private static void QueueItems(WFDrydockConsoleComponent comp, WFDrydockJobComponent job, List<WFDrydockWorkItem> items, float budget)
     {
         var workTotal = 0f;
         foreach (var item in items)
@@ -871,7 +874,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         }
 
         var span = workTotal / job.Slots.Count;
-        var scale = span > comp.MaxDuration ? comp.MaxDuration / span : 1f;
+        var scale = span > budget ? Math.Max(0f, budget) / span : 1f;
         foreach (var item in items)
         {
             item.WorkTime *= scale;

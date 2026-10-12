@@ -812,6 +812,82 @@ public sealed class DrydockTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>A refit far longer than its cap is paced to finish within MaxRefitDuration, deploy and travel included.</summary>
+    [Test]
+    public async Task RefitFinishesWithinMaxRefitDuration()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+        var upgrades = server.System<WFDrydockUpgradeSystem>();
+        var timing = server.ResolveDependency<IGameTiming>();
+        var thrusterRefit = server.ResolveDependency<IPrototypeManager>().Index(ThrusterRefit);
+
+        EntityUid console = default, ship = default;
+        var thrusters = new List<EntityUid>();
+
+        await server.WaitAssertion(() =>
+        {
+            EntityUid station;
+            (station, console, _) = LoadDrydock(pair, map.MapId);
+
+            // Full power throughout, so only the pacing sets the job's length.
+            foreach (var (crane, _) in Cranes(pair, station, "South"))
+            {
+                em.RemoveComponent<PowerConsumerComponent>(crane);
+            }
+
+            ship = CreateShip(pair, map.MapId);
+            SetFloor(pair, ship, 12);
+            for (var x = 0; x < 10; x++)
+            for (var y = 1; y < 12; y += 3)
+            {
+                thrusters.Add(SpawnAnchored(pair, ship, "Thruster", new Vector2i(x, y)));
+            }
+        });
+
+        await server.WaitRunTicks(2);
+
+        TimeSpan start = default;
+        float maxDuration = 0;
+        await server.WaitAssertion(() =>
+        {
+            var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
+            maxDuration = comp.MaxRefitDuration;
+            var items = thrusters.Select(thruster => new WFDrydockWorkItem
+            {
+                Kind = WFDrydockWorkKind.Upgrade,
+                Target = thruster,
+                Upgrade = ThrusterRefit.Id,
+                Tier = 1,
+                Parts = 1,
+                Cost = 1000,
+                LocalPos = em.GetComponent<TransformComponent>(thruster).LocalPosition,
+            }).ToList();
+
+            Assert.That(items.Count * comp.UpgradeWorkTime / 2, Is.GreaterThan(maxDuration * 5),
+                "The unpaced refit should run far past the cap.");
+            start = timing.CurTime;
+            drydock.StartJob(console, comp, ship, null, items, 0);
+        });
+
+        var skipped = await RunJob(pair, console, steps: 400);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(em.HasComponent<WFDrydockJobComponent>(console), Is.False, "The refit should finish.");
+            Assert.That(skipped, Is.EqualTo(0), "Cranes should reach every thruster.");
+            Assert.That((timing.CurTime - start).TotalSeconds, Is.LessThanOrEqualTo(maxDuration + 2),
+                "The refit should end within its cap.");
+            Assert.That(thrusters.Select(t => upgrades.GetTier(t, thrusterRefit)), Has.All.EqualTo(1),
+                "Every thruster should be refitted.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     /// <summary>A parked ship that drifts under its cranes keeps each working crane's targets on its item.</summary>
     [Test]
     public async Task CraneFollowsItemWhenShipDrifts()

@@ -31,6 +31,9 @@ public sealed partial class WFDrydockSystem
     /// <summary>Pause after the cranes reach the ship before work starts.</summary>
     private const float DeploySettle = 0.75f;
 
+    /// <summary>Shortest work time an item is paced down to, so its crane still visibly works it.</summary>
+    private const float MinWorkTime = 0.5f;
+
     /// <summary>Time between re-aims of the cranes, so a drifting ship keeps its items under the heads.</summary>
     private static readonly TimeSpan AimInterval = TimeSpan.FromSeconds(0.5);
 
@@ -235,6 +238,7 @@ public sealed partial class WFDrydockSystem
 
         job.Power = lowest;
         job.Unpowered = allStalled ? job.Unpowered + frameTime : 0f;
+        job.Deadline += TimeSpan.FromSeconds((1 - lowest) * frameTime);
     }
 
     /// <summary>Pushes a slot's timers back by the time its crane lost to low power.</summary>
@@ -308,7 +312,7 @@ public sealed partial class WFDrydockSystem
         slot.GiveUpAt = curTime + TimeSpan.FromSeconds(comp.ReachTimeout);
         slot.WorkFrom = curTime + TimeSpan.FromSeconds(travel);
         // An unreachable item is never finished; the slot gives it up at GiveUpAt instead.
-        slot.Ends = reachable ? slot.WorkFrom + TimeSpan.FromSeconds(item.WorkTime) : TimeSpan.MaxValue;
+        slot.Ends = reachable ? slot.WorkFrom + TimeSpan.FromSeconds(PacedWorkTime(job, item, travel, curTime)) : TimeSpan.MaxValue;
         slot.NextSpark = slot.WorkFrom;
         slot.NextSound = slot.WorkFrom;
     }
@@ -390,6 +394,17 @@ public sealed partial class WFDrydockSystem
         job.Pending[best] = job.Pending[^1];
         job.Pending.RemoveAt(job.Pending.Count - 1);
         return item;
+    }
+
+    /// <summary>
+    /// An item's work time, shortened when crane travel has put its slot behind the job's deadline: the time left is
+    /// shared between this item and the slot's share of the queue, each with a trip as long as this one.
+    /// </summary>
+    private static float PacedWorkTime(WFDrydockJobComponent job, WFDrydockWorkItem item, float travel, TimeSpan curTime)
+    {
+        var share = 1f + (float) job.Pending.Count / job.Slots.Count;
+        var paced = (float) (job.Deadline - curTime).TotalSeconds / share - travel;
+        return Math.Min(item.WorkTime, Math.Max(MinWorkTime, paced));
     }
 
     /// <summary>Order in which work is taken: by kind, with guns that mount on hardpoints after the other parts.</summary>

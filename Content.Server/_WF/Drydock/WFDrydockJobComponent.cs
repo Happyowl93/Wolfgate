@@ -100,6 +100,10 @@ public sealed partial class WFDrydockJobComponent : Component
     [ViewVariables]
     public bool Started;
 
+    /// <summary>Time the job must finish by at full power; lost power pushes it back.</summary>
+    [ViewVariables]
+    public TimeSpan Deadline;
+
     /// <summary>Estimated time the job finishes, given the queue and slots.</summary>
     [ViewVariables]
     public TimeSpan EstimatedEnd;

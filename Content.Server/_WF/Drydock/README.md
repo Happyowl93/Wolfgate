@@ -37,9 +37,10 @@ estimated price and 35% of its construction materials' value (`WFDrydockSystem.C
 wall, priced low but built from four 600 cr sheets, comes to about 960 cr. Healing costs the rebuild price times the
 share of health lost. Work is capped at 50% of the ship's shipyard price (`VesselComponent`), or 40% of its full
 rebuild price for ships not bought at one. A fee of 2.5% of that value (at least 1,500 cr) comes on top and is never
-refunded. A job runs at most 10 minutes (`maxDuration`); longer work is sped up to fit. When it ends, the console says
-so on its radio channel (`noticeChannel`, Common), at the console, and to a payer elsewhere. Cranes take the nearest
-item and skip any they cannot reach within 10 s, refunding its cost.
+refunded. At full power a repair runs at most 10 minutes (`maxDuration`) and a refit 3 (`maxRefitDuration`), crane
+deploy and travel included; longer work is sped up to fit, and lost power adds the time it costs. When a job ends, the
+console says so on its radio channel (`noticeChannel`, Common), at the console, and to a payer elsewhere. Cranes take
+the nearest item and skip any they cannot reach within 10 s, refunding its cost.
 
 Refits swap the machine parts of thrusters, gyroscopes and power systems for higher-rated stock parts, one tier at a
 time (`upgrades.yml`), priced per stock part swapped: 1,000 cr for Mk II, 4,000 for Mk III and 10,000 for Mk IV.
