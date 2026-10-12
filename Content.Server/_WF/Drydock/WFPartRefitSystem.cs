@@ -111,10 +111,9 @@ public sealed class WFPartRefitSystem : EntitySystem
             ApplyRating(args.Target, args.Effect.Ratings[args.Tier - 1]);
     }
 
-    /// <summary>Collects the covered machines anchored on a ship, clearing the list first.</summary>
-    public void GetMachines(EntityUid ship, WFPartRatingRefit effect, List<EntityUid> result)
+    /// <summary>Collects the covered machines anchored on a ship.</summary>
+    private void GetMachines(EntityUid ship, WFPartRatingRefit effect, List<EntityUid> result)
     {
-        result.Clear();
         if (!TryComp<MapGridComponent>(ship, out var grid))
             return;
 
@@ -168,13 +167,6 @@ public sealed class WFPartRefitSystem : EntitySystem
         }
 
         return count;
-    }
-
-    /// <summary>Raises a machine to a tier of a refit line.</summary>
-    public void ApplyTier(EntityUid machine, WFShipRefitPrototype refit, int tier)
-    {
-        if (refit.Effect is WFPartRatingRefit effect && tier >= 1 && tier <= effect.Ratings.Count)
-            ApplyRating(machine, effect.Ratings[tier - 1]);
     }
 
     /// <summary>Swaps a machine's parts rated below a rating for parts of that rating.</summary>

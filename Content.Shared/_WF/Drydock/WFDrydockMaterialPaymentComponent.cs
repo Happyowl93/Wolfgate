@@ -21,9 +21,8 @@ public sealed partial class WFDrydockMaterialPaymentComponent : Component
     public float InKindFactor = 0.01f;
 
     /// <summary>
-    /// Most units of each material one repair of a <see cref="ReferenceValue"/> ship may bill, so a wreck never costs
-    /// more than building the ship. The limits scale with the ship's price. Each item's share of a material over its
-    /// limit is scaled down. Refits are not limited.
+    /// Most units of each material one repair of a <see cref="ReferenceValue"/> ship may bill, scaled by the ship's
+    /// price. Refits are not limited.
     /// </summary>
     [DataField]
     public Dictionary<ProtoId<MaterialPrototype>, int> MaxBill = new();

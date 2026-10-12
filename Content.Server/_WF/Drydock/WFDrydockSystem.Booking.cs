@@ -237,7 +237,7 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>Builds the booking window state for a caller's ship, with its booking and any running job.</summary>
-    public WFDrydockConsoleState BuildOperatorState(EntityUid op, EntityUid? ship)
+    private WFDrydockConsoleState BuildOperatorState(EntityUid op, EntityUid? ship)
     {
         var eval = Evaluate(ship, GetBerths(op));
         if (eval.Pricing is not { } slot)

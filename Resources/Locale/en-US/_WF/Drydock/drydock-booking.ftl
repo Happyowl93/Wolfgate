@@ -5,4 +5,3 @@ drydock-booking-head-to = Berth { $berth } is yers, { $ship }. Follow the green 
 drydock-booking-cancelled = Booking struck aff the ledger.
 drydock-booking-expired = Yer booking fer berth { $berth } ran oot. Ah've gien it away.
 drydock-booking-starting = Right! Cranes are swingin' on { $ship } in berth { $berth }.
-drydock-console-own-grid = The cranes can't work on the ship they're mounted on.

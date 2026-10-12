@@ -641,15 +641,9 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
     private void OnUpgrade(EntityUid uid, WFDrydockConsoleComponent comp, WFDrydockUpgradeMessage args)
     {
-        var actor = args.Actor;
-        if (!comp.Refits.Any(u => u.Id == args.Upgrade) || !_prototype.TryIndex<WFShipRefitPrototype>(args.Upgrade, out _))
-        {
-            Deny(uid, comp, actor, Loc.GetString("drydock-console-unknown-refit"));
-            return;
-        }
-
-        if (TryGetWorkableShip(uid, comp, actor, out var berthed))
-            TryStartWork(uid, comp, berthed, actor, args.Upgrade);
+        // BuildRefitWork refuses a refit this console doesn't sell.
+        if (TryGetWorkableShip(uid, comp, args.Actor, out var berthed))
+            TryStartWork(uid, comp, berthed, args.Actor, args.Upgrade);
     }
 
     /// <summary>Starts a repair on the ship in this berth, paid by the actor.</summary>
@@ -710,8 +704,8 @@ public sealed partial class WFDrydockSystem : EntitySystem
         if (HasComp<WFDrydockJobComponent>(console))
             return Deny(console, comp, actor, Loc.GetString("drydock-console-busy"));
 
-        if (TryComp<WFDrydockBookingComponent>(console, out var reserved) && reserved.Ship != berthed)
-            return Deny(console, comp, actor, Loc.GetString("drydock-console-reserved", ("berth", BerthLabel(console, comp)), ("ship", Name(reserved.Ship))));
+        if (TryComp<WFDrydockBookingComponent>(console, out var booking) && booking.Ship != berthed)
+            return Deny(console, comp, actor, Loc.GetString("drydock-console-reserved", ("berth", BerthLabel(console, comp)), ("ship", Name(booking.Ship))));
 
         if (!IsHeldStill(console, comp, berthed))
             return Deny(console, comp, actor, Loc.GetString("drydock-console-ship-moving"));
@@ -719,7 +713,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         if (IsShipyardGrid(console, comp, berthed))
             return Deny(console, comp, actor, Loc.GetString("drydock-console-own-grid"));
 
-        if (TryComp<WFDrydockBookingComponent>(console, out var booking))
+        if (booking != null)
             RemoveBooking(console, booking);
 
         ship = berthed;

@@ -55,12 +55,4 @@ public sealed class WFDrydockConsoleBoundUserInterface : BoundUserInterface
 
         _window?.UpdateState(castState);
     }
-
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-
-        if (disposing)
-            _window?.Close();
-    }
 }

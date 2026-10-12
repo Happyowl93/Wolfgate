@@ -80,3 +80,10 @@ drydock-plot-deploying = Cranes deploying
 drydock-plot-working = Work in progress { $percent }%
 drydock-plot-sound = Hull sound
 drydock-plot-surveyed = Survey: { $count } items
+
+drydock-upgrade-thrusters = Thrusters
+drydock-upgrade-gyroscopes = Gyroscopes
+drydock-upgrade-power = Power systems
+
+drydock-console-materials-none = none
+drydock-console-material-amount = { $name } { $sheets }

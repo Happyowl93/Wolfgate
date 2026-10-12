@@ -232,7 +232,7 @@ public sealed class DrydockTest
         await server.WaitAssertion(() =>
         {
             // The ship bought Thrusters Mk III for its one thruster part.
-            parts.ApplyTier(thruster, thrusters, 2);
+            refits.Apply(thrusters, thruster, 2);
             refits.SetRefit(grid, ThrusterRefit.Id, 2, 1);
             var fullPrice = thrusters.Tiers[0].Price + thrusters.Tiers[1].Price;
 
@@ -339,6 +339,7 @@ public sealed class DrydockTest
         var map = await pair.CreateTestMap();
         var grid = map.Grid;
         var upgrades = server.System<WFPartRefitSystem>();
+        var refits = server.System<WFShipRefitSystem>();
         var protoMan = server.ResolveDependency<IPrototypeManager>();
         var thrusters = protoMan.Index(ThrusterRefit);
         var gyros = protoMan.Index(GyroscopeRefit);
@@ -365,21 +366,21 @@ public sealed class DrydockTest
             Assert.That(upgrades.GetTier(thruster, thrusters), Is.EqualTo(0), "A stock thruster should be tier 0.");
             Assert.That(thrust.Thrust, Is.EqualTo(stockThrust).Within(0.01f), "A stock thruster should have base thrust.");
 
-            upgrades.ApplyTier(thruster, thrusters, 1);
+            refits.Apply(thrusters, thruster, 1);
             Assert.That(PartsOf(pair, thruster), Has.All.StartsWith("AdvancedCapacitorStockPart:3"),
                 "Tier 1 should swap every thruster part for an advanced capacitor.");
             Assert.That(upgrades.GetTier(thruster, thrusters), Is.EqualTo(1));
             Assert.That(thrust.Thrust, Is.EqualTo(stockThrust * MathF.Pow(thrust.PartRatingThrustMultiplier, 2)).Within(0.01f),
                 "Tier 1 thrust should follow the rating-3 capacitor.");
 
-            upgrades.ApplyTier(thruster, thrusters, 3);
+            refits.Apply(thrusters, thruster, 3);
             Assert.That(PartsOf(pair, thruster), Has.All.StartsWith("QuadraticCapacitorStockPart:6"),
                 "Tier 3 should swap every thruster part for a quadratic capacitor.");
             Assert.That(upgrades.GetTier(thruster, thrusters), Is.EqualTo(3));
             Assert.That(thrust.Thrust, Is.EqualTo(stockThrust * MathF.Pow(thrust.PartRatingThrustMultiplier, 5)).Within(0.01f),
                 "Tier 3 thrust should follow the rating-6 capacitor.");
 
-            upgrades.ApplyTier(gyroscope, gyros, 1);
+            refits.Apply(gyros, gyroscope, 1);
             Assert.That(PartsOf(pair, gyroscope), Has.Some.StartsWith("NanoManipulatorStockPart:3"),
                 "The manipulator should become a nano manipulator.");
             Assert.That(PartsOf(pair, gyroscope), Has.Some.StartsWith("AdvancedCapacitorStockPart:3"),
@@ -402,6 +403,7 @@ public sealed class DrydockTest
         var map = await pair.CreateTestMap();
         var grid = map.Grid;
         var upgrades = server.System<WFPartRefitSystem>();
+        var refits = server.System<WFShipRefitSystem>();
         var stacks = server.System<SharedStackSystem>();
         var containers = server.System<SharedContainerSystem>();
         var gyros = server.ResolveDependency<IPrototypeManager>().Index(GyroscopeRefit);
@@ -436,7 +438,7 @@ public sealed class DrydockTest
             Assert.That(upgrades.PartsToSwap(gyroscope, gyros, 1), Is.EqualTo(3),
                 "A stack of two manipulators and a capacitor should count as three parts.");
 
-            upgrades.ApplyTier(gyroscope, gyros, 1);
+            refits.Apply(gyros, gyroscope, 1);
             Assert.That(PartsOf(pair, gyroscope).Count(p => p.StartsWith("NanoManipulatorStockPart:3")), Is.EqualTo(2),
                 "The stack of two manipulators should become two nano manipulators.");
             Assert.That(upgrades.GetTier(gyroscope, gyros), Is.EqualTo(1));
