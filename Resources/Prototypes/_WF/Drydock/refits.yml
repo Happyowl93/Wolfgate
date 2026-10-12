@@ -1,22 +1,22 @@
-# Drydock refit upgrades: each tier swaps a machine's stock parts for higher-rated ones.
-# Price and materials are per stock part swapped (a thruster has 1, a gyroscope 3, a SMES 8). Materials run about
-# twice the advanced and super part lathe recipes; Mk III and Mk IV add silver, gold and uranium, and Mk IV two
-# bluespace crystals per part.
+# Ship refits sold at the drydock. A ship owns a line's tier; each tier swaps the line's machine parts for higher-rated
+# ones, so the effect counts machine parts as units. Price and materials are per part (a thruster has 1, a gyroscope 3,
+# a SMES 8). Materials run about twice the advanced and super part lathe recipes; Mk III and Mk IV add silver, gold and
+# uranium, and Mk IV two bluespace crystals per part.
 
-- type: wfDrydockUpgrade
-  id: WFDrydockThrusters
+- type: wfShipRefit
+  id: WFRefitThrusters
   name: drydock-upgrade-thrusters
-  target: LinearThruster
+  effect: !type:WFPartRatingRefit
+    target: LinearThruster
+    ratings: [ 3, 4, 6 ]
   tiers:
-  - rating: 3
-    price: 1000
+  - price: 1000
     materials:
       Steel: 300
       Plastic: 300
       Plasma: 200
       Gold: 150
-  - rating: 4
-    price: 4000
+  - price: 4000
     materials:
       Steel: 400
       Plastic: 400
@@ -25,8 +25,7 @@
       Silver: 200
       Uranium: 200
       UraniumFissile: 12
-  - rating: 6
-    price: 10000
+  - price: 10000
     materials:
       Plastic: 400
       Plasma: 200
@@ -35,20 +34,20 @@
       Uranium: 300
       Bluespace: 200
 
-- type: wfDrydockUpgrade
-  id: WFDrydockGyroscopes
+- type: wfShipRefit
+  id: WFRefitGyroscopes
   name: drydock-upgrade-gyroscopes
-  target: Gyroscope
+  effect: !type:WFPartRatingRefit
+    target: Gyroscope
+    ratings: [ 3, 4, 6 ]
   tiers:
-  - rating: 3
-    price: 1000
+  - price: 1000
     materials:
       Steel: 300
       Plastic: 300
       Plasma: 200
       Gold: 150
-  - rating: 4
-    price: 4000
+  - price: 4000
     materials:
       Steel: 400
       Plastic: 400
@@ -57,8 +56,7 @@
       Silver: 200
       Uranium: 200
       UraniumFissile: 12
-  - rating: 6
-    price: 10000
+  - price: 10000
     materials:
       Plastic: 400
       Plasma: 200
@@ -67,20 +65,20 @@
       Uranium: 300
       Bluespace: 200
 
-- type: wfDrydockUpgrade
-  id: WFDrydockPower
+- type: wfShipRefit
+  id: WFRefitPower
   name: drydock-upgrade-power
-  target: Power
+  effect: !type:WFPartRatingRefit
+    target: Power
+    ratings: [ 3, 4, 6 ]
   tiers:
-  - rating: 3
-    price: 1000
+  - price: 1000
     materials:
       Steel: 300
       Plastic: 300
       Plasma: 200
       Gold: 150
-  - rating: 4
-    price: 4000
+  - price: 4000
     materials:
       Steel: 400
       Plastic: 400
@@ -89,8 +87,7 @@
       Silver: 200
       Uranium: 200
       UraniumFissile: 12
-  - rating: 6
-    price: 10000
+  - price: 10000
     materials:
       Plastic: 400
       Plasma: 200

@@ -8,7 +8,7 @@ using Robust.Client.UserInterface;
 namespace Content.Client._WF.Drydock;
 
 /// <summary>
-/// A row of refit-mark lamps, Mk II upward, lit up to the lowest mark the ship's machines all carry.
+/// A row of refit-mark lamps, Mk II upward, lit up to the mark the ship owns.
 /// </summary>
 public sealed class WFDrydockTierPips : Control
 {
@@ -20,10 +20,10 @@ public sealed class WFDrydockTierPips : Control
     /// <summary>Refit tiers on offer.</summary>
     public int MaxTier { get; set; }
 
-    /// <summary>Lowest tier among the ship's machines; 0 is stock.</summary>
+    /// <summary>Tier the ship owns; 0 is none.</summary>
     public int Tier { get; set; }
 
-    /// <summary>Whether the ship has machines for this refit; without them every lamp is dark.</summary>
+    /// <summary>Whether the refit applies to the ship; otherwise every lamp is dark.</summary>
     public bool Lit { get; set; }
 
     public WFDrydockTierPips()

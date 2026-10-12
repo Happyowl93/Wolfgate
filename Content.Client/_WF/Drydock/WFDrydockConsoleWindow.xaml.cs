@@ -360,11 +360,11 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
     private void UpdateRefitRow(RefitRow row, WFDrydockUpgradeEntry entry, WFDrydockConsoleState state, bool blocked)
     {
         var button = row.Button;
-        row.Units.Text = Loc.GetString("drydock-ui-refit-units", ("parts", entry.Parts));
-        row.Units.Visible = !state.Working && entry.Parts > 0;
+        row.Units.Text = Loc.GetString("drydock-ui-refit-units", ("parts", entry.Units));
+        row.Units.Visible = !state.Working && entry.Units > 0;
         row.Pips.MaxTier = entry.MaxTier;
-        row.Pips.Tier = entry.MinTier;
-        row.Pips.Lit = entry.Parts > 0;
+        row.Pips.Tier = entry.Tier;
+        row.Pips.Lit = entry.Units > 0 || entry.Tier > 0;
         row.Bill.Visible = false;
 
         if (state.Working)
@@ -372,12 +372,12 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
             button.Text = Loc.GetString("drydock-ui-refit-busy");
             button.Disabled = true;
         }
-        else if (entry.Parts == 0)
+        else if (entry.Units == 0)
         {
             button.Text = Loc.GetString("drydock-ui-refit-no-parts");
             button.Disabled = true;
         }
-        else if (entry.MinTier >= entry.MaxTier)
+        else if (entry.NextTier == 0)
         {
             button.Text = Loc.GetString("drydock-ui-refit-maxed");
             button.Disabled = true;
@@ -385,7 +385,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         else if (state.PaysWithMaterials)
         {
             var bill = FormatMaterials(entry.NextMaterials);
-            button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-key" : "drydock-ui-refit-key", ("mark", Mark(entry.MinTier + 1)));
+            button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-key" : "drydock-ui-refit-key", ("mark", Mark(entry.NextTier)));
             button.Disabled = blocked || !Covers(entry.NextMaterials, state.StoredMaterials);
             row.Bill.Text = bill;
             row.Bill.ToolTip = bill;
@@ -394,7 +394,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         else
         {
             button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-button" : "drydock-ui-refit-button",
-                ("mark", Mark(entry.MinTier + 1)),
+                ("mark", Mark(entry.NextTier)),
                 ("price", entry.NextPrice.ToString("N0", CultureInfo.InvariantCulture)));
             button.Disabled = blocked;
         }

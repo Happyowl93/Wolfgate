@@ -83,6 +83,9 @@ public sealed partial class WFDrydockJobComponent : Component
     [ViewVariables]
     public bool PaidInMaterials;
 
+    /// <summary>Refit lines the job's refit items bring up, to the highest tier among them.</summary>
+    public Dictionary<string, int> Refits = new();
+
     /// <summary>Materials returned for skipped items of a material job.</summary>
     public Dictionary<string, int> SkippedMaterials = new();
 

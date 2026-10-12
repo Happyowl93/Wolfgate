@@ -42,8 +42,17 @@ deploy and travel included; longer work is sped up to fit, and lost power adds t
 console says so on its radio channel (`noticeChannel`, Common), at the console, and to a payer elsewhere. Cranes take
 the nearest item and skip any they cannot reach within 10 s, refunding its cost.
 
-Refits swap the machine parts of thrusters, gyroscopes and power systems for higher-rated stock parts, one tier at a
-time (`upgrades.yml`), priced per stock part swapped: 1,000 cr for Mk II, 4,000 for Mk III and 10,000 for Mk IV.
+A ship owns refits (`WFShipRefitsComponent`, saved with it): a tier of a refit line (`wfShipRefit`, `refits.yml`) and
+the units it paid for there. A line's `effect` is its kind, and a server system implements each kind by handling its
+survey, prospect and apply events (`WFShipRefitEffect`); `WFShipRefitSystem` holds ownership and pricing. New kinds,
+such as action modules or armor, are a new effect and its system. The thruster, gyroscope and power lines are
+`WFPartRatingRefit` (`WFPartRefitSystem`): each tier swaps the line's machine parts for higher-rated stock parts, priced
+per part: 1,000 cr for Mk II, 4,000 for Mk III and 10,000 for Mk IV.
+
+A refit buys the next tier any unit falls short of, for every unit of the line, and is recorded once its job finishes
+with nothing skipped. A repair then brings each owned line back to tier, rebuilt machines included: units the ship paid
+for cost `refitRepairShare` (20%) of their tiers, and units past that coverage, such as machines added later, pay in
+full. Refit costs sit outside the repair cap. The ship repair tool rebuilds machines stock.
 
 The console window is an instrument deck in the cockpit style (CombatConsole's instrument kit). A live berth plot
 (`WFDrydockBerthPlot`) draws the bay, the station around it, the ship's hull, the work left on it (missing hull red,
@@ -85,8 +94,11 @@ client `WFDrydockCraneVisualSystem` (crane animation and rig) and `WFDrydockCons
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Job.cs`](WFDrydockSystem.Job.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Linking.cs`](WFDrydockSystem.Linking.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Materials.cs`](WFDrydockSystem.Materials.cs)
-- [`Content.Server/_WF/Drydock/WFDrydockUpgradeSystem.cs`](WFDrydockUpgradeSystem.cs)
+- [`Content.Server/_WF/Drydock/WFDrydockSystem.Refits.cs`](WFDrydockSystem.Refits.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockWorkItem.cs`](WFDrydockWorkItem.cs)
+- [`Content.Server/_WF/Drydock/WFPartRefitSystem.cs`](WFPartRefitSystem.cs)
+- [`Content.Server/_WF/Drydock/WFShipRefitsComponent.cs`](WFShipRefitsComponent.cs)
+- [`Content.Server/_WF/Drydock/WFShipRefitSystem.cs`](WFShipRefitSystem.cs)
 
 ### Shared
 
@@ -99,7 +111,9 @@ client `WFDrydockCraneVisualSystem` (crane animation and rig) and `WFDrydockCons
 - [`Content.Shared/_WF/Drydock/WFDrydockGuideComponent.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockGuideComponent.cs)
 - [`Content.Shared/_WF/Drydock/WFDrydockMaterialPaymentComponent.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockMaterialPaymentComponent.cs)
 - [`Content.Shared/_WF/Drydock/WFDrydockOperatorComponent.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockOperatorComponent.cs)
-- [`Content.Shared/_WF/Drydock/WFDrydockUpgradePrototype.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockUpgradePrototype.cs)
+- [`Content.Shared/_WF/Drydock/WFPartRatingRefit.cs`](../../../Content.Shared/_WF/Drydock/WFPartRatingRefit.cs)
+- [`Content.Shared/_WF/Drydock/WFShipRefitEffect.cs`](../../../Content.Shared/_WF/Drydock/WFShipRefitEffect.cs)
+- [`Content.Shared/_WF/Drydock/WFShipRefitPrototype.cs`](../../../Content.Shared/_WF/Drydock/WFShipRefitPrototype.cs)
 
 ### Client
 
@@ -130,8 +144,8 @@ client `WFDrydockCraneVisualSystem` (crane animation and rig) and `WFDrydockCons
 - [`Resources/Prototypes/_WF/Drydock/mobile.yml`](../../../Resources/Prototypes/_WF/Drydock/mobile.yml)
 - [`Resources/Prototypes/_WF/Drydock/poi.yml`](../../../Resources/Prototypes/_WF/Drydock/poi.yml)
 - [`Resources/Prototypes/_WF/Drydock/ports.yml`](../../../Resources/Prototypes/_WF/Drydock/ports.yml)
+- [`Resources/Prototypes/_WF/Drydock/refits.yml`](../../../Resources/Prototypes/_WF/Drydock/refits.yml)
 - [`Resources/Prototypes/_WF/Drydock/sounds.yml`](../../../Resources/Prototypes/_WF/Drydock/sounds.yml)
-- [`Resources/Prototypes/_WF/Drydock/upgrades.yml`](../../../Resources/Prototypes/_WF/Drydock/upgrades.yml)
 
 ### Localization
 

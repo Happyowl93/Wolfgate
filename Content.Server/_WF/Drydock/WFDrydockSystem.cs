@@ -47,7 +47,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private DamageableSystem _damageable = default!;
     [Dependency] private PricingSystem _pricing = default!;
-    [Dependency] private WFDrydockUpgradeSystem _upgrade = default!;
+    [Dependency] private WFShipRefitSystem _refits = default!;
     [Dependency] private WFHullSectionSystem _hull = default!;
     [Dependency] private IServerPreferencesManager _prefs = default!;
     [Dependency] private IGameTiming _timing = default!;
@@ -192,7 +192,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         return TryGetBerth(console, comp, out var berth) ? berth.Label : comp.Berth;
     }
 
-    /// <summary>Lists the work needed to restore the ship: hull tiles, missing entities, then heals.</summary>
+    /// <summary>Lists the work needed to restore the ship: hull tiles, missing entities, heals, then owned refits.</summary>
     public List<WFDrydockWorkItem> BuildRepairItems(EntityUid ship, WFDrydockConsoleComponent comp)
     {
         var items = new List<WFDrydockWorkItem>();
@@ -202,6 +202,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         AddMissingTiles(ship, grid, data, comp, items);
         AddMissingEntities(ship, data, comp, items);
         AddHeals(ship, grid, comp, items);
+        AddRefitRepairs(ship, comp, items);
         CapRepair(ship, comp, items);
         return items;
     }
@@ -246,19 +247,26 @@ public sealed partial class WFDrydockSystem : EntitySystem
         return Math.Max(comp.MinFee, (int) Math.Round(value * comp.FeeFraction / 10) * 10);
     }
 
-    /// <summary>Scales every item down so the work costs no more than its cap, so a wreck never costs a new ship.</summary>
+    /// <summary>
+    /// Scales every item down so the work costs no more than its cap, so a wreck never costs a new ship. Restored refits
+    /// were bought separately and are charged in full, outside the cap.
+    /// </summary>
     private void CapRepair(EntityUid ship, WFDrydockConsoleComponent comp, List<WFDrydockWorkItem> items)
     {
         var (value, vessel) = ShipValue(ship, comp);
         var cap = (long) (value * (vessel ? comp.CapFraction : comp.SnapshotCapFraction));
-        var total = items.Sum(i => (long) i.Cost);
+        var total = items.Sum(i => (long) (i.Cost - i.RefitCost));
         if (cap <= 0 || total <= cap)
             return;
 
         var scale = (double) cap / total;
         foreach (var item in items)
         {
-            item.Cost = Math.Max(1, (int) (item.Cost * scale));
+            var capped = item.Cost - item.RefitCost;
+            if (capped <= 0)
+                continue;
+
+            item.Cost = Math.Max(1, (int) (capped * scale)) + item.RefitCost;
             item.Share *= (float) scale;
         }
     }
@@ -419,6 +427,11 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
         var entity = Spawn(data.EntityPalette[spec.ProtoIndex].Id, new EntityCoordinates(ship, spec.LocalPosition));
         _transform.SetLocalRotation(entity, spec.Rotation);
+        // A rebuild comes back stock; the refits the ship owns bring it back to tier, as its quote charged.
+        foreach (var (refit, owned) in _refits.Owned(ship))
+        {
+            _refits.Apply(refit, entity, owned.Tier);
+        }
         spec.OriginalEntity = GetNetEntity(entity);
         Dirty(ship, data);
     }
@@ -436,12 +449,12 @@ public sealed partial class WFDrydockSystem : EntitySystem
     private void ApplyUpgrade(WFDrydockWorkItem item)
     {
         if (item.Upgrade == null ||
-            !_prototype.TryIndex<WFDrydockUpgradePrototype>(item.Upgrade, out var proto) ||
+            !_prototype.TryIndex<WFShipRefitPrototype>(item.Upgrade, out var proto) ||
             TerminatingOrDeleted(item.Target))
             return;
 
-        // ApplyTier skips a part that already reached the tier.
-        _upgrade.ApplyTier(item.Target, proto, item.Tier);
+        // A refit leaves units already at the tier alone.
+        _refits.Apply(proto, item.Target, item.Tier);
     }
 
     /// <summary>
@@ -499,7 +512,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         };
         foreach (var u in s.Upgrades)
         {
-            parts.Add($"{u.Id}:{u.Name}:{u.Parts}:{u.MinTier}:{u.MaxTier}:{u.NextPrice}:{DictKey(u.NextMaterials)}");
+            parts.Add($"{u.Id}:{u.Name}:{u.Units}:{u.Tier}:{u.MaxTier}:{u.NextTier}:{u.NextPrice}:{DictKey(u.NextMaterials)}");
         }
 
         return string.Join("|", parts);
@@ -567,10 +580,10 @@ public sealed partial class WFDrydockSystem : EntitySystem
             state.RemainingSeconds = (float) Math.Max(0d, (job.EstimatedEnd - _timing.CurTime).TotalSeconds);
         }
 
-        foreach (var id in comp.Upgrades)
+        foreach (var id in comp.Refits)
         {
-            if (_prototype.TryIndex<WFDrydockUpgradePrototype>(id.Id, out var proto))
-                state.Upgrades.Add(BuildUpgradeEntry(proto, ship, pay, scanParts: job == null));
+            if (_prototype.TryIndex(id, out var proto))
+                state.Upgrades.Add(BuildRefitEntry(proto, ship, comp, pay, scan: job == null));
         }
 
         return state;
@@ -615,47 +628,6 @@ public sealed partial class WFDrydockSystem : EntitySystem
         }
     }
 
-    /// <summary>One refit line for the console: the ship's part count and the price of its next tier.</summary>
-    private WFDrydockUpgradeEntry BuildUpgradeEntry(WFDrydockUpgradePrototype proto, EntityUid? ship, WFDrydockMaterialPaymentComponent? pay, bool scanParts)
-    {
-        var entry = new WFDrydockUpgradeEntry
-        {
-            Id = proto.ID,
-            Name = Loc.GetString(proto.Name),
-            MaxTier = proto.Tiers.Count,
-        };
-
-        // Skipped during a job, when the upgrade buttons are disabled.
-        if (ship is not { } shipUid || !scanParts)
-            return entry;
-
-        var parts = new List<EntityUid>();
-        _upgrade.GetParts(shipUid, proto, parts);
-        entry.Parts = parts.Count;
-        if (parts.Count == 0)
-            return entry;
-
-        var minTier = parts.Min(p => _upgrade.GetTier(p, proto));
-        entry.MinTier = minTier;
-        if (minTier >= proto.Tiers.Count)
-            return entry;
-
-        // Only the machines at the lowest tier are refitted next, priced per stock part swapped.
-        var tier = proto.Tiers[minTier];
-        foreach (var part in parts)
-        {
-            if (_upgrade.GetTier(part, proto) != minTier)
-                continue;
-
-            var swapped = _upgrade.PartsToSwap(part, proto, minTier + 1);
-            entry.NextPrice += swapped * tier.Price;
-            if (pay != null)
-                AddBill(entry.NextMaterials, ItemBill(pay, swapped * tier.Price, tier.Materials, swapped));
-        }
-
-        return entry;
-    }
-
     private void OnUiOpened(EntityUid uid, WFDrydockConsoleComponent comp, BoundUIOpenedEvent args)
     {
         UpdateUi(uid, comp, force: true);
@@ -670,7 +642,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
     private void OnUpgrade(EntityUid uid, WFDrydockConsoleComponent comp, WFDrydockUpgradeMessage args)
     {
         var actor = args.Actor;
-        if (!comp.Upgrades.Any(u => u.Id == args.Upgrade) || !_prototype.TryIndex<WFDrydockUpgradePrototype>(args.Upgrade, out _))
+        if (!comp.Refits.Any(u => u.Id == args.Upgrade) || !_prototype.TryIndex<WFShipRefitPrototype>(args.Upgrade, out _))
         {
             Deny(uid, comp, actor, Loc.GetString("drydock-console-unknown-refit"));
             return;
@@ -827,6 +799,11 @@ public sealed partial class WFDrydockSystem : EntitySystem
         job.WorkStarts = curTime + TimeSpan.FromSeconds(deploy);
         job.Deadline = curTime + TimeSpan.FromSeconds(maxDuration);
         QueueItems(comp, job, items, maxDuration - deploy);
+        foreach (var item in items)
+        {
+            if (item.Kind == WFDrydockWorkKind.Upgrade && item.Upgrade is { } refit)
+                job.Refits[refit] = Math.Max(job.Refits.GetValueOrDefault(refit), item.Tier);
+        }
         job.NextSpark = job.WorkStarts;
         job.NextIndustry = curTime;
         job.NextBerthCheck = curTime;

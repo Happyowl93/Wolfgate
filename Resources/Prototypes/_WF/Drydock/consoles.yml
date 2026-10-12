@@ -21,10 +21,10 @@
     flags:
     - Anchorable
   - type: WFDrydockConsole
-    upgrades:
-    - WFDrydockThrusters
-    - WFDrydockGyroscopes
-    - WFDrydockPower
+    refits:
+    - WFRefitThrusters
+    - WFRefitGyroscopes
+    - WFRefitPower
   - type: DeviceLinkSource
     ports:
       - WFDrydockCraneSender

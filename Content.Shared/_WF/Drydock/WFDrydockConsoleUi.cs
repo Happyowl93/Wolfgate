@@ -54,7 +54,7 @@ public sealed class WFDrydockConsoleState : BoundUserInterfaceState
     /// <summary>Seconds until the running job is estimated to finish, 0 when idle.</summary>
     public float RemainingSeconds;
 
-    /// <summary>Refit options offered by the console.</summary>
+    /// <summary>Refit lines offered by the console.</summary>
     public List<WFDrydockUpgradeEntry> Upgrades = new();
 
     /// <summary>Whether this console books work for a berth instead of starting it.</summary>
@@ -126,25 +126,28 @@ public readonly record struct WFDrydockPlotMark(Vector2 Position, WFDrydockMarkK
 [Serializable, NetSerializable]
 public sealed class WFDrydockUpgradeEntry
 {
-    /// <summary>Upgrade prototype id.</summary>
+    /// <summary>Refit prototype id.</summary>
     public string Id = string.Empty;
 
     /// <summary>Localized name.</summary>
     public string Name = string.Empty;
 
-    /// <summary>Number of matching parts on the berthed ship.</summary>
-    public int Parts;
+    /// <summary>Units the refit covers on the berthed ship, such as machine parts.</summary>
+    public int Units;
 
-    /// <summary>Lowest tier among the matching parts; 0 is stock.</summary>
-    public int MinTier;
+    /// <summary>Tier the ship owns; 0 is none.</summary>
+    public int Tier;
 
-    /// <summary>Highest tier available for this upgrade.</summary>
+    /// <summary>Highest tier of the refit.</summary>
     public int MaxTier;
 
-    /// <summary>Price of the next tier across all its machines; 0 when maxed or no parts.</summary>
+    /// <summary>Tier the next refit would buy, past any its units already reach; 0 when there is none.</summary>
+    public int NextTier;
+
+    /// <summary>Price of the next refit, units the ship owns at its tier restored at the repair share.</summary>
     public int NextPrice;
 
-    /// <summary>Bill for the next tier across all parts when paying with materials.</summary>
+    /// <summary>Bill of the next refit when paying with materials.</summary>
     public Dictionary<string, int> NextMaterials = new();
 }
 
@@ -167,11 +170,11 @@ public sealed class WFDrydockToggleBerthLightsMessage : BoundUserInterfaceMessag
 public sealed class WFDrydockCancelBookingMessage : BoundUserInterfaceMessage;
 
 /// <summary>
-/// Starts or books a refit of one upgrade line, one tier up.
+/// Starts or books the next tier of a refit line.
 /// </summary>
 [Serializable, NetSerializable]
 public sealed class WFDrydockUpgradeMessage(string upgrade) : BoundUserInterfaceMessage
 {
-    /// <summary>Upgrade prototype id to refit.</summary>
+    /// <summary>Refit prototype id.</summary>
     public string Upgrade = upgrade;
 }

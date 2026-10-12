@@ -650,7 +650,7 @@ public sealed partial class WFDrydockSystem
 
     /// <summary>
     /// Ends a job. A finished one notifies and confirms; an aborted or unpowered one refunds its unfinished items and denies.
-    /// Then the cranes park and the UI refreshes.
+    /// Then the ship's refits are recorded, the cranes park and the UI refreshes.
     /// </summary>
     private void EndJob(EntityUid console, WFDrydockConsoleComponent comp, WFDrydockJobComponent job, JobEnd end)
     {
@@ -682,6 +682,7 @@ public sealed partial class WFDrydockSystem
             _audio.PlayPvs(comp.DenySound, console);
         }
 
+        RecordRefits(job, end);
         RemComp<WFDrydockJobComponent>(console);
         ParkCranes(console, comp);
         UpdateUi(console, comp);

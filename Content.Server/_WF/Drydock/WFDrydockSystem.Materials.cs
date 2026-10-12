@@ -17,24 +17,28 @@ public sealed partial class WFDrydockSystem
     {
         foreach (var item in items)
         {
-            Dictionary<ProtoId<MaterialPrototype>, int>? own = null;
-            if (item.Kind == WFDrydockWorkKind.Upgrade && item.Upgrade != null &&
-                _prototype.TryIndex<WFDrydockUpgradePrototype>(item.Upgrade, out var proto) &&
-                item.Tier >= 1 && item.Tier <= proto.Tiers.Count)
+            // A refit item pays its tiers' own materials, or the rates on its cost when they list none.
+            if (item.Kind == WFDrydockWorkKind.Upgrade)
             {
-                own = proto.Tiers[item.Tier - 1].Materials;
-            }
-
-            if (own == null && item.Prototype is { } protoId && _prototype.TryIndex(protoId, out var entityProto))
-            {
-                item.Materials = InKindBill(pay, item, ConstructionMaterials(entityProto));
+                item.Materials = item.RefitMaterials is { Count: > 0 } refit
+                    ? new Dictionary<string, int>(refit)
+                    : ItemBill(pay, item.Cost);
                 continue;
             }
 
-            item.Materials = ItemBill(pay, item.Cost, own, item.Parts);
+            item.Materials = item.Prototype is { } protoId && _prototype.TryIndex(protoId, out var entityProto)
+                ? InKindBill(pay, item, ConstructionMaterials(entityProto))
+                : ItemBill(pay, item.Cost);
         }
 
         LimitBill(pay, items, BillScale(ship, comp, pay));
+
+        // A rebuild restoring a refit pays the refit's materials too, outside the limits.
+        foreach (var item in items)
+        {
+            if (item.Kind != WFDrydockWorkKind.Upgrade && item.RefitMaterials != null && item.Materials != null)
+                AddBill(item.Materials, item.RefitMaterials);
+        }
     }
 
     /// <summary>
@@ -92,7 +96,7 @@ public sealed partial class WFDrydockSystem
     /// </summary>
     private static Dictionary<string, int> InKindBill(WFDrydockMaterialPaymentComponent pay, WFDrydockWorkItem item, Dictionary<string, int> construction)
     {
-        var bill = ItemBill(pay, item.Cost, null, 0);
+        var bill = ItemBill(pay, item.Cost - item.RefitCost);
         foreach (var (id, amount) in construction)
         {
             if (pay.Rates.ContainsKey(id))
@@ -106,21 +110,10 @@ public sealed partial class WFDrydockSystem
         return bill;
     }
 
-    /// <summary>A work item's material bill: its tier's per-part bill times its parts, or its cost times each rate.</summary>
-    private static Dictionary<string, int> ItemBill(WFDrydockMaterialPaymentComponent pay, int cost, Dictionary<ProtoId<MaterialPrototype>, int>? own, int parts)
+    /// <summary>A material bill for a cost: the cost times each rate.</summary>
+    private static Dictionary<string, int> ItemBill(WFDrydockMaterialPaymentComponent pay, int cost)
     {
         var bill = new Dictionary<string, int>();
-        if (own is { Count: > 0 })
-        {
-            foreach (var (id, amount) in own)
-            {
-                if (parts > 0)
-                    bill[id] = amount * parts;
-            }
-
-            return bill;
-        }
-
         foreach (var (id, rate) in pay.Rates)
         {
             var amount = (int) Math.Ceiling(cost * rate);

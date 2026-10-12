@@ -181,7 +181,13 @@ public sealed partial class WFDrydockConsoleComponent : Component
     [DataField]
     public SoundSpecifier ConfirmSound = new SoundPathSpecifier("/Audio/Effects/Cargo/ping.ogg");
 
-    /// <summary>Refit upgrades this console offers.</summary>
+    /// <summary>Refit lines this console sells and restores.</summary>
     [DataField]
-    public List<ProtoId<WFDrydockUpgradePrototype>> Upgrades = new();
+    public List<ProtoId<WFShipRefitPrototype>> Refits = new();
+
+    /// <summary>
+    /// Share of a refit's price charged to bring a unit the ship already paid for back to its tier, as after a rebuild.
+    /// </summary>
+    [DataField]
+    public float RefitRepairShare = 0.2f;
 }

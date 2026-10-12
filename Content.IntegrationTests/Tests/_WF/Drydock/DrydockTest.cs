@@ -77,8 +77,8 @@ public sealed class DrydockTest
     private const int PayerFunds = 1_000_000;
 
     private static readonly ProtoId<DamageTypePrototype> Blunt = "Blunt";
-    private static readonly ProtoId<WFDrydockUpgradePrototype> ThrusterRefit = "WFDrydockThrusters";
-    private static readonly ProtoId<WFDrydockUpgradePrototype> GyroscopeRefit = "WFDrydockGyroscopes";
+    private static readonly ProtoId<WFShipRefitPrototype> ThrusterRefit = "WFRefitThrusters";
+    private static readonly ProtoId<WFShipRefitPrototype> GyroscopeRefit = "WFRefitGyroscopes";
     private static readonly EntProtoId WallProto = "WallSolid";
 
     /// <summary>A host grid with its crane and console, as a mobile shipyard.</summary>
@@ -200,6 +200,67 @@ public sealed class DrydockTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>
+    /// A ship that owns a refit gets it back in repairs: a rebuilt machine is brought back to tier at the repair share,
+    /// and a machine past the refit's coverage is brought up at the full price.
+    /// </summary>
+    [Test]
+    public async Task RepairRestoresOwnedRefit()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var grid = map.Grid;
+        var drydock = server.System<WFDrydockSystem>();
+        var parts = server.System<WFPartRefitSystem>();
+        var refits = server.System<WFShipRefitSystem>();
+        var protoMan = server.ResolveDependency<IPrototypeManager>();
+        var thrusters = protoMan.Index(ThrusterRefit);
+        var console = new WFDrydockConsoleComponent { Berth = "T" };
+
+        EntityUid thruster = default;
+
+        await server.WaitAssertion(() =>
+        {
+            (thruster, _) = BuildHull(pair, grid);
+            server.System<ShipRepairSystem>().GenerateRepairData(grid);
+        });
+
+        await server.WaitRunTicks(2);
+
+        await server.WaitAssertion(() =>
+        {
+            // The ship bought Thrusters Mk III for its one thruster part.
+            parts.ApplyTier(thruster, thrusters, 2);
+            refits.SetRefit(grid, ThrusterRefit.Id, 2, 1);
+            var fullPrice = thrusters.Tiers[0].Price + thrusters.Tiers[1].Price;
+
+            em.DeleteEntity(thruster);
+            var rebuild = drydock.BuildRepairItems(grid, console).Single(i => i.Kind == WFDrydockWorkKind.Entity);
+            Assert.That(rebuild.RefitCost, Is.EqualTo((int) Math.Ceiling(fullPrice * console.RefitRepairShare)),
+                "A covered part should be restored at the repair share of both tiers.");
+
+            drydock.ApplyItem(grid, rebuild);
+            Assert.That(parts.GetTier(FindThruster(pair, grid, ThrusterTile), thrusters), Is.EqualTo(2),
+                "The rebuilt thruster should come back at Mk III.");
+
+            // A thruster added after the refit is past its coverage.
+            var added = SpawnAnchored(pair, grid, "Thruster", new Vector2i(3, 1));
+            var refit = drydock.BuildRepairItems(grid, console).Single(i => i.Kind == WFDrydockWorkKind.Upgrade);
+            Assert.Multiple(() =>
+            {
+                Assert.That(refit.Target, Is.EqualTo(added), "Only the new thruster should be below tier.");
+                Assert.That(refit.Cost, Is.EqualTo(fullPrice), "A part past the coverage should pay the full refit.");
+            });
+
+            drydock.ApplyItem(grid, refit);
+            Assert.That(parts.GetTier(added, thrusters), Is.EqualTo(2), "The new thruster should be brought to Mk III.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     /// <summary>An original that still exists elsewhere on the ship is not counted as missing.</summary>
     [Test]
     public async Task ExistingOriginalNotCountedMissing()
@@ -277,7 +338,7 @@ public sealed class DrydockTest
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
         var grid = map.Grid;
-        var upgrades = server.System<WFDrydockUpgradeSystem>();
+        var upgrades = server.System<WFPartRefitSystem>();
         var protoMan = server.ResolveDependency<IPrototypeManager>();
         var thrusters = protoMan.Index(ThrusterRefit);
         var gyros = protoMan.Index(GyroscopeRefit);
@@ -340,7 +401,7 @@ public sealed class DrydockTest
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
         var grid = map.Grid;
-        var upgrades = server.System<WFDrydockUpgradeSystem>();
+        var upgrades = server.System<WFPartRefitSystem>();
         var stacks = server.System<SharedStackSystem>();
         var containers = server.System<SharedContainerSystem>();
         var gyros = server.ResolveDependency<IPrototypeManager>().Index(GyroscopeRefit);
@@ -396,7 +457,7 @@ public sealed class DrydockTest
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
         var drydock = server.System<WFDrydockSystem>();
-        var upgrades = server.System<WFDrydockUpgradeSystem>();
+        var upgrades = server.System<WFPartRefitSystem>();
         var destructible = server.System<DestructibleSystem>();
         var damageable = server.System<DamageableSystem>();
         var ui = server.System<SharedUserInterfaceSystem>();
@@ -821,7 +882,7 @@ public sealed class DrydockTest
         var em = server.EntMan;
         var map = await pair.CreateTestMap();
         var drydock = server.System<WFDrydockSystem>();
-        var upgrades = server.System<WFDrydockUpgradeSystem>();
+        var upgrades = server.System<WFPartRefitSystem>();
         var timing = server.ResolveDependency<IGameTiming>();
         var thrusterRefit = server.ResolveDependency<IPrototypeManager>().Index(ThrusterRefit);
 
@@ -862,7 +923,6 @@ public sealed class DrydockTest
                 Target = thruster,
                 Upgrade = ThrusterRefit.Id,
                 Tier = 1,
-                Parts = 1,
                 Cost = 1000,
                 LocalPos = em.GetComponent<TransformComponent>(thruster).LocalPosition,
             }).ToList();
@@ -883,6 +943,8 @@ public sealed class DrydockTest
                 "The refit should end within its cap.");
             Assert.That(thrusters.Select(t => upgrades.GetTier(t, thrusterRefit)), Has.All.EqualTo(1),
                 "Every thruster should be refitted.");
+            Assert.That(server.System<WFShipRefitSystem>().GetRefit(ship, ThrusterRefit.Id), Is.EqualTo((1, thrusters.Count)),
+                "The ship should own Mk II, covering every thruster's part.");
         });
 
         await pair.CleanReturnAsync();

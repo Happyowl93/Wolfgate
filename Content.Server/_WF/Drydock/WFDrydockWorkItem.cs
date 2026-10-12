@@ -37,14 +37,11 @@ public sealed class WFDrydockWorkItem
     /// <summary>Entity to heal or refit, or the original entity of a missing one.</summary>
     public EntityUid Target;
 
-    /// <summary>Upgrade prototype id for refits.</summary>
+    /// <summary>Refit prototype id of a refit item.</summary>
     public string? Upgrade;
 
-    /// <summary>Tier a refit raises the part to.</summary>
+    /// <summary>Tier a refit item brings its target to.</summary>
     public int Tier;
-
-    /// <summary>Stock parts a refit swaps in its machine; its price and material bill are per part.</summary>
-    public int Parts;
 
     /// <summary>Prototype a rebuild or heal works on, for its construction materials.</summary>
     public EntProtoId? Prototype;
@@ -60,6 +57,12 @@ public sealed class WFDrydockWorkItem
 
     /// <summary>Credits charged for this item.</summary>
     public int Cost;
+
+    /// <summary>Share of the cost for refits, charged outside the repair cap: all of a refit item's, or a rebuild's restore.</summary>
+    public int RefitCost;
+
+    /// <summary>Tier materials of that refit share, for a console that pays in materials.</summary>
+    public Dictionary<string, int>? RefitMaterials;
 
     /// <summary>Material bill when quoted by a console that pays in materials, or null.</summary>
     public Dictionary<string, int>? Materials;

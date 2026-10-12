@@ -519,39 +519,7 @@ public sealed partial class WFDrydockSystem
             return items.Count == 0 ? Loc.GetString("drydock-console-nothing-to-repair") : null;
         }
 
-        items = new List<WFDrydockWorkItem>();
-        if (!comp.Upgrades.Any(u => u.Id == upgrade) || !_prototype.TryIndex<WFDrydockUpgradePrototype>(upgrade, out var proto))
-            return Loc.GetString("drydock-console-unknown-refit");
-
-        var parts = new List<EntityUid>();
-        _upgrade.GetParts(ship, proto, parts);
-        if (parts.Count == 0)
-            return Loc.GetString("drydock-console-no-parts");
-
-        var minTier = parts.Min(p => _upgrade.GetTier(p, proto));
-        if (minTier >= proto.Tiers.Count)
-            return Loc.GetString("drydock-console-refit-maxed");
-
-        var tierPrice = proto.Tiers[minTier].Price;
-        foreach (var part in parts)
-        {
-            if (_upgrade.GetTier(part, proto) > minTier)
-                continue;
-
-            var swapped = _upgrade.PartsToSwap(part, proto, minTier + 1);
-            items.Add(new WFDrydockWorkItem
-            {
-                Kind = WFDrydockWorkKind.Upgrade,
-                Target = part,
-                Upgrade = proto.ID,
-                Tier = minTier + 1,
-                Parts = swapped,
-                Cost = tierPrice * swapped,
-                LocalPos = Transform(part).LocalPosition,
-            });
-        }
-
-        return null;
+        return BuildRefitWork(ship, comp, upgrade, out items);
     }
 
     /// <summary>Price of a repair (with its fee) or a refit.</summary>
