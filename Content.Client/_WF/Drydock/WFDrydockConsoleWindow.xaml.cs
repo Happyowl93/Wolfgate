@@ -129,7 +129,6 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         BlockedCranesLabel.Visible = state.BlockedCranes > 0;
         BlockedCranesLabel.Text = Loc.GetString("drydock-ui-cranes-blocked", ("count", state.BlockedCranes));
         NoCranesLabel.Visible = state.CraneCount == 0;
-        NoCranesLabel.Text = Loc.GetString("drydock-ui-no-cranes");
     }
 
     private void UpdateBooking(WFDrydockConsoleState state)
@@ -249,16 +248,14 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
     /// <summary>Sets a refit row's texts and disabled flags from the console state.</summary>
     private void UpdateRefitRow((string Id, Label Parts, Button Button) row, WFDrydockUpgradeEntry entry, WFDrydockConsoleState state, bool blocked)
     {
-        var working = state.Working;
-        var booking = state.Booking;
         var button = row.Button;
 
-        row.Parts.Visible = !working;
+        row.Parts.Visible = !state.Working;
         row.Parts.Text = Loc.GetString("drydock-ui-refit-parts",
             ("parts", entry.Parts),
             ("mark", Mark(entry.MinTier)));
 
-        if (working)
+        if (state.Working)
         {
             button.Text = Loc.GetString("drydock-ui-refit-busy");
             button.Disabled = true;
@@ -275,14 +272,14 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         }
         else if (state.PaysWithMaterials)
         {
-            button.Text = Loc.GetString(booking ? "drydock-console-book-refit-materials" : "drydock-console-refit-materials",
+            button.Text = Loc.GetString(state.Booking ? "drydock-console-book-refit-materials" : "drydock-console-refit-materials",
                 ("mark", Mark(entry.MinTier + 1)),
                 ("materials", FormatMaterials(entry.NextMaterials)));
             button.Disabled = blocked || !Covers(entry.NextMaterials, state.StoredMaterials);
         }
         else
         {
-            button.Text = Loc.GetString(booking ? "drydock-ui-book-refit-button" : "drydock-ui-refit-button",
+            button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-button" : "drydock-ui-refit-button",
                 ("mark", Mark(entry.MinTier + 1)),
                 ("price", entry.NextPrice));
             button.Disabled = blocked;

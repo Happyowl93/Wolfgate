@@ -70,7 +70,7 @@ public sealed partial class HailingSystem
         // Per-caller services build their state for this actor.
         if (serviceComp.PerCaller)
         {
-            var ev = new HailServiceOpenedEvent(helm, Transform(helm).GridUid, actor, key);
+            var ev = new HailServiceOpenedEvent(helm, Transform(helm).GridUid, actor);
             RaiseLocalEvent(service, ref ev);
         }
         else

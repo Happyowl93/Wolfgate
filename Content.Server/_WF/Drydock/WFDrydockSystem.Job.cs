@@ -55,7 +55,7 @@ public sealed partial class WFDrydockSystem
         UpdateBookings(curTime);
         UpdateBerthLights(curTime);
         UpdateBlockers(curTime);
-        RefreshMaterialConsoles(frameTime);
+        RefreshMaterialConsoles(curTime);
 
         _ends.Clear();
         var query = EntityQueryEnumerator<WFDrydockJobComponent, WFDrydockConsoleComponent>();
@@ -314,12 +314,8 @@ public sealed partial class WFDrydockSystem
     private void GiveUpReach(EntityUid console, WFDrydockConsoleComponent comp, WFDrydockJobComponent job, WFDrydockJobSlot slot)
     {
         var returned = new List<WFDrydockWorkItem>();
-        var skipped = 0;
         if (slot.Item is { } stuck)
-        {
             returned.Add(stuck);
-            skipped++;
-        }
 
         slot.Item = null;
         slot.Unreachable = false;
@@ -331,12 +327,11 @@ public sealed partial class WFDrydockSystem
                 continue;
 
             returned.Add(pending);
-            skipped++;
             job.Pending.RemoveAt(i);
         }
 
-        job.Done += skipped;
-        job.Skipped += skipped;
+        job.Done += returned.Count;
+        job.Skipped += returned.Count;
         if (job.PaidInMaterials)
         {
             AddBill(job.SkippedMaterials, ReturnMaterials(console, JobCranes(job), returned));
@@ -629,7 +624,7 @@ public sealed partial class WFDrydockSystem
         }
         else
         {
-            var unfinished = job.Pending.Concat(job.Slots.Where(s => s.Item != null).Select(s => s.Item!)).ToList();
+            var unfinished = UnfinishedItems(job);
             var powerLost = end == JobEnd.Unpowered;
             if (job.PaidInMaterials)
             {
@@ -649,6 +644,12 @@ public sealed partial class WFDrydockSystem
         RemComp<WFDrydockJobComponent>(console);
         ParkCranes(console, comp);
         UpdateUi(console, comp);
+    }
+
+    /// <summary>Items not applied yet: the queue and the items in progress.</summary>
+    private static List<WFDrydockWorkItem> UnfinishedItems(WFDrydockJobComponent job)
+    {
+        return job.Pending.Concat(job.Slots.Where(s => s.Item != null).Select(s => s.Item!)).ToList();
     }
 
     /// <summary>Pops a job message at the console, and on the payer when they ordered it from their own ship.</summary>

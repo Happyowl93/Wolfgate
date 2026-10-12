@@ -413,9 +413,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         {
             state.ShipName = MetaData(berthed).EntityName;
 
-            var items = job != null
-                ? job.Pending.Concat(job.Slots.Where(s => s.Item != null).Select(s => s.Item!)).ToList()
-                : BuildRepairItems(berthed, comp);
+            var items = job != null ? UnfinishedItems(job) : BuildRepairItems(berthed, comp);
             CountWork(state, items);
 
             if (pay != null && job == null && items.Count > 0)
@@ -553,7 +551,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         if (cranes.Any(c => CraneBusyElsewhere(console, c)))
             return Deny(console, comp, actor, Loc.GetString("drydock-console-crane-busy"));
 
-        // Booked jobs are always paid in credits; walk-in material consoles pay from their storage.
+        // Booked jobs are always paid in credits; walk-in material consoles pay from their cranes.
         var pay = booked ? null : CompOrNull<WFDrydockMaterialPaymentComponent>(console);
         if (pay != null)
         {

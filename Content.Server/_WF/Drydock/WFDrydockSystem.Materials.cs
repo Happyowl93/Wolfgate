@@ -12,7 +12,7 @@ public sealed partial class WFDrydockSystem
 {
     [Dependency] private SharedOreSiloSystem _oreSilo = default!;
 
-    private float _materialRefresh;
+    private TimeSpan _nextMaterialRefresh;
 
     /// <summary>Sets each item's material bill for a console that pays in materials.</summary>
     private void AssignMaterials(WFDrydockMaterialPaymentComponent pay, List<WFDrydockWorkItem> items)
@@ -221,14 +221,13 @@ public sealed partial class WFDrydockSystem
         return bill;
     }
 
-    /// <summary>Re-sends open material consoles' state about once a second, since crane and silo stock change off the console.</summary>
-    private void RefreshMaterialConsoles(float frameTime)
+    /// <summary>Re-sends open material consoles' state once a second, since crane and silo stock change off the console.</summary>
+    private void RefreshMaterialConsoles(TimeSpan curTime)
     {
-        _materialRefresh += frameTime;
-        if (_materialRefresh < 1f)
+        if (curTime < _nextMaterialRefresh)
             return;
 
-        _materialRefresh = 0f;
+        _nextMaterialRefresh = curTime + TimeSpan.FromSeconds(1);
         var query = EntityQueryEnumerator<WFDrydockConsoleComponent, WFDrydockMaterialPaymentComponent>();
         while (query.MoveNext(out var uid, out var comp, out _))
         {

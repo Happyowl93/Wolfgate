@@ -24,8 +24,8 @@ public sealed partial class WFDrydockSystem
     /// <summary>Earliest time bookings are checked and booking windows pushed again.</summary>
     private TimeSpan _nextBookingCheck;
 
-    /// <summary>A berth console with its bay area, station and approach lights.</summary>
-    private readonly record struct BerthSlot(EntityUid Console, WFDrydockConsoleComponent Comp, EntityUid Station, Box2 Area, Vector2 Approach, float ApproachLength, string Label);
+    /// <summary>A berth console with its berth.</summary>
+    private readonly record struct BerthSlot(EntityUid Console, WFDrydockConsoleComponent Comp, WFDrydockBerth Berth);
 
     /// <summary>The berth a booking is priced at, the berth it would take, and the refusal notice.</summary>
     private readonly record struct Evaluation(BerthSlot? Pricing, BerthSlot? Chosen, string? Notice);
@@ -170,7 +170,7 @@ public sealed partial class WFDrydockSystem
             if (xform.GridUid != grid || !TryGetBerth(console, comp, out var berth))
                 continue;
 
-            berths.Add(new BerthSlot(console, comp, berth.Grid, berth.Area, berth.Approach, comp.ApproachLength, berth.Label));
+            berths.Add(new BerthSlot(console, comp, berth));
         }
 
         return berths;
@@ -182,9 +182,9 @@ public sealed partial class WFDrydockSystem
         var size = ShipSize(ship);
         var at = _transform.GetWorldPosition(ship);
         return berths
-            .Where(b => SortedSize(b.Area.Width, b.Area.Height) is var bay && size.X <= bay.X && size.Y <= bay.Y)
-            .OrderBy(b => b.Area.Width * b.Area.Height)
-            .ThenBy(b => (Vector2.Transform(b.Area.Center, _transform.GetWorldMatrix(b.Station)) - at).LengthSquared())
+            .Where(b => SortedSize(b.Berth.Area.Width, b.Berth.Area.Height) is var bay && size.X <= bay.X && size.Y <= bay.Y)
+            .OrderBy(b => b.Berth.Area.Width * b.Berth.Area.Height)
+            .ThenBy(b => (Vector2.Transform(b.Berth.Area.Center, _transform.GetWorldMatrix(b.Berth.Grid)) - at).LengthSquared())
             .ToList();
     }
 
@@ -220,7 +220,7 @@ public sealed partial class WFDrydockSystem
         if (berths.Count == 0)
             return new(null, null, Loc.GetString("drydock-booking-full"));
 
-        if (ship is { } owned && berths.Any(b => b.Station == owned))
+        if (ship is { } owned && berths.Any(b => b.Berth.Grid == owned))
             return new(berths[0], null, Loc.GetString("drydock-console-own-grid"));
 
         if (ship is not { } caller)
@@ -315,10 +315,10 @@ public sealed partial class WFDrydockSystem
         booking.StillSince = null;
 
         var guide = EnsureComp<WFDrydockGuideComponent>(ship);
-        FillGuide(guide, slot, ShipFrame(ship, slot.Area, comp.FrameMargin));
+        FillGuide(guide, slot.Berth, slot.Comp.ApproachLength, ShipFrame(ship, slot.Berth.Area, comp.FrameMargin));
         Dirty(ship, guide);
 
-        Tell(actor, helm, Loc.GetString("drydock-booking-head-to", ("berth", slot.Label), ("ship", Name(ship))));
+        Tell(actor, helm, Loc.GetString("drydock-booking-head-to", ("berth", slot.Berth.Label), ("ship", Name(ship))));
     }
 
     /// <summary>The parking frame for a ship: its size plus margin, turned to the bay's long side and clamped to the bay.</summary>
@@ -332,19 +332,19 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>Lays the parking frame and approach lights for a ship in a berth, in the station's local space.</summary>
-    private void FillGuide(WFDrydockGuideComponent guide, BerthSlot slot, Vector2 frame)
+    private static void FillGuide(WFDrydockGuideComponent guide, WFDrydockBerth berth, float approachLength, Vector2 frame)
     {
-        var area = slot.Area;
-        var approach = slot.Approach.LengthSquared() > 0f ? Vector2.Normalize(slot.Approach) : new Vector2(0, -1);
+        var area = berth.Area;
+        var approach = berth.Approach.LengthSquared() > 0f ? Vector2.Normalize(berth.Approach) : new Vector2(0, -1);
         var center = area.Center;
         var frameExtent = Math.Abs(approach.X) * frame.X + Math.Abs(approach.Y) * frame.Y;
         var areaExtent = Math.Abs(approach.X) * area.Width + Math.Abs(approach.Y) * area.Height;
 
-        guide.Station = slot.Station;
+        guide.Station = berth.Grid;
         guide.Center = center;
         guide.Size = frame;
         guide.PathEnd = center + approach * (frameExtent / 2f);
-        guide.PathStart = center + approach * (areaExtent / 2f + slot.ApproachLength);
+        guide.PathStart = center + approach * (areaExtent / 2f + approachLength);
     }
 
     /// <summary>Removes every booking held for a ship, and its guide.</summary>

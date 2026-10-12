@@ -71,6 +71,10 @@ public sealed class DrydockTest
     /// <summary>Funds given to the payer, enough for any repair in these tests.</summary>
     private const int PayerFunds = 1_000_000;
 
+    private static readonly ProtoId<DamageTypePrototype> Blunt = "Blunt";
+    private static readonly ProtoId<WFDrydockUpgradePrototype> ThrusterRefit = "WFDrydockThrusters";
+    private static readonly ProtoId<WFDrydockUpgradePrototype> GyroscopeRefit = "WFDrydockGyroscopes";
+
     /// <summary>A host grid with its crane and console, as a mobile shipyard.</summary>
     private readonly record struct Shipyard(EntityUid Grid, EntityUid Crane, EntityUid Console);
 
@@ -116,10 +120,10 @@ public sealed class DrydockTest
     private static EntityUid FindThruster(TestPair pair, EntityUid grid, Vector2i tile)
     {
         var em = pair.Server.EntMan;
-        foreach (var thrusterComp in em.EntityQuery<ThrusterComponent>(true))
+        var query = em.AllEntityQueryEnumerator<ThrusterComponent, MetaDataComponent>();
+        while (query.MoveNext(out var uid, out _, out var meta))
         {
-            var uid = thrusterComp.Owner;
-            if (em.GetComponent<MetaDataComponent>(uid).EntityPrototype?.ID != "Thruster")
+            if (meta.EntityPrototype?.ID != "Thruster")
                 continue;
 
             var xform = em.GetComponent<TransformComponent>(uid);
@@ -157,7 +161,7 @@ public sealed class DrydockTest
             ship.GenerateRepairData(grid);
 
             // Damage the wall, then break the hull: a hole, a lost thruster.
-            var blunt = new DamageSpecifier(protoMan.Index<DamageTypePrototype>("Blunt"), FixedPoint2.New(20));
+            var blunt = new DamageSpecifier(protoMan.Index(Blunt), FixedPoint2.New(20));
             damageable.TryChangeDamage(wall, blunt);
             em.DeleteEntity(thruster);
             CutHole(pair, grid, HoleTile);
@@ -269,8 +273,8 @@ public sealed class DrydockTest
         var grid = map.Grid;
         var upgrades = server.System<WFDrydockUpgradeSystem>();
         var protoMan = server.ResolveDependency<IPrototypeManager>();
-        var thrusters = protoMan.Index<WFDrydockUpgradePrototype>("WFDrydockThrusters");
-        var gyros = protoMan.Index<WFDrydockUpgradePrototype>("WFDrydockGyroscopes");
+        var thrusters = protoMan.Index(ThrusterRefit);
+        var gyros = protoMan.Index(GyroscopeRefit);
 
         EntityUid thruster = default;
         EntityUid gyroscope = default;
@@ -381,7 +385,7 @@ public sealed class DrydockTest
     public static EntityUid CreateShip(TestPair pair, MapId map, Vector2? worldPos = null)
     {
         var server = pair.Server;
-        var grid = server.ResolveDependency<IMapManager>().CreateGrid(map).Owner;
+        var grid = server.ResolveDependency<IMapManager>().CreateGridEntity(map).Owner;
         server.System<SharedTransformSystem>().SetWorldPosition(grid, worldPos ?? BerthAHull);
         return grid;
     }

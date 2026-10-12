@@ -23,10 +23,6 @@
   - type: WiresPanel
   - type: WFDrydockConsole
     baseFee: 0
-    upgrades:
-    - WFDrydockThrusters
-    - WFDrydockGyroscopes
-    - WFDrydockPower
   - type: WFDrydockMaterialPayment
     rates:
       Steel: 0.2
@@ -45,7 +41,7 @@
   parent: [WFDrydockCrane, ConstructibleMachine]
   id: WFMobileDrydockCrane
   name: mobile drydock crane
-  description: A short two-by-two crane for a ship's bay. Works the nearby hull with welders, grinders and bolt drivers.
+  description: A compact drydock crane for ships. Repairs and refits ships held alongside.
   components:
   - type: Transform
     anchored: false

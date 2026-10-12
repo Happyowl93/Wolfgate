@@ -68,13 +68,13 @@ public sealed class WFDrydockConsoleState : BoundUserInterfaceState
     /// <summary>Localized line explaining why nothing can be booked, or null.</summary>
     public string? Notice;
 
-    /// <summary>Whether this console takes materials from its own storage instead of credits.</summary>
+    /// <summary>Whether this console charges materials instead of credits.</summary>
     public bool PaysWithMaterials;
 
     /// <summary>Bill of the next repair when paying with materials.</summary>
     public Dictionary<string, int> RepairMaterials = new();
 
-    /// <summary>Materials held in the console's storage.</summary>
+    /// <summary>Materials the working cranes and their silos hold.</summary>
     public Dictionary<string, int> StoredMaterials = new();
 
     /// <summary>Whether the console's berth lights are on.</summary>

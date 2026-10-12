@@ -1,6 +1,6 @@
-# Drydock work sounds, mixed per kind of work.
+# Drydock work sounds, one collection per kind of work. Repeated files weight the pick.
 
-# Hull plating going back on: welding and grinding the seams.
+# Hull tiles.
 - type: soundCollection
   id: WFDrydockHullWork
   files:
@@ -11,7 +11,7 @@
   - /Audio/Effects/metal_scrape2.ogg
   - /Audio/Items/welder.ogg
 
-# Missing parts rebuilt and bolted down: bolt drivers, ratchets, then a weld.
+# Missing parts.
 - type: soundCollection
   id: WFDrydockPartWork
   files:
@@ -22,7 +22,7 @@
   - /Audio/Items/ratchet.ogg
   - /Audio/Items/drill_use.ogg
 
-# Damaged structure patched: welding, grinding and hammering it true.
+# Damage repair.
 - type: soundCollection
   id: WFDrydockDamageWork
   files:
@@ -32,7 +32,7 @@
   - /Audio/Effects/metal_thud1.ogg
   - /Audio/Items/welder2.ogg
 
-# Machines opened up and refitted: drills, ratchets and screwdrivers.
+# Refits.
 - type: soundCollection
   id: WFDrydockRefitWork
   files:
@@ -43,7 +43,7 @@
   - /Audio/Items/drill_hit.ogg
   - /Audio/Machines/screwdriveropen.ogg
 
-# Background machinery across the ship while a job runs.
+# Random spots on the ship during a job.
 - type: soundCollection
   id: WFDrydockIndustry
   files:
@@ -56,7 +56,7 @@
   - /Audio/Items/drill_use.ogg
   - /Audio/Items/ratchet.ogg
 
-# Crane hydraulics when a boom slews, extends or travels.
+# Crane hydraulics when it starts moving.
 - type: soundCollection
   id: WFDrydockCraneMove
   files:

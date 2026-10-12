@@ -1,9 +1,9 @@
 namespace Content.Server._WF.Drydock;
 
 /// <summary>
-/// Work booked on a berth console for a ship. Held until the ship settles in the berth, or until the booking lapses.
+/// Work booked on a berth console for a ship. Held until the ship settles in the berth, or until the booking lapses. Not saved.
 /// </summary>
-[RegisterComponent]
+[RegisterComponent, UnsavedComponent]
 public sealed partial class WFDrydockBookingComponent : Component
 {
     /// <summary>Ship the work is booked for.</summary>

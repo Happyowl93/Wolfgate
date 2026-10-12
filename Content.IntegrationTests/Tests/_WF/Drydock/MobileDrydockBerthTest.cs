@@ -77,7 +77,7 @@ public sealed class MobileDrydockBerthTest
         var xforms = pair.Server.System<SharedTransformSystem>();
         track.Positions.Add(xforms.GetWorldPosition(uid));
         track.Parents.Add(em.GetComponent<TransformComponent>(uid).ParentUid);
-        if (em.TryGetComponent(uid, out MapGridComponent? grid))
+        if (em.TryGetComponent(uid, out MapGridComponent grid))
             track.GridTicks.Add(grid.LastModifiedTick.Value);
         track.ComponentCounts.Add(em.ComponentCount(uid));
         track.ComponentSets.Add(string.Join(",", em.GetComponents(uid).Select(c => c.GetType().Name).OrderBy(n => n)));

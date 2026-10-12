@@ -34,6 +34,10 @@ public sealed class MobileDrydockTest
 {
     internal static readonly string[] StockMaterials = { "Steel", "Glass", "Plastic" };
 
+    private static readonly ProtoId<TechnologyPrototype> Shuttlecraft = "Shuttlecraft";
+    private static readonly ProtoId<LatheRecipePrototype> ConsoleBoardRecipe = "WFComputerMobileDrydockCircuitboard";
+    private static readonly ProtoId<LatheRecipePrototype> CraneBoardRecipe = "WFMobileDrydockCraneMachineCircuitboard";
+
     /// <summary>Spawns a host grid with a mobile crane, a material console, and MV power from a substation on the HV debug generator.</summary>
     internal static (EntityUid Grid, EntityUid Crane, EntityUid Console) SpawnMobileYard(TestPair pair, MapId map)
     {
@@ -139,7 +143,7 @@ public sealed class MobileDrydockTest
             Assert.That(drydock.TryStartRepair(console, comp, ship, payer), Is.True, "The repair should start.");
             Assert.Multiple(() =>
             {
-                Assert.That(em.TryGetComponent(console, out WFDrydockJobComponent? job), Is.True, "The job should exist.");
+                Assert.That(em.TryGetComponent(console, out WFDrydockJobComponent job), Is.True, "The job should exist.");
                 Assert.That(job?.PaidInMaterials, Is.True, "The job should be paid in materials.");
                 foreach (var (id, amount) in bill)
                 {
@@ -221,7 +225,7 @@ public sealed class MobileDrydockTest
             Assert.That(drydock.TryStartRepair(console, comp, ship, payer), Is.True, "The repair should start.");
             Assert.Multiple(() =>
             {
-                Assert.That(em.TryGetComponent(console, out WFDrydockJobComponent? job), Is.True, "The job should exist.");
+                Assert.That(em.TryGetComponent(console, out WFDrydockJobComponent job), Is.True, "The job should exist.");
                 Assert.That(job?.PaidInMaterials, Is.True, "The job should be paid in materials.");
                 foreach (var (id, amount) in bill)
                 {
@@ -298,13 +302,13 @@ public sealed class MobileDrydockTest
             Assert.That(em.GetComponent<MachineBoardComponent>(board).Prototype.Id, Is.EqualTo("WFMobileDrydockCrane"),
                 "The crane board should build a mobile drydock crane.");
 
-            var unlocks = protos.Index<TechnologyPrototype>("Shuttlecraft").RecipeUnlocks.Select(r => r.ToString()).ToList();
+            var unlocks = protos.Index(Shuttlecraft).RecipeUnlocks.Select(r => r.ToString()).ToList();
             Assert.Multiple(() =>
             {
                 Assert.That(unlocks, Does.Contain("WFComputerMobileDrydockCircuitboard"), "Shuttlecraft should unlock the console board.");
                 Assert.That(unlocks, Does.Contain("WFMobileDrydockCraneMachineCircuitboard"), "Shuttlecraft should unlock the crane board.");
-                Assert.That(protos.HasIndex<LatheRecipePrototype>("WFComputerMobileDrydockCircuitboard"), Is.True, "The console board recipe should exist.");
-                Assert.That(protos.HasIndex<LatheRecipePrototype>("WFMobileDrydockCraneMachineCircuitboard"), Is.True, "The crane board recipe should exist.");
+                Assert.That(protos.HasIndex(ConsoleBoardRecipe), Is.True, "The console board recipe should exist.");
+                Assert.That(protos.HasIndex(CraneBoardRecipe), Is.True, "The crane board recipe should exist.");
             });
         });
 
@@ -354,7 +358,7 @@ public sealed class MobileDrydockTest
         await server.WaitAssertion(() =>
         {
             ToggleBerthLights(pair, console, payer);
-            Assert.That(em.TryGetComponent(console, out WFDrydockGuideComponent? guide), Is.True, "Lights on should add a guide to the console.");
+            Assert.That(em.TryGetComponent(console, out WFDrydockGuideComponent guide), Is.True, "Lights on should add a guide to the console.");
             Assert.Multiple(() =>
             {
                 Assert.That(guide!.Station, Is.EqualTo(berth.Grid), "The guide should sit on the berth's grid.");

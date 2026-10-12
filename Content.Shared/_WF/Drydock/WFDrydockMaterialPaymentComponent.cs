@@ -4,7 +4,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._WF.Drydock;
 
 /// <summary>
-/// A drydock console that takes materials from its own storage instead of credits.
+/// A drydock console that charges materials from its cranes' storage and their linked silos instead of credits.
 /// </summary>
 [RegisterComponent]
 public sealed partial class WFDrydockMaterialPaymentComponent : Component

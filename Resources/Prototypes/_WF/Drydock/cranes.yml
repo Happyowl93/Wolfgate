@@ -6,7 +6,7 @@
   abstract: true
   id: WFDrydockCraneBase
   name: drydock crane
-  description: A two-by-two crane. Its arm runs down the bay, and its boom works the hull with welders, grinders and bolt drivers.
+  description: A drydock crane. Its arm runs down the bay and its boom works the hull.
   components:
   - type: Transform
     anchored: true

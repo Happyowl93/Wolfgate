@@ -35,7 +35,7 @@ public sealed partial class WFDrydockSystem
         }
 
         var guide = EnsureComp<WFDrydockGuideComponent>(uid);
-        FillGuide(guide, new BerthSlot(uid, comp, berth.Grid, berth.Area, berth.Approach, comp.ApproachLength, berth.Label), berth.Area.Size);
+        FillGuide(guide, berth, comp.ApproachLength, berth.Area.Size);
         Dirty(uid, guide);
         comp.BerthLightsUntil = _timing.CurTime + TimeSpan.FromSeconds(comp.BerthLightsTime);
         UpdateUi(uid, comp);

@@ -339,20 +339,19 @@ public sealed partial class HailWindow : FancyWindow
     private void UpdateServices(HailConsoleComponent? hail)
     {
         var offered = hail is { State: HailState.Connected } ? hail.Services : null;
-        var any = offered is { Count: > 0 };
-        ServiceBox.Visible = any;
+        ServiceBox.Visible = offered is { Count: > 0 };
 
-        if (!any)
+        if (offered is not { Count: > 0 })
         {
             _services.Clear();
             ServiceList.RemoveAllChildren();
             return;
         }
 
-        if (!SameServices(offered!))
+        if (!SameServices(offered))
         {
             _services.Clear();
-            _services.AddRange(offered!);
+            _services.AddRange(offered);
             ServiceList.RemoveAllChildren();
 
             foreach (var entry in _services)

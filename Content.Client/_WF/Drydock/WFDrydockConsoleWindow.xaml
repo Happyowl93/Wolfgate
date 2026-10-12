@@ -27,6 +27,7 @@
                Margin="0 0 0 15"
                StyleClasses="LabelDanger"/>
         <Label Name="NoCranesLabel"
+               Text="{Loc 'drydock-ui-no-cranes'}"
                Visible="False"
                HorizontalAlignment="Center"
                Margin="0 0 0 15"

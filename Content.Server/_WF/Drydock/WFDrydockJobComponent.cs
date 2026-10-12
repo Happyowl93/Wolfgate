@@ -46,7 +46,7 @@ public sealed class WFDrydockJobSlot
 /// <summary>
 /// Runtime state of a drydock job, stored on the console while work runs. Not saved.
 /// </summary>
-[RegisterComponent]
+[RegisterComponent, UnsavedComponent]
 public sealed partial class WFDrydockJobComponent : Component
 {
     /// <summary>Ship being worked on.</summary>
@@ -79,11 +79,11 @@ public sealed partial class WFDrydockJobComponent : Component
     [ViewVariables]
     public int SkippedRefund;
 
-    /// <summary>Whether the job was paid from the console's materials, so refunds go back into its storage.</summary>
+    /// <summary>Whether the job was paid in materials, so refunds go back into its first crane.</summary>
     [ViewVariables]
     public bool PaidInMaterials;
 
-    /// <summary>Materials returned to the console's storage for skipped items of a material job.</summary>
+    /// <summary>Materials returned for skipped items of a material job.</summary>
     public Dictionary<string, int> SkippedMaterials = new();
 
     /// <summary>Time the cranes finish deploying over the ship and work starts.</summary>
