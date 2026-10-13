@@ -30,6 +30,9 @@ drydock-ui-count-parts = Parts
 drydock-ui-count-damage = Damage
 drydock-ui-quote = Quote
 drydock-ui-stock = Stock
+drydock-ui-part-stock = Part stock
+drydock-ui-chemical-stock = Chemicals
+drydock-ui-stock-more = { $list } +{ $more } more
 drydock-ui-eta = Time left
 drydock-ui-expires = Expires
 drydock-ui-credits = { $price } cr
@@ -93,3 +96,5 @@ drydock-upgrade-landing-thrusters-lamp = ATMO
 
 drydock-console-materials-none = none
 drydock-console-material-amount = { $name } { $sheets }
+drydock-console-part-amount = { $name } ×{ $count }
+drydock-console-chemical-amount = { $name } { $amount }u

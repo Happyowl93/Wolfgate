@@ -342,7 +342,9 @@ public sealed partial class WFDrydockSystem
         job.Skipped += returned.Count;
         if (job.PaidInMaterials)
         {
-            AddBill(job.SkippedMaterials, ReturnMaterials(console, JobCranes(job), returned));
+            var (materials, parts) = ReturnMaterials(console, JobCranes(job), returned);
+            AddBill(job.SkippedMaterials, materials);
+            AddBill(job.SkippedParts, parts);
         }
         else
         {
@@ -668,7 +670,7 @@ public sealed partial class WFDrydockSystem
             Notify(console, comp, job, job.Skipped == 0
                 ? Loc.GetString("drydock-console-finished", ("ship", Name(job.Ship)))
                 : job.PaidInMaterials
-                    ? Loc.GetString("drydock-console-finished-skipped-materials", ("ship", Name(job.Ship)), ("count", job.Skipped), ("refund", FormatMaterials(job.SkippedMaterials)))
+                    ? Loc.GetString("drydock-console-finished-skipped-materials", ("ship", Name(job.Ship)), ("count", job.Skipped), ("refund", FormatBill(job.SkippedMaterials, job.SkippedParts)))
                     : Loc.GetString("drydock-console-finished-skipped", ("ship", Name(job.Ship)), ("count", job.Skipped), ("refund", job.SkippedRefund)));
             _audio.PlayPvs(comp.ConfirmSound, console);
         }
@@ -678,9 +680,9 @@ public sealed partial class WFDrydockSystem
             var powerLost = end == JobEnd.Unpowered;
             if (job.PaidInMaterials)
             {
-                var returned = ReturnMaterials(console, JobCranes(job), unfinished);
+                var (materials, parts) = ReturnMaterials(console, JobCranes(job), unfinished);
                 Notify(console, comp, job, Loc.GetString(powerLost ? "drydock-console-aborted-power-materials" : "drydock-console-aborted-materials",
-                    ("refund", FormatMaterials(returned))));
+                    ("refund", FormatBill(materials, parts))));
             }
             else
             {

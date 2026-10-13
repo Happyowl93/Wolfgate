@@ -92,6 +92,14 @@ plastitanium sheets for a 150k to 500k ship): 25k cr of work takes about 14 stee
 at about 60% of the voucher for a 250k ship, scaled by ship price. A rebuild also takes 1% of any construction material
 the rates don't cover, so a plastitanium wall adds 4 units of plastitanium. Refunds go back into the job's first crane.
 
+A mobile crane also links a parts silo and a chemical silo (Lathe module), from the silo's window like a lathe, and
+parts silos then take any machine part (`parts` on its `FabricationSiloClient`). A refit unit billed in full takes the
+stock part it installs from the parts silo, if there is one, instead of its tier materials
+(`WFDrydockSystem.Supplies.cs`). Only that exact prototype counts, so trade goods that are machine parts, such as
+`CapacitorEconomy2`, are never spent. Units restored at the repair share pay in materials, so a spare part isn't spent on
+a 20% bill. Unfinished work's parts go back to the silo, or onto the floor at the crane. The console lists the refit
+parts and the chemicals the silos hold; nothing uses chemicals yet.
+
 ### Crane upgrades
 
 A mobile crane takes machine part upgrades (`WFDrydockCraneUpgradesComponent`, applied in `WFDrydockSystem.Upgrades.cs`
@@ -132,6 +140,7 @@ Mk IV manipulators on stock bins draw 30 kW.
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Linking.cs`](WFDrydockSystem.Linking.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Materials.cs`](WFDrydockSystem.Materials.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Refits.cs`](WFDrydockSystem.Refits.cs)
+- [`Content.Server/_WF/Drydock/WFDrydockSystem.Supplies.cs`](WFDrydockSystem.Supplies.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Upgrades.cs`](WFDrydockSystem.Upgrades.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockWorkItem.cs`](WFDrydockWorkItem.cs)
 - [`Content.Server/_WF/Drydock/WFLandingThrusterRefitSystem.cs`](WFLandingThrusterRefitSystem.cs)
@@ -173,6 +182,7 @@ Mk IV manipulators on stock bins draw 30 kW.
 - [`Content.IntegrationTests/Tests/_WF/Drydock/DrydockTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/DrydockTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockBerthTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockBerthTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockClientTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockClientTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockSiloTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockSiloTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockUpgradeTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockUpgradeTest.cs)
 

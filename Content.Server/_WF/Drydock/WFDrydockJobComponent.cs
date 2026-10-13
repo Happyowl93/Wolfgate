@@ -89,6 +89,9 @@ public sealed partial class WFDrydockJobComponent : Component
     /// <summary>Materials returned for skipped items of a material job.</summary>
     public Dictionary<string, int> SkippedMaterials = new();
 
+    /// <summary>Parts returned for skipped items of a material job.</summary>
+    public Dictionary<string, int> SkippedParts = new();
+
     /// <summary>Time the cranes finish deploying over the ship and work starts.</summary>
     [ViewVariables]
     public TimeSpan WorkStarts;

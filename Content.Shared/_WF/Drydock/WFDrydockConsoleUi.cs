@@ -1,4 +1,5 @@
 using System.Numerics;
+using Content.Shared.FixedPoint;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._WF.Drydock;
@@ -75,8 +76,17 @@ public sealed class WFDrydockConsoleState : BoundUserInterfaceState
     /// <summary>Bill of the next repair when paying with materials.</summary>
     public Dictionary<string, int> RepairMaterials = new();
 
+    /// <summary>Parts the next repair takes from the parts silos in place of materials, by prototype.</summary>
+    public Dictionary<string, int> RepairParts = new();
+
     /// <summary>Materials the working cranes and their silos hold.</summary>
     public Dictionary<string, int> StoredMaterials = new();
+
+    /// <summary>Parts refits install that the working cranes' parts silos hold, by prototype.</summary>
+    public Dictionary<string, int> StoredParts = new();
+
+    /// <summary>Reagents the working cranes' chemical silos hold, by prototype.</summary>
+    public Dictionary<string, FixedPoint2> StoredChemicals = new();
 
     /// <summary>Whether the console's berth lights are on.</summary>
     public bool BerthLightsOn;
@@ -155,6 +165,9 @@ public sealed class WFDrydockUpgradeEntry
 
     /// <summary>Bill of the next refit when paying with materials.</summary>
     public Dictionary<string, int> NextMaterials = new();
+
+    /// <summary>Parts the next refit takes from the parts silos in place of materials, by prototype.</summary>
+    public Dictionary<string, int> NextParts = new();
 }
 
 /// <summary>

@@ -64,9 +64,18 @@ public sealed class WFDrydockWorkItem
     /// <summary>Tier materials of that refit share, for a console that pays in materials.</summary>
     public Dictionary<string, int>? RefitMaterials;
 
+    /// <summary>Refit units this item pays for in full, which parts from a parts silo can pay for instead of materials.</summary>
+    public List<WFDrydockRefitUnits>? RefitUnits;
+
     /// <summary>Material bill when quoted by a console that pays in materials, or null.</summary>
     public Dictionary<string, int>? Materials;
+
+    /// <summary>Parts taken from a parts silo in place of materials, by prototype, or null.</summary>
+    public Dictionary<string, int>? Parts;
 
     /// <summary>Seconds one crane spends on this item, set when the job starts.</summary>
     public float WorkTime;
 }
+
+/// <summary>Units of a refit line an item brings to a tier, paid in full, by the tier each reaches now.</summary>
+public sealed record WFDrydockRefitUnits(string Refit, int Tier, int[] Full);

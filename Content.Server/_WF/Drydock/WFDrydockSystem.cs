@@ -501,11 +501,14 @@ public sealed partial class WFDrydockSystem : EntitySystem
             $"{s.Booking}/{s.BookedBerth}/{s.BookingSeconds}/{s.Notice}/{s.PaysWithMaterials}/{s.BerthLightsOn}",
             $"{s.Station}/{s.BerthConsole}/{s.BerthLabel}/{s.BerthArea}/{s.Approach}/{s.Ship}/{s.Marks.Count}",
             DictKey(s.RepairMaterials),
+            DictKey(s.RepairParts),
             DictKey(s.StoredMaterials),
+            DictKey(s.StoredParts),
+            string.Join(",", s.StoredChemicals.OrderBy(kv => kv.Key).Select(kv => $"{kv.Key}={kv.Value}")),
         };
         foreach (var u in s.Upgrades)
         {
-            parts.Add($"{u.Id}:{u.Name}:{u.Units}:{u.Tier}:{u.MaxTier}:{u.NextTier}:{u.NextPrice}:{DictKey(u.NextMaterials)}");
+            parts.Add($"{u.Id}:{u.Name}:{u.Units}:{u.Tier}:{u.MaxTier}:{u.NextTier}:{u.NextPrice}:{DictKey(u.NextMaterials)}:{DictKey(u.NextParts)}");
         }
 
         return string.Join("|", parts);
@@ -545,6 +548,8 @@ public sealed partial class WFDrydockSystem : EntitySystem
             state.PaysWithMaterials = true;
             // Same stock the job's charge draws from: the cranes' storage and their linked silos.
             state.StoredMaterials = Availability(working);
+            state.StoredParts = PartStock(working);
+            state.StoredChemicals = StoredChemicals(working);
         }
 
         if (ship is { } berthed)
@@ -560,8 +565,9 @@ public sealed partial class WFDrydockSystem : EntitySystem
             {
                 if (pay != null)
                 {
-                    AssignMaterials(berthed, comp, pay, items);
+                    AssignMaterials(berthed, comp, pay, items, working);
                     state.RepairMaterials = SumBills(items);
+                    state.RepairParts = SumParts(items);
                 }
                 else
                 {
@@ -581,7 +587,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         foreach (var id in comp.Refits)
         {
             if (_prototype.TryIndex(id, out var proto))
-                state.Upgrades.Add(BuildRefitEntry(proto, ship, comp, pay, scan: job == null));
+                state.Upgrades.Add(BuildRefitEntry(proto, ship, comp, pay, working, scan: job == null));
         }
 
         return state;
@@ -672,7 +678,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         var pay = booked ? null : CompOrNull<WFDrydockMaterialPaymentComponent>(console);
         if (pay != null)
         {
-            AssignMaterials(ship, comp, pay, items);
+            AssignMaterials(ship, comp, pay, items, cranes);
             if (!TryPayMaterials(console, comp, actor, items))
                 return false;
 
