@@ -5,13 +5,11 @@ drydock-ui-repairs = Repairs
 drydock-ui-deploying = Deploying
 
 drydock-ui-refits = Refits
-drydock-ui-refit-button = Refit { $mark } ({ $price } cr)
 drydock-ui-refit-maxed = Fully refitted
 drydock-ui-refit-no-parts = No parts
 drydock-ui-refit-busy = Drydock busy
 
 drydock-ui-booking-title = Drydock services
-drydock-ui-book-refit-button = Book refit { $mark } ({ $price } cr)
 drydock-ui-booked = Berth { $berth } is booked. Follow the green lights in and hold still.
 drydock-ui-cancel-booking = Cancel booking
 drydock-ui-power-none = Cranes have no power
@@ -42,6 +40,7 @@ drydock-ui-book-repair-key = Book repair
 drydock-ui-refit-key = Refit { $mark }
 drydock-ui-book-refit-key = Book refit { $mark }
 drydock-ui-refit-mark = to Mk { $mark }
+drydock-ui-refit-price = Cost: { $price } cr
 drydock-ui-refit-units = { $parts } fitted
 drydock-gauge-progress = Work
 drydock-gauge-power = Crane power

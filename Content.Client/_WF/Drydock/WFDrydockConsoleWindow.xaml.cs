@@ -400,21 +400,17 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
             button.Text = Loc.GetString("drydock-ui-refit-maxed");
             button.Disabled = true;
         }
-        else if (state.PaysWithMaterials)
+        else
         {
-            var bill = FormatMaterials(entry.NextMaterials);
+            // The price goes on the line below, as the key is too narrow for it in wider themes.
+            var bill = state.PaysWithMaterials
+                ? FormatMaterials(entry.NextMaterials)
+                : Loc.GetString("drydock-ui-refit-price", ("price", entry.NextPrice.ToString("N0", CultureInfo.InvariantCulture)));
             button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-key" : "drydock-ui-refit-key", ("mark", RefitMark(entry)));
-            button.Disabled = blocked || !Covers(entry.NextMaterials, state.StoredMaterials);
+            button.Disabled = blocked || (state.PaysWithMaterials && !Covers(entry.NextMaterials, state.StoredMaterials));
             row.Bill.Text = bill;
             row.Bill.ToolTip = bill;
             row.Bill.Visible = true;
-        }
-        else
-        {
-            button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-button" : "drydock-ui-refit-button",
-                ("mark", RefitMark(entry)),
-                ("price", entry.NextPrice.ToString("N0", CultureInfo.InvariantCulture)));
-            button.Disabled = blocked;
         }
     }
 
