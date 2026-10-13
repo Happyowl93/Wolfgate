@@ -313,7 +313,7 @@ public sealed partial class WFDrydockSystem
         slot.GiveUpAt = curTime + TimeSpan.FromSeconds(comp.ReachTimeout);
         slot.WorkFrom = curTime + TimeSpan.FromSeconds(travel);
         // An unreachable item is never finished; the slot gives it up at GiveUpAt instead.
-        slot.Ends = reachable ? slot.WorkFrom + TimeSpan.FromSeconds(PacedWorkTime(job, item, travel, curTime)) : TimeSpan.MaxValue;
+        slot.Ends = reachable ? slot.WorkFrom + TimeSpan.FromSeconds(PacedWorkTime(job, item, travel, curTime, SlotSpeed(slot))) : TimeSpan.MaxValue;
         slot.NextSpark = slot.WorkFrom;
         slot.NextSound = slot.WorkFrom;
     }
@@ -398,14 +398,22 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>
-    /// An item's work time, shortened when crane travel has put its slot behind the job's deadline: the time left is
-    /// shared between this item and the slot's share of the queue, each with a trip as long as this one.
+    /// An item's work time at its crane's speed, shortened when crane travel has put its slot behind the job's deadline:
+    /// the time left is shared between this item and the slot's share of the queue, each with a trip as long as this one.
     /// </summary>
-    private static float PacedWorkTime(WFDrydockJobComponent job, WFDrydockWorkItem item, float travel, TimeSpan curTime)
+    private static float PacedWorkTime(WFDrydockJobComponent job, WFDrydockWorkItem item, float travel, TimeSpan curTime, float speed)
     {
         var share = 1f + (float) job.Pending.Count / job.Slots.Count;
         var paced = (float) (job.Deadline - curTime).TotalSeconds / share - travel;
-        return Math.Min(item.WorkTime, Math.Max(MinWorkTime, paced));
+        return Math.Min(item.WorkTime / speed, Math.Max(MinWorkTime, paced));
+    }
+
+    /// <summary>Speed multiplier of a slot's crane; 1 for a slot without one.</summary>
+    private float SlotSpeed(WFDrydockJobSlot slot)
+    {
+        return slot.Crane is { } crane && TryComp<WFDrydockCraneComponent>(crane, out var comp)
+            ? Math.Max(0.01f, comp.SpeedMultiplier)
+            : 1f;
     }
 
     /// <summary>Order in which work is taken: by kind, with guns that mount on hardpoints after the other parts.</summary>
@@ -446,7 +454,7 @@ public sealed partial class WFDrydockSystem
     private void UpdateEstimate(WFDrydockJobComponent job, TimeSpan curTime)
     {
         var remaining = 0d;
-        var speed = Math.Max(WFDrydockCraneComponent.StallRatio, job.Power);
+        var speed = Math.Max(WFDrydockCraneComponent.StallRatio, job.Power) * job.Slots.Average(SlotSpeed);
         foreach (var item in job.Pending)
         {
             remaining += item.WorkTime / speed;
@@ -559,7 +567,7 @@ public sealed partial class WFDrydockSystem
         var headTime = Math.Max(
             Math.Max(Math.Abs(target.Position - crane.Position) / crane.Speed, Math.Abs(target.Trolley - crane.TrolleyPosition) / crane.TrolleySpeed),
             Math.Max(Math.Abs(target.Extension - ClampExtension(crane, crane.Extension)) / crane.ExtendSpeed, Math.Abs(target.Angle - crane.Angle) / crane.SlewSpeed));
-        var time = armTime + headTime;
+        var time = (armTime + headTime) / Math.Max(0.01f, crane.SpeedMultiplier);
 
         // Hydraulics at the arm root whenever the crane gets going; aim corrections only when they are slow.
         if (time > (correction ? 0.5f : 0.25f))

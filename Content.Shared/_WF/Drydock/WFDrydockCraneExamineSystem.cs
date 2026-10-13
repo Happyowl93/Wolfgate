@@ -3,7 +3,8 @@ using Content.Shared.Examine;
 namespace Content.Shared._WF.Drydock;
 
 /// <summary>
-/// Tells who examines a drydock crane which console it is linked to and how much of its power it receives.
+/// Tells who examines a drydock crane which console it is linked to, how much power it draws while working and how much of
+/// it it receives.
 /// </summary>
 public sealed class WFDrydockCraneExamineSystem : EntitySystem
 {
@@ -23,6 +24,7 @@ public sealed class WFDrydockCraneExamineSystem : EntitySystem
         if (comp.Blocker is { } blocker)
             args.PushMarkup(Loc.GetString("drydock-crane-examine-blocked", ("blocker", blocker)));
 
+        args.PushMarkup(Loc.GetString("drydock-crane-examine-load", ("kw", MathF.Round(comp.WorkingLoad / 1000f, 1))));
         args.PushMarkup(Loc.GetString("drydock-crane-examine-power", ("percent", (int) MathF.Round(comp.PowerRatio * 100f))));
     }
 }

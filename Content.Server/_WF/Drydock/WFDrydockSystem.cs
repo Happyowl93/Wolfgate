@@ -84,6 +84,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         InitializeBerthLights();
         InitializeBooking();
         InitializeLinking();
+        InitializeUpgrades();
     }
 
     /// <summary>The largest ship grid whose center lies in the console's berth area, or null.</summary>

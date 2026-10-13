@@ -73,6 +73,20 @@
     extension: 4
     idleLoad: 200
     workingLoad: 6000
+  # Manipulators speed it up, matter bins lengthen its arm and boom, capacitors trim its draw. Speed and reach each
+  # multiply the draw, so a full set draws about 6, 20, 50 and 120 kW from stock to Mk IV; see the Drydock README.
+  # The first reach tier matches the crane above.
+  - type: WFDrydockCraneUpgrades
+    workingLoad: 6000
+    speed: [ 1, 1.5, 2.25, 3 ]
+    speedLoad: [ 1, 1.9, 3.1, 5 ]
+    reach:
+    - { maxArm: 29, sections: 4, sectionLength: 4 }
+    - { maxArm: 37, sections: 4, sectionLength: 5 }
+    - { maxArm: 47, sections: 5, sectionLength: 5 }
+    - { maxArm: 63, sections: 5, sectionLength: 6 }
+    reachLoad: [ 1, 1.9, 3.1, 5 ]
+    efficiency: [ 1, 0.9, 0.85, 0.8 ]
   - type: Machine
     board: WFMobileDrydockCraneMachineCircuitboard
   # Two-by-two graph, so deconstruction and breakage give a MachineFrame2x2 on the same tiles.
@@ -148,6 +162,7 @@
     prototype: WFMobileDrydockCrane
     requirements:
       Manipulator: 2
+      MatterBin: 2
       Capacitor: 1
     stackRequirements:
       Steel: 10
