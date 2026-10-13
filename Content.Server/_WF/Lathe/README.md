@@ -68,6 +68,11 @@ use, editing queued totals), `FabricationSiloMenu` and `LatheMenu.Wolfgate`.
 - [`Resources/Locale/en-US/_WF/Lathe/fabrication-silo.ftl`](../../../Resources/Locale/en-US/_WF/Lathe/fabrication-silo.ftl)
 - [`Resources/Locale/en-US/_WF/Lathe/lathe-menu.ftl`](../../../Resources/Locale/en-US/_WF/Lathe/lathe-menu.ftl)
 
+### Textures
+
+- [`Resources/Textures/_WF/Lathe/chemical_silo.rsi/`](../../../Resources/Textures/_WF/Lathe/chemical_silo.rsi/)
+- [`Resources/Textures/_WF/Lathe/parts_silo.rsi/`](../../../Resources/Textures/_WF/Lathe/parts_silo.rsi/)
+
 ## Non-modular edits
 
 - [`Content.Client/Lathe/UI/LatheBoundUserInterface.cs`](../../../Content.Client/Lathe/UI/LatheBoundUserInterface.cs)
