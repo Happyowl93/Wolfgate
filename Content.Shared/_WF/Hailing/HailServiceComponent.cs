@@ -3,13 +3,13 @@ using Robust.Shared.Serialization.TypeSerializers.Implementations;
 namespace Content.Shared._WF.Hailing;
 
 /// <summary>
-/// An entity whose UI a caller can open over a hail to its grid. It is relayed through the caller's helm, so it must
-/// work from its state and messages alone.
+/// An entity whose UI a caller can open over a hail to its grid, offered by the hail responder there. It is relayed
+/// through the caller's helm, so it must work from its state and messages alone.
 /// </summary>
 [RegisterComponent]
 public sealed partial class HailServiceComponent : Component
 {
-    /// <summary>Name of the service shown in the call.</summary>
+    /// <summary>Name of the service, shown as the answer that opens it.</summary>
     [DataField(required: true)]
     public LocId Name;
 

@@ -72,6 +72,18 @@ public sealed class HailSayMessage : BoundUserInterfaceMessage
     }
 }
 
+/// <summary>The pilot picked one of the answers on offer.</summary>
+[Serializable, NetSerializable]
+public sealed class HailChooseMessage : BoundUserInterfaceMessage
+{
+    public string Id;
+
+    public HailChooseMessage(string id)
+    {
+        Id = id;
+    }
+}
+
 /// <summary>Tells a console why its hail or call stopped.</summary>
 [Serializable, NetSerializable]
 public sealed class HailEndedMessage : BoundUserInterfaceMessage
@@ -83,17 +95,5 @@ public sealed class HailEndedMessage : BoundUserInterfaceMessage
     {
         Reason = reason;
         Ship = ship;
-    }
-}
-
-/// <summary>The pilot opened a service offered over the open channel.</summary>
-[Serializable, NetSerializable]
-public sealed class HailOpenServiceMessage : BoundUserInterfaceMessage
-{
-    public NetEntity Service;
-
-    public HailOpenServiceMessage(NetEntity service)
-    {
-        Service = service;
     }
 }

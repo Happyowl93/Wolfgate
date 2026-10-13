@@ -14,6 +14,12 @@ public sealed partial class HailConsoleComponent : Component
     /// <summary>Longest line a console will send.</summary>
     public const int MaxLineLength = 300;
 
+    /// <summary>Most answers one offer can hold.</summary>
+    public const int MaxOptions = 4;
+
+    /// <summary>Longest label an answer can have.</summary>
+    public const int MaxOptionLength = 60;
+
     [ViewVariables, AutoNetworkedField]
     public HailState State = HailState.Calling;
 
@@ -36,9 +42,19 @@ public sealed partial class HailConsoleComponent : Component
     [ViewVariables, AutoNetworkedField]
     public List<HailLine> Log = new();
 
-    /// <summary>Hail services on the other end's grid, offered for the length of the call.</summary>
+    /// <summary>
+    /// Answers the other end has put in front of the person at this console. While there are any, they pick
+    /// one instead of typing.
+    /// </summary>
     [ViewVariables, AutoNetworkedField]
-    public List<HailServiceEntry> Services = new();
+    public List<HailOption> Options = new();
+
+    /// <summary>
+    /// This end is run by an NPC with no UI open: it counts as manned while its operator is alive and on the
+    /// console's ship.
+    /// </summary>
+    [ViewVariables]
+    public bool Automated;
 
     /// <summary>The other end is an admin speaking as God: there is no ship and nobody to show.</summary>
     [ViewVariables, AutoNetworkedField]
@@ -93,12 +109,18 @@ public enum HailState : byte
     Connected,
 }
 
-/// <summary>A hail service the other end offers, with its localized name.</summary>
+/// <summary>One answer the person at a console can pick.</summary>
 [Serializable, NetSerializable]
-public struct HailServiceEntry
+public struct HailOption
 {
-    public NetEntity Service;
-    public string Name;
+    public string Id;
+    public string Text;
+
+    public HailOption(string id, string text)
+    {
+        Id = id;
+        Text = text;
+    }
 }
 
 /// <summary>One line of a hail's chat, as one end sees it.</summary>

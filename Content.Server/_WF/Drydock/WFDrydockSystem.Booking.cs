@@ -35,7 +35,7 @@ public sealed partial class WFDrydockSystem
         SubscribeLocalEvent<WFDrydockOperatorComponent, WFDrydockRepairMessage>(OnOperatorRepair);
         SubscribeLocalEvent<WFDrydockOperatorComponent, WFDrydockUpgradeMessage>(OnOperatorUpgrade);
         SubscribeLocalEvent<WFDrydockOperatorComponent, WFDrydockCancelBookingMessage>(OnOperatorCancel);
-        SubscribeLocalEvent<WFDrydockOperatorComponent, HailAnsweredEvent>(OnOperatorHailAnswered);
+        SubscribeLocalEvent<WFDrydockOperatorComponent, HailServiceGreetEvent>(OnOperatorHailAnswered);
     }
 
     /// <summary>Gives the operator the drydock window, so a hail relay can copy it onto the helm.</summary>
@@ -92,7 +92,7 @@ public sealed partial class WFDrydockSystem
         SendOperatorState(uid, ship, helm);
     }
 
-    private void OnOperatorHailAnswered(EntityUid uid, WFDrydockOperatorComponent comp, ref HailAnsweredEvent args)
+    private void OnOperatorHailAnswered(EntityUid uid, WFDrydockOperatorComponent comp, ref HailServiceGreetEvent args)
     {
         if (ValidShip(args.Ship) is not { } ship)
         {

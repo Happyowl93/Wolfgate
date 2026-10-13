@@ -1,5 +1,4 @@
 using System.Linq;
-using Content.Server.Shuttles.Components;
 using Content.Shared._WF.Hailing;
 using Content.Shared.Shuttles.Components;
 
@@ -7,6 +6,7 @@ namespace Content.Server._WF.Hailing;
 
 /// <summary>
 /// Hail services: UIs on the other ship's grid, relayed onto the caller's helm and driven by their own state and messages.
+/// A hail responder offers them as answers to pick.
 /// </summary>
 public sealed partial class HailingSystem
 {
@@ -16,43 +16,26 @@ public sealed partial class HailingSystem
         SubscribeLocalEvent<HailRelayComponent, BoundUIClosedEvent>(OnRelayClosed);
     }
 
-    /// <summary>Fills a connected hail's services from the services on the other ship.</summary>
-    private void FillServices(HailConsoleComponent hail)
+    /// <summary>
+    /// Opens a service's UI on a helm for the person on its call, if the service is on the ship at the other end.
+    /// </summary>
+    public bool OpenService(EntityUid helm, EntityUid service, EntityUid actor)
     {
-        hail.Services.Clear();
-
-        if (hail.PeerGrid is not { } peerGrid)
-            return;
-
-        var query = EntityQueryEnumerator<HailServiceComponent, TransformComponent>();
-
-        while (query.MoveNext(out var uid, out var service, out var xform))
-        {
-            if (xform.GridUid != peerGrid)
-                continue;
-
-            hail.Services.Add(new HailServiceEntry
-            {
-                Service = GetNetEntity(uid),
-                Name = Loc.GetString(service.Name),
-            });
-        }
-    }
-
-    /// <summary>Opens a connected hail's service UI on the helm for the actor.</summary>
-    private void OpenService(EntityUid helm, EntityUid service, EntityUid actor)
-    {
-        if (!TryComp<HailServiceComponent>(service, out var serviceComp) ||
+        if (!TryComp<HailConsoleComponent>(helm, out var hail) || hail.State != HailState.Connected ||
+            hail.OperatorUid != actor || hail.PeerGrid is not { } peerGrid || Transform(service).GridUid != peerGrid ||
+            !TryComp<HailServiceComponent>(service, out var serviceComp) ||
             !_ui.TryGetInterfaceData(service, serviceComp.Key, out var serviceData) ||
             !TryComp<UserInterfaceComponent>(helm, out var helmUi))
-            return;
+        {
+            return false;
+        }
 
         var relay = EnsureComp<HailRelayComponent>(helm);
 
         // Never shadow one of the helm's own interfaces.
         var key = serviceComp.Key;
         if (_ui.HasUi(helm, key, helmUi) && !relay.RelayKeys.Contains(key))
-            return;
+            return false;
 
         if (relay.Links.TryGetValue(key, out var linked) && linked != service)
             _ui.CloseUi((helm, helmUi), key);
@@ -80,6 +63,13 @@ public sealed partial class HailingSystem
         }
 
         _ui.OpenUi((helm, helmUi), key, actor);
+        return true;
+    }
+
+    /// <summary>Whether a helm has a service window open over its call.</summary>
+    public bool HasOpenService(EntityUid helm)
+    {
+        return TryComp<HailRelayComponent>(helm, out var relay) && relay.Links.Count > 0;
     }
 
     /// <summary>Has the far end of a helm's connected call speak a line to it. Returns false if there is no live call.</summary>
@@ -93,22 +83,6 @@ public sealed partial class HailingSystem
         }
 
         return Say(peer, caller, text);
-    }
-
-    /// <summary>Opens a service offered over the open channel.</summary>
-    private void OnOpenService(Entity<ShuttleConsoleComponent> ent, ref HailOpenServiceMessage args)
-    {
-        var serviceId = args.Service;
-        if (!TryComp<HailConsoleComponent>(ent, out var hail) || hail.State != HailState.Connected ||
-            args.Actor != hail.OperatorUid || !hail.Services.Any(entry => entry.Service == serviceId))
-        {
-            return;
-        }
-
-        if (!TryGetEntity(serviceId, out var service))
-            return;
-
-        OpenService(ent, service.Value, args.Actor);
     }
 
     /// <summary>Mirrors every relayed service's state onto its helm.</summary>

@@ -23,8 +23,8 @@ public sealed partial class ShuttleConsoleWindow
     /// <summary>The pilot sent a line down the channel.</summary>
     public event Action<string>? HailSayRequested;
 
-    /// <summary>The pilot asked for a service the hailed ship offers.</summary>
-    public event Action<NetEntity>? HailServiceRequested;
+    /// <summary>The pilot picked one of the answers on offer.</summary>
+    public event Action<string>? HailChooseRequested;
 
     private HailWindow? _hailWindow;
     private HailStrip _hailStrip = default!;
@@ -48,7 +48,7 @@ public sealed partial class ShuttleConsoleWindow
         window.AnswerRequested += accept => HailAnswerRequested?.Invoke(accept);
         window.EndRequested += () => HailEndRequested?.Invoke();
         window.SayRequested += text => HailSayRequested?.Invoke(text);
-        window.ServiceRequested += service => HailServiceRequested?.Invoke(service);
+        window.ChooseRequested += id => HailChooseRequested?.Invoke(id);
     }
 
     /// <summary>

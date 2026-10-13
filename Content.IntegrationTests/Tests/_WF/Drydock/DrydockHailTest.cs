@@ -17,7 +17,7 @@ using Robust.Shared.Map;
 namespace Content.IntegrationTests.Tests._WF.Drydock;
 
 /// <summary>
-/// A ship hails the drydock; the dockmaster answers and greets, and the pilot opens the drydock window over the call.
+/// A ship hails the drydock; the dockmaster answers and greets, and the pilot picks the drydock window from its answers.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(HailingSystem))]
@@ -87,8 +87,12 @@ public sealed class DrydockHailTest
         {
             var hail = em.GetComponent<HailConsoleComponent>(console);
             Assert.That(hail.Peer, Is.EqualTo(traffic), "The call should run from the traffic console.");
-            Assert.That(hail.Services.Select(s => s.Service), Does.Contain(em.GetNetEntity(dockmaster)),
-                "The dockmaster's service should be offered on the open channel.");
+            Assert.That(em.GetComponent<HailConsoleComponent>(traffic).Automated, Is.True,
+                "The dockmaster should hold its end as an automated console.");
+            Assert.That(ui.IsUiOpen(traffic, ShuttleConsoleUiKey.Key, dockmaster), Is.False,
+                "The dockmaster should not need the console's window.");
+            Assert.That(hail.Options.Select(o => o.Text), Is.EqualTo(new[] { Loc.GetString("drydock-hail-service") }),
+                "The dockmaster's service should be the answer on offer.");
 
             var heard = hail.Log.Where(l => !l.Own).Select(l => l.Text).ToList();
             var greetings = new[] { "drydock-hail-greeting-1", "drydock-hail-greeting-2", "drydock-hail-greeting-3" }
@@ -105,7 +109,8 @@ public sealed class DrydockHailTest
 
         await server.WaitAssertion(() =>
         {
-            DrydockTest.RaiseUiMessage(pair, console, ShuttleConsoleUiKey.Key, new HailOpenServiceMessage(em.GetNetEntity(dockmaster)), pilot);
+            var offered = em.GetComponent<HailConsoleComponent>(console).Options[0].Id;
+            DrydockTest.RaiseUiMessage(pair, console, ShuttleConsoleUiKey.Key, new HailChooseMessage(offered), pilot);
 
             Assert.That(em.TryGetComponent(console, out HailRelayComponent? relay), "Opening a service should add a relay to the helm.");
             Assert.That(relay!.Links.TryGetValue(WFDrydockConsoleUiKey.Key, out var linked) && linked == dockmaster,
@@ -121,6 +126,21 @@ public sealed class DrydockHailTest
         await server.WaitAssertion(() =>
         {
             Assert.That(ui.IsUiOpen(console, WFDrydockConsoleUiKey.Key, pilot), "The relayed window should stay open during the call.");
+            Assert.That(em.GetComponent<HailConsoleComponent>(console).Options, Is.Empty,
+                "Nothing should be on offer while the drydock window is open.");
+
+            ui.CloseUi(console, WFDrydockConsoleUiKey.Key, pilot);
+        });
+
+        // Closing the window brings the answers back, and the service opens again from them.
+        bool Offered() => em.TryGetComponent(console, out HailConsoleComponent? hail) && hail.Options.Count > 0;
+        await DrydockTest.RunUntil(pair, 40, 10, Offered);
+        Assert.That(Offered(), Is.True, "The dockmaster should offer its service again once the window is closed.");
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(hailing.Choose(console, pilot, em.GetComponent<HailConsoleComponent>(console).Options[0].Id), Is.True);
+            Assert.That(ui.IsUiOpen(console, WFDrydockConsoleUiKey.Key, pilot), "The drydock window should open again.");
 
             hailing.End(console);
 
