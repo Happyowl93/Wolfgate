@@ -93,6 +93,8 @@ public sealed partial class WFDrydockSystem
         {
             Id = refit.ID,
             Name = Loc.GetString(refit.Name),
+            Mark = refit.Mark is { } mark ? Loc.GetString(mark) : null,
+            Lamp = refit.Lamp is { } lamp ? Loc.GetString(lamp) : null,
             MaxTier = refit.Tiers.Count,
         };
 

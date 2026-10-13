@@ -380,6 +380,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         row.Units.Text = Loc.GetString("drydock-ui-refit-units", ("parts", entry.Units));
         row.Units.Visible = !state.Working && entry.Units > 0;
         row.Pips.MaxTier = entry.MaxTier;
+        row.Pips.Label = entry.Lamp;
         row.Pips.Tier = entry.Tier;
         row.Pips.Lit = entry.Units > 0 || entry.Tier > 0;
         row.Bill.Visible = false;
@@ -402,7 +403,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         else if (state.PaysWithMaterials)
         {
             var bill = FormatMaterials(entry.NextMaterials);
-            button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-key" : "drydock-ui-refit-key", ("mark", WFDrydockTierPips.Mark(entry.NextTier)));
+            button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-key" : "drydock-ui-refit-key", ("mark", RefitMark(entry)));
             button.Disabled = blocked || !Covers(entry.NextMaterials, state.StoredMaterials);
             row.Bill.Text = bill;
             row.Bill.ToolTip = bill;
@@ -411,10 +412,16 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         else
         {
             button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-button" : "drydock-ui-refit-button",
-                ("mark", WFDrydockTierPips.Mark(entry.NextTier)),
+                ("mark", RefitMark(entry)),
                 ("price", entry.NextPrice.ToString("N0", CultureInfo.InvariantCulture)));
             button.Disabled = blocked;
         }
+    }
+
+    /// <summary>What a refit key refits to: the line's own phrase, or its next mark.</summary>
+    private static string RefitMark(WFDrydockUpgradeEntry entry)
+    {
+        return entry.Mark ?? Loc.GetString("drydock-ui-refit-mark", ("mark", WFDrydockTierPips.Mark(entry.NextTier)));
     }
 
     private WFCockpitStatusReading VesselLamp()

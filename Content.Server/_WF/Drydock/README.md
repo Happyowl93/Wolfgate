@@ -58,6 +58,13 @@ such as action modules or armor, are a new effect and its system. The thruster, 
 `WFPartRatingRefit` (`WFPartRefitSystem`): each tier swaps the line's machine parts for higher-rated stock parts, priced
 per part: 1,000 cr for Mk II, 4,000 for Mk III and 10,000 for Mk IV.
 
+The atmospheric thruster line is `WFLandingThrusterRefit` (`WFLandingThrusterRefitSystem`): one tier that converts
+every linear thruster the way a landing thruster kit does (Planets module), at 800 cr per thruster. A converted
+thruster keeps full thrust and its normal power draw below orbit, where an unconverted one gives half thrust for
+three times the power, so a fully converted ship hovers on the power it already flies on. It keeps the thruster's
+parts, so it stacks with the thruster line. A single-tier line can name its tier with `mark` (the keys' "to Mk II")
+and `lamp` (the lamp's numeral).
+
 A refit buys the next tier any unit falls short of, for every unit of the line, and is recorded once its job finishes
 with nothing skipped. A repair then brings each owned line back to tier, rebuilt machines included: units the ship paid
 for cost `refitRepairShare` (20%) of their tiers, and units past that coverage, such as machines added later, pay in
@@ -105,6 +112,7 @@ the rates don't cover, so a plastitanium wall adds 4 units of plastitanium. Refu
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Materials.cs`](WFDrydockSystem.Materials.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Refits.cs`](WFDrydockSystem.Refits.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockWorkItem.cs`](WFDrydockWorkItem.cs)
+- [`Content.Server/_WF/Drydock/WFLandingThrusterRefitSystem.cs`](WFLandingThrusterRefitSystem.cs)
 - [`Content.Server/_WF/Drydock/WFPartRefitSystem.cs`](WFPartRefitSystem.cs)
 - [`Content.Server/_WF/Drydock/WFShipRefitsComponent.cs`](WFShipRefitsComponent.cs)
 - [`Content.Server/_WF/Drydock/WFShipRefitSystem.cs`](WFShipRefitSystem.cs)
@@ -120,6 +128,7 @@ the rates don't cover, so a plastitanium wall adds 4 units of plastitanium. Refu
 - [`Content.Shared/_WF/Drydock/WFDrydockGuideComponent.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockGuideComponent.cs)
 - [`Content.Shared/_WF/Drydock/WFDrydockMaterialPaymentComponent.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockMaterialPaymentComponent.cs)
 - [`Content.Shared/_WF/Drydock/WFDrydockOperatorComponent.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockOperatorComponent.cs)
+- [`Content.Shared/_WF/Drydock/WFLandingThrusterRefit.cs`](../../../Content.Shared/_WF/Drydock/WFLandingThrusterRefit.cs)
 - [`Content.Shared/_WF/Drydock/WFPartRatingRefit.cs`](../../../Content.Shared/_WF/Drydock/WFPartRatingRefit.cs)
 - [`Content.Shared/_WF/Drydock/WFShipRefitEffect.cs`](../../../Content.Shared/_WF/Drydock/WFShipRefitEffect.cs)
 - [`Content.Shared/_WF/Drydock/WFShipRefitPrototype.cs`](../../../Content.Shared/_WF/Drydock/WFShipRefitPrototype.cs)

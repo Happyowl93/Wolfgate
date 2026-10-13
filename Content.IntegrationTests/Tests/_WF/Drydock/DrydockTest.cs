@@ -19,6 +19,7 @@ using Content.Shared._NF.Bank.Components;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared._WF.Drydock;
 using Content.Shared._WF.Hailing;
+using Content.Shared._WF.Planets.Flight;
 using Content.Shared.Construction.Components;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
@@ -76,6 +77,7 @@ public sealed class DrydockTest
     private static readonly ProtoId<DamageTypePrototype> Blunt = "Blunt";
     private static readonly ProtoId<WFShipRefitPrototype> ThrusterRefit = "WFRefitThrusters";
     private static readonly ProtoId<WFShipRefitPrototype> GyroscopeRefit = "WFRefitGyroscopes";
+    private static readonly ProtoId<WFShipRefitPrototype> LandingRefit = "WFRefitLandingThrusters";
     private static readonly EntProtoId WallProto = "WallSolid";
 
     /// <summary>A host grid with its crane and console, as a mobile shipyard.</summary>
@@ -253,6 +255,75 @@ public sealed class DrydockTest
 
             drydock.ApplyItem(grid, refit);
             Assert.That(parts.GetTier(added, thrusters), Is.EqualTo(2), "The new thruster should be brought to Mk III.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// The atmospheric refit converts every linear thruster and no gyroscope, keeps a thruster refit's parts and thrust,
+    /// and comes back on a rebuilt thruster at the repair share.
+    /// </summary>
+    [Test]
+    public async Task LandingRefitConvertsThrusters()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var grid = map.Grid;
+        var drydock = server.System<WFDrydockSystem>();
+        var refits = server.System<WFShipRefitSystem>();
+        var protoMan = server.ResolveDependency<IPrototypeManager>();
+        var thrusters = protoMan.Index(ThrusterRefit);
+        var landing = protoMan.Index(LandingRefit);
+        var console = new WFDrydockConsoleComponent { Berth = "T" };
+
+        EntityUid thruster = default;
+        EntityUid gyroscope = default;
+
+        await server.WaitAssertion(() =>
+        {
+            (thruster, _) = BuildHull(pair, grid);
+            gyroscope = SpawnAnchored(pair, grid, "Gyroscope", new Vector2i(2, 1));
+            server.System<ShipRepairSystem>().GenerateRepairData(grid);
+        });
+
+        await server.WaitRunTicks(2);
+
+        await server.WaitAssertion(() =>
+        {
+            var survey = refits.Survey(grid, landing, 1);
+            Assert.Multiple(() =>
+            {
+                Assert.That(WFShipRefitSystem.Units(survey), Is.EqualTo(1), "Only the linear thruster is a unit.");
+                Assert.That(survey.Below.Single().Entity, Is.EqualTo(thruster), "The stock thruster is unconverted.");
+            });
+
+            refits.Apply(thrusters, thruster, 3);
+            var thrust = em.GetComponent<ThrusterComponent>(thruster).Thrust;
+            refits.Apply(landing, thruster, 1);
+            refits.Apply(landing, gyroscope, 1);
+            Assert.Multiple(() =>
+            {
+                Assert.That(em.HasComponent<WFLandingThrusterComponent>(thruster), "The thruster should be converted.");
+                Assert.That(em.HasComponent<WFLandingThrusterComponent>(gyroscope), Is.False, "A gyroscope is never converted.");
+                Assert.That(PartsOf(pair, thruster), Has.All.StartsWith("QuadraticCapacitorStockPart:6"),
+                    "The conversion should keep the Mk IV parts.");
+                Assert.That(em.GetComponent<ThrusterComponent>(thruster).Thrust, Is.EqualTo(thrust).Within(0.01f),
+                    "The conversion should keep the Mk IV thrust.");
+                Assert.That(refits.NextTier(grid, landing, out _), Is.EqualTo(0), "A converted ship has nothing left to refit.");
+            });
+
+            refits.SetRefit(grid, LandingRefit.Id, 1, 1);
+            em.DeleteEntity(thruster);
+            var rebuild = drydock.BuildRepairItems(grid, console).Single(i => i.Kind == WFDrydockWorkKind.Entity);
+            Assert.That(rebuild.RefitCost, Is.EqualTo((int) Math.Ceiling(landing.Tiers[0].Price * console.RefitRepairShare)),
+                "A covered thruster should be converted again at the repair share.");
+
+            drydock.ApplyItem(grid, rebuild);
+            Assert.That(em.HasComponent<WFLandingThrusterComponent>(FindThruster(pair, grid, ThrusterTile)),
+                "The rebuilt thruster should come back converted.");
         });
 
         await pair.CleanReturnAsync();

@@ -24,6 +24,9 @@ public sealed class WFDrydockTierPips : Control
     /// <summary>Tier the ship owns; 0 is none.</summary>
     public int Tier { get; set; }
 
+    /// <summary>Text on the first lamp in place of its numeral, for a single-tier line.</summary>
+    public string? Label { get; set; }
+
     /// <summary>Whether the refit applies to the ship; otherwise every lamp is dark.</summary>
     public bool Lit { get; set; }
 
@@ -63,7 +66,7 @@ public sealed class WFDrydockTierPips : Control
             var color = i == count - 1 ? skin.Good : skin.Accent;
             var inner = WFConsoleAnnunciator.Face(handle, box, UIScale, color, lit);
             var text = lit ? WFInstrumentTheme.Digital ? color : skin.Ink : skin.TextMuted;
-            var numeral = Numerals[i + 1];
+            var numeral = i == 0 && Label != null ? Label : Numerals[i + 1];
             var scale = WFInstrumentText.FitScale(handle, _font!, numeral, UIScale, inner.Width - 2 * UIScale, inner.Height);
             if (scale == 0)
                 continue;

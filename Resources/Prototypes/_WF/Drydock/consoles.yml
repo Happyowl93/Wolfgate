@@ -25,6 +25,7 @@
     - WFRefitThrusters
     - WFRefitGyroscopes
     - WFRefitPower
+    - WFRefitLandingThrusters
   - type: DeviceLinkSource
     ports:
       - WFDrydockCraneSender

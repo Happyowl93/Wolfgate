@@ -132,6 +132,12 @@ public sealed class WFDrydockUpgradeEntry
     /// <summary>Localized name.</summary>
     public string Name = string.Empty;
 
+    /// <summary>Localized phrase in place of "to Mk N" on the keys, or null.</summary>
+    public string? Mark;
+
+    /// <summary>Localized text in place of the lamp numeral, or null.</summary>
+    public string? Lamp;
+
     /// <summary>Units the refit covers on the berthed ship, such as machine parts.</summary>
     public int Units;
 

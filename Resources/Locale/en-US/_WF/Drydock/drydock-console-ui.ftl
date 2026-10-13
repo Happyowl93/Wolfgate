@@ -5,13 +5,13 @@ drydock-ui-repairs = Repairs
 drydock-ui-deploying = Deploying
 
 drydock-ui-refits = Refits
-drydock-ui-refit-button = Refit to Mk { $mark } ({ $price } cr)
+drydock-ui-refit-button = Refit { $mark } ({ $price } cr)
 drydock-ui-refit-maxed = Fully refitted
 drydock-ui-refit-no-parts = No parts
 drydock-ui-refit-busy = Drydock busy
 
 drydock-ui-booking-title = Drydock services
-drydock-ui-book-refit-button = Book refit to Mk { $mark } ({ $price } cr)
+drydock-ui-book-refit-button = Book refit { $mark } ({ $price } cr)
 drydock-ui-booked = Berth { $berth } is booked. Follow the green lights in and hold still.
 drydock-ui-cancel-booking = Cancel booking
 drydock-ui-power-none = Cranes have no power
@@ -39,8 +39,9 @@ drydock-ui-clock = { $minutes }:{ $seconds }
 drydock-ui-berth-lights = Berth lights
 drydock-ui-repair-key = Repair
 drydock-ui-book-repair-key = Book repair
-drydock-ui-refit-key = Refit to Mk { $mark }
-drydock-ui-book-refit-key = Book refit to Mk { $mark }
+drydock-ui-refit-key = Refit { $mark }
+drydock-ui-book-refit-key = Book refit { $mark }
+drydock-ui-refit-mark = to Mk { $mark }
 drydock-ui-refit-units = { $parts } fitted
 drydock-gauge-progress = Work
 drydock-gauge-power = Crane power
@@ -87,6 +88,9 @@ drydock-plot-surveyed = Survey: { $count } { $count ->
 drydock-upgrade-thrusters = Thrusters
 drydock-upgrade-gyroscopes = Gyroscopes
 drydock-upgrade-power = Power systems
+drydock-upgrade-landing-thrusters = Atmospheric thrusters
+drydock-upgrade-landing-thrusters-mark = for atmosphere
+drydock-upgrade-landing-thrusters-lamp = ATMO
 
 drydock-console-materials-none = none
 drydock-console-material-amount = { $name } { $sheets }

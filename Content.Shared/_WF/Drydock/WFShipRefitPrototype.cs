@@ -25,6 +25,14 @@ public sealed partial class WFShipRefitPrototype : IPrototype
     /// <summary>What the refit does to a ship.</summary>
     [DataField(required: true)]
     public WFShipRefitEffect Effect = default!;
+
+    /// <summary>For a single-tier line, replaces "to Mk II" on its keys, as in "Refit for atmosphere".</summary>
+    [DataField]
+    public LocId? Mark;
+
+    /// <summary>For a single-tier line, replaces the numeral on its lamp.</summary>
+    [DataField]
+    public LocId? Lamp;
 }
 
 /// <summary>

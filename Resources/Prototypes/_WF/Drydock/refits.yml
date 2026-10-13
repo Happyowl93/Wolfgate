@@ -93,3 +93,18 @@
       Silver: 300
       Uranium: 300
       Bluespace: 200
+
+# The landing thruster kit's conversion, done by the cranes on every linear thruster and kept through repairs. Priced
+# per thruster at twice the kit's value, in the kit's own materials. Combines with the thruster line.
+- type: wfShipRefit
+  id: WFRefitLandingThrusters
+  name: drydock-upgrade-landing-thrusters
+  mark: drydock-upgrade-landing-thrusters-mark
+  lamp: drydock-upgrade-landing-thrusters-lamp
+  effect: !type:WFLandingThrusterRefit
+  tiers:
+  - price: 800
+    materials:
+      Steel: 1500
+      Plastic: 500
+      Glass: 300
