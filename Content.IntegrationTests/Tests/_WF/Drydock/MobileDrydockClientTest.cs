@@ -43,7 +43,7 @@ public sealed class MobileDrydockClientTest
         bool Filled);
 
     /// <summary>Reads the client's console, crane, open drydock interfaces and windows.</summary>
-    private static ClientView Look(TestPair pair, NetEntity console, NetEntity crane)
+    private static ClientView Look(TestPair pair, NetEntity console, NetEntity crane, int refits)
     {
         var em = pair.Client.EntMan;
         var ui = pair.Client.System<SharedUserInterfaceSystem>();
@@ -71,15 +71,15 @@ public sealed class MobileDrydockClientTest
         var window = windows.FirstOrDefault();
 
         return new ClientView(clientConsole ?? EntityUid.Invalid, clientCrane ?? EntityUid.Invalid, craneComp, bui, buis,
-            windows.Count, window, window != null && Filled(window));
+            windows.Count, window, window != null && Filled(window, refits));
     }
 
-    /// <summary>Whether the window has its button captions and its three refit rows.</summary>
-    private static bool Filled(WFDrydockConsoleWindow window)
+    /// <summary>Whether the window has its button captions and a row for each of the console's refits.</summary>
+    private static bool Filled(WFDrydockConsoleWindow window, int refits)
     {
         return !string.IsNullOrEmpty(window.FindControl<Button>("RepairButton").Text)
                && !string.IsNullOrEmpty(window.FindControl<Button>("BerthLightsButton").Text)
-               && window.FindControl<BoxContainer>("RefitContainer").ChildCount == 3;
+               && window.FindControl<BoxContainer>("RefitContainer").ChildCount == refits;
     }
 
     [Test]
@@ -139,13 +139,14 @@ public sealed class MobileDrydockClientTest
 
         var netConsole = em.GetNetEntity(console);
         var netCrane = em.GetNetEntity(crane);
+        var refits = em.GetComponent<WFDrydockConsoleComponent>(console).Refits.Count;
         var gameStates = client.ResolveDependency<IClientGameStateManager>();
         gameStates.GameStateApplied += OnStateApplied;
 
         ClientView first = default;
         await client.WaitAssertion(() =>
         {
-            first = Look(pair, netConsole, netCrane);
+            first = Look(pair, netConsole, netCrane, refits);
             Assert.Multiple(() =>
             {
                 Assert.That(first.Bui, Is.Not.Null, "The client should open the console's interface.");
@@ -164,7 +165,7 @@ public sealed class MobileDrydockClientTest
                 await pair.RunTicksSync(1);
                 await client.WaitPost(() =>
                 {
-                    var view = Look(pair, netConsole, netCrane);
+                    var view = Look(pair, netConsole, netCrane, refits);
                     views.Add((stage, view));
                     if (trackArm && view.CraneComp != null)
                         arms.Add(view.CraneComp.VisualArm);
@@ -181,7 +182,7 @@ public sealed class MobileDrydockClientTest
         await Watch("Silo refilled", 60);
 
         // The payer presses repair in whichever window the client has now.
-        await client.WaitPost(() => (Look(pair, netConsole, netCrane).Bui ?? first.Bui)?.SendMessage(new WFDrydockRepairMessage()));
+        await client.WaitPost(() => (Look(pair, netConsole, netCrane, refits).Bui ?? first.Bui)?.SendMessage(new WFDrydockRepairMessage()));
         await Watch("Repair sent", 5);
         var jobStarted = false;
         await server.WaitPost(() => jobStarted = em.HasComponent<WFDrydockJobComponent>(console));
