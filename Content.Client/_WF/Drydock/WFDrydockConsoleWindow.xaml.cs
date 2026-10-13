@@ -337,7 +337,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
             return FormatMaterials(materials);
 
         var partList = string.Join(", ", PartEntries(parts));
-        return materials.Count == 0 ? partList : string.Join(", ", FormatMaterials(materials), partList);
+        return materials.Count == 0 ? partList : FormatMaterials(materials) + ", " + partList;
     }
 
     /// <summary>Parts as "name ×count" entries, most first.</summary>
