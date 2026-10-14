@@ -122,7 +122,7 @@ public sealed class MobileDrydockSiloTest
             DrydockTest.RaiseUiMessage(pair, yard.Console, WFDrydockConsoleUiKey.Key, new WFDrydockUpgradeMessage(ThrusterRefit), payer);
             Assert.Multiple(() =>
             {
-                Assert.That(em.TryGetComponent(yard.Console, out WFDrydockJobComponent? job) && job.PaidInMaterials, Is.True,
+                Assert.That(em.TryGetComponent(yard.Console, out WFDrydockJobComponent job) && job.PaidInMaterials, Is.True,
                     "The refit should start, paid from the silo.");
                 Assert.That(silos.GetPartAmount(yard.Crane, MkIICapacitor), Is.EqualTo(0), "The silo's part should be taken.");
             });

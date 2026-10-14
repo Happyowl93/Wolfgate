@@ -74,7 +74,7 @@ The only code is `GasDepositSystem.Wolfgate.cs`. A gas sale console that pays an
 - [`Resources/Prototypes/_Mono/Entities/Objects/Economy/EconomyMaterials/ore_stacks.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Economy/EconomyMaterials/ore_stacks.yml)
   - lithium paces mining, 1-3 -> 0-2
   - copper 1-5 -> 1-3
-- [`Resources/Prototypes/_Mono/Entities/Objects/Electronics/datafarms.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Electronics/datafarms.yml): datafarms cost 80k points, so building many doesn't outrun the capital gates, 2 -> 8
+- [`Resources/Prototypes/_Mono/Entities/Objects/Electronics/datafarms.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Electronics/datafarms.yml): datafarms cost 30k
 - [`Resources/Prototypes/_Mono/Entities/World/Biome/basic.yml`](../../../Resources/Prototypes/_Mono/Entities/World/Biome/basic.yml)
   - rich rocks (sand, chromite) at each size's basalt probability
   - rich rocks (andesite, sand, chromite) leave the 9 km ring; sand and chromite move to the Wilds

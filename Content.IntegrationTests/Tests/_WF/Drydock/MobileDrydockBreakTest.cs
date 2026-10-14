@@ -112,7 +112,7 @@ public sealed class MobileDrydockBreakTest
                     "The crane should get two scrap chunks for every tile.");
 
                 var packs = em.GetComponent<FabricationSiloComponent>(silo).Parts!.ContainedEntities
-                    .Where(e => em.TryGetComponent(e, out FlatpackComponent? pack) && pack.Entity == Gun)
+                    .Where(e => em.TryGetComponent(e, out FlatpackComponent pack) && pack.Entity == Gun)
                     .ToList();
                 Assert.That(packs, Has.Count.EqualTo(1), "The gun should be in the parts silo as a salvaged flatpack.");
 
@@ -225,7 +225,7 @@ public sealed class MobileDrydockBreakTest
             Assert.That(drydock.TryStartBreak(console, comp, ship, actor), Is.True, "The break should start.");
         });
 
-        bool Holding() => em.TryGetComponent(console, out WFDrydockJobComponent? job) &&
+        bool Holding() => em.TryGetComponent(console, out WFDrydockJobComponent job) &&
                           job.Slots.Any(s => s.Crane == second && s.Item != null);
 
         await DrydockTest.RunUntil(pair, 200, 5, Holding);
@@ -315,7 +315,7 @@ public sealed class MobileDrydockBreakTest
 
         // Let a few tiles go, then tow the hull out of the berth.
         await DrydockTest.RunUntil(pair, 200, 10,
-            () => em.TryGetComponent(console, out WFDrydockJobComponent? running) && running.Done >= 3);
+            () => em.TryGetComponent(console, out WFDrydockJobComponent running) && running.Done >= 3);
 
         Vector2 berthed = default;
         await server.WaitAssertion(() =>
