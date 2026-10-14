@@ -81,29 +81,29 @@ public sealed partial class WFDrydockConsoleComponent : Component
 
     /// <summary>Seconds one crane needs to restore a hull tile.</summary>
     [DataField]
-    public float TileWorkTime = 4f;
+    public float TileWorkTime = 2f;
 
     /// <summary>Seconds one crane needs to restore a missing entity.</summary>
     [DataField]
-    public float EntityWorkTime = 15f;
+    public float EntityWorkTime = 8f;
 
     /// <summary>Seconds one crane needs to heal a damaged part.</summary>
     [DataField]
-    public float HealWorkTime = 6f;
+    public float HealWorkTime = 3f;
 
     /// <summary>Seconds one crane needs to refit a part by one tier.</summary>
     [DataField]
-    public float UpgradeWorkTime = 60f;
+    public float UpgradeWorkTime = 30f;
 
     /// <summary>
     /// Longest repair in seconds at full power, crane deploy and travel included; longer work is sped up to fit.
     /// </summary>
     [DataField]
-    public float MaxDuration = 600f;
+    public float MaxDuration = 360f;
 
     /// <summary>Longest refit in seconds at full power, as <see cref="MaxDuration"/> is for repairs.</summary>
     [DataField]
-    public float MaxRefitDuration = 180f;
+    public float MaxRefitDuration = 120f;
 
     /// <summary>Longest hull break in seconds at full power, as <see cref="MaxDuration"/> is for repairs.</summary>
     [DataField]
