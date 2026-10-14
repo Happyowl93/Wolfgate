@@ -47,7 +47,8 @@
 
 - type: crystallizerRecipe
   id: Plastitanium
-  # WOLFGATE(Mining): one plastitanium sheet per batch, gated on ammonia (SheetPlastitanium10 -> SheetPlastitanium1)
+  # WOLFGATE(Mining): one plastitanium sheet per batch from about 480 mol of gas, most of it ammonia
+  # Was 10 sheets from 35 O2, 3 N2, 8 CO2, 9 plasma, 3 tritium, 7 ammonia and 2 N2O.
   name: Plastitanium (1)
   minimumTemperature: 7920
   maximumTemperature: 8150
@@ -56,14 +57,14 @@
     SheetPlastitanium1: 1
   dangerous: true
   minimumRequirements:
-  - 35     # oxygen
-  - 3     # nitrogen
-  - 8     # carbon dioxide
-  - 9     # plasma
-  - 3     # tritium
+  - 105     # oxygen
+  - 9     # nitrogen
+  - 24     # carbon dioxide
+  - 27     # plasma
+  - 9     # tritium
   - 0     # vapor
-  - 1000     # ammonia # WOLFGATE(Mining): crystallizer plastitanium needs 1000 mol ammonia, 7 -> 1000
-  - 2     # n2o
+  - 300     # ammonia
+  - 6     # n2o
   - 0     # frezon
   - 0     # bz
   - 0     # healium

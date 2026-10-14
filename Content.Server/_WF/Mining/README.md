@@ -56,8 +56,7 @@ drops the rate line from examine, since the Hokkaido console states its rate in 
 - [`Content.Shared/_NF/Bank/MarketModifierSystem.cs`](../../../Content.Shared/_NF/Bank/MarketModifierSystem.cs): some consoles state their rate in their description instead
 - [`Resources/Prototypes/_DV/Entities/Objects/Tools/lathe_upgrade_kits.yml`](../../../Resources/Prototypes/_DV/Entities/Objects/Tools/lathe_upgrade_kits.yml): kits don't fit ore processors
 - [`Resources/Prototypes/_Mono/Atmospherics/crystallizer.yml`](../../../Resources/Prototypes/_Mono/Atmospherics/crystallizer.yml)
-  - one plastitanium sheet per batch, gated on ammonia (SheetPlastitanium10 -> SheetPlastitanium1)
-  - crystallizer plastitanium needs 1000 mol ammonia, 7 -> 1000
+  - one plastitanium sheet per batch from about 480 mol of gas, most of it ammonia
   - crystallizer plasteel costs real gas, 8 -> 100
   - crystallizer plasteel plasma, 5 -> 200
   - gas plasma costs 40 mol per sheet, 10 -> 40
