@@ -379,6 +379,7 @@
     cashType: MMCIndustrialCredit
   - type: MarketModifier
     mod: 0.0014
+    hideExamine: true
 #   mod: 1.25
   # WOLFGATE END
 
