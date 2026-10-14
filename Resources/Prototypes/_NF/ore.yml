@@ -24,15 +24,15 @@
 # Medium yields
 - type: ore
   id: NFOreGold
-  oreEntity: GoldOre5
+  oreEntity: GoldOre1 # WOLFGATE(Mining): gold drops single ores, GoldOre5 1-3 -> GoldOre1 1-1
   minOreYield: 1
-  maxOreYield: 3
+  maxOreYield: 1 # WOLFGATE(Mining)
 
 - type: ore
   id: NFOreSilver
-  oreEntity: SilverOre5
+  oreEntity: SilverOre1 # WOLFGATE(Mining): silver drops single ores, SilverOre5 1-3 -> SilverOre1 1-2
   minOreYield: 1
-  maxOreYield: 3
+  maxOreYield: 2 # WOLFGATE(Mining)
 
 - type: ore
   id: NFOreSalt
@@ -43,13 +43,13 @@
 # Low yields
 - type: ore
   id: NFOrePlasma
-  oreEntity: PlasmaOre5
+  oreEntity: PlasmaOre1 # WOLFGATE(Mining): plasma drops single ores, PlasmaOre5 -> PlasmaOre1
   minOreYield: 1
   maxOreYield: 2
 
 - type: ore
   id: NFOreUranium
-  oreEntity: UraniumOre5
+  oreEntity: UraniumOre1 # WOLFGATE(Mining): uranium drops single ores, UraniumOre5 -> UraniumOre1
   minOreYield: 1
   maxOreYield: 2
 
@@ -89,13 +89,13 @@
 # Medium yields
 - type: ore
   id: NFOreGoldDense
-  oreEntity: GoldOre5
+  oreEntity: GoldOre1 # WOLFGATE(Mining): gold drops single ores, GoldOre5 -> GoldOre1
   minOreYield: 3
   maxOreYield: 5
 
 - type: ore
   id: NFOreSilverDense
-  oreEntity: SilverOre5
+  oreEntity: SilverOre1 # WOLFGATE(Mining): silver drops single ores, SilverOre5 -> SilverOre1
   minOreYield: 3
   maxOreYield: 5
 
@@ -108,13 +108,13 @@
 # Low yields
 - type: ore
   id: NFOrePlasmaDense
-  oreEntity: PlasmaOre5
+  oreEntity: PlasmaOre1 # WOLFGATE(Mining): plasma drops single ores, PlasmaOre5 -> PlasmaOre1
   minOreYield: 2
   maxOreYield: 4
 
 - type: ore
   id: NFOreUraniumDense
-  oreEntity: UraniumOre5
+  oreEntity: UraniumOre1 # WOLFGATE(Mining): uranium drops single ores, UraniumOre5 -> UraniumOre1
   minOreYield: 2
   maxOreYield: 4
 
