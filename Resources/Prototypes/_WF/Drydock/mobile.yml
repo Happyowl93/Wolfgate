@@ -17,11 +17,10 @@
   - type: Rotatable
     rotateWhileAnchored: false
   - type: WiresPanel
-  # No fee, and no radio notice since the crew is aboard.
+  # No fee.
   - type: WFDrydockConsole
     minFee: 0
     feeFraction: 0
-    noticeChannel: null
   # Rates and limits are pegged to a T2 ship voucher; see the Drydock README.
   - type: WFDrydockMaterialPayment
     rates:

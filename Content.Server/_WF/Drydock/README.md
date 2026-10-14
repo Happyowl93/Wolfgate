@@ -41,7 +41,8 @@ A job restores missing hull tiles and entities and heals damage, from the ship's
 (`ShipRepairDataComponent`). Cranes take the nearest item and skip any they can't reach within 10 s, refunding it. At
 full power a repair takes at most 10 minutes (`maxDuration`) and a refit 3 (`maxRefitDuration`), crane deploy and
 travel included; longer work is sped up to fit, and lost power adds the time it costs. When a job ends, the console
-announces it on its radio channel (`noticeChannel`, Common), at the console, and to a payer elsewhere.
+announces it at the console and to a payer elsewhere; it can also use a radio channel (`noticeChannel`), which no
+console sets.
 
 ## Pricing
 

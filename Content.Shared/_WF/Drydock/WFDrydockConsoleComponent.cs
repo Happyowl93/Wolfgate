@@ -117,9 +117,9 @@ public sealed partial class WFDrydockConsoleComponent : Component
     [DataField]
     public float BreakTileWorkTime = 1.5f;
 
-    /// <summary>Radio channel a finished or aborted job is announced on, so a crew can leave and come back. Null for none.</summary>
+    /// <summary>Radio channel a finished or aborted job is announced on, or null for none.</summary>
     [DataField]
-    public ProtoId<RadioChannelPrototype>? NoticeChannel = "Common";
+    public ProtoId<RadioChannelPrototype>? NoticeChannel;
 
     /// <summary>Seconds every berth crane may stay unpowered during a job before it is aborted and refunded.</summary>
     [DataField]
