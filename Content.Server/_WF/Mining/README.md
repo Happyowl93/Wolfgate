@@ -1,8 +1,8 @@
 # Mining
 
 Paces the material economy so the faction voucher ladder ends at about 150 minutes instead of minutes into a round.
-Strategic ores (gold, silver, plasma, uranium) drop single ores, lithium drops 0-1 per vein and is the main tuning
-knob, and sand and chromite only spawn in the Wilds. The scrap processor still smelts strategic sheets, but at 1,500 raw
+Strategic ores (gold, silver, plasma, uranium) drop single ores, about 3 per vein (a third of upstream), lithium drops
+0-2 per vein and is the main tuning knob, and sand and chromite only spawn in the Wilds. The scrap processor still smelts strategic sheets, but at 1,500 raw
 scrap (lithium 6,000) with no upgrade discount, and lathe upgrade kits don't fit ore processors. Plastitanium is
 uncommon in scrap rolls and drone loot, and the crystallizer needs real gas for plastitanium, plasteel and plasma.
 
@@ -72,8 +72,8 @@ drops the rate line from examine, since the Hokkaido console states its rate in 
   - depleted uranium priced as its comment says, 20 -> 2.5
   - the Hokkaido composite bounty matches it
 - [`Resources/Prototypes/_Mono/Entities/Objects/Economy/EconomyMaterials/ore_stacks.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Economy/EconomyMaterials/ore_stacks.yml)
-  - lithium paces mining, 1-3 -> 0-1
-  - copper 1-5 -> 1-2
+  - lithium paces mining, 1-3 -> 0-2
+  - copper 1-5 -> 1-3
 - [`Resources/Prototypes/_Mono/Entities/Objects/Electronics/datafarms.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Electronics/datafarms.yml): datafarms cost 80k points, so building many doesn't outrun the capital gates, 2 -> 8
 - [`Resources/Prototypes/_Mono/Entities/World/Biome/basic.yml`](../../../Resources/Prototypes/_Mono/Entities/World/Biome/basic.yml)
   - rich rocks (sand, chromite) at each size's basalt probability
@@ -83,15 +83,17 @@ drops the rate line from examine, since the Hokkaido console states its rate in 
 - [`Resources/Prototypes/_Mono/Research/TSF/tsf_misc.yml`](../../../Resources/Prototypes/_Mono/Research/TSF/tsf_misc.yml)
   - Luda moves to WFTsfCapitalVouchers
   - Flyssa moves to WFTsfCapitalVouchers
-- [`Resources/Prototypes/_NF/Entities/Markers/Spawners/Random/Salvage/minerals.yml`](../../../Resources/Prototypes/_NF/Entities/Markers/Spawners/Random/Salvage/minerals.yml): scrap rock gives less lithium than plain rock, 0.05 -> 0.025
+- [`Resources/Prototypes/_NF/Entities/Markers/Spawners/Random/Salvage/minerals.yml`](../../../Resources/Prototypes/_NF/Entities/Markers/Spawners/Random/Salvage/minerals.yml): scrap rock gives less lithium than plain rock, 0.05 -> 0.035
 - [`Resources/Prototypes/_NF/Entities/Structures/Machines/Computers/computers.yml`](../../../Resources/Prototypes/_NF/Entities/Structures/Machines/Computers/computers.yml): the Hokkaido console pays MMC industrial credits, 1 MIC per ~715 cr of gas
 - [`Resources/Prototypes/_NF/ore.yml`](../../../Resources/Prototypes/_NF/ore.yml)
-  - gold drops single ores, GoldOre5 1-3 -> GoldOre1 1-1
-  - silver drops single ores, SilverOre5 1-3 -> SilverOre1 1-2
-  - plasma drops single ores, PlasmaOre5 -> PlasmaOre1
-  - uranium drops single ores, UraniumOre5 -> UraniumOre1
-  - gold drops single ores, GoldOre5 -> GoldOre1
-  - silver drops single ores, SilverOre5 -> SilverOre1
+  - gold drops single ores, GoldOre5 1-3 -> GoldOre1 2-4
+  - silver drops single ores, SilverOre5 1-3 -> SilverOre1 2-5
+  - plasma drops single ores, PlasmaOre5 1-2 -> PlasmaOre1 2-4
+  - uranium drops single ores, UraniumOre5 1-2 -> UraniumOre1 2-4
+  - gold drops single ores, GoldOre5 3-5 -> GoldOre1 6-10
+  - silver drops single ores, SilverOre5 3-5 -> SilverOre1 6-10
+  - plasma drops single ores, PlasmaOre5 2-4 -> PlasmaOre1 4-8
+  - uranium drops single ores, UraniumOre5 2-4 -> UraniumOre1 4-8
 - [`Resources/Prototypes/_NF/Recipes/Lathes/materials.yml`](../../../Resources/Prototypes/_NF/Recipes/Lathes/materials.yml): SmeltScrap always costs 400 raw, lathe upgrades don't discount it
 - [`Resources/Prototypes/_NF/Recipes/Lathes/sheet.yml`](../../../Resources/Prototypes/_NF/Recipes/Lathes/sheet.yml)
   - scrap smelts strategic sheets at a real cost, 120 -> 1500 raw, no discount

@@ -306,7 +306,13 @@ public sealed partial class WFDrydockSystem
                 AddBreakYield(pay, ConstructionMaterials(proto), yield);
         }
 
-        foreach (var (id, amount) in pay.BreakTileYield)
+        AddPerTileYield(pay, yield);
+    }
+
+    /// <summary>Adds what every lifted tile pays whatever stood on it: its own yield and its salvage.</summary>
+    private static void AddPerTileYield(WFDrydockMaterialPaymentComponent pay, Dictionary<string, int> yield)
+    {
+        foreach (var (id, amount) in pay.BreakTileYield.Concat(pay.BreakTileSalvage))
         {
             yield[id] = yield.GetValueOrDefault(id) + amount;
         }
@@ -378,12 +384,7 @@ public sealed partial class WFDrydockSystem
         }
 
         if (pay != null)
-        {
-            foreach (var (id, amount) in pay.BreakTileYield)
-            {
-                yield[id] = yield.GetValueOrDefault(id) + amount;
-            }
-        }
+            AddPerTileYield(pay, yield);
 
         EnsureComp<WFHulkComponent>(ship).Broken.Add(item.TileIndex);
         var credit = CreditBreak(ship, job, pay, yield);

@@ -116,15 +116,16 @@ crew, escorts and allies respond. Nobody aboard stops the job.
 The hull is peeled tile by tile from its edges inward: each crane takes the nearest tile it reaches that has an open
 side and whose loss leaves the hull in one piece, so the grid never splits. Tiles out of reach are skipped, and only
 tiles that are the last link between parts out of reach are left with them. A hull being broken only has to overlap
-the berth, since peeling moves its centre. A crane strips everything anchored on the tile, 6 s per repairable entity plus 1.5 s for the tile,
-divided by crane speed and capped at 12 minutes (`maxBreakDuration`). People and loose things drift off as their tiles
+the berth, since peeling moves its centre. A crane strips everything anchored on the tile, 0.45 s per repairable entity plus 0.1 s for the tile,
+divided by crane speed and capped at 10 minutes (`maxBreakDuration`), so a Caracara is about 3 crane-minutes of work. People and loose things drift off as their tiles
 go, mobs are taken out of stripped containers, and anything still aboard is set adrift before the last tile, which
 takes the grid with it.
 
 Each finished tile credits the slot's crane silo or crane (`breakDefaultYield`, `breakYield` and `breakTileYield` on
 the payment component): 25% of every material in what it strips, but only 5% of the plastitanium and composite, plus 25
-steel units per tile. An abort pays nothing more. The caps grow with each tile the job lifts (`breakCap`: 1 plastitanium or composite
-sheet per 20 tiles, plasteel per 3, steel per 2), and yield past them waits for later tiles, so the outer walls that
+steel units per tile, and 2 chunks of scrap per tile (`breakTileSalvage`, uncapped, and never billed to rebuild the
+tile). An abort pays nothing more. The caps grow with each tile the job lifts (`breakCap`: 1 plastitanium or composite
+sheet per 20 tiles, plasteel per 2, steel per tile), and yield past them waits for later tiles, so the outer walls that
 come off first are paid as the peel goes on. A hull broken whole or in parts, aborted and restarted, pays the same.
 
 A stripped machine's board and parts, and a computer's board, go to the crane's parts silo, or onto the nearest free

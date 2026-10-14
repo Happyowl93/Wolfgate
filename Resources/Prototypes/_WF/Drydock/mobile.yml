@@ -35,20 +35,22 @@
       Plastic: 1500
       Plastitanium: 600
     # Breaking a hull pays a quarter of every material the cranes strip, plastitanium and composite only 5%, plus steel
-    # per tile lifted, within caps per hull tile: plastitanium and composite 1 sheet per 20 tiles, plasteel 1 per 3,
-    # steel 1 per 2. Materials breakCap doesn't list are uncapped. Machines and computers also give up their boards and
-    # parts. See the Drydock README.
+    # and 2 scrap chunks per tile lifted, within caps per hull tile: plastitanium and composite 1 sheet per 20 tiles,
+    # plasteel 1 per 2, steel 1 per tile. Materials breakCap doesn't list are uncapped. Machines and computers also give
+    # up their boards and parts. See the Drydock README.
     breakDefaultYield: 0.25
     breakYield:
       Plastitanium: 0.05
       PdvComposite: 0.05
     breakTileYield:
       Steel: 25
+    breakTileSalvage:
+      RawScrap: 200
     breakCap:
       Plastitanium: 5
       PdvComposite: 5
-      Plasteel: 33.3
-      Steel: 50
+      Plasteel: 50
+      Steel: 100
 
 - type: entity
   parent: BaseComputerCircuitboard

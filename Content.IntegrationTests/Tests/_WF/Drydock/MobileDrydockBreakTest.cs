@@ -106,8 +106,10 @@ public sealed class MobileDrydockBreakTest
                     "The person aboard should be adrift on the map.");
                 Assert.That(Stored(pair, crane, "Plastitanium"), Is.InRange(1, tiles * 5),
                     "The crane should get plastitanium, within a sheet per 20 tiles.");
-                Assert.That(Stored(pair, crane, "Steel"), Is.InRange(tiles * 25, tiles * 50),
-                    "The crane should get steel for every tile, within a sheet per 2 tiles.");
+                Assert.That(Stored(pair, crane, "Steel"), Is.InRange(tiles * 25, tiles * 100),
+                    "The crane should get steel for every tile, within a sheet per tile.");
+                Assert.That(Stored(pair, crane, "RawScrap"), Is.EqualTo(tiles * 200),
+                    "The crane should get two scrap chunks for every tile.");
 
                 var packs = em.GetComponent<FabricationSiloComponent>(silo).Parts!.ContainedEntities
                     .Where(e => em.TryGetComponent(e, out FlatpackComponent? pack) && pack.Entity == Gun)
