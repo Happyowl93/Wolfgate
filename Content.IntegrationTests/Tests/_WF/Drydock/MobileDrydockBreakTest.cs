@@ -195,6 +195,54 @@ public sealed class MobileDrydockBreakTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>A crane destroyed mid-break leaves the job to the other crane instead of jamming it.</summary>
+    [Test]
+    public async Task BreakSurvivesDestroyedCrane()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+
+        EntityUid console = default, crane = default, second = default, ship = default, actor = default;
+        await server.WaitAssertion(() =>
+        {
+            (console, crane, ship, actor) = SetUpBreak(pair, map.MapId);
+            var yard = em.GetComponent<TransformComponent>(console).GridUid!.Value;
+            second = DrydockTest.SpawnAnchored(pair, yard, "WFMobileDrydockCrane", new Vector2i(2, 5));
+            DrydockTest.LinkCrane(pair, console, second);
+        });
+
+        await MobileDrydockTest.WaitForCranePower(pair, crane);
+        await MobileDrydockTest.WaitForCranePower(pair, second);
+
+        await server.WaitAssertion(() =>
+        {
+            var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
+            Assert.That(drydock.TryStartBreak(console, comp, ship, actor), Is.True, "The break should start.");
+        });
+
+        bool Holding() => em.TryGetComponent(console, out WFDrydockJobComponent? job) &&
+                          job.Slots.Any(s => s.Crane == second && s.Item != null);
+
+        await DrydockTest.RunUntil(pair, 200, 5, Holding);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Holding(), Is.True, "The second crane should take a tile.");
+            em.DeleteEntity(second);
+        });
+
+        await RunBreak(pair, console);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(em.Deleted(ship), Is.True, "The other crane should finish breaking the hull.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     /// <summary>An outpost, a station member without a deed, is refused; a bought ship, which carries one, is not.</summary>
     [Test]
     public async Task BreakRefusesOutposts()

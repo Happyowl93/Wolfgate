@@ -348,7 +348,10 @@ public sealed partial class WFDrydockSystem
             return;
 
         var pay = CompOrNull<WFDrydockMaterialPaymentComponent>(console);
-        var crane = slot.Crane ?? JobCranes(job).FirstOrDefault();
+        // The slot's crane may have been destroyed mid-job.
+        var crane = slot.Crane is { } own && !TerminatingOrDeleted(own)
+            ? own
+            : JobCranes(job).FirstOrDefault(c => !TerminatingOrDeleted(c));
         var drop = DropSpot(crane.Valid ? crane : console);
 
         var yield = new Dictionary<string, int>();
