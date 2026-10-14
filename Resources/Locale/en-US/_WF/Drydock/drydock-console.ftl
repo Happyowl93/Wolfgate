@@ -52,10 +52,10 @@ drydock-console-break-started = Breaking up { $ship }: { $count } { $count ->
    *[other] tiles
 }.
 drydock-console-break-finished = { $ship } is broken up. Recovered: { $yield }.
-drydock-console-break-finished-skipped = Breaking done on { $ship }. { $count } { $count ->
+drydock-console-break-finished-skipped = Finished breaking { $ship }. { $count } { $count ->
     [one] tile
    *[other] tiles
-} out of crane reach left standing. Recovered: { $yield }.
+} left standing. Recovered: { $yield }.
 drydock-console-break-aborted = Ship left the berth. Breaking stopped. Recovered: { $yield }.
 drydock-console-break-aborted-power = The cranes lost power. Breaking stopped. Recovered: { $yield }.
 

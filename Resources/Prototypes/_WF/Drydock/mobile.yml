@@ -5,7 +5,7 @@
   parent: WFComputerDrydock
   id: WFComputerMobileDrydock
   name: mobile drydock console
-  description: A drydock console for ships. Work is paid from its linked cranes and their silos.
+  description: A drydock console for ships. Work is paid for with materials from its linked cranes and their silos.
   components:
   - type: Computer
     board: WFComputerMobileDrydockCircuitboard
@@ -134,8 +134,8 @@
       - RawMaterial
       - Ingot
   - type: OreSiloClient
-  # Links a parts silo, whose machine parts pay for refit parts in place of materials, and a chemical silo the console
-  # lists. Parts silos then accept every machine part, and the salvaged hardware flatpacks a hull break strips off.
+  # Links a parts silo, whose machine parts stand in for refit materials, and a chemical silo the console lists. Parts
+  # silos then accept every machine part and salvaged hardware flatpack.
   - type: FabricationSiloClient
     parts:
       components:

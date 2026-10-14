@@ -3,8 +3,7 @@ using Content.Shared.Examine;
 namespace Content.Shared._WF.Drydock;
 
 /// <summary>
-/// Tells who examines a drydock crane which console it is linked to, how much power it draws while working and how much of
-/// it it receives.
+/// Shows a drydock crane's linked console, working power draw and share of power received on examine.
 /// </summary>
 public sealed class WFDrydockCraneExamineSystem : EntitySystem
 {

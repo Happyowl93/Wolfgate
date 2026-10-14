@@ -128,7 +128,7 @@ public sealed class WFDrydockConsoleState : BoundUserInterfaceState
     public const int MaxMarks = 512;
 }
 
-/// <summary>One kind of item the parts silos hold: its prototype, its name (salvaged flatpacks name each one), and how many.</summary>
+/// <summary>How many of one item the parts silos hold, by prototype and name, since salvaged flatpacks differ only by name.</summary>
 [Serializable, NetSerializable]
 public readonly record struct WFDrydockStoredPart(string Prototype, string Name, int Count);
 

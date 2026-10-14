@@ -25,9 +25,7 @@ public sealed partial class GasDepositSystem
             : _prototype.Index(cash).Name;
     }
 
-    /// <summary>
-    /// Refuses a sale that would pay nothing, so the gas stays in the sale points instead of vanishing for nothing.
-    /// </summary>
+    /// <summary>Refuses a sale that would pay nothing, leaving the gas in the sale points.</summary>
     private bool RefuseWorthlessSale(Entity<GasSaleConsoleComponent> ent, EntityUid gridUid, EntityUid user)
     {
         GetNearbyMixtures(ent, gridUid, out _, out var value);

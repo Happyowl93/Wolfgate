@@ -23,8 +23,8 @@ public sealed partial class FabricationSiloClientComponent : Component
     public EntityUid? ChemicalSilo;
 
     /// <summary>
-    /// Parts this machine uses besides its lathe recipes', which parts silos then accept; matched on prototype
-    /// components and tags.
+    /// Extra parts parts silos accept for this machine, beyond its lathe recipes. Matched on prototype components and
+    /// tags only.
     /// </summary>
     [DataField]
     public EntityWhitelist? Parts;
