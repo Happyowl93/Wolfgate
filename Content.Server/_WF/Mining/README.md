@@ -2,8 +2,10 @@
 
 Paces the material economy so the faction voucher ladder ends at about 150 minutes instead of minutes into a round.
 Strategic ores (gold, silver, plasma, uranium) drop single ores, about 3 per vein (a third of upstream), lithium drops
-0-2 per vein and is the main tuning knob, and sand and chromite only spawn in the Wilds. The scrap processor still smelts strategic sheets, but at 1,500 raw
-scrap (lithium 6,000) with no upgrade discount, and lathe upgrade kits don't fit ore processors. Plastitanium is
+0-2 per vein and is the main tuning knob, and sand and chromite only spawn in the Wilds. The scrap processor still smelts strategic sheets, but at 500 raw
+scrap (lithium 2,000) with no upgrade discount, so smelting them is worth less than selling the scrap. Diamond and
+bluespace from scrap get no discount either, so hull-break scrap can't feed them at a profit, and lathe upgrade kits
+don't fit ore processors. Plastitanium is
 uncommon in scrap rolls and drone loot, and the crystallizer needs real gas for plastitanium, plasteel and plasma.
 
 The capital ships (Luda, Flyssa, Saturn) sit behind `WFTsfCapitalVouchers` and `WFPdvCapitalVouchers`, so both
@@ -96,9 +98,11 @@ drops the rate line from examine, since the Hokkaido console states its rate in 
   - uranium drops single ores, UraniumOre5 2-4 -> UraniumOre1 4-8
 - [`Resources/Prototypes/_NF/Recipes/Lathes/materials.yml`](../../../Resources/Prototypes/_NF/Recipes/Lathes/materials.yml): SmeltScrap always costs 400 raw, lathe upgrades don't discount it
 - [`Resources/Prototypes/_NF/Recipes/Lathes/sheet.yml`](../../../Resources/Prototypes/_NF/Recipes/Lathes/sheet.yml)
-  - scrap smelts strategic sheets at a real cost, 120 -> 1500 raw, no discount
-  - scrap smelts strategic sheets at a real cost, 100 -> 1500 raw, no discount
-  - scrap smelts strategic sheets at a real cost, 100 -> 6000 raw, no discount
+  - scrap smelts strategic sheets at a real cost, 120 -> 500 raw, no discount
+  - scrap smelts strategic sheets at a real cost, 100 -> 500 raw, no discount
+  - no lathe discount, so hull-break scrap can't smelt bluespace at a profit
+  - no lathe discount, so hull-break scrap can't smelt diamond at a profit
+  - scrap smelts strategic sheets at a real cost, 100 -> 2000 raw, no discount
 - [`Resources/Prototypes/Entities/Structures/Machines/lathe.yml`](../../../Resources/Prototypes/Entities/Structures/Machines/lathe.yml)
   - lathe upgrade kits don't fit ore processors; Structure repeats BaseStructure's tag
   - smaller matter-bin bonus on the industrial processor, 0.92 -> 0.97
