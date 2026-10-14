@@ -107,7 +107,7 @@ public sealed partial class WFDrydockConsoleComponent : Component
 
     /// <summary>Longest hull break in seconds at full power, as <see cref="MaxDuration"/> is for repairs.</summary>
     [DataField]
-    public float MaxBreakDuration = 1200f;
+    public float MaxBreakDuration = 720f;
 
     /// <summary>Seconds one crane needs to strip an entity off a hull it breaks.</summary>
     [DataField]

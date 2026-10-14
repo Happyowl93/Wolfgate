@@ -117,7 +117,7 @@ The hull is peeled tile by tile from its edges inward: each crane takes the near
 side and whose loss leaves the hull in one piece, so the grid never splits. Tiles out of reach are skipped, and only
 tiles that are the last link between parts out of reach are left with them. A hull being broken only has to overlap
 the berth, since peeling moves its centre. A crane strips everything anchored on the tile, 6 s per repairable entity plus 1.5 s for the tile,
-divided by crane speed and capped at 20 minutes (`maxBreakDuration`). People and loose things drift off as their tiles
+divided by crane speed and capped at 12 minutes (`maxBreakDuration`). People and loose things drift off as their tiles
 go, mobs are taken out of stripped containers, and anything still aboard is set adrift before the last tile, which
 takes the grid with it.
 
