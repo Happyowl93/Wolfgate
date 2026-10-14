@@ -349,7 +349,7 @@ public sealed partial class WFDrydockSystem
 
         var pay = CompOrNull<WFDrydockMaterialPaymentComponent>(console);
         var crane = slot.Crane ?? JobCranes(job).FirstOrDefault();
-        var drop = crane.Valid ? Transform(crane).Coordinates : Transform(console).Coordinates;
+        var drop = DropSpot(crane.Valid ? crane : console);
 
         var yield = new Dictionary<string, int>();
         var anchored = new List<EntityUid>();

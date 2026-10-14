@@ -3,6 +3,10 @@ using Content.Server._WF.Lathe;
 using Content.Shared._WF.Drydock;
 using Content.Shared._WF.Lathe;
 using Content.Shared.FixedPoint;
+using Content.Shared.Maps;
+using Content.Shared.Physics;
+using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.Drydock;
@@ -15,6 +19,10 @@ public sealed partial class WFDrydockSystem
 {
     [Dependency] private FabricationSiloSystem _fabricationSilo = default!;
     [Dependency] private WFPartRefitSystem _partRefits = default!;
+    [Dependency] private TurfSystem _turf = default!;
+
+    /// <summary>Tiles out from a crane searched for free floor to leave things on.</summary>
+    private const int DropSearch = 3;
 
     /// <summary>
     /// Pays the items' full-price refit units with matching parts from the cranes' parts silos where there are any,
@@ -208,7 +216,7 @@ public sealed partial class WFDrydockSystem
             return;
 
         var silos = PartsSilos(cranes);
-        var coords = Transform(drop).Coordinates;
+        var coords = DropSpot(drop);
         foreach (var (id, amount) in parts)
         {
             for (var i = 0; i < amount; i++)
@@ -222,6 +230,38 @@ public sealed partial class WFDrydockSystem
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Where things a crane can't store are left: the free floor tile nearest it, so they aren't hidden under its
+    /// footprint. The crane's own position when no tile nearby is free.
+    /// </summary>
+    private EntityCoordinates DropSpot(EntityUid crane)
+    {
+        var xform = Transform(crane);
+        if (xform.GridUid is not { } gridUid || !TryComp<MapGridComponent>(gridUid, out var grid))
+            return xform.Coordinates;
+
+        var origin = _map.TileIndicesFor(gridUid, grid, xform.Coordinates);
+        Vector2i? best = null;
+        var bestDistance = int.MaxValue;
+        for (var dx = -DropSearch; dx <= DropSearch; dx++)
+        {
+            for (var dy = -DropSearch; dy <= DropSearch; dy++)
+            {
+                var distance = dx * dx + dy * dy;
+                var tile = origin + new Vector2i(dx, dy);
+                if (distance >= bestDistance ||
+                    _map.GetTileRef(gridUid, grid, tile).Tile.IsEmpty ||
+                    _turf.IsTileBlocked(gridUid, tile, CollisionGroup.Impassable | CollisionGroup.MidImpassable, grid))
+                    continue;
+
+                best = tile;
+                bestDistance = distance;
+            }
+        }
+
+        return best is { } free ? _map.GridTileToLocal(gridUid, grid, free) : xform.Coordinates;
     }
 
     /// <summary>Lists parts as localized names and counts, comma separated.</summary>

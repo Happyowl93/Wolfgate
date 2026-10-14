@@ -99,10 +99,11 @@ A mobile crane also links a parts silo and a chemical silo (Lathe module), from 
 parts silos then take any machine part (`parts` on its `FabricationSiloClient`). A refit unit billed in full takes the
 stock part it installs from the parts silo, if there is one, instead of its tier materials
 (`WFDrydockSystem.Supplies.cs`). Only that exact prototype counts, so trade goods that are machine parts, such as
-`CapacitorEconomy2`, are never spent. Units restored at the repair share pay in materials, so a spare part isn't spent on
-a 20% bill. Unfinished work's parts go back to the silo, or onto the floor at the crane. The console lists everything
-the parts silos hold and the chemicals in the chemical silos; nothing uses chemicals yet. Bills (the repair quote,
-the salvage preview and each refit's cost) list one row per material, red where the cranes hold too little.
+`CapacitorEconomy2`, are never spent. Units restored at the repair share pay in materials, so a spare part isn't spent
+on a 20% bill. Unfinished work's parts go back to the silo, or onto the nearest free floor beside the crane. The console
+lists everything the parts silos hold and the chemicals in the chemical silos; nothing uses chemicals yet. Bills (the
+repair quote, the salvage preview and each refit's cost) list one row per material, red where the cranes hold too
+little.
 
 ### Hull breaking
 
@@ -126,10 +127,10 @@ steel units per tile. An abort pays nothing more. The caps grow with each tile t
 sheet per 20 tiles, plasteel per 3, steel per 2), and yield past them waits for later tiles, so the outer walls that
 come off first are paid as the peel goes on. A hull broken whole or in parts, aborted and restarted, pays the same.
 
-A stripped machine's board and parts, and a computer's board, go to the crane's parts silo, or onto the floor beside
-the crane when the silo doesn't take them. Guns on hardpoints come off whole as a `WFSalvagedFlatpack`, put in the parts
-silo or left at the crane the same way. It unpacks at half the damage that would destroy the gun and sells for a quarter
-of its price.
+A stripped machine's board and parts, and a computer's board, go to the crane's parts silo, or onto the nearest free
+floor beside the crane when the silo doesn't take them. Guns on hardpoints come off whole as a `WFSalvagedFlatpack`, put
+in the parts silo or left at the crane the same way. It unpacks at half the damage that would destroy the gun and sells
+for a quarter of its price.
 
 The hull keeps its repair snapshot, so a repair can rebuild what was broken, but `WFHulkComponent` records the broken
 tiles and rebuilding a tile or part on one bills its full materials, outside the repair's limits: a part's construction
