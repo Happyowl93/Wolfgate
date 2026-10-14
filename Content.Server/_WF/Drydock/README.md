@@ -99,8 +99,9 @@ parts silos then take any machine part (`parts` on its `FabricationSiloClient`).
 stock part it installs from the parts silo, if there is one, instead of its tier materials
 (`WFDrydockSystem.Supplies.cs`). Only that exact prototype counts, so trade goods that are machine parts, such as
 `CapacitorEconomy2`, are never spent. Units restored at the repair share pay in materials, so a spare part isn't spent on
-a 20% bill. Unfinished work's parts go back to the silo, or onto the floor at the crane. The console lists the refit
-parts and the chemicals the silos hold; nothing uses chemicals yet.
+a 20% bill. Unfinished work's parts go back to the silo, or onto the floor at the crane. The console lists everything
+the parts silos hold and the chemicals in the chemical silos; nothing uses chemicals yet. Bills (the repair quote,
+the salvage preview and each refit's cost) list one row per material, red where the cranes hold too little.
 
 ### Hull breaking
 

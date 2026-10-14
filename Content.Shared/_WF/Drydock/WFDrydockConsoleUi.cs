@@ -82,8 +82,8 @@ public sealed class WFDrydockConsoleState : BoundUserInterfaceState
     /// <summary>Materials the working cranes and their silos hold.</summary>
     public Dictionary<string, int> StoredMaterials = new();
 
-    /// <summary>Parts refits install that the working cranes' parts silos hold, by prototype.</summary>
-    public Dictionary<string, int> StoredParts = new();
+    /// <summary>Everything the working cranes' parts silos hold.</summary>
+    public List<WFDrydockStoredPart> StoredParts = new();
 
     /// <summary>Reagents the working cranes' chemical silos hold, by prototype.</summary>
     public Dictionary<string, FixedPoint2> StoredChemicals = new();
@@ -127,6 +127,10 @@ public sealed class WFDrydockConsoleState : BoundUserInterfaceState
     /// <summary>Most work marks sent to the berth plot.</summary>
     public const int MaxMarks = 512;
 }
+
+/// <summary>One kind of item the parts silos hold: its prototype, its name (salvaged flatpacks name each one), and how many.</summary>
+[Serializable, NetSerializable]
+public readonly record struct WFDrydockStoredPart(string Prototype, string Name, int Count);
 
 /// <summary>What a berth plot mark shows.</summary>
 [Serializable, NetSerializable]

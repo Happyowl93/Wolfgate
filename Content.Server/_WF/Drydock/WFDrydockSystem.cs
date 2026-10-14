@@ -534,7 +534,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
             DictKey(s.RepairMaterials),
             DictKey(s.RepairParts),
             DictKey(s.StoredMaterials),
-            DictKey(s.StoredParts),
+            string.Join(",", s.StoredParts.OrderBy(p => p.Name).Select(p => $"{p.Prototype}:{p.Name}={p.Count}")),
             string.Join(",", s.StoredChemicals.OrderBy(kv => kv.Key).Select(kv => $"{kv.Key}={kv.Value}")),
         };
         foreach (var u in s.Upgrades)
@@ -579,7 +579,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
             state.PaysWithMaterials = true;
             // Same stock the job's charge draws from: the cranes' storage and their linked silos.
             state.StoredMaterials = Availability(working);
-            state.StoredParts = PartStock(working);
+            state.StoredParts = SiloContents(working);
             state.StoredChemicals = StoredChemicals(working);
         }
 

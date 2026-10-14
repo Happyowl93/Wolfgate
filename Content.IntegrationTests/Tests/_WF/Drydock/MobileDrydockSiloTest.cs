@@ -98,7 +98,8 @@ public sealed class MobileDrydockSiloTest
             var quoted = before.Upgrades.Single(u => u.Id == ThrusterRefit);
             Assert.Multiple(() =>
             {
-                Assert.That(before.StoredParts, Is.Empty, "The console should list only parts a refit installs.");
+                Assert.That(before.StoredParts.Select(p => p.Prototype), Is.EquivalentTo(new[] { EconomyCapacitor, MkICapacitor }),
+                    "The console should list everything in the silo, refit parts or not.");
                 Assert.That(quoted.NextParts, Is.Empty, "The refit should take neither part.");
                 Assert.That(quoted.NextMaterials, Is.Not.Empty, "Without its part, the refit should bill materials.");
             });
@@ -111,7 +112,8 @@ public sealed class MobileDrydockSiloTest
             var entry = state.Upgrades.Single(u => u.Id == ThrusterRefit);
             Assert.Multiple(() =>
             {
-                Assert.That(state.StoredParts.GetValueOrDefault(MkIICapacitor), Is.EqualTo(1), "The console should list the silo's part.");
+                Assert.That(state.StoredParts.Single(p => p.Prototype == MkIICapacitor).Count, Is.EqualTo(1),
+                    "The console should list the silo's part.");
                 Assert.That(entry.NextParts.GetValueOrDefault(MkIICapacitor), Is.EqualTo(1), "The refit should take the part.");
                 Assert.That(entry.NextMaterials, Is.Empty, "The part should pay for the thruster's only unit.");
             });

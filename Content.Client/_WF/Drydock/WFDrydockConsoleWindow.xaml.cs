@@ -86,6 +86,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         IoCManager.InjectDependencies(this);
         FitWindow(this, new Vector2(1060, 690));
 
+        _quote.EmptyText = _salvage.EmptyText = Loc.GetString("drydock-console-materials-none");
         RepairButton.OnPressed += _ => OnRepairPressed?.Invoke();
         BreakButton.OnPressed += _ => OnBreakPressed?.Invoke();
         BreakButton.Text = Loc.GetString("drydock-ui-break-key");
@@ -268,14 +269,15 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         if (state.PaysWithMaterials)
         {
             var billed = state.RepairMaterials.Count > 0 || state.RepairParts.Count > 0;
-            _quote.Value = FormatBill(state.RepairMaterials, state.RepairParts);
+            _quote.SetRows(BillRows(state.RepairMaterials, state.RepairParts, state.StoredMaterials));
             _quote.Lit = billed;
             var covered = Covers(state.RepairMaterials, state.StoredMaterials);
-            _quote.Tint = covered ? null : Red;
+            _quote.Tint = null;
             RepairButton.Disabled = state.ShipName is null || state.Working || !billed || !covered || blocked;
         }
         else
         {
+            _quote.SetRows(null);
             _quote.Value = Loc.GetString("drydock-ui-credits", ("price", state.RepairPrice.ToString("N0", CultureInfo.InvariantCulture)));
             _quote.Lit = state.RepairPrice > 0;
             _quote.Tint = null;
@@ -283,7 +285,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         }
 
         _salvage.Visible = state.CanBreak && !state.Working;
-        _salvage.Value = FormatMaterials(state.BreakYield);
+        _salvage.SetRows(BillRows(state.BreakYield, new Dictionary<string, int>()));
         _salvage.Lit = state.BreakYield.Count > 0;
         BreakButton.Visible = state.CanBreak;
         BreakButton.Disabled = state.ShipName is null || state.Working || !state.Breakable || blocked;
@@ -322,54 +324,42 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
     }
 
     /// <summary>
-    /// Formats a material bill as "Steel 2.5, Glass 0.5" (sheets), or the "none" string when empty.
+    /// A bill as readout rows: each material in sheets, then each part by count, most first. A material the cranes hold
+    /// too little of is red, when their stock is given.
     /// </summary>
-    private string FormatMaterials(Dictionary<string, int> materials)
+    private List<WFDrydockReadoutRow> BillRows(Dictionary<string, int> materials, Dictionary<string, int> parts,
+        Dictionary<string, int>? stored = null)
     {
-        if (materials.Count == 0)
-            return Loc.GetString("drydock-console-materials-none");
-
         var storage = _entMan.System<SharedMaterialStorageSystem>();
-        var parts = new List<string>();
-        foreach (var (id, amount) in materials)
+        var rows = new List<WFDrydockReadoutRow>();
+        foreach (var (id, amount) in materials.OrderBy(m => m.Key))
         {
             if (!_prototypeManager.TryIndex<MaterialPrototype>(id, out var proto))
                 continue;
 
-            var sheets = amount / (float) storage.GetSheetVolume(proto);
-            parts.Add(Loc.GetString("drydock-console-material-amount",
-                ("name", Loc.GetString(proto.Name)),
-                ("sheets", sheets.ToString("0.##", CultureInfo.InvariantCulture))));
+            var isShort = stored != null && stored.GetValueOrDefault(id) < amount;
+            rows.Add(new WFDrydockReadoutRow(Loc.GetString(proto.Name),
+                Loc.GetString("lathe-menu-material-amount",
+                    ("amount", amount / (float) storage.GetSheetVolume(proto)),
+                    ("unit", Loc.GetString(proto.Unit))),
+                isShort ? Red : null));
         }
 
-        return string.Join(", ", parts);
-    }
+        foreach (var (id, count) in parts.OrderByDescending(p => p.Value))
+        {
+            var name = _prototypeManager.TryIndex<EntityPrototype>(id, out var proto) ? proto.Name : id;
+            rows.Add(new WFDrydockReadoutRow(name, Loc.GetString("drydock-ui-supply-count", ("count", count))));
+        }
 
-    /// <summary>Formats a material bill followed by the parts that pay for the rest.</summary>
-    private string FormatBill(Dictionary<string, int> materials, Dictionary<string, int> parts)
-    {
-        if (parts.Count == 0)
-            return FormatMaterials(materials);
-
-        var partList = string.Join(", ", PartEntries(parts));
-        return materials.Count == 0 ? partList : FormatMaterials(materials) + ", " + partList;
-    }
-
-    /// <summary>Parts as "name ×count" entries, most first.</summary>
-    private List<string> PartEntries(Dictionary<string, int> parts)
-    {
-        return parts.OrderByDescending(p => p.Value)
-            .Select(p => Loc.GetString("drydock-console-part-amount",
-                ("name", _prototypeManager.TryIndex<EntityPrototype>(p.Key, out var proto) ? proto.Name : p.Key),
-                ("count", p.Value)))
-            .ToList();
+        return rows;
     }
 
     /// <summary>Lists the materials, parts and chemicals the cranes can draw on; rebuilt only when they change.</summary>
     private void UpdateSupplies(WFDrydockConsoleState state)
     {
         _suppliesPanel.Visible = state.PaysWithMaterials;
-        var key = string.Join(";", state.StoredMaterials.Concat(state.StoredParts).Select(p => $"{p.Key}={p.Value}"))
+        var key = string.Join(";", state.StoredMaterials.Select(p => $"{p.Key}={p.Value}"))
+                  + "|" + string.Join(";", state.StoredParts.Select(p => $"{p.Prototype}:{p.Name}={p.Count}"))
                   + "|" + string.Join(";", state.StoredChemicals.Select(p => $"{p.Key}={p.Value}"));
         if (!state.PaysWithMaterials || key == _suppliesKey)
             return;
@@ -392,14 +382,14 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         }
 
         var parts = new List<(Control, string, string)>();
-        foreach (var (id, count) in state.StoredParts)
+        foreach (var part in state.StoredParts)
         {
-            if (!_prototypeManager.TryIndex<EntityPrototype>(id, out var proto))
+            if (!_prototypeManager.HasIndex<EntityPrototype>(part.Prototype))
                 continue;
 
             var icon = new EntityPrototypeView();
-            icon.SetPrototype(id);
-            parts.Add((icon, proto.Name, Loc.GetString("drydock-ui-supply-count", ("count", count))));
+            icon.SetPrototype(part.Prototype);
+            parts.Add((icon, part.Name, Loc.GetString("drydock-ui-supply-count", ("count", part.Count))));
         }
 
         var chemicals = new List<(Control, string, string)>();
@@ -486,7 +476,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
     }
 
     /// <summary>One refit line's controls: name and machine count, mark lamps and key, and a material bill.</summary>
-    private sealed record RefitRow(string Id, BoxContainer Root, Label Units, WFDrydockTierPips Pips, Button Button, Label Bill);
+    private sealed record RefitRow(string Id, BoxContainer Root, Label Units, WFDrydockTierPips Pips, Button Button, WFDrydockReadout Bill);
 
     /// <summary>Builds one refit row's controls. Their text and state are set by <see cref="UpdateRefitRow"/>.</summary>
     private RefitRow BuildRefitRow(WFDrydockUpgradeEntry entry)
@@ -496,7 +486,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         var pips = new WFDrydockTierPips { MaxTier = entry.MaxTier, VerticalAlignment = VAlignment.Center, SetWidth = 112 };
         var button = new Button { HorizontalExpand = true };
         button.AddStyleClass("WfCompact");
-        var bill = new Label { FontColorOverride = Muted, ClipText = true, HorizontalExpand = true, Visible = false };
+        var bill = new WFDrydockReadout("drydock-ui-refit-cost") { Visible = false, EmptyText = Loc.GetString("drydock-console-materials-none") };
 
         var id = entry.Id;
         button.OnPressed += _ => OnUpgradePressed?.Invoke(id);
@@ -535,14 +525,19 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         }
         else
         {
-            // The price goes on the line below, as the key is too narrow for it in wider themes.
-            var bill = state.PaysWithMaterials
-                ? FormatBill(entry.NextMaterials, entry.NextParts)
-                : Loc.GetString("drydock-ui-refit-price", ("price", entry.NextPrice.ToString("N0", CultureInfo.InvariantCulture)));
+            // The cost goes below the key, which is too narrow for it, one row per material.
+            if (state.PaysWithMaterials)
+            {
+                row.Bill.SetRows(BillRows(entry.NextMaterials, entry.NextParts, state.StoredMaterials));
+            }
+            else
+            {
+                row.Bill.SetRows(null);
+                row.Bill.Value = Loc.GetString("drydock-ui-credits", ("price", entry.NextPrice.ToString("N0", CultureInfo.InvariantCulture)));
+            }
+
             button.Text = Loc.GetString(state.Booking ? "drydock-ui-book-refit-key" : "drydock-ui-refit-key", ("mark", RefitMark(entry)));
             button.Disabled = blocked || (state.PaysWithMaterials && !Covers(entry.NextMaterials, state.StoredMaterials));
-            row.Bill.Text = bill;
-            row.Bill.ToolTip = bill;
             row.Bill.Visible = true;
         }
     }

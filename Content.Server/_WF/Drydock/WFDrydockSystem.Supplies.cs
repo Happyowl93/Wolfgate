@@ -75,6 +75,26 @@ public sealed partial class WFDrydockSystem
         return taken;
     }
 
+    /// <summary>Everything in the cranes' parts silos, by prototype and name, for the console's supplies list.</summary>
+    private List<WFDrydockStoredPart> SiloContents(List<EntityUid> cranes)
+    {
+        var counts = new Dictionary<(string Prototype, string Name), int>();
+        foreach (var (silo, _) in PartsSilos(cranes))
+        {
+            foreach (var part in silo.Comp.Parts!.ContainedEntities)
+            {
+                var meta = MetaData(part);
+                if (meta.EntityPrototype?.ID is not { } id)
+                    continue;
+
+                var key = (id, meta.EntityName);
+                counts[key] = counts.GetValueOrDefault(key) + _fabricationSilo.GetItemCount(part);
+            }
+        }
+
+        return counts.Select(c => new WFDrydockStoredPart(c.Key.Prototype, c.Key.Name, c.Value)).ToList();
+    }
+
     /// <summary>
     /// Parts refits install in the cranes' parts silos, by prototype. Other parts of the same type and rating, such as
     /// trade goods, are left alone.
