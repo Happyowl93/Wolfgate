@@ -80,12 +80,12 @@ public sealed partial class WFDrydockSystem
     private JobEnd TickJob(EntityUid console, WFDrydockConsoleComponent comp, WFDrydockJobComponent job, TimeSpan curTime, float frameTime)
     {
         if (TerminatingOrDeleted(job.Ship))
-            return JobEnd.Aborted;
+            return job.HullGone ? JobEnd.Finished : JobEnd.Aborted;
 
         if (curTime >= job.NextBerthCheck)
         {
             job.NextBerthCheck = curTime + BerthCheckInterval;
-            if (GetBerthedShip(console, comp) != job.Ship)
+            if (!StillBerthed(console, comp, job))
                 return JobEnd.Aborted;
         }
 
@@ -119,7 +119,19 @@ public sealed partial class WFDrydockSystem
 
         var changed = false;
         foreach (var slot in job.Slots)
+        {
             changed |= TickSlot(console, comp, job, slot, curTime);
+            // A break that lifted the last tile took the hull with it.
+            if (TerminatingOrDeleted(job.Ship))
+                return job.HullGone ? JobEnd.Finished : JobEnd.Aborted;
+        }
+
+        // No crane took a tile, so those left would split the hull if lifted; they stay.
+        if (job.Break && job.Pending.Count > 0 && job.Slots.All(s => s.Item == null))
+        {
+            LeaveStanding(job);
+            changed = true;
+        }
 
         if (changed)
         {
@@ -159,7 +171,10 @@ public sealed partial class WFDrydockSystem
         var changed = false;
         if (slot.Item is { } finished && curTime >= slot.Ends)
         {
-            ApplyItem(job.Ship, finished);
+            if (finished.Kind == WFDrydockWorkKind.Break)
+                ApplyBreak(console, job, slot, finished);
+            else
+                ApplyItem(job.Ship, finished);
             job.Done++;
             slot.Item = null;
             changed = true;
@@ -289,7 +304,7 @@ public sealed partial class WFDrydockSystem
     {
         return kind switch
         {
-            WFDrydockWorkKind.Tile => comp.HullWorkSound,
+            WFDrydockWorkKind.Tile or WFDrydockWorkKind.Break => comp.HullWorkSound,
             WFDrydockWorkKind.Entity => comp.PartWorkSound,
             WFDrydockWorkKind.Heal => comp.DamageWorkSound,
             _ => comp.RefitWorkSound,
@@ -362,6 +377,9 @@ public sealed partial class WFDrydockSystem
     /// </summary>
     private WFDrydockWorkItem? TakeNearest(WFDrydockConsoleComponent comp, WFDrydockJobComponent job, WFDrydockJobSlot slot)
     {
+        if (job.Break)
+            return TakeBreakTile(comp, job, slot);
+
         var rank = job.Pending.Min(Rank);
         var reach = -1;
         var reachDistance = float.MaxValue;
@@ -665,7 +683,9 @@ public sealed partial class WFDrydockSystem
     /// </summary>
     private void EndJob(EntityUid console, WFDrydockConsoleComponent comp, WFDrydockJobComponent job, JobEnd end)
     {
-        if (end == JobEnd.Finished)
+        if (job.Break)
+            EndBreak(console, comp, job, end);
+        else if (end == JobEnd.Finished)
         {
             Notify(console, comp, job, job.Skipped == 0
                 ? Loc.GetString("drydock-console-finished", ("ship", Name(job.Ship)))
@@ -693,7 +713,9 @@ public sealed partial class WFDrydockSystem
             _audio.PlayPvs(comp.DenySound, console);
         }
 
-        RecordRefits(job, end);
+        if (!job.Break)
+            RecordRefits(job, end);
+
         RemComp<WFDrydockJobComponent>(console);
         ParkCranes(console, comp);
         UpdateUi(console, comp);

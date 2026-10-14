@@ -1,0 +1,17 @@
+# Flatpack that guns stripped off a broken hull come out in. The drydock sets what each one unpacks into. Its tag lets
+# mobile drydock cranes' parts silos take it, on the client too.
+
+- type: Tag
+  id: WFSalvagedHardware
+
+- type: entity
+  parent: BaseFlatpack
+  id: WFSalvagedFlatpack
+  name: salvaged flatpack
+  description: Hardware stripped off a broken hull. It unpacks damaged.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: WFSalvagedHardware
+  - type: Tag
+    tags:
+    - WFSalvagedHardware

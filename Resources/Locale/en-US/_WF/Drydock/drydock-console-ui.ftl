@@ -42,6 +42,9 @@ drydock-ui-clock = { $minutes }:{ $seconds }
 drydock-ui-berth-lights = Berth lights
 drydock-ui-repair-key = Repair
 drydock-ui-book-repair-key = Book repair
+drydock-ui-salvage = Salvage
+drydock-ui-break-key = Break hull
+drydock-ui-break-confirm = Confirm: break hull
 drydock-ui-refit-key = Refit { $mark }
 drydock-ui-book-refit-key = Book refit { $mark }
 drydock-ui-refit-mark = to Mk { $mark }
@@ -83,6 +86,7 @@ drydock-plot-awaiting = Awaiting vessel
 drydock-plot-inbound = Proceed to berth { $berth }
 drydock-plot-deploying = Cranes deploying
 drydock-plot-working = Work in progress { $percent }%
+drydock-plot-breaking = Breaking hull { $percent }%
 drydock-plot-sound = Hull sound
 drydock-plot-surveyed = Survey: { $count } { $count ->
     [one] item

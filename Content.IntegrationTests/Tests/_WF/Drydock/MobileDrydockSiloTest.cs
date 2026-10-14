@@ -33,7 +33,7 @@ public sealed class MobileDrydockSiloTest
     private const string MkICapacitor = "CapacitorStockPart";
 
     /// <summary>Spawns an always-powered fabrication silo on a yard, off the arm column, and links a crane to it.</summary>
-    private static EntityUid SpawnLinkedSilo(TestPair pair, EntityUid host, string proto, Vector2i tile, EntityUid crane)
+    internal static EntityUid SpawnLinkedSilo(TestPair pair, EntityUid host, string proto, Vector2i tile, EntityUid crane)
     {
         var em = pair.Server.EntMan;
         var silo = DrydockTest.SpawnAnchored(pair, host, proto, tile);

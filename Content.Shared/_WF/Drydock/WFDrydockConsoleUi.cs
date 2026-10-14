@@ -88,6 +88,18 @@ public sealed class WFDrydockConsoleState : BoundUserInterfaceState
     /// <summary>Reagents the working cranes' chemical silos hold, by prototype.</summary>
     public Dictionary<string, FixedPoint2> StoredChemicals = new();
 
+    /// <summary>Whether this console breaks hulls.</summary>
+    public bool CanBreak;
+
+    /// <summary>Whether the ship in the berth may be broken here.</summary>
+    public bool Breakable;
+
+    /// <summary>Whether the running job breaks the ship.</summary>
+    public bool Breaking;
+
+    /// <summary>Materials breaking the ship would recover, within what is left of its caps.</summary>
+    public Dictionary<string, int> BreakYield = new();
+
     /// <summary>Whether the console's berth lights are on.</summary>
     public bool BerthLightsOn;
 
@@ -175,6 +187,12 @@ public sealed class WFDrydockUpgradeEntry
 /// </summary>
 [Serializable, NetSerializable]
 public sealed class WFDrydockRepairMessage : BoundUserInterfaceMessage;
+
+/// <summary>
+/// Starts breaking up the berthed ship.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class WFDrydockBreakMessage : BoundUserInterfaceMessage;
 
 /// <summary>
 /// Turns the console's berth lights on or off.

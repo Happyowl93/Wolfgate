@@ -32,6 +32,13 @@ public sealed partial class WFDrydockSystem
 
         LimitBill(pay, items, BillScale(ship, comp, pay));
 
+        // Rebuilding what a break stripped costs its full materials, outside the limits, so breaking it again never pays.
+        foreach (var item in items)
+        {
+            if (item.Broken)
+                BillBroken(pay, item);
+        }
+
         // A rebuild restoring a refit pays the refit's materials too, outside the limits.
         foreach (var item in items)
         {

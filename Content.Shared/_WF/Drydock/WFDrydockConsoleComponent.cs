@@ -105,6 +105,18 @@ public sealed partial class WFDrydockConsoleComponent : Component
     [DataField]
     public float MaxRefitDuration = 180f;
 
+    /// <summary>Longest hull break in seconds at full power, as <see cref="MaxDuration"/> is for repairs.</summary>
+    [DataField]
+    public float MaxBreakDuration = 1200f;
+
+    /// <summary>Seconds one crane needs to strip an entity off a hull it breaks.</summary>
+    [DataField]
+    public float BreakEntityWorkTime = 6f;
+
+    /// <summary>Seconds one crane needs to lift a stripped hull tile.</summary>
+    [DataField]
+    public float BreakTileWorkTime = 1.5f;
+
     /// <summary>Radio channel a finished or aborted job is announced on, so a crew can leave and come back. Null for none.</summary>
     [DataField]
     public ProtoId<RadioChannelPrototype>? NoticeChannel = "Common";

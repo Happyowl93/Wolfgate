@@ -46,6 +46,9 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
     /// <summary>Raised with the upgrade id when a refit button is pressed.</summary>
     public event Action<string>? OnUpgradePressed;
 
+    /// <summary>Raised when the break key is pressed and confirmed.</summary>
+    public event Action? OnBreakPressed;
+
     /// <summary>Raised when the cancel booking button is pressed.</summary>
     public event Action? OnCancelBookingPressed;
 
@@ -57,6 +60,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
     private readonly WFDrydockReadout _parts = new("drydock-ui-count-parts", counter: true);
     private readonly WFDrydockReadout _damage = new("drydock-ui-count-damage", counter: true);
     private readonly WFDrydockReadout _quote = new("drydock-ui-quote");
+    private readonly WFDrydockReadout _salvage = new("drydock-ui-salvage");
     private readonly WFDrydockReadout _eta = new("drydock-ui-eta");
     private readonly WFDrydockReadout _expires = new("drydock-ui-expires");
     private readonly WFGlassGauge _progress;
@@ -83,6 +87,9 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
         FitWindow(this, new Vector2(1060, 690));
 
         RepairButton.OnPressed += _ => OnRepairPressed?.Invoke();
+        BreakButton.OnPressed += _ => OnBreakPressed?.Invoke();
+        BreakButton.Text = Loc.GetString("drydock-ui-break-key");
+        BreakButton.ConfirmationText = Loc.GetString("drydock-ui-break-confirm");
         CancelBookingButton.OnPressed += _ => OnCancelBookingPressed?.Invoke();
         BerthLightsButton.OnPressed += _ => OnBerthLightsPressed?.Invoke();
         BerthLightsButton.Text = Loc.GetString("drydock-ui-berth-lights");
@@ -123,7 +130,7 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
 
         // Right: the hull survey and repair key, the cranes' supplies, the refit bay, and the berth's lights and booking.
         var counters = Row(_tiles, _parts, _damage);
-        var survey = Panel("drydock-ui-repairs", Column(counters, _quote, _progress, _eta, RepairButton), padding: 10, gap: 4);
+        var survey = Panel("drydock-ui-repairs", Column(counters, _quote, _progress, _eta, RepairButton, _salvage, BreakButton), padding: 10, gap: 4);
         var supplies = new ScrollContainer { HScrollEnabled = false, HorizontalExpand = true, SetHeight = SupplyListHeight };
         supplies.AddChild(_supplyList);
         _suppliesPanel = Panel("drydock-ui-supplies", supplies, padding: 10, gap: 4);
@@ -201,6 +208,9 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
             return (state.Notice ?? Loc.GetString("drydock-plot-no-berth"), Skin.Caution);
         if (state.Working)
         {
+            if (state.Breaking && !state.Deploying)
+                return (Loc.GetString("drydock-plot-breaking", ("percent", (int) MathF.Round(state.Progress * 100f))), Red);
+
             return state.Deploying
                 ? (Loc.GetString("drydock-plot-deploying"), Skin.Caution)
                 : (Loc.GetString("drydock-plot-working", ("percent", (int) MathF.Round(state.Progress * 100f))), Skin.Caution);
@@ -271,6 +281,12 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
             _quote.Tint = null;
             RepairButton.Disabled = state.ShipName is null || state.Working || state.RepairPrice <= 0 || blocked;
         }
+
+        _salvage.Visible = state.CanBreak && !state.Working;
+        _salvage.Value = FormatMaterials(state.BreakYield);
+        _salvage.Lit = state.BreakYield.Count > 0;
+        BreakButton.Visible = state.CanBreak;
+        BreakButton.Disabled = state.ShipName is null || state.Working || !state.Breakable || blocked;
 
         _eta.Value = state.Deploying
             ? Loc.GetString("drydock-ui-deploying")

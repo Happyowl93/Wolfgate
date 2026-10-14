@@ -14,7 +14,9 @@ console deck).
 
 A berth is the set of cranes linked to a `WFComputerDrydock` with a multitool, from its sender port to their receiver
 ports (`ports.yml`). A crane serves one console, so linking it elsewhere moves it. The work area is the union of the
-cranes' reach, starting `BerthGap` tiles down each arm, and ships approach from the arms' direction.
+cranes' reach, starting `BerthGap` tiles down each arm, and ships approach from the arms' direction. The ship in a
+berth is the one with the most tiles in its area, so a hull bigger than the berth still counts; a booked ship has to
+come in until the centre of its bounds is in the area.
 
 Cranes come in three sizes, `WFDrydockCrane` (36-tile arm), `WFDrydockCraneLarge` (60) and `WFDrydockCraneHuge` (80,
 the station's), each with a `Mirrored` variant. They are 2x2 HV machines whose speed scales with the power they get.
@@ -100,6 +102,38 @@ stock part it installs from the parts silo, if there is one, instead of its tier
 a 20% bill. Unfinished work's parts go back to the silo, or onto the floor at the crane. The console lists the refit
 parts and the chemicals the silos hold; nothing uses chemicals yet.
 
+### Hull breaking
+
+A mobile console also breaks up the ship in its berth for materials (`WFDrydockSystem.Break.cs`), behind a confirm on
+its Break hull key. Anything but a station can be broken: outposts and POIs (station members with no `ShuttleDeed`) and
+the drydock's own grid are refused, while player ships, encounter and event ships are fair game. Breaking a crewed
+ship is an attack on it, reported on start and with every tile through `WFCrewAlertSystem.ReportBreaking`, so its
+crew, escorts and allies respond. Nobody aboard stops the job.
+
+The hull is peeled tile by tile from its edges inward: each crane takes the nearest tile it reaches that has an open
+side and whose loss leaves the hull in one piece, so the grid never splits. Tiles out of reach are skipped, and only
+tiles that are the last link between parts out of reach are left with them. A hull being broken only has to overlap
+the berth, since peeling moves its centre. A crane strips everything anchored on the tile, 6 s per repairable entity plus 1.5 s for the tile,
+divided by crane speed and capped at 20 minutes (`maxBreakDuration`). People and loose things drift off as their tiles
+go, mobs are taken out of stripped containers, and anything still aboard is set adrift before the last tile, which
+takes the grid with it.
+
+Each finished tile credits the slot's crane silo or crane (`breakDefaultYield`, `breakYield` and `breakTileYield` on
+the payment component): 25% of every material in what it strips, but only 5% of the plastitanium and composite, plus 25
+steel units per tile. An abort pays nothing more. The caps grow with each tile the job lifts (`breakCap`: 1 plastitanium or composite
+sheet per 20 tiles, plasteel per 3, steel per 2), and yield past them waits for later tiles, so the outer walls that
+come off first are paid as the peel goes on. A hull broken whole or in parts, aborted and restarted, pays the same.
+
+A stripped machine's board and parts, and a computer's board, go to the crane's parts silo, or onto the floor beside
+the crane when the silo doesn't take them. Guns on hardpoints come off whole as a `WFSalvagedFlatpack`, put in the parts
+silo or left at the crane the same way. It unpacks at half the damage that would destroy the gun and sells for a quarter
+of its price.
+
+The hull keeps its repair snapshot, so a repair can rebuild what was broken, but `WFHulkComponent` records the broken
+tiles and rebuilding a tile or part on one bills its full materials, outside the repair's limits: a part's construction
+materials and a tile's plating. Breaking returns at most a share of that, so break and rebuild never pays. An encounter
+leaves a hull alone for 5 minutes after its last broken tile.
+
 ### Crane upgrades
 
 A mobile crane takes machine part upgrades (`WFDrydockCraneUpgradesComponent`, applied in `WFDrydockSystem.Upgrades.cs`
@@ -134,6 +168,7 @@ Mk IV manipulators on stock bins draw 30 kW.
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.BerthLights.cs`](WFDrydockSystem.BerthLights.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Blockers.cs`](WFDrydockSystem.Blockers.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Booking.cs`](WFDrydockSystem.Booking.cs)
+- [`Content.Server/_WF/Drydock/WFDrydockSystem.Break.cs`](WFDrydockSystem.Break.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Construction.cs`](WFDrydockSystem.Construction.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.cs`](WFDrydockSystem.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Job.cs`](WFDrydockSystem.Job.cs)
@@ -143,13 +178,16 @@ Mk IV manipulators on stock bins draw 30 kW.
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Supplies.cs`](WFDrydockSystem.Supplies.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockSystem.Upgrades.cs`](WFDrydockSystem.Upgrades.cs)
 - [`Content.Server/_WF/Drydock/WFDrydockWorkItem.cs`](WFDrydockWorkItem.cs)
+- [`Content.Server/_WF/Drydock/WFHulkComponent.cs`](WFHulkComponent.cs)
 - [`Content.Server/_WF/Drydock/WFLandingThrusterRefitSystem.cs`](WFLandingThrusterRefitSystem.cs)
 - [`Content.Server/_WF/Drydock/WFPartRefitSystem.cs`](WFPartRefitSystem.cs)
+- [`Content.Server/_WF/Drydock/WFSalvagedHardwareComponent.cs`](WFSalvagedHardwareComponent.cs)
 - [`Content.Server/_WF/Drydock/WFShipRefitsComponent.cs`](WFShipRefitsComponent.cs)
 - [`Content.Server/_WF/Drydock/WFShipRefitSystem.cs`](WFShipRefitSystem.cs)
 
 ### Shared
 
+- [`Content.Shared/_WF/Drydock/SharedFlatpackSystem.Salvage.cs`](../../../Content.Shared/_WF/Drydock/SharedFlatpackSystem.Salvage.cs)
 - [`Content.Shared/_WF/Drydock/WFDrydockConsoleComponent.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockConsoleComponent.cs)
 - [`Content.Shared/_WF/Drydock/WFDrydockConsoleUi.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockConsoleUi.cs)
 - [`Content.Shared/_WF/Drydock/WFDrydockCraneComponent.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockCraneComponent.cs)
@@ -159,6 +197,7 @@ Mk IV manipulators on stock bins draw 30 kW.
 - [`Content.Shared/_WF/Drydock/WFDrydockGuideComponent.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockGuideComponent.cs)
 - [`Content.Shared/_WF/Drydock/WFDrydockMaterialPaymentComponent.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockMaterialPaymentComponent.cs)
 - [`Content.Shared/_WF/Drydock/WFDrydockOperatorComponent.cs`](../../../Content.Shared/_WF/Drydock/WFDrydockOperatorComponent.cs)
+- [`Content.Shared/_WF/Drydock/WFFlatpackUnpackedEvent.cs`](../../../Content.Shared/_WF/Drydock/WFFlatpackUnpackedEvent.cs)
 - [`Content.Shared/_WF/Drydock/WFLandingThrusterRefit.cs`](../../../Content.Shared/_WF/Drydock/WFLandingThrusterRefit.cs)
 - [`Content.Shared/_WF/Drydock/WFPartRatingRefit.cs`](../../../Content.Shared/_WF/Drydock/WFPartRatingRefit.cs)
 - [`Content.Shared/_WF/Drydock/WFShipRefitEffect.cs`](../../../Content.Shared/_WF/Drydock/WFShipRefitEffect.cs)
@@ -181,6 +220,7 @@ Mk IV manipulators on stock bins draw 30 kW.
 - [`Content.IntegrationTests/Tests/_WF/Drydock/DrydockHailTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/DrydockHailTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Drydock/DrydockTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/DrydockTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockBerthTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockBerthTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockBreakTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockBreakTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockClientTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockClientTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockSiloTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockSiloTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Drydock/MobileDrydockTest.cs)
@@ -196,6 +236,7 @@ Mk IV manipulators on stock bins draw 30 kW.
 - [`Resources/Prototypes/_WF/Drydock/poi.yml`](../../../Resources/Prototypes/_WF/Drydock/poi.yml)
 - [`Resources/Prototypes/_WF/Drydock/ports.yml`](../../../Resources/Prototypes/_WF/Drydock/ports.yml)
 - [`Resources/Prototypes/_WF/Drydock/refits.yml`](../../../Resources/Prototypes/_WF/Drydock/refits.yml)
+- [`Resources/Prototypes/_WF/Drydock/salvage.yml`](../../../Resources/Prototypes/_WF/Drydock/salvage.yml)
 - [`Resources/Prototypes/_WF/Drydock/sounds.yml`](../../../Resources/Prototypes/_WF/Drydock/sounds.yml)
 
 ### Localization
@@ -217,6 +258,7 @@ Mk IV manipulators on stock bins draw 30 kW.
 
 ## Non-modular edits
 
+- [`Content.Shared/Construction/SharedFlatpackSystem.cs`](../../../Content.Shared/Construction/SharedFlatpackSystem.cs): salvaged hardware unpacks damaged
 - [`Resources/Prototypes/_Mono/Entities/Objects/Devices/ship_vouchers.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Devices/ship_vouchers.yml): single use, so a drydock repair undercuts printing another card
 - [`Resources/Prototypes/Recipes/Lathes/Packs/science.yml`](../../../Resources/Prototypes/Recipes/Lathes/Packs/science.yml): mobile drydock boards
 - [`Resources/Prototypes/Research/industrial.yml`](../../../Resources/Prototypes/Research/industrial.yml): mobile drydock boards

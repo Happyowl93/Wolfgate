@@ -35,6 +35,21 @@
       Glass: 3000
       Plastic: 1500
       Plastitanium: 600
+    # Breaking a hull pays a quarter of every material the cranes strip, plastitanium and composite only 5%, plus steel
+    # per tile lifted, within caps per hull tile: plastitanium and composite 1 sheet per 20 tiles, plasteel 1 per 3,
+    # steel 1 per 2. Materials breakCap doesn't list are uncapped. Machines and computers also give up their boards and
+    # parts. See the Drydock README.
+    breakDefaultYield: 0.25
+    breakYield:
+      Plastitanium: 0.05
+      PdvComposite: 0.05
+    breakTileYield:
+      Steel: 25
+    breakCap:
+      Plastitanium: 5
+      PdvComposite: 5
+      Plasteel: 33.3
+      Steel: 50
 
 - type: entity
   parent: BaseComputerCircuitboard
@@ -119,11 +134,13 @@
       - Ingot
   - type: OreSiloClient
   # Links a parts silo, whose machine parts pay for refit parts in place of materials, and a chemical silo the console
-  # lists. Parts silos then accept every machine part.
+  # lists. Parts silos then accept every machine part, and the salvaged hardware flatpacks a hull break strips off.
   - type: FabricationSiloClient
     parts:
       components:
       - MachinePart
+      tags:
+      - WFSalvagedHardware
   # Medium-voltage draw, for a ship's MV network.
   - type: PowerConsumer
     voltage: Medium
