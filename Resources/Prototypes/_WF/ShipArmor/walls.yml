@@ -1,4 +1,5 @@
 # PDV adamantite walls: plastitanium walls built from PDV composite. Full mount coverage, and every variant outlasts several heavy shells.
+# Raising shields on a grid with anchored adamantite switches them off.
 
 - type: entity
   parent: WallPlastitanium
@@ -13,6 +14,12 @@
   - type: Construction
     graph: WFAdamantiteWall
     node: adamantiteWall
+  - type: WFShieldDisruptingArmor
+  - type: ExtendDescription
+    descriptionList:
+    - description: wf-shield-disrupting-armor-examine
+      color: "#dc143c"
+      requireDetailRange: false
   - type: ArmorThickness
     thickness: 13
     canBePierced: false
@@ -58,6 +65,12 @@
   - type: Construction
     graph: WFAdamantiteWall
     node: adamantiteWallDiagonal
+  - type: WFShieldDisruptingArmor
+  - type: ExtendDescription
+    descriptionList:
+    - description: wf-shield-disrupting-armor-examine
+      color: "#dc143c"
+      requireDetailRange: false
   - type: ArmorThickness
     thickness: 13
     canBePierced: false
@@ -100,6 +113,12 @@
   - type: Construction
     graph: WFAdamantiteWall
     node: adamantiteWall
+  - type: WFShieldDisruptingArmor
+  - type: ExtendDescription
+    descriptionList:
+    - description: wf-shield-disrupting-armor-examine
+      color: "#dc143c"
+      requireDetailRange: false
   - type: ArmorThickness
     thickness: 15
     canBePierced: false
@@ -145,6 +164,12 @@
   - type: Construction
     graph: WFAdamantiteWall
     node: adamantiteWallDiagonal
+  - type: WFShieldDisruptingArmor
+  - type: ExtendDescription
+    descriptionList:
+    - description: wf-shield-disrupting-armor-examine
+      color: "#dc143c"
+      requireDetailRange: false
   - type: ArmorThickness
     thickness: 15
     canBePierced: false

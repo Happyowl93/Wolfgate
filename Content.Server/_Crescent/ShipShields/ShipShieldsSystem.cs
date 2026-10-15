@@ -202,6 +202,10 @@ public sealed partial class ShipShieldsSystem : EntitySystem
         if (IsWolfgateShieldFtlLocked(entity))
             return EntityUid.Invalid;
         // WOLFGATE END
+        // WOLFGATE(ShipArmor) START: adamantite on the grid switches the shields off
+        if (BlockWolfgateShieldForArmor(entity))
+            return EntityUid.Invalid;
+        // WOLFGATE END
         // WOLFGATE(ShipShields) START: discard stale grid fields and reserve active fields for their owner
         // if (TryComp<ShipShieldedComponent>(entity, out var existingShielded))
         //     return existingShielded.Shield;

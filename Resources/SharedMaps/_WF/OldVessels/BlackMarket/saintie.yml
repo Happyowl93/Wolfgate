@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 07/16/2026 12:09:39
-  entityCount: 1754
+  entityCount: 1753
 maps: []
 grids:
 - 1
@@ -8044,13 +8044,6 @@ entities:
     components:
     - type: Transform
       pos: -0.5,-9.5
-      parent: 1
-- proto: ShieldGeneratorMedium
-  entities:
-  - uid: 1226
-    components:
-    - type: Transform
-      pos: 0.5,-2.5
       parent: 1
 - proto: SignalButtonDirectional
   entities:
