@@ -66,7 +66,7 @@ The only code is `GasDepositSystem.Wolfgate.cs`. A gas sale console that pays an
   - drone plastitanium 20 -> 8 sheets
   - drone plastitanium 40 -> 16 sheets
 - [`Resources/Prototypes/_Mono/Catalogs/Fills/Crates/materials.yml`](../../../Resources/Prototypes/_Mono/Catalogs/Fills/Crates/materials.yml): exotic crate fissile, 3 -> 1
-- [`Resources/Prototypes/_Mono/Entities/Markers/Spawners/Random/scrap_processor.yml`](../../../Resources/Prototypes/_Mono/Entities/Markers/Spawners/Random/scrap_processor.yml): plastitanium is uncommon in the rare materials group (weight 0.4), so scrap doesn't undercut the crystallizer
+- [`Resources/Prototypes/_Mono/Entities/Markers/Spawners/Random/scrap_processor.yml`](../../../Resources/Prototypes/_Mono/Entities/Markers/Spawners/Random/scrap_processor.yml): plastitanium is uncommon in the rare materials group (weight 0.6), so scrap doesn't undercut the crystallizer
 - [`Resources/Prototypes/_Mono/Entities/Materials/materials.yml`](../../../Resources/Prototypes/_Mono/Entities/Materials/materials.yml)
   - fissile 25000 -> 10000 per sheet, so the centrifuge isn't the best credit faucet
   - depleted uranium priced as its comment says, 20 -> 2.5
