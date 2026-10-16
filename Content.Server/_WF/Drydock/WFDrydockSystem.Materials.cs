@@ -32,7 +32,7 @@ public sealed partial class WFDrydockSystem
 
         LimitBill(pay, items, BillScale(ship, comp, pay));
 
-        // Rebuilding what a break stripped costs its full materials, outside the limits, so breaking it again never pays.
+        // Rebuilding what a break stripped costs more than the break recovered, outside the limits, so breaking it again never pays.
         foreach (var item in items)
         {
             if (item.Broken)

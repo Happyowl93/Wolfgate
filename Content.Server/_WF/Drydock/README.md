@@ -48,7 +48,8 @@ console sets.
 
 A hull tile costs 120 cr. Rebuilding an entity costs 60 cr labor plus the more of twice its estimated price and 35% of
 its construction materials' value (`WFDrydockSystem.Construction.cs`), so a plastitanium wall, priced low but built
-from four 600 cr sheets, comes to about 960 cr. Healing costs the rebuild price times the share of health lost. Work
+from four 600 cr sheets, comes to about 960 cr. A machine's construction materials include the sheets its board calls
+for, so a jump drive with 2 fissile sheets comes to about 7,000 cr. Healing costs the rebuild price times the share of health lost. Work
 is capped at 50% of the ship's shipyard price (`VesselComponent`), or 40% of its full rebuild price for ships not
 bought at one. A fee of 2.5% of that value (at least 1,500 cr) comes on top and is never refunded.
 
@@ -94,6 +95,8 @@ storage or their linked material silo. Work is billed at material units per cred
 plastitanium sheets for a 150k to 500k ship): 25k cr of work takes about 14 steel sheets, and `maxBill` caps a repair
 at about 60% of the voucher for a 250k ship, scaled by ship price. A rebuild also takes 1% of any construction material
 the rates don't cover, so a plastitanium wall adds 4 units of plastitanium. Refunds go back into the job's first crane.
+A repair short of a material leaves out the work that needs it, such as an upgrade's fissile, and does the rest; it is
+refused only when that leaves nothing. A refit is all or nothing.
 
 A mobile crane also links a parts silo and a chemical silo (Lathe module), from the silo's window like a lathe, and
 parts silos then take any machine part (`parts` on its `FabricationSiloClient`). A refit unit billed in full takes the
@@ -131,13 +134,15 @@ sheet per 20 tiles, plasteel per 2, steel per tile), and yield past them waits f
 come off first are paid as the peel goes on. A hull broken whole or in parts, aborted and restarted, pays the same.
 
 A stripped machine's board and parts, and a computer's board, go to the crane's parts silo, or onto the nearest free
-floor beside the crane when the silo doesn't take them. Guns on hardpoints come off whole as a `WFSalvagedFlatpack`, put
+floor beside the crane when the silo doesn't take them. The sheets a machine's board calls for, such as a jump drive's 2
+fissile uranium, count as its construction materials, so they price its rebuild and the break pays its share of them. Guns on hardpoints come off whole as a `WFSalvagedFlatpack`, put
 in the parts silo or left at the crane the same way. It unpacks at half the damage that would destroy the gun and sells
 for a quarter of its price.
 
 The hull keeps its repair snapshot, so a repair can rebuild what was broken, but `WFHulkComponent` records the broken
-tiles and rebuilding a tile or part on one bills its full materials, outside the repair's limits: a part's construction
-materials and a tile's plating. Breaking returns at most a share of that, so break and rebuild never pays. An encounter
+tiles and rebuilding a tile or part on one bills twice what breaking it recovered (`brokenBillFactor`), outside the
+repair's limits, so break and rebuild never pays. A plastitanium wall, which breaks for 5% of its plastitanium,
+rebuilds for 10%. An encounter
 leaves a hull alone for 5 minutes after its last broken tile.
 
 ### Crane upgrades

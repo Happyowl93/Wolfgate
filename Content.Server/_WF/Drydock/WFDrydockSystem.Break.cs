@@ -435,32 +435,23 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>
-    /// Raises a broken item's bill to its full materials: a rebuild's construction materials, or a tile's own yield
-    /// grossed up by the share a break recovers of it.
+    /// Raises a broken item's bill to <see cref="WFDrydockMaterialPaymentComponent.BrokenBillFactor"/> times what breaking
+    /// it recovered, so break and rebuild never pays.
     /// </summary>
     private void BillBroken(WFDrydockMaterialPaymentComponent pay, WFDrydockWorkItem item)
     {
         if (item.Materials == null)
             return;
 
-        var full = new Dictionary<string, int>();
+        var recovered = new Dictionary<string, int>();
         if (item.Kind == WFDrydockWorkKind.Tile)
-        {
-            foreach (var (id, amount) in pay.BreakTileYield)
-            {
-                var recovered = BreakShare(pay, id.Id);
-                var share = recovered > 0 ? recovered : 1f;
-                full[id.Id] = (int) Math.Ceiling(amount / share);
-            }
-        }
+            recovered = pay.BreakTileYield.ToDictionary(t => t.Key.Id, t => t.Value);
         else if (item.Prototype is { } protoId && _prototype.TryIndex(protoId, out var proto))
-        {
-            full = ConstructionMaterials(proto);
-        }
+            AddBreakYield(pay, ConstructionMaterials(proto), recovered);
 
-        foreach (var (id, amount) in full)
+        foreach (var (id, amount) in recovered)
         {
-            item.Materials[id] = Math.Max(item.Materials.GetValueOrDefault(id), amount);
+            item.Materials[id] = Math.Max(item.Materials.GetValueOrDefault(id), (int) Math.Ceiling(amount * pay.BrokenBillFactor));
         }
     }
 
@@ -565,6 +556,10 @@ public sealed partial class WFDrydockSystem
         {
             foreach (var part in container.ContainedEntities.ToList())
             {
+                // The board's sheets are in the machine's construction materials, so the yield already pays a share of them.
+                if (HasComp<MaterialComponent>(part))
+                    continue;
+
                 if (_container.Remove(part, container, destination: drop) && crane.Valid)
                     _fabricationSilo.ReturnPart(crane, part);
             }

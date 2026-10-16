@@ -350,6 +350,45 @@ public sealed class MobileDrydockTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>
+    /// A crane stocked with everything but plastitanium, on a ship missing a steel and a plastitanium wall, rebuilds the
+    /// steel one and leaves the plastitanium wall out.
+    /// </summary>
+    [Test]
+    public async Task MaterialConsoleRepairsWhatStockCovers()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+
+        EntityUid console = default, crane = default, ship = default, payer = default;
+        await server.WaitAssertion(() =>
+        {
+            (console, crane, ship, payer) = SetUpMobileRepair(pair, map.MapId);
+            Stock(pair, crane);
+            var wall = DrydockTest.SpawnAnchored(pair, ship, PlastitaniumWall, new Vector2i(2, 2));
+            var steel = DrydockTest.SpawnAnchored(pair, ship, "WallSolid", new Vector2i(2, 3));
+            server.System<ShipRepairSystem>().GenerateRepairData(ship);
+            em.DeleteEntity(wall);
+            em.DeleteEntity(steel);
+        });
+
+        await WaitForCranePower(pair, crane);
+
+        await server.WaitAssertion(() =>
+        {
+            var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
+            var items = drydock.BuildRepairItems(ship, comp).Count;
+            Assert.That(drydock.TryStartRepair(console, comp, ship, payer), Is.True, "The repair should start short.");
+            Assert.That(em.GetComponent<WFDrydockJobComponent>(console).Total, Is.EqualTo(items - 1),
+                "The job should leave the wall out.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     /// <summary>The mobile crane's board builds it, and the Shuttlecraft tech unlocks both of its boards.</summary>
     [Test]
     public async Task CraneIsConstructible()

@@ -14,6 +14,7 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Drydock;
 
@@ -132,6 +133,52 @@ public sealed class MobileDrydockBreakTest
                 Assert.That(boards, Has.Count.EqualTo(1), "The autolathe's board should come to the crane.");
                 Assert.That(Stored(pair, crane, "ReinforcedGlass"), Is.GreaterThan(0), "The window should pay reinforced glass.");
             });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// A jump drive's board sheets, its fissile uranium among them, count as its construction materials: they price its
+    /// rebuild, and a break previews and pays a quarter of them.
+    /// </summary>
+    [Test]
+    public async Task MachineSheetsCountAsConstruction()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+
+        EntityUid console = default, crane = default, ship = default, actor = default;
+        await server.WaitAssertion(() =>
+        {
+            (console, crane, ship, actor) = SetUpBreak(pair, map.MapId);
+            DrydockTest.SpawnAnchored(pair, ship, "MachineFTLDrive25S", new Vector2i(1, 2));
+        });
+
+        await MobileDrydockTest.WaitForCranePower(pair, crane);
+
+        await server.WaitAssertion(() =>
+        {
+            drydock.UpdateUi(console, force: true);
+            Assert.That(server.System<SharedUserInterfaceSystem>().TryGetUiState<WFDrydockConsoleState>(console,
+                WFDrydockConsoleUiKey.Key, out var state), Is.True, "The console should have a state.");
+            Assert.That(state!.BreakYield.GetValueOrDefault("UraniumFissile"), Is.EqualTo(50),
+                "The salvage preview should list a quarter of the drive's fissile.");
+            Assert.That(drydock.RebuildPrice(new WFDrydockConsoleComponent(), server.ProtoMan.Index<EntityPrototype>("MachineFTLDrive25S")),
+                Is.AtLeast(7000), "Rebuilding the drive should be priced on its fissile.");
+
+            var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
+            Assert.That(drydock.TryStartBreak(console, comp, ship, actor), Is.True, "The break should start.");
+        });
+
+        await RunBreak(pair, console);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored(pair, crane, "UraniumFissile"), Is.EqualTo(50), "A quarter of the drive's fissile should be stored.");
         });
 
         await pair.CleanReturnAsync();
@@ -306,7 +353,7 @@ public sealed class MobileDrydockBreakTest
 
     /// <summary>
     /// A hull walled in plastitanium all round holds more than its caps. Towed out mid-break, it pays only for the tiles
-    /// lifted, and a repair quotes its broken tiles and walls at their full materials; broken again, the two parts
+    /// lifted, and a repair quotes its broken tiles and walls at twice what breaking them recovered; broken again, the two parts
     /// together pay no more than the whole.
     /// </summary>
     [Test]
@@ -387,10 +434,10 @@ public sealed class MobileDrydockBreakTest
                 WFDrydockConsoleUiKey.Key, out var state), Is.True, "The console should have a state.");
             Assert.Multiple(() =>
             {
-                Assert.That(state!.RepairMaterials.GetValueOrDefault("Steel"), Is.AtLeast(lifted * 100),
-                    "Each broken tile should bill its full plating.");
-                Assert.That(state.RepairMaterials.GetValueOrDefault("Plastitanium"), Is.AtLeast(lifted * 200),
-                    "Each broken wall should bill its full plastitanium.");
+                Assert.That(state!.RepairMaterials.GetValueOrDefault("Steel"), Is.AtLeast(lifted * 50),
+                    "Each broken tile should bill twice its plating's yield.");
+                Assert.That(state.RepairMaterials.GetValueOrDefault("Plastitanium"), Is.AtLeast(lifted * 20),
+                    "Each broken wall should bill twice its plastitanium's yield.");
             });
         });
 

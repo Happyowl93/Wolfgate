@@ -60,4 +60,11 @@ public sealed partial class WFDrydockMaterialPaymentComponent : Component
     /// </summary>
     [DataField]
     public Dictionary<ProtoId<MaterialPrototype>, float> BreakCap = new();
+
+    /// <summary>
+    /// Rebuilding what a hull break stripped bills this many times what the break recovered of it, outside the repair
+    /// limits, so break and rebuild never pays.
+    /// </summary>
+    [DataField]
+    public float BrokenBillFactor = 2f;
 }
