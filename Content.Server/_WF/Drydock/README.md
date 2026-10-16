@@ -95,8 +95,9 @@ storage or their linked material silo. Work is billed at material units per cred
 plastitanium sheets for a 150k to 500k ship): 25k cr of work takes about 14 steel sheets, and `maxBill` caps a repair
 at about 60% of the voucher for a 250k ship, scaled by ship price. A rebuild also takes 1% of any construction material
 the rates don't cover, so a plastitanium wall adds 4 units of plastitanium. Refunds go back into the job's first crane.
-A repair short of a material leaves out the work that needs it, such as an upgrade's fissile, and does the rest; it is
-refused only when that leaves nothing. A refit is all or nothing.
+A repair short of materials does what the stock covers (`Affordable`): it takes each item in work order (tiles, then
+parts, heals and refits) while the stock left pays for it, and once a tile is left out leaves out the parts too, as one
+might stand on it. It is refused only when that leaves nothing. A refit is all or nothing.
 
 A mobile crane also links a parts silo and a chemical silo (Lathe module), from the silo's window like a lathe, and
 parts silos then take any machine part (`parts` on its `FabricationSiloClient`). A refit unit billed in full takes the

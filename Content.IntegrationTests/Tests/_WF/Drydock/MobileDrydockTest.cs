@@ -389,6 +389,49 @@ public sealed class MobileDrydockTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>A crane holding plastic for one of two missing steel walls rebuilds that one and leaves the other.</summary>
+    [Test]
+    public async Task MaterialConsoleRepairsWhatPlasticCovers()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+
+        EntityUid console = default, crane = default, ship = default, payer = default;
+        await server.WaitAssertion(() =>
+        {
+            (console, crane, ship, payer) = SetUpMobileRepair(pair, map.MapId);
+            Stock(pair, crane);
+            var first = DrydockTest.SpawnAnchored(pair, ship, "WallSolid", new Vector2i(2, 2));
+            var second = DrydockTest.SpawnAnchored(pair, ship, "WallSolid", new Vector2i(2, 3));
+            server.System<ShipRepairSystem>().GenerateRepairData(ship);
+            em.DeleteEntity(first);
+            em.DeleteEntity(second);
+        });
+
+        await WaitForCranePower(pair, crane);
+
+        await server.WaitAssertion(() =>
+        {
+            var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
+            drydock.UpdateUi(console, comp, force: true);
+            server.System<SharedUserInterfaceSystem>().TryGetUiState<WFDrydockConsoleState>(console, WFDrydockConsoleUiKey.Key, out var state);
+            var plastic = state!.RepairMaterials.GetValueOrDefault("Plastic");
+            Assert.That(plastic, Is.GreaterThanOrEqualTo(2), "Each wall should bill plastic.");
+
+            // Plastic for one of the two identical walls.
+            var materials = server.System<SharedMaterialStorageSystem>();
+            materials.TryChangeMaterialAmount(crane, "Plastic", plastic / 2 - materials.GetMaterialAmount(crane, "Plastic", localOnly: true), localOnly: true);
+
+            Assert.That(drydock.TryStartRepair(console, comp, ship, payer), Is.True, "The repair should start short of plastic.");
+            Assert.That(em.GetComponent<WFDrydockJobComponent>(console).Total, Is.EqualTo(1), "The job should rebuild one wall.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     /// <summary>The mobile crane's board builds it, and the Shuttlecraft tech unlocks both of its boards.</summary>
     [Test]
     public async Task CraneIsConstructible()

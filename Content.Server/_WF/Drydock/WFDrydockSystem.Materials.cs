@@ -237,6 +237,33 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>
+    /// The items a stock of materials pays for, each taken in work order while the stock left covers it: tiles, then
+    /// parts, heals and refits. Once a tile is left out so are the parts, as one might stand on it.
+    /// </summary>
+    private static List<WFDrydockWorkItem> Affordable(List<WFDrydockWorkItem> items, Dictionary<string, int> stock)
+    {
+        var left = new Dictionary<string, int>(stock);
+        var tileLeftOut = false;
+        var affordable = new List<WFDrydockWorkItem>();
+        foreach (var item in items.OrderBy(Rank))
+        {
+            var bill = item.Materials ?? new Dictionary<string, int>();
+            if ((tileLeftOut && item.Kind == WFDrydockWorkKind.Entity) || bill.Any(m => left.GetValueOrDefault(m.Key) < m.Value))
+            {
+                tileLeftOut |= item.Kind == WFDrydockWorkKind.Tile;
+                continue;
+            }
+
+            foreach (var (id, amount) in bill)
+                left[id] = left.GetValueOrDefault(id) - amount;
+
+            affordable.Add(item);
+        }
+
+        return affordable;
+    }
+
+    /// <summary>
     /// Takes the items' bill from the console's silos, then its cranes, and their parts from the parts silos, all or
     /// nothing; denies with the shortfall.
     /// </summary>

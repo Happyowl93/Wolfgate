@@ -714,14 +714,9 @@ public sealed partial class WFDrydockSystem : EntitySystem
         {
             AssignMaterials(ship, comp, pay, items, cranes);
 
-            // A repair short of a material leaves out the work that needs it, such as an upgrade's fissile, and does the rest.
-            if (upgrade == null)
-            {
-                var stock = Availability(cranes);
-                var lacking = SumBills(items).Where(m => stock.GetValueOrDefault(m.Key) < m.Value).Select(m => m.Key).ToList();
-                if (items.Where(i => i.Materials?.Keys.Any(lacking.Contains) != true).ToList() is { Count: > 0 } doable)
-                    items = doable;
-            }
+            // A repair short of materials does what the stock covers; a refit is all or nothing.
+            if (upgrade == null && Affordable(items, Availability(cranes)) is { Count: > 0 } doable)
+                items = doable;
 
             if (!TryPayMaterials(console, comp, actor, items))
                 return false;
