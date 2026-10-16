@@ -4,18 +4,23 @@ using Content.Shared.Construction.Prototypes;
 using Content.Shared.Construction.Steps;
 using Content.Shared.Materials;
 using Content.Shared.Stacks;
+using Content.Shared.Tag;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.Drydock;
 
 public sealed partial class WFDrydockSystem
 {
+    [Dependency] private TagSystem _tag = default!;
+
+    private static readonly ProtoId<TagPrototype> WallTag = "Wall";
+
     /// <summary>Construction materials by entity prototype, in material units.</summary>
     private readonly Dictionary<string, Dictionary<string, int>> _constructionMaterials = new();
 
     /// <summary>
     /// Materials to build an entity by hand: every material step on its construction graph from the start node to its
-    /// node, and for a machine the sheets its board calls for, such as a jump drive's fissile. Empty without a graph.
+    /// node, plus a machine's board sheets. Empty without a graph.
     /// </summary>
     private Dictionary<string, int> ConstructionMaterials(EntityPrototype proto)
     {
@@ -50,7 +55,7 @@ public sealed partial class WFDrydockSystem
         if (proto.TryGetComponent<MachineComponent>(out var machine, Factory) && machine.Board is { } board &&
             _prototype.Index(board).TryGetComponent<MachineBoardComponent>(out var boardComp, Factory))
         {
-            // Sheets only: a break strips them with the machine, while cable comes off whole with its parts.
+            // Cable comes off whole with the parts, so only sheets count.
             foreach (var (stack, amount) in boardComp.StackRequirements)
             {
                 if (_prototype.TryIndex(stack, out var stackProto) &&
@@ -76,6 +81,12 @@ public sealed partial class WFDrydockSystem
         {
             materials[material] = materials.GetValueOrDefault(material) + amount * count;
         }
+    }
+
+    /// <summary>Whether a prototype is a wall.</summary>
+    private bool IsWall(EntityPrototype proto)
+    {
+        return proto.TryGetComponent<TagComponent>(out var tags, Factory) && _tag.HasTag(tags, WallTag);
     }
 
     /// <summary>Market value of a set of materials, from each material's price per unit.</summary>

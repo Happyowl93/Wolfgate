@@ -106,25 +106,12 @@ public sealed class MobileDrydockTest
         return silo;
     }
 
-    /// <summary>The material bill a console quotes for a ship's repair: each item's cost times the console's rates.</summary>
-    private static Dictionary<string, int> QuotedBill(TestPair pair, EntityUid console, EntityUid ship)
+    /// <summary>The material bill a console quotes for the repair of the ship in its berth.</summary>
+    private static Dictionary<string, int> QuotedBill(TestPair pair, EntityUid console)
     {
-        var em = pair.Server.EntMan;
-        var items = pair.Server.System<WFDrydockSystem>().BuildRepairItems(ship, em.GetComponent<WFDrydockConsoleComponent>(console));
-        var pay = em.GetComponent<WFDrydockMaterialPaymentComponent>(console);
-
-        var bill = new Dictionary<string, int>();
-        foreach (var item in items)
-        {
-            foreach (var (id, rate) in pay.Rates)
-            {
-                var amount = (int) Math.Ceiling(item.Cost * rate);
-                if (amount > 0)
-                    bill[id] = bill.GetValueOrDefault(id) + amount;
-            }
-        }
-
-        return bill;
+        pair.Server.System<WFDrydockSystem>().UpdateUi(console, force: true);
+        pair.Server.System<SharedUserInterfaceSystem>().TryGetUiState<WFDrydockConsoleState>(console, WFDrydockConsoleUiKey.Key, out var state);
+        return new Dictionary<string, int>(state!.RepairMaterials);
     }
 
     /// <summary>A mobile crane holds the sheets a repair's bill is paid in, and the console holds none.</summary>
@@ -149,7 +136,7 @@ public sealed class MobileDrydockTest
             (console, crane, ship, payer) = SetUpMobileRepair(pair, map.MapId);
             Stock(pair, crane);
 
-            bill = QuotedBill(pair, console, ship);
+            bill = QuotedBill(pair, console);
             Assert.That(bill.GetValueOrDefault("Steel"), Is.GreaterThan(0), "The repair should quote steel.");
             Assert.That(bank.TryGetBalance(payer, out bankBefore), Is.True, "The payer should have an account.");
         });
@@ -184,8 +171,8 @@ public sealed class MobileDrydockTest
     }
 
     /// <summary>
-    /// A missing plastitanium wall is quoted in plastitanium on a material console, and priced well above a shuttle wall
-    /// in credits.
+    /// On a material console a missing plastitanium wall is quoted at 4% of its construction materials, twice what
+    /// breaking it pays, and a missing thruster at all of its own; the wall is priced well above a shuttle wall in credits.
     /// </summary>
     [Test]
     public async Task PlastitaniumWallBilledInKind()
@@ -201,9 +188,12 @@ public sealed class MobileDrydockTest
         {
             var (console, _, ship, _) = SetUpMobileRepair(pair, map.MapId);
             var wall = DrydockTest.SpawnAnchored(pair, ship, PlastitaniumWall, new Vector2i(2, 2));
+            var thruster = DrydockTest.SpawnAnchored(pair, ship, "Thruster", new Vector2i(2, 3));
             server.System<ShipRepairSystem>().GenerateRepairData(ship);
             em.DeleteEntity(wall);
+            em.DeleteEntity(thruster);
 
+            // Nothing caps the bill, so the quote is the wall's and thruster's own, however small the ship.
             var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
             drydock.UpdateUi(console, comp, force: true);
             Assert.That(server.System<SharedUserInterfaceSystem>().TryGetUiState<WFDrydockConsoleState>(console,
@@ -212,22 +202,15 @@ public sealed class MobileDrydockTest
             var station = new WFDrydockConsoleComponent();
             Assert.Multiple(() =>
             {
-                Assert.That(state!.RepairMaterials.GetValueOrDefault("Plastitanium"), Is.GreaterThan(0),
-                    "The wall should be rebuilt from plastitanium.");
+                Assert.That(state!.RepairMaterials, Is.EquivalentTo(new Dictionary<string, int>
+                    {
+                        ["Plastitanium"] = 16, ["Plasteel"] = 24, ["Steel"] = 8 + 1015,
+                    }),
+                    "The wall should bill 4% of its 4 plastitanium, 6 plasteel and 2 steel sheets, the thruster all its 10.15 steel.");
                 Assert.That(drydock.RebuildPrice(station, protoMan.Index(PlastitaniumWall)),
                     Is.GreaterThan(2 * drydock.RebuildPrice(station, protoMan.Index(ShuttleWall))),
                     "A plastitanium wall should cost well over a shuttle wall to rebuild.");
             });
-
-            // A repair never bills more of a material than the console's limit, here set for a ship of this one's price.
-            var pay = em.GetComponent<WFDrydockMaterialPaymentComponent>(console);
-            var (value, vessel) = drydock.ShipValue(ship, comp);
-            pay.ReferenceValue = (int) (vessel ? value : value * comp.SnapshotCapFraction / comp.CapFraction);
-            pay.MaxBill["Steel"] = 10;
-            drydock.UpdateUi(console, comp, force: true);
-            server.System<SharedUserInterfaceSystem>().TryGetUiState<WFDrydockConsoleState>(console, WFDrydockConsoleUiKey.Key, out state);
-            Assert.That(state!.RepairMaterials.GetValueOrDefault("Steel"), Is.InRange(1, 10),
-                "The repair's steel should be cut to the limit.");
         });
 
         await pair.CleanReturnAsync();
@@ -257,7 +240,7 @@ public sealed class MobileDrydockTest
             silo = SpawnSilo(pair, server.System<SharedTransformSystem>().GetGrid(console)!.Value);
             Stock(pair, silo);
 
-            bill = QuotedBill(pair, console, ship);
+            bill = QuotedBill(pair, console);
             Assert.That(bill.GetValueOrDefault("Steel"), Is.GreaterThan(0), "The repair should quote steel.");
             Assert.That(bank.TryGetBalance(payer, out bankBefore), Is.True, "The payer should have an account.");
         });
@@ -389,9 +372,9 @@ public sealed class MobileDrydockTest
         await pair.CleanReturnAsync();
     }
 
-    /// <summary>A crane holding plastic for one of two missing steel walls rebuilds that one and leaves the other.</summary>
+    /// <summary>A crane holding steel for one of two missing steel walls rebuilds that one and leaves the other.</summary>
     [Test]
-    public async Task MaterialConsoleRepairsWhatPlasticCovers()
+    public async Task MaterialConsoleRepairsWhatSteelCovers()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
         var server = pair.Server;
@@ -418,14 +401,14 @@ public sealed class MobileDrydockTest
             var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
             drydock.UpdateUi(console, comp, force: true);
             server.System<SharedUserInterfaceSystem>().TryGetUiState<WFDrydockConsoleState>(console, WFDrydockConsoleUiKey.Key, out var state);
-            var plastic = state!.RepairMaterials.GetValueOrDefault("Plastic");
-            Assert.That(plastic, Is.GreaterThanOrEqualTo(2), "Each wall should bill plastic.");
+            var steel = state!.RepairMaterials.GetValueOrDefault("Steel");
+            Assert.That(steel, Is.GreaterThanOrEqualTo(2), "Each wall should bill steel.");
 
-            // Plastic for one of the two identical walls.
+            // Steel for one of the two identical walls.
             var materials = server.System<SharedMaterialStorageSystem>();
-            materials.TryChangeMaterialAmount(crane, "Plastic", plastic / 2 - materials.GetMaterialAmount(crane, "Plastic", localOnly: true), localOnly: true);
+            materials.TryChangeMaterialAmount(crane, "Steel", steel / 2 - materials.GetMaterialAmount(crane, "Steel", localOnly: true), localOnly: true);
 
-            Assert.That(drydock.TryStartRepair(console, comp, ship, payer), Is.True, "The repair should start short of plastic.");
+            Assert.That(drydock.TryStartRepair(console, comp, ship, payer), Is.True, "The repair should start short of steel.");
             Assert.That(em.GetComponent<WFDrydockJobComponent>(console).Total, Is.EqualTo(1), "The job should rebuild one wall.");
         });
 

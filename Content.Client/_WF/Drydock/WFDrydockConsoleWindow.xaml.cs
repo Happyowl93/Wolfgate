@@ -271,7 +271,6 @@ public sealed partial class WFDrydockConsoleWindow : FancyWindow
             var billed = state.RepairMaterials.Count > 0 || state.RepairParts.Count > 0;
             _quote.SetRows(BillRows(state.RepairMaterials, state.RepairParts, state.StoredMaterials));
             _quote.Lit = billed;
-            // A short repair still does what the stock covers; the server refuses one that covers nothing.
             _quote.Tint = null;
             RepairButton.Disabled = state.ShipName is null || state.Working || !billed || blocked;
         }
