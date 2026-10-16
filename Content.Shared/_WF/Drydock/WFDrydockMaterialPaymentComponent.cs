@@ -23,7 +23,7 @@ public sealed partial class WFDrydockMaterialPaymentComponent : Component
 
     /// <summary>Rebuilding a wall or tile bills this many times what breaking it recovers.</summary>
     [DataField]
-    public float StructureRepairFactor = 2f;
+    public float StructureRepairFactor = 1.3f;
 
     /// <summary>
     /// Share of every construction material a hull break recovers from what it strips, unless <see cref="BreakYield"/>

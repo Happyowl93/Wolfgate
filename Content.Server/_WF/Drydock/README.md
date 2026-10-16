@@ -92,10 +92,10 @@ own grid.
 
 The mobile console charges no fee and pays in materials (`WFDrydockMaterialPaymentComponent`), from its cranes' own
 storage or their linked material silo, with no work cap (`capFraction` 0). A wall (the `Wall` tag) or hull tile bills
-`structureRepairFactor` (2) times what breaking it pays: 4% of the wall's construction materials, 4 steel a tile.
-Anything else bills `repairShare` (100%) of its construction materials, a heal that times the share of health lost, a
-refit its tier's `materials`, and work with no construction materials, such as a gun, its price times `rates`. Refunds
-go back into the job's first crane. A repair short of materials does what the stock covers, in work order; once a tile
+`structureRepairFactor` (1.3) times what breaking it pays: 2.6% of the wall's construction materials, 3 steel units
+a tile. Anything else bills `repairShare` (100%) of its construction materials, a heal that times the share of health
+lost, a refit its tier's `materials`, and work with no construction materials, such as a gun, its price times `rates`.
+Refunds go back into the job's first crane. A repair short of materials does what the stock covers, in work order; once a tile
 is left out, so are the parts. A refit is all or nothing.
 
 A mobile crane also links a parts silo and a chemical silo (Lathe module), from the silo's window like a lathe, and

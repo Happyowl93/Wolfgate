@@ -171,7 +171,7 @@ public sealed class MobileDrydockTest
     }
 
     /// <summary>
-    /// On a material console a missing plastitanium wall is quoted at 4% of its construction materials, twice what
+    /// On a material console a missing plastitanium wall is quoted at 2.6% of its construction materials, 1.3 times what
     /// breaking it pays, and a missing thruster at all of its own; the wall is priced well above a shuttle wall in credits.
     /// </summary>
     [Test]
@@ -204,9 +204,9 @@ public sealed class MobileDrydockTest
             {
                 Assert.That(state!.RepairMaterials, Is.EquivalentTo(new Dictionary<string, int>
                     {
-                        ["Plastitanium"] = 16, ["Plasteel"] = 24, ["Steel"] = 8 + 1015,
+                        ["Plastitanium"] = 11, ["Plasteel"] = 16, ["Steel"] = 6 + 1015,
                     }),
-                    "The wall should bill 4% of its 4 plastitanium, 6 plasteel and 2 steel sheets, the thruster all its 10.15 steel.");
+                    "The wall should bill 2.6% of its 4 plastitanium, 6 plasteel and 2 steel sheets, the thruster all its 10.15 steel.");
                 Assert.That(drydock.RebuildPrice(station, protoMan.Index(PlastitaniumWall)),
                     Is.GreaterThan(2 * drydock.RebuildPrice(station, protoMan.Index(ShuttleWall))),
                     "A plastitanium wall should cost well over a shuttle wall to rebuild.");
