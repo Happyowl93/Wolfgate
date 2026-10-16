@@ -273,6 +273,38 @@ public sealed class MobileDrydockBreakTest
     }
 
     /// <summary>
+    /// A hull with an indestructible wall or monolith tenebris is refused; one with a gaslock, which takes no damage at
+    /// all, is not.
+    /// </summary>
+    [Test]
+    public async Task BreakRefusesIndestructibleHulls()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Dirty = true });
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var (console, _, ship, _) = SetUpBreak(pair, map.MapId);
+            var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
+            var gaslock = DrydockTest.SpawnAnchored(pair, ship, "Gaslock", new Vector2i(1, 1));
+            Assert.That(drydock.BreakRefusal(console, comp, ship), Is.Null, "A gaslock should not protect a hull.");
+            em.DeleteEntity(gaslock);
+
+            foreach (var wall in new[] { "WallPlastitaniumIndestructible", "WallReinforcedChitinMonolithic" })
+            {
+                var uid = DrydockTest.SpawnAnchored(pair, ship, wall, new Vector2i(1, 1));
+                Assert.That(drydock.BreakRefusal(console, comp, ship), Is.Not.Null, $"A hull with {wall} should be refused.");
+                em.DeleteEntity(uid);
+            }
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
     /// A hull walled in plastitanium all round holds more than its caps. Towed out mid-break, it pays only for the tiles
     /// lifted, and a repair quotes its broken tiles and walls at their full materials; broken again, the two parts
     /// together pay no more than the whole.

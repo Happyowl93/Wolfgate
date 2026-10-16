@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Numerics;
 using Content.Server._WF.NpcCrew.Systems;
+using Content.Server.Atmos.Components;
 using Content.Server.Cargo.Systems;
 using Content.Server.Construction;
 using Content.Server.Construction.Components;
@@ -42,6 +43,9 @@ public sealed partial class WFDrydockSystem
 
     /// <summary>Damage type salvaged hardware unpacks with.</summary>
     private static readonly ProtoId<DamageTypePrototype> SalvageDamage = "Blunt";
+
+    /// <summary>Damage past which a barrier counts as indestructible; monolith tenebris takes 99,999, outpost walls 30,000.</summary>
+    private const float IndestructibleDamage = 50000;
 
     private static readonly Vector2i[] Neighbours = { new(1, 0), new(-1, 0), new(0, 1), new(0, -1) };
 
@@ -94,7 +98,10 @@ public sealed partial class WFDrydockSystem
         return true;
     }
 
-    /// <summary>Why a ship can't be broken at a console, or null. Stations, outposts and the drydock's own grid are refused.</summary>
+    /// <summary>
+    /// Why a ship can't be broken at a console, or null. Stations, outposts, indestructible grids and the drydock's own
+    /// grid are refused.
+    /// </summary>
     public string? BreakRefusal(EntityUid console, WFDrydockConsoleComponent comp, EntityUid ship)
     {
         if (IsShipyardGrid(console, comp, ship))
@@ -104,7 +111,24 @@ public sealed partial class WFDrydockSystem
         if (HasComp<StationMemberComponent>(ship) && !HasComp<ShuttleDeedComponent>(ship))
             return Loc.GetString("drydock-console-break-station");
 
+        if (HasIndestructibleBarrier(ship))
+            return Loc.GetString("drydock-console-break-indestructible");
+
         return null;
+    }
+
+    /// <summary>
+    /// Whether a grid has a damageable wall, window or door that nothing destroys, or only past
+    /// <see cref="IndestructibleDamage"/>: a vault's walls or monolith tenebris, set there to keep the grid whole.
+    /// </summary>
+    private bool HasIndestructibleBarrier(EntityUid ship)
+    {
+        if (!TryComp<MapGridComponent>(ship, out var grid))
+            return false;
+
+        var barriers = new HashSet<Entity<AirtightComponent>>();
+        _lookup.GetLocalEntitiesIntersecting(ship, grid.LocalAABB, barriers);
+        return barriers.Any(b => HasComp<DamageableComponent>(b) && _destructible.DestroyedAt(b).Float() >= IndestructibleDamage);
     }
 
     /// <summary>Lists a break item per hull tile, timed by the entities its crane strips off it.</summary>

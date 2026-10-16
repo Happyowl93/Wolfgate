@@ -109,7 +109,9 @@ little.
 
 A mobile console also breaks up the ship in its berth for materials (`WFDrydockSystem.Break.cs`), behind a confirm on
 its Break hull key. Anything but a station can be broken: outposts and POIs (station members with no `ShuttleDeed`) and
-the drydock's own grid are refused, while player ships, encounter and event ships are fair game. Breaking a crewed
+the drydock's own grid are refused, and so is any grid with an indestructible wall, window or door (damageable but
+destroyed by nothing, or only past 50,000 damage), such as a vault or a monolith fragment. Player ships, encounter and
+event ships are fair game. Breaking a crewed
 ship is an attack on it, reported on start and with every tile through `WFCrewAlertSystem.ReportBreaking`, so its
 crew, escorts and allies respond. Nobody aboard stops the job.
 
