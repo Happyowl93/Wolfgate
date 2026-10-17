@@ -90,6 +90,10 @@ public sealed class ShipyardTest
             {
                 foreach (var vessel in protoManager.EnumeratePrototypes<VesselPrototype>())
                 {
+                    // WOLFGATE(RoundSetup): deliberately discounted test vessels are not production catalog prices
+                    if (pair.IsTestPrototype(vessel))
+                        continue;
+
                     random.SetSeed(ArbitrageSeed); // WOLFGATE: same rolls on every run
                     map.CreateMap(out var mapId, runMapInit: false); // WOLFGATE: mapped fill contents are recorded before map init
                     double appraisePrice = 0;

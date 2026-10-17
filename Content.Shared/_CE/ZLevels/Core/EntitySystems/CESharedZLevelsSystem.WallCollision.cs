@@ -16,7 +16,7 @@ namespace Content.Shared._CE.ZLevels.Core.EntitySystems;
 public abstract partial class CESharedZLevelsSystem
 {
     [Dependency] private EntityQuery<FixturesComponent> _wallFixturesQuery = default!;
-    public readonly record struct CEWallContact(Box2 ShipTile, Box2 WallTile);
+    public readonly record struct CEWallContact(Box2 ShipTile, Box2 WallTile, EntityUid Wall); // WOLFGATE(Planets): retain the contacted obstacle for crash ploughing.
 
     // The bounding box of the previous position of the grid.
     private Dictionary<EntityUid, (EntityUid Map, Box2Rotated Bounds)> _previousGridPosition = new();
@@ -121,7 +121,7 @@ public abstract partial class CESharedZLevelsSystem
             var shipAabb = new Box2(worldCentre - tileHalf, worldCentre + tileHalf);
 
             if (shipAabb.Intersects(wallAabb))
-                contacts.Add(new CEWallContact(shipAabb, wallAabb));
+                contacts.Add(new CEWallContact(shipAabb, wallAabb, wall)); // WOLFGATE(Planets): retain the contacted obstacle for crash ploughing.
         }
     }
 

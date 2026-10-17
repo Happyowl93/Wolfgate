@@ -1,7 +1,8 @@
 # WOLFGATE(Species): ported from HardLight (Skrell)
 - type: entity
   id: OrganSkrellStomach
-  parent: BaseAnimalOrgan
+  # WOLFGATE(Wolfmed): Wolfmed stomach data, so the organ can be hurt, scanned and treated
+  parent: [BaseAnimalOrgan, WFWolfmedOrganStomach]
   name: stomach
   description: "Now you can sea food! Gross."
   components:
@@ -40,7 +41,7 @@
 
 - type: entity
   id: OrganSkrellLungs
-  parent: BaseHumanOrgan
+  parent: [BaseHumanOrgan, WFWolfmedOrganLungs] # WOLFGATE(Wolfmed): M4: OD16 parity, Wolfmed lung data (plan 9.2 group C)
   name: lungs
   description: "These used to be not needed as much in the not-too-distant past where gills were more relied on instead."
   components:
@@ -87,7 +88,7 @@
 
 - type: entity
   id: OrganSkrellHeart
-  parent: BaseArachnidOrgan
+  parent: [BaseArachnidOrgan, WFWolfmedOrganHeart] # WOLFGATE(Wolfmed): M4: OD16 parity, Wolfmed heart data (plan 9.2 group C)
   name: heart
   description: "A squishy little biological pump for amphibians."
   components:
@@ -118,7 +119,8 @@
 
 - type: entity
   id: OrganSkrellLiver
-  parent: BaseHumanOrgan
+  # WOLFGATE(Wolfmed): Wolfmed liver data, so the organ can be hurt, scanned and treated
+  parent: [BaseHumanOrgan, WFWolfmedOrganLiver]
   name: liver
   description: "Don't let the crows get to this."
   components:
@@ -144,7 +146,8 @@
 
 - type: entity
   id: OrganSkrellKidneys
-  parent: BaseHumanOrgan
+  # WOLFGATE(Wolfmed): Wolfmed kidneys data, so the organ can be hurt, scanned and treated
+  parent: [BaseHumanOrgan, WFWolfmedOrganKidneys]
   name: kidneys
   description: "Very good at turning water into... a less-pleasant kind of water."
   components:
@@ -173,7 +176,7 @@
 
 - type: entity
   id: OrganSkrellBrain
-  parent: BaseHumanOrganUnGibbable
+  parent: [BaseHumanOrganUnGibbable, WFWolfmedOrganBrain] # WOLFGATE(Wolfmed): M4: OD16 parity, brain clock (plan 9.2 group C)
   name: brain
   description: "The source of incredible, unending intelligence. Ribbit."
   components:
@@ -220,7 +223,8 @@
 
 - type: entity
   id: OrganSkrellEyes
-  parent: BaseHumanOrgan
+  # WOLFGATE(Wolfmed): Wolfmed eyes data, so the organ can be hurt, scanned and treated
+  parent: [BaseHumanOrgan, WFWolfmedOrganEyes]
   name: eyes
   description: "Two big ol' springtime peepers."
   components:

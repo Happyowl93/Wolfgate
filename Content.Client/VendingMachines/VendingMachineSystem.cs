@@ -1,3 +1,7 @@
+// WOLFGATE(EngineCompat) START: Engine v291 serialization generation cannot use a namespace named Component.
+// using Content.Shared._Mono.Economy.Component;
+using Content.Shared._Mono.Economy.Components;
+// WOLFGATE END
 using Content.Shared.VendingMachines;
 using Robust.Client.Animations;
 using Robust.Client.GameObjects;

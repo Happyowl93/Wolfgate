@@ -44,6 +44,9 @@
     damage:
       types:
         Piercing: 11
+  # WOLFGATE(Wolfmed): W1: buckshot leaves fragments, not a clean channel.
+  - type: WolfmedDamageCause
+    cause: Fragment
 
 - type: entity
   id: Pellet12_gaugeSpread

@@ -4,6 +4,9 @@ namespace Content.Client.Shuttles.UI;
 
 public sealed partial class ShuttleConsoleWindow
 {
+    /// <summary>The owner selected a ship-wide access mode.</summary>
+    public event Action<WFShipAccessMode>? ShipAccessModeRequested;
+
     /// <summary>The owner flipped the ship lock on the access tab.</summary>
     public event Action<bool>? ShipAccessLockedRequested;
 
@@ -36,6 +39,7 @@ public sealed partial class ShuttleConsoleWindow
 
     private void WfAccessInitialize()
     {
+        AccessContainer.ModeChanged += mode => ShipAccessModeRequested?.Invoke(mode);
         AccessContainer.LockedChanged += locked => ShipAccessLockedRequested?.Invoke(locked);
         AccessContainer.AddRequested += target => ShipAccessAddRequested?.Invoke(target);
         AccessContainer.RemoveRequested += key => ShipAccessRemoveRequested?.Invoke(key);

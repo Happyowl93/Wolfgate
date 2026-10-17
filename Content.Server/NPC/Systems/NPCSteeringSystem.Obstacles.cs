@@ -40,6 +40,10 @@ public sealed partial class NPCSteeringSystem
     private SteeringObstacleStatus TryHandleFlags(EntityUid uid, NPCSteeringComponent component, PathPoly poly)
     {
         DebugTools.Assert(!poly.Data.IsFreeSpace);
+
+        // WOLFGATE(NpcCrew): crew shove a loose crate off their path
+        if (TryShoveCrewObstacle(uid, component, poly) is { } shove)
+            return shove;
         // TODO: Store PathFlags on the steering comp
         // and be able to re-check it.
 
@@ -79,6 +83,11 @@ public sealed partial class NPCSteeringSystem
             var isDoor = (poly.Data.Flags & PathfindingBreadcrumbFlag.Door) != 0x0;
             var isAccessRequired = (poly.Data.Flags & PathfindingBreadcrumbFlag.Access) != 0x0;
             var isClimbable = (poly.Data.Flags & PathfindingBreadcrumbFlag.Climb) != 0x0;
+
+            // WOLFGATE(NpcCrew) START: open authorized doors through normal interaction before considering prying.
+            if (isDoor && TryOpenCrewAccessDoor(uid, component, obstacleEnts))
+                return SteeringObstacleStatus.Continuing;
+            // WOLFGATE END
 
             // Just walk into it stupid
             if (isDoor && !isAccessRequired)

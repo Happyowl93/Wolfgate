@@ -5,13 +5,13 @@
   description: Bluespace technologies on the application of bureaucracy.
   components:
   - type: Sprite
-    sprite: Structures/Machines/fax_machine.rsi
+    sprite: _Impstation/Structures/Machines/fax_machine.rsi # WOLFGATE(Resprites): Imp Sprite Ports
     drawdepth: SmallObjects
     layers:
     - state: icon
       map: [ "enum.FaxMachineVisuals.VisualState" ]
   - type: Icon
-    sprite: Structures/Machines/fax_machine.rsi
+    sprite: _Impstation/Structures/Machines/fax_machine.rsi # WOLFGATE(Resprites): Imp Sprite Ports
     state: icon
   - type: Appearance
   - type: Physics
@@ -126,4 +126,5 @@
       name: "Captain's Office"
       receiveNukeCodes: true
     - type: StealTarget
-      stealGroup: FaxMachineCaptain
+      stealGroup:
+      - FaxMachineCaptain

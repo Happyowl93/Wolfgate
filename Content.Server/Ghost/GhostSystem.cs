@@ -73,6 +73,7 @@ namespace Content.Server.Ghost
         [Dependency] private IAdminManager _admin = default!; // Frontier
         [Dependency] private IServerPreferencesManager _preferencesManager = default!;
         [Dependency] private GhostSpriteStateSystem _ghostState = default!;
+        [Dependency] private Content.Server._WF.Wolfmed.Life.WolfmedDyingActionsSystem _wolfmedEndings = default!; // WOLFGATE(Wolfmed): M1a: honest endings
 
         private EntityQuery<GhostComponent> _ghostQuery;
         private EntityQuery<PhysicsComponent> _physicsQuery;
@@ -671,6 +672,12 @@ namespace Content.Server.Ghost
             if (TryComp<GhostComponent>(playerEntity, out var comp) && !comp.CanGhostInteract)
                 return false;
 
+            // WOLFGATE(Wolfmed): M1a: a wound host's own ghost command opens Wolfmed's honest dialog instead (plan 5.4):
+            // Succumb while Dying, "left alive but empty" otherwise. Handled, so the command prints no denial.
+            if (viaCommand && !forced && canReturnGlobal && playerEntity is { } wolfmedBody &&
+                _wolfmedEndings.TryOpenGhostDialog(wolfmedBody))
+                return true;
+
             if (mind.VisitingEntity != default)
             {
                 _mind.UnVisit(mindId, mind: mind);
@@ -695,6 +702,7 @@ namespace Content.Server.Ghost
 
             if (_configurationManager.GetCVar(CCVars.GhostKillCrit) &&
                 canReturnGlobal &&
+                !_wolfmedEndings.OwnsEnding(playerEntity) && // WOLFGATE(Wolfmed): M1a: no Asphyxiation top-up or free return on a wound host
                 TryComp(playerEntity, out MobStateComponent? mobState))
             {
                 if (_mobState.IsCritical(playerEntity.Value, mobState))

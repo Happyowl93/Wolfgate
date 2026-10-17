@@ -54,6 +54,7 @@ public sealed partial class ShipShieldsSystem
     /// <summary>Refreshes changing hulls and emitter health.</summary>
     private void UpdateWolfgateShields(float frameTime)
     {
+        UpdateWolfgateFtlShields();
         UpdateWolfgateShieldTails();
         var query = EntityQueryEnumerator<WFShipShieldVisualsComponent, ShipShieldComponent>();
         while (query.MoveNext(out var uid, out var visuals, out var shield))
@@ -89,12 +90,18 @@ public sealed partial class ShipShieldsSystem
         _transformSystem.SetWorldRotation(shield, _transformSystem.GetWorldRotation(grid));
     }
 
-    /// <summary>Lets the originating ship's weapon shots cross its own perimeter.</summary>
+    /// <summary>Passes shots from the protected ship and other protected autonomous fire.</summary>
     private bool IsWolfgateShieldFriendlyProjectile(EntityUid shield, EntityUid projectile)
     {
-        return TryComp<ShipShieldComponent>(shield, out var shieldComp) &&
-            TryComp<ProjectileGridPhaseComponent>(projectile, out var phase) &&
-            phase.SourceGrid == shieldComp.Shielded;
+        if (!TryComp<ShipShieldComponent>(shield, out var shieldComp))
+            return false;
+        if (TryComp<ProjectileGridPhaseComponent>(projectile, out var phase) && phase.SourceGrid == shieldComp.Shielded)
+            return true;
+        if (!_shipWeaponProjectileQuery.HasComponent(projectile) || !_projectileQuery.TryGetComponent(projectile, out var shot))
+            return false;
+        var attempt = new WFShipShieldInterceptAttemptEvent(shieldComp.Shielded, projectile, shot.Weapon, shot.Shooter);
+        RaiseLocalEvent(ref attempt);
+        return attempt.Cancelled;
     }
     /// <summary>Uses the padded hull perimeter for both collisions and rendering.</summary>
     private void CreateWolfgateShieldHull(EntityUid shield, EntityUid grid, MapGridComponent mapGrid, PhysicsComponent physics, Vector2[][]? existingContours = null)
@@ -185,6 +192,7 @@ public sealed partial class ShipShieldsSystem
             return;
         DisarmWolfgateAbsorbedProjectile(args.ProjUid);
         var impactPosition = WolfgateShieldImpactPosition(uid, args.ProjUid);
+        var launchGrid = CompOrNull<ProjectileGridPhaseComponent>(args.ProjUid)?.SourceGrid;
         if (component.Source is { } source)
         {
             var emitter = Comp<ShipShieldEmitterComponent>(source);
@@ -192,6 +200,7 @@ public sealed partial class ShipShieldsSystem
             var ev = new ShieldDeflectedEvent(args.ProjUid, projectile);
             RaiseLocalEvent(source, ref ev);
             emitter.Damage = previousDamage + (emitter.Damage - previousDamage) / strength;
+            ReportWolfgateShieldAttack(component, emitter.Damage - previousDamage, launchGrid, projectile.Weapon, projectile.Shooter);
             var impactStrength = WFShipShieldEffects.ImpactStrength(emitter.Damage - previousDamage,
                 WFShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp));
             WolfgateShieldImpact(uid, impactPosition, impactStrength);
@@ -201,6 +210,7 @@ public sealed partial class ShipShieldsSystem
             WolfgateShieldImpact(uid, impactPosition, projectile.Damage.GetTotal() > 0 ? 1f : 0f);
             projectile.ProjectileSpent = true;
             QueueDel(args.ProjUid);
+            ReportWolfgateShieldAttack(component, (float) projectile.Damage.GetTotal(), launchGrid, projectile.Weapon, projectile.Shooter);
         }
     }
     /// <summary>Captures the contact before projectile triggers can remove it.</summary>

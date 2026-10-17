@@ -3,10 +3,15 @@
 # TODO BODY: Part damage
 - type: entity
   id: PartSynth
-  parent: [ BaseItem, BasePart ]
+  parent: [WFWolfmedPartIpc, BaseItem, BasePart] # WOLFGATE(Wolfmed): M4: OD16 Synth is mechanical, chassis wound profile; WFWolfmedPartIpc must stay FIRST (RT first-parent-wins)
   name: "synth body part"
   abstract: true
   components:
+  # WOLFGATE(Wolfmed): playtest 5, the IPC part container (as PartIPCBase), so the welder and the applicator repair a synth
+  # BasePart's Inorganic is on no repair tool's list, which left "nothing needs the welder" on a synth with three chassis
+  # breaches; WFInorganicWolfmed also carries the Cold and Caustic that Inorganic drops.
+  - type: Damageable
+    damageContainer: WFInorganicWolfmed
   - type: Extractable
     juiceSolution:
       reagents:
@@ -50,7 +55,7 @@
 - type: entity
   id: LeftArmSynth
   name: "left synth arm"
-  parent: [ PartSynth, BaseLeftArm ]
+  parent: [ PartSynth, BaseEdibleCyberneticLimb, BaseLeftArm ] # WOLFGATE(Wolfmed): metallic edible profile
   components:
   - type: Sprite
     sprite: _HL/Mobs/Species/Synth/parts.rsi
@@ -59,7 +64,7 @@
 - type: entity
   id: RightArmSynth
   name: "right synth arm"
-  parent: [ PartSynth, BaseRightArm ]
+  parent: [ PartSynth, BaseEdibleCyberneticLimb, BaseRightArm ] # WOLFGATE(Wolfmed): metallic edible profile
   components:
   - type: Sprite
     sprite: _HL/Mobs/Species/Synth/parts.rsi
@@ -68,7 +73,7 @@
 - type: entity
   id: LeftHandSynth
   name: "left synth hand"
-  parent: [ PartSynth, BaseLeftHand ]
+  parent: [ PartSynth, BaseEdibleCyberneticLimb, BaseLeftHand ] # WOLFGATE(Wolfmed): metallic edible profile
   components:
   - type: Sprite
     sprite: _HL/Mobs/Species/Synth/parts.rsi
@@ -77,7 +82,7 @@
 - type: entity
   id: RightHandSynth
   name: "right synth hand"
-  parent: [ PartSynth, BaseRightHand ]
+  parent: [ PartSynth, BaseEdibleCyberneticLimb, BaseRightHand ] # WOLFGATE(Wolfmed): metallic edible profile
   components:
   - type: Sprite
     sprite: _HL/Mobs/Species/Synth/parts.rsi
@@ -86,7 +91,7 @@
 - type: entity
   id: LeftLegSynth
   name: "left synth leg"
-  parent: [ PartSynth, BaseLeftLeg ]
+  parent: [ PartSynth, BaseEdibleCyberneticLimb, BaseLeftLeg ] # WOLFGATE(Wolfmed): metallic edible profile
   components:
   - type: Sprite
     sprite: _HL/Mobs/Species/Synth/parts.rsi
@@ -95,7 +100,7 @@
 - type: entity
   id: RightLegSynth
   name: "right synth leg"
-  parent: [ PartSynth, BaseRightLeg ]
+  parent: [ PartSynth, BaseEdibleCyberneticLimb, BaseRightLeg ] # WOLFGATE(Wolfmed): metallic edible profile
   components:
   - type: Sprite
     sprite: _HL/Mobs/Species/Synth/parts.rsi
@@ -104,7 +109,7 @@
 - type: entity
   id: LeftFootSynth
   name: "left synth foot"
-  parent: [ PartSynth, BaseLeftFoot ]
+  parent: [ PartSynth, BaseEdibleCyberneticLimb, BaseLeftFoot ] # WOLFGATE(Wolfmed): metallic edible profile
   components:
   - type: Sprite
     sprite: _HL/Mobs/Species/Synth/parts.rsi
@@ -113,7 +118,7 @@
 - type: entity
   id: RightFootSynth
   name: "right synth foot"
-  parent: [ PartSynth, BaseRightFoot ]
+  parent: [ PartSynth, BaseEdibleCyberneticLimb, BaseRightFoot ] # WOLFGATE(Wolfmed): metallic edible profile
   components:
   - type: Sprite
     sprite: _HL/Mobs/Species/Synth/parts.rsi

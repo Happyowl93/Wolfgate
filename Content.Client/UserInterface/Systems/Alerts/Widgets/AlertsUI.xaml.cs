@@ -114,7 +114,11 @@ public sealed partial class AlertsUI : UIWidget
                     var added = false;
                     foreach (var alertControl in AlertContainer.Children)
                     {
-                        if (alertOrderPrototype.Compare(newAlert, ((AlertControl) alertControl).Alert) >= 0)
+                        // WOLFGATE(RoundSetup) START: The crew locator shares this column and isn't an AlertControl.
+                        if (alertControl is not AlertControl existing)
+                            continue;
+                        // WOLFGATE END
+                        if (alertOrderPrototype.Compare(newAlert, existing.Alert) >= 0) // WOLFGATE(RoundSetup)
                             continue;
 
                         var idx = alertControl.GetPositionInParent();

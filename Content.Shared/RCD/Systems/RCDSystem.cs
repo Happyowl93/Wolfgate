@@ -31,6 +31,9 @@ using Robust.Shared.Audio;
 
 // Mono
 using System.Numerics;
+// ES START
+using Content.Shared._ES.Sparks;
+// ES END
 
 namespace Content.Shared.RCD.Systems;
 
@@ -53,6 +56,10 @@ public partial class RCDSystem : EntitySystem
     [Dependency] private SharedMapSystem _mapSystem = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private TagSystem _tags = default!;
+// ES START
+    [Dependency] private ESSparksSystem _esSparks = default!;
+// ES END
+
 
     private readonly int _instantConstructionDelay = 0;
     private readonly EntProtoId _instantConstructionFx = "EffectRCDConstruct0";
@@ -104,6 +111,9 @@ public partial class RCDSystem : EntitySystem
 
         // Set the current RCD prototype to the one supplied
         component.ProtoId = args.ProtoId;
+// ES START
+        _esSparks.DoSparks(uid, 1, user: args.Actor);
+// ES END
         UpdateCachedPrototype(uid, component);
         Dirty(uid, component);
     }
@@ -568,6 +578,7 @@ public partial class RCDSystem : EntitySystem
                 {
                     // Deconstruct tile (either converts the tile to lattice, or removes lattice)
                     var tile = (_turf.GetContentTileDefinition(mapGridData.Tile).ID != "Lattice") ? new Tile(_tileDefMan["Lattice"].TileId) : Tile.Empty;
+                    if (tile.IsEmpty) WfRecordHullTileDeconstruction(mapGridData.GridUid, mapGridData.Position); // WOLFGATE(Shuttles): removing the last lattice leaves the hull survey before any split copies it.
                     _mapSystem.SetTile(mapGridData.GridUid, mapGridData.Component, mapGridData.Position, tile);
                     _adminLogger.Add(LogType.RCD, LogImpact.High, $"{ToPrettyString(user):user} used RCD to set grid: {mapGridData.GridUid} tile: {mapGridData.Position} open to space");
                 }
@@ -575,6 +586,7 @@ public partial class RCDSystem : EntitySystem
                 {
                     // Deconstruct object
                     _adminLogger.Add(LogType.RCD, LogImpact.High, $"{ToPrettyString(user):user} used RCD to delete {ToPrettyString(target):target}");
+                    WfRecordHullDeconstruction(target.Value); // WOLFGATE(Shuttles): Successful RCD removal updates the hull design without erasing combat losses.
                     QueueDel(target);
                 }
 

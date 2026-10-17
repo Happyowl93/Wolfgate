@@ -13,6 +13,9 @@ If you want to host or create content for Wolfgate, this is the repo you need. I
 <!-- WOLFGATE(Branding): dropped Monolith's Discord link -->
 [Steam](https://store.steampowered.com/app/1255460/Space_Station_14/)
 
+<!-- WOLFGATE(Branding): link to the contributor guidelines -->
+[Guide to Modularisation and Wolfgate](Wolfgate%20Guidelines.md)
+
 ## Contributing
 
 <!-- WOLFGATE(Branding) START: rebrand contributing section -->

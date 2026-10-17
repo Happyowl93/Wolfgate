@@ -163,7 +163,10 @@ public partial class ChatBox : UIWidget
     {
         var formatted = new FormattedMessage(4); // WD EDIT // specifying size beforehand smells like a useless microoptimisation, but i'll give them the benefit of doubt
         formatted.PushColor(color);
-        formatted.AddMarkupOrThrow(message);
+        // WOLFGATE(ChatTabs) START: a line whose markup does not parse is shown as text instead of throwing out of a refill
+        // formatted.AddMarkupOrThrow(message);
+        WfAddMarkup(formatted, message);
+        // WOLFGATE END
         formatted.Pop();
         if(repeat != 0) // WD EDIT START
         {
@@ -174,7 +177,10 @@ public partial class ChatBox : UIWidget
                 ("size", 8+sizeIncrease)
             ));
         } // WD EDIT END
-        Contents.AddMessage(formatted, tagsAllowed: null);
+        // WOLFGATE(ChatTabs) START: a line whose tags fail to lay out is shown as text instead of throwing out of a refill
+        // Contents.AddMessage(formatted, tagsAllowed: null);
+        WfAddEntry(formatted, message, color);
+        // WOLFGATE END
     }
 
     public void Focus(ChatSelectChannel? channel = null)

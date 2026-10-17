@@ -555,18 +555,21 @@
     sprite: _Mono/Objects/Materials/bayponents.rsi
     state: "camera"
   # flash stuff
-  - type: EmitSoundOnTrigger
-    sound:
-      path: /Audio/Weapons/flash.ogg
-  - type: FlashOnTrigger
-    range: 3
-  - type: TriggerOnProximity
-    enabled: true
-    cooldown: 5
-    shape:
-      !type:PhysShapeCircle
-      radius: 2
-    repeating: true
+#  - type: EmitSoundOnTrigger
+#    sound:
+#      path: /Audio/Weapons/flash.ogg
+#  - type: FlashOnTrigger
+#    range: 3
+#  - type: TriggerOnProximity
+#    enabled: true
+#    cooldown: 5
+#    shape:
+#      !type:PhysShapeCircle
+#      radius: 2
+#    repeating: true
+#  - type: StaticPrice
+#    price: 1200
+  # WOLFGATE: Monolith#4805 commented the price out with the flash, leaving 300 for a good made from 1800
   - type: StaticPrice
     price: 1200
 

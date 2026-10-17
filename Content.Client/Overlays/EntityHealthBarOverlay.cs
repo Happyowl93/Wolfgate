@@ -136,7 +136,7 @@ public sealed class EntityHealthBarOverlay : Overlay
                 !_mobThresholdSystem.TryGetThresholdForState(uid, MobState.Dead, out threshold, thresholds))
                 return (1, false);
 
-            var ratio = 1 - ((FixedPoint2) (dmg.TotalDamage / threshold)).Float();
+            var ratio = Math.Clamp(1 - ((FixedPoint2) (dmg.TotalDamage / threshold)).Float(), 0f, 1f); // WOLFGATE(Wolfmed): wound hosts can carry damage past the threshold
             return (ratio, false);
         }
 
@@ -148,7 +148,7 @@ public sealed class EntityHealthBarOverlay : Overlay
                 return (1, true);
             }
 
-            var ratio = 1 - ((dmg.TotalDamage - critThreshold) / (deadThreshold - critThreshold)).Value.Float();
+            var ratio = Math.Clamp(1 - ((dmg.TotalDamage - critThreshold) / (deadThreshold - critThreshold)).Value.Float(), 0f, 1f); // WOLFGATE(Wolfmed): clamp, projected damage can exceed the dead threshold
 
             return (ratio, true);
         }

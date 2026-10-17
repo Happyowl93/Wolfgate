@@ -41,3 +41,4 @@ wf-shield-recovery-stalled = Automatic recovery time unavailable.
 wf-shield-recovery-help = Estimate assumes power remains available. Further damage can delay recovery.
 wf-shield-helm-adjusting = REDISTRIBUTING SHIELD POWER
 wf-shield-helm-adjusting-help = Power is flowing toward the white target. Current protection is shown by the coloured ring.
+wf-shield-recovery-ftl-locked = FTL lockout · Waiting for jump cooldown to finish.

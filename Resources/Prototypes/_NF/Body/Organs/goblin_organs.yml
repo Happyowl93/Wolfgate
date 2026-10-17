@@ -66,12 +66,16 @@
     state: ears
 
 - type: entity
-  parent: BaseHumanOrgan
+  parent: [BaseHumanOrgan, WFWolfmedOrganLungs] # WOLFGATE(Wolfmed): M4: OD16 parity, Wolfmed lung data (plan 9.2 group A-prime)
   id: OrganGoblinLungs
   name: lungs
   suffix: Goblin
   description: "They breathe business."
   components:
+  # WOLFGATE(Wolfmed) START: in the lungs slot; BaseHumanOrgan leaves it blank, so surgery and the analyzer missed it
+  - type: Organ
+    slotId: lungs
+  # WOLFGATE END
   - type: Sprite
     sprite: _NF/Mobs/Species/Goblin/organs.rsi
     layers:

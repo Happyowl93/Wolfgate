@@ -9,6 +9,7 @@ public sealed partial class ShuttleConsoleBoundUserInterface
         if (_window == null)
             return;
 
+        _window.ShipAccessModeRequested += mode => SendMessage(new WFShipAccessSetModeMessage(mode));
         _window.ShipAccessLockedRequested += locked => SendMessage(new WFShipAccessSetLockedMessage(locked));
         _window.ShipAccessAddRequested += target => SendMessage(new WFShipAccessAddPlayerMessage(target));
         _window.ShipAccessRemoveRequested += key => SendMessage(new WFShipAccessRemoveMessage(key));

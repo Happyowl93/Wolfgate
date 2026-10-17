@@ -17,6 +17,7 @@
       methods: [Touch]
       effects:
       - !type:WashCreamPieReaction
+      - !type:WolfmedCoolOverheating # WOLFGATE(Wolfmed): W6: water takes heat out of an overheated chassis.
   - type: DamageOnHighSpeedImpact
     damage:
       types:
@@ -121,10 +122,18 @@
       visible: false
     - map: ["enum.HumanoidVisualLayers.LFoot"]
     - map: ["enum.HumanoidVisualLayers.RFoot"]
+    # WOLFGATE(Species) START: underwear and genital layers; without them they were added on top of the clothes
+    - map: ["enum.HumanoidVisualLayers.Genital"]
+    - map: ["enum.HumanoidVisualLayers.Breasts"]
+    - map: ["enum.HumanoidVisualLayers.UndergarmentTop"]
+    - map: ["enum.HumanoidVisualLayers.Penis"]
+    - map: ["enum.HumanoidVisualLayers.UndergarmentBottom"]
+    # WOLFGATE END
     - map: ["socks"]
     - map: ["underpants"]
     - map: ["undershirt"]
     - map: ["jumpsuit"]
+    - map: [ "balaclava" ]
     - map: ["enum.HumanoidVisualLayers.LHand"]
     - map: ["enum.HumanoidVisualLayers.RHand"]
     - map: ["enum.HumanoidVisualLayers.Handcuffs"]
@@ -142,11 +151,16 @@
     - map: ["eyes"]
     - map: ["belt"]
     - map: ["neck"]
+    - map: ["neck2"] # WOLFGATE(Species): the IPC inventory has the slot, without a layer it drew over everything
+    - map: ["neck3"] # WOLFGATE(Species): the IPC inventory has the slot, without a layer it drew over everything
     - map: ["back"]
     - map: ["enum.HumanoidVisualLayers.FacialHair"]
     - map: ["enum.HumanoidVisualLayers.Hair"]
     - map: ["enum.HumanoidVisualLayers.HeadSide"]
     - map: ["enum.HumanoidVisualLayers.HeadTop"]
+    - map: ["enum.HumanoidVisualLayers.Wings"] # WOLFGATE(Species): wings had no layer and drew over helmets
+    - map: [ "helmetcover" ]
+    - map: [ "helmetattachment" ]
     - map: ["mask"]
     - map: ["head"]
     - map: ["pocket1"]

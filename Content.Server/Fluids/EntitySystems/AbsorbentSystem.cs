@@ -101,6 +101,14 @@ public sealed partial class AbsorbentSystem : SharedAbsorbentSystem
 
     private void OnAfterInteract(EntityUid uid, AbsorbentComponent component, AfterInteractEvent args)
     {
+        // WOLFGATE(BloodTrail) START: a mop used on bare floor washes the blood decals off the tile
+        if (args.CanReach && !args.Handled && args.Target == null)
+        {
+            args.Handled = TryMopFloor(args.User, args.Used, component, args.ClickLocation);
+            return;
+        }
+        // WOLFGATE END
+
         if (!args.CanReach || args.Handled || args.Target == null)
             return;
 

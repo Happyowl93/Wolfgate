@@ -3,21 +3,30 @@ using Robust.Shared.Audio.Components;
 
 namespace Content.Client.Audio;
 
+/// <summary>What is holding the music paused; it resumes once none are left.</summary>
+[Flags]
+public enum WfMusicPauseReason : byte
+{
+    None = 0,
+    InternetSound = 1 << 0,
+    SoundtrackMute = 1 << 1,
+}
+
 /// <summary>
-/// Lets internet sounds pause ambient, combat and lobby music, then resume it. A partial so the
-/// music systems stay untouched.
+/// Lets internet sounds and the soundtrack mute pause ambient, combat and lobby music, then resume it.
+/// A partial so the music systems stay untouched.
 /// </summary>
 public sealed partial class ContentAudioSystem
 {
     private readonly HashSet<EntityUid> _wfPausedMusic = new();
-    private bool _wfMusicPaused;
+    private WfMusicPauseReason _wfMusicPauseReasons;
 
     /// <summary>
-    /// Pauses current music and keeps any new track paused until <see cref="ResumeMusicWolfgate"/>.
+    /// Pauses current music and keeps any new track paused until every reason is resumed.
     /// </summary>
-    public void PauseMusicWolfgate()
+    public void PauseMusicWolfgate(WfMusicPauseReason reason)
     {
-        _wfMusicPaused = true;
+        _wfMusicPauseReasons |= reason;
         EnforceMusicPauseWolfgate();
     }
 
@@ -26,7 +35,7 @@ public sealed partial class ContentAudioSystem
     /// </summary>
     public void EnforceMusicPauseWolfgate()
     {
-        if (!_wfMusicPaused)
+        if (_wfMusicPauseReasons == WfMusicPauseReason.None)
             return;
 
         PauseMusicStream(_ambientMusicStream);
@@ -34,11 +43,13 @@ public sealed partial class ContentAudioSystem
     }
 
     /// <summary>
-    /// Resumes every track paused by <see cref="PauseMusicWolfgate"/> that still exists.
+    /// Drops a pause reason and, once none are left, resumes every track that still exists.
     /// </summary>
-    public void ResumeMusicWolfgate()
+    public void ResumeMusicWolfgate(WfMusicPauseReason reason)
     {
-        _wfMusicPaused = false;
+        _wfMusicPauseReasons &= ~reason;
+        if (_wfMusicPauseReasons != WfMusicPauseReason.None)
+            return;
 
         foreach (var uid in _wfPausedMusic)
         {

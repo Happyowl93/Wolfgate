@@ -103,6 +103,7 @@ public abstract partial class SharedSurgerySystem : EntitySystem
         args.Repeat = (HasComp<SurgeryRepeatableStepComponent>(step) && !IsStepComplete(ent, part, args.Step, surgery));
         var ev = new SurgeryStepEvent(args.User, ent, part, GetTools(args.User), surgery);
         RaiseLocalEvent(step, ref ev);
+        WolfmedStepDone(part, surgery, args.Step); // WOLFGATE(Wolfmed): playtest 5, a begun procedure stays open until its closing step
         RefreshUI(ent);
     }
 
@@ -124,8 +125,17 @@ public abstract partial class SharedSurgerySystem : EntitySystem
             || !TryComp(args.Part, out DamageableComponent? partDamageable)
             || damageable.TotalDamage <= 0
             && partDamageable.TotalDamage <= 0
-            && !HasComp<IncisionOpenComponent>(args.Part))
+            // WOLFGATE(Wolfmed) START: playtest 3 SAM: a wound host lists by its wounds (HOOK 24)
+            // && !HasComp<IncisionOpenComponent>(args.Part))
+            && !HasComp<IncisionOpenComponent>(args.Part)
+            && !WolfmedJudgedByWounds(args.Body)) // WOLFGATE(Wolfmed): playtest 3 SAM: a wound host lists by its wounds (HOOK 24)
+            // WOLFGATE END
             args.Cancelled = true;
+
+        // WOLFGATE(Wolfmed) START: HOOK 24 - P4-D19 wound-severity window
+        if (WolfmedWoundWindowFails(ent, args.Body, args.Part))
+            args.Cancelled = true;
+        // WOLFGATE END
     }
 
     /*private void OnLarvaValid(Entity<SurgeryLarvaConditionComponent> ent, ref SurgeryValidEvent args)
@@ -262,6 +272,14 @@ public abstract partial class SharedSurgerySystem : EntitySystem
             return;
         }
 
+        // WOLFGATE(Wolfmed) START: HOOK 25 - P4-D18 untreated amputation consequence
+        if (WolfmedStumpBlocksAttachment(args.Part))
+        {
+            args.Cancelled = true;
+            return;
+        }
+        // WOLFGATE END
+
         // Get any existing body parts of the specified type/symmetry
         var results = _body.GetBodyChildrenOfType(args.Body, ent.Comp.Part, symmetry: ent.Comp.Symmetry);
 
@@ -373,6 +391,11 @@ public abstract partial class SharedSurgerySystem : EntitySystem
 
     private List<EntityUid> GetTools(EntityUid surgeon)
     {
+        // WOLFGATE(Wolfmed) START: AUTODOC: a pod has no hands.
+        if (WolfmedInternalTools(surgeon) is { } internalTools)
+            return internalTools;
+        // WOLFGATE END
+
         return _hands.EnumerateHeld(surgeon).ToList();
     }
 
@@ -380,6 +403,11 @@ public abstract partial class SharedSurgerySystem : EntitySystem
     {
         if (_standing.IsDown(entity))
             return true;
+
+        // WOLFGATE(Wolfmed) START: AUTODOC: an occupant lies down inside the pod.
+        if (WolfmedOnOperatingPlatform(entity))
+            return true;
+        // WOLFGATE END
 
         if (TryComp(entity, out BuckleComponent? buckle) &&
             TryComp(buckle.BuckledTo, out StrapComponent? strap))

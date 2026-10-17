@@ -164,6 +164,7 @@ binds:
 - function: EditorRotateObject
   type: State
   key: MouseMiddle
+  priority: -1 # WOLFGATE(Input): it swallows the click, so anything else bound to middle mouse goes first
 - function: EditorFlipObject
   type: State
   key: MouseMiddle
@@ -251,6 +252,11 @@ binds:
 - function: OpenGuidebook
   type: State
   key: NumpadNum0
+# WOLFGATE(SectorControl): sector map key
+- function: OpenSectorMap
+  type: State
+  key: N
+  mod1: Shift
 - function: OpenAHelp
   type: State
   key: F1
@@ -527,6 +533,7 @@ binds:
   type: State
   key: MouseMiddle
   mod1: Shift
+  allowSubCombs: true # WOLFGATE(Input): holding Shift to walk doesn't cancel the plain middle mouse binds
 - function: ArcadeUp
   type: State
   key: Up
@@ -615,6 +622,73 @@ binds:
   type: State
   key: MouseRight
   canFocus: true
+# WOLFGATE(MappingTools) START: Select tool, clipboard, undo and z-level keys for the mapping tools
+- function: WFMappingEnableSelect
+  type: State
+  key: M
+- function: WFMappingSelect
+  type: State
+  key: MouseLeft
+  canFocus: true
+  priority: 1
+- function: WFMappingSelect
+  type: State
+  key: MouseLeft
+  canFocus: true
+  mod1: Shift
+  priority: 1
+- function: WFMappingSelectCancel
+  type: State
+  key: MouseRight
+  canFocus: true
+  priority: 1
+- function: WFMappingCopy
+  type: State
+  key: C
+  mod1: Control
+- function: WFMappingCut
+  type: State
+  key: X
+  mod1: Control
+- function: WFMappingPaste
+  type: State
+  key: V
+  mod1: Control
+- function: WFMappingDelete
+  type: State
+  key: Delete
+- function: WFMappingRotate
+  type: State
+  key: R
+- function: WFMappingMirror
+  type: State
+  key: F
+  priority: 1
+- function: WFMappingMirrorVertical
+  type: State
+  key: F
+  mod1: Shift
+  priority: 1
+- function: WFMappingUndo
+  type: State
+  key: Z
+  mod1: Control
+- function: WFMappingRedo
+  type: State
+  key: Y
+  mod1: Control
+- function: WFMappingRedo
+  type: State
+  key: Z
+  mod1: Control
+  mod2: Shift
+- function: WFMappingLevelUp
+  type: State
+  key: PageUp
+- function: WFMappingLevelDown
+  type: State
+  key: PageDown
+# WOLFGATE END
 # region Frontier
 - function: SwapHandsPrevious
   type: State

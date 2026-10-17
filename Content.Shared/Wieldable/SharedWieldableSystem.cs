@@ -106,6 +106,7 @@ public abstract partial class SharedWieldableSystem : EntitySystem
 
     private void OnItemInHand(EntityUid uid, GunWieldBonusComponent component, GotEquippedHandEvent args)  // GoobStation change - OnItemInHand for NoWieldNeeded
     {
+        RefreshModifiers((uid, component)); // WOLFGATE(Weapons): a gun loaded from a save skipped map init and had no wield bonus
         _gun.RefreshModifiers(uid, args.User);
     }
 
@@ -116,6 +117,7 @@ public abstract partial class SharedWieldableSystem : EntitySystem
 
     private void OnGunWielded(EntityUid uid, GunWieldBonusComponent component, ref ItemWieldedEvent args)
     {
+        RefreshModifiers((uid, component)); // WOLFGATE(Weapons)
         _gun.RefreshModifiers(uid);
     }
 
@@ -141,6 +143,47 @@ public abstract partial class SharedWieldableSystem : EntitySystem
                 args.AngleDecay += bonus.Comp.AngleDecayModified;
                 args.AngleIncrease += bonus.Comp.AngleIncreaseModified;
             // Mono end
+        }
+    }
+
+    // Mono - Needed for attachments.
+    public void RefreshModifiers(Entity<GunWieldBonusComponent?> gun)
+    {
+        if (!Resolve(gun, ref gun.Comp, false)) // WOLFGATE(Weapons): attachable pistols have no wield bonus, which is not an error
+            return;
+
+        var comp = gun.Comp;
+        var ev = new WieldRefreshModifiersEvent(
+            (gun, comp),
+            comp.AngleIncrease,
+            comp.AngleDecay,
+            comp.MaxAngle,
+            comp.MinAngle
+        );
+        RaiseLocalEvent(gun, ref ev);
+
+        if (!comp.AngleIncreaseModified.EqualsApprox(ev.AngleIncrease))
+        {
+            comp.AngleIncreaseModified = ev.AngleIncrease;
+            DirtyField(gun, nameof(GunWieldBonusComponent.AngleIncreaseModified));
+        }
+
+        if (!comp.AngleDecayModified.EqualsApprox(ev.AngleDecay))
+        {
+            comp.AngleDecayModified = ev.AngleDecay;
+            DirtyField(gun, nameof(GunWieldBonusComponent.AngleDecayModified));
+        }
+
+        if (!comp.MaxAngleModified.EqualsApprox(ev.MaxAngle))
+        {
+            comp.MaxAngleModified = ev.MaxAngle;
+            DirtyField(gun, nameof(GunWieldBonusComponent.MaxAngleModified));
+        }
+
+        if (!comp.MinAngleModified.EqualsApprox(ev.MinAngle))
+        {
+            comp.MinAngleModified = ev.MinAngle;
+            DirtyField(gun, nameof(GunWieldBonusComponent.MinAngleModified));
         }
     }
 

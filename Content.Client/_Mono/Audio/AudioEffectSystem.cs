@@ -35,7 +35,9 @@ public sealed partial class AudioEffectSystem : EntitySystem
     // actually this problem applies for effects too
     private bool? _auxiliariesSafe = null;
 
-    private static readonly Dictionary<ProtoId<AudioPresetPrototype>, (EntityUid AuxiliaryUid, EntityUid EffectUid)> CachedEffects = new();
+    // WOLFGATE: per-instance cache; a static one leaked entity ids between pooled test clients and tripped SetAuxiliary's assert
+    // private static readonly Dictionary<ProtoId<AudioPresetPrototype>, (EntityUid AuxiliaryUid, EntityUid EffectUid)> CachedEffects = new();
+    private readonly Dictionary<ProtoId<AudioPresetPrototype>, (EntityUid AuxiliaryUid, EntityUid EffectUid)> CachedEffects = new();
 
     /// <summary>
     ///     An auxiliary with no effect; for removing effects.
@@ -176,7 +178,9 @@ public sealed partial class AudioEffectSystem : EntitySystem
             return true;
 
         // resolve the cached auxiliary
-        if (!_cachedBlankAuxiliaryUid.IsValid())
+        // WOLFGATE: also rebuild a blank auxiliary that a client state reset deleted
+        // if (!_cachedBlankAuxiliaryUid.IsValid())
+        if (!_cachedBlankAuxiliaryUid.IsValid() || !HasComp<AudioAuxiliaryComponent>(_cachedBlankAuxiliaryUid))
             _cachedBlankAuxiliaryUid = _audioSystem.CreateAuxiliary().Entity;
 
         _audioSystem.SetAuxiliary(entity, entity.Comp, _cachedBlankAuxiliaryUid);
@@ -199,6 +203,14 @@ public sealed partial class AudioEffectSystem : EntitySystem
 
         if (CachedEffects.TryGetValue(preset, out var cached))
         {
+            // WOLFGATE START: a client state reset can delete cached entities without a round restart; rebuild those
+            if (!HasComp<AudioAuxiliaryComponent>(cached.AuxiliaryUid))
+            {
+                TryQueueDel(cached.EffectUid);
+                CachedEffects.Remove(preset);
+                return TryCacheEffect(preset, out auxiliaryUid, out effectUid);
+            }
+            // WOLFGATE END
             auxiliaryUid = cached.AuxiliaryUid;
             effectUid = cached.EffectUid;
             return true;

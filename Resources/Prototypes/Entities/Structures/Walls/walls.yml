@@ -78,8 +78,68 @@
     delay: 8
     fx: EffectRCDDeconstruct8
   - type: IconSmooth
-    key: bricks
+    key: walls
     base: brick
+
+# HALF MONO BUT ITS RLLY JUST UPSTREAM CONTENT....
+- type: entity
+  parent: BaseWallTierFour # Mono
+  id: WallConcrete
+  name: concrete wall
+  components:
+  - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
+    soundGroups:
+      Brute:
+        collection: WFBulletImpactConcrete # WOLFGATE(Weapons)
+  - type: Sprite
+    sprite: Structures/Walls/concrete.rsi
+  - type: Icon
+    sprite: Structures/Walls/concrete.rsi
+  - type: IconSmooth
+    key: walls
+    base: concrete
+
+- type: entity
+  parent: BaseWall
+  id: WallConcreteIndestructible
+  name: concrete wall
+  description: Skub knows this wall is too hard to destroy. # Frontier
+  suffix: indestructible
+  components:
+  - type: Tag
+    tags:
+    - Wall
+  - type: Sprite
+    sprite: Structures/Walls/concrete.rsi
+  - type: Icon
+    sprite: Structures/Walls/concrete.rsi
+  - type: IconSmooth
+    key: walls
+    base: concrete
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 9000
+  - type: Damageable
+    damageContainer: StructuralInorganic
+    damageModifierSet: StructuralMetallicStrong
+  - type: RadiationBlocker
+    resistance: 5
+  - type: StaticPrice
+    price: 110 # Mono
+  - type: ArmorThickness
+    canBePierced: false
+  - type: RangedDamageSound # WOLFGATE(Weapons): material bullet impacts
+    soundGroups:
+      Brute:
+        collection: WFBulletImpactConcrete # WOLFGATE(Weapons)
 
 - type: entity
   parent: BaseWallTierTwo # Mono
@@ -373,6 +433,9 @@
     tags:
     - Wall
     - WallT3
+  # WOLFGATE(ShipArmor): plastitanium hull armor takes 80% of mount hits (10 of 12.5)
+  - type: ArmorThickness
+    thickness: 10
 
 - type: entity
   parent: [ WallPlastitaniumDiagonalIndestructible, BaseWallTierTwo ] # Mono
@@ -392,6 +455,9 @@
   - type: Construction # Mono
     graph: Girder
     node: wallPlastitaniumDiagonal
+  # WOLFGATE(ShipArmor): plastitanium hull armor takes 80% of mount hits (10 of 12.5)
+  - type: ArmorThickness
+    thickness: 10
 
 - type: entity
   id: WallPlastitaniumDiagonalIndestructible

@@ -8,9 +8,6 @@ using Robust.Shared.Map.Components;
 using Robust.Shared.Map.Events;
 using Robust.Shared.Serialization.Manager;
 using Robust.Shared.Serialization.Markdown.Mapping;
-using Robust.Shared.Serialization.Markdown.Sequence;
-using Robust.Shared.Serialization.Markdown.Value;
-using Robust.Shared.Utility;
 
 namespace Content.Client._WF.ShipPreview;
 
@@ -18,18 +15,14 @@ namespace Content.Client._WF.ShipPreview;
 public sealed partial class ShipPreviewSystem
 {
     [Dependency] private IDependencyCollection _dependencies = default!;
-    [Dependency] private IComponentFactory _components = default!;
     [Dependency] private ISerializationManager _serialization = default!;
 
     /// <summary>Initializes deserialized sprite artwork before preview entities start their visualizers.</summary>
-    private bool TryLoadGrid(ShipPreviewHandle handle, ResPath path,
+    private bool TryLoadGrid(ShipPreviewHandle handle, MappingDataNode data,
         [NotNullWhen(true)] out Entity<MapGridComponent>? grid)
     {
         grid = null;
-        if (!_loader.TryReadFile(path, out var data))
-            return false;
-
-        RemoveServerComponents(data);
+        RemoveUnknownComponents(data);
         var migrations = new BeforeEntityReadEvent();
         RaiseLocalEvent(migrations);
         var reader = new EntityDeserializer(_dependencies, data, new DeserializationOptions
@@ -80,26 +73,6 @@ public sealed partial class ShipPreviewSystem
         {
             if (!loaded)
                 _loader.Delete(reader.Result);
-        }
-    }
-
-    /// <summary>Skips saved server components that have no client registration.</summary>
-    private void RemoveServerComponents(MappingDataNode data)
-    {
-        foreach (var group in data.Get<SequenceDataNode>("entities").Cast<MappingDataNode>())
-        {
-            foreach (var entity in group.Get<SequenceDataNode>("entities").Cast<MappingDataNode>())
-            {
-                if (!entity.TryGet<SequenceDataNode>("components", out var components))
-                    continue;
-
-                for (var i = components.Count - 1; i >= 0; i--)
-                {
-                    var component = (MappingDataNode) components[i];
-                    if (!_components.TryGetRegistration(component.Get<ValueDataNode>("type").Value, out _))
-                        components.RemoveAt(i);
-                }
-            }
         }
     }
 }

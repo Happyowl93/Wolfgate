@@ -94,9 +94,11 @@ public sealed partial class SpaceCleanupSystem : BaseCleanupSystem<PhysicsCompon
             && !_immuneQuery.HasComp(uid) // handled by GridCleanupSystem
             && !_mindQuery.HasComp(uid) // no deleting anything that can have a mind - should be handled by MobCleanupSystem anyway
             && (price = (float)_pricing.GetPrice(uid)) <= _maxPrice
+            // WOLFGATE(Cleanup) START: floor the lookup radius, since a zero-price entity's zero radius asserted the server down.
             && (isStuck
-                || !_cleanup.HasNearbyGrids(xform.Coordinates, _maxGridDistance * aggression * MathF.Sqrt(price / _maxPrice))
-                    && !_cleanup.HasNearbyPlayers(xform.Coordinates, _maxDistance * aggression * MathF.Sqrt(price / _maxPrice)));
+                || !_cleanup.HasNearbyGrids(xform.Coordinates, MathF.Max(0.5f, _maxGridDistance * aggression * MathF.Sqrt(price / _maxPrice)))
+                    && !_cleanup.HasNearbyPlayers(xform.Coordinates, MathF.Max(0.5f, _maxDistance * aggression * MathF.Sqrt(price / _maxPrice))));
+            // WOLFGATE END
     }
 
     private bool GetWallStuck(Entity<TransformComponent> ent)

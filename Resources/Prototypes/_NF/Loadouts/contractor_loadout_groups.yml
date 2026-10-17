@@ -207,6 +207,29 @@
   - ContractorClothingUniformJumpskirtYellowTurtleneckDress
   - ContractorClothingUniformJumpskirtYellowOldDress
   - ContractorClothingUniformJabroni
+  # WOLFGATE(ClownCosmetics) START
+  - WFContractorClothingUniformCircusClown
+  - WFContractorClothingUniformJokester
+  - WFContractorClothingUniformJesterEvil
+  - WFContractorCandyClownUniformSuit
+  - WFContractorStripedClownUniformSuit
+  - WFContractorSpottedClownUniformSuit
+  - WFContractorClothingUniformJumpsuitPerformerClown
+  - WFContractorClothingUniformJumpskirtPerformerClown
+  - WFContractorClothingUniformJumpsuitClownFormal
+  - WFContractorClothingUniformJumpskirtClownFormal
+  - WFContractorCoolCoyoteClothesSexyclown
+  - WFContractorClothingUniformJumpsuitMimeCropped
+  - WFContractorClothingUniformJumpskirtMimeCropped
+  - WFContractorClothingUniformJumpsuitMimeNouveau
+  - WFContractorClothingUniformJumpskirtMimeNouveau
+  - WFContractorClothingUniformJumpsuitPerformerMime
+  - WFContractorClothingUniformJumpskirtPerformerMime
+  - WFContractorClothingUniformJumpsuitMimeSuaveWhite
+  - WFContractorClothingUniformJumpsuitMimeSuaveBlack
+  - WFContractorMimeFrillsUniformSuit
+  - WFContractorCoolCoyoteClothesSexymime
+  # WOLFGATE END
 
   fallbacks:
   - ContractorClothingUniformJumpsuitColorGrey
@@ -218,7 +241,6 @@
   loadouts:
   ## Mono start
   - ContractorClothingModsuitAtmostechPowerCell
-  - ContractorClothingModsuitCaptainPowerCell
   - ContractorClothingModsuitEngineerPowerCell
   ## Mono end
   - ContractorClothingBackpack
@@ -303,11 +325,8 @@
   - ContractorClothingOuterHardsuitEVA
   - ContractorClothingOuterHardsuitBasic
   - ContractorClothingOuterHardsuitVoidParamed
-  - ContractorClothingOuterHardsuitUIEngineer
-  - ContractorClothingOuterHardsuitUIPilot
   ## Mono start
   - ContractorClothingOuterHardsuitAtmos
-  - ContractorClothingOuterHardsuitCap
   - ContractorClothingOuterHardsuitEngineering
   - ContractorClothingOuterHardsuitSalvage
   - ContractorClothingOuterHardsuitSpatio
@@ -337,7 +356,7 @@
   - ContractorClothingOuterWinterHydro
   - ContractorClothingOuterWinterBar
   - ContractorClothingOuterWinterChef
-  - ContractorClothingOuterWinterCap
+# - ContractorClothingOuterWinterCap # Mono: remove captain gear from contractor
   - ContractorClothingOuterWinterMusician
   - ContractorClothingOuterWinterCargo
   - ContractorClothingOuterWinterMiner
@@ -392,6 +411,10 @@
   - ContractorWetFloorSign
   - ContractorClothingOuterCoatExpensive
   - ContractorClothingOuterCoatSpaceAsshole
+  # WOLFGATE(ClownCosmetics) START
+  - WFContractorClothingOuterCoatJokester
+  - WFContractorClothingOuterCoatPufferMime
+  # WOLFGATE END
 
 - type: loadoutGroup
   id: ContractorBelt
@@ -490,6 +513,13 @@
   - ContractorClothingShoesSkates
   - ContractorClothingShoesClownLarge
   - ContractorClothingShoesBling
+  # WOLFGATE(ClownCosmetics) START
+  - WFContractorClothingShoesCircus
+  - WFContractorClothingShoesJokester
+  - WFContractorClothingShoesJesterEvilJanglers
+  - WFContractorClothingShoesMimeBoots
+  - WFContractorClothingUnderSocksMime
+  # WOLFGATE END
   fallbacks:
   - ContractorClothingShoesColorBlack
 
@@ -536,8 +566,8 @@
   - ContractorClothingHeadHatSurgcapPurple
   - ContractorClothingHeadHatFedoraGrey
   - ContractorClothingHeadHatFedoraBrown
-  - ContractorClothingHeadHatCapcap
-  - ContractorClothingHeadHatCaptain
+# - ContractorClothingHeadHatCapcap # Mono: remove captain gear from contractor
+# - ContractorClothingHeadHatCaptain
   - ContractorClothingHeadTinfoil
   - ContractorClothingHeadHatBeretRND
   - ContractorClothingHeadHatBeretEngineering
@@ -579,6 +609,11 @@
   - ContractorClothingHeadHatTophat
   - ContractorClothingHeadHatUNSABeer
   - ContractorClothingHeadSanabi # Mono
+  # WOLFGATE(ClownCosmetics) START
+  - WFContractorClothingHeadHatCircusClown
+  - WFContractorClothingHeadJesterEvilHat
+  - WFContractorClothingHeadHatMimeBowler
+  # WOLFGATE END
 
 - type: loadoutGroup
   id: ContractorEars
@@ -629,7 +664,7 @@
   - ContractorClothingHandsGlovesBoxingBlue
   - ContractorClothingHandsGlovesBoxingRed
   - ContractorClothingHandsGlovesBoxingYellow
-  - ContractorClothingHandsGlovesCaptain
+# - ContractorClothingHandsGlovesCaptain
   - ContractorClothingHandsGlovesColorWhite
 
 - type: loadoutGroup
@@ -700,6 +735,9 @@
   - ContractorClothingNeckMantleBH # Mono
   - ContractorClothingNeckCloakSanabi # Mono
   - ContractorClothingNeckUIOvercoat # Mono
+  # WOLFGATE(ClownCosmetics) START
+  - WFContractorClothingNeckRuffle
+  # WOLFGATE END
 
 - type: loadoutGroup
   id: ContractorPDA
@@ -726,7 +764,7 @@
   - ContractorZookeeperPDA
   - ContractorEngineerPDA
   - ContractorAtmosPDA
-  - ContractorCaptainPDA
+# - ContractorCaptainPDA
   - ContractorQuartermasterPDA
   - ContractorSeniorResearcherPDA
   - ContractorRnDPDA
@@ -824,7 +862,7 @@
   - ContractorClothingMaskGas
   - ContractorClothingMaskPunkHalf # Punkish (Randomized visuals)
   - ContractorClothingMaskGasExplorer
-  - ContractorClothingMaskGasCaptain
+# - ContractorClothingMaskGasCaptain
   - ContractorClothingMaskGasAtmos
   - ContractorClothingMaskDrakeIndustries
   - ContractorClothingMaskPlague
@@ -842,6 +880,11 @@
   - ClothingMaskBat
   - ClothingMaskBee
   - ClothingMaskFox
+  # WOLFGATE(ClownCosmetics) START
+  - WFContractorClothingMaskClownNose
+  - WFContractorClothingMaskSusMime
+  - WFContractorClothingMaskMimeSecurity
+  # WOLFGATE END
   fallbacks:
   - ContractorClothingMaskBreath
 
@@ -876,6 +919,7 @@
   - ContractorFlashlightLantern
   - ContractorCardBoxBlack
   - ContractorWristwatch
+  - WFPlanetTimepiece # WOLFGATE(Planets): planetary clock and weather HUD.
   - ContractorWristwatchGold
   - ContractorSilverRing
   - ContractorGoldRing

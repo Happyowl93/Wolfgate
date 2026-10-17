@@ -11,6 +11,7 @@ on:
       - "Resources/SharedMaps/_WF/**/*.yml" # WOLFGATE(Ci): Wolfgate ship grids
       - "Resources/Prototypes/_WF/**/*.yml" # WOLFGATE(Ci): Wolfgate vessels and entity prices, which sit in module folders
       - ".github/workflows/nf-shipyard-tests.yml" # WOLFGATE(Ci): run when this workflow changes
+      - "Content.*/**/Shipyard/**" # WOLFGATE(Ci): main CI skips these tests, so shipyard code and test changes run them here
 
 jobs:
   build:

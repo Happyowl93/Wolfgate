@@ -237,7 +237,7 @@ public abstract partial class CESharedZLevelsSystem
 
                 var groundYInterp = MathHelper.Lerp(y0, y1, frac);
 
-                if (target.Comp.Velocity < 0 && target.Comp.Velocity > -2f && heightComp.Stick)
+                if (target.Comp.Velocity <= 0 && target.Comp.Velocity > -2f && heightComp.Stick)
                     stickyGround = true;
 
                 return -floor + groundYInterp;
@@ -247,6 +247,9 @@ public abstract partial class CESharedZLevelsSystem
             if (_map.TryGetTileRef(gridUid, grid, gridTile, out var tileRef) &&
                 !tileRef.Tile.IsEmpty)
                 return -floor; // tile ground has groundY == 0 -> -floor
+
+            if (WfUnloadedGround(gridUid, gridTile)) // WOLFGATE(Planets): planet terrain that isn't loaded is still ground
+                return -floor;
         }
 
         return -maxFloors;

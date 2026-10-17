@@ -26,6 +26,18 @@ public sealed class ShipGeneralQuartersRequestMessage : BoundUserInterfaceMessag
     }
 }
 
+/// <summary>Pilot sent or cancelled the ship's distress call.</summary>
+[Serializable, NetSerializable]
+public sealed class ShipDistressRequestMessage : BoundUserInterfaceMessage
+{
+    public bool Active;
+
+    public ShipDistressRequestMessage(bool active)
+    {
+        Active = active;
+    }
+}
+
 /// <summary>Pilot typed a free-text announcement.</summary>
 [Serializable, NetSerializable]
 public sealed class ShipPaAnnounceRequestMessage : BoundUserInterfaceMessage
@@ -50,6 +62,36 @@ public sealed class ShipPaInternetSoundRequestMessage : BoundUserInterfaceMessag
     }
 }
 
-/// <summary>Pilot cut whatever the ship was playing.</summary>
+/// <summary>Pilot stopped whatever the ship was playing and emptied its queue.</summary>
 [Serializable, NetSerializable]
 public sealed class ShipPaInternetSoundStopMessage : BoundUserInterfaceMessage;
+
+/// <summary>What the pilot wants done to the ship's playlist.</summary>
+[Serializable, NetSerializable]
+public enum ShipPaPlaylistAction : byte
+{
+    /// <summary>End the playing track and start the next one.</summary>
+    Skip,
+
+    /// <summary>Take one waiting link out, named by <see cref="ShipPaPlaylistRequestMessage.Id"/>.</summary>
+    Remove,
+
+    /// <summary>Empty the queue and leave the playing track alone.</summary>
+    Clear,
+}
+
+/// <summary>Pilot skipped the playing track, removed a waiting link or cleared the queue.</summary>
+[Serializable, NetSerializable]
+public sealed class ShipPaPlaylistRequestMessage : BoundUserInterfaceMessage
+{
+    public ShipPaPlaylistAction Action;
+
+    /// <summary>The waiting entry to remove; ignored by the other actions.</summary>
+    public int Id;
+
+    public ShipPaPlaylistRequestMessage(ShipPaPlaylistAction action, int id = 0)
+    {
+        Action = action;
+        Id = id;
+    }
+}

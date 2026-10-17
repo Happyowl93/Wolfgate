@@ -61,7 +61,11 @@ public sealed partial class PathfindingSystem
 
             // TODO: Handling power + door prying
             // Door we should be able to open
-            if (isDoor && !isAccess && (request.Flags & PathFlags.Interact) != 0x0)
+            // WOLFGATE(NpcCrew) START: access-aware NPCs may plan through readers and check permission at the door.
+            // if (isDoor && !isAccess && (request.Flags & PathFlags.Interact) != 0x0)
+            if (isDoor && (!isAccess || (request.Flags & PathFlags.Access) != 0x0)
+                && (request.Flags & PathFlags.Interact) != 0x0)
+            // WOLFGATE END
             {
                 modifier += 0.5f;
             }
@@ -70,6 +74,12 @@ public sealed partial class PathfindingSystem
             {
                 modifier += 10f;
             }
+            // WOLFGATE(NpcCrew) START: a loose crate costs a shove, so crew go round it when they can.
+            else if ((end.Data.Flags & PathfindingBreadcrumbFlag.Movable) != 0x0 && (request.Flags & PathFlags.Shoving) != 0x0)
+            {
+                modifier += 4f;
+            }
+            // WOLFGATE END
             else if ((request.Flags & PathFlags.Smashing) != 0x0 && end.Data.Damage > 0f)
             {
                 modifier += 10f + end.Data.Damage / 100f;

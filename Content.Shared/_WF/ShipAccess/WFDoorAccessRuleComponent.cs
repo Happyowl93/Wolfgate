@@ -39,7 +39,7 @@ public sealed partial class WFDoorAccessRuleComponent : Component
     public bool SealPending;
 }
 
-/// <summary>The seven per-door rules from the design table. Every rule but Default applies whether or not the ship is locked.</summary>
+/// <summary>The per-door access rules. Every rule but Default applies whether or not the ship is locked.</summary>
 [Serializable, NetSerializable]
 public enum WFDoorAccessRule : byte
 {
@@ -63,4 +63,7 @@ public enum WFDoorAccessRule : byte
 
     /// <summary>Nobody, bolted shut; the deed holder unseals it from the console.</summary>
     Sealed,
+
+    /// <summary>The owner and current members of the linked crew, regardless of ship mode.</summary>
+    Crew,
 }

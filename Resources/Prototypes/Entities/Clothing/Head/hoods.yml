@@ -170,10 +170,11 @@
   - type: Clothing
     sprite: Clothing/Head/Hoods/rad.rsi
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Heat: 0.95
-        Radiation: 0.65
+        Radiation: 0.5 # WOLFGATE: radiation hood blocks more radiation (was 0.65)
   - type: IdentityBlocker
   - type: BreathMask
   - type: HideLayerClothing

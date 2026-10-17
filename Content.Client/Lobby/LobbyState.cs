@@ -1,4 +1,5 @@
 using Content.Client._NF.LateJoin;
+using Content.Client._WF.RoundSetup; // WOLFGATE(RoundSetup)
 using Content.Client.Audio;
 using Content.Client.Eui;
 using Content.Client.GameTicking.Managers;
@@ -37,7 +38,9 @@ namespace Content.Client.Lobby
         public LobbyGui? Lobby;
 
         // Frontier - save pickerwindow so it opens only once
-        private PickerWindow? _pickerWindow = null;
+        // WOLFGATE(RoundSetup) START: the normal jobs picker is managed by the Round Setup lobby partial
+        // private PickerWindow? _pickerWindow = null;
+        // WOLFGATE END
 
         protected override void Startup()
         {
@@ -63,19 +66,22 @@ namespace Content.Client.Lobby
 
             // WOLFGATE(Stylesheets) START: rich label so long names wrap in the menu column; unformatted so brackets in names survive
             Lobby.ServerName.SetMessage(FormattedMessage.FromUnformatted(string.IsNullOrEmpty(lobbyNameCvar)
-                ? Loc.GetString("ui-lobby-title", ("serverName", serverName))
+                ? serverName // WOLFGATE(RoundSetup): the preparation header supplies its own lobby context
                 : lobbyNameCvar));
             // WOLFGATE END
 
             var width = _cfg.GetCVar(CCVars.ServerLobbyRightPanelWidth);
             // WOLFGATE(Stylesheets): the game-menu lobby keeps the chat as a dock, at most 30% of the window
-            Lobby.RightSide.SetWidth = Math.Min(width, Math.Max(500f, _userInterfaceManager.RootControl.Width * 0.3f));
+            // WOLFGATE(RoundSetup): keep room for the crew browser at 720p
+            // Lobby.RightSide.SetWidth = Math.Min(width, Math.Max(340f, _userInterfaceManager.RootControl.Width * 0.28f));
+            InitializeRoundSetupHome(); // WOLFGATE(RoundSetup): the responsive layout owns the dock size
 
             UpdateLobbyUi();
 
             Lobby.CharacterPreview.CharacterSetupButton.OnPressed += OnSetupPressed;
             Lobby.ReadyButton.OnPressed += OnReadyPressed;
-            Lobby.ReadyButton.OnToggled += OnReadyToggled;
+            // WOLFGATE(RoundSetup): the primary action handles readiness and crew membership together
+            // Lobby.ReadyButton.OnToggled += OnReadyToggled;
 
             _gameTicker.InfoBlobUpdated += UpdateLobbyUi;
             _gameTicker.LobbyStatusUpdated += LobbyStatusUpdated;
@@ -95,8 +101,10 @@ namespace Content.Client.Lobby
 
             Lobby!.CharacterPreview.CharacterSetupButton.OnPressed -= OnSetupPressed;
             Lobby!.ReadyButton.OnPressed -= OnReadyPressed;
-            Lobby!.ReadyButton.OnToggled -= OnReadyToggled;
+            // WOLFGATE(RoundSetup): the primary action owns readiness instead of a toggle subscription
+            // Lobby!.ReadyButton.OnToggled -= OnReadyToggled;
 
+            ShutdownRoundSetupHome(); // WOLFGATE(RoundSetup): release live crew updates and the normal job picker
             Lobby = null;
         }
 
@@ -114,14 +122,13 @@ namespace Content.Client.Lobby
 
         private void OnReadyPressed(BaseButton.ButtonEventArgs args)
         {
-            if (!_gameTicker.IsGameStarted)
-            {
-                return;
-            }
-            // Frontier to downstream: if you want to skip the first window and go straight to station picker,
-            // simply change the enum to station or crew in the PickerWindow constructor.
-            _pickerWindow ??= new PickerWindow();
-            _pickerWindow.OpenCentered();
+            // WOLFGATE(RoundSetup) START: the lobby directly handles normal joining or opens the player's crew
+            // if (!_gameTicker.IsGameStarted)
+            //     return;
+            // _pickerWindow ??= new PickerWindow();
+            // _pickerWindow.OpenCentered();
+            JoinFromRoundSetupHome();
+            // WOLFGATE END
         }
 
         private void OnReadyToggled(BaseButton.ButtonToggledEventArgs args)
@@ -180,7 +187,10 @@ namespace Content.Client.Lobby
 
         private void LobbyLateJoinStatusUpdated()
         {
-            Lobby!.ReadyButton.Disabled = _gameTicker.DisallowedLateJoin;
+            // WOLFGATE(RoundSetup) START: keep crew management available while normal late join is disabled
+            // Lobby!.ReadyButton.Disabled = _gameTicker.DisallowedLateJoin;
+            UpdateRoundSetupHome();
+            // WOLFGATE END
         }
 
         private void UpdateLobbyUi()
@@ -201,6 +211,10 @@ namespace Content.Client.Lobby
                 Lobby!.ReadyButton.Pressed = _gameTicker.AreWeReady;
                 Lobby!.ObserveButton.Disabled = true;
             }
+
+            // WOLFGATE(RoundSetup) START: synchronize direct joining and crew membership with lobby readiness
+            UpdateRoundSetupHome();
+            // WOLFGATE END
 
             if (_gameTicker.ServerInfoBlob != null)
             {

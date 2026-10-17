@@ -33,11 +33,14 @@ public sealed partial class CCVars
     public static readonly CVarDef<bool>
         GameLobbyEnabled = CVarDef.Create("game.lobbyenabled", true, CVar.ARCHIVE);
 
+    // WOLFGATE(RoundSetup) START: give players six minutes to configure and join scenario lobbies.
     /// <summary>
-    ///     Controls the duration of the lobby timer in seconds. Defaults to 2 minutes and 30 seconds.
+    ///     Controls the duration of the lobby timer in seconds. Defaults to six minutes.
     /// </summary>
     public static readonly CVarDef<int>
-        GameLobbyDuration = CVarDef.Create("game.lobbyduration", 180, CVar.ARCHIVE); // Frontier: 150<180
+        // GameLobbyDuration = CVarDef.Create("game.lobbyduration", 180, CVar.ARCHIVE); // Frontier: 150<180
+        GameLobbyDuration = CVarDef.Create("game.lobbyduration", 360, CVar.ARCHIVE);
+    // WOLFGATE END
 
     /// <summary>
     ///     Controls if players can latejoin at all.
@@ -49,7 +52,7 @@ public sealed partial class CCVars
     ///     Controls the default game preset.
     /// </summary>
     public static readonly CVarDef<string>
-        GameLobbyDefaultPreset = CVarDef.Create("game.defaultpreset", "nfpirate", CVar.ARCHIVE); // Frontier: secret<nfpirate
+        GameLobbyDefaultPreset = CVarDef.Create("game.defaultpreset", "MonoStandard", CVar.ARCHIVE); // Frontier: secret<nfpirate; WOLFGATE(Planets): defaults to MonoStandard (was nfpirate), whose round start spawns the star system.
 
     /// <summary>
     ///     Controls if the game can force a different preset if the current preset's criteria are not met.
@@ -79,7 +82,7 @@ public sealed partial class CCVars
     ///     Controls the game map prototype to load. SS14 stores these prototypes in Prototypes/Maps.
     /// </summary>
     public static readonly CVarDef<string>
-        GameMap = CVarDef.Create("game.map", "Frontier", CVar.SERVERONLY); // Frontier: string.Empty<Frontier
+        GameMap = CVarDef.Create("game.map", string.Empty, CVar.SERVERONLY); // Mono - Changed back to string.Empty. We use a mappool so Crocus/Hyperwar can switch the map.
 
     /// <summary>
     ///     Controls whether to use world persistence or not.

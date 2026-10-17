@@ -10,7 +10,23 @@ shuttle-console-ship-announce-placeholder = Type an announcement...
 shuttle-console-ship-announce = Announce
 
 shuttle-console-ship-sound = Play
-shuttle-console-ship-sound-stop = Cut
+shuttle-console-ship-sound-tooltip = Plays the link now, or adds it to the queue if something is already playing.
+shuttle-console-ship-sound-stop = Stop
+shuttle-console-ship-sound-stop-tooltip = Stops the track and empties the queue.
 shuttle-console-ship-sound-placeholder = Link to play over the speakers...
-shuttle-console-ship-collision-alert-on = Collision alert: on
-shuttle-console-ship-collision-alert-off = Collision alert: OFF
+shuttle-console-ship-playlist-now = Now playing: {$title}
+shuttle-console-ship-playlist-waiting = Waiting for the speakers...
+shuttle-console-ship-playlist-skip = Skip
+shuttle-console-ship-playlist-skip-tooltip = Ends this track and starts the next.
+shuttle-console-ship-playlist-queue = Up next {$count}/{$max}
+shuttle-console-ship-playlist-clear = Clear
+shuttle-console-ship-playlist-clear-tooltip = Empties the queue and leaves this track playing.
+shuttle-console-ship-playlist-row = {$position}. {$title}
+shuttle-console-ship-playlist-remove = X
+shuttle-console-ship-playlist-remove-tooltip = Take this out of the queue.
+shuttle-console-ship-collision-alert-on = Collision: on
+shuttle-console-ship-collision-alert-off = Collision: OFF
+
+shuttle-console-ship-distress-send = SEND SOS
+shuttle-console-ship-distress-cancel = CANCEL SOS
+shuttle-console-ship-distress-tooltip = Call for help on the common radio and mark this ship on every radar and the sector map.

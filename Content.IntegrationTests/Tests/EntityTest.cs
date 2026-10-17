@@ -1,3 +1,4 @@
+using System; // WOLFGATE(Wolfmed)
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -16,6 +17,8 @@ namespace Content.IntegrationTests.Tests
 {
     [TestFixture]
     [TestOf(typeof(EntityUid))]
+    // WOLFGATE(Wolfmed): the spawn-all tests need about six gigabytes each; two at once go past the runner's heap limit
+    [NonParallelizable]
     public sealed class EntityTest
     {
         private static readonly ProtoId<EntityCategoryPrototype> SpawnerCategory = "Spawner";
@@ -28,15 +31,18 @@ namespace Content.IntegrationTests.Tests
             var settings = new PoolSettings { Dirty = true };
             await using var pair = await PoolManager.GetServerClient(settings);
             var server = pair.Server;
-
             var entityMan = server.ResolveDependency<IEntityManager>();
             var mapManager = server.System<SharedMapSystem>();
             var prototypeMan = server.ResolveDependency<IPrototypeManager>();
             var mapSystem = entityMan.System<SharedMapSystem>();
 
+            // WOLFGATE(Wolfmed) START: in slices. All the prototypes at once, each on its own map and grid, held for 450
+            // ticks, took the test host to 16.5 GB and the 16 GB runner cancelled the job every run. Each slice spawns,
+            // runs the same 450 ticks and is deleted before the next, so every prototype still gets its update loops.
+            var protoIds = new List<string>();
             await server.WaitPost(() =>
             {
-                var protoIds = prototypeMan
+                protoIds = prototypeMan
                     .EnumeratePrototypes<EntityPrototype>()
                     .Where(p => !p.Abstract)
                     .Where(p => !pair.IsTestPrototype(p))
@@ -45,41 +51,30 @@ namespace Content.IntegrationTests.Tests
                     .Where(p => p.Categories.All(x => x.ID != SpawnerCategory)) // mono
                     .Select(p => p.ID)
                     .ToList();
-
-                foreach (var protoId in protoIds)
-                {
-                    mapSystem.CreateMap(out var mapId);
-                    var grid = mapManager.CreateGridEntity(mapId);
-                    // TODO: Fix this better in engine.
-                    mapSystem.SetTile(grid.Owner, grid.Comp, Vector2i.Zero, new Tile(1));
-                    var coord = new EntityCoordinates(grid.Owner, 0, 0);
-                    SpawnEntity(entityMan, protoId, coord);
-                }
             });
 
-            await server.WaitRunTicks(450); // 15 seconds, enough to trigger most update loops
-
-            await server.WaitPost(() =>
+            for (var first = 0; first < protoIds.Count; first += SpawnAllSlice)
             {
-                static IEnumerable<(EntityUid, TComp)> Query<TComp>(IEntityManager entityMan)
-                    where TComp : Component
+                var slice = protoIds.Skip(first).Take(SpawnAllSlice).ToList();
+                await server.WaitPost(() =>
                 {
-                    var query = entityMan.AllEntityQueryEnumerator<TComp>();
-                    while (query.MoveNext(out var uid, out var meta))
+                    foreach (var protoId in slice)
                     {
-                        yield return (uid, meta);
+                        mapSystem.CreateMap(out var mapId);
+                        var grid = mapManager.CreateGridEntity(mapId);
+
+                        // TODO: Fix this better in engine.
+                        mapSystem.SetTile(grid.Owner, grid.Comp, Vector2i.Zero, new Tile(1));
+
+                        var coord = new EntityCoordinates(grid.Owner, 0, 0);
+                        SpawnEntity(entityMan, protoId, coord);
                     }
-                }
+                });
 
-                var entityMetas = Query<MetaDataComponent>(entityMan).ToList();
-                foreach (var (uid, meta) in entityMetas)
-                {
-                    if (!meta.EntityDeleted)
-                        entityMan.DeleteEntity(uid);
-                }
-
-                Assert.That(entityMan.EntityCount, Is.Zero);
-            });
+                await server.WaitRunTicks(450); // 15 seconds, enough to trigger most update loops
+                await server.WaitPost(() => DeleteEverything(entityMan, mapSystem));
+            }
+            // WOLFGATE END
 
             await pair.CleanReturnAsync();
         }
@@ -129,6 +124,17 @@ namespace Content.IntegrationTests.Tests
                     }
                 }
 
+                // WOLFGATE(Wolfmed) START: maps first, so everything on them goes parent-first, as it does when a round
+                // ends. Deleting in enumeration order could delete a held item out of a live xenoborg's hand before its
+                // module, which DroppableBorgModuleSystem logs as an error; the order follows prototype file order,
+                // which differs between Windows and Linux, so it failed on CI only.
+                var mapSystem = entityMan.System<SharedMapSystem>();
+                foreach (var mapId in mapSystem.GetAllMapIds().ToList())
+                {
+                    mapSystem.DeleteMap(mapId);
+                }
+                // WOLFGATE END
+
                 var entityMetas = Query<MetaDataComponent>(entityMan).ToList();
                 foreach (var (uid, meta) in entityMetas)
                 {
@@ -141,6 +147,45 @@ namespace Content.IntegrationTests.Tests
 
             await pair.CleanReturnAsync();
         }
+
+        // WOLFGATE(Wolfmed) START: the slice size and the delete of the sliced spawn-all test.
+        /// <summary>Prototypes spawned per slice of the different-maps spawn-all test: about a seventh of them.</summary>
+        private const int SpawnAllSlice = 2500;
+
+        /// <summary>
+        /// Maps first, so everything on them goes parent-first, as it does when a round ends. Deleting in enumeration
+        /// order could delete a held item out of a live xenoborg's hand before its module, which
+        /// DroppableBorgModuleSystem logs as an error; the order follows prototype file order, which differs between
+        /// Windows and Linux, so it failed on CI only. Then whatever is left, and nothing may remain.
+        /// </summary>
+        private static void DeleteEverything(IEntityManager entityMan, SharedMapSystem mapSystem)
+        {
+            foreach (var mapId in mapSystem.GetAllMapIds().ToList())
+            {
+                mapSystem.DeleteMap(mapId);
+            }
+
+            var entityMetas = new List<(EntityUid, MetaDataComponent)>();
+            var query = entityMan.AllEntityQueryEnumerator<MetaDataComponent>();
+            while (query.MoveNext(out var uid, out var meta))
+            {
+                entityMetas.Add((uid, meta));
+            }
+
+            foreach (var (uid, meta) in entityMetas)
+            {
+                if (!meta.EntityDeleted)
+                    entityMan.DeleteEntity(uid);
+            }
+
+            Assert.That(entityMan.EntityCount, Is.Zero);
+
+            // The slice's garbage goes now, not when the next slice has already been spawned on top of it.
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        // WOLFGATE END
 
         /// <summary>
         ///     Variant of <see cref="SpawnAndDeleteAllEntitiesOnDifferentMaps"/> that also launches a client and dirties

@@ -56,6 +56,10 @@ public sealed partial class NPCSteeringSystem
             return true;
         }
 
+        // WOLFGATE(NpcCrew): a loose crate on the node is shoved, not walked into
+        if (IsCrewShoveBlocked(uid, steering, node))
+            return false;
+
         // TODO: Ideally for "FreeSpace" we check all entities on the tile and build flags dynamically (pathfinder refactor in future).
         var ents = _entSetPool.Get();
         _lookup.GetLocalEntitiesIntersecting(node.GraphUid, node.Box.Enlarged(-0.04f), ents, flags: LookupFlags.Static);
@@ -68,7 +72,10 @@ public sealed partial class NPCSteeringSystem
 
             foreach (var intersecting in ents)
             {
-                if (!_physics.IsCurrentlyHardCollidable((uid, fixtures, physics), intersecting))
+                // WOLFGATE(NpcCrew) START: compare both bodies for every NPC; the engine helper reads the first fixtures twice.
+                // if (!_physics.IsCurrentlyHardCollidable((uid, fixtures, physics), intersecting))
+                if (!IsCrewObstacleCollidable(uid, intersecting))
+                // WOLFGATE END
                 {
                     continue;
                 }
@@ -223,6 +230,11 @@ public sealed partial class NPCSteeringSystem
                 // Ignore stuck while handling obstacles.
                 ResetStuck(steering, ourCoordinates);
                 SteeringObstacleStatus status;
+
+                // WOLFGATE(NpcCrew) START: stop blended input while access-aware crew settle at an obstacle.
+                if ((steering.Flags & PathFlags.Access) != 0x0)
+                    moveMultiplier = 0f;
+                // WOLFGATE END
 
                 // Breaking behaviours and the likes.
                 lock (_obstacles)

@@ -14,7 +14,7 @@ public sealed partial class ParallaxSystem : SharedParallaxSystem
     [Dependency] private IOverlayManager _overlay = default!;
     [Dependency] private IParallaxManager _parallax = default!;
 
-    private static readonly ProtoId<ParallaxPrototype> Fallback = "Default";
+    private static readonly ProtoId<ParallaxPrototype> Fallback = "SnowballStation"; // Mono
 
     public const int ParallaxZIndex = 0;
 

@@ -144,7 +144,9 @@
 - type: technology
   id: AtmosphericTech
   name: research-technology-atmospheric-tech
-  entityIcon: GasThermoMachineFreezerEnabled
+  icon:
+    sprite: _Impstation/Structures/Piping/Atmospherics/thermomachine.rsi # WOLFGATE(Resprites): Imp Sprite Ports
+    state: freezerOff
   discipline: Industrial
   tier: 1
   cost: 8500
@@ -175,6 +177,10 @@
   - MiniStationAnchorCircuitboard # Frontier
   - SmallThrusterMachineCircuitboard # Frontier
   - SmallGyroscopeMachineCircuitboard # Frontier
+  # WOLFGATE(Drydock) START: mobile drydock boards
+  - WFComputerMobileDrydockCircuitboard
+  - WFMobileDrydockCraneMachineCircuitboard
+  # WOLFGATE END
   technologyPrerequisites:
   - AdvancedParts
   position: -5, 7

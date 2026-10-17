@@ -188,6 +188,11 @@ public sealed partial class WFShipAccessServerSystem
             foreach (var entry in ship.Comp.AllowList)
                 keys.Add(_access.ToRecordKey(entry.Key));
 
+            if (ship.Comp.Mode == WFShipAccessMode.Crew)
+            {
+                foreach (var key in ship.Comp.CrewKeys)
+                    keys.Add(_access.ToRecordKey(key));
+            }
             backup.Locked = false;
             backup.OwnLists = true;
             CommitReader(reader);
@@ -215,6 +220,11 @@ public sealed partial class WFShipAccessServerSystem
             case WFDoorAccessRule.Code:
                 keys.UnionWith(owners);
                 break;
+            case WFDoorAccessRule.Crew:
+                keys.UnionWith(owners);
+                foreach (var key in ship.Comp.CrewKeys)
+                    keys.Add(_access.ToRecordKey(key));
+                break;
             case WFDoorAccessRule.Players:
             case WFDoorAccessRule.PlayersOrCode:
                 keys.UnionWith(owners);
@@ -225,6 +235,12 @@ public sealed partial class WFShipAccessServerSystem
                 keys.UnionWith(owners);
                 foreach (var entry in ship.Comp.AllowList)
                     keys.Add(_access.ToRecordKey(entry.Key));
+
+                if (ship.Comp.Mode == WFShipAccessMode.Crew)
+                {
+                    foreach (var key in ship.Comp.CrewKeys)
+                        keys.Add(_access.ToRecordKey(key));
+                }
 
                 // Any one of the company's access levels is enough, each on its own list.
                 if (ship.Comp.Mode == WFShipAccessMode.Faction && _access.IsFactionGrid(ship, out var company))

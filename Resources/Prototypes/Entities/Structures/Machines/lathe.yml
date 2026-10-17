@@ -160,6 +160,7 @@
     unlitRunningState: unlit-building
     staticPacks:
     - ToolsStatic
+    - WFPlanetStatic # WOLFGATE(Planets): landing thruster kits and parachutes.
     - PartsStatic
     - AtmosStatic
     - CablesStatic
@@ -351,7 +352,8 @@
     - AiCoreBoard
     - S2MechBoards
     - EngineeringBoardsGoob #Goob Factorio port
-    - ReactorCircuitboards # FH edit
+    - ReactorCircuitboards # FH edit\
+    - ServiceBoardsGoob #Forge-Change
   - type: MaterialStorage
     whitelist:
       tags:
@@ -618,13 +620,15 @@
     # Shitmed Change
     - SMSurgery
     - SMCybernetics
+    - WFWolfmedAutodocPrograms # WOLFGATE(Wolfmed): AUTODOC: the four program disks, behind the same research as the rest of medbay.
     # Einstein Engines Packs
     - Translators # Language
     - TranslatorImplanters # Language
   - type: Machine
     board: MedicalTechFabCircuitboard
   - type: StealTarget
-    stealGroup: MedicalTechFabCircuitboard
+    stealGroup:
+    - MedicalTechFabCircuitboard
   - type: PirateBountyItem # Mono
     id: Techfab
 
@@ -768,6 +772,12 @@
   - type: PlaceableSurface # DeltaV: Allow ore bags to dump into it directly
     isPlaceable: false # but not place on it if you just click it with a random item
   - type: OreSiloClient #Gives silo access to ore holding
+  # WOLFGATE(Mining) START: lathe upgrade kits don't fit ore processors; Structure repeats BaseStructure's tag
+  - type: Tag
+    tags:
+    - Structure
+    - WFNoLatheUpgradeKit
+  # WOLFGATE END
 
 - type: entity
   parent: OreProcessor
@@ -780,7 +790,8 @@
   - type: Machine
     board: OreProcessorIndustrialMachineCircuitboard
   - type: Lathe
-    partRatingMaterialUseMultiplier: 0.92 # Mono
+    # WOLFGATE(Mining): smaller matter-bin bonus on the industrial processor, 0.92 -> 0.97
+    partRatingMaterialUseMultiplier: 0.97 # Mono
     materialUseMultiplier: 0.6 # Mono
     timeMultiplier: 0.5
     staticPacks:

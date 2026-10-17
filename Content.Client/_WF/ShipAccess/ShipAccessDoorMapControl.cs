@@ -32,6 +32,7 @@ public sealed class ShipAccessDoorMapControl : ShipViewControl
         Color.FromHex("#3fd6c8"),
         Color.FromHex("#40ff40"),
         Color.FromHex("#ff3030"),
+        Color.FromHex("#ff9f50"),
     };
 
     private readonly List<ShipAccessDoorNode> _doors = new();

@@ -1,5 +1,7 @@
 # ShipAccess
 
+Owners select Private, Crew or (on company ships) Faction from the console access mode selector. Crew adds the linked crew's issued ID cards to default readers without granting ownership. The per-door Crew rule admits only owners and that crew, regardless of ship mode or lock state. Scenario ships link at launch; an owner in a spawned crew can also select Crew on another ship to link it. Crew credentials update on arrival, leaving and respawning, survive temporary disconnects, and stay separate from explicit guest permissions. Resale clears the link.
+
 Per-card access control for purchased ships, built on the normal airlock access system: every door, locker and
 lockable button on the ship is gated by its own access reader (an airlock's door electronics), and this module
 only decides what that reader holds. Whoever carries the ship's deed is its owner, on an ID card or, for a ship bought with one,
@@ -144,6 +146,7 @@ and `ShipAccessKeypadWindow` (the keypad). The `WFShipLocked` access level is in
 - [`Content.Server/_WF/ShipAccess/WFShipAccessCodeComponent.cs`](WFShipAccessCodeComponent.cs)
 - [`Content.Server/_WF/ShipAccess/WFShipAccessServerSystem.Codes.cs`](WFShipAccessServerSystem.Codes.cs)
 - [`Content.Server/_WF/ShipAccess/WFShipAccessServerSystem.Console.cs`](WFShipAccessServerSystem.Console.cs)
+- [`Content.Server/_WF/ShipAccess/WFShipAccessServerSystem.Crew.cs`](WFShipAccessServerSystem.Crew.cs)
 - [`Content.Server/_WF/ShipAccess/WFShipAccessServerSystem.cs`](WFShipAccessServerSystem.cs)
 - [`Content.Server/_WF/ShipAccess/WFShipAccessServerSystem.Doors.cs`](WFShipAccessServerSystem.Doors.cs)
 - [`Content.Server/_WF/ShipAccess/WFShipAccessServerSystem.Readers.cs`](WFShipAccessServerSystem.Readers.cs)
@@ -167,10 +170,12 @@ and `ShipAccessKeypadWindow` (the keypad). The `WFShipLocked` access level is in
 - [`Content.Client/_WF/ShipAccess/ShuttleConsoleBoundUserInterface.ShipAccess.cs`](../../../Content.Client/_WF/ShipAccess/ShuttleConsoleBoundUserInterface.ShipAccess.cs)
 - [`Content.Client/_WF/ShipAccess/ShuttleConsoleWindow.ShipAccess.cs`](../../../Content.Client/_WF/ShipAccess/ShuttleConsoleWindow.ShipAccess.cs)
 - [`Content.Client/_WF/ShipAccess/WFShipAccessClientSystem.cs`](../../../Content.Client/_WF/ShipAccess/WFShipAccessClientSystem.cs)
+- [`Content.Client/_WF/ShipAccess/WFWrappedLabel.cs`](../../../Content.Client/_WF/ShipAccess/WFWrappedLabel.cs)
 
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WF/ShipAccess/ShipAccessCodeTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipAccess/ShipAccessCodeTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/ShipAccess/ShipAccessCrewTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipAccess/ShipAccessCrewTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/ShipAccess/ShipAccessDoorRuleTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipAccess/ShipAccessDoorRuleTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/ShipAccess/ShipAccessOwnerTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipAccess/ShipAccessOwnerTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/ShipAccess/ShipAccessTest.cs`](../../../Content.IntegrationTests/Tests/_WF/ShipAccess/ShipAccessTest.cs)

@@ -8,6 +8,7 @@ using Robust.Shared.Graphics;
 using Robust.Shared.Input;
 using Robust.Shared.Map;
 using Robust.Shared.Timing;
+using Robust.Shared.Utility;
 
 namespace Content.Client._WF.ShipPreview;
 
@@ -46,8 +47,13 @@ public sealed partial class ShipPreviewControl : Control
 
     private IClydeViewport? _viewport;
 
-    private VesselPrototype? _vessel;
-    private VesselPrototype? _pending;
+    /// <summary>
+    /// Something to show: a vessel, or grid YAML under a key.
+    /// </summary>
+    private sealed record PreviewSource(VesselPrototype? Vessel, string? Key, string? Yaml, string? Name);
+
+    private PreviewSource? _shown;
+    private PreviewSource? _pending;
     private bool _loadQueued;
     private int _loadDelay;
 
@@ -103,20 +109,41 @@ public sealed partial class ShipPreviewControl : Control
     {
         if (vessel == null)
         {
-            _pending = null;
-            _loadQueued = false;
-            ClearPreview("wf-ship-preview-no-vessel");
-            PreviewUpdated?.Invoke();
+            ShowMessage("wf-ship-preview-no-vessel");
             return;
         }
 
+        Queue(new PreviewSource(vessel, null, null, null));
+    }
+
+    /// <summary>
+    /// Shows a grid from YAML text. <paramref name="key"/> identifies it, so the same key isn't loaded twice.
+    /// </summary>
+    public void SetGridText(string key, string yaml, string? name)
+    {
+        Queue(new PreviewSource(null, key, yaml, name));
+    }
+
+    /// <summary>
+    /// Clears the preview and shows a message in its place.
+    /// </summary>
+    public void ShowMessage(string locId)
+    {
+        _pending = null;
+        _loadQueued = false;
+        ClearPreview(locId);
+        PreviewUpdated?.Invoke();
+    }
+
+    private void Queue(PreviewSource source)
+    {
         // Already showing it, or already queued to show it.
-        if (_loadQueued && _pending == vessel)
+        if (_loadQueued && Same(_pending, source))
             return;
-        if (!_loadQueued && _hasGrid && _vessel == vessel)
+        if (!_loadQueued && _hasGrid && Same(_shown, source))
             return;
 
-        _pending = vessel;
+        _pending = source;
         _loadQueued = true;
         // Skip one frame update so the loading label gets drawn before the load stalls the frame.
         _loadDelay = 1;
@@ -186,24 +213,33 @@ public sealed partial class ShipPreviewControl : Control
         }
 
         _loadQueued = false;
-        if (_pending is { } vessel)
-            Load(vessel);
+        if (_pending is { } source)
+            Load(source);
     }
 
-    private void Load(VesselPrototype vessel)
+    private static bool Same(PreviewSource? a, PreviewSource? b)
+    {
+        return a != null && b != null && a.Vessel == b.Vessel && a.Key == b.Key;
+    }
+
+    private void Load(PreviewSource source)
     {
         var system = _entMan.System<ShipPreviewSystem>();
 
         _handle ??= system.Acquire();
 
-        if (!system.TryLoad(_handle, vessel, out var preview))
+        var loaded = source.Vessel is { } vessel
+            ? system.TryLoad(_handle, vessel, out var preview)
+            : system.TryLoadText(_handle, new ResPath(source.Key!), source.Yaml!, source.Name, out preview);
+
+        if (!loaded)
         {
             ClearPreview("wf-ship-preview-failed");
             PreviewUpdated?.Invoke();
             return;
         }
 
-        _vessel = vessel;
+        _shown = source;
         _grid = preview.Grid.Owner;
         _bounds = preview.LocalBounds;
         _hasGrid = true;
@@ -224,7 +260,7 @@ public sealed partial class ShipPreviewControl : Control
         if (_hasGrid && _handle != null)
             _entMan.System<ShipPreviewSystem>().Clear(_handle);
 
-        _vessel = null;
+        _shown = null;
         _grid = EntityUid.Invalid;
         _hasGrid = false;
         _dragging = false;

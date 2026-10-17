@@ -14,6 +14,7 @@ public enum WFShipShieldRecoveryStatus : byte
     NoPower,
     Lowered,
     Disabled,
+    FtlLocked,
 }
 
 /// <summary>Identifies the shield generator's shared control panel.</summary>

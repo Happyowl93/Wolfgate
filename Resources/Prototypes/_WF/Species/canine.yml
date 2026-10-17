@@ -1,6 +1,6 @@
 # Canine. Vulpkanin in every respect except the head, which is the human one so the muzzle is a
 # marking you pick rather than art baked into the species. Everything else - torso, limbs, body, names,
-# marking budget - is Vulpkanin's.
+# marking budget - is Vulpkanin's (vulpkanin.yml beside this file).
 - type: species
   id: WFCanine
   name: species-name-canine
@@ -22,7 +22,7 @@
     Hair: MobHumanoidAnyMarking
     FacialHair: MobHumanoidAnyMarking
     Snout: MobHumanoidAnyMarking
-    Chest: MobVulpkaninTorso
+    Chest: WFMobVulpkaninTorso
     UndergarmentTop: MobHumanoidAnyMarking
     UndergarmentBottom: MobHumanoidAnyMarking
     Genital: MobHumanoidAnyMarking
@@ -34,14 +34,14 @@
     TailBehind: MobHumanoidAnyMarking
     TailOversuit: MobHumanoidAnyMarking
     Eyes: MobHumanoidEyes
-    LArm: MobVulpkaninLArm
-    RArm: MobVulpkaninRArm
-    LHand: MobVulpkaninLHand
-    RHand: MobVulpkaninRHand
-    LLeg: MobVulpkaninLLeg
-    RLeg: MobVulpkaninRLeg
-    LFoot: MobVulpkaninLFoot
-    RFoot: MobVulpkaninRFoot
+    LArm: WFMobVulpkaninLArm
+    RArm: WFMobVulpkaninRArm
+    LHand: WFMobVulpkaninLHand
+    RHand: WFMobVulpkaninRHand
+    LLeg: WFMobVulpkaninLLegDigi
+    RLeg: WFMobVulpkaninRLegDigi
+    LFoot: WFMobVulpkaninLFootDigi
+    RFoot: WFMobVulpkaninRFootDigi
 
 - type: humanoidBaseSprite
   id: WFMobCanineHead
@@ -73,7 +73,7 @@
     Tail:
       points: 1
       required: true
-      defaultMarkings: [ VulpTail ]
+      defaultMarkings: [ FoxTail ]
     Head:
       points: 3
       required: false
@@ -92,4 +92,4 @@
     HeadTop:
       points: 1
       required: true
-      defaultMarkings: [ VulpEar ]
+      defaultMarkings: [ FoxEar ]

@@ -16,6 +16,7 @@ Client controls other Wolfgate UI is built from.
 
 ### Client
 
+- [`Content.Client/_WF/UserInterface/Alerts/WFAlertsWrapUIController.cs`](Alerts/WFAlertsWrapUIController.cs)
 - [`Content.Client/_WF/UserInterface/Controls/WolfgateColorPicker.cs`](Controls/WolfgateColorPicker.cs)
 - [`Content.Client/_WF/UserInterface/Controls/WolfgateColorPopup.cs`](Controls/WolfgateColorPopup.cs)
 - [`Content.Client/_WF/UserInterface/WindowPopout/WindowPopoutUIController.cs`](WindowPopout/WindowPopoutUIController.cs)

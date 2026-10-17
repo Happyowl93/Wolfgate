@@ -50,6 +50,7 @@ public sealed partial class ExecutionSystem : EntitySystem
     [Dependency] private SharedAppearanceSystem _appearanceSystem = default!;
     [Dependency] private SharedAudioSystem _audioSystem = default!;
     [Dependency] private GunSystem _gunSystem = default!;
+    [Dependency] private Content.Server._WF.Wolfmed.Life.WolfmedExecutionSystem _wolfmedExecution = default!; // WOLFGATE(Wolfmed): the kill and the gore tiers on a wound host
 
     /// <inheritdoc/>
     public override void Initialize()
@@ -109,6 +110,9 @@ public sealed partial class ExecutionSystem : EntitySystem
             return false;
 
         // The victim must be incapacitated to be executed
+        // WOLFGATE(Wolfmed) START: a Downed wound host is helpless enough to execute
+        if (!HasComp<Content.Shared._WF.Wolfmed.Consciousness.WolfmedDownedComponent>(victim))
+        // WOLFGATE END
         if (victim != attacker && _actionBlockerSystem.CanInteract(victim, null))
             return false;
 
@@ -134,6 +138,11 @@ public sealed partial class ExecutionSystem : EntitySystem
     {
         if (!CanExecuteWithGun(weapon, victim, attacker))
             return;
+
+        // WOLFGATE(Wolfmed) START: a player is asked "are you sure?" first, and the do-after starts on a yes
+        if (!_wolfmedConfirmed && _wolfmedExecution.AskFirst(weapon, victim, attacker, true))
+            return;
+        // WOLFGATE END
 
         var executionTime = weapon.Comp.ExecutionTime; // Mono
 
@@ -237,6 +246,7 @@ public sealed partial class ExecutionSystem : EntitySystem
 
         // Get some information from IShootable
         var ammoUid = ev.Ammo[0].Entity;
+        var wolfmedStrength = _wolfmedExecution.MeasureRound((weapon, component), ammoUid); // WOLFGATE(Wolfmed): read the round before the switch below spends or deletes it
         switch (ev.Ammo[0].Shootable)
         {
             case CartridgeAmmoComponent cartridge:
@@ -291,6 +301,10 @@ public sealed partial class ExecutionSystem : EntitySystem
         }
 
         // Gun successfully fired, deal damage
+        // WOLFGATE(Wolfmed) START: a lethal round kills a wound host and leaves its tier's gore; anything else takes the old hit
+        // A shot at oneself is a suicide there: the ghost leaves first and cannot return.
+        if (!_wolfmedExecution.TryGunExecution(victim, attacker, weapon, wolfmedStrength))
+        // WOLFGATE END
         _damageableSystem.TryChangeDamage(victim, damage * component.ExecutionModifier * damageModifier.Modifier, true, targetPart: TargetBodyPart.Head); // Mono - ExecutionModifier
         _audioSystem.PlayEntity(shotSound, Filter.Pvs(weapon), weapon, false, AudioParams.Default);
         RaiseLocalEvent(weapon, new AmmoShotEvent { FiredProjectiles = [] });

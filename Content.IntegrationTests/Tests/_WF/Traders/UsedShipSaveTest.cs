@@ -1,9 +1,11 @@
 #nullable enable
 using System.Linq;
+using Content.Server._ES.TileFires;
 using Content.Server._NF.Shipyard.Systems;
 using Content.Server._WF.Shipyard;
 using Content.Server.NPC.HTN;
 using Content.Server.NPC;
+using Content.Server.Spreader;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
@@ -95,6 +97,56 @@ public sealed class UsedShipSaveTest
                 Assert.That(htn.Blackboard.GetValue<EntityUid>(NPCBlackboard.Owner), Is.EqualTo(npc));
             }
             Assert.That(npcs, Is.GreaterThan(0), "The vessel should carry at least one HTN entity (autopilot console).");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// A hull with a fire aboard still copies: the fire sits in the grid's spread queue, which is not saved.
+    /// </summary>
+    [Test]
+    public async Task BurningShipRoundTrips()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var protoMan = server.ResolveDependency<IPrototypeManager>();
+        var mapLoader = entMan.System<MapLoaderSystem>();
+        var shipyard = entMan.System<ShipyardSystem>();
+
+        var shuttle = EntityUid.Invalid;
+        await server.WaitAssertion(() =>
+        {
+            var vessel = protoMan.Index<VesselPrototype>("Arribane");
+            Assert.That(mapLoader.TryLoadGrid(map.MapId, vessel.ShuttlePath, out var grid), Is.True);
+            shuttle = grid!.Value.Owner;
+        });
+
+        await pair.RunTicksSync(30);
+
+        await server.WaitAssertion(() =>
+        {
+            var fires = entMan.System<ESTileFireSystem>();
+            var lit = false;
+            var xforms = entMan.GetComponent<TransformComponent>(shuttle).ChildEnumerator;
+            while (!lit && xforms.MoveNext(out var child))
+                lit = fires.TryDoTileFire(entMan.GetComponent<TransformComponent>(child).Coordinates);
+
+            Assert.That(lit, Is.True, "No tile on the vessel would take a fire.");
+        });
+
+        await pair.RunTicksSync(5);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entMan.GetComponent<SpreaderGridComponent>(shuttle).SpreadQueues.Values.Any(queue => queue.Count > 0),
+                Is.True, "The fire is not queued to spread, so the test proves nothing.");
+
+            shipyard.SetupShipyardIfNeeded();
+            Assert.That(shipyard.TrySaveShip(shuttle, out var data), Is.True, "Save failed.");
+            Assert.That(shipyard.TryAddSavedShip(data!, out _), Is.True, "Load failed.");
         });
 
         await pair.CleanReturnAsync();

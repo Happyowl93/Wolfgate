@@ -3,7 +3,7 @@
   name: species-name-vulpkanin
   roundStart: true
   prototype: MobVulpkanin
-  sprites: MobVulpkaninSprites
+  sprites: WFMobVulpkaninSprites # WOLFGATE(Species): was MobVulpkaninSprites; Starlight's body on digitigrade legs
   defaultSkinTone: "#985629"
   markingLimits: MobVulpkaninMarkingLimits
   dollPrototype: MobVulpkaninDummy
@@ -52,7 +52,7 @@
     Tail:
       points: 1
       required: true
-      defaultMarkings: [ VulpTail ]
+      defaultMarkings: [ FoxTail ] # WOLFGATE(Species): was VulpTail; Starlight's tail for Starlight's body
     Head:
       points: 3
       required: false
@@ -68,7 +68,7 @@
     HeadTop:
       points: 1
       required: true
-      defaultMarkings: [ VulpEar ]
+      defaultMarkings: [ FoxEar ] # WOLFGATE(Species): was VulpEar; Starlight's ears for Starlight's body
 
 - type: humanoidBaseSprite
   id: MobVulpkaninHead

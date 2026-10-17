@@ -43,6 +43,7 @@
     damageContainers:
     - Inorganic
     - Silicon
+    - WFSiliconWolfmed # WOLFGATE(Wolfmed): playtest 3: the IPC's container, so its bar shows
   inventoryTemplateId: borgShort
   spriteBodyState: engineer
   spriteHasMindState: engineer_l
@@ -125,6 +126,7 @@
     damageContainers:
     - Inorganic
     - Silicon
+    - WFSiliconWolfmed # WOLFGATE(Wolfmed): playtest 3: the IPC's container, so its bar shows
   inventoryTemplateId: borgShort
   spriteBodyState: engineer
   spriteHasMindState: engineer_l
@@ -188,6 +190,7 @@
     - Biological
     - Inorganic
     - Silicon
+    - WFSiliconWolfmed # WOLFGATE(Wolfmed): playtest 3: the IPC's container, so its bar shows
   - type: FootstepModifier
     footstepSoundCollection:
       path: /Audio/_Mono/Effects/Footsteps/borgwalk3.ogg
@@ -223,6 +226,7 @@
     - Biological
     - Inorganic
     - Silicon
+    - WFSiliconWolfmed # WOLFGATE(Wolfmed): playtest 3: the IPC's container, so its bar shows
   - type: FootstepModifier
     footstepSoundCollection:
       path: /Audio/_Mono/Effects/Footsteps/borgwalk3.ogg
@@ -256,6 +260,7 @@
     - Biological
     - Inorganic
     - Silicon
+    - WFSiliconWolfmed # WOLFGATE(Wolfmed): playtest 3: the IPC's container, so its bar shows
   - type: FootstepModifier
     footstepSoundCollection:
       path: /Audio/_Mono/Effects/Footsteps/borgwalk4.ogg
@@ -291,6 +296,7 @@
     - Biological
     - Inorganic
     - Silicon
+    - WFSiliconWolfmed # WOLFGATE(Wolfmed): playtest 3: the IPC's container, so its bar shows
   - type: FootstepModifier
     footstepSoundCollection:
       path: /Audio/_Mono/Effects/Footsteps/borgwalk4.ogg

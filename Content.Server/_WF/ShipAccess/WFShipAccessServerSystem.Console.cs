@@ -12,6 +12,7 @@ public sealed partial class WFShipAccessServerSystem
     {
         Subs.BuiEvents<ShuttleConsoleComponent>(ShuttleConsoleUiKey.Key, subs =>
         {
+            subs.Event<WFShipAccessSetModeMessage>(OnSetMode);
             subs.Event<WFShipAccessSetLockedMessage>(OnSetLocked);
             subs.Event<WFShipAccessAddPlayerMessage>(OnAddPlayer);
             subs.Event<WFShipAccessRemoveMessage>(OnRemove);
@@ -23,6 +24,19 @@ public sealed partial class WFShipAccessServerSystem
             subs.Event<WFShipAccessSetShipCodeMessage>(OnSetShipCode);
             subs.Event<WFShipAccessSetDoorCodeMessage>(OnSetDoorCode);
         });
+    }
+
+    private void OnSetMode(Entity<ShuttleConsoleComponent> console, ref WFShipAccessSetModeMessage args)
+    {
+        if (!TryGetEditableShip(console, args.Actor, out var ship))
+            return;
+        if (args.Mode == WFShipAccessMode.Crew && !TryLinkCrew(ship, args.Actor))
+        {
+            Popup(console, args.Actor, "ship-access-no-crew");
+            return;
+        }
+        if (!SetMode(ship, args.Mode))
+            Popup(console, args.Actor, "ship-access-mode-unavailable");
     }
 
     private void OnSetLocked(Entity<ShuttleConsoleComponent> console, ref WFShipAccessSetLockedMessage args)

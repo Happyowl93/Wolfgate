@@ -8,6 +8,7 @@
   - type: Sprite
     sprite: _Mono/Clothing/Head/Modsuits/ussp-varyag.rsi
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.95
@@ -57,6 +58,7 @@
   - type: Sprite
     sprite: _Mono/Clothing/Head/Modsuits/ussp-zastavnik.rsi
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.95
@@ -127,6 +129,7 @@
   - type: Sprite
     sprite: _Mono/Clothing/Head/Modsuits/rogue.rsi
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.9
@@ -212,6 +215,7 @@
   - type: Sprite
     sprite: _Mono/Clothing/Head/Modsuits/tsfmc-volta.rsi
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.90
@@ -294,6 +298,7 @@
       enum.RadarConsoleUiKey.Key:
         type: RadarConsoleBoundUserInterface
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.90

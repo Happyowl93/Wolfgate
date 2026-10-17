@@ -52,6 +52,8 @@
   - type: InputMover
   - type: InteractionOutline
   - type: Vehicle
+  # WOLFGATE(Planets): vehicles and their riders leave temporary flight maps through normal z-level physics.
+  - type: CEZPhysics
   - type: Pullable
   - type: Physics
     bodyType: KinematicController
@@ -220,8 +222,9 @@
           path: /Audio/Effects/Vehicle/vehiclestartup.ogg
           params:
             volume: -3
-  - type: StealTarget
-    stealGroup: VehicleSecway
+# - type: StealTarget
+#   stealGroup:
+#   - VehicleSecway
 
 - type: entity
   parent: BaseVehicleRideable

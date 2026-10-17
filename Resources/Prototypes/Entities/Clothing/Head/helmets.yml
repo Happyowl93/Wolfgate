@@ -7,6 +7,7 @@
   abstract: true
   components:
   - type: Armor #Values seem to let the user survive one extra hit if attacked consistently.
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.9
@@ -74,6 +75,7 @@
   - type: Clothing
     sprite: Clothing/Head/Helmets/swat.rsi
   - type: Armor #This is intentionally not spaceproof, when the time comes to port the values from SS13 this should be buffed from what it was.
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.80
@@ -117,6 +119,7 @@
     sprite: Clothing/Head/Helmets/light_riot.rsi
   - type: IngestionBlocker
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.8
@@ -141,6 +144,7 @@
   - type: ExplosionResistance
     damageCoefficient: 0.9
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.95
@@ -185,6 +189,7 @@
     sprite: Clothing/Head/Helmets/cult.rsi
   - type: IngestionBlocker
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.9
@@ -346,6 +351,7 @@
   - type: Clothing
     sprite: Clothing/Head/Helmets/linghelmet.rsi
   - type: Armor #admeme item so it should be fine being overpowered while helmets are still intentionally kneecapped.
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.5
@@ -435,14 +441,15 @@
 - type: entity
   parent: ClothingHeadHelmetBase
   id: ClothingHeadHelmetRaid
-  name: syndicate raid helmet
-  description: An armored helmet for use with the syndicate raid suit. Very stylish.
+  name: raid helmet # Mono: remove syndicate references
+  description: An armored helmet for use with the raid suit. Very stylish. # Mono: remove syndicate references
   components:
   - type: Sprite
     sprite: Clothing/Head/Helmets/syndie-raid.rsi
   - type: Clothing
     sprite: Clothing/Head/Helmets/syndie-raid.rsi
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers: #There's gotta be SOME reason to use this over other helmets.
       coefficients:
         Blunt: 0.85

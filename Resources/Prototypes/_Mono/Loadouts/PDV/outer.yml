@@ -9,6 +9,11 @@
     outerClothing: ClothingOuterArmorBPVestMedium
 
 - type: loadout
+  id: PDVClothingOuterArmorInfantry
+  equipment:
+    outerClothing: ClothingOuterArmorBPVestLightPDV
+
+- type: loadout
   id: PDVClothingOuterArmorCV67
   equipment:
     outerClothing: ClothingOuterHardsuitVizier

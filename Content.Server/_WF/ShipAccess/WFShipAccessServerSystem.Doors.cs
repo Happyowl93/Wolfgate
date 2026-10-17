@@ -109,6 +109,8 @@ public sealed partial class WFShipAccessServerSystem
     private bool ApplyDoorRule(EntityUid door, WFDoorAccessRule rule, out WFDoorAccessRule old)
     {
         old = WFDoorAccessRule.Default;
+        if (!Enum.IsDefined(rule))
+            return false;
         if (!TryComp<WFDoorAccessRuleComponent>(door, out var comp))
         {
             // A door without the component already follows the ship.
@@ -273,6 +275,12 @@ public sealed partial class WFShipAccessServerSystem
         if (!TryGetEditableShip(console, args.Actor, out var ship) || !TryGetShipDoor(console, ship, args.Door, args.Actor, out var door))
             return;
 
+        if (args.Rule == WFDoorAccessRule.Crew && !TryLinkCrew(ship, args.Actor))
+        {
+            Popup(console, args.Actor, "ship-access-no-crew");
+            return;
+        }
+
         // Sealing an open or unpowered door is deferred, so say so rather than leave the owner guessing.
         if (SetDoorRule(ship, door, args.Rule) && args.Rule == WFDoorAccessRule.Sealed
             && (!_door.IsBolted(door) || Comp<WFDoorAccessRuleComponent>(door).SealPending))
@@ -284,6 +292,11 @@ public sealed partial class WFShipAccessServerSystem
         if (!TryGetEditableShip(console, args.Actor, out var ship))
             return;
 
+        if (args.Rule == WFDoorAccessRule.Crew && !TryLinkCrew(ship, args.Actor))
+        {
+            Popup(console, args.Actor, "ship-access-no-crew");
+            return;
+        }
         var changed = SetAllDoorRules(ship, args.Rule);
         _popup.PopupEntity(Loc.GetString("ship-access-all-doors-set", ("count", changed)), console.Owner, args.Actor);
     }

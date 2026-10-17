@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Taken from Meridian Rift at https://github.com/Aphelion-Moon/Meridian-Rift/tree/0fd8e40910402f2745e5e5e4adc7d37bd45fed40 (modular_nova/modules/bodyparts/icons/shadekin_parts_greyscale.dmi), which carries the art of NovaSector, Skyrat-tg and tgstation. Each leg is cut into a leg and a foot. Tinted to _Starlight/Mobs/Species/Shadekin/parts.rsi.",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "l_foot",
+      "directions": 4
+    },
+    {
+      "name": "l_leg",
+      "directions": 4
+    },
+    {
+      "name": "r_foot",
+      "directions": 4
+    },
+    {
+      "name": "r_leg",
+      "directions": 4
+    }
+  ]
+}

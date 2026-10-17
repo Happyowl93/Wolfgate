@@ -114,7 +114,7 @@
   name: mono-chimera-tsf-title
   description: mono-chimera-tsf-description
   showInVote: true
-  minPlayers: 20 # WOLFGATE: only Insurgency is votable below 20 players
+  minPlayers: 30
   rules:
   - NFAdventure
   - BasicStationEventScheduler
@@ -136,7 +136,7 @@
   name: mono-chimera-pdv-title
   description: mono-chimera-pdv-description
   showInVote: true
-  minPlayers: 20 # WOLFGATE: only Insurgency is votable below 20 players
+  minPlayers: 30
   rules:
   - NFAdventure
   - BasicStationEventScheduler
@@ -180,8 +180,8 @@
   name: mono-allatonce-title
   description: mono-allatonce-description
   showInVote: true # we ball
-  minPlayers: 20 # WOLFGATE: only Insurgency is votable below 20 players
   weight: 0.25 # requires 80% votes
+  minPlayers: 30
   rules:
   - NFAdventure
   - BasicStationEventScheduler
@@ -204,12 +204,33 @@
   name: mono-roguetsf-hyperwar-title
   description: mono-roguetsf-hyperwar-description
   showInVote: true # we ball
-  minPlayers: 20 # WOLFGATE: only Insurgency is votable below 20 players
   weight: 0.15 # Giant majority needed
+  autobalancerEnabled: true
   supportedMaps: HyperwarMapPool
+  minPlayers: 30
   rules:
   - NFAdventure
   - Hyperwar
   - RoundEndRuleHour3
   - PortstrikeAnnounceRuleHour2
   - StarSystemKyphrus
+
+- type: gamePreset
+  id: MonoCrocus
+  alias:
+  - crocus
+  - monocrocus
+  name: mono-crocus-title
+  description: mono-crocus-description
+  showInVote: true
+  weight: 0.25 # 80% majority needed
+  respawnMultiplier: 0.25
+  autobalancerEnabled: true
+  supportedMaps: CrocusMapPool
+  minPlayers: 30
+  rules:
+  - PDVObjectivesCrocus
+  - TSFObjectivesCrocus
+  - RoundEndRuleHour1
+  - CrocusAnnouncementMinuteRoundStart
+  - CrocusAnnouncementMinute10m

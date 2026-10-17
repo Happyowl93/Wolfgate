@@ -99,7 +99,8 @@ public sealed class AvaliChemistryTest
                 Assert.That(Damage(Avali, "Amoxla", "Poison"), Is.EqualTo(FixedPoint2.Zero), "Amoxla poisoned an Avali.");
                 Assert.That(Damage(Human, "Amoxla", "Poison"), Is.GreaterThan(FixedPoint2.Zero), "Amoxla didn't poison a human.");
                 Assert.That(Damage(Avali, "Ammonia", "Caustic"), Is.EqualTo(FixedPoint2.Zero), "Ammonia burned an Avali.");
-                Assert.That(Damage(Human, "Ammonia", "Caustic"), Is.GreaterThan(FixedPoint2.Zero), "Ammonia didn't burn a human.");
+                // Wolfmed: what a metabolised reagent deals a wound host is toxin load, so the caustic arrives as Poison.
+                Assert.That(Damage(Human, "Ammonia", "Poison"), Is.GreaterThan(FixedPoint2.Zero), "Ammonia didn't harm a human.");
                 foreach (var reagent in new[] { "Saline", "Iron", "Dexalin", "DexalinPlus" })
                 {
                     Assert.That(Damage(Avali, reagent, "Poison"), Is.GreaterThan(FixedPoint2.Zero), $"{reagent} didn't poison an Avali.");

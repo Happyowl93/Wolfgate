@@ -63,6 +63,9 @@ public sealed partial class CEZLevelsSystem
             if (_wallContacts.Count == 0)
                 continue;
 
+            if (WfPloughThroughWalls(uid, body)) // WOLFGATE(Planets): a skidding hull flattens obstacles instead of bouncing.
+                continue;
+
             ResolveWallCollision(uid, body);
         }
     }

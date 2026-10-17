@@ -268,6 +268,9 @@ unmarked:
   - path: Resources/Maps/_Mono/Outpost/caelestinus_central.yml
     module: Traders
     reason: NPC traders, ATMs, deposit consoles and vents placed on the Central Command map.
+  - path: Resources/Maps/_Mono/POI/underground.yml
+    module: LockableButtons
+    reason: The two blast door buttons take Underground access; the station's crew has no Pirate access.
   - path: Resources/Textures/Tiles/exoborg.png
     module: Xenoborgs
     reason: Exoborg floor tile redrawn.
@@ -951,7 +954,7 @@ unmarked:
     reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
   - path: Content.Server/Objectives/Components/StealTargetComponent.cs
     module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
+    reason: Engine v289 removed the PrototypeId serializers; drops their using.
   - path: Content.Server/Parallax/BiomeSystem.PlanetSetup.cs
     module: EngineCompat
     reason: Engine v280 removed IMapManager; uses SharedMapSystem.
@@ -994,18 +997,6 @@ unmarked:
   - path: Content.Server/Radiation/Systems/RadiationSystem.cs
     module: EngineCompat
     reason: Engine v280 removed IMapManager; uses SharedMapSystem.
-  - path: Content.Server/Radio/Components/ActiveRadioComponent.cs
-    module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
-  - path: Content.Server/Radio/Components/IntrinsicRadioTransmitterComponent.cs
-    module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
-  - path: Content.Server/Radio/Components/RadioMicrophoneComponent.cs
-    module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
-  - path: Content.Server/Radio/Components/RadioSpeakerComponent.cs
-    module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
   - path: Content.Server/Research/TechnologyDisk/Components/DiskConsoleComponent.cs
     module: EngineCompat
     reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
@@ -1981,6 +1972,9 @@ unmarked:
   - path: Content.Shared/_Goobstation/Factory/RoboticArmSystem.cs
     module: EngineCompat
     reason: Engine v280 removed IMapManager; uses SharedMapSystem.
+  - path: Content.Shared/_Goobstation/Radio/Components/ActiveRadioComponent.cs
+    module: EngineCompat
+    reason: Engine v289 removed the PrototypeId serializers; drops their using.
   - path: Content.Shared/_Impstation/Thaven/ThavenMoodPrototype.cs
     module: EngineCompat
     reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
@@ -2194,9 +2188,93 @@ unmarked:
   - path: Content.IntegrationTests/Tests/Fluids/PuddleTest.cs
     module: EngineCompat
     reason: Engine v288 GetAllTiles enumerates lazily; tiles are collected before clearing.
+  - path: Content.Server/Decals/DecalSystem.cs
+    module: EngineCompat
+    reason: Engine v291 gives a split-off grid its own origin; decals move by the split offset.
+  - path: Resources/Prototypes/_Mono/Entities/Structures/Storage/reagents.yml
+    module: EngineCompat
+    reason: Engine v291 replaced Occluder boundingBox with a polygon.
+  - path: Resources/Prototypes/_Nuclear14/Entities/Structures/Furniture/shelf.yml
+    module: EngineCompat
+    reason: Engine v286 Box2 rejects inverted bounds; fixture bounds normalized.
+  - path: Resources/Prototypes/_Nuclear14/Entities/Structures/Walls/tall_obstacles.yml
+    module: EngineCompat
+    reason: Engine v286 Box2 rejects inverted bounds; fixture bounds normalized.
+  - path: Resources/Textures/_Onyx/
+    module: Wolfmed
+    reason: Space Onyx wound-system sprites (wound and fracture states, alerts, medical items) ported with Wolfmed.
+  - path: Resources/Maps/_NF/POI/medical.yml
+    module: Wolfmed
+    reason: An autodoc pod placed in the medical POI.
   - path: Resources/Textures/Effects/fire.rsi/
     module: BetterFire
     reason: Object fire state (fire) replaced with TauCeti generic_overlay.
   - path: Resources/Textures/Mobs/Effects/onfire.rsi/
     module: BetterFire
     reason: Generic_mob_burning and Standing replaced with TauCeti fire sprites; Standing_underlay added.
+  - path: Resources/Textures/_Impstation/Structures/
+    module: Resprites
+    reason: Impstation structure resprites (thermomachines, cryo pod, cryosleep, hydro tray, conveyor, fax, stasis bed, suit storage).
+  - path: Resources/Audio/_Goobstation/RadioStation/
+    module: null
+    reason: Radio host tracks (Monolith#4833) re-encoded to mono Vorbis q0 to cut download size.
+  - path: Resources/Audio/_Mono/RadioStation/
+    module: null
+    reason: Nulb vinyl tracks (Monolith#4835) re-encoded to mono Vorbis q0 to cut download size.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/inertia.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/mock.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/snakelet.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/bazalt.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/europa.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/gadfly.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_em.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_r.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/kresta.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/kynda.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/layak.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/motleyanne.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/neptune.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/ontos.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/osa.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/saturn.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/scorpion.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/tethys.yml
+    module: ShipArmor
+    reason: PDV hull refit from plastitanium to adamantite walls.
+  - path: Resources/SharedMaps/_Mono/Shuttles/Civilian/caracara.yml
+    module: null
+    reason: PDV pack, top-left thruster was mapped disabled.

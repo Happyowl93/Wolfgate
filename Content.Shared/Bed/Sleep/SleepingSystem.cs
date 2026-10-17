@@ -236,7 +236,12 @@ public sealed partial class SleepingSystem : EntitySystem
         if (args.NewMobState == MobState.Dead)
         {
             RemComp<SpamEmitSoundComponent>(ent);
-            RemComp<SleepingComponent>(ent);
+            // WOLFGATE(Wolfmed) START: playtest 5, a body that died asleep stayed stunned and knocked down once revived.
+            // Falling asleep stuns and knocks down with no timer, and only Wake takes them and the Wake action off; a
+            // body in cardiac arrest looks dead and can still fall asleep.
+            // RemComp<SleepingComponent>(ent);
+            Wake(ent);
+            // WOLFGATE END
             return;
         }
         if (TryComp<SpamEmitSoundComponent>(ent, out var spam))

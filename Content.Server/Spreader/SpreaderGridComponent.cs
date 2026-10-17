@@ -13,6 +13,9 @@ public sealed partial class SpreaderGridComponent : Component
     [DataField]
     public float UpdateSpacing = 1f;
 
-    [DataField]
+    // WOLFGATE(Shipyard) START: the queue is rebuilt on grid init and cannot be written, so a grid with a live spreader failed to save
+    // [DataField]
+    [ViewVariables]
+    // WOLFGATE END
     public Dictionary<ProtoId<EdgeSpreaderPrototype>, Queue<Entity<EdgeSpreaderComponent>>> SpreadQueues = new();
 }

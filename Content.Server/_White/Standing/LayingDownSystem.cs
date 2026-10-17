@@ -19,6 +19,10 @@ public sealed partial class LayingDownSystem : SharedLayingDownSystem
     {
         var uid = GetEntity(ev.User);
 
+        // WOLFGATE(Standing): a client only answers for its own body
+        if (args.SenderSession.AttachedEntity != uid)
+            return;
+
         if (!TryComp(uid, out LayingDownComponent? layingDown))
             return;
 

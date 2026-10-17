@@ -77,18 +77,25 @@ namespace Content.Client.HealthAnalyzer.UI
                 bodyPartButton.Value.MouseFilter = MouseFilterMode.Stop;
                 bodyPartButton.Value.OnPressed += _ => SetActiveBodyPart(bodyPartButton.Key, bodyPartButton.Value);
             }
-            ReturnButton.OnPressed += _ => ResetBodyPart();
+            // WOLFGATE(Wolfmed) START: UI3 - the return button is gone and the doll drives targeting.
+            // ReturnButton.OnPressed += _ => ResetBodyPart();
+            InitWolfmedTargeting();
+            // WOLFGATE END
             // Shitmed Change End
         }
 
         // Shitmed Change Start
         public void SetActiveBodyPart(TargetBodyPart part, TextureButton button)
         {
-            if (_target == null)
-                return;
-
-            // Bit of the ole shitcode until we have Groins in the prototypes.
-            OnBodyPartSelected?.Invoke(part == TargetBodyPart.Groin ? TargetBodyPart.Torso : part, _target.Value);
+            // WOLFGATE(Wolfmed) START: UI3 - the doll sets the local player's targeted part instead of rescanning one part.
+            // It now works exactly as the HUD doll and the targeting hotkeys do.
+            // if (_target == null)
+            //     return;
+            //
+            // // Bit of the ole shitcode until we have Groins in the prototypes.
+            // OnBodyPartSelected?.Invoke(part == TargetBodyPart.Groin ? TargetBodyPart.Torso : part, _target.Value);
+            SelectWolfmedTargetPart(part);
+            // WOLFGATE END
         }
 
         public void ResetBodyPart()
@@ -108,6 +115,7 @@ namespace Content.Client.HealthAnalyzer.UI
         // Not all of this function got messed with, but it was spread enough to warrant being covered entirely by a Shitmed Change
         public void Populate(HealthAnalyzerScannedUserMessage msg)
         {
+            PopulateWolfmed(msg); // WOLFGATE(Wolfmed): HOOK 26 - first statement; Populate early-returns below and a trailing call would leave the previous patient's rows on screen.
             // Start-Shitmed
             _target = _entityManager.GetEntity(msg.TargetEntity);
             EntityUid? part = msg.Part != null ? _entityManager.GetEntity(msg.Part.Value) : null;
@@ -117,12 +125,13 @@ namespace Content.Client.HealthAnalyzer.UI
                 || !_entityManager.TryGetComponent<DamageableComponent>(isPart ? part : _target, out var damageable))
             {
                 NoPatientDataText.Visible = true;
+                HideWolfmed(); // WOLFGATE(Wolfmed): HOOK 26 - a target outside client PVS can still carry non-null diagnostics.
                 return;
             }
 
             SetActiveButtons(_entityManager.HasComponent<TargetingComponent>(_target.Value));
 
-            ReturnButton.Visible = isPart;
+            // ReturnButton.Visible = isPart; // WOLFGATE(Wolfmed): UI3 - the return button and its frame are gone with the part-view path.
             PartNameLabel.Visible = isPart;
 
             if (part != null)
@@ -187,6 +196,7 @@ namespace Content.Client.HealthAnalyzer.UI
 
             AlertsDivider.Visible = showAlerts;
             AlertsContainer.Visible = showAlerts;
+            WolfmedAlertsPanel.Visible = showAlerts; // WOLFGATE(Wolfmed): HOOK 26 - the framed box around the alerts, so an empty one costs the overview pane no height.
 
             if (showAlerts)
                 AlertsContainer.DisposeAllChildren();

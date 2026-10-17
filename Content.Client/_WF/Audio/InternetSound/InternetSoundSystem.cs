@@ -232,7 +232,7 @@ public sealed partial class InternetSoundSystem : EntitySystem
         }
 
         // Music loops keep starting tracks while paused; hold them until the sound finishes.
-        _contentAudio.PauseMusicWolfgate();
+        _contentAudio.PauseMusicWolfgate(WfMusicPauseReason.InternetSound);
         _globalSound.PauseEventMusicWolfgate();
         _contentAudio.EnforceMusicPauseWolfgate();
         _globalSound.EnforceEventMusicPauseWolfgate();
@@ -240,7 +240,7 @@ public sealed partial class InternetSoundSystem : EntitySystem
 
     private void ResumeMusic()
     {
-        _contentAudio.ResumeMusicWolfgate();
+        _contentAudio.ResumeMusicWolfgate(WfMusicPauseReason.InternetSound);
         _globalSound.ResumeEventMusicWolfgate();
     }
 

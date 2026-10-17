@@ -148,7 +148,9 @@
 - type: technology
   id: BiochemicalStasis
   name: research-technology-biochemical-stasis
-  entityIcon: StasisBed
+  icon:
+    sprite: _Impstation/Structures/Machines/stasis_bed.rsi # WOLFGATE(Resprites): Imp Sprite Ports
+    state: icon
   discipline: CivilianServices
   tier: 2
   cost: 10000
@@ -178,6 +180,14 @@
   - AdvancedRetractor
   - BorgModuleAdvancedSurgery
   - DefibrillatorCompact # Mono
+  # WOLFGATE(Wolfmed) START: AUTODOC: the program disks and modules the medical lathe lists, behind the same research as the rest of surgery.
+  - WFAutodocProgramDiskTransplant
+  - WFAutodocProgramDiskLimb
+  - WFAutodocProgramDiskNeuro
+  - WFAutodocProgramDiskCavity
+  - WFAutodocDefibModule
+  - WFAutodocAutofixModule
+  # WOLFGATE END
   technologyPrerequisites:
   - SuperParts
   - IndustrialMedicine

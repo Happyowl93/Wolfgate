@@ -212,6 +212,7 @@ public sealed partial class HumanoidAppearanceSystem : SharedHumanoidAppearanceS
         DebugTools.Assert(IsClientSide(uid));
 
         humanoid.MarkingSet = markings;
+        humanoid.CustomMarkings = ProfileCustomMarkings(profile); // WOLFGATE(CustomMarkings): the doll wears the profile's custom markings
         humanoid.PermanentlyHidden = new HashSet<HumanoidVisualLayers>();
         humanoid.HiddenLayers = new Dictionary<HumanoidVisualLayers, SlotFlags>();
         humanoid.CustomBaseLayers = customBaseLayers;
@@ -221,6 +222,7 @@ public sealed partial class HumanoidAppearanceSystem : SharedHumanoidAppearanceS
         humanoid.Species = profile.Species;
         humanoid.SkinColor = profile.Appearance.SkinColor;
         humanoid.EyeColor = profile.Appearance.EyeColor;
+        ApplyLegStyle(profile, humanoid); // WOLFGATE(LegStyle): the picked legs replace the species' leg layers
         humanoid.Height = profile.Appearance.Height;
         humanoid.Width = profile.Appearance.Width;
 

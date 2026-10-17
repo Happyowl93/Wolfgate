@@ -105,6 +105,7 @@
       head-vox:
       - state: equipped-HEAD-sealed-vox
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.90
@@ -168,6 +169,7 @@
       head-vox:
       - state: equipped-HEAD-sealed-vox
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.90
@@ -212,7 +214,7 @@
   parent: BaseClothingModsuitHelmet
   id: ClothingModsuitHelmetHeadOfSecurity
   name: bulwark modsuit helmet
-  description: Put on the HEAD of security.. How do you see out of this thing?
+  description: How do you see out of this thing?
   categories: [ HideSpawnMenu ]
   components:
   - type: Clothing
@@ -231,6 +233,7 @@
       head-vox:
       - state: equipped-HEAD-sealed-vox
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.90
@@ -281,6 +284,7 @@
   - type: Sprite
     sprite: _Goobstation/Clothing/Head/Modsuits/paramedic.rsi
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.90
@@ -331,6 +335,7 @@
   - type: Sprite
     sprite: _Goobstation/Clothing/Head/Modsuits/engineer.rsi
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.90
@@ -394,6 +399,7 @@
       head-vox:
       - state: equipped-HEAD-sealed-vox
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.90
@@ -444,6 +450,7 @@
   - type: Sprite
     sprite: _Goobstation/Clothing/Head/Modsuits/researchdirector.rsi
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.90
@@ -509,6 +516,7 @@
       head-vulpkanin:
       - state: equipped-HEAD-sealed-vulpkanin
   - type: Armor
+    coverage: [Head] # WOLFGATE(Wolfmed): P6, P3-D6: locational armour coverage
     modifiers:
       coefficients:
         Blunt: 0.85
