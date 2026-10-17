@@ -28,6 +28,7 @@ links, hand-on, the merge) and the marked edits in `SharedShipRepairSystem.Tool`
 ### Server
 
 - [`Content.Server/_WF/ShipRepair/AtmosphereSystem.WFReattach.cs`](AtmosphereSystem.WFReattach.cs)
+- [`Content.Server/_WF/ShipRepair/ShipRepairSystem.WFRebase.cs`](ShipRepairSystem.WFRebase.cs)
 - [`Content.Server/_WF/ShipRepair/WFHullSectionServerSystem.cs`](WFHullSectionServerSystem.cs)
 
 ### Shared

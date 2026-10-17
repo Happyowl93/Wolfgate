@@ -91,7 +91,7 @@ public sealed class HullSectionTest
 
         await server.WaitAssertion(() =>
         {
-            var chunks = em.GetComponent<ShipRepairDataComponent>(hull).Chunks.Count;
+            var blueprint = SnapshotTiles(em.GetComponent<ShipRepairDataComponent>(hull)).Count;
             // The top four rows of the hull's side make a second, smaller section.
             Cut(pair, hull, Enumerable.Range(0, SeamColumn).Select(x => new Vector2i(x, 10)));
             var small = SectionsOf(em, hull).Single(uid => uid != large);
@@ -100,7 +100,7 @@ public sealed class HullSectionTest
 
             Assert.That(em.TryGetComponent<ShipRepairDataComponent>(large, out var inherited), Is.True,
                 "The largest section did not take over the blueprint.");
-            Assert.That(inherited!.Chunks, Has.Count.EqualTo(chunks));
+            Assert.That(SnapshotTiles(inherited!), Has.Count.EqualTo(blueprint));
             Assert.That(em.HasComponent<WFHullSectionComponent>(large), Is.False, "The new hull still links to the old one.");
             Assert.That(em.GetComponent<WFHullSectionComponent>(small).Hull, Is.EqualTo(large), "The other section was not repointed.");
 
@@ -109,6 +109,75 @@ public sealed class HullSectionTest
 
             Assert.That(em.HasComponent<WFHullSectionComponent>(small), Is.False, "A section with no hull left is still linked.");
             Assert.That(em.HasComponent<ShipRepairDataComponent>(small), Is.False, "A scrap section took over the blueprint.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>A promoted section's snapshot follows its own tile indices, and the other section still maps onto it.</summary>
+    [Test]
+    public async Task PromotedSnapshotLinesUpWithTheHeir()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var em = server.EntMan;
+        var maps = server.System<SharedMapSystem>();
+        var map = await pair.CreateTestMap();
+        var (hull, large) = await BuildSplitHull(pair, map.MapId);
+
+        await server.WaitAssertion(() =>
+        {
+            var original = em.GetComponent<ShipRepairDataComponent>(hull);
+            var hullChunks = original.Chunks.Keys.ToHashSet();
+            var blueprint = SnapshotTiles(original).Count;
+            Cut(pair, hull, Enumerable.Range(0, SeamColumn).Select(x => new Vector2i(x, 10)));
+            var small = SectionsOf(em, hull).Single(uid => uid != large);
+            Assert.That(em.GetComponent<WFHullSectionComponent>(large).Offset, Is.Not.EqualTo(Vector2i.Zero),
+                "The heir kept the hull's tile indices, so this test shows nothing.");
+
+            em.DeleteEntity(hull);
+
+            var data = em.GetComponent<ShipRepairDataComponent>(large);
+            var snapshot = SnapshotTiles(data);
+            Assert.That(snapshot, Has.Count.EqualTo(blueprint), "The handed-on snapshot lost or gained tiles.");
+
+            foreach (var tile in maps.GetAllTiles(large, em.GetComponent<MapGridComponent>(large)).ToList())
+            {
+                Assert.That(snapshot.GetValueOrDefault(tile.GridIndices), Is.EqualTo(tile.Tile.TypeId),
+                    $"The heir's tile {tile.GridIndices} is not where its snapshot has it.");
+            }
+
+            var offset = em.GetComponent<WFHullSectionComponent>(small).Offset;
+            foreach (var tile in maps.GetAllTiles(small, em.GetComponent<MapGridComponent>(small)).ToList())
+            {
+                var place = tile.GridIndices + offset;
+                Assert.That(snapshot.GetValueOrDefault(place), Is.EqualTo(tile.Tile.TypeId),
+                    $"The other section's tile {tile.GridIndices} does not map onto its place in the heir's snapshot.");
+                Assert.That(HasTile(pair, large, place), Is.False, $"The other section's place {place} overlaps the heir.");
+            }
+
+            var fixtures = 0;
+            foreach (var (chunkIndex, chunk) in data.Chunks)
+            {
+                Assert.That(chunk.Entities.Keys.All(id => id < chunk.NextUid), Is.True, $"Chunk {chunkIndex} would reuse an entity id.");
+                foreach (var spec in chunk.Entities.Values)
+                {
+                    if (!em.TryGetEntity(spec.OriginalEntity, out var fixture)
+                        || em.GetComponent<TransformComponent>(fixture.Value).ParentUid != large)
+                        continue;
+
+                    fixtures++;
+                    var local = em.GetComponent<TransformComponent>(fixture.Value).LocalPosition;
+                    Assert.That((spec.LocalPosition - local).Length(), Is.LessThan(0.01f),
+                        $"{em.ToPrettyString(fixture)} is stored at {spec.LocalPosition}, not where it stands at {local}.");
+                    var tile = new Vector2i((int) MathF.Floor(local.X), (int) MathF.Floor(local.Y));
+                    Assert.That(SnapshotChunk(tile, data.ChunkSize), Is.EqualTo(chunkIndex),
+                        $"{em.ToPrettyString(fixture)} is stored in another tile's chunk.");
+                }
+            }
+
+            Assert.That(fixtures, Is.GreaterThan(0), "No fixture aboard the heir was in its snapshot.");
+            Assert.That(data.Chunks.Keys.Any(key => !hullChunks.Contains(key)), Is.True, "The snapshot was not moved onto the heir's indices.");
         });
 
         await pair.CleanReturnAsync();
@@ -943,6 +1012,29 @@ public sealed class HullSectionTest
                     $"Tile {index} links {direction} but its neighbour does not link back, {when}.");
             }
         }
+    }
+
+    /// <summary>Every stored tile of a repair snapshot, by grid index.</summary>
+    private static Dictionary<Vector2i, int> SnapshotTiles(ShipRepairDataComponent data)
+    {
+        var tiles = new Dictionary<Vector2i, int>();
+        var size = data.ChunkSize;
+        foreach (var (chunkIndex, chunk) in data.Chunks)
+        {
+            for (var i = 0; i < chunk.Tiles.Length; i++)
+            {
+                if (chunk.Tiles[i] != Tile.Empty.TypeId)
+                    tiles[chunkIndex * size + new Vector2i(i % size, i / size)] = chunk.Tiles[i];
+            }
+        }
+
+        return tiles;
+    }
+
+    /// <summary>The snapshot chunk holding a grid tile.</summary>
+    private static Vector2i SnapshotChunk(Vector2i index, int size)
+    {
+        return new Vector2i((int) MathF.Floor(index.X / (float) size), (int) MathF.Floor(index.Y / (float) size));
     }
 
     private static bool HasTile(TestPair pair, EntityUid grid, Vector2i index)

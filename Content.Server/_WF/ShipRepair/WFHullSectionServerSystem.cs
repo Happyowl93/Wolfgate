@@ -1,5 +1,6 @@
 using System.Numerics;
 using Content.Server._Mono.FireControl;
+using Content.Server._Mono.ShipRepair;
 using Content.Server._WF.EngineCompat;
 using Content.Server._WF.Shipyard;
 using Content.Server.Atmos.EntitySystems;
@@ -26,6 +27,7 @@ public sealed partial class WFHullSectionServerSystem : EntitySystem
     [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private SharedPhysicsSystem _physics = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private ShipRepairSystem _repair = default!;
     [Dependency] private WFGridSplitOriginSystem _splitOrigin = default!;
     [Dependency] private WFHullSectionSystem _sections = default!;
 
@@ -132,7 +134,7 @@ public sealed partial class WFHullSectionServerSystem : EntitySystem
         var heirOffset = heir is { } heirGrid ? _sections.OffsetOf(heirGrid) : Vector2i.Zero;
         if (heir is { } next)
         {
-            CopySnapshot(ent.Comp, next);
+            CopySnapshot(ent.Comp, next, -heirOffset);
             if (TryComp<ShipRepairRestrictComponent>(ent, out var restrict))
                 EnsureComp<ShipRepairRestrictComponent>(next).ToolWhitelist = restrict.ToolWhitelist;
         }
@@ -167,8 +169,8 @@ public sealed partial class WFHullSectionServerSystem : EntitySystem
         return count;
     }
 
-    /// <summary>Gives a grid its own copy of a repair snapshot.</summary>
-    private void CopySnapshot(ShipRepairDataComponent source, EntityUid target)
+    /// <summary>Gives a grid its own copy of a repair snapshot, moved by <paramref name="shift"/> tiles onto its indices.</summary>
+    private void CopySnapshot(ShipRepairDataComponent source, Entity<MapGridComponent> target, Vector2i shift)
     {
         var copy = EnsureComp<ShipRepairDataComponent>(target);
         copy.ChunkSize = source.ChunkSize;
@@ -197,6 +199,7 @@ public sealed partial class WFHullSectionServerSystem : EntitySystem
             copy.Chunks[index] = chunkCopy;
         }
 
+        _repair.WfShiftSnapshot(copy, shift, target.Comp.TileSize);
         Dirty(target, copy);
     }
 
