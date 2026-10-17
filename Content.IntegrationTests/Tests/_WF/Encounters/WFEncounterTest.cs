@@ -662,6 +662,15 @@ public sealed partial class WFEncounterTest : InteractionTest
             Assert.That(state.Engaged, Is.Empty, "Under the ceasefire a PDV ship inside the ring is not fired on.");
             Server.System<Content.Server._Mono.AlertLevel.WarLevelSystem>().SetLevel(true);
             Assert.That(Server.System<WFEncounterZoneSystem>().AtWar("PDV", "TSF"), Is.True, "A declared war is mutual.");
+            SEntMan.GetComponent<Content.Shared._Mono.Company.CompanyComponent>(intruder).CompanyName = "PDVCivilian";
+        });
+        await RunTicks(150);
+        await Server.WaitAssertion(() =>
+        {
+            var state = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["patrol"];
+            Assert.That(state.Engaged, Is.Empty, "A PDV civilian ship showing its IFF is not fired on, even at war.");
+            Assert.That(state.Warned.ContainsKey(intruder), Is.False, "Nor is it warned off.");
+            SEntMan.GetComponent<Content.Shared._Mono.Company.CompanyComponent>(intruder).CompanyName = "PDV";
         });
         await RunTicks(150);
         await Server.WaitAssertion(() =>

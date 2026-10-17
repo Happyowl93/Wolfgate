@@ -37,6 +37,7 @@
     - MonoRogueMiscDynamic
     - MonoRogueGearDynamic
     #- MonoRogueGearProDynamic
+    - MonoRogueGearProDynamic # WOLFGATE(MonoReverts): the restored PDV suit research needs a lathe that prints it
     # TSF start
     - MonoTSFWeaponsDynamicMelee
     - MonoTSFWeaponsDynamicRanged
