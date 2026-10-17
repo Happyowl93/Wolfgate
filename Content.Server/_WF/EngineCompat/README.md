@@ -25,6 +25,7 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 
 ### Server
 
+- [`Content.Server/_WF/EngineCompat/AtmosphereSystem.WFSplitOrigin.cs`](AtmosphereSystem.WFSplitOrigin.cs)
 - [`Content.Server/_WF/EngineCompat/WFGridSplitOriginComponent.cs`](WFGridSplitOriginComponent.cs)
 - [`Content.Server/_WF/EngineCompat/WFGridSplitOriginSystem.cs`](WFGridSplitOriginSystem.cs)
 
@@ -35,6 +36,7 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/EngineCompat/AtmosSplitOffsetTest.cs`](../../../Content.IntegrationTests/Tests/_WF/EngineCompat/AtmosSplitOffsetTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/EngineCompat/EngineV291RegressionTest.cs`](../../../Content.IntegrationTests/Tests/_WF/EngineCompat/EngineV291RegressionTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/EngineCompat/ExpeditionConsoleTest.cs`](../../../Content.IntegrationTests/Tests/_WF/EngineCompat/ExpeditionConsoleTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/EngineCompat/ShuttleProximityTest.cs`](../../../Content.IntegrationTests/Tests/_WF/EngineCompat/ShuttleProximityTest.cs)
@@ -206,6 +208,7 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 - [`Content.Server/Atmos/EntitySystems/AtmosDebugOverlaySystem.cs`](../../Atmos/EntitySystems/AtmosDebugOverlaySystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Server/Atmos/EntitySystems/AtmosphereSystem.Commands.cs`](../../Atmos/EntitySystems/AtmosphereSystem.Commands.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Server/Atmos/EntitySystems/AtmosphereSystem.cs`](../../Atmos/EntitySystems/AtmosphereSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
+- [`Content.Server/Atmos/EntitySystems/AtmosphereSystem.GridAtmosphere.cs`](../../Atmos/EntitySystems/AtmosphereSystem.GridAtmosphere.cs): engine v291 gives a split-off grid its own origin; map its tiles back to the old grid.
 - [`Content.Server/Atmos/EntitySystems/GasTileOverlaySystem.cs`](../../Atmos/EntitySystems/GasTileOverlaySystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Server/Atmos/Monitor/Components/AirAlarmComponent.cs`](../../Atmos/Monitor/Components/AirAlarmComponent.cs): Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
 - [`Content.Server/Atmos/Monitor/Components/AtmosAlarmableComponent.cs`](../../Atmos/Monitor/Components/AtmosAlarmableComponent.cs): Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
