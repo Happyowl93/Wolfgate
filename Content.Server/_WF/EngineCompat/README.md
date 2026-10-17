@@ -35,6 +35,7 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/EngineCompat/EngineV291RegressionTest.cs`](../../../Content.IntegrationTests/Tests/_WF/EngineCompat/EngineV291RegressionTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/EngineCompat/ShuttleProximityTest.cs`](../../../Content.IntegrationTests/Tests/_WF/EngineCompat/ShuttleProximityTest.cs)
 
 ### Prototypes
@@ -105,6 +106,7 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 - [`Content.Client/UserInterface/RichText/MonoTag.cs`](../../../Content.Client/UserInterface/RichText/MonoTag.cs): Engine v289 removed [ValidatePrototypeId]; its constants became ProtoId fields.
 - [`Content.Client/UserInterface/Systems/Chat/ChatUIController.cs`](../../../Content.Client/UserInterface/Systems/Chat/ChatUIController.cs): Engine v289 removed [ValidatePrototypeId]; its constants became ProtoId fields.
 - [`Content.Client/UserInterface/Systems/Info/InfoUIController.cs`](../../../Content.Client/UserInterface/Systems/Info/InfoUIController.cs): Engine v289 removed [ValidatePrototypeId]; its constants became ProtoId fields.
+- [`Content.Client/UserInterface/Systems/Storage/Controls/ItemGridPiece.cs`](../../../Content.Client/UserInterface/Systems/Storage/Controls/ItemGridPiece.cs): v291 Box2 collapses an inverted box
 - [`Content.Client/VendingMachines/VendingMachineBoundUserInterface.cs`](../../../Content.Client/VendingMachines/VendingMachineBoundUserInterface.cs): Engine v291 serialization generation cannot use a namespace named Component.
 - [`Content.Client/VendingMachines/VendingMachineSystem.cs`](../../../Content.Client/VendingMachines/VendingMachineSystem.cs): Engine v291 serialization generation cannot use a namespace named Component.
 - [`Content.Client/Weapons/Misc/TetherGunSystem.cs`](../../../Content.Client/Weapons/Misc/TetherGunSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
@@ -155,6 +157,10 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 - [`Content.Server/_Goobstation/MobCaller/MobCallerSystem.cs`](../../_Goobstation/MobCaller/MobCallerSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Server/_Goobstation/Teleportation/Systems/TeleportSystem.cs`](../../_Goobstation/Teleportation/Systems/TeleportSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Server/_Mono/Cleanup/CleanupHelperSystem.cs`](../../_Mono/Cleanup/CleanupHelperSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
+- [`Content.Server/_Mono/Cleanup/SpaceCleanupSystem.cs`](../../_Mono/Cleanup/SpaceCleanupSystem.cs)
+  - reflection doesn't fill v291's optional ignoreShapeSkin
+  - pass every parameter, optional ones at their defaults
+  - v291 added an optional seventh parameter, which Invoke won't default
 - [`Content.Server/_Mono/Drill/ShipDrillSystem.cs`](../../_Mono/Drill/ShipDrillSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Server/_Mono/FireControl/FireControlSystem.Console.cs`](../../_Mono/FireControl/FireControlSystem.Console.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Server/_Mono/NPC/HTN/ShipSteeringSystem.cs`](../../_Mono/NPC/HTN/ShipSteeringSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
