@@ -92,6 +92,15 @@ public sealed partial class NPCCombatSystem
                 continue;
             }
 
+            // WOLFGATE(NpcCrew) START: no shooting while Downed, crit, stunned or asleep
+            if (!CanNpcShoot(uid))
+            {
+                comp.ShootAccumulator = 0f;
+                UpdatePointerLineNoTarget(gunUid);
+                continue;
+            }
+            // WOLFGATE END
+
             if (comp.Status == CombatStatus.Unspecified)
             {
                 UpdatePointerLineNoTarget(gunUid); // Goobstation

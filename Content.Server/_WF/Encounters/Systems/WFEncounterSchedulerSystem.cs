@@ -542,11 +542,12 @@ public sealed partial class WFEncounterSchedulerSystem : EntitySystem
 
     /// <summary>
     /// Whether a map is sector space that ships can be put in: not hyperspace, not the shipyard's holding map, not
-    /// an expedition and not one of a planet's layers.
+    /// an expedition, not a vehicle's interior and not one of a planet's layers.
     /// </summary>
     private bool IsSector(MapId map, EntityUid? mapUid)
     {
         if (mapUid is not { } uid || HasComp<Content.Shared.Shuttles.Components.FTLMapComponent>(uid)
+            || HasComp<Content.Shared._WF.Vehicles.Core.VehicleInteriorLinkComponent>(uid)
             || HasComp<Content.Server.Salvage.Expeditions.SalvageExpeditionComponent>(uid)
             || EntityManager.System<Content.Server._NF.Shipyard.Systems.ShipyardSystem>().ShipyardMap == map)
             return false;
@@ -614,10 +615,22 @@ public sealed partial class WFEncounterSchedulerSystem : EntitySystem
         var players = EntityQueryEnumerator<ActorComponent, TransformComponent>();
         while (players.MoveNext(out var uid, out _, out var xform))
         {
+            if (HasComp<GhostComponent>(uid) || _mobs.IsDead(uid) || _mobs.IsCritical(uid))
+                continue;
+
+            // Inside a vehicle a player is on the interior's own map; the vehicle outside is where they are.
+            var where = _transform.GetMapCoordinates(uid, xform);
+            if (TryComp<Content.Shared._WF.Vehicles.Core.VehicleInteriorLinkComponent>(xform.MapUid, out var link))
+            {
+                if (TerminatingOrDeleted(link.Vehicle))
+                    continue;
+                where = _transform.GetMapCoordinates(link.Vehicle);
+            }
+
             // A body without a mob state still counts; ghosts and the dead don't. Only the sector is open space:
             // a player on a planet, in its orbit or in a cavern is no place to put ships beside.
-            if (xform.MapID != MapId.Nullspace && IsSector(xform.MapID, xform.MapUid) && !HasComp<GhostComponent>(uid) && !_mobs.IsDead(uid) && !_mobs.IsCritical(uid))
-                anchors.Add(_transform.GetMapCoordinates(uid, xform));
+            if (where.MapId != MapId.Nullspace && IsSector(where.MapId, _maps.GetMapOrInvalid(where.MapId)))
+                anchors.Add(where);
         }
 
         if (anchors.Count == 0)
