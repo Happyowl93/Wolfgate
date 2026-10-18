@@ -145,6 +145,8 @@ public sealed partial class WFReaverCampaignSystem
             return null;
 
         var watch = Spawn(null, new EntityCoordinates(uid, Vector2.Zero));
+        // A hull passing over the map origin would otherwise pick it up.
+        Transform(watch).GridTraversal = false;
         _meta.SetEntityName(watch, Loc.GetString("wf-reaver-watch"));
         EnsureComp<TelecomExemptComponent>(watch);
         state.Watch = watch;

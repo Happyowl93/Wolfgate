@@ -212,6 +212,7 @@ ground overhead is a ceiling (the Caverns `WfSealedAbove`). `WFAtmosphericJetpac
 - [`Content.IntegrationTests/Tests/_WF/Planets/LiftoffTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Planets/LiftoffTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Planets/OrbitalMobFallTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Planets/OrbitalMobFallTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Planets/OrbitArrivalTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Planets/OrbitArrivalTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Planets/OrbitBeaconPinTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Planets/OrbitBeaconPinTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Planets/OrbitDecayTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Planets/OrbitDecayTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Planets/OrbitEntryTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Planets/OrbitEntryTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Planets/ParachuteTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Planets/ParachuteTest.cs)

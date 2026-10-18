@@ -315,7 +315,9 @@ public sealed partial class WFEncounterSystem : EntitySystem
             return false;
 
         // On the map itself: parented to a grid under the origin, it would go with that grid and orphan its ships.
+        // Out of grid traversal too, or a ship loaded on top of it would pick it up as it flies off.
         var uid = Spawn(null, new EntityCoordinates(map.Value, origin.Position));
+        Transform(uid).GridTraversal = false;
         var comp = AddComp<WFEncounterComponent>(uid);
         var designation = $"{(char) ('A' + _random.Next(26))}{(char) ('A' + _random.Next(26))}-{_random.Next(100, 1000)}";
         comp.Prototype = prototype.ID;

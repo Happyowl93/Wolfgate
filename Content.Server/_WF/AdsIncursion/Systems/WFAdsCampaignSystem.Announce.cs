@@ -142,6 +142,8 @@ public sealed partial class WFAdsCampaignSystem
             return null;
 
         var watch = Spawn(null, new EntityCoordinates(uid, Vector2.Zero));
+        // A hull passing over the map origin would otherwise pick it up.
+        Transform(watch).GridTraversal = false;
         _meta.SetEntityName(watch, Loc.GetString("wf-ads-watch"));
         EnsureComp<TelecomExemptComponent>(watch);
         EnsureComp<SpeechComponent>(watch).SpeechVerb = SynthVerb;
