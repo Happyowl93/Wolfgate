@@ -42,6 +42,9 @@ public sealed class WFDrydockJobSlot
 
     /// <summary>Time an unreachable item is given up on.</summary>
     public TimeSpan GiveUpAt;
+
+    /// <summary>Time an idle slot that found nothing to take looks through the queue again.</summary>
+    public TimeSpan NextTake;
 }
 
 /// <summary>

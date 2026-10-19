@@ -86,7 +86,9 @@ an edge pointer with its range. Open consoles refresh once a second.
 
 `WFComputerMobileDrydock` (board `WFComputerMobileDrydockCircuitboard`) and `WFMobileDrydockCrane` (board
 `WFMobileDrydockCraneMachineCircuitboard`, MV power, at stock parts a 26-tile berth starting 3 tiles past the machine, 13 tiles
-across). Both boards print at the circuit imprinter after Shuttlecraft research. To mirror a mobile crane, unbolt it,
+across). Both boards print at the circuit imprinter after Shuttlecraft research. The crane builds in a 2x2 machine
+frame, from 20 steel, 10 plasteel, 10 MV cable, 4 motors and 4 armor plates on top of its parts, and can be pulled
+while unbolted. To mirror a mobile crane, unbolt it,
 open its panel and cut with wirecutters for 2 s (`WFDrydockCraneMirrorSystem`). It works walk-in only and never on its
 own grid.
 
@@ -99,11 +101,11 @@ Refunds go back into the job's first crane. A repair short of materials does wha
 is left out, so are the parts. A refit is all or nothing.
 
 A mobile crane also links a parts silo and a chemical silo (Lathe module), from the silo's window like a lathe, and
-parts silos then take any machine part (`parts` on its `FabricationSiloClient`). A refit unit billed in full takes the
+parts silos then take any machine part and machine or computer board (`parts` on its `FabricationSiloClient`). A refit unit billed in full takes the
 stock part it installs from the parts silo, if there is one, instead of its tier materials
 (`WFDrydockSystem.Supplies.cs`). Only that exact prototype counts, so trade goods that are machine parts, such as
 `CapacitorEconomy2`, are never spent. Units restored at the repair share pay in materials, so a spare part isn't spent
-on a 20% bill. Unfinished work's parts go back to the silo, or onto the nearest free floor beside the crane. The console
+on a 20% bill. Unfinished work's parts go back to the silo, or onto the nearest free floor beside the crane, never past a wall. The console
 lists everything the parts silos hold and the chemicals in the chemical silos; nothing uses chemicals yet. Bills (the
 repair quote, the salvage preview and each refit's cost) list one row per material, red where the cranes hold too
 little.
