@@ -201,7 +201,7 @@ namespace Content.Client.Options.UI.Tabs
             AddButton(ContentKeyFunctions.ActivateItemInWorld);
             AddButton(ContentKeyFunctions.AltActivateItemInWorld);
             AddButton(ContentKeyFunctions.Drop);
-            AddButton(ContentKeyFunctions.WFOfferItem); // WOLFGATE(ItemOffer): hold out the active item
+            AddButton(ContentKeyFunctions.WFOfferItem); // WOLFGATE(ExtraInteractions): hold out the active item
             AddButton(ContentKeyFunctions.ExamineEntity);
             AddButton(ContentKeyFunctions.SwapHands);
             AddButton(ContentKeyFunctions.SwapHandsPrevious); // Frontier

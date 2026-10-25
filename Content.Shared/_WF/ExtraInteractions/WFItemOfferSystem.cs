@@ -18,7 +18,7 @@ using Robust.Shared.Input.Binding;
 using Robust.Shared.Player;
 using Robust.Shared.Utility;
 
-namespace Content.Shared._WF.ItemOffer;
+namespace Content.Shared._WF.ExtraInteractions;
 
 /// <summary>
 /// Lets a mob hold out its active item so anyone in reach can take it, without dropping it first.

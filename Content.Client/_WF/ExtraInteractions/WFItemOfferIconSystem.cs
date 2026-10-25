@@ -1,4 +1,4 @@
-using Content.Shared._WF.ItemOffer;
+using Content.Shared._WF.ExtraInteractions;
 using Content.Shared.CombatMode;
 using Content.Shared.Interaction;
 using Robust.Client.Graphics;
@@ -7,7 +7,7 @@ using Robust.Shared.Input.Binding;
 using Robust.Shared.Map;
 using Robust.Shared.Player;
 
-namespace Content.Client._WF.ItemOffer;
+namespace Content.Client._WF.ExtraInteractions;
 
 /// <summary>
 /// Draws each offered item in front of its offerer and turns a click on it into a take request.

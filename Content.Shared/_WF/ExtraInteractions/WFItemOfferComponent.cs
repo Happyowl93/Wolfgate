@@ -1,7 +1,7 @@
 using Robust.Shared.GameStates;
 using Robust.Shared.Serialization;
 
-namespace Content.Shared._WF.ItemOffer;
+namespace Content.Shared._WF.ExtraInteractions;
 
 /// <summary>
 /// On a mob holding out an item for anyone nearby to take.

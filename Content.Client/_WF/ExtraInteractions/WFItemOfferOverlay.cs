@@ -1,18 +1,19 @@
 using System.Numerics;
-using Content.Shared._WF.ItemOffer;
+using Content.Shared._WF.ExtraInteractions;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Shared.Enums;
 using Robust.Shared.Timing;
 
-namespace Content.Client._WF.ItemOffer;
+namespace Content.Client._WF.ExtraInteractions;
 
 /// <summary>
 /// A translucent, gently bobbing copy of each offered item, half a tile in front of whoever holds it out.
 /// </summary>
 public sealed class WFItemOfferOverlay : Overlay
 {
-    public override OverlaySpace Space => OverlaySpace.WorldSpace;
+    // Under FOV and lighting, like the item itself would be.
+    public override OverlaySpace Space => OverlaySpace.WorldSpaceBelowFOV;
 
     private const float Alpha = 0.6f;
     private const float BobHeight = 0.04f;

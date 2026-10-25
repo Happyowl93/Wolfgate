@@ -13,3 +13,5 @@ wf-item-offer-examine = {CAPITALIZE(SUBJECT($user))} {CONJUGATE-BE($user)} holdi
 wf-item-offer-verb-take = Take {THE($item)}
 wf-item-offer-verb-offer = Offer {THE($item)}
 wf-item-offer-verb-stop = Stop offering
+
+wf-show-item-emote = shows {POSS-ADJ($user)} {$item}.

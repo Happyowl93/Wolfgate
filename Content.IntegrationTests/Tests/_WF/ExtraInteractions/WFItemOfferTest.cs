@@ -1,10 +1,10 @@
 #nullable enable
-using Content.Shared._WF.ItemOffer;
+using Content.Shared._WF.ExtraInteractions;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Robust.Shared.GameObjects;
 
-namespace Content.IntegrationTests.Tests._WF.ItemOffer;
+namespace Content.IntegrationTests.Tests._WF.ExtraInteractions;
 
 /// <summary>An offered item moves straight from the offerer's hand to the taker's, and the offer ends when it leaves the hand.</summary>
 [TestFixture]

@@ -249,7 +249,7 @@ binds:
 - function: OpenCraftingMenu
   type: State
   key: G
-# WOLFGATE(ItemOffer): offer item key, on a key free in the stock layout
+# WOLFGATE(ExtraInteractions): offer item key, on a key free in the stock layout
 - function: WFOfferItem
   type: State
   key: J
