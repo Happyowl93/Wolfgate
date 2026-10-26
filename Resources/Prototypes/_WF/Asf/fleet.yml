@@ -183,7 +183,7 @@
   id: WFAsfGuardian
   parent: BaseVessel
   name: ASFN Guardian
-  description: A Federation patrol corvette armed with an Apollo heavy laser, 2 Type-12 Hummingbird cutting arrays and 2 self-loading Serpent torpedo launchers, plus a small shield and bunks for 2. Open the bow door before firing the Apollo.
+  description: A Federation patrol corvette armed with an Apollo heavy laser, 2 Type-12 Hummingbird cutting arrays and 2 self-loading Tarnyx EMP cannons, plus a small shield and bunks for 2. Open the bow door before firing the Apollo.
   price: 120000
   category: Medium
   group: Custom

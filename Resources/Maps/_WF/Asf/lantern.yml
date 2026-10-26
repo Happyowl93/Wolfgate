@@ -1,7 +1,7 @@
 meta:
   format: 6
   postmapinit: false
-  entityCount: 3564
+  entityCount: 3568
 tilemap:
   0: Space
   3: FloorCarpetOffice
@@ -16344,6 +16344,28 @@ entities:
     - type: Transform
       pos: 4.5,-20.5
       parent: 1
+- proto: HardpointBallisticHeavy
+  entities:
+  - uid: 3590
+    components:
+    - type: Transform
+      rot: -1.5707963267948966 rad
+      pos: -10.5,-0.5
+      parent: 1
+- proto: HardpointBallisticMedium
+  entities:
+  - uid: 3586
+    components:
+    - type: Transform
+      rot: -1.5707963267948966 rad
+      pos: -11.5,-12.5
+      parent: 1
+  - uid: 3588
+    components:
+    - type: Transform
+      rot: 1.5707963267948966 rad
+      pos: 16.5,-9.5
+      parent: 1
 - proto: HardpointEnergyHeavy
   entities:
   - uid: 961
@@ -16434,28 +16456,6 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 14.5,-29.5
       parent: 1
-- proto: HardpointMissileHeavy
-  entities:
-  - uid: 1021
-    components:
-    - type: Transform
-      pos: -10.5,-0.5
-      parent: 1
-      rot: -1.5707963267948966 rad
-- proto: HardpointMissileMedium
-  entities:
-  - uid: 1013
-    components:
-    - type: Transform
-      rot: -1.5707963267948966 rad
-      pos: -11.5,-12.5
-      parent: 1
-  - uid: 1017
-    components:
-    - type: Transform
-      rot: 1.5707963267948966 rad
-      pos: 16.5,-9.5
-      parent: 1
 - proto: HydroponicsToolClippers
   entities:
   - uid: 1398
@@ -16502,6 +16502,13 @@ entities:
     components:
     - type: Transform
       pos: 13.5,20.5
+      parent: 1
+- proto: KitchenElectricRange
+  entities:
+  - uid: 3584
+    components:
+    - type: Transform
+      pos: 12.5,17.5
       parent: 1
 - proto: KitchenMicrowave
   entities:
@@ -18897,6 +18904,13 @@ entities:
     - type: Transform
       pos: 10.5,20.5
       parent: 1
+- proto: VendingMachineCigs
+  entities:
+  - uid: 3583
+    components:
+    - type: Transform
+      pos: 7.5,15.5
+      parent: 1
 - proto: VendingMachineCiviMedPlus
   entities:
   - uid: 3552
@@ -18927,6 +18941,13 @@ entities:
     components:
     - type: Transform
       pos: 10.5,-2.5
+      parent: 1
+- proto: VendingMachineDinnerware
+  entities:
+  - uid: 3585
+    components:
+    - type: Transform
+      pos: 13.5,17.5
       parent: 1
 - proto: VendingMachineDiscount
   entities:
@@ -18982,6 +19003,13 @@ entities:
     - type: Transform
       pos: 10.5,-4.5
       parent: 1
+- proto: VendingMachineSustenance
+  entities:
+  - uid: 3582
+    components:
+    - type: Transform
+      pos: 7.5,20.5
+      parent: 1
 - proto: WeaponLaserTurretApollo
   entities:
   - uid: 3579
@@ -18996,6 +19024,26 @@ entities:
       pos: 10.5,37.5
       parent: 1
       rot: 3.141592653589793 rad
+- proto: WeaponTurretTarnyx
+  entities:
+  - uid: 3587
+    components:
+    - type: Transform
+      rot: -1.5707963267948966 rad
+      pos: -11.5,-12.5
+      parent: 1
+  - uid: 3589
+    components:
+    - type: Transform
+      rot: 1.5707963267948966 rad
+      pos: 16.5,-9.5
+      parent: 1
+  - uid: 3591
+    components:
+    - type: Transform
+      rot: -1.5707963267948966 rad
+      pos: -10.5,-0.5
+      parent: 1
 - proto: WFAsfAirlock
   entities:
   - uid: 41
@@ -22554,26 +22602,6 @@ entities:
     - type: Transform
       pos: 15.5,25.5
       parent: 1
-- proto: WeaponTurretSerpentMissile
-  entities:
-  - uid: 1014
-    components:
-    - type: Transform
-      rot: -1.5707963267948966 rad
-      pos: -11.5,-12.5
-      parent: 1
-  - uid: 1018
-    components:
-    - type: Transform
-      rot: 1.5707963267948966 rad
-      pos: 16.5,-9.5
-      parent: 1
-  - uid: 1022
-    components:
-    - type: Transform
-      pos: -10.5,-0.5
-      parent: 1
-      rot: -1.5707963267948966 rad
 - proto: WeldingFuelTankFull
   entities:
   - uid: 1436

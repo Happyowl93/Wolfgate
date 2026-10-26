@@ -3059,6 +3059,20 @@ entities:
     - type: Transform
       pos: 4.5,1.5
       parent: 1
+- proto: HardpointBallisticMedium
+  entities:
+  - uid: 730
+    components:
+    - type: Transform
+      rot: 3.141592653589793 rad
+      pos: 15.5,7.5
+      parent: 1
+  - uid: 732
+    components:
+    - type: Transform
+      rot: 3.141592653589793 rad
+      pos: 1.5,7.5
+      parent: 1
 - proto: HardpointEnergyHeavy
   entities:
   - uid: 644
@@ -3080,20 +3094,6 @@ entities:
     - type: Transform
       rot: 3.141592653589793 rad
       pos: 16.5,2.5
-      parent: 1
-- proto: HardpointMissileMedium
-  entities:
-  - uid: 646
-    components:
-    - type: Transform
-      rot: 3.141592653589793 rad
-      pos: 15.5,7.5
-      parent: 1
-  - uid: 652
-    components:
-    - type: Transform
-      rot: 3.141592653589793 rad
-      pos: 1.5,7.5
       parent: 1
 - proto: KitchenMicrowave
   entities:
@@ -3642,6 +3642,20 @@ entities:
     components:
     - type: Transform
       pos: 8.5,-1.5
+      parent: 1
+- proto: WeaponTurretTarnyx
+  entities:
+  - uid: 731
+    components:
+    - type: Transform
+      rot: 3.141592653589793 rad
+      pos: 15.5,7.5
+      parent: 1
+  - uid: 733
+    components:
+    - type: Transform
+      rot: 3.141592653589793 rad
+      pos: 1.5,7.5
       parent: 1
 - proto: WFAsfAirlock
   entities:
@@ -4527,20 +4541,6 @@ entities:
     - type: Transform
       rot: 3.141592653589793 rad
       pos: 16.5,2.5
-      parent: 1
-- proto: WeaponTurretSerpentMissile
-  entities:
-  - uid: 647
-    components:
-    - type: Transform
-      rot: 3.141592653589793 rad
-      pos: 15.5,7.5
-      parent: 1
-  - uid: 653
-    components:
-    - type: Transform
-      rot: 3.141592653589793 rad
-      pos: 1.5,7.5
       parent: 1
 - proto: WindoorSecureUranium
   entities:
