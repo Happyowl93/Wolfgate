@@ -30,7 +30,10 @@ spine, flared shoulders with the docks, a pinched waist and a wide engineering s
   Halcyon and Helios) around the shield generator, the engine bay and engine maintenance. LargeAPCs feed the shield,
   thrusters and science wing.
 - Outside: nine large thrusters in three stern clusters, two reverse thrusters on the bow arms and two lateral
-  thrusters on each flank (`WFAsfThrusterLarge`), and gun pads on the arm tips, flanks and pods.
+  thrusters on each flank (`WFAsfThrusterLarge`). Guns follow the Apogee's mounts: a TPC Scylla superheavy on the
+  sensor block and a Cerberus heavy on the port arm, six Hummingbirds around the hull, six Flutters for point defence,
+  and three self-recharging Serpent torpedo launchers, one of them on a heavy missile mount on the port shoulder
+  (firepower 40 on the scale below).
 
 - Fleet (`fleet.yml`; civilian hulls are "ASF", armed ones "ASFN" like the TSF's "TSFN"), sold at `WFAsfComputerShipyard` in the shipyard hall (a purple recolour of the USSP
   shipyard screen). Prices and loadouts were set against other factions' hulls of similar tile count, scoring
