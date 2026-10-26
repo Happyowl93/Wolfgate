@@ -106,7 +106,7 @@
   - type: Magboots # voidboots: hold on outside a grid too
     requiresGrid: false
 
-# Aegis: same armour, plus a hardlight personal shield in the control unit; dark armour so it reads apart
+# Aegis: same armour, plus a hardlight personal shield in the control unit; grey armour so it reads apart
 
 - type: entity
   parent: [ WFAsfClothingModsuitField, MonoEnergyShieldClothing, BaseFactionGearOtherFactionT3 ]

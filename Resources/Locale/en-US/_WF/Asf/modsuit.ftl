@@ -7,7 +7,7 @@ ent-WFAsfClothingModsuitHelmetField = Pathfinder modsuit helmet
 ent-WFAsfClothingModsuitGauntletsField = Pathfinder modsuit gauntlets
     .desc = Armored modsuit gauntlets.
 ent-WFAsfClothingModsuitChestplateField = Pathfinder modsuit chestplate
-    .desc = A grey-plated modsuit chestplate with violet trim and a slot for armor plates.
+    .desc = A dark-plated modsuit chestplate with bright violet trim and a slot for armor plates.
 ent-WFAsfClothingModsuitBootsField = Pathfinder modsuit boots
     .desc = Sealed, armored modsuit boots with void-rated mag clamps that hold on even off a hull.
 
@@ -16,11 +16,11 @@ ent-WFAsfClothingModsuitAegis = ASF Aegis modsuit control unit
 ent-WFAsfClothingModsuitAegisPowerCell = { ent-WFAsfClothingModsuitAegis }
     .desc = { ent-WFAsfClothingModsuitAegis.desc }
 ent-WFAsfClothingModsuitHelmetAegis = Aegis modsuit helmet
-    .desc = A dark armored modsuit helmet. The visor glows while the emitter runs.
+    .desc = A grey armored modsuit helmet. The visor glows while the emitter runs.
 ent-WFAsfClothingModsuitGauntletsAegis = Aegis modsuit gauntlets
     .desc = { ent-WFAsfClothingModsuitGauntletsField.desc }
 ent-WFAsfClothingModsuitChestplateAegis = Aegis modsuit chestplate
-    .desc = A dark violet modsuit chestplate with hardlight seams and a slot for armor plates.
+    .desc = A grey-plated modsuit chestplate with violet hardlight seams and a slot for armor plates.
 ent-WFAsfClothingModsuitBootsAegis = Aegis modsuit boots
     .desc = { ent-WFAsfClothingModsuitBootsField.desc }
 
