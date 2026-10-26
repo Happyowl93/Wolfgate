@@ -5,7 +5,7 @@ meta:
   forkId: ''
   forkVersion: ''
   time: 02/10/2026 15:04:00
-  entityCount: 561
+  entityCount: 568
 maps: []
 grids:
 - 1
@@ -830,6 +830,18 @@ entities:
     - type: Transform
       rot: 3.141592653589793 rad
       pos: 12.5,0.5
+      parent: 1
+  - uid: 725
+    components:
+    - type: Transform
+      rot: -1.5707963267948966 rad
+      pos: 6.5,1.5
+      parent: 1
+  - uid: 728
+    components:
+    - type: Transform
+      rot: 1.5707963267948966 rad
+      pos: 10.5,1.5
       parent: 1
 - proto: AirAlarm
   entities:
@@ -1708,6 +1720,11 @@ entities:
     - type: Transform
       pos: 12.5,11.5
       parent: 1
+  - uid: 727
+    components:
+    - type: Transform
+      pos: 6.5,1.5
+      parent: 1
 - proto: CableHV
   entities:
   - uid: 252
@@ -1779,6 +1796,16 @@ entities:
     components:
     - type: Transform
       pos: 11.5,1.5
+      parent: 1
+  - uid: 720
+    components:
+    - type: Transform
+      pos: 12.5,4.5
+      parent: 1
+  - uid: 721
+    components:
+    - type: Transform
+      pos: 12.5,5.5
       parent: 1
 - proto: CableMV
   entities:
@@ -1906,6 +1933,16 @@ entities:
     components:
     - type: Transform
       pos: 5.5,4.5
+      parent: 1
+  - uid: 726
+    components:
+    - type: Transform
+      pos: 6.5,1.5
+      parent: 1
+  - uid: 729
+    components:
+    - type: Transform
+      pos: 10.5,1.5
       parent: 1
 - proto: CableTerminal
   entities:
@@ -2064,13 +2101,6 @@ entities:
     components:
     - type: Transform
       pos: 7.5,5.5
-      parent: 1
-- proto: ComputerTabletopPowerMonitoring
-  entities:
-  - uid: 333
-    components:
-    - type: Transform
-      pos: 12.5,5.5
       parent: 1
 - proto: ComputerTabletopShuttle
   entities:
@@ -2946,6 +2976,13 @@ entities:
       pipeLayer: Secondary
     - type: AtmosPipeColor
       color: '#990000FF'
+- proto: GeneratorCRPinchShuttle
+  entities:
+  - uid: 719
+    components:
+    - type: Transform
+      pos: 12.5,5.5
+      parent: 1
 - proto: GravityGeneratorMini
   entities:
   - uid: 417
@@ -3036,13 +3073,13 @@ entities:
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 1.5,7.5
+      pos: 0.5,2.5
       parent: 1
   - uid: 650
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 15.5,7.5
+      pos: 16.5,2.5
       parent: 1
 - proto: HardpointMissileMedium
   entities:
@@ -3050,13 +3087,13 @@ entities:
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 16.5,2.5
+      pos: 15.5,7.5
       parent: 1
   - uid: 652
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 0.5,2.5
+      pos: 1.5,7.5
       parent: 1
 - proto: KitchenMicrowave
   entities:
@@ -3064,6 +3101,14 @@ entities:
     components:
     - type: Transform
       pos: 6.5,7.5
+      parent: 1
+- proto: LockerWallMaterialsFuelPlasmaFilled
+  entities:
+  - uid: 724
+    components:
+    - type: Transform
+      rot: 1.5707963267948966 rad
+      pos: 10.5,5.5
       parent: 1
 - proto: MedkitAdvancedFilled
   entities:
@@ -3101,23 +3146,12 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 7.5,9.5
       parent: 1
-- proto: PortableGeneratorSuperPacmanShuttle
-  entities:
-  - uid: 93
-    components:
-    - type: Transform
-      pos: 11.5,5.5
-      parent: 1
-    - type: FuelGenerator
-      'on': false
-    - type: Physics
-      bodyType: Static
 - proto: PowerCellRecharger
   entities:
   - uid: 441
     components:
     - type: Transform
-      pos: 12.5,4.5
+      pos: 4.5,5.5
       parent: 1
 - proto: PoweredSmallLight
   entities:
@@ -3447,7 +3481,7 @@ entities:
   - uid: 655
     components:
     - type: Transform
-      pos: 11.5,7.5
+      pos: 11.5,5.5
       parent: 1
 - proto: SignalButtonDirectional
   entities:
@@ -3552,18 +3586,6 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 6.5,7.5
       parent: 1
-  - uid: 493
-    components:
-    - type: Transform
-      rot: -1.5707963267948966 rad
-      pos: 12.5,4.5
-      parent: 1
-  - uid: 494
-    components:
-    - type: Transform
-      rot: -1.5707963267948966 rad
-      pos: 12.5,5.5
-      parent: 1
   - uid: 495
     components:
     - type: Transform
@@ -3605,6 +3627,14 @@ entities:
     - type: Transform
       rot: 1.5707963267948966 rad
       pos: 11.25,4.5
+      parent: 1
+- proto: UraniumReinforcedWindowDirectional
+  entities:
+  - uid: 722
+    components:
+    - type: Transform
+      rot: 1.5707963267948966 rad
+      pos: 11.5,5.5
       parent: 1
 - proto: VendingMachineTankDispenserEVA
   entities:
@@ -4490,13 +4520,13 @@ entities:
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 1.5,7.5
+      pos: 0.5,2.5
       parent: 1
   - uid: 651
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 15.5,7.5
+      pos: 16.5,2.5
       parent: 1
 - proto: WeaponTurretSerpentMissile
   entities:
@@ -4504,11 +4534,19 @@ entities:
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 16.5,2.5
+      pos: 15.5,7.5
       parent: 1
   - uid: 653
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 0.5,2.5
+      pos: 1.5,7.5
+      parent: 1
+- proto: WindoorSecureUranium
+  entities:
+  - uid: 723
+    components:
+    - type: Transform
+      rot: 1.5707963267948966 rad
+      pos: 11.5,4.5
       parent: 1
