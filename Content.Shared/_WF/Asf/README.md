@@ -6,26 +6,31 @@ good shields, lasers first and a few self-loading torpedoes.
 
 Players join at ASF Lantern Post (`WFAsfLantern`, `Resources/Prototypes/_WF/Asf/lantern.yml`) as Envoy, Enforcer,
 Field Researcher or Colonist. It is a base ship that spawns as a mobile POI (no ForceAnchor) with gyroscopes and a
-station anchor. Its plan is a set of rooms of different sizes and offsets, and the hull is generated around them, so
-the outline is uneven and nothing is mirrored. From bow to stern:
+station anchor. Its hull follows the Starsector Apogee at about Saturn size (35x74 tiles): a hammerhead bow, a narrow
+spine, flared shoulders with the docks, a pinched waist and a wide engineering stern. From bow to stern:
 
-- A tapered bridge on a wide ready-room collar (fire control, EVA gear), with a sensor boom off the starboard bow.
-- A private north block: the envoy office, shipyard hall and quarters, then the post, the wardrobe room with the ASF
-  drobe (`WFAsfDrobe`) and a commons that juts out to starboard, all off a short spine corridor. The post's west wall
-  is its armoury: a rifle rack (`WFAsfGunRackFilled`, three coil rifles), a table with four slug boxes and a box each of rifle and pistol magazines, and a sidearm
-  rack (`WFAsfPistolRackFilled`, four coil pistols). Three suit storage units (`WFAsfSuitStoragePathfinder`, ASF
-  security access) along its north wall each hold a charged Pathfinder modsuit, a breath mask and tanks. Racks and suit
-  units are in `Entities/armory.yml`.
-- The public middle: consular office, atrium garden and clinic over the dock concourse. The concourse runs out into a
-  long port docking arm (3 docks; a FuelVend and a FlatpackVend flank its bay) and a short starboard annex (2 docks)
-  with the public cargo bay behind it: four sell pallets and a sale console, the ASF bounty console, the grant kiosk,
-  two artifact containers and a hand labeler.
-- Aft: the farm with a stores pod off its flank, the gyro room, R&D lab, power room, atmos, and an anomaly pair (an
-  observation room looking through plasma glass into a test chamber with an artifact analyzer and an APE). The lab's
-  material silo is mapped linked to all three lathes (protolathe, `WFAsfLathe`, circuit imprinter), so they share
-  its materials.
-- Outside the pressure hull: engine pylons of different lengths on lattice trusses (seven large thrusters in all,
-  `WFAsfThrusterLarge`), a central engine block, gun pads on trusses and stubs, and hull plating filling the notches.
+- Command, private: the bridge in the forward dome, fire control (gunnery server and a second gunnery console) in the
+  raised starboard sensor block, the shipyard hall in the port arm tip, and the envoy office behind the bridge with the
+  envoy's cabin and the wardrobe room (`WFAsfDrobe`) off a port hall. The starboard arm holds the post and its armoury:
+  three suit storage units (`WFAsfSuitStoragePathfinder`, ASF security access) each with a charged Pathfinder modsuit,
+  a breath mask and tanks; a rifle rack (`WFAsfGunRackFilled`, three coil rifles), a sidearm rack
+  (`WFAsfPistolRackFilled`, four coil pistols) and a table with four slug boxes and a box each of rifle and pistol
+  magazines. Racks and suit units are in `Entities/armory.yml`.
+- Crew, private, behind a transverse corridor: the colonists' bunk room with cryo and a lounge pod, washroom, EVA ready
+  room, commons, galley with a freezer, and a chapel.
+- The spine, public: consular office, library, and the Enforcer's and Field Researcher's cabins.
+- The shoulders, public: the dock concourse runs out into a port docking arm (3 docks; a FuelVend and a FlatpackVend)
+  and a starboard annex (2 docks). Below it are the clinic, an atrium garden on the spine, and the cargo bay: four
+  sell pallets and a sale console, the ASF bounty console, the grant kiosk and a hand labeler, with an artifact vault.
+- Aft, private: farm and stores, gyroscopes with the gravity generator and station anchor, engineering lockers, the R&D
+  lab with a server room, a workshop, and an anomaly pair (an observation room looking through plasma glass into a test
+  chamber with an artifact analyzer and an APE). The lab's material silo is mapped linked to all three lathes
+  (protolathe, `WFAsfLathe`, circuit imprinter), so they share its materials.
+- Stern: atmos, the SMES room, a sealed reactor chamber with two 200 kW bluespace reactors (`MachineOutpostCore`, as on
+  Halcyon and Helios) around the shield generator, the engine bay and engine maintenance. LargeAPCs feed the shield,
+  thrusters and science wing.
+- Outside: nine large thrusters in three stern clusters, two reverse thrusters on the bow arms and two lateral
+  thrusters on each flank (`WFAsfThrusterLarge`), and gun pads on the arm tips, flanks and pods.
 
 - Fleet (`fleet.yml`; civilian hulls are "ASF", armed ones "ASFN" like the TSF's "TSFN"), sold at `WFAsfComputerShipyard` in the shipyard hall (a purple recolour of the USSP
   shipyard screen). Prices and loadouts were set against other factions' hulls of similar tile count, scoring
