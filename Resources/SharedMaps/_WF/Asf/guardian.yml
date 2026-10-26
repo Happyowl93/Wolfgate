@@ -2039,7 +2039,7 @@ entities:
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: 8.5,4.5
+      pos: 8.5,5.5
       parent: 1
 - proto: ChairWood
   entities:
@@ -3129,7 +3129,7 @@ entities:
   - uid: 438
     components:
     - type: Transform
-      pos: 8.5,5.5
+      pos: 8.5,4.5
       parent: 1
 - proto: OxygenCanister
   entities:
