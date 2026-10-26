@@ -46,7 +46,7 @@ spine, flared shoulders with the docks, a pinched waist and a wide engineering s
   | Porter (hauler) | 130 | - | - | 40k |
   | Vigil (escort fighter) | 64 | 3: Hummingbird, Flutter | - | 40k |
   | Bulwark (gunship) | 99 | 4: Hummingbird, Serpent | small | 75k |
-  | Guardian (corvette) | 237 | 12: Apollo, 2 Hummingbird, 2 Serpent | small | 120k |
+  | Guardian (corvette) | 237 | 12: Apollo, 2 Hummingbird, 2 Tarnyx | small | 123k |
   | Lodestar (flagship frigate) | 479 | 22: 2 Apollo, 4 Hummingbird, 2 Serpent, 2 Flutter | MS-250 Aegis | 250k, voucher only |
 
   Peers at those sizes: QJ340/Bazalt (fighters), QJ270/Strayk/Reaver (gunships), Paladin/Kite/Shiv (corvettes),
