@@ -3,13 +3,13 @@ ent-WFAsfClothingModsuitField = ASF Pathfinder modsuit control unit
 ent-WFAsfClothingModsuitFieldPowerCell = { ent-WFAsfClothingModsuitField }
     .desc = { ent-WFAsfClothingModsuitField.desc }
 ent-WFAsfClothingModsuitHelmetField = Pathfinder modsuit helmet
-    .desc = A plated modsuit helmet with a lilac visor and a headlamp.
+    .desc = A plated modsuit helmet with a lilac visor, a headlamp and dual-tube night vision.
 ent-WFAsfClothingModsuitGauntletsField = Pathfinder modsuit gauntlets
     .desc = Armored modsuit gauntlets.
 ent-WFAsfClothingModsuitChestplateField = Pathfinder modsuit chestplate
-    .desc = A pearl-white modsuit chestplate with a slot for armor plates.
+    .desc = A grey-plated modsuit chestplate with violet trim and a slot for armor plates.
 ent-WFAsfClothingModsuitBootsField = Pathfinder modsuit boots
-    .desc = Sealed, armored modsuit boots.
+    .desc = Sealed, armored modsuit boots with void-rated mag clamps that hold on even off a hull.
 
 ent-WFAsfClothingModsuitAegis = ASF Aegis modsuit control unit
     .desc = A Pathfinder refitted with a hardlight emitter in the control unit. While the suit is sealed it can project a personal shield that absorbs fire until it breaks.
