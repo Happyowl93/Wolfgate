@@ -1,7 +1,7 @@
 using Content.Shared.EntityTable.EntitySelectors;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
-using Robust.Shared.Utility;
+using Robust.Shared.Utility; // WOLFGATE(Xenoarch)
 
 namespace Content.Shared.EntityTable;
 
@@ -9,6 +9,7 @@ public sealed partial class EntityTableSystem : EntitySystem
 {
     [Dependency] private IRobustRandom _random = default!;
 
+    // WOLFGATE(Xenoarch): wizden's EntityTable upgrade, context-aware lookups for the xenoarch trigger tables
     /// <summary>
     /// Iterates once through Entities that EntitySelector in EntityTableProto provides and picks first one.
     /// </summary>
@@ -67,6 +68,7 @@ public sealed partial class EntityTableSystem : EntitySystem
     }
     // WOLFGATE END
 
+    // WOLFGATE(Xenoarch): wizden's EntityTable upgrade, spawn listings
     /// <summary>
     /// Builds a list of all the spawns in an EntityTable as keys, and their modified weights as values.
     /// </summary>

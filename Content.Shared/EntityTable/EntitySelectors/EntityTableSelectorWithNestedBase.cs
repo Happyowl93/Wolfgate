@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's EntityTable upgrade, for the xenoarch trigger tables
 using Content.Shared.EntityTable.Conditions;
 using JetBrains.Annotations;
 using Robust.Shared.Prototypes;
@@ -95,3 +96,4 @@ public abstract partial class EntityTableSelectorWithNestedBase : EntityTableSel
         }
     }
 }
+// WOLFGATE END

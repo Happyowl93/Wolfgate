@@ -1,4 +1,5 @@
-﻿using Content.Shared.Xenoarchaeology.Artifact;
+﻿// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
+using Content.Shared.Xenoarchaeology.Artifact;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Content.Shared.Xenoarchaeology.Equipment.Components;
 using Robust.Shared.Containers;
@@ -32,3 +33,4 @@ public sealed class SuppressArtifactContainerSystem : EntitySystem
         _xenoArtifact.SetSuppressed((args.Entity, artifact), false);
     }
 }
+// WOLFGATE END

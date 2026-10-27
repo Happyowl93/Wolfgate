@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Robust.Shared.GameStates;
 
 namespace Content.Shared.Xenoarchaeology.Artifact.XAT.Components;
@@ -14,3 +15,4 @@ public sealed partial class XATDeathComponent : Component
     [DataField, AutoNetworkedField]
     public float Range = 15;
 }
+// WOLFGATE END

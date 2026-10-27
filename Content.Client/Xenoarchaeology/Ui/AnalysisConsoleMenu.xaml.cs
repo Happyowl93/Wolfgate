@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using System.Text;
 using Content.Client.Message;
 using Content.Client.Resources;
@@ -260,3 +261,4 @@ public sealed partial class AnalysisConsoleMenu : FancyWindow
     }
 }
 
+// WOLFGATE END

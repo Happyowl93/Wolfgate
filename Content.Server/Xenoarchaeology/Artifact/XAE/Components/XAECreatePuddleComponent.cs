@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Destructible.Thresholds;
@@ -44,3 +45,4 @@ public sealed partial class XAECreatePuddleComponent : Component
     [DataField]
     public bool ReplaceDescription;
 }
+// WOLFGATE END

@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Chemistry;
 using Content.Shared.Chemistry.Reaction;
 using Content.Shared.Chemistry.Reagent;
@@ -36,3 +37,4 @@ public sealed partial class XATReactiveComponent : Component
     [DataField, AutoNetworkedField]
     public FixedPoint2 MinQuantity = 5f;
 }
+// WOLFGATE END

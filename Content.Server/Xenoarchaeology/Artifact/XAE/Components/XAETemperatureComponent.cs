@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Atmos;
 
 namespace Content.Server.Xenoarchaeology.Artifact.XAE.Components;
@@ -21,3 +22,4 @@ public sealed partial class XAETemperatureComponent : Component
     [DataField("affectAdjacent")]
     public bool AffectAdjacentTiles = true;
 }
+// WOLFGATE END

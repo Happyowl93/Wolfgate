@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's EntityTable upgrade, for the xenoarch trigger tables
 using Robust.Shared.Serialization;
 using Robust.Shared.Serialization.Manager;
 using Robust.Shared.Serialization.Markdown.Mapping;
@@ -34,3 +35,4 @@ public sealed class EntityTableTypeSerializer :
         return serializationManager.Read<EntityTableSelector>(node, context, notNullableOverride: true);
     }
 }
+// WOLFGATE END

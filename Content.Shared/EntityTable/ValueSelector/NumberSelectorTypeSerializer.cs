@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's EntityTable upgrade, for the xenoarch trigger tables
 using System.Globalization;
 using Robust.Shared.Serialization;
 using Robust.Shared.Serialization.Manager;
@@ -50,3 +51,4 @@ public sealed class NumberSelectorTypeSerializer :
         return serializationManager.Read<NumberSelector>(node, context, notNullableOverride: true);
     }
 }
+// WOLFGATE END

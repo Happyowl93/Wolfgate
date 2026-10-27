@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Destructible.Thresholds;
 using Content.Shared.DoAfter;
 using Content.Shared.Whitelist;
@@ -91,3 +92,4 @@ public sealed partial class XATInteractWithDoAfterEvent : DoAfterEvent
         return this;
     }
 }
+// WOLFGATE END

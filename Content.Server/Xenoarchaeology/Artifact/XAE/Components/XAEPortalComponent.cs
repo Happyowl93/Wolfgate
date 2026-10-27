@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Robust.Shared.Prototypes;
 
 namespace Content.Server.Xenoarchaeology.Artifact.XAE.Components;
@@ -22,3 +23,4 @@ public sealed partial class XAEPortalComponent : Component
     public float MaxRange = 1000f;
     // End Frontier
 }
+// WOLFGATE END

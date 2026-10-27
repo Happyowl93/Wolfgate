@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Robust.Shared.Timing;
 
@@ -86,3 +87,4 @@ public abstract class BaseXATSystem<T> : EntitySystem where T : Component
         ref TEvent args
     ) where TEvent : notnull;
 }
+// WOLFGATE END

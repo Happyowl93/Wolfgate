@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.DoAfter;
 using Content.Shared.Tools;
 using Robust.Shared.GameStates;
@@ -47,3 +48,4 @@ public sealed partial class XATToolUseDoAfterEvent : DoAfterEvent
         return this;
     }
 }
+// WOLFGATE END

@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Damage;
 using Content.Shared.Stacks;
 using Content.Shared.Whitelist;
@@ -114,3 +115,4 @@ public enum ArtifactCrusherVisuals : byte
 {
     Crushing
 }
+// WOLFGATE END

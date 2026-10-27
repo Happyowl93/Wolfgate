@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Server.Salvage;
 using Content.Server.Xenoarchaeology.Artifact.XAT.Components;
 using Content.Shared.Clothing;
@@ -65,3 +66,4 @@ public sealed class XATMagnetSystem : BaseQueryUpdateXATSystem<XATMagnetComponen
         }
     }
 }
+// WOLFGATE END

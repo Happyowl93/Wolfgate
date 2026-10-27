@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Magic.Events;
 using Content.Shared.Xenoarchaeology.Artifact.XAE.Components;
 using Robust.Shared.Timing;
@@ -25,3 +26,4 @@ public sealed class XAEKnockSystem : BaseXAESystem<XAEKnockComponent>
         RaiseLocalEvent(ev);
     }
 }
+// WOLFGATE END

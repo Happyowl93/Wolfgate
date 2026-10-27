@@ -1,4 +1,4 @@
-<Document>
+<!-- WOLFGATE(Xenoarch): wizden's xenoarch rework guidebook page --><Document>
   # Analysis Console
 
   The Analysis Console is a device used to interface with artifacts. It can be used to check nodes, their triggers and effects, and extract points.

@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Server.Atmos.EntitySystems;
 using Content.Server.Xenoarchaeology.Artifact.XAT.Components;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
@@ -27,3 +28,4 @@ public sealed class XATPressureSystem : BaseQueryUpdateXATSystem<XATPressureComp
         }
     }
 }
+// WOLFGATE END

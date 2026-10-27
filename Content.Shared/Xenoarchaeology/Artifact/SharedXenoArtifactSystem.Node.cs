@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.EntityTable;
 using Content.Shared.NameIdentifier;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
@@ -419,3 +420,4 @@ public abstract partial class SharedXenoArtifactSystem
     }
     // End Frontier
 }
+// WOLFGATE END

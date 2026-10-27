@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Destructible.Thresholds;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
@@ -88,3 +89,4 @@ public sealed partial class XenoArtifactNodeComponent : Component
     // End Frontier: reduce value if artifexium used
     #endregion
 }
+// WOLFGATE END

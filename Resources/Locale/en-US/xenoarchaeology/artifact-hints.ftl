@@ -1,3 +1,4 @@
+# WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 ### Description hints
 xenoarch-trigger-examine-wrenching = There's a loose bit spinning around.
 xenoarch-trigger-examine-prying = There's a panel coming up from the surface.
@@ -8,3 +9,4 @@ xenoarch-trigger-examine-timer = Carvings and scratches cover the surface... You
 ### Effects hints
 xenoarch-effect-puddle = Produces puddle of following reagents: {$reagent}
 xenoarch-effect-foam = Produces foam of following reagents: {$reagent}
+# WOLFGATE END

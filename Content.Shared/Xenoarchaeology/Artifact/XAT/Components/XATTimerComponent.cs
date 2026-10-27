@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Destructible.Thresholds;
 using Robust.Shared.GameStates;
 
@@ -21,3 +22,4 @@ public sealed partial class XATTimerComponent : Component
     [DataField, AutoNetworkedField]
     public MinMax PossibleDelayInSeconds;
 }
+// WOLFGATE END

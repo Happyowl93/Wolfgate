@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using System.Linq;
 using System.Numerics;
 using Content.Client.Xenoarchaeology.Artifact;
@@ -228,3 +229,4 @@ public sealed partial class XenoArtifactGraphControl : BoxContainer
     }
 }
 
+// WOLFGATE END

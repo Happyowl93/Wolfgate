@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's random point light, for the artifact lamp effect
 using Robust.Shared.GameStates;
 
 namespace Content.Shared.Light.Components;
@@ -33,3 +34,4 @@ public sealed partial class RandomPointLightComponent : Component
     [DataField]
     public float MinEnergy = 1;
 }
+// WOLFGATE END

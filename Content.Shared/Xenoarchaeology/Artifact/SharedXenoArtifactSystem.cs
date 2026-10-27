@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Actions;
 using Content.Shared.Popups;
 using Content.Shared.Tiles; // Frontier
@@ -134,3 +135,4 @@ public abstract partial class SharedXenoArtifactSystem : EntitySystem
 /// <summary> Event of artifact destruction. </summary>
 [ByRefEvent]
 public record struct XenoArtifactDestroyedEvent;
+// WOLFGATE END

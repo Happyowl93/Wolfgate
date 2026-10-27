@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Explosion.Components.OnTrigger;
 
 namespace Content.Server.Xenoarchaeology.Artifact.XAE.Components;
@@ -7,3 +8,4 @@ namespace Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 /// </summary>
 [RegisterComponent, Access(typeof(XAETriggerExplosivesSystem))]
 public sealed partial class XAETriggerExplosivesComponent : Component;
+// WOLFGATE END

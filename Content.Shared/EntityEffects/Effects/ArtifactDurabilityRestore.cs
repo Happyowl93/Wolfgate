@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's artifact glue reagent effects
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Content.Shared.Xenoarchaeology.Artifact;
 using Robust.Shared.Prototypes;
@@ -34,3 +35,4 @@ public sealed partial class ArtifactDurabilityRestore : EntityEffect
         return Loc.GetString("reagent-effect-guidebook-artifact-durability-restore", ("restored", RestoredDurability));
     }
 }
+// WOLFGATE END

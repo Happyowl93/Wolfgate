@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 using Content.Shared.Popups;
 using Content.Shared.Xenoarchaeology.Artifact;
@@ -51,3 +52,4 @@ public sealed class XAETelepathicSystem : BaseXAESystem<XAETelepathicComponent>
         }
     }
 }
+// WOLFGATE END

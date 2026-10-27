@@ -11,9 +11,11 @@
       sprite: Objects/Specific/Xenoarchaeology/node_scanner.rsi
     - type: NodeScanner
     - type: UseDelay
-      delay: 1
+      delay: 1 # WOLFGATE(Xenoarch): wizden's node scanner rework
     - type: GuideHelp
       guides:
+      # WOLFGATE(Xenoarch) START: wizden's node scanner rework
+      # - ArtifactReports
       - Xenoarchaeology
     - type: ActivatableUI
       key: enum.NodeScannerUiKey.Key
@@ -22,3 +24,4 @@
       interfaces:
         enum.NodeScannerUiKey.Key:
           type: NodeScannerBoundUserInterface
+      # WOLFGATE END

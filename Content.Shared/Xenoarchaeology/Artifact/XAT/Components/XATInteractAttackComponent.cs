@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Destructible.Thresholds;
 using Content.Shared.Whitelist;
 using Robust.Shared.GameStates;
@@ -49,3 +50,4 @@ public sealed partial class XATInteractAttackComponent : Component
     [DataField, AutoNetworkedField]
     public LocId? InsufficientInteractionPopup = "interact-artifact-more";
 }
+// WOLFGATE END

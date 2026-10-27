@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's EntityTable upgrade, for the xenoarch trigger tables
 using Robust.Shared.Random;
 
 namespace Content.Shared.EntityTable.ValueSelector;
@@ -35,3 +36,4 @@ public sealed partial class RangeNumberSelector : NumberSelector
         return (Range.X + Range.Y) / 2f;
     }
 }
+// WOLFGATE END

@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Item;
 using Content.Shared.Xenoarchaeology.Artifact;
 using Content.Shared.Xenoarchaeology.XenoArtifacts;
@@ -75,3 +76,4 @@ public sealed class RandomArtifactSpriteSystem : EntitySystem
         ent.Comp.ActivationStart = _time.CurTime;
     }
 }
+// WOLFGATE END

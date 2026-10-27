@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Server.Atmos.EntitySystems;
 using Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 using Content.Shared.Atmos;
@@ -50,3 +51,4 @@ public sealed class XAECreateGasSystem : BaseXAESystem<XAECreateGasComponent>
         }
     }
 }
+// WOLFGATE END

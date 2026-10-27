@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Server.Ghost;
 using Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 using Content.Shared.Light.Components;
@@ -47,3 +48,4 @@ public sealed class XAELightFlickerSystem : BaseXAESystem<XAELightFlickerCompone
         }
     }
 }
+// WOLFGATE END

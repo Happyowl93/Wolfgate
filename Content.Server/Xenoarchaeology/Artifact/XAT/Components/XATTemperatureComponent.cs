@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 namespace Content.Server.Xenoarchaeology.Artifact.XAT.Components;
 
 /// <summary>
@@ -18,3 +19,4 @@ public sealed partial class XATTemperatureComponent : Component
     [DataField]
     public bool TriggerOnHigherTemp = true;
 }
+// WOLFGATE END

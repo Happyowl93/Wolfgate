@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 namespace Content.Shared.Xenoarchaeology.Artifact.XAE;
 
 /// <summary>
@@ -19,3 +20,4 @@ public abstract class BaseXAESystem<T> : EntitySystem where T : Component
     /// <param name="args">Activation event (containing artifact and other useful info).</param>
     protected abstract void OnActivated(Entity<T> ent, ref XenoArtifactNodeActivatedEvent args);
 }
+// WOLFGATE END

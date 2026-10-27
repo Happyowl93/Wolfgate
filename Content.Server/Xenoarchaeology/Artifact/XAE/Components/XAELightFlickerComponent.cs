@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 namespace Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 
 /// <summary>
@@ -18,3 +19,4 @@ public sealed partial class XAELightFlickerComponent : Component
     [DataField]
     public float FlickerChance = 0.75f;
 }
+// WOLFGATE END

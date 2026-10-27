@@ -1,3 +1,4 @@
+# WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 - type: entity
   parent: [BaseStructureDynamic, BaseXenoArtifact]
   id: BaseXenoArtifactStructure
@@ -56,3 +57,4 @@
       min: 9
       max: 13
 
+# WOLFGATE END

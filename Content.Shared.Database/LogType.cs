@@ -485,7 +485,7 @@ public enum LogType
     /// <summary>
     /// Artifact node got activated.
     /// </summary>
-    ArtifactNode = 101,
+    ArtifactNode = 101, // WOLFGATE(Xenoarch): artifact node activations, from the wizden rework
 
     // <Mono>
     ShipgunFired = 150,

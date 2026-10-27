@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Server.Polymorph.Systems;
 using Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 using Content.Shared.Humanoid;
@@ -37,3 +38,4 @@ public sealed class XAEPolymorphSystem : BaseXAESystem<XAEPolymorphComponent>
         }
     }
 }
+// WOLFGATE END

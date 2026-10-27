@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
 
@@ -52,3 +53,4 @@ public sealed partial class XenoArtifactUnlockingComponent : Component
         }
     };
 }
+// WOLFGATE END

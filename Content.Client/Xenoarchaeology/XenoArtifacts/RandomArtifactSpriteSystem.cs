@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Xenoarchaeology.XenoArtifacts;
 using Robust.Client.GameObjects;
 
@@ -51,3 +52,4 @@ public enum ArtifactsVisualLayers : byte
     UnlockingEffect, // doesn't have to use this
     ActivationEffect
 }
+// WOLFGATE END

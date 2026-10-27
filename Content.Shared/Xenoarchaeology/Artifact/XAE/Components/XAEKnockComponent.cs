@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Robust.Shared.GameStates;
 
 namespace Content.Shared.Xenoarchaeology.Artifact.XAE.Components;
@@ -14,3 +15,4 @@ public sealed partial class XAEKnockComponent : Component
     [DataField, AutoNetworkedField]
     public float KnockRange = 4f;
 }
+// WOLFGATE END

@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using System.Numerics;
 using Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 using Content.Shared.Mind.Components;
@@ -68,3 +69,4 @@ public sealed class XAEPortalSystem : BaseXAESystem<XAEPortalComponent>
         _link.TryLink(firstPortal.Value, secondPortal.Value, true);
     }
 }
+// WOLFGATE END

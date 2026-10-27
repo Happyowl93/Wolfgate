@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using System.Numerics;
 using Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 using Content.Shared.Maps;
@@ -70,3 +71,4 @@ public sealed class XAEThrowThingsAroundSystem : BaseXAESystem<XAEThrowThingsAro
         }
     }
 }
+// WOLFGATE END

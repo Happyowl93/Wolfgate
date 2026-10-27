@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.DeviceLinking;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
@@ -31,3 +32,4 @@ public sealed partial class ArtifactAnalyzerComponent : Component
     [DataField]
     public ProtoId<SinkPortPrototype> LinkingPort = "ArtifactAnalyzerReceiver";
 }
+// WOLFGATE END

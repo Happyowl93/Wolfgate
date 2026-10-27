@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 
 namespace Content.Shared.Xenoarchaeology.Artifact.XAT;
@@ -49,3 +50,4 @@ public abstract class BaseQueryUpdateXATSystem<T> : BaseXATSystem<T> where T : C
         float frameTime
     );
 }
+// WOLFGATE END

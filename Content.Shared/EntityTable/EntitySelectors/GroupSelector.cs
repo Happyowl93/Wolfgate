@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's EntityTable upgrade, for the xenoarch trigger tables
 using System.Linq;
 using Content.Shared.Random.Helpers;
 using Robust.Shared.Prototypes;
@@ -58,3 +59,4 @@ public sealed partial class GroupSelector : EntityTableSelectorWithChildrenBase
         return $"Group({string.Join(", ", Children.Select(x => $"{x}: {x.Weight}"))})";
     }
 }
+// WOLFGATE END

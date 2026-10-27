@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using System.Diagnostics.CodeAnalysis;
 using Content.Shared.DeviceLinking;
 using Content.Shared.DeviceLinking.Events;
@@ -160,3 +161,4 @@ public abstract class SharedArtifactAnalyzerSystem : EntitySystem
         return true;
     }
 }
+// WOLFGATE END

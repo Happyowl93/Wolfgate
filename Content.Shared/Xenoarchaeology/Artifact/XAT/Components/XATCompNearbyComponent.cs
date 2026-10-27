@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Robust.Shared.GameStates;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 
@@ -28,3 +29,4 @@ public sealed partial class XATCompNearbyComponent : Component
     [DataField, AutoNetworkedField]
     public int Count = 1;
 }
+// WOLFGATE END

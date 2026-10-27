@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework tests
 using System.Linq;
 using Content.Shared.Xenoarchaeology.Artifact;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
@@ -417,3 +418,4 @@ public sealed class XenoArtifactTest
         await pair.CleanReturnAsync();
     }
 }
+// WOLFGATE END

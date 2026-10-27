@@ -1,3 +1,4 @@
+# WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 - type: entity
   parent: [BaseItem, BaseXenoArtifact]
   id: BaseXenoArtifactItem
@@ -155,3 +156,4 @@
   components:
   - type: Stack
     count: 1
+# WOLFGATE END

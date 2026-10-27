@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.DeviceLinking;
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
@@ -50,3 +51,4 @@ public enum ArtifactAnalyzerUiKey : byte
 [Serializable, NetSerializable]
 public sealed class AnalysisConsoleExtractButtonPressedMessage : BoundUserInterfaceMessage;
 
+// WOLFGATE END

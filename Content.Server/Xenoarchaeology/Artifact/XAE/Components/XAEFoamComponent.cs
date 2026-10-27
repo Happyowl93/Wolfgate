@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Chemistry.Reagent;
 using Robust.Shared.Prototypes;
 
@@ -54,3 +55,4 @@ public sealed partial class XAEFoamComponent : Component
     public bool ReplaceDescription;
 }
 
+// WOLFGATE END

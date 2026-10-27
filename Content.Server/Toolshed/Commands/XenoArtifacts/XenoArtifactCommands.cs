@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoartifact toolshed commands
 using System.Text;
 using Content.Server.Administration;
 using Content.Server.Xenoarchaeology.Artifact;
@@ -242,3 +243,4 @@ public sealed partial class XenoArtifactCommand : ToolshedCommand
         }
     }
 }
+// WOLFGATE END

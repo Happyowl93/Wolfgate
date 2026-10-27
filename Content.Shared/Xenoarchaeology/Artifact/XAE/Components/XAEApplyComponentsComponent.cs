@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
 
@@ -27,3 +28,4 @@ public sealed partial class XAEApplyComponentsComponent : Component
     [DataField]
     public bool RefreshOnReactivate { get; set; }
 }
+// WOLFGATE END

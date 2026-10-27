@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's EntityTable upgrade, for the xenoarch trigger tables
 using Content.Shared.EntityTable.EntitySelectors;
 using Robust.Shared.Prototypes;
 
@@ -32,3 +33,4 @@ public sealed partial class ExcludeEntitiesFromContextCondition : EntityTableCon
         return !used.Contains(entSelector.Id);
     }
 }
+// WOLFGATE END

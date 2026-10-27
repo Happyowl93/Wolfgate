@@ -7,7 +7,7 @@
     - type: Transform
       noRot: true
     - type: AccessReader
-      access: [ ] # Frontier: Removed ["Research"], ["Cargo"]
+      access: [ ] # Frontier: Removed ["Research"], ["Cargo"] # WOLFGATE(Xenoarch): Frontier's open artifact crate
     - type: Lock
     - type: ResistLocker
     - type: Sprite
@@ -46,7 +46,7 @@
       capacity: 1
       whitelist:
         components:
-        - XenoArtifact
+        - XenoArtifact # WOLFGATE(Xenoarch): the xenoarch rework renamed Artifact
     - type: Weldable
     - type: SuppressArtifactContainer
     - type: RadiationBlockingContainer

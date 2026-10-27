@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Throwing;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Content.Shared.Xenoarchaeology.Artifact.XAT.Components;
@@ -22,3 +23,4 @@ public sealed class XATItemLandSystem : BaseXATSystem<XATItemLandComponent>
         Trigger(artifact, node);
     }
 }
+// WOLFGATE END

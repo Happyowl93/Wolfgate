@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Atmos;
 
 namespace Content.Server.Xenoarchaeology.Artifact.XAE.Components;
@@ -14,3 +15,4 @@ public sealed partial class XAECreateGasComponent : Component
     [DataField]
     public Dictionary<Gas, float> Gases = new();
 }
+// WOLFGATE END

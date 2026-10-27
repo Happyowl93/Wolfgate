@@ -1,3 +1,4 @@
+# WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 analysis-console-menu-title = Broad-Spectrum Mark 3 Analysis Console
 analysis-console-server-list-button = Server
 analysis-console-extract-button = Extract points
@@ -31,3 +32,4 @@ analysis-console-extract-none = [font="Monospace" size=11][color=orange] No unlo
 analysis-console-extract-sum = [font="Monospace" size=11][color=orange]Total Research: {$value}[/color][/font]
 
 analyzer-artifact-extract-popup = Energy shimmers on the artifact's surface!
+# WOLFGATE END

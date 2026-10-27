@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's EntityTable upgrade, for the xenoarch trigger tables
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 
@@ -48,3 +49,4 @@ public sealed partial class NestedSelector : EntityTableSelectorWithNestedBase
         return $"Nested({TableId})";
     }
 }
+// WOLFGATE END

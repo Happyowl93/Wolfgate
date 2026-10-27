@@ -1,15 +1,17 @@
 using Content.Server.Body.Systems;
 using Content.Server.Popups;
+using Content.Server.Power.Components;
 using Content.Server.Power.EntitySystems;
 using Content.Server.Stack;
 using Content.Server.Storage.Components;
+// using Content.Server.Xenoarchaeology.XenoArtifacts; // WOLFGATE(Xenoarch): the old artifact system is gone
 using Content.Shared.Body.Components;
 using Content.Shared.Damage;
 using Content.Shared.Power;
 using Content.Shared.Verbs;
 using Content.Shared.Whitelist;
 using Content.Shared.Xenoarchaeology.Equipment;
-using Content.Shared.Xenoarchaeology.Equipment.Components;
+using Content.Shared.Xenoarchaeology.Equipment.Components; // WOLFGATE(Xenoarch)
 using Robust.Shared.Collections;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
@@ -17,15 +19,16 @@ using Robust.Shared.Timing;
 namespace Content.Server.Xenoarchaeology.Equipment.Systems;
 
 /// <inheritdoc/>
-public sealed class ArtifactCrusherSystem : SharedArtifactCrusherSystem
+public sealed partial class ArtifactCrusherSystem : SharedArtifactCrusherSystem
 {
-    [Dependency] private readonly IGameTiming _timing = default!;
-    [Dependency] private readonly IRobustRandom _random = default!;
-    [Dependency] private readonly BodySystem _body = default!;
-    [Dependency] private readonly DamageableSystem _damageable = default!;
-    [Dependency] private readonly StackSystem _stack = default!;
-    [Dependency] private readonly PopupSystem _popup = default!;
-    [Dependency] private readonly EntityWhitelistSystem _whitelistSystem = default!;
+    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private IRobustRandom _random = default!;
+    // [Dependency] private ArtifactSystem _artifact = default!; // WOLFGATE(Xenoarch): the old artifact system is gone
+    [Dependency] private BodySystem _body = default!;
+    [Dependency] private DamageableSystem _damageable = default!;
+    [Dependency] private StackSystem _stack = default!;
+    [Dependency] private PopupSystem _popup = default!;
+    [Dependency] private EntityWhitelistSystem _whitelistSystem = default!;
 
     /// <inheritdoc/>
     public override void Initialize()
@@ -50,7 +53,8 @@ public sealed class ArtifactCrusherSystem : SharedArtifactCrusherSystem
 
         var verb = new AlternativeVerb
         {
-            Text = Loc.GetString("artifact-crusher-verb-start-crushing"),
+            // Text = Loc.GetString("item-toggle-activate"), // so it works for the organ harvester. it might be stupid but who really cares
+            Text = Loc.GetString("artifact-crusher-verb-start-crushing"), // WOLFGATE(Xenoarch): wizden's crusher verb
             Priority = 2,
             Act = () => StartCrushing((ent, ent.Comp, entityStorageComp))
         };
@@ -101,6 +105,7 @@ public sealed class ArtifactCrusherSystem : SharedArtifactCrusherSystem
                 {
                     ContainerSystem.Insert((stack, null, null, null), crusher.OutputContainer);
                 }
+                // _artifact.ForceActivateArtifact(contained); // WOLFGATE(Xenoarch): the reworked artifacts don't force-activate
             }
 
             if (!TryComp<BodyComponent>(contained, out var body))

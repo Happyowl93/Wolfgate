@@ -1,5 +1,5 @@
 - type: soundCollection
-  id: ArtifactUnlockingActivationSuccess
+  id: ArtifactUnlockingActivationSuccess # WOLFGATE(Xenoarch): renamed by the wizden xenoarch rework
   files:
     - /Audio/Items/Artifact/artifact1.ogg
     - /Audio/Items/Artifact/artifact2.ogg
@@ -9,6 +9,7 @@
     - /Audio/Items/Artifact/artifact6.ogg
     - /Audio/Items/Artifact/artifact7.ogg
 
+# WOLFGATE(Xenoarch) START: unlock failure and forced activation sounds from the wizden rework
 - type: soundCollection
   id: ArtifactUnlockActivationFailure
   files:
@@ -18,3 +19,4 @@
   id: ArtifactForceActivation
   files:
     - /Audio/Items/Artifact/artifact-force-activated1.ogg
+# WOLFGATE END

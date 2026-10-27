@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Interaction;
 using Content.Shared.Timing;
 using Content.Shared.Verbs;
@@ -128,3 +129,4 @@ public sealed class NodeScannerSystem : EntitySystem
         _ui.TryOpenUi((device, null), NodeScannerUiKey.Key, actor, predicted: true);
     }
 }
+// WOLFGATE END

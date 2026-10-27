@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 namespace Content.Server.Xenoarchaeology.Artifact.XAT.Components;
 
 /// <summary>
@@ -18,3 +19,4 @@ public sealed partial class XATPressureComponent : Component
     [DataField]
     public float? MaxPressureThreshold;
 }
+// WOLFGATE END

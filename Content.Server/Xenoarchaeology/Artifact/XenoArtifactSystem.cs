@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Server.Cargo.Systems;
 using Content.Shared.Xenoarchaeology.Artifact;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
@@ -33,3 +34,4 @@ public sealed partial class XenoArtifactSystem : SharedXenoArtifactSystem
         }
     }
 }
+// WOLFGATE END

@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's artifact glue reagent effects
 using Content.Shared.Xenoarchaeology.Artifact;
 using Content.Shared.EntityEffects;
 using Content.Shared.Popups;
@@ -42,3 +43,4 @@ public sealed partial class ArtifactUnlock : EntityEffect
         return Loc.GetString("reagent-effect-guidebook-artifact-unlock", ("chance", Probability));
     }
 }
+// WOLFGATE END

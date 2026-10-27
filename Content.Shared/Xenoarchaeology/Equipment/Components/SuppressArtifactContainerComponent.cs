@@ -1,4 +1,5 @@
-﻿using Robust.Shared.GameStates;
+﻿// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
+using Robust.Shared.GameStates;
 
 namespace Content.Shared.Xenoarchaeology.Equipment.Components;
 
@@ -7,3 +8,4 @@ namespace Content.Shared.Xenoarchaeology.Equipment.Components;
 /// </summary>
 [RegisterComponent, NetworkedComponent, Access(typeof(SuppressArtifactContainerSystem))]
 public sealed partial class SuppressArtifactContainerComponent : Component;
+// WOLFGATE END

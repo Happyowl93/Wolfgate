@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Server.Fluids.EntitySystems;
 using Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 using Content.Shared.Chemistry.Reagent;
@@ -75,3 +76,4 @@ public sealed class XAECreatePuddleSystem: BaseXAESystem<XAECreatePuddleComponen
         _puddle.TrySpillAt(ent, component.ChemicalSolution, out _);
     }
 }
+// WOLFGATE END

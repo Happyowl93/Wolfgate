@@ -29,6 +29,7 @@
   minValue: 1000
   maxValue: 9999
 
+# WOLFGATE(Xenoarch): artifact node IDs, from the wizden rework
 - type: nameIdentifierGroup
   id: XenoArtifactNode
   minValue: 0

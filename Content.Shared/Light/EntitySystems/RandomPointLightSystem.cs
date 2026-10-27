@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's random point light, for the artifact lamp effect
 using System.Numerics;
 using Content.Shared.Light.Components;
 using Content.Shared.Random.Helpers;
@@ -37,3 +38,4 @@ public sealed partial class RandomPointLightSystem : EntitySystem
         _light.SetColor(ent, color);
     }
 }
+// WOLFGATE END

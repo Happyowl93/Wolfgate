@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Destructible.Thresholds;
 
 namespace Content.Server.Xenoarchaeology.Artifact.XAE.Components;
@@ -20,3 +21,4 @@ public sealed partial class XAEIgniteComponent : Component
     [DataField]
     public MinMax FireStack = new(2, 5);
 }
+// WOLFGATE END

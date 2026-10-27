@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Interaction;
 using Content.Shared.Movement.Pulling.Events;
 using Content.Shared.Weapons.Melee.Events;
@@ -40,3 +41,4 @@ public sealed class XATInteractionSystem : BaseXATSystem<XATInteractionComponent
         Trigger(artifact, node);
     }
 }
+// WOLFGATE END

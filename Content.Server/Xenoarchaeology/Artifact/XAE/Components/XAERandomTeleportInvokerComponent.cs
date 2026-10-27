@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 namespace Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 
 /// <summary>
@@ -19,3 +20,4 @@ public sealed partial class XAERandomTeleportInvokerComponent : Component
     [DataField]
     public float MinRange = 6f;
 }
+// WOLFGATE END

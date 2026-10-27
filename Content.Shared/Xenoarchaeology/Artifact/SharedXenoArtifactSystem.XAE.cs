@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Administration.Logs;
 using Content.Shared.Database;
 using Content.Shared.Interaction;
@@ -171,3 +172,4 @@ public readonly record struct XenoArtifactActivatedEvent(
     EntityUid? Target,
     EntityCoordinates Coordinates
 );
+// WOLFGATE END

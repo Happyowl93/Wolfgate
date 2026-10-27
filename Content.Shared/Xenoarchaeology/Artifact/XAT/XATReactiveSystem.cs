@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Chemistry;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Content.Shared.Xenoarchaeology.Artifact.XAT.Components;
@@ -56,3 +57,4 @@ public sealed class XATReactiveSystem : BaseXATSystem<XATReactiveComponent>
         return false;
     }
 }
+// WOLFGATE END

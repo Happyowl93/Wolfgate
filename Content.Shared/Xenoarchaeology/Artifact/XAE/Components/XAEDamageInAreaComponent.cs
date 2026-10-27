@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Damage;
 using Content.Shared.Whitelist;
 using Robust.Shared.GameStates;
@@ -40,3 +41,4 @@ public sealed partial class XAEDamageInAreaComponent : Component
     [DataField, AutoNetworkedField]
     public bool IgnoreResistances;
 }
+// WOLFGATE END

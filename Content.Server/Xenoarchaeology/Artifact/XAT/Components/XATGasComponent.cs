@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Atmos;
 
 namespace Content.Server.Xenoarchaeology.Artifact.XAT.Components;
@@ -26,3 +27,4 @@ public sealed partial class XATGasComponent : Component
     [DataField]
     public bool ShouldBePresent = true;
 }
+// WOLFGATE END

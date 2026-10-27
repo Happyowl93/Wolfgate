@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoartifact toolshed commands
 using System.Linq;
 using Content.Shared.Xenoarchaeology.Artifact;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
@@ -68,3 +69,4 @@ public sealed partial class XenoArtifactNodeParser : CustomCompletionParser<(Ent
         return CompletionResult.FromHintOptions(list, hint);
     }
 }
+// WOLFGATE END

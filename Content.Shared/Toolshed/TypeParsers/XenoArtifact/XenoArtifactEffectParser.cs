@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoartifact toolshed commands
 using Robust.Shared.Console;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Toolshed;
@@ -24,3 +25,4 @@ public sealed partial class XenoArtifactEffectParser : CustomCompletionParser<Pr
 
     }
 }
+// WOLFGATE END

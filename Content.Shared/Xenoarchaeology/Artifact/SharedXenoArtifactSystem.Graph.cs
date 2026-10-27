@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using System.Diagnostics.CodeAnalysis;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Robust.Shared.Prototypes;
@@ -611,3 +612,4 @@ public abstract partial class SharedXenoArtifactSystem
         CancelUnlockingState(artifactEnt);
     }
 }
+// WOLFGATE END

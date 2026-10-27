@@ -1,4 +1,5 @@
-﻿namespace Content.Server.Xenoarchaeology.Artifact.XAE.Components;
+﻿// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
+namespace Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 
 /// <summary>
 ///     Harmless artifact that broadcast "thoughts" to players nearby.
@@ -37,3 +38,4 @@ public sealed partial class XAETelepathicComponent : Component
     [ViewVariables(VVAccess.ReadWrite)]
     public float Range = 10f;
 }
+// WOLFGATE END

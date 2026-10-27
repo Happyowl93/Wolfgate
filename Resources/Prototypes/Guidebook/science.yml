@@ -38,6 +38,8 @@
   name: guide-entry-xenoarchaeology
   text: "/ServerInfo/_NF/Guidebook/Science/Xenoarchaeology.xml" # Frontier: added _NF folder
   children:
+  # WOLFGATE(Xenoarch) START: wizden's xenoarch guidebook pages replaced Artifact Reports
+  # - ArtifactReports
     - AnalysisConsole
     - XenoarchaeologyUnlockingNodes
 
@@ -50,6 +52,12 @@
   id: AnalysisConsole
   name: guide-entry-analysisconsole
   text: "/ServerInfo/Guidebook/Science/AnalysisConsole.xml"
+
+# - type: guideEntry
+#   id: ArtifactReports
+#   name: guide-entry-artifact-reports
+#   text: "/ServerInfo/Guidebook/Science/ArtifactReports.xml"
+# WOLFGATE END
 
 - type: guideEntry
   id: Robotics

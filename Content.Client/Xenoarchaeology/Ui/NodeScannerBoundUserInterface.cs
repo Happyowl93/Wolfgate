@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Robust.Client.UserInterface;
 
 namespace Content.Client.Xenoarchaeology.Ui;
@@ -19,3 +20,4 @@ public sealed class NodeScannerBoundUserInterface(EntityUid owner, Enum uiKey) :
         _scannerDisplay.SetOwner(Owner);
     }
 }
+// WOLFGATE END

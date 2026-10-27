@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 namespace Content.Server.Xenoarchaeology.Artifact.XAT.Components;
 
 /// <summary>
@@ -19,3 +20,4 @@ public sealed partial class XATMagnetComponent : Component
     [DataField]
     public float MagbootsRange = 2f;
 }
+// WOLFGATE END

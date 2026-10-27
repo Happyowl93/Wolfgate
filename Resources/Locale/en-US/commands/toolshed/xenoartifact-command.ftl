@@ -1,3 +1,4 @@
+# WOLFGATE(Xenoarch) START: wizden's xenoartifact toolshed commands
 command-description-xenoartifact-list =
     List all EntityUids of spawned artifacts.
 command-description-xenoartifact-printmatrix =
@@ -27,3 +28,4 @@ command-spawnartifactwithnode-spawn-artifact-structure-hint = use structure-like
 command-spawnartifactwithnode-spawn-artifact-type-hint = <artifact entity proto id>
 
 command-xenoartifact-common-node-hint = depth {$depth} node {$nodeId} trigger: '{$trigger}', effect: '{$effect}'
+# WOLFGATE END

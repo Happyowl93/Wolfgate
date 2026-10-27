@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using System.Linq;
 using Content.Shared.Destructible.Thresholds;
 using Content.Shared.EntityTable;
@@ -266,3 +267,4 @@ public sealed partial class XenoArtifactSystem
         }
     }
 }
+// WOLFGATE END

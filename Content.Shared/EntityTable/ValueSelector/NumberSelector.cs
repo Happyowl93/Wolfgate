@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's EntityTable upgrade, for the xenoarch trigger tables
 using Content.Shared.EntityTable.EntitySelectors;
 using JetBrains.Annotations;
 using Robust.Shared.Random;
@@ -27,3 +28,4 @@ public abstract partial class NumberSelector
     /// <returns>The average amount of occurrences</returns>
     public abstract float Average();
 }
+// WOLFGATE END

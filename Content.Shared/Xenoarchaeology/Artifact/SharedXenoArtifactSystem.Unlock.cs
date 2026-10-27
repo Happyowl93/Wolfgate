@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
@@ -229,3 +230,4 @@ public record struct ArtifactUnlockingStartedEvent;
 /// <param name="UnlockedNode">Node which were unlocked. Null if stage was finished without new unlocks.</param>
 [ByRefEvent]
 public record struct ArtifactUnlockingFinishedEvent(EntityUid? UnlockedNode);
+// WOLFGATE END

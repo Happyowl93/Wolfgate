@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Xenoarchaeology.Artifact;
@@ -54,3 +55,4 @@ public sealed class XAEShuffleSystem : BaseXAESystem<XAEShuffleComponent>
         }
     }
 }
+// WOLFGATE END

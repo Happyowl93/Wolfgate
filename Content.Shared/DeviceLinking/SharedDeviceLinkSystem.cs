@@ -229,6 +229,7 @@ public abstract partial class SharedDeviceLinkSystem : EntitySystem
         return links;
     }
 
+    // WOLFGATE(Xenoarch) START: wizden's linked-sink lookup, used by the artifact analyzer
     /// <summary>
     /// Gets the entities linked to a specific source port.
     /// </summary>
@@ -239,6 +240,7 @@ public abstract partial class SharedDeviceLinkSystem : EntitySystem
 
         return new HashSet<EntityUid>(linked); // clone to prevent modifying the original
     }
+    // WOLFGATE END
 
     /// <summary>
     /// Returns the default links for the given list of source port prototypes

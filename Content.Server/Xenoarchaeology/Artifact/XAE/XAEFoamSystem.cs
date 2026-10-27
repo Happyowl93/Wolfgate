@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Server.Fluids.EntitySystems;
 using Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 using Content.Shared.Chemistry.Components;
@@ -62,3 +63,4 @@ public sealed class XAEFoamSystem : BaseXAESystem<XAEFoamComponent>
         _smoke.StartSmoke(foamEnt, sol, component.Duration, spreadAmount);
     }
 }
+// WOLFGATE END

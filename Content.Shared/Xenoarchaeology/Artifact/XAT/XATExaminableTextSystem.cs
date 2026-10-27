@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Examine;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Content.Shared.Xenoarchaeology.Artifact.XAT.Components;
@@ -26,3 +27,4 @@ public sealed class XATExaminableTextSystem : BaseXATSystem<XATExaminableTextCom
         args.PushMarkup(Loc.GetString(node.Comp1.ExamineText));
     }
 }
+// WOLFGATE END

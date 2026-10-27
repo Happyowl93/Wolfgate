@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.FixedPoint;
@@ -36,3 +37,4 @@ public sealed partial class XATDamageThresholdReachedComponent : Component
     [DataField, AutoNetworkedField]
     public Dictionary<ProtoId<DamageGroupPrototype>, FixedPoint2> GroupsNeeded = new();
 }
+// WOLFGATE END

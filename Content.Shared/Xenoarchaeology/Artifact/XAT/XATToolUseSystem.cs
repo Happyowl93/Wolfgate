@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Interaction;
 using Content.Shared.Tools.Components;
 using Content.Shared.Tools.Systems;
@@ -50,3 +51,4 @@ public sealed class XATToolUseSystem : BaseXATSystem<XATToolUseComponent>
             tool);
     }
 }
+// WOLFGATE END

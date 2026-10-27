@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 namespace Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 
 /// <summary>
@@ -12,3 +13,4 @@ public sealed partial class XAEChargeBatteryComponent : Component
     [DataField("radius")]
     public float Radius = 15f;
 }
+// WOLFGATE END

@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's xenoarch rework
 using Content.Shared.Research.Components;
 using Content.Shared.Xenoarchaeology.Equipment.Components;
 using Robust.Client.UserInterface;
@@ -42,3 +43,4 @@ public sealed class AnalysisConsoleBoundUserInterface(EntityUid owner, Enum uiKe
     }
 }
 
+// WOLFGATE END

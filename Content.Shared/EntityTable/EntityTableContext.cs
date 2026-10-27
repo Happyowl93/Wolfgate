@@ -1,3 +1,4 @@
+// WOLFGATE(Xenoarch) START: wizden's EntityTable upgrade, for the xenoarch trigger tables
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
@@ -73,3 +74,4 @@ public sealed class EntityTableContext : IEnumerable
 /// String value under which data will be stored inside. They should not have collisions, otherwise data will be rewritten.
 /// </param>
 public readonly record struct EntityTableContextKey<T>(string Key);
+// WOLFGATE END
