@@ -120,54 +120,6 @@
       - WFMonolithicCrystalSmall
 
 - type: cargoBounty
-  id: WFAsfBountyArtifactStorage
-  reward: 30
-  rewardSuffix: ARG
-  rewardProto: WFAsfRewardGrant
-  description: wf-asf-bounty-desc-artifact
-  idPrefix: LTN
-  entries:
-  - name: wf-asf-bounty-name-artifact-storage
-    amount: 1
-    whitelist:
-      requireAll: true
-      components:
-      - XenoArtifact
-      - Storage
-
-- type: cargoBounty
-  id: WFAsfBountyArtifactIntercom
-  reward: 30
-  rewardSuffix: ARG
-  rewardProto: WFAsfRewardGrant
-  description: wf-asf-bounty-desc-artifact
-  idPrefix: LTN
-  entries:
-  - name: wf-asf-bounty-name-artifact-intercom
-    amount: 1
-    whitelist:
-      requireAll: true
-      components:
-      - XenoArtifact
-      - Intercom
-
-- type: cargoBounty
-  id: WFAsfBountyArtifactInstrument
-  reward: 25
-  rewardSuffix: ARG
-  rewardProto: WFAsfRewardGrant
-  description: wf-asf-bounty-desc-artifact
-  idPrefix: LTN
-  entries:
-  - name: wf-asf-bounty-name-artifact-instrument
-    amount: 1
-    whitelist:
-      requireAll: true
-      components:
-      - XenoArtifact
-      - Instrument
-
-- type: cargoBounty
   id: WFAsfBountyArtifactVessel
   reward: 25
   rewardSuffix: ARG
@@ -216,22 +168,6 @@
       - HeldSpeedModifier
 
 - type: cargoBounty
-  id: WFAsfBountyArtifactPower
-  reward: 50
-  rewardSuffix: ARG
-  rewardProto: WFAsfRewardGrant
-  description: wf-asf-bounty-desc-artifact
-  idPrefix: LTN
-  entries:
-  - name: wf-asf-bounty-name-artifact-power
-    amount: 1
-    whitelist:
-      requireAll: true
-      components:
-      - XenoArtifact
-      - PowerSupplier
-
-- type: cargoBounty
   id: WFAsfBountyArtifactDrill
   reward: 45
   rewardSuffix: ARG
@@ -262,19 +198,3 @@
       components:
       - XenoArtifact
       - MultipleTool
-
-- type: cargoBounty
-  id: WFAsfBountyArtifactGun
-  reward: 50
-  rewardSuffix: ARG
-  rewardProto: WFAsfRewardGrant
-  description: wf-asf-bounty-desc-artifact
-  idPrefix: LTN
-  entries:
-  - name: wf-asf-bounty-name-artifact-gun
-    amount: 1
-    whitelist:
-      requireAll: true
-      components:
-      - XenoArtifact
-      - RevolverAmmoProvider

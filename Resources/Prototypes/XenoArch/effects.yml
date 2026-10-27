@@ -2,17 +2,12 @@
   id: XenoArtifactEffectsDefaultTable
   table: !type:GroupSelector
     children:
-    # hijacks use key, prevents from using artifact, sadly
-    #- id: XenoArtifactEffectUniversalIntercom
-    #  weight: 10.0
     - id: XenoArtifactBecomeLamp
       weight: 10
     - id: XenoArtifactBecomeRainbowLamp
       weight: 1
     - id: XenoArtifactSolutionStorage
       weight: 10.0
-    # - id: XenoArtifactPhasing # Frontier: prevents sale
-    #   weight: 2.0 # Frontier
     - id: XenoArtifactWandering
       weight: 4.0
     - id: XenoArtifactSpeedUp
@@ -111,10 +106,6 @@
       weight: 3.0
     - id: XenoArtifactHealAll
       weight: 1.0
-    #- id: XenoArtifactTesla
-    #  weight: 10.0
-    #- id: XenoArtifactSingularity
-    #  weight: 10.0
     - id: XenoArtifactExplosionScary
       weight: 1.0
     - id: XenoArtifactBoom
@@ -152,10 +143,6 @@
   id: XenoArtifactEffectsHandheldOnlyTable
   table: !type:GroupSelector
     children:
-    #- id: XenoArtifactBecomeRandomInstrument
-    #  weight 10.0 # removed until we have value-based system
-    #- id: XenoArtifactGun
-    #  weight 4.0 #it conflicts with default interaction - it should activate artifact nodes
     - id: XenoArtifactOmnitool
       weight: 10.0
     - id: XenoArtifactDrill
@@ -210,74 +197,6 @@
     - type: PointLight
       radius: 3
     - type: RgbLightController
-
-- type: entity
-  id: XenoArtifactEffectUniversalIntercom
-  parent: BaseOneTimeXenoArtifactEffect
-  description: Obtains ability of long-distance communication device
-  categories: [ HideSpawnMenu ] # Frontier
-  components:
-  - type: XAEApplyComponents
-    components:
-    - type: RadioMicrophone
-      powerRequired: false
-      toggleOnInteract: false
-      listenRange: 3
-    - type: Speech
-    - type: RadioSpeaker
-      toggleOnInteract: false
-    - type: ActivatableUI
-      key: enum.IntercomUiKey.Key
-    - type: Intercom
-      requiresPower: false
-      supportedChannels:
-      - Common
-      # - CentCom # Frontier
-      # - Command # Frontier
-      - Engineering
-      - Medical
-      - Science
-      # - Security # Frontier
-      # - Service # Frontier
-      - Supply
-      # - Binary # Frontier # WOLFGATE(Xenoarch): no Binary channel here
-
-- type: entity
-  id: XenoArtifactBecomeRandomInstrument
-  parent: BaseOneTimeXenoArtifactEffect
-  description: Obtains ability of musical instrument
-  categories: [ HideSpawnMenu ] # Frontier
-  components:
-  - type: XAEApplyComponents
-    components:
-    - type: Instrument
-    - type: ActivatableUI
-      singleUser: true
-      verbText: verb-instrument-openui
-      key: enum.InstrumentUiKey.Key
-
-- type: entity
-  id: XenoArtifactStorage
-  parent: BaseOneTimeXenoArtifactEffect
-  description: Obtains ability of hidden storage
-  categories: [ HideSpawnMenu ] # Frontier
-  components:
-  - type: XAEApplyComponents
-    components:
-    - type: Item
-      size: Huge
-    - type: Storage
-      maxItemSize: Huge
-      grid:
-      - 0,0,10,5
-
-- type: entity
-  id: XenoArtifactPhasing
-  parent: BaseOneTimeXenoArtifactEffect
-  description: Becomes phased
-  categories: [ HideSpawnMenu ] # Frontier
-  components:
-  - type: XAERemoveCollision
 
 - type: entity
   id: XenoArtifactWandering
@@ -350,57 +269,6 @@
       soundHit:
         path: /Audio/Weapons/bladeslice.ogg
     - type: Sharp
-
-- type: entity
-  id: XenoArtifactGenerateEnergy
-  parent: BaseOneTimeXenoArtifactEffect # todo - increment power, but only once per node
-  description: Produces power
-  categories: [ HideSpawnMenu ] # Frontier
-  components:
-  - type: XAEApplyComponents
-    components:
-    - type: PowerSupplier
-      supplyRate: 20000
-    - type: NodeContainer
-      examinable: true
-      nodes:
-        output_hv:
-          !type:CableDeviceNode
-          nodeGroupID: HVPower
-
-- type: entity
-  id: XenoArtifactGun
-  parent: BaseOneTimeXenoArtifactEffect
-  description: Obtains ability of firearm
-  categories: [ HideSpawnMenu ] # Frontier
-  components:
-  - type: XAEApplyComponents
-    applyIfAlreadyHave: true
-    refreshOnReactivate: true
-    components:
-    - type: RevolverAmmoProvider
-      whitelist:
-        tags:
-        # WOLFGATE(Xenoarch) START: Mono's .357 ammo, as the old gun effect used
-        - Cartridge357_magnumFMJ
-        - SpeedLoader357_magnumFMJ
-      proto: Cartridge357_magnumFMJ
-      # WOLFGATE END
-      capacity: 7
-      chambers: [ True, True, True, True, True, True, True ]
-      ammoSlots: [ null, null, null, null, null, null, null ]
-      soundEject:
-        path: /Audio/Weapons/Guns/MagOut/revolver_magout.ogg
-      soundInsert:
-        path: /Audio/Weapons/Guns/MagIn/revolver_magin.ogg
-    - type: Gun
-      selectedMode: SemiAuto
-      fireRate: 2
-      availableModes:
-      - SemiAuto
-      - FullAuto # no alien revolver in buildings
-      soundGunshot:
-        path: /Audio/Weapons/Guns/Gunshots/revolver.ogg
 
 - type: entity
   id: XenoArtifactGhost
@@ -815,37 +683,6 @@
     - type: StealthOnMove
       passiveVisibilityRate: -0.10
       movementVisibilityRate: 0.10
-
-- type: entity
-  id: XenoArtifactRareMaterialSpawn
-  parent: BaseXenoArtifactEffect # todo: splice into different well-named effects, amounts should reflect how rare material is
-  description: Create rare materials
-  categories: [ HideSpawnMenu ] # Frontier
-  components:
-  - type: XAEApplyComponents
-    applyIfAlreadyHave: true
-    refreshOnReactivate: true
-    components:
-    - type: EntityTableSpawner
-      deleteSpawnerAfterSpawn: false
-      table: !type:AllSelector
-        children:
-        - id: SilverOre1
-          rolls: !type:ConstantNumberSelector
-            value: 6
-          prob: 0.3
-        - id: PlasmaOre1
-          rolls: !type:ConstantNumberSelector
-            value: 6
-          prob: 0.3
-        - id: GoldOre1
-          rolls: !type:ConstantNumberSelector
-            value: 6
-          prob: 0.3
-        - id: UraniumOre1
-          rolls: !type:ConstantNumberSelector
-            value: 6
-          prob: 0.3
 
 - type: entity
   id: XenoArtifactRareMaterialSpawnSilver
@@ -1362,38 +1199,6 @@
       groups:
         Brute: -300
         Burn: -300
-
-- type: entity
-  id: XenoArtifactTesla
-  parent: BaseOneTimeXenoArtifactEffect
-  description: Mass destruction
-  categories: [ HideSpawnMenu ] # Frontier
-  components:
-  - type: XAEApplyComponents
-    applyIfAlreadyHave: true
-    refreshOnReactivate: true
-    components:
-    - type: EntityTableSpawner
-      deleteSpawnerAfterSpawn: false
-      table: !type:AllSelector
-        children:
-        - id: Singularity
-
-- type: entity
-  id: XenoArtifactSingularity
-  parent: BaseOneTimeXenoArtifactEffect
-  description: Imminent doom
-  categories: [ HideSpawnMenu ] # Frontier
-  components:
-  - type: XAEApplyComponents
-    applyIfAlreadyHave: true
-    refreshOnReactivate: true
-    components:
-    - type: EntityTableSpawner
-      deleteSpawnerAfterSpawn: false
-      table: !type:AllSelector
-        children:
-        - id: TeslaEnergyBall
 
 - type: entity
   id: XenoArtifactExplosionScary

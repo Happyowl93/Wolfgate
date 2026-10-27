@@ -398,9 +398,8 @@ public abstract partial class SharedXenoArtifactSystem
 
         var artifact = _xenoArtifactQuery.Get(nodeComponent.Attached.Value);
 
-        var nonactiveNodes = GetActiveNodes(artifact);
         var durabilityEffect = MathF.Pow((float)nodeComponent.Durability / nodeComponent.MaxDurability, 2);
-        var durabilityMultiplier = nonactiveNodes.Contains(node)
+        var durabilityMultiplier = IsNodeActive(artifact, node)
             ? 1f - durabilityEffect
             : 1f + durabilityEffect;
 
@@ -408,7 +407,7 @@ public abstract partial class SharedXenoArtifactSystem
         nodeComponent.ResearchValue = (int)(Math.Pow(1.4, Math.Pow(predecessorNodes.Count + 1, 1.2f)) * nodeComponent.BasePointValue * durabilityMultiplier); // Frontier: add one to count, 1.25<1.4, 1.5<1.2
         // Frontier: remove value from using artifexium, different value sets
         if (node.Comp.ArtifexiumUsed)
-            nodeComponent.ResearchValue = (int)Math.Pow(nodeComponent.ResearchValue - 700, 0.9);
+            nodeComponent.ResearchValue = (int)Math.Pow(Math.Max(0, nodeComponent.ResearchValue - 700), 0.9);
         // End Frontier: remove value from using artifexium, different value sets
 
     }

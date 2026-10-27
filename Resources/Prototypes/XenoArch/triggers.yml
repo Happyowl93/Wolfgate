@@ -494,7 +494,6 @@
       max: 3
     whitelist:
       components:
-      - LaserProjectile
       - HitscanBasicRaycast # WOLFGATE(Xenoarch): every hitscan beam counts, since ours aren't reparented onto a laser base
       tags:
       - EmitterBolt

@@ -1,7 +1,6 @@
 using Content.Server.Fluids.EntitySystems;
 using Content.Server.Xenoarchaeology.Artifact.XAE.Components;
 using Content.Shared.Chemistry.Components;
-using Content.Shared.Chemistry.Reaction;
 using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Xenoarchaeology.Artifact;
 using Content.Shared.Xenoarchaeology.Artifact.XAE;
@@ -15,6 +14,8 @@ namespace Content.Server.Xenoarchaeology.Artifact.XAE;
 /// </summary>
 public sealed class XAEFoamSystem : BaseXAESystem<XAEFoamComponent>
 {
+    private static readonly EntProtoId FoamEntity = "Foam";
+
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly SmokeSystem _smoke = default!;
     [Dependency] private readonly IPrototypeManager _prototypeManager= default!;
@@ -56,7 +57,7 @@ public sealed class XAEFoamSystem : BaseXAESystem<XAEFoamComponent>
         var sol = new Solution();
         var range = (int)MathF.Round(MathHelper.Lerp(component.MinFoamAmount, component.MaxFoamAmount, _random.NextFloat(0, 1f)));
         sol.AddReagent(component.SelectedReagent, component.ReagentAmount);
-        var foamEnt = Spawn(ChemicalReactionSystem.FoamReaction, args.Coordinates);
+        var foamEnt = Spawn(FoamEntity, args.Coordinates);
         var spreadAmount = range * 4;
         _smoke.StartSmoke(foamEnt, sol, component.Duration, spreadAmount);
     }

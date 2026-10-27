@@ -18,15 +18,4 @@ public sealed class NodeScannerBoundUserInterface(EntityUid owner, Enum uiKey) :
         _scannerDisplay = this.CreateWindow<NodeScannerDisplay>();
         _scannerDisplay.SetOwner(Owner);
     }
-
-    /// <inheritdoc />
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-
-        if (!disposing)
-            return;
-
-        _scannerDisplay?.Dispose();
-    }
 }

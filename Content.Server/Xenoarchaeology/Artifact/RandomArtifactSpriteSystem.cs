@@ -14,6 +14,9 @@ public sealed class RandomArtifactSpriteSystem : EntitySystem
     [Dependency] private readonly AppearanceSystem _appearance = default!;
     [Dependency] private readonly SharedItemSystem _item = default!;
 
+    /// <summary> Artifacts still showing their activation effect. </summary>
+    private readonly List<Entity<RandomArtifactSpriteComponent>> _activated = new();
+
     public override void Initialize()
     {
         base.Initialize();
@@ -28,18 +31,22 @@ public sealed class RandomArtifactSpriteSystem : EntitySystem
     {
         base.Update(frameTime);
 
-        var query = EntityQueryEnumerator<RandomArtifactSpriteComponent, AppearanceComponent>();
-        while (query.MoveNext(out var uid, out var component, out var appearance))
+        for (var i = _activated.Count - 1; i >= 0; i--)
         {
-            if (component.ActivationStart == null)
+            var (uid, component) = _activated[i];
+            if (component.Deleted || component.ActivationStart == null)
+            {
+                _activated.RemoveAt(i);
                 continue;
+            }
 
             var timeDif = _time.CurTime - component.ActivationStart.Value;
-            if (timeDif.Seconds >= component.ActivationTime)
-            {
-                _appearance.SetData(uid, SharedArtifactsVisuals.IsActivated, false, appearance);
-                component.ActivationStart = null;
-            }
+            if (timeDif.TotalSeconds < component.ActivationTime)
+                continue;
+
+            _appearance.SetData(uid, SharedArtifactsVisuals.IsActivated, false);
+            component.ActivationStart = null;
+            _activated.RemoveAt(i);
         }
     }
 
@@ -63,6 +70,8 @@ public sealed class RandomArtifactSpriteSystem : EntitySystem
     private void ArtifactActivated(Entity<RandomArtifactSpriteComponent> ent, ref XenoArtifactActivatedEvent args)
     {
         _appearance.SetData(ent, SharedArtifactsVisuals.IsActivated, true);
+        if (ent.Comp.ActivationStart == null)
+            _activated.Add(ent);
         ent.Comp.ActivationStart = _time.CurTime;
     }
 }

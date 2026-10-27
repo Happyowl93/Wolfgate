@@ -5,7 +5,6 @@
   # description: A strange artifact from time unknown. Looks like a good time. # Frontier
   description: A strange artifact of unknown origin. Its shape is bizarre and alien. # Frontier
   abstract: true
-  noSpawn: true
   components:
   # Visual
   - type: Appearance

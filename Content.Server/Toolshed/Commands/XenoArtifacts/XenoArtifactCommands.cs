@@ -210,7 +210,7 @@ public sealed partial class XenoArtifactCommand : ToolshedCommand
         if (from.Artifact.Owner != to.Artifact.Owner || from.Node.Owner == to.Node.Owner)
             return;
 
-        _artifact = Sys<XenoArtifactSystem>();
+        _artifact ??= Sys<XenoArtifactSystem>();
         _artifact.AddEdge(from.Artifact.AsNullable(), from.Node, to.Node);
     }
 

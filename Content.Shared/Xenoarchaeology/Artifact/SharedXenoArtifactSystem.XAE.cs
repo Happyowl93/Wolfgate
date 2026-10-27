@@ -4,7 +4,6 @@ using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
 using Content.Shared.Timing;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
-using Content.Shared.Tiles; // Frontier
 using Robust.Shared.Map;
 
 namespace Content.Shared.Xenoarchaeology.Artifact;
@@ -67,9 +66,7 @@ public abstract partial class SharedXenoArtifactSystem
             return false;
 
         // Frontier: Disable activations on protected grids
-        if (TryComp(artifact, out TransformComponent? xform)
-            && TryComp<ProtectedGridComponent>(xform.GridUid, out var prot)
-            && prot.PreventArtifactTriggers)
+        if (IsOnProtectedGrid(artifact))
         {
             _popup.PopupClient(Loc.GetString("artifact-activation-fail"), artifact, user);
             return false;

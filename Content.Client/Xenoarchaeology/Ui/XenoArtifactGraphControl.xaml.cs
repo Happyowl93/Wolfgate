@@ -23,6 +23,9 @@ public sealed partial class XenoArtifactGraphControl : BoxContainer
 
     private Entity<XenoArtifactNodeComponent>? _hoveredNode;
 
+    /// <summary> Screen position of each node, rebuilt every frame. </summary>
+    private readonly Dictionary<EntityUid, Vector2> _nodePositions = new();
+
     private readonly Font _font;
 
     public event Action<Entity<XenoArtifactNodeComponent>>? OnNodeSelected;
@@ -85,9 +88,22 @@ public sealed partial class XenoArtifactGraphControl : BoxContainer
             return;
         var artifact = _artifact.Value;
 
-        var maxDepth = _artifactSystem.GetAllNodes(artifact)
-                                      .Max(s => s.Comp.Depth);
         var segments = _artifactSystem.GetSegments(artifact);
+        segments.RemoveAll(s => s.Count == 0);
+        if (segments.Count == 0)
+            return;
+
+        // Group each segment's nodes by depth once; layout and drawing both read from it.
+        var layers = new List<Dictionary<int, List<Entity<XenoArtifactNodeComponent>>>>(segments.Count);
+        var maxDepth = 0;
+        var segmentWidths = 0f;
+        foreach (var segment in segments)
+        {
+            var orderedNodes = _artifactSystem.GetDepthOrderedNodes(segment);
+            layers.Add(orderedNodes);
+            maxDepth = Math.Max(maxDepth, orderedNodes.Keys.Max());
+            segmentWidths += GetBiggestWidth(orderedNodes);
+        }
 
         var bottomLeft = Position // the position
                          + new Vector2(0, Size.Y * UIScale) // the scaled height of the control
@@ -102,25 +118,29 @@ public sealed partial class XenoArtifactGraphControl : BoxContainer
             ySpacing = Math.Clamp((controlHeight - ((maxDepth + 1) * NodeDiameter)) / maxDepth, MinYSpacing, MaxYSpacing);
 
         // gets settings for visualizing segments (groups of interconnected nodes - there may be 1 or more per artifact).
-        var segmentWidths = segments.Sum(GetBiggestWidth);
         var segmentSpacing = Math.Clamp((controlWidth - segmentWidths) / (segments.Count - 1), MinXSegmentSpacing, MaxXSegmentSpacing);
         var segmentOffset = Math.Max((controlWidth - (segmentWidths) - (segmentSpacing * (segments.Count - 1))) / 2, 0);
 
         bottomLeft.X += segmentOffset;
         bottomLeft.Y -= (controlHeight - (ySpacing * maxDepth) - (NodeDiameter * (maxDepth + 1))) / 2;
 
+        _nodePositions.Clear();
+        foreach (var orderedNodes in layers)
+        {
+            LayoutSegment(orderedNodes, ySpacing, bottomLeft);
+            bottomLeft.X += GetBiggestWidth(orderedNodes) + segmentSpacing;
+        }
+
         var cursor = (UserInterfaceManager.MousePositionScaled.Position * UIScale) - GlobalPixelPosition;
 
-        foreach (var segment in segments)
+        for (var s = 0; s < segments.Count; s++)
         {
-            // For each segment we draw nodes in order of depth. Method returns List of nodes for each depth level.
-            var orderedNodes = _artifactSystem.GetDepthOrderedNodes(segment);
-            foreach (var (_, nodes) in orderedNodes)
+            // For each segment we draw nodes in order of depth.
+            foreach (var (_, nodes) in layers[s])
             {
-                for (var i = 0; i < nodes.Count; i++)
+                foreach (var node in nodes)
                 {
                     // selecting color for node based on its state
-                    var node = nodes[i];
                     var color = LockedNodeColor;
                     if (_artifactSystem.IsNodeActive(artifact, node))
                     {
@@ -139,7 +159,7 @@ public sealed partial class XenoArtifactGraphControl : BoxContainer
                         }
                     }
 
-                    var pos = GetNodePos(node, ySpacing, segments, ref bottomLeft);
+                    var pos = _nodePositions[node.Owner];
                     var hovered = (cursor - pos).LengthSquared() <= NodeRadius * NodeRadius;
                     if (hovered)
                     {
@@ -158,50 +178,52 @@ public sealed partial class XenoArtifactGraphControl : BoxContainer
             }
 
             // draw edges for each segment and each node that have successors
-            foreach (var node in segment)
+            foreach (var node in segments[s])
             {
-                var fromNode = GetNodePos(node, ySpacing, segments, ref bottomLeft) + new Vector2(0, -NodeRadius);
+                var fromNode = _nodePositions[node.Owner] + new Vector2(0, -NodeRadius);
                 var successorNodes = _artifactSystem.GetDirectSuccessorNodes((artifact, artifact), node);
                 foreach (var successorNode in successorNodes)
                 {
+                    if (!_nodePositions.TryGetValue(successorNode.Owner, out var successorPos))
+                        continue;
+
                     var color = node.Comp.Locked
                         ? LockedNodeColor
                         : UnlockedNodeColor;
 
-                    var toNode = GetNodePos(successorNode, ySpacing, segments, ref bottomLeft) + new Vector2(0, NodeRadius);
-                    handle.DrawLine(fromNode, toNode, color);
+                    handle.DrawLine(fromNode, successorPos + new Vector2(0, NodeRadius), color);
                 }
             }
-
-            bottomLeft.X += GetBiggestWidth(segment) + segmentSpacing;
         }
     }
 
-    private Vector2 GetNodePos(Entity<XenoArtifactNodeComponent> node, float ySpacing, List<List<Entity<XenoArtifactNodeComponent>>> segments, ref Vector2 bottomLeft)
+    /// <summary>
+    /// Stores the screen position of every node in a segment, laid out row by row from its bottom-left corner.
+    /// </summary>
+    private void LayoutSegment(Dictionary<int, List<Entity<XenoArtifactNodeComponent>>> orderedNodes, float ySpacing, Vector2 bottomLeft)
     {
-        var yPos = -(NodeDiameter + ySpacing) * node.Comp.Depth;
-
-        var segment = segments.First(s => s.Contains(node));
-        var depthOrderedNodes = _artifactSystem.GetDepthOrderedNodes(segment);
-        var biggestTier = depthOrderedNodes.Max(s => s.Value.Count);
-        var nodesInLayer = depthOrderedNodes.GetValueOrDefault(node.Comp.Depth)!.Count;
+        var biggestTier = orderedNodes.Max(s => s.Value.Count);
         var biggestWidth = (NodeDiameter + MinXSpacing) * biggestTier;
 
-        var xSpacing = Math.Clamp((biggestWidth - (NodeDiameter * nodesInLayer)) / (nodesInLayer - 1), MinXSpacing, MaxXSpacing);
-        var layerXOffset = (biggestWidth - (xSpacing * (nodesInLayer - 1)) - (NodeDiameter * nodesInLayer)) / 2;
+        foreach (var (depth, nodes) in orderedNodes)
+        {
+            var yPos = -(NodeDiameter + ySpacing) * depth;
+            var nodesInLayer = nodes.Count;
 
-        // get index of node in current segment's row (row per depth level)
-        var index = depthOrderedNodes.GetValueOrDefault(node.Comp.Depth)!.IndexOf(node);
+            var xSpacing = Math.Clamp((biggestWidth - (NodeDiameter * nodesInLayer)) / (nodesInLayer - 1), MinXSpacing, MaxXSpacing);
+            var layerXOffset = (biggestWidth - (xSpacing * (nodesInLayer - 1)) - (NodeDiameter * nodesInLayer)) / 2;
 
-        var xPos = NodeDiameter * index + (xSpacing * index) + layerXOffset;
-
-        return bottomLeft + new Vector2(xPos, yPos);
+            for (var index = 0; index < nodesInLayer; index++)
+            {
+                var xPos = NodeDiameter * index + (xSpacing * index) + layerXOffset;
+                _nodePositions[nodes[index].Owner] = bottomLeft + new Vector2(xPos, yPos);
+            }
+        }
     }
 
-    private float GetBiggestWidth(List<Entity<XenoArtifactNodeComponent>> nodes)
+    private float GetBiggestWidth(Dictionary<int, List<Entity<XenoArtifactNodeComponent>>> orderedNodes)
     {
-        var num = _artifactSystem.GetDepthOrderedNodes(nodes)
-                                 .Max(p => p.Value.Count);
+        var num = orderedNodes.Max(p => p.Value.Count);
         return (NodeDiameter * num) + MinXSpacing * (num - 1);
     }
 }

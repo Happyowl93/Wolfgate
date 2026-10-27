@@ -37,7 +37,6 @@
 
   <Box>
     <GuideEntityEmbed Entity="CrateArtifactContainer" Caption="Artifact Container"/>
-    <GuideEntityEmbed Entity="HandheldArtifactContainer" Caption="Handheld Container"/>
   </Box>
   - [bold]Artifact Containers:[/bold] Safely store and transports artifacts and prevent nodes from triggering.
   <Box>

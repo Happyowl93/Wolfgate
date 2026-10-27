@@ -42,12 +42,6 @@ public sealed partial class NestedSelector : EntityTableSelectorWithNestedBase
         return proto.Index(TableId).Table.ListSpawns(entMan, proto, ctx);
     }
 
-    /// <inheritdoc/>>
-    protected override IEnumerable<(EntProtoId spawn, double)> AverageSpawnsImplementation(IEntityManager entMan, IPrototypeManager proto, EntityTableContext ctx)
-    {
-        return proto.Index(TableId).Table.AverageSpawns(entMan, proto, ctx);
-    }
-
     /// <inheritdoc/>
     public override string ToString()
     {

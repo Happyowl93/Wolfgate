@@ -1,5 +1,4 @@
 using Content.Client.UserInterface.Controls;
-using Content.Shared.NameIdentifier;
 using Content.Shared.Xenoarchaeology.Artifact;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Content.Shared.Xenoarchaeology.Equipment.Components;
@@ -21,6 +20,7 @@ public sealed partial class NodeScannerDisplay : FancyWindow
     private EntityUid _owner;
     private TimeSpan _updateFromAttachedFrequency;
     private readonly HashSet<string> _triggeredNodeNames = new();
+    private readonly HashSet<string> _shownNodeNames = new();
 
     public NodeScannerDisplay()
     {
@@ -57,9 +57,10 @@ public sealed partial class NodeScannerDisplay : FancyWindow
 
         _nextUpdate = _timing.CurTime + _updateFromAttachedFrequency;
 
+        _triggeredNodeNames.Clear();
         if (!_ent.TryGetComponent(_owner, out NodeScannerConnectedComponent? connectedScanner))
         {
-            Update(false, ArtifactState.None);
+            Update(false, ArtifactState.None, _triggeredNodeNames);
             return;
         }
 
@@ -69,7 +70,6 @@ public sealed partial class NodeScannerDisplay : FancyWindow
 
         _ent.TryGetComponent(attachedArtifactEnt, out XenoArtifactUnlockingComponent? unlockingComponent);
 
-        _triggeredNodeNames.Clear();
         ArtifactState artifactState;
         if (unlockingComponent == null)
         {
@@ -85,8 +85,7 @@ public sealed partial class NodeScannerDisplay : FancyWindow
             foreach (var triggeredIndex in triggeredIndexes)
             {
                 var node = _artifact.GetNode((attachedArtifactEnt, artifactComponent), triggeredIndex);
-                var triggeredNodeName = (_ent.GetComponentOrNull<NameIdentifierComponent>(node)?.Identifier ?? 0).ToString("D3");
-                _triggeredNodeNames.Add(triggeredNodeName);
+                _triggeredNodeNames.Add(_artifact.GetNodeId(node));
             }
 
             artifactState = ArtifactState.Unlocking;
@@ -98,41 +97,34 @@ public sealed partial class NodeScannerDisplay : FancyWindow
     /// <summary>
     /// Updates labels with scanned artifact data and list of triggered nodes from component.
     /// </summary>
-    private void Update(bool isConnected, ArtifactState artifactState, HashSet<string>? triggeredNodeNames = null)
+    private void Update(bool isConnected, ArtifactState artifactState, HashSet<string> triggeredNodeNames)
     {
         ArtifactStateLabel.Text = GetStateText(artifactState);
         NodeScannerState.Text = isConnected
             ? Loc.GetString("node-scanner-artifact-connected")
             : Loc.GetString("node-scanner-artifact-non-connected");
 
-        ActiveNodesList.Children.Clear();
+        // show list of triggered nodes instead of 'no data' placeholder
+        var hasNodes = triggeredNodeNames.Count > 0;
+        NoActiveNodeDataLabel.Visible = !hasNodes;
+        ActiveNodesList.Visible = hasNodes;
 
-        if (triggeredNodeNames == null)
+        if (_shownNodeNames.SetEquals(triggeredNodeNames))
             return;
 
-        if (triggeredNodeNames.Count > 0)
+        _shownNodeNames.Clear();
+        _shownNodeNames.UnionWith(triggeredNodeNames);
+        ActiveNodesList.Children.Clear();
+        foreach (var nodeId in triggeredNodeNames)
         {
-            // show list of triggered nodes instead of 'no data' placeholder
-            NoActiveNodeDataLabel.Visible = false;
-            ActiveNodesList.Visible = true;
-
-            foreach (var nodeId in triggeredNodeNames)
+            var nodeLabel = new Button
             {
-                var nodeLabel = new Button
-                {
-                    Text = nodeId,
-                    Margin = new Thickness(15, 5, 0, 0),
-                    MaxHeight = 40,
-                    Disabled = true
-                };
-                ActiveNodesList.Children.Add(nodeLabel);
-            }
-        }
-        else
-        {
-            // clear list of activated nodes (done previously), show 'no data' placeholder
-            NoActiveNodeDataLabel.Visible = true;
-            ActiveNodesList.Visible = false;
+                Text = nodeId,
+                Margin = new Thickness(15, 5, 0, 0),
+                MaxHeight = 40,
+                Disabled = true
+            };
+            ActiveNodesList.Children.Add(nodeLabel);
         }
     }
 

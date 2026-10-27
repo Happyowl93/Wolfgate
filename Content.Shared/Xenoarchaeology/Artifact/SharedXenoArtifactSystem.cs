@@ -1,5 +1,6 @@
 using Content.Shared.Actions;
 using Content.Shared.Popups;
+using Content.Shared.Tiles; // Frontier
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Robust.Shared.Containers;
 using Robust.Shared.Network;
@@ -109,6 +110,16 @@ public abstract partial class SharedXenoArtifactSystem : EntitySystem
 
         return result;
     }
+
+    // Frontier: Disable activations on protected grids
+    /// <summary>
+    /// Checks if the artifact sits on a grid that blocks artifact activations and triggers.
+    /// </summary>
+    public bool IsOnProtectedGrid(EntityUid artifact)
+    {
+        return TryComp<ProtectedGridComponent>(Transform(artifact).GridUid, out var prot) && prot.PreventArtifactTriggers;
+    }
+    // End Frontier
 
     public void SetSuppressed(Entity<XenoArtifactComponent> ent, bool val)
     {

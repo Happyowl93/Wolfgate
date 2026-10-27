@@ -21,11 +21,6 @@ public sealed partial class NoneSelector : EntityTableSelector
         yield break;
     }
 
-    protected override IEnumerable<(EntProtoId spawn, double)> AverageSpawnsImplementation(IEntityManager entMan, IPrototypeManager proto, EntityTableContext ctx)
-    {
-        yield break;
-    }
-
     /// <inheritdoc/>
     public override string ToString()
     {

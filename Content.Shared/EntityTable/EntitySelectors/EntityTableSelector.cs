@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Content.Shared.EntityTable.Conditions;
 using Content.Shared.EntityTable.ValueSelector;
 using JetBrains.Annotations;
@@ -84,25 +83,18 @@ public abstract partial class EntityTableSelector
     /// </summary>
     public virtual bool CheckConditions(IEntityManager entMan, IPrototypeManager proto, EntityTableContext ctx)
     {
+        ctx.TryGetData(AdditionalConditionsKey, out var additionalConditions);
+
         // No conditions to evaluate (own or injected into the context) => always valid.
-        if (!TryGetConditions(ctx, out var conditions))
+        if (Conditions.Count == 0 && (additionalConditions == null || additionalConditions.Count == 0))
             return true;
 
         var success = false;
-        foreach (var condition in conditions)
-        {
-            var res = condition.Evaluate(this, entMan, proto, ctx);
+        if (!EvaluateConditions(Conditions, entMan, proto, ctx, ref success)
+            || additionalConditions != null && !EvaluateConditions(additionalConditions, entMan, proto, ctx, ref success))
+            return false;
 
-            if (RequireAll && !res)
-                return false; // intentional break out of loop and function
-
-            success |= res;
-        }
-
-        if (RequireAll)
-            return true;
-
-        return success;
+        return RequireAll || success;
     }
 
     /// <summary>
@@ -119,20 +111,6 @@ public abstract partial class EntityTableSelector
         }
     }
 
-    /// <summary>
-    /// Gets a list of every spawn in the table, and the average number of occurrences, ignoring conditions.
-    /// </summary>
-    public IEnumerable<(EntProtoId spawn, double prob)> AverageSpawns(IEntityManager entMan,
-        IPrototypeManager proto,
-        EntityTableContext ctx,
-        float mod = 1f)
-    {
-        foreach (var (spawn, prob) in AverageSpawnsImplementation(entMan, proto, ctx))
-        {
-            yield return (spawn, prob * Prob * Rolls.Average() * mod);
-        }
-    }
-
     protected abstract IEnumerable<EntProtoId> GetSpawnsImplementation(IRobustRandom rand,
         IEntityManager entMan,
         IPrototypeManager proto,
@@ -142,33 +120,27 @@ public abstract partial class EntityTableSelector
         IPrototypeManager proto,
         EntityTableContext ctx);
 
-    protected abstract IEnumerable<(EntProtoId spawn, double)> AverageSpawnsImplementation(IEntityManager entMan,
-        IPrototypeManager proto,
-        EntityTableContext ctx);
-
     /// <summary>
-    /// Gets the effective conditions for this selector, respecting conditions injected into the context.
-    /// Returns false when there are no conditions to evaluate.
+    /// Evaluates conditions, folding their results into <paramref name="success"/>.
+    /// Returns false as soon as one fails while <see cref="RequireAll"/> is set.
     /// </summary>
-    private bool TryGetConditions(EntityTableContext ctx, [NotNullWhen(true)] out List<EntityTableCondition>? conditions)
+    private bool EvaluateConditions(
+        List<EntityTableCondition> conditions,
+        IEntityManager entMan,
+        IPrototypeManager proto,
+        EntityTableContext ctx,
+        ref bool success)
     {
-        var hasAdditionalConditions = ctx.TryGetData(AdditionalConditionsKey, out var additionalConditions);
-
-        if (Conditions.Count == 0 && !hasAdditionalConditions)
+        foreach (var condition in conditions)
         {
-            conditions = null;
-            return false;
+            var res = condition.Evaluate(this, entMan, proto, ctx);
+
+            if (RequireAll && !res)
+                return false;
+
+            success |= res;
         }
 
-        if (!hasAdditionalConditions)
-        {
-            conditions = Conditions;
-            return true;
-        }
-
-        conditions = new List<EntityTableCondition>(Conditions.Count + additionalConditions!.Count);
-        conditions.AddRange(Conditions);
-        conditions.AddRange(additionalConditions);
         return true;
     }
 }

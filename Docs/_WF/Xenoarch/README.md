@@ -12,10 +12,11 @@ That rewrite brought wizden's upgraded `Content.Shared/EntityTable` (conditions,
 count, round duration, rule occurrence) were left out, since nothing here uses them.
 
 Wolfgate's own changes: the old Mono artifact gases (BZ, healium, nitrium, pluoxium) are effects in
-`Resources/Prototypes/_WF/Xenoarch`, the gun effect uses Mono's .357 ammo, a fully unlocked artifact sells for
-about 0.6 × its research value (around 47k spesos on average), the ASF artifact bounties match the new
-`XenoArtifact` component, and hitscans raise `HitscanRaycastStrikeEvent` on what they hit (after ship shields), so
-any hitscan beam counts for the laser trigger.
+`Resources/Prototypes/_WF/Xenoarch`, a fully unlocked artifact sells for about 0.6 × its research value (around 47k
+spesos on average), the ASF artifact bounties match the new `XenoArtifact` component and only ask for effects an
+artifact can roll, and hitscans raise `HitscanRaycastStrikeEvent` on what they hit (after ship shields), so any
+hitscan beam counts for the laser trigger. Wizden's effects that no table rolls (intercom, instrument, storage, gun,
+power, phasing, tesla, singularity) and the handheld artifact container, which nothing produces, were left out.
 
 Players scan artifacts with an analyzer linked to an analysis console, perform the listed triggers, and extract
 research points from the console. Admins use the `xenoartifact` toolshed commands (`spawnartwithnode`,
@@ -45,6 +46,7 @@ doesn't occur.
 
 - [`Content.Server/Xenoarchaeology/Artifact/XAE/XAEChargeBatterySystem.cs`](../../../Content.Server/Xenoarchaeology/Artifact/XAE/XAEChargeBatterySystem.cs): BatteryComponent lives in Shared here
 - [`Content.Server/Xenoarchaeology/Artifact/XAE/XAEEmpInAreaSystem.cs`](../../../Content.Server/Xenoarchaeology/Artifact/XAE/XAEEmpInAreaSystem.cs): predicted EMP takes a TimeSpan
+- [`Content.Server/Xenoarchaeology/Artifact/XAE/XAERandomTeleportInvokerSystem.cs`](../../../Content.Server/Xenoarchaeology/Artifact/XAE/XAERandomTeleportInvokerSystem.cs): server-only here, so nobody predicts the popup
 - [`Content.Shared/_NF/CCVar/NFCCVars.cs`](../../../Content.Shared/_NF/CCVar/NFCCVars.cs): Frontier's xenoarch cvar, ported with the rework
 - [`Content.Shared/EntityTable/EntitySelectors/GroupSelector.cs`](../../../Content.Shared/EntityTable/EntitySelectors/GroupSelector.cs): our weighted Pick takes IRobustRandom as the receiver
 - [`Content.Shared/EntityTable/EntityTableSystem.cs`](../../../Content.Shared/EntityTable/EntityTableSystem.cs): the EntityTable upgrade keeps the old System.Random overload for existing callers
@@ -61,7 +63,6 @@ doesn't occur.
 - [`Content.Shared/Xenoarchaeology/Artifact/XAT/XATMicrowaveSystem.cs`](../../../Content.Shared/Xenoarchaeology/Artifact/XAT/XATMicrowaveSystem.cs): BeingMicrowavedEvent is under Components here
 - [`Content.Shared/Xenoarchaeology/Artifact/XAT/XATStaminaDamageThresholdReachedSystem.cs`](../../../Content.Shared/Xenoarchaeology/Artifact/XAT/XATStaminaDamageThresholdReachedSystem.cs): BeforeStaminaDamageEvent is in Systems here
 - [`Resources/Audio/_NF/Items/Artifact/`](../../../Resources/Audio/_NF/Items/Artifact/): Frontier's quieter artifact unlock failure sound.
-- [`Resources/Audio/Items/Artifact/artifact-activation-fail1.ogg`](../../../Resources/Audio/Items/Artifact/artifact-activation-fail1.ogg): Artifact unlock failure sound from the wizden xenoarch rework.
 - [`Resources/Audio/Items/Artifact/artifact-force-activated1.ogg`](../../../Resources/Audio/Items/Artifact/artifact-force-activated1.ogg): Artifact forced activation sound from the wizden xenoarch rework.
 - [`Resources/Locale/en-US/entity-categories.ftl`](../../../Resources/Locale/en-US/entity-categories.ftl)
 - [`Resources/Locale/en-US/flavors/flavor-profiles.ftl`](../../../Resources/Locale/en-US/flavors/flavor-profiles.ftl)
@@ -85,8 +86,6 @@ doesn't occur.
 - [`Resources/Prototypes/XenoArch/effects.yml`](../../../Resources/Prototypes/XenoArch/effects.yml)
   - Goob gases the old gas effect could roll
   - no anomalite material here
-  - no Binary channel here
-  - Mono's .357 ammo, as the old gun effect used
   - Goob's proper invisibility, as the old effect had
 - [`Resources/Prototypes/XenoArch/triggers.yml`](../../../Resources/Prototypes/XenoArch/triggers.yml)
   - Frontier's goblin blood; no sulfur blood here
@@ -94,6 +93,5 @@ doesn't occur.
   - every hitscan beam counts, since ours aren't reparented onto a laser base
 - [`Resources/ServerInfo/_NF/Guidebook/Science/Xenoarchaeology.xml`](../../../Resources/ServerInfo/_NF/Guidebook/Science/Xenoarchaeology.xml): wizden's rework page with the sector intro from the old Frontier page
 - [`Resources/Textures/Objects/Specific/Xenoarchaeology/xeno_artifacts.rsi/`](../../../Resources/Textures/Objects/Specific/Xenoarchaeology/xeno_artifacts.rsi/): Artifact activation state from the wizden xenoarch rework.
-- [`Resources/Textures/Objects/Storage/artifact_container.rsi/`](../../../Resources/Textures/Objects/Storage/artifact_container.rsi/): Handheld artifact container sprites from the wizden xenoarch rework.
 
 <!-- WOLFGATE-GENERATED END -->

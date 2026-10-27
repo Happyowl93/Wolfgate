@@ -80,7 +80,6 @@ guide-entry-ape = A.P.E.
 guide-entry-xenoarchaeology = Xenoarchaeology
 guide-entry-xenoarchaeologyunlockingnodes = Unlocking Nodes
 guide-entry-analysisconsole = Analysis Console
-guide-entry-artifact-reports = Artifact Reports
 guide-entry-traversal-distorter = Traversal Distorter
 guide-entry-machine-upgrading = Machine Upgrading
 guide-entry-robotics = Robotics

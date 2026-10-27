@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
-using Content.Shared.Tiles; // Frontier
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Collections;
@@ -75,16 +74,8 @@ public abstract partial class SharedXenoArtifactSystem
         SoundSpecifier? soundEffect;
 
         // Frontier: Disable activations on protected grids
-        var gridProtected = false;
-        if (TryComp(ent, out TransformComponent? xform)
-            && TryComp<ProtectedGridComponent>(xform.GridUid, out var prot)
-            && prot.PreventArtifactTriggers)
-        {
-            gridProtected = true;
-        }
-
         Entity<XenoArtifactNodeComponent>? node = null;
-        if (!gridProtected && TryGetNodeFromUnlockState(ent, out node))
+        if (!IsOnProtectedGrid(ent) && TryGetNodeFromUnlockState(ent, out node))
         // End Frontier: Disable activations on protected grids
         {
             // Frontier: remove value if artifexium used
@@ -169,10 +160,9 @@ public abstract partial class SharedXenoArtifactSystem
                     node = curNode;
                     return true; // exit early
                 }
-                else
-                {
-                    potentialNodes.Add(curNode);
-                }
+
+                potentialNodes.Add(curNode);
+                continue;
                 // End Frontier: allow supersets
             }
 

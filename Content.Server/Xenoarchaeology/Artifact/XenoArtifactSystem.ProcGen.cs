@@ -145,9 +145,10 @@ public sealed partial class XenoArtifactSystem
         int scatterCount
     )
     {
-        ValueList<Entity<XenoArtifactNodeComponent>> predecessorsToUse = new(predecessors);
         if (predecessors.Count <= 0)
             return [];
+
+        ValueList<Entity<XenoArtifactNodeComponent>> predecessorsToUse = new(predecessors);
 
         List<Entity<XenoArtifactNodeComponent>> directPredecessors = new();
         // Select predecessors to build an edge to
@@ -263,7 +264,5 @@ public sealed partial class XenoArtifactSystem
             if (!_usedTriggers.Add(trigger))
                 throw new ArgumentException();
         }
-
-        public IReadOnlyCollection<EntProtoId> UsedTriggers => _usedTriggers;
     }
 }

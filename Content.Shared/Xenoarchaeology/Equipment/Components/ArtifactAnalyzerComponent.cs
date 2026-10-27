@@ -12,12 +12,6 @@ namespace Content.Shared.Xenoarchaeology.Equipment.Components;
 public sealed partial class ArtifactAnalyzerComponent : Component
 {
     /// <summary>
-    /// How long it takes to analyze an artifact
-    /// </summary>
-    [DataField]
-    public TimeSpan AnalysisDuration = TimeSpan.FromSeconds(30);
-
-    /// <summary>
     /// The current artifact placed on this analyzer.
     /// Can be null if none are present.
     /// </summary>
@@ -30,12 +24,6 @@ public sealed partial class ArtifactAnalyzerComponent : Component
     /// </summary>
     [ViewVariables, AutoNetworkedField]
     public EntityUid? Console;
-
-    /// <summary>
-    /// Marker, if artifact graph data is ready for printing.
-    /// </summary>
-    [ViewVariables(VVAccess.ReadWrite)]
-    public bool ReadyToPrint = false;
 
     /// <summary>
     /// The machine linking port for linking the analyzer with the console.

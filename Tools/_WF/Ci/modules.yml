@@ -2638,9 +2638,6 @@ unmarked:
   - path: Resources/Audio/_Starlight/Effects/Machinery/electric_buzz.ogg
     module: DecorImport
     reason: Bar sign buzz sound, ported from Starlight.
-  - path: Resources/Audio/Items/Artifact/artifact-activation-fail1.ogg
-    module: Xenoarch
-    reason: Artifact unlock failure sound from the wizden xenoarch rework.
   - path: Resources/Audio/Items/Artifact/artifact-force-activated1.ogg
     module: Xenoarch
     reason: Artifact forced activation sound from the wizden xenoarch rework.
@@ -2656,6 +2653,3 @@ unmarked:
   - path: Resources/Maps/elkridge.yml
     module: Xenoarch
     reason: Removed the mapped artifact's BiasedArtifact component, which no longer exists.
-  - path: Resources/Textures/Objects/Storage/artifact_container.rsi/
-    module: Xenoarch
-    reason: Handheld artifact container sprites from the wizden xenoarch rework.

@@ -12,7 +12,6 @@ using Content.Shared.Weapons.Hitscan.Events;
 using Content.Shared.Weapons.Melee.Events;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Content.Shared.Xenoarchaeology.Artifact.XAT.Components;
-using Content.Shared.Tiles; // Frontier
 using Robust.Shared.Physics.Events;
 
 namespace Content.Shared.Xenoarchaeology.Artifact;
@@ -76,12 +75,8 @@ public abstract partial class SharedXenoArtifactSystem
             return;
 
         // Frontier: Disable activations on protected grids
-        if (TryComp(ent, out TransformComponent? xform)
-            && TryComp<ProtectedGridComponent>(xform.GridUid, out var prot)
-            && prot.PreventArtifactTriggers)
-        {
+        if (IsOnProtectedGrid(ent))
             return;
-        }
         // End Frontier: Disable activations on protected grids
 
         if (!_unlockingQuery.TryGetComponent(ent, out var unlockingComp))

@@ -88,25 +88,4 @@ public sealed partial class EntityTableSystem : EntitySystem
         ctx ??= new EntityTableContext();
         return table.ListSpawns(EntityManager, ProtoMan, ctx);
     }
-
-    /// <inheritdoc cref="AverageSpawns(EntityTableSelector?,EntityTableContext?)"/>
-    public IEnumerable<(EntProtoId spawn, double)> AverageSpawns(EntityTablePrototype entTableProto, EntityTableContext? ctx = null)
-    {
-        return AverageSpawns(entTableProto.Table, ctx);
-    }
-
-    /// <summary>
-    /// Returns the average expected spawns of a specific entity table.
-    /// </summary>
-    /// <param name="table">The entity table we want the spawns of</param>
-    /// <param name="ctx">Optional EntityTableContext</param>
-    /// <returns></returns>
-    public IEnumerable<(EntProtoId spawn, double)> AverageSpawns(EntityTableSelector? table, EntityTableContext? ctx = null)
-    {
-        if (table == null)
-            return new List<(EntProtoId spawn, double)>();
-
-        ctx ??= new EntityTableContext();
-        return table.AverageSpawns(EntityManager, ProtoMan, ctx);
-    }
 }

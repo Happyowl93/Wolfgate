@@ -7,10 +7,12 @@ using Content.Server.Storage.EntitySystems;
 using Content.Shared.Cargo;
 using Content.Shared.Cargo.Components;
 using Content.Shared.Cargo.Prototypes;
+using Content.Shared.EntityTable;
 using Content.Shared.Maps;
 using Content.Shared.Stacks;
 using Content.Shared.Store;
 using Content.Shared.Store.Components;
+using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Content.Shared.Xenoarchaeology.Artifact.XAE.Components;
 using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.GameObjects;
@@ -152,20 +154,33 @@ public sealed class AsfGrantsTest
         await pair.CleanReturnAsync();
     }
 
-    /// <summary>Each property an artifact bounty asks for is an effect an artifact keeps once unlocked, so it survives shipping.</summary>
+    /// <summary>
+    /// Each property an artifact bounty asks for comes from an effect some artifact can roll and keeps once unlocked,
+    /// so it survives shipping.
+    /// </summary>
     [Test]
     public async Task ArtifactBountiesAskForLastingEffects()
     {
         await using var pair = await PoolManager.GetServerClient();
         var prototypes = pair.Server.ResolveDependency<IPrototypeManager>();
         var factory = pair.Server.ResolveDependency<IComponentFactory>();
+        var tables = pair.Server.System<EntityTableSystem>();
 
-        var lasting = prototypes.EnumeratePrototypes<EntityPrototype>()
-            .Where(p => !p.Abstract)
-            .SelectMany(p => p.TryGetComponent<XAEApplyComponentsComponent>(out var apply, factory)
-                ? apply.Components.Keys
-                : Enumerable.Empty<string>())
-            .ToHashSet();
+        var lasting = new HashSet<string>();
+        await pair.Server.WaitAssertion(() =>
+        {
+            foreach (var proto in prototypes.EnumeratePrototypes<EntityPrototype>())
+            {
+                if (proto.Abstract || !proto.TryGetComponent<XenoArtifactComponent>(out var artifact, factory))
+                    continue;
+
+                foreach (var (effect, _) in tables.ListSpawns(artifact.EffectsTable))
+                {
+                    if (prototypes.Index(effect).TryGetComponent<XAEApplyComponentsComponent>(out var apply, factory))
+                        lasting.UnionWith(apply.Components.Keys);
+                }
+            }
+        });
         var checkedAny = false;
         foreach (var bounty in prototypes.EnumeratePrototypes<CargoBountyPrototype>().Where(b => b.ID.StartsWith("WFAsfBounty")))
         {
@@ -175,7 +190,7 @@ public sealed class AsfGrantsTest
                     continue;
                 foreach (var comp in comps.Where(c => c != "XenoArtifact"))
                 {
-                    Assert.That(lasting, Does.Contain(comp), $"{bounty.ID} asks for {comp}, which no artifact effect keeps.");
+                    Assert.That(lasting, Does.Contain(comp), $"{bounty.ID} asks for {comp}, which no rollable artifact effect keeps.");
                     checkedAny = true;
                 }
             }

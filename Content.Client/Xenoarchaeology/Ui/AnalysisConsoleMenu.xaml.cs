@@ -13,7 +13,6 @@ using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface.Controls;
 using Robust.Client.UserInterface.XAML;
 using Robust.Shared.Audio;
-using Robust.Shared.Configuration;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
 
@@ -23,6 +22,7 @@ namespace Content.Client.Xenoarchaeology.Ui;
 public sealed partial class AnalysisConsoleMenu : FancyWindow
 {
     private static readonly TimeSpan ExtractInfoDisplayForDuration = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan RefreshInterval = TimeSpan.FromSeconds(1);
 
     [Dependency] private readonly IEntityManager _ent = default!;
     [Dependency] private readonly IResourceCache _resCache = default!;
@@ -31,12 +31,13 @@ public sealed partial class AnalysisConsoleMenu : FancyWindow
     private readonly ArtifactAnalyzerSystem _artifactAnalyzer;
     private readonly XenoArtifactSystem _xenoArtifact;
     private readonly AudioSystem _audio;
-    private readonly MetaDataSystem _meta = default!;
+    private readonly MetaDataSystem _meta;
 
     private Entity<AnalysisConsoleComponent> _owner;
     private Entity<XenoArtifactNodeComponent>? _currentNode;
 
     private TimeSpan? _hideExtractInfoIn;
+    private TimeSpan _nextRefresh;
     private int _extractionSum;
 
     public event Action? OnServerSelectionButtonPressed;
@@ -106,6 +107,7 @@ public sealed partial class AnalysisConsoleMenu : FancyWindow
                 continue;
 
             count++;
+            _extractionSum += pointValue;
 
             var nodeId = _xenoArtifact.GetNodeId(node);
 
@@ -130,6 +132,13 @@ public sealed partial class AnalysisConsoleMenu : FancyWindow
     protected override void FrameUpdate(FrameEventArgs args)
     {
         base.FrameUpdate(args);
+
+        // Node and analyzer changes don't raise a console state update, so poll them.
+        if (_timing.CurTime >= _nextRefresh)
+        {
+            _nextRefresh = _timing.CurTime + RefreshInterval;
+            Update(_owner);
+        }
 
         if (_hideExtractInfoIn == null || _timing.CurTime + _meta.GetPauseTime(_owner) < _hideExtractInfoIn)
             return;
@@ -164,6 +173,10 @@ public sealed partial class AnalysisConsoleMenu : FancyWindow
         {
             SetSelectedNode(null);
         }
+        else
+        {
+            SetSelectedNode(_currentNode);
+        }
     }
 
     public void SetSelectedNode(Entity<XenoArtifactNodeComponent>? node)
@@ -197,7 +210,7 @@ public sealed partial class AnalysisConsoleMenu : FancyWindow
         }
         else
         {
-            var percent = node.Value.Comp.MaxDurability <= 0 ? 0f : (float)node.Value.Comp.Durability / node.Value.Comp.MaxDurability;
+            var percent = (float)node.Value.Comp.Durability / node.Value.Comp.MaxDurability;
             var color = percent switch
             {
                 >= 0.75f => Color.Lime,
