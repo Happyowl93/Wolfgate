@@ -3704,3 +3704,20 @@ Entries:
   id: 100258
   time: '2026-10-27T04:22:03.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/387
+- author: TheSlapper
+  changes:
+    - type: Add
+      message: Various alien themed items.
+  id: 100259
+  time: '2026-10-27T20:35:45.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/393
+- author: Balls2zawall
+  changes:
+    - type: Tweak
+      message: >-
+        Removed alot of dark corners from Zvezda, and gave it a tiny bit more
+        power to keep the lights on and the doors powered without needing to
+        start the NFR.
+  id: 100260
+  time: '2026-10-27T20:59:23.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/392
