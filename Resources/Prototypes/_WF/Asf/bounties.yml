@@ -98,7 +98,7 @@
     amount: 1
     whitelist:
       components:
-      - Artifact
+      - XenoArtifact
 
 - type: cargoBounty
   id: WFAsfBountySurvey
@@ -112,7 +112,7 @@
     amount: 1
     whitelist:
       components:
-      - Artifact
+      - XenoArtifact
   - name: wf-asf-bounty-name-crystal-small
     amount: 2
     whitelist:
@@ -132,7 +132,7 @@
     whitelist:
       requireAll: true
       components:
-      - Artifact
+      - XenoArtifact
       - Storage
 
 - type: cargoBounty
@@ -148,7 +148,7 @@
     whitelist:
       requireAll: true
       components:
-      - Artifact
+      - XenoArtifact
       - Intercom
 
 - type: cargoBounty
@@ -164,7 +164,7 @@
     whitelist:
       requireAll: true
       components:
-      - Artifact
+      - XenoArtifact
       - Instrument
 
 - type: cargoBounty
@@ -180,7 +180,7 @@
     whitelist:
       requireAll: true
       components:
-      - Artifact
+      - XenoArtifact
       - RefillableSolution
 
 - type: cargoBounty
@@ -196,7 +196,7 @@
     whitelist:
       requireAll: true
       components:
-      - Artifact
+      - XenoArtifact
       - RandomWalk
 
 - type: cargoBounty
@@ -212,7 +212,7 @@
     whitelist:
       requireAll: true
       components:
-      - Artifact
+      - XenoArtifact
       - HeldSpeedModifier
 
 - type: cargoBounty
@@ -228,7 +228,7 @@
     whitelist:
       requireAll: true
       components:
-      - Artifact
+      - XenoArtifact
       - PowerSupplier
 
 - type: cargoBounty
@@ -244,7 +244,7 @@
     whitelist:
       requireAll: true
       components:
-      - Artifact
+      - XenoArtifact
       - Sharp
 
 - type: cargoBounty
@@ -260,7 +260,7 @@
     whitelist:
       requireAll: true
       components:
-      - Artifact
+      - XenoArtifact
       - MultipleTool
 
 - type: cargoBounty
@@ -276,5 +276,5 @@
     whitelist:
       requireAll: true
       components:
-      - Artifact
+      - XenoArtifact
       - RevolverAmmoProvider

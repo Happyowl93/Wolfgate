@@ -782,3 +782,11 @@ ClothingMaskMimeSecurity: WFClothingMaskMimeSecurity
 CoolCoyoteClothesSexyclown: WFCoolCoyoteClothesSexyclown
 CoolCoyoteClothesSexymime: WFCoolCoyoteClothesSexymime
 # WOLFGATE END
+
+# WOLFGATE(Xenoarch) START: wizden xenoarch rework replaced the old artifact types
+SimpleXenoArtifact: ComplexXenoArtifact
+MediumXenoArtifact: ComplexXenoArtifact
+SimpleXenoArtifactItem: ComplexXenoArtifactItem
+MediumXenoArtifactItem: ComplexXenoArtifactItem
+VariedXenoArtifactItem: ComplexXenoArtifactItem
+# WOLFGATE END

@@ -482,6 +482,11 @@ public enum LogType
     /// </summary>
     ShuttleImpact = 102,
 
+    /// <summary>
+    /// Artifact node got activated.
+    /// </summary>
+    ArtifactNode = 101,
+
     // <Mono>
     ShipgunFired = 150,
 
