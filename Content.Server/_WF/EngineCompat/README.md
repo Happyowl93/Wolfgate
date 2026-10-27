@@ -648,7 +648,6 @@ listed under `unmarked` in `Tools/_WF/Ci/modules.yml` with the engine change it 
 - [`Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.cs`](../../../Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Shared/Weather/SharedWeatherSystem.cs`](../../../Content.Shared/Weather/SharedWeatherSystem.cs): Engine v280 removed IMapManager; uses SharedMapSystem.
 - [`Content.Shared/Whistle/WhistleComponent.cs`](../../../Content.Shared/Whistle/WhistleComponent.cs): Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
-- [`Content.Shared/Xenoarchaeology/Artifact/Prototypes/XenoArchTriggerPrototype.cs`](../../../Content.Shared/Xenoarchaeology/Artifact/Prototypes/XenoArchTriggerPrototype.cs)
 - [`Content.Shared/Zombies/ZombieComponent.cs`](../../../Content.Shared/Zombies/ZombieComponent.cs): Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
 - [`Resources/Locale/en-US/replays/replays.ftl`](../../../Resources/Locale/en-US/replays/replays.ftl): Engine v291 ships cmd-replay-toggleui-desc; duplicate removed.
 - [`Resources/Prototypes/_CE/Entities/Structures/Architecture/Ladders/base.yml`](../../../Resources/Prototypes/_CE/Entities/Structures/Architecture/Ladders/base.yml): Engine v286 Box2 rejects inverted bounds; fixture bounds normalized. Engine v287 occluders dropped boundingBox; the default polygon matches.

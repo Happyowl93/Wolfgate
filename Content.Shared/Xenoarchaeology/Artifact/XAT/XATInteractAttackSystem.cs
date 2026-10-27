@@ -1,4 +1,5 @@
 using Content.Shared.Popups;
+using Content.Shared.Weapons.Hitscan.Events;
 using Content.Shared.Weapons.Melee.Events;
 using Content.Shared.Whitelist;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
@@ -24,6 +25,7 @@ public sealed partial class XATInteractAttackSystem : BaseXATSystem<XATInteractA
 
         XATSubscribeDirectEvent<AttackedEvent>(OnAttacked);
         XATSubscribeDirectEvent<StartCollideEvent>(OnStartCollide);
+        XATSubscribeDirectEvent<HitscanRaycastStrikeEvent>(OnHitscan);
     }
 
     /// <summary>
@@ -51,6 +53,20 @@ public sealed partial class XATInteractAttackSystem : BaseXATSystem<XATInteractA
     {
         if (_whitelistSystem.IsWhitelistPassOrNull(node.Comp1.Whitelist, args.OtherEntity) && DoTriggerCountdown(node, artifact.Owner, args.OtherEntity))
             Trigger(artifact, node);
+    }
+
+    /// <summary>
+    /// Trigger the node if the striking hitscan matches the whitelist.
+    /// </summary>
+    private void OnHitscan(Entity<XenoArtifactComponent> artifact, Entity<XATInteractAttackComponent, XenoArtifactNodeComponent> node, ref HitscanRaycastStrikeEvent args)
+    {
+        // WOLFGATE(Xenoarch): our strike event carries the fields directly instead of wizden's Data
+        if ((_whitelistSystem.IsWhitelistPassOrNull(node.Comp1.Whitelist, args.Hitscan)
+             || _whitelistSystem.IsWhitelistPassOrNull(node.Comp1.Whitelist, args.Gun))
+            && DoTriggerCountdown(node, artifact.Owner, args.Shooter))
+        {
+            Trigger(artifact, node);
+        }
     }
 
     /// <summary>

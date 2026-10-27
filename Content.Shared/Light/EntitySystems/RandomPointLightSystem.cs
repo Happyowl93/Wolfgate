@@ -1,6 +1,6 @@
 using System.Numerics;
 using Content.Shared.Light.Components;
-using Robust.Shared.Random; // WOLFGATE(Xenoarch): NextFloat on System.Random
+using Content.Shared.Random.Helpers;
 using Robust.Shared.Timing;
 
 namespace Content.Shared.Light.EntitySystems;
@@ -21,7 +21,7 @@ public sealed partial class RandomPointLightSystem : EntitySystem
 
         var rpl = ent.Comp;
 
-        var rand = new System.Random((int) _timing.CurTick.Value + GetNetEntity(ent).Id); // WOLFGATE(Xenoarch): no PredictedRandom helper here
+        var rand = SharedRandomExtensions.PredictedRandom(_timing, GetNetEntity(ent));
         // Keeping the V variable between 0.5 and 1.0 so that it's always bright
         var hsv = new Vector4(
             rand.NextFloat(0, 1),

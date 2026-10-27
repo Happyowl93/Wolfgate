@@ -8,6 +8,7 @@ using Content.Shared.Interaction;
 using Content.Shared.Kitchen.Components; // WOLFGATE(Xenoarch): BeingMicrowavedEvent is under Components here
 using Content.Shared.Movement.Pulling.Events;
 using Content.Shared.Throwing;
+using Content.Shared.Weapons.Hitscan.Events;
 using Content.Shared.Weapons.Melee.Events;
 using Content.Shared.Xenoarchaeology.Artifact.Components;
 using Content.Shared.Xenoarchaeology.Artifact.XAT.Components;
@@ -32,6 +33,7 @@ public abstract partial class SharedXenoArtifactSystem
         XATRelayLocalEvent<XATInteractWithDoAfterEvent>();
         XATRelayLocalEvent<ElectrocutionAttemptEvent>();
         XATRelayLocalEvent<StartCollideEvent>();
+        XATRelayLocalEvent<HitscanRaycastStrikeEvent>();
         XATRelayLocalEvent<BeforeStaminaDamageEvent>();
 
         // special case this one because we need to order the messages
