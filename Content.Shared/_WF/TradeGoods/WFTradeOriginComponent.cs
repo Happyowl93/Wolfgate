@@ -27,7 +27,7 @@ public sealed partial class WFTradeOriginComponent : Component
     [ViewVariables]
     public MapCoordinates Point = MapCoordinates.Nullspace;
 
-    /// <summary>The last player ship the crate rode on, for escort pay.</summary>
+    /// <summary>The last player ship the crate rode on, named when it is sold or taken.</summary>
     [ViewVariables]
     public EntityUid? Carrier;
 

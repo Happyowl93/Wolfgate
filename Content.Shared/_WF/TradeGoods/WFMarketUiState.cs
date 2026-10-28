@@ -65,6 +65,6 @@ public enum WFMarketAlertKind : byte
     /// <summary>Trouble: blockades, traders who won't deal with the holder.</summary>
     Warning,
 
-    /// <summary>About the holder alone: their faction's war pay, their convoy.</summary>
+    /// <summary>About the holder alone: their faction's war pay.</summary>
     Personal,
 }

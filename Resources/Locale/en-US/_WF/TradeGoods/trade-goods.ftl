@@ -81,8 +81,6 @@ wf-trade-rush-fill = {$seller} {$count}
 
 wf-trade-seal-examine = Manifest seal: {$run} freight run, bound for {$station}. Lawful chutes pay {$percent}%; deliver it to {$station} for a salvage bonus.
 wf-trade-thermal-examine = [color=#9aa7b1]Warm: it shows on thermal sensors.[/color]
-wf-trade-escort-name = escorting {$ship}
-wf-trade-escort-paid = Convoy bonus: {$ships} paid {$amount} for escorting {$trader}.
 
 ## Market app
 

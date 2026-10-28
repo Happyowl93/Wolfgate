@@ -561,11 +561,9 @@ public sealed partial class WFEncounterRewardSystem : EntitySystem
     /// <summary>
     /// Pays spesos to the living players aboard some ships, an equal share to each crewed ship and then to each player
     /// aboard it, within the hourly cap; returns how many were paid. <paramref name="name"/> is what the payment says it
-    /// is for and <paramref name="subject"/> names the same in the admin log. Players in <paramref name="except"/> are
-    /// left out.
+    /// is for and <paramref name="subject"/> names the same in the admin log.
     /// </summary>
-    public int PayCrews(string name, string subject, int spesos, IEnumerable<EntityUid> ships, string deed,
-        IReadOnlySet<NetUserId>? except = null)
+    public int PayCrews(string name, string subject, int spesos, IEnumerable<EntityUid> ships, string deed)
     {
         var aboard = new Dictionary<EntityUid, List<(ICommonSession Session, EntityUid Mob)>>();
         foreach (var ship in ships)
@@ -577,8 +575,7 @@ public sealed partial class WFEncounterRewardSystem : EntitySystem
         var players = EntityQueryEnumerator<ActorComponent, TransformComponent>();
         while (players.MoveNext(out var uid, out var actor, out var xform))
         {
-            if (xform.GridUid is { } grid && aboard.TryGetValue(grid, out var crew) && !HasComp<GhostComponent>(uid) && !_mobs.IsDead(uid)
-                && except?.Contains(actor.PlayerSession.UserId) != true)
+            if (xform.GridUid is { } grid && aboard.TryGetValue(grid, out var crew) && !HasComp<GhostComponent>(uid) && !_mobs.IsDead(uid))
                 crew.Add((actor.PlayerSession, uid));
         }
 

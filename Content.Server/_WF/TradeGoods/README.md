@@ -38,10 +38,9 @@ and less when late. One left at its origin past its deadline is withdrawn;
 one carried off is recalled a window after its deadline, or as soon as its destination is gone.
 
 Traffic and rewards: a blockade attempt that traffic breaks is announced with the ships that ran it, who split a relief
-bounty; real deliveries stamp the station's cell as traffic. Crewed ships that fly beside a laden trader split an
-escort bonus when it sells a big haul (`WFTradeEscortSystem`); players seen aboard the trader in the window get none of
-it, so a crew can't pay itself by splitting into two ships. Wandering merchants (`WFEncounterWanderingMerchant`) carry a chute
-that buys a few goods at a premium; a merchant won't buy from someone who hurt them.
+bounty; real deliveries stamp the station's cell as traffic. There is no escort bonus: traders who want protection pay
+escorts themselves. Wandering merchants (`WFEncounterWanderingMerchant`) carry a chute that buys a few goods at a
+premium; a merchant won't buy from someone who hurt them.
 
 Cargo-console trading crates (Frontier's `TradeCrate`, normal and express) sell at their destination's pallet, not a
 chute. `WFTradeCrateMarketSystem` puts them in the same markets: their pallet price is scaled by the selling grid's
@@ -81,7 +80,6 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 - [`Content.Server/_WF/TradeGoods/DispenserSystem.TradeGoods.cs`](DispenserSystem.TradeGoods.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFMarketCartridgeSystem.cs`](Systems/WFMarketCartridgeSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeCrateMarketSystem.cs`](Systems/WFTradeCrateMarketSystem.cs)
-- [`Content.Server/_WF/TradeGoods/Systems/WFTradeEscortSystem.cs`](Systems/WFTradeEscortSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeFreightSystem.cs`](Systems/WFTradeFreightSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeMarketSystem.Announce.cs`](Systems/WFTradeMarketSystem.Announce.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeMarketSystem.Buy.cs`](Systems/WFTradeMarketSystem.Buy.cs)
