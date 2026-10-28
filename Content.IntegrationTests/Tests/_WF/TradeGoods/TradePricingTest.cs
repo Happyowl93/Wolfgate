@@ -492,10 +492,8 @@ public sealed class TradePricingTest
             Assert.That(territory.ContestOf(map.MapId, quiet), Is.Null, "The quiet contest wasn't decided.");
 
             Assert.That(territory.Owner(map.MapId, busy), Is.Null, "Traffic should keep the busy cell free.");
-            Assert.That(sector.BlockadesBroken.GetValueOrDefault(busyShip), Is.EqualTo(1), "The ship that ran the blockade wasn't named.");
 
             Assert.That(territory.Owner(map.MapId, quiet)?.Id, Is.EqualTo(Blockader), "A quiet cell should fall to the blockade.");
-            Assert.That(sector.BlockadesBroken.ContainsKey(quietShip), Is.False, "A quiet lane was announced as broken.");
             Assert.That(sector.Blockaded(), Does.Contain(quietStation));
             Assert.That(market.Quote(quietChute, Medical)!.Value.Reason, Is.EqualTo((LocId) "wf-trade-reason-blockade"));
         });

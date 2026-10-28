@@ -47,9 +47,6 @@ public sealed class WFTradeSectorSystem : EntitySystem
     private readonly Dictionary<WFSectorCell, WFTradeBlockadeAttempt> _attempts = new();
     private readonly Dictionary<EntityUid, TimeSpan> _stamped = new();
 
-    /// <summary>Ships named in a broken blockade this round, for the honours.</summary>
-    public readonly Dictionary<EntityUid, int> BlockadesBroken = new();
-
     public override void Initialize()
     {
         base.Initialize();
@@ -65,7 +62,6 @@ public sealed class WFTradeSectorSystem : EntitySystem
     {
         _attempts.Clear();
         _stamped.Clear();
-        BlockadesBroken.Clear();
     }
 
     private void OnQuote(WFTradeQuoteEvent args)
@@ -188,11 +184,6 @@ public sealed class WFTradeSectorSystem : EntitySystem
 
         var names = string.Join(", ", ships.Select(ship => Name(ship)));
         _market.Radio(Loc.GetString("wf-trade-blockade-broken", ("station", Name(station)), ("ships", names)));
-
-        foreach (var ship in ships)
-        {
-            BlockadesBroken[ship] = BlockadesBroken.GetValueOrDefault(ship) + 1;
-        }
 
         var bounty = _market.Profile(station).ReliefBounty;
         if (bounty > 0)

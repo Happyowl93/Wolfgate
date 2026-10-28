@@ -52,9 +52,6 @@ public sealed class WFTradeEscortSystem : EntitySystem
 
     private readonly Dictionary<EntityUid, Vector2> _lastPositions = new();
 
-    /// <summary>Escort pay each ship earned this round, for the honours.</summary>
-    public readonly Dictionary<string, int> Paid = new();
-
     public override void Initialize()
     {
         base.Initialize();
@@ -67,7 +64,6 @@ public sealed class WFTradeEscortSystem : EntitySystem
         _samples.Clear();
         _sales.Clear();
         _lastPositions.Clear();
-        Paid.Clear();
     }
 
     public override void Update(float frameTime)
@@ -191,15 +187,9 @@ public sealed class WFTradeEscortSystem : EntitySystem
             return;
 
         var bonus = (int) (total * Share);
-        // Nobody aboard to pay means nothing earned, for honours too.
+        // Nobody aboard to pay means nothing earned.
         if (_rewards.PayCrews(Loc.GetString("wf-trade-escort-name", ("ship", Name(ship))), $"escort of {ToPrettyString(ship)}", bonus, paid, "escorting") == 0)
             return;
-
-        foreach (var escort in paid)
-        {
-            var name = Name(escort);
-            Paid[name] = Paid.GetValueOrDefault(name) + bonus / paid.Count;
-        }
 
         _market.TellAboard(paid.Append(ship).ToList(), Loc.GetString("wf-trade-escort-paid",
             ("ships", string.Join(", ", paid.Select(escort => Name(escort)))), ("amount", bonus), ("trader", Name(ship))));

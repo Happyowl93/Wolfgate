@@ -44,9 +44,6 @@ public sealed class WFTradeRushSystem : EntitySystem
 
     public IReadOnlyList<WFTradeRush> Active => _active;
 
-    /// <summary>Rush crates each ship delivered this round, for the honours.</summary>
-    public readonly Dictionary<string, int> Delivered = new();
-
     public override void Initialize()
     {
         base.Initialize();
@@ -58,7 +55,6 @@ public sealed class WFTradeRushSystem : EntitySystem
     private void OnCleanup(RoundRestartCleanupEvent args)
     {
         _active.Clear();
-        Delivered.Clear();
         _next = null;
     }
 
@@ -81,7 +77,6 @@ public sealed class WFTradeRushSystem : EntitySystem
         var seller = args.Ship is { } ship ? Name(ship) : Name(args.Seller);
         rush.Remaining--;
         rush.Filled[seller] = rush.Filled.GetValueOrDefault(seller) + 1;
-        Delivered[seller] = Delivered.GetValueOrDefault(seller) + 1;
         if (rush.Remaining > 0)
             return;
 

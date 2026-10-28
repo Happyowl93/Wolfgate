@@ -14,8 +14,8 @@ using Robust.Shared.Timing;
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
 /// <summary>
-/// What the market pays out beyond the chute: rush orders raise a station's quote until filled or expired, round end
-/// names the top hauler, and ships that fly beside a laden trader split a bonus when it sells a big haul.
+/// What the market pays out beyond the chute: rush orders raise a station's quote until filled or expired, and ships
+/// that fly beside a laden trader split a bonus when it sells a big haul.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFTradeRushSystem))]
@@ -61,11 +61,9 @@ public sealed class TradeRewardsTest
             Assert.That(quote.Reason, Is.EqualTo((LocId) "wf-trade-reason-rush"));
             Assert.That(quote.Factor, Is.EqualTo(rush.Factor).Within(0.01f));
 
-            var delivered = rushes.Delivered.GetValueOrDefault(hauler);
             market.Sell(chute, TradeTestWorld.Hauled(entMan, far, map.GridCoords, Metals), seller);
             Assert.That(rush.Remaining, Is.EqualTo(rush.Total - 1));
             Assert.That(rush.Filled.GetValueOrDefault(hauler), Is.EqualTo(1));
-            Assert.That(rushes.Delivered.GetValueOrDefault(hauler), Is.EqualTo(delivered + 1));
 
             for (var i = 0; i < 20 && rush.Remaining > 0; i++)
             {
@@ -91,41 +89,6 @@ public sealed class TradeRewardsTest
             Assert.That(rushes.Active, Does.Not.Contain(expiring), "An expired rush stayed open.");
             var scrap = market.Quote(chute, Scrap)!.Value;
             Assert.That(scrap.Amount, Is.EqualTo(scrap.Base), "An expired rush still raised the price.");
-        });
-
-        await pair.CleanReturnAsync();
-    }
-
-    [Test]
-    public async Task HonoursNameTheTopHauler()
-    {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entMan = server.EntMan;
-        var loc = server.ResolveDependency<ILocalizationManager>();
-
-        await server.WaitAssertion(() =>
-        {
-            var chute = TradeTestWorld.MarketChute(entMan, map);
-            var grid = map.Grid.Owner;
-            var seller = entMan.SpawnEntity(null, map.GridCoords);
-            const string hauler = "WF honours test hauler";
-            entMan.System<MetaDataSystem>().SetEntityName(seller, hauler);
-
-            // Far above anything another test on this server sold, so this seller tops the tally.
-            const int amount = 40_000_000;
-            for (var i = 0; i < 2; i++)
-            {
-                var crate = entMan.SpawnEntity(Fabric, map.GridCoords);
-                entMan.EventBus.RaiseEvent(EventSource.Local, new WFTradeSaleEvent(grid, chute, Fabric, amount, seller, null, crate));
-            }
-
-            var summary = new RoundEndTextAppendEvent();
-            entMan.EventBus.RaiseEvent(EventSource.Local, summary);
-            Assert.That(summary.Text, Does.Contain(loc.GetString("wf-trade-honours-header")));
-            Assert.That(summary.Text, Does.Contain(loc.GetString("wf-trade-honours-hauler",
-                ("ship", hauler), ("spesos", amount * 2), ("crates", 2))));
         });
 
         await pair.CleanReturnAsync();
@@ -174,20 +137,13 @@ public sealed class TradeRewardsTest
                 (now, new HashSet<EntityUid> { wingman }),
             };
 
-            var wingmanBefore = escorts.Paid.GetValueOrDefault("WF escort test wingman");
-            var stragglerBefore = escorts.Paid.GetValueOrDefault("WF escort test straggler");
-
             var first = threshold / 2;
             Sell(first);
-            Assert.That(escorts.Paid.GetValueOrDefault("WF escort test wingman"), Is.EqualTo(wingmanBefore),
-                "Escorts were paid before the trader sold a big haul.");
+            Assert.That(escorts.Progress(trader).Sold, Is.EqualTo(first), "The trader's sales weren't counted toward escort pay.");
 
-            // The haul is big enough, but nobody is aboard either escort to take the pay, so neither earns honours.
+            // The haul is big enough: it is shared out (to nobody, with no one aboard the escorts) and the window starts over.
             Sell(threshold - first);
-            Assert.That(escorts.Paid.GetValueOrDefault("WF escort test wingman"), Is.EqualTo(wingmanBefore),
-                "An escort with nobody aboard to pay was credited for honours.");
-            Assert.That(escorts.Paid.GetValueOrDefault("WF escort test straggler"), Is.EqualTo(stragglerBefore),
-                "A ship seldom beside the trader was paid as an escort.");
+            Assert.That(escorts.Progress(trader).Sold, Is.Zero, "A big haul wasn't shared out among the escorts.");
             Assert.That(share, Is.GreaterThan(0f));
 
             void Sell(int amount)

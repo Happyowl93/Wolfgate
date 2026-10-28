@@ -40,9 +40,6 @@ public sealed class WFTradeSpecialCrateSystem : EntitySystem
     private TimeSpan? _nextConsignment;
     private TimeSpan _nextClassified;
 
-    /// <summary>Consignments each ship delivered on time this round, for the honours.</summary>
-    public readonly Dictionary<string, int> Couriers = new();
-
     public override void Initialize()
     {
         base.Initialize();
@@ -59,7 +56,6 @@ public sealed class WFTradeSpecialCrateSystem : EntitySystem
     {
         _nextConsignment = null;
         _nextClassified = TimeSpan.Zero;
-        Couriers.Clear();
     }
 
     private WFTradeMarketPrototype Profile => _proto.Index(WFTradeMarketSystem.DefaultProfile);
@@ -122,10 +118,7 @@ public sealed class WFTradeSpecialCrateSystem : EntitySystem
         if (TryComp<WFConsignmentComponent>(args.Crate, out var consignment))
         {
             if (consignment.Destination == args.Grid && _timing.CurTime <= consignment.Deadline)
-            {
-                Couriers[ship] = Couriers.GetValueOrDefault(ship) + 1;
                 _market.Radio(Loc.GetString("wf-trade-consignment-delivered", ("ship", ship), ("station", Name(args.Grid))));
-            }
 
             return;
         }

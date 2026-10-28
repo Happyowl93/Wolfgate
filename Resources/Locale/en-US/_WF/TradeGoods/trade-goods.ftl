@@ -92,15 +92,6 @@ wf-trade-thermal-examine = [color=#9aa7b1]Warm: it shows on thermal sensors.[/co
 wf-trade-escort-name = escorting {$ship}
 wf-trade-escort-paid = Convoy bonus: {$ships} paid {$amount} for escorting {$trader}.
 
-## Round end
-
-wf-trade-honours-header = [color=#d9a441]Sector Exchange honours[/color]
-wf-trade-honours-hauler = Top hauler: {$ship}, {$spesos} delivered in {$crates} crates.
-wf-trade-honours-runner = Blockade runner: {$ship}, {$count} blockades broken.
-wf-trade-honours-rush = Rush champion: {$ship}, {$count} rush crates.
-wf-trade-honours-courier = Courier of the round: {$ship}, {$count} consignments on time.
-wf-trade-honours-escort = Best escort: {$ship}, {$spesos} in convoy bonuses.
-
 ## Market app
 
 wf-market-program-name = Market

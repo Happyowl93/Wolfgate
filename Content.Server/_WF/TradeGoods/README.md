@@ -31,8 +31,7 @@ Underground's fence vendor silences it for five minutes.
 
 Traffic and rewards: a blockade attempt that traffic breaks is announced with the ships that ran it, who split a relief
 bounty; real deliveries stamp the station's cell as traffic. Crewed ships that fly beside a laden trader split an
-escort bonus when it sells a big haul (`WFTradeEscortSystem`). Round end names the top hauler, blockade runner, rush
-champion, courier and escort (`WFTradeHonoursSystem`). Wandering merchants (`WFEncounterWanderingMerchant`) carry a chute
+escort bonus when it sells a big haul (`WFTradeEscortSystem`). Wandering merchants (`WFEncounterWanderingMerchant`) carry a chute
 that buys a few goods at a premium; a merchant won't buy from someone who hurt them.
 
 Cargo-console trading crates (Frontier's `TradeCrate`, normal and express) sell at their destination's pallet, not a
@@ -71,7 +70,6 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeCrateMarketSystem.cs`](Systems/WFTradeCrateMarketSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeEscortSystem.cs`](Systems/WFTradeEscortSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeFreightSystem.cs`](Systems/WFTradeFreightSystem.cs)
-- [`Content.Server/_WF/TradeGoods/Systems/WFTradeHonoursSystem.cs`](Systems/WFTradeHonoursSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeMarketSystem.Announce.cs`](Systems/WFTradeMarketSystem.Announce.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeMarketSystem.cs`](Systems/WFTradeMarketSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeMarketSystem.Origin.cs`](Systems/WFTradeMarketSystem.Origin.cs)
