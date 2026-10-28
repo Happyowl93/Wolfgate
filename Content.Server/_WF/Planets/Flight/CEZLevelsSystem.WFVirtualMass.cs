@@ -22,6 +22,12 @@ public sealed partial class CEZLevelsSystem
         return mass;
     }
 
+    /// <summary>Virtual cargo mass across a grid's whole rigid set, as lift counts it.</summary>
+    public float WfGetSetLiftLoad(EntityUid grid)
+    {
+        return GetWFVirtualMass(grid, CollectRigidSet(grid));
+    }
+
     /// <summary>Virtual cargo mass other modules report for one grid.</summary>
     private float WfLiftLoad(EntityUid grid)
     {

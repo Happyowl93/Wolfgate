@@ -1,0 +1,126 @@
+# The Market PDA app: live chute prices, sector alerts and the hold.
+- type: entity
+  parent: NFBasePDACartridge
+  id: WFMarketCartridge
+  name: market cartridge
+  description: A program showing what every station's turn-in chute pays right now, and why.
+  components:
+  - type: Sprite
+    sprite: Objects/Devices/cartridge.rsi
+    state: cart-q
+  - type: Icon
+    sprite: Objects/Devices/cartridge.rsi
+    state: cart-q
+  - type: UIFragment
+    ui: !type:MarketUi
+  - type: Cartridge
+    programName: wf-market-program-name
+    icon: { sprite: _Mono/Objects/TradeGoods/trade.rsi, state: luxury }
+    readonly: true
+  - type: WFMarketCartridge
+  - type: StaticPrice
+    price: 50
+    vendPrice: 500
+
+- type: loadout
+  id: WFContractorMarketCartridge
+  effects:
+  - !type:GroupLoadoutEffect
+    proto: ContractorT1
+  price: 0
+  storage:
+    back:
+    - WFMarketCartridge
+
+# Priority consignments: sealed crates for one station, worth most if delivered before the deadline.
+- type: entity
+  parent: BaseTradeItem
+  id: WFTradeConsignment
+  name: priority consignment
+  description: A sealed, stamped crate bound for one station, with a delivery deadline on the label.
+  components:
+  - type: Sprite
+    layers:
+    - state: luxury
+      color: "#e8c46a"
+  - type: StaticPrice
+    price: 100
+  - type: WFConsignment
+  - type: WFCargoMass
+    class: Light
+
+- type: entity
+  parent: WFTradeConsignment
+  id: WFTradeConsignmentHeavy
+  name: heavy priority consignment
+  description: A sealed, stamped crate of machinery bound for one station. It weighs a ton, and then some.
+  components:
+  - type: Sprite
+    layers:
+    - state: metal
+      color: "#e8c46a"
+  - type: WFConsignment
+    value: 32000
+    onTimeBonus: 14000
+    latePenalty: 14000
+  - type: WFCargoMass
+    class: Bulk
+
+# Silences a classified crate's transponder for a while. One use.
+- type: entity
+  parent: BaseItem
+  id: WFTransponderJammer
+  name: transponder jammer
+  description: A one-shot burst jammer. Clamp it to a crate's transponder and nobody hears it for a while.
+  components:
+  - type: Sprite
+    sprite: Objects/Devices/jammer.rsi
+    state: jammer
+  - type: Item
+    sprite: Objects/Devices/jammer.rsi
+    size: Small
+  - type: WFTransponderJammer
+  - type: StaticPrice
+    price: 500
+    vendPrice: 6000
+
+# The Underground's fence: takes anything at middling prices, sealed freight at full price, and classified cargo.
+- type: entity
+  parent: BaseCargoChute
+  id: WFCargoChuteUnderground
+  name: Underground fence chute
+  description: A chute that leads somewhere nobody asks about. It takes anything, and pays without questions.
+  components:
+  - type: Dispenser
+    defaultItem: PaperWrittenDispenserInstructions
+    inventory:
+      TradeGoodAmmo: SpaceCash6000
+      TradeGoodSupplies: SpaceCash2500
+      TradeGoodMedicalSupplies: SpaceCash2500
+      TradeGoodChemicalSupplies: SpaceCash3000
+      TradeGoodChemicalsVolatile: SpaceCash4000
+      TradeGoodWeaponParts: SpaceCash6000
+      TradeGoodScrap: SpaceCash2500
+      TradeGoodFissionFuel: SpaceCash12000
+      TradeGoodFusionFuel: SpaceCash8000
+      TradeGoodComponents: SpaceCash2500
+      TradeGoodShipComponents: SpaceCash4000
+      TradeGoodEquipment: SpaceCash2500
+      TradeGoodFertilizer: SpaceCash3000
+      TradeGoodLuxuries: SpaceCash9000
+      TradeGoodFabric: SpaceCash2500
+      TradeGoodMetals: SpaceCash2500
+
+- type: entity
+  parent: VendingMachineTraderBaikal
+  id: WFVendingMachineFence
+  name: Underground fence vendor
+  description: Sells what a fence's customers need and nobody else sells.
+  components:
+  - type: VendingMachine
+    pack: WFFenceInventory
+
+- type: vendingMachineInventory
+  id: WFFenceInventory
+  startingInventory:
+    WFTransponderJammer: 4294967295 # Infinite

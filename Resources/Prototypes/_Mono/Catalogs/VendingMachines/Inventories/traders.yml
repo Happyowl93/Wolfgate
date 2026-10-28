@@ -13,6 +13,7 @@
     PaperWrittenDispenserHalcyonRequesting: 4294967295 # Infinite
     PaperWrittenDispenserHeliosRequesting: 4294967295 # Infinite
     PaperWrittenDispenserZvezdaRequesting: 4294967295 # Infinite
+    WFMarketCartridge: 4294967295 # WOLFGATE(TradeGoods): the Market app
 
 - type: vendingMachineInventory
   id: TraderTradeMall
