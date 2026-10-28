@@ -36,7 +36,27 @@ public readonly record struct WFMarketPrice(string Good, int Amount, float Facto
 
 /// <summary>A sector event worth chasing; <c>Ends</c> is game time, or null for no countdown.</summary>
 [Serializable, NetSerializable]
-public readonly record struct WFMarketAlert(string Text, TimeSpan? Ends, bool Urgent);
+public readonly record struct WFMarketAlert(string Text, TimeSpan? Ends, bool Urgent, WFMarketAlertKind Kind = WFMarketAlertKind.Deal);
+
+/// <summary>What an alert is about, for its colour and tag in the app.</summary>
+[Serializable, NetSerializable]
+public enum WFMarketAlertKind : byte
+{
+    /// <summary>Better prices or paid work: rushes, consignments, shortages, relief, war and raid demand, merchants.</summary>
+    Deal,
+
+    /// <summary>Ships moving goods: freighters inbound.</summary>
+    Traffic,
+
+    /// <summary>Trouble: blockades, traders who won't deal with the holder.</summary>
+    Warning,
+
+    /// <summary>About the holder alone: their faction's war pay, their convoy.</summary>
+    Personal,
+
+    /// <summary>Classified cargo sightings for the hunting companies.</summary>
+    Hunt,
+}
 
 /// <summary>One crate aboard the holder's ship and where it sells best now, or the one place it sells when bound.</summary>
 [Serializable, NetSerializable]

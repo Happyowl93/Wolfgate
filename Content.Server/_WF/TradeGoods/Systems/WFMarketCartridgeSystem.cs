@@ -12,6 +12,7 @@ using Content.Shared._WF.CargoLoad;
 using Content.Shared._WF.SectorControl;
 using Content.Shared._WF.TradeGoods;
 using Content.Shared.CartridgeLoader;
+using Content.Shared.PDA;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -40,6 +41,8 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     [Dependency] private WFCargoLoadSystem _cargo = default!;
     [Dependency] private WarLevelSystem _war = default!;
 
+    public static readonly EntProtoId MarketCartridge = "WFMarketCartridge";
+
     private static readonly TimeSpan RefreshInterval = TimeSpan.FromSeconds(5);
 
     /// <summary>Hold crates whose origins fall in the same square of this many metres share one best-price lookup.</summary>
@@ -51,6 +54,17 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<WFMarketCartridgeComponent, CartridgeUiReadyEvent>(OnUiReady);
+        SubscribeLocalEvent<PdaComponent, ComponentStartup>(OnPdaStartup);
+    }
+
+    /// <summary>
+    /// Adds the Market app to every PDA's preinstalled programs before they install at map init, since most PDA
+    /// prototypes replace the base list. Last in the list, so a full disk drops it rather than a job program.
+    /// </summary>
+    private void OnPdaStartup(Entity<PdaComponent> ent, ref ComponentStartup args)
+    {
+        if (TryComp<CartridgeLoaderComponent>(ent, out var loader) && !loader.PreinstalledPrograms.Contains(MarketCartridge))
+            loader.PreinstalledPrograms.Add(MarketCartridge);
     }
 
     private void OnUiReady(Entity<WFMarketCartridgeComponent> ent, ref CartridgeUiReadyEvent args)
@@ -131,7 +145,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
 
         foreach (var station in _sector.Blockaded())
         {
-            alerts.Add(new WFMarketAlert(Loc.GetString("wf-market-alert-blockade", ("station", Name(station)), ("factor", profile.BlockadeFactor)), null, false));
+            alerts.Add(new WFMarketAlert(Loc.GetString("wf-market-alert-blockade", ("station", Name(station)), ("factor", profile.BlockadeFactor)), null, false, WFMarketAlertKind.Warning));
         }
 
         foreach (var (station, ends) in _sector.Raided())
@@ -149,7 +163,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
 
         foreach (var (ship, station, goods) in _freight.Inbound())
         {
-            alerts.Add(new WFMarketAlert(Loc.GetString("wf-market-alert-freight", ("ship", ship), ("station", station), ("goods", goods)), null, false));
+            alerts.Add(new WFMarketAlert(Loc.GetString("wf-market-alert-freight", ("ship", ship), ("station", station), ("goods", goods)), null, false, WFMarketAlertKind.Traffic));
         }
 
         // A chute aboard an NPC hull is a wandering merchant's.
@@ -167,7 +181,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         {
             var minutes = (int) (_timing.CurTime - heard).TotalMinutes;
             hunterAlerts.Add(new WFMarketAlert(Loc.GetString(jammed ? "wf-market-alert-classified-jammed" : "wf-market-alert-classified",
-                ("cell", cell), ("minutes", minutes), ("ship", ship ?? Loc.GetString("wf-market-adrift"))), null, true));
+                ("cell", cell), ("minutes", minutes), ("ship", ship ?? Loc.GetString("wf-market-adrift"))), null, true, WFMarketAlertKind.Hunt));
         }
 
         return (stations.Values.OrderBy(station => station.Name).ToList(), alerts, hunterAlerts);
@@ -283,7 +297,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
 
         foreach (var grid in shunned)
         {
-            yield return new WFMarketAlert(Loc.GetString("wf-market-alert-shunned", ("station", Name(grid))), null, false);
+            yield return new WFMarketAlert(Loc.GetString("wf-market-alert-shunned", ("station", Name(grid))), null, false, WFMarketAlertKind.Warning);
         }
 
         if (company is not { } own || !_war.GetWarLevel(EntityUid.Invalid))
@@ -293,14 +307,14 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         if (home is { CreditEntity: not null } && profile.WarEffortCredits > 0)
         {
             yield return new WFMarketAlert(Loc.GetString("wf-market-alert-war-effort", ("navy", Loc.GetString(home.Name)),
-                ("credits", profile.WarEffortCredits)), null, false);
+                ("credits", profile.WarEffortCredits)), null, false, WFMarketAlertKind.Personal);
         }
 
         foreach (var navy in profile.Navies.Where(navy => navy.Enemies.Contains(own)))
         {
             yield return new WFMarketAlert(Loc.GetString(home is { PostsDefectorWarrants: true } ? "wf-market-alert-defector-warrant" : "wf-market-alert-defector",
                 ("navy", Loc.GetString(navy.Name)), ("factor", profile.DefectorFactor), ("warrant", profile.DefectorWarrant),
-                ("own", home is { } ownNavy ? Loc.GetString(ownNavy.Name) : string.Empty)), null, false);
+                ("own", home is { } ownNavy ? Loc.GetString(ownNavy.Name) : string.Empty)), null, false, WFMarketAlertKind.Personal);
         }
     }
 
@@ -311,7 +325,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         {
             var (sold, threshold) = _escort.Progress(trader);
             yield return new WFMarketAlert(Loc.GetString("wf-market-alert-escorting", ("trader", Name(trader)),
-                ("percent", WFTradeEscortSystem.SharePercent), ("sold", sold), ("threshold", threshold)), null, false);
+                ("percent", WFTradeEscortSystem.SharePercent), ("sold", sold), ("threshold", threshold)), null, false, WFMarketAlertKind.Personal);
         }
 
         var escorts = _escort.EscortsOf(ship).Where(escort => !TerminatingOrDeleted(escort)).ToList();
@@ -319,7 +333,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         {
             var (sold, threshold) = _escort.Progress(ship);
             yield return new WFMarketAlert(Loc.GetString("wf-market-alert-escorted", ("ships", string.Join(", ", escorts.Select(escort => Name(escort)))),
-                ("percent", WFTradeEscortSystem.SharePercent), ("sold", sold), ("threshold", threshold)), null, false);
+                ("percent", WFTradeEscortSystem.SharePercent), ("sold", sold), ("threshold", threshold)), null, false, WFMarketAlertKind.Personal);
         }
     }
 }

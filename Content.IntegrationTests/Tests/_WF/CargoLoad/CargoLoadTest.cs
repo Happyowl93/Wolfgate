@@ -26,6 +26,7 @@ public sealed class CargoLoadTest
     // Metals are Bulk (5t), luxuries Light (1t), in WFCargoLoadDefault.
     private const string BulkCrate = "TradeGoodMetals";
     private const string LightCrate = "TradeGoodLuxuries";
+    private static readonly EntProtoId SteelSheet = "SheetSteel1";
 
     [Test]
     public async Task LoadSlowsTheShipAndCountsAgainstLift()
@@ -140,8 +141,8 @@ public sealed class CargoLoadTest
         await server.WaitAssertion(() =>
         {
             // 10000 units is 100 sheets of steel; packed, they weigh StoredFactor of the same sheets loose.
-            var sheet = protos.Index<EntityPrototype>("SheetSteel1");
-            Assert.That(sheet.TryGetComponent<WFCargoMassComponent>(out var mass, entMan.ComponentFactory), Is.True);
+            var sheet = protos.Index(SteelSheet);
+            Assert.That(sheet.TryComp<WFCargoMassComponent>(out var mass, entMan.ComponentFactory), Is.True);
             var loose = mass!.PerUnit * 100f;
             Assert.That(cargo.MaterialWeight("Steel") * 10000f, Is.EqualTo(loose).Within(0.001f));
 

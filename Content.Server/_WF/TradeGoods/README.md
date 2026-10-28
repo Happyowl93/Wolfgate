@@ -8,7 +8,8 @@ each with its weight and price per tonne. The app's Alerts tab lists every event
 for the holder alone: traders who won't deal with them, what the war pays their faction, and the convoy they are
 escorting or that escorts them. Its Hold tab prices each crate aboard as a chute would (`WFMarketCartridgeSystem.BestFor`):
 seals, destination bonuses, the seller's faction and special payouts count, and chutes that would refuse it are skipped;
-consignments and console trading crates show where they are bound.
+consignments and console trading crates show where they are bound. Every PDA gets the app: `WFMarketCartridgeSystem` appends
+it to each PDA's preinstalled programs at startup, since most PDA prototypes replace the base list.
 
 What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifierCap`):
 - Shortages at one station and sector-wide booms (`WFTradeShortageSystem`, `wfTradeShortage`).
@@ -93,6 +94,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketAppTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketAppTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketHoldTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketHoldTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketPdaTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketPdaTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCargoTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCargoTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeFreightTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeFreightTest.cs)
@@ -114,6 +116,10 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 
 - [`Resources/Locale/en-US/_WF/TradeGoods/trade-goods.ftl`](../../../Resources/Locale/en-US/_WF/TradeGoods/trade-goods.ftl)
 
+### Textures
+
+- [`Resources/Textures/_WF/TradeGoods/market.rsi/`](../../../Resources/Textures/_WF/TradeGoods/market.rsi/)
+
 ## Non-modular edits
 
 - [`Content.Server/_Crescent/Dispenser/DispenserSystem.cs`](../../_Crescent/Dispenser/DispenserSystem.cs)
@@ -129,6 +135,5 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 - [`Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml): no free crates from the eject wire or wrecking the vendor
 - [`Resources/Prototypes/_NF/Entities/Structures/Specific/TradingCrates/crates.yml`](../../../Resources/Prototypes/_NF/Entities/Structures/Specific/TradingCrates/crates.yml): the pallet price follows the selling station's demand
 - [`Resources/Prototypes/_NF/Loadouts/contractor_loadout_groups.yml`](../../../Resources/Prototypes/_NF/Loadouts/contractor_loadout_groups.yml): the Market app
-- [`Resources/Prototypes/Entities/Objects/Devices/pda.yml`](../../../Resources/Prototypes/Entities/Objects/Devices/pda.yml): every PDA has the Market app
 
 <!-- WOLFGATE-GENERATED END -->

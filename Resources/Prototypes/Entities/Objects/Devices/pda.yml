@@ -83,7 +83,6 @@
       - NewsReaderCartridge
       - BountyContractsCartridge # Frontier
       - AstroNavCartridge # Frontier
-      - WFMarketCartridge # WOLFGATE(TradeGoods): every PDA has the Market app
     cartridgeSlot:
       priority: -1
       name: device-pda-slot-component-slot-name-cartridge
