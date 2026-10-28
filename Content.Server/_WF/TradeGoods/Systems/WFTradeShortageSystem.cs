@@ -43,6 +43,7 @@ public sealed class WFTradeShortageSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<WFTradeQuoteEvent>(OnQuote);
+        SubscribeLocalEvent<WFTradeBuyQuoteEvent>(OnBuyQuote);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnCleanup);
     }
 
@@ -53,6 +54,22 @@ public sealed class WFTradeShortageSystem : EntitySystem
     }
 
     private void OnQuote(WFTradeQuoteEvent args)
+    {
+        var now = _timing.CurTime;
+        foreach (var shortage in _active)
+        {
+            if (shortage.Ends > now
+                && (shortage.Grid == null || shortage.Grid == args.Grid)
+                && (shortage.Goods?.Contains(args.Good) ?? _market.InGroup(args.Good, shortage.Group)))
+            {
+                args.Modifiers.Add(new WFTradeModifier(shortage.Factor,
+                    shortage.Grid == null ? "wf-trade-reason-boom" : "wf-trade-reason-short"));
+            }
+        }
+    }
+
+    /// <summary>A station short of a good, or a sector booming for it, also charges more to buy it.</summary>
+    private void OnBuyQuote(WFTradeBuyQuoteEvent args)
     {
         var now = _timing.CurTime;
         foreach (var shortage in _active)

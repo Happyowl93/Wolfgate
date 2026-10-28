@@ -223,6 +223,37 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
             station.Prices.Sort((a, b) => b.Amount.CompareTo(a.Amount));
         }
 
+        // Trade vendors list what the station charges; a station with vendors and no chute still gets a card.
+        var vendorGrids = new HashSet<EntityUid>();
+        var vendors = EntityQueryEnumerator<WFTradeVendorComponent, TransformComponent>();
+        while (vendors.MoveNext(out _, out _, out var vendorXform))
+        {
+            if (vendorXform.GridUid is { } grid && _market.IsMarketMap(vendorXform.MapID))
+                vendorGrids.Add(grid);
+        }
+
+        foreach (var grid in vendorGrids)
+        {
+            if (!stations.TryGetValue(grid, out var station))
+            {
+                stations[grid] = station = new WFMarketStation
+                {
+                    Name = Name(grid),
+                    Faction = Loc.GetString(profile.DefaultMarketFaction),
+                    FactionColor = profile.DefaultMarketFactionColor,
+                };
+                order[grid] = profile.MarketFactions.Count;
+            }
+
+            foreach (var (good, quote) in _market.StationBuyQuotes(grid))
+            {
+                station.Buys.Add(new WFMarketPrice(_market.GoodName(good), quote.Amount, quote.Factor,
+                    Loc.GetString(quote.Reason), _cargo.GoodWeight(good), false));
+            }
+
+            station.Buys.Sort((a, b) => a.Amount.CompareTo(b.Amount));
+        }
+
         // An alert naming a hidden market is off the books too.
         var hiddenNames = stations.Values.Where(station => station.Underground).Select(station => station.Name).ToHashSet();
         var alerts = new List<(WFMarketAlert, bool)>();

@@ -29,6 +29,9 @@
   # Cargo-console trading crates share one demand per station; the floor still covers the console price.
   tradeCratePerSale: 0.05
   tradeCrateFloor: 0.3
+  # Each trade good bought from a station's vendor makes it scarcer there; vendors never charge below base.
+  buyPerPurchase: 0.03
+  buyScarcityCap: 0.6
   modifierCap: 2.5
   minHaulDistance: 3000
   highlight: 1.4

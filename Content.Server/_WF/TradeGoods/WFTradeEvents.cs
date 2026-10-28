@@ -22,6 +22,17 @@ public sealed class WFTradeQuoteEvent(EntityUid grid, EntityUid chute, string go
     public readonly List<WFTradeModifier> Modifiers = new();
 }
 
+/// <summary>
+/// Raised broadcast when a station's trade vendor prices a good. Modules whose conditions make goods scarce there, such
+/// as shortages, blockades and raids, add factors above 1; they are capped together like a chute's.
+/// </summary>
+public sealed class WFTradeBuyQuoteEvent(EntityUid grid, string good) : EntityEventArgs
+{
+    public readonly EntityUid Grid = grid;
+    public readonly string Good = good;
+    public readonly List<WFTradeModifier> Modifiers = new();
+}
+
 /// <summary>Raised broadcast when a chute buys a crate, before the crate is deleted.</summary>
 public readonly record struct WFTradeSaleEvent(
     EntityUid Grid,

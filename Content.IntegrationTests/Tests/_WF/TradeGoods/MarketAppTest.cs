@@ -25,6 +25,7 @@ public sealed class MarketAppTest
             var station = new WFMarketStation { Name = "Halcyon", Faction = "Trans-Solarian Federation" };
             station.Prices.Add(new WFMarketPrice("medical supplies", 9500, 1.9f, "blockade", 1f, true));
             station.Prices.Add(new WFMarketPrice("metals", 2000, 0.5f, "glutted", 5f, false));
+            station.Buys.Add(new WFMarketPrice("fabric", 1130, 1.13f, "scarce", 1f, false));
             var rival = new WFMarketStation { Name = "Camelot", Faction = "USSP" };
             rival.Prices.Add(new WFMarketPrice("medical supplies", 6000, 1f, "steady", 1f, false));
             var state = new WFMarketUiState { Ship = "ISV Mule" };
@@ -63,6 +64,10 @@ public sealed class MarketAppTest
             Assert.That(texts.Any(text => text.Contains("Thrust") || text.Contains("stored")), Is.False, "Ship load belongs on the helm, not the app.");
             Assert.That(texts, Has.Some.Contains("metals").And.Contains("2"), "Identical crates should share a row with a count.");
             Assert.That(texts, Has.Some.Contains("Cargo Depot A").And.Contains("9000"));
+            Assert.That(texts, Has.Some.EqualTo("SELL HERE"), "A card with both lists should label them.");
+            Assert.That(texts, Has.Some.EqualTo("BUY HERE"), "Vendor prices should show on the station's card.");
+            Assert.That(texts, Has.Some.EqualTo("1130"));
+            Assert.That(texts, Has.Some.EqualTo("scarce"));
             Assert.That(texts.Any(text => text.Contains('{') || text.Contains("wf-market")), Is.False, "Every string should resolve.");
 
             // An empty state says so on every tab.

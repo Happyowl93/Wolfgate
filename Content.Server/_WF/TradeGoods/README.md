@@ -18,6 +18,15 @@ there. UI state reaches every client near a PDA, so for those holders the networ
 full state goes to the viewers alone (`WFMarketPrivateStateEvent`, kept by the client `WFMarketSystem`). Radio lines
 naming a hidden market go only to the underground companies (`WFTradeMarketSystem.Announce`).
 
+Buy prices move too (`WFTradeMarketSystem.Buy`). Station trade vendors (`WFTradeVendorComponent`, on
+`VendingMachineTraderBaikal` and its children) charge each trade good's base price times its scarcity there: every crate
+bought adds `buyPerPurchase`, up to `buyScarcityCap`, decaying with the same half-life, and a freighter supplying the
+station eases it. Shortages, booms, blockades and raids at the station raise it further (`WFTradeBuyQuoteEvent`, capped at
+`modifierCap`). A vendor never charges below base, so the sell floors still cover a bought crate. The server keeps each
+vendor's live prices on the networked component, refreshed every 5 s and on each purchase, so the vending menu shows what
+`AuthorizedVend` charges; the Market app lists them as each station card's Buy here rows, cheapest starred. NPC trader
+shops and console trading crates keep their fixed prices.
+
 What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifierCap`):
 - Shortages at one station and sector-wide booms (`WFTradeShortageSystem`, `wfTradeShortage`).
 - Blockades, relief rates while a blockade is contested, war demand at the navy chutes and raid alerts
@@ -78,6 +87,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeEscortSystem.cs`](Systems/WFTradeEscortSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeFreightSystem.cs`](Systems/WFTradeFreightSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeMarketSystem.Announce.cs`](Systems/WFTradeMarketSystem.Announce.cs)
+- [`Content.Server/_WF/TradeGoods/Systems/WFTradeMarketSystem.Buy.cs`](Systems/WFTradeMarketSystem.Buy.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeMarketSystem.cs`](Systems/WFTradeMarketSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeMarketSystem.Origin.cs`](Systems/WFTradeMarketSystem.Origin.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeRushSystem.cs`](Systems/WFTradeRushSystem.cs)
@@ -85,6 +95,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeShortageSystem.cs`](Systems/WFTradeShortageSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeSpecialCrateSystem.cs`](Systems/WFTradeSpecialCrateSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeWarSystem.cs`](Systems/WFTradeWarSystem.cs)
+- [`Content.Server/_WF/TradeGoods/VendingMachineSystem.TradeGoods.cs`](VendingMachineSystem.TradeGoods.cs)
 - [`Content.Server/_WF/TradeGoods/WFTradeEvents.cs`](WFTradeEvents.cs)
 
 ### Shared
@@ -93,11 +104,14 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 - [`Content.Shared/_WF/TradeGoods/WFTradeCrateMarketComponent.cs`](../../../Content.Shared/_WF/TradeGoods/WFTradeCrateMarketComponent.cs)
 - [`Content.Shared/_WF/TradeGoods/WFTradeMarketPrototype.cs`](../../../Content.Shared/_WF/TradeGoods/WFTradeMarketPrototype.cs)
 - [`Content.Shared/_WF/TradeGoods/WFTradeOriginComponent.cs`](../../../Content.Shared/_WF/TradeGoods/WFTradeOriginComponent.cs)
+- [`Content.Shared/_WF/TradeGoods/WFTradeVendorComponent.cs`](../../../Content.Shared/_WF/TradeGoods/WFTradeVendorComponent.cs)
 
 ### Client
 
 - [`Content.Client/_WF/TradeGoods/MarketUi.cs`](../../../Content.Client/_WF/TradeGoods/MarketUi.cs)
+- [`Content.Client/_WF/TradeGoods/VendingMachineMenu.TradeGoods.cs`](../../../Content.Client/_WF/TradeGoods/VendingMachineMenu.TradeGoods.cs)
 - [`Content.Client/_WF/TradeGoods/WFMarketSystem.cs`](../../../Content.Client/_WF/TradeGoods/WFMarketSystem.cs)
+- [`Content.Client/_WF/TradeGoods/WFTradeVendorSystem.cs`](../../../Content.Client/_WF/TradeGoods/WFTradeVendorSystem.cs)
 
 ### Integration tests
 
@@ -105,6 +119,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketHoldTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketHoldTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketPdaTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketPdaTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketUndergroundTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketUndergroundTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeBuyPriceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeBuyPriceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCargoTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCargoTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCommandTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCommandTest.cs)
@@ -134,16 +149,21 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 
 ## Non-modular edits
 
+- [`Content.Client/VendingMachines/UI/VendingMachineMenu.xaml.cs`](../../../Content.Client/VendingMachines/UI/VendingMachineMenu.xaml.cs): trade vendors show the station's live price
+- [`Content.Client/VendingMachines/VendingMachineBoundUserInterface.cs`](../../../Content.Client/VendingMachines/VendingMachineBoundUserInterface.cs): the menu reads the vendor's live trade-good prices
 - [`Content.Server/_Crescent/Dispenser/DispenserSystem.cs`](../../_Crescent/Dispenser/DispenserSystem.cs)
   - chutes refuse goods not hauled away from where they were made, and quote the rest live
   - chutes also take consignments they don't list
   - pay the live quote, print live prices
+- [`Content.Server/VendingMachines/VendingMachineSystem.cs`](../../VendingMachines/VendingMachineSystem.cs): trade vendors charge the station's live price
 - [`Resources/Maps/_Mono/POI/underground.yml`](../../../Resources/Maps/_Mono/POI/underground.yml): The fence chute in the vendor room, beside the contraband vendor.
 - [`Resources/Prototypes/_Crescent/Entities/Objects/Misc/trade.yml`](../../../Resources/Prototypes/_Crescent/Entities/Objects/Misc/trade.yml): chutes check where a crate was made
 - [`Resources/Prototypes/_Mono/Entities/Structures/dispensers.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/dispensers.yml)
   - match the CC manifest, which lists no ship components and metals at 5000
   - match the Halcyon manifest, which buys fertilizer and no components
-- [`Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml): no free crates from the eject wire or wrecking the vendor
+- [`Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml)
+  - no free crates from the eject wire or wrecking the vendor
+  - trade goods cost the station's live price
 - [`Resources/Prototypes/_NF/Entities/Structures/Specific/TradingCrates/crates.yml`](../../../Resources/Prototypes/_NF/Entities/Structures/Specific/TradingCrates/crates.yml): the pallet price follows the selling station's demand
 
 <!-- WOLFGATE-GENERATED END -->

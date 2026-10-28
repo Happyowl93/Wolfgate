@@ -14,6 +14,10 @@ public sealed partial class WFTradeMarketComponent : Component
     [ViewVariables]
     public Dictionary<string, (float Pressure, TimeSpan Touched)> Pressure = new();
 
+    /// <summary>Recent-purchase scarcity per good at this station's vendors and when it was last decayed.</summary>
+    [ViewVariables]
+    public Dictionary<string, (float Scarcity, TimeSpan Touched)> Scarcity = new();
+
     /// <summary>Crates of each good delivered here this round.</summary>
     [ViewVariables]
     public Dictionary<string, int> Delivered = new();

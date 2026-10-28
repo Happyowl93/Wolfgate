@@ -31,6 +31,7 @@ wf-trade-reason-rush = rush order
 wf-trade-reason-sealed = sealed freight
 wf-trade-reason-salvage = salvage bonus
 wf-trade-reason-defector = enemy buyer
+wf-trade-reason-scarce = scarce
 
 wf-trade-goods-medical = medical supplies
 wf-trade-goods-supplies = supplies
@@ -97,6 +98,8 @@ wf-market-filter = Filter goods...
 wf-market-price-amount = {$amount}
 wf-market-price-weight = {$tonnes}t · {$perTonne}/t
 wf-market-station-best = ★ best for {$count}
+wf-market-sell-heading = SELL HERE
+wf-market-buy-heading = BUY HERE
 wf-market-no-stations = No stations are buying right now.
 wf-market-no-match = No market buys that.
 wf-market-tab-underground = Underground

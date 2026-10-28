@@ -269,7 +269,8 @@ public sealed class MarketUiFragment : BoxContainer
 
     /// <summary>
     /// Adds the stations with a price matching the filter as cards under a header per faction, and returns how many.
-    /// Stars mark the best price for a good within the list, where more than one of its stations buys it.
+    /// Each card lists what its chutes pay and what its vendors charge. Stars mark the best sell price and the cheapest
+    /// buy price for a good within the list, where more than one of its stations deals in it.
     /// </summary>
     private int AddSection(BoxContainer target, List<WFMarketStation> stations, string filter, bool underground)
     {
@@ -281,17 +282,26 @@ public sealed class MarketUiFragment : BoxContainer
             buyers[price.Good] = buyers.GetValueOrDefault(price.Good) + 1;
         }
 
+        var cheapest = new Dictionary<string, int>();
+        var sellers = new Dictionary<string, int>();
+        foreach (var price in stations.SelectMany(station => station.Buys))
+        {
+            cheapest[price.Good] = cheapest.TryGetValue(price.Good, out var low) ? Math.Min(low, price.Amount) : price.Amount;
+            sellers[price.Good] = sellers.GetValueOrDefault(price.Good) + 1;
+        }
+
         bool IsTop(WFMarketPrice price) => buyers[price.Good] > 1 && price.Amount == best[price.Good];
+        bool IsCheapest(WFMarketPrice price) => sellers[price.Good] > 1 && price.Amount == cheapest[price.Good];
+        bool Matches(WFMarketPrice price) => filter.Length == 0 || price.Good.Contains(filter, StringComparison.OrdinalIgnoreCase);
 
         var accent = underground ? Red : Hot;
         var shown = 0;
         string? faction = null;
         foreach (var station in stations)
         {
-            var prices = station.Prices
-                .Where(price => filter.Length == 0 || price.Good.Contains(filter, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-            if (prices.Count == 0)
+            var prices = station.Prices.Where(Matches).ToList();
+            var buys = station.Buys.Where(Matches).ToList();
+            if (prices.Count == 0 && buys.Count == 0)
                 continue;
 
             // The server sends stations sorted by faction; a header starts each group.
@@ -310,7 +320,7 @@ public sealed class MarketUiFragment : BoxContainer
             }
 
             shown++;
-            var tops = prices.Count(IsTop);
+            var tops = prices.Count(IsTop) + buys.Count(IsCheapest);
             var content = new BoxContainer { Orientation = LayoutOrientation.Vertical, HorizontalExpand = true };
             var title = new BoxContainer { Orientation = LayoutOrientation.Horizontal, HorizontalExpand = true, Margin = new Thickness(0, 0, 0, 3) };
             title.AddChild(new Label
@@ -325,35 +335,26 @@ public sealed class MarketUiFragment : BoxContainer
                 title.AddChild(new Label { Text = Loc.GetString("wf-market-station-best", ("count", tops)), FontColorOverride = accent, StyleClasses = { "LabelSmall" }, VerticalAlignment = VAlignment.Center });
             content.AddChild(title);
 
+            // Labelled only when the card has both, so a chute-only station reads as before.
+            var both = prices.Count > 0 && buys.Count > 0;
+            if (both)
+                content.AddChild(Dimmed(Loc.GetString("wf-market-sell-heading")));
+
             for (var i = 0; i < prices.Count; i++)
             {
-                var price = prices[i];
-                var row = new BoxContainer { Orientation = LayoutOrientation.Horizontal, HorizontalExpand = true };
-                row.AddChild(new Label { Text = IsTop(price) ? "★" : string.Empty, FontColorOverride = accent, MinWidth = 14 });
-                row.AddChild(new Label { Text = price.Good, HorizontalExpand = true, ClipText = true });
-                row.AddChild(new Label
-                {
-                    Text = Trend(price.Factor),
-                    FontColorOverride = Colour(price.Factor),
-                    MinWidth = 14,
-                    Margin = new Thickness(4, 0, 0, 0),
-                });
-                row.AddChild(new Label
-                {
-                    Text = Loc.GetString("wf-market-price-amount", ("amount", price.Amount)),
-                    FontColorOverride = price.Highlight ? accent : Bright,
-                    MinWidth = 50,
-                    Align = Label.AlignMode.Right,
-                    Margin = new Thickness(0, 0, 8, 0),
-                });
-                row.AddChild(Dimmed(Loc.GetString("wf-market-price-weight", ("tonnes", price.Tonnes),
-                    ("perTonne", price.Tonnes > 0 ? (int) (price.Amount / price.Tonnes) : 0)), 78));
-                var reason = Dimmed(price.Reason, 64);
-                reason.ClipText = true;
-                reason.Margin = new Thickness(4, 0, 0, 0);
-                reason.FontColorOverride = price.Factor >= 1.02f || price.Factor <= 0.98f ? Colour(price.Factor) : Quiet;
-                row.AddChild(reason);
-                content.AddChild(i % 2 == 1 ? Panel(row, RowShade, Color.Transparent, new Thickness(0), new Thickness(0)) : row);
+                AddPriceRow(content, prices[i], i, IsTop(prices[i]), accent, false);
+            }
+
+            if (buys.Count > 0)
+            {
+                var heading = Dimmed(Loc.GetString("wf-market-buy-heading"));
+                heading.Margin = new Thickness(0, prices.Count > 0 ? 4 : 0, 0, 0);
+                content.AddChild(heading);
+            }
+
+            for (var i = 0; i < buys.Count; i++)
+            {
+                AddPriceRow(content, buys[i], i, IsCheapest(buys[i]), accent, true);
             }
 
             var card = Panel(content, underground ? RedCard : CardBackground, station.FactionColor,
@@ -363,6 +364,40 @@ public sealed class MarketUiFragment : BoxContainer
         }
 
         return shown;
+    }
+
+    /// <summary>
+    /// One good's row on a station card. A buy price that rises is bad for the player, so its colours run the other way.
+    /// </summary>
+    private void AddPriceRow(BoxContainer content, WFMarketPrice price, int index, bool star, Color accent, bool buying)
+    {
+        var colour = buying ? BuyColour(price.Factor) : Colour(price.Factor);
+        var row = new BoxContainer { Orientation = LayoutOrientation.Horizontal, HorizontalExpand = true };
+        row.AddChild(new Label { Text = star ? "★" : string.Empty, FontColorOverride = accent, MinWidth = 14 });
+        row.AddChild(new Label { Text = price.Good, HorizontalExpand = true, ClipText = true });
+        row.AddChild(new Label
+        {
+            Text = Trend(price.Factor),
+            FontColorOverride = colour,
+            MinWidth = 14,
+            Margin = new Thickness(4, 0, 0, 0),
+        });
+        row.AddChild(new Label
+        {
+            Text = Loc.GetString("wf-market-price-amount", ("amount", price.Amount)),
+            FontColorOverride = price.Highlight ? accent : Bright,
+            MinWidth = 50,
+            Align = Label.AlignMode.Right,
+            Margin = new Thickness(0, 0, 8, 0),
+        });
+        row.AddChild(Dimmed(Loc.GetString("wf-market-price-weight", ("tonnes", price.Tonnes),
+            ("perTonne", price.Tonnes > 0 ? (int) (price.Amount / price.Tonnes) : 0)), 78));
+        var reason = Dimmed(price.Reason, 64);
+        reason.ClipText = true;
+        reason.Margin = new Thickness(4, 0, 0, 0);
+        reason.FontColorOverride = price.Factor >= 1.02f || price.Factor <= 0.98f ? colour : Quiet;
+        row.AddChild(reason);
+        content.AddChild(index % 2 == 1 ? Panel(row, RowShade, Color.Transparent, new Thickness(0), new Thickness(0)) : row);
     }
 
     private void UpdateAlerts(WFMarketUiState state)
@@ -467,6 +502,12 @@ public sealed class MarketUiFragment : BoxContainer
     private static Color Colour(float factor)
     {
         return factor >= 1.02f ? Up : factor <= 0.98f ? Down : Dim;
+    }
+
+    /// <summary>A buy price's colour: dearer is bad, so red.</summary>
+    private static Color BuyColour(float factor)
+    {
+        return factor >= 1.02f ? Down : factor <= 0.98f ? Up : Dim;
     }
 
     private static Color KindColour(WFMarketAlertKind kind)

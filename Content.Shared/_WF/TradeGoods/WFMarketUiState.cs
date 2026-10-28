@@ -32,7 +32,12 @@ public sealed class WFMarketPrivateStateEvent(NetEntity loader, WFMarketUiState 
 public sealed class WFMarketStation
 {
     public string Name = string.Empty;
+
+    /// <summary>What the station's chutes pay for each good.</summary>
     public List<WFMarketPrice> Prices = new();
+
+    /// <summary>What the station's trade vendors charge for each good, cheapest first.</summary>
+    public List<WFMarketPrice> Buys = new();
 
     /// <summary>An off-the-books market, listed under the app's Underground tab.</summary>
     public bool Underground;
@@ -43,7 +48,7 @@ public sealed class WFMarketStation
     public Color FactionColor = Color.Gray;
 }
 
-/// <summary>One good's live quote at a station; <c>Reason</c> is already localized.</summary>
+/// <summary>One good's live sell or buy price at a station; <c>Reason</c> is already localized.</summary>
 [Serializable, NetSerializable]
 public readonly record struct WFMarketPrice(string Good, int Amount, float Factor, string Reason, float Tonnes, bool Highlight);
 

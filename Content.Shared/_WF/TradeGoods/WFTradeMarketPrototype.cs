@@ -38,6 +38,14 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public float TradeCrateFloor = 0.3f;
 
+    /// <summary>Scarcity one trade good bought from a station's vendor adds there, raising what its vendors charge.</summary>
+    [DataField]
+    public float BuyPerPurchase = 0.03f;
+
+    /// <summary>Most scarcity can raise a vendor's price, as a fraction of its base.</summary>
+    [DataField]
+    public float BuyScarcityCap = 0.6f;
+
     /// <summary>Cap on the product of the modifiers that raise a price.</summary>
     [DataField]
     public float ModifierCap = 2.5f;

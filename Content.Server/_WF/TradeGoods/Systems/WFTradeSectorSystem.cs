@@ -51,6 +51,7 @@ public sealed class WFTradeSectorSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<WFTradeQuoteEvent>(OnQuote);
+        SubscribeLocalEvent<WFTradeBuyQuoteEvent>(OnBuyQuote);
         SubscribeLocalEvent<WFTradeSaleEvent>(OnSale);
         SubscribeLocalEvent<WFSectorCellContestedEvent>(OnContested);
         SubscribeLocalEvent<WFSectorContestResolvedEvent>(OnResolved, after: [typeof(WFReaverCampaignSystem)]);
@@ -85,6 +86,19 @@ public sealed class WFTradeSectorSystem : EntitySystem
             args.Modifiers.Add(new WFTradeModifier(profile.WarFactor, "wf-trade-reason-war"));
 
         if (_reaver.RecentlyRaided(args.Grid, profile.RaidWindow) && InAny(good, profile.RaidGroups))
+            args.Modifiers.Add(new WFTradeModifier(profile.RaidFactor, "wf-trade-reason-raid"));
+    }
+
+    /// <summary>A blockaded or recently raided station charges more to buy the goods it is short of.</summary>
+    private void OnBuyQuote(WFTradeBuyQuoteEvent args)
+    {
+        var profile = _market.Profile(args.Grid);
+        if (TryStationCell(args.Grid, out var map, out var cell)
+            && BlockadingOwner(map, cell, args.Grid)
+            && InAny(args.Good, profile.BlockadeGroups))
+            args.Modifiers.Add(new WFTradeModifier(profile.BlockadeFactor, "wf-trade-reason-blockade"));
+
+        if (_reaver.RecentlyRaided(args.Grid, profile.RaidWindow) && InAny(args.Good, profile.RaidGroups))
             args.Modifiers.Add(new WFTradeModifier(profile.RaidFactor, "wf-trade-reason-raid"));
     }
 

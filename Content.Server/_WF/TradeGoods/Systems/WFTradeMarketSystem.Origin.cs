@@ -60,6 +60,7 @@ public sealed partial class WFTradeMarketSystem
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
+        UpdateVendors();
         if (_timing.CurTime < _nextSweep)
             return;
 

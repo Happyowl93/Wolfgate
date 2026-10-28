@@ -60,6 +60,7 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnCleanup);
         InitializeOrigin();
+        InitializeBuy();
     }
 
     private void OnCleanup(RoundRestartCleanupEvent args)
@@ -118,14 +119,20 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
         return pressure;
     }
 
-    /// <summary>Adds pressure to a good at a market, creating the market if needed. Supply from freight is tagged as such.</summary>
+    /// <summary>
+    /// Adds pressure to a good at a market, creating the market if needed. Supply from freight is tagged as such, and
+    /// eases the good's scarcity at the station's vendors by the same amount.
+    /// </summary>
     public void AddPressure(EntityUid grid, string good, float amount, bool supplied = false)
     {
         var market = EnsureComp<WFTradeMarketComponent>(grid);
         var pressure = Pressure(grid, good);
         market.Pressure[good] = (Math.Max(0f, pressure + amount), _timing.CurTime);
-        if (supplied)
-            _supplied[(grid, good)] = _timing.CurTime + Profile(grid).HalfLife;
+        if (!supplied)
+            return;
+
+        _supplied[(grid, good)] = _timing.CurTime + Profile(grid).HalfLife;
+        AddScarcity(grid, good, -amount);
     }
 
     /// <summary>Crates of a good delivered to a market this round.</summary>
