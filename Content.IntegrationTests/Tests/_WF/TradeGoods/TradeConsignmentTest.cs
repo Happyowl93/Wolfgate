@@ -17,13 +17,17 @@ using Robust.Shared.Timing;
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
 /// <summary>
-/// Consignments go between stations a haul apart and never to a wandering merchant, are recalled once their destination
-/// is gone or long after their deadline, and a crate made aboard a ship docked to a moving market is made there.
+/// Consignments go between stations a haul apart and never to a wandering merchant or a hidden market, are recalled once
+/// their destination is gone or long after their deadline, a crate made aboard a ship docked to a moving market is made
+/// there, and a low sale never suggests a hidden market.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFTradeSpecialCrateSystem))]
 public sealed class TradeConsignmentTest
 {
+    private const string Hideout = "CargoChuteHideout";
+    private const string Ammo = "TradeGoodAmmo";
+
     /// <summary>Puts the dummy ticker in a round, so the timed consignment checks run, as the sector tests do.</summary>
     private static void StartRound(GameTicker ticker)
     {
@@ -51,16 +55,19 @@ public sealed class TradeConsignmentTest
             TradeTestWorld.Station(entMan, map, new Vector2(5000f, 0f), "WF consignment far depot");
             var merchant = TradeTestWorld.Station(entMan, map, new Vector2(-5000f, 0f), "WF consignment merchant").Grid;
             entMan.EnsureComponent<WFEncounterGridComponent>(merchant);
+            var fence = TradeTestWorld.Station(entMan, map, new Vector2(0f, -5000f), "WF consignment fence", TradeTestWorld.Fence).Grid;
 
             first = special.SpawnConsignment()!.Value;
             second = special.SpawnConsignment()!.Value;
-            Assert.That(special.SpawnConsignment(), Is.Null, "A merchant was given a consignment.");
+            Assert.That(special.SpawnConsignment(), Is.Null, "A merchant or hidden market was given a consignment.");
 
             foreach (var crate in new[] { first, second })
             {
                 var consignment = entMan.GetComponent<WFConsignmentComponent>(crate);
                 Assert.That(consignment.Destination, Is.Not.EqualTo(merchant));
                 Assert.That(consignment.Origin, Is.Not.EqualTo(merchant));
+                Assert.That(consignment.Destination, Is.Not.EqualTo(fence), "A consignment was bound for a hidden market.");
+                Assert.That(consignment.Origin, Is.Not.EqualTo(fence), "A consignment was posted at a hidden market.");
                 var distance = (xformSys.GetWorldPosition(consignment.Destination!.Value)
                                 - xformSys.GetWorldPosition(consignment.Origin!.Value)).Length();
                 Assert.That(distance, Is.GreaterThanOrEqualTo(3000f), "A consignment was posted between stations closer than a haul.");
@@ -121,6 +128,31 @@ public sealed class TradeConsignmentTest
                 "Riding docked to a moving market counted as a haul.");
             Assert.That(market.WasHauled(chute, docked), Is.False);
             Assert.That(market.CheckHaul(chute, undocked), Is.Null, "A crate hauled from a ship that was never docked was refused.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task LowSaleNeverSuggestsAHiddenMarket()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var market = entMan.System<WFTradeMarketSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var chute = TradeTestWorld.MarketChute(entMan, map);
+            var (helios, heliosChute) = TradeTestWorld.Station(entMan, map, new Vector2(0f, 5000f), "WF test helios", Hideout);
+            Assert.That(market.Quote(heliosChute, Ammo)!.Value.Amount, Is.GreaterThan(market.Quote(chute, Ammo)!.Value.Amount),
+                "The test needs Helios to pay more for ammo than the open chute.");
+
+            var best = market.Best(Ammo);
+            Assert.That(best, Is.Not.Null);
+            Assert.That(best!.Value.Chute, Is.Not.EqualTo(heliosChute), "A sale suggested a hidden market.");
+            Assert.That(market.IsHiddenMarket(helios), Is.True);
         });
 
         await pair.CleanReturnAsync();

@@ -361,13 +361,13 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
         return chutes;
     }
 
-    /// <summary>The station paying most for a good now, other than one grid.</summary>
+    /// <summary>The open station paying most for a good now, other than one grid. Hidden markets are never suggested.</summary>
     public (string Station, int Amount, EntityUid Chute)? Best(string good, EntityUid? except = null)
     {
         (string, int, EntityUid)? best = null;
         foreach (var (chute, _, grid) in Chutes())
         {
-            if (grid == except || Quote(chute, good) is not { } quote)
+            if (grid == except || IsHiddenChute(chute) || Quote(chute, good) is not { } quote)
                 continue;
 
             if (best is not { } current || quote.Amount > current.Item2)

@@ -139,7 +139,8 @@ public sealed class WFTradeSpecialCrateSystem : EntitySystem
 
     /// <summary>
     /// Puts a priority consignment at one station's chute for another station at least the haul distance away. Wandering
-    /// merchants are never an end, since they leave.
+    /// merchants are never an end, since they leave, and nor are hidden markets: a public crate or alert would name them,
+    /// and the fence takes only sealed freight.
     /// </summary>
     public EntityUid? SpawnConsignment()
     {
@@ -148,8 +149,12 @@ public sealed class WFTradeSpecialCrateSystem : EntitySystem
             return null;
 
         var blockaded = _sector.Blockaded().ToHashSet();
-        var chutes = _market.Chutes()
-            .Where(chute => !blockaded.Contains(chute.Grid) && !HasComp<WFEncounterGridComponent>(chute.Grid))
+        var all = _market.Chutes();
+        var hidden = all.Where(chute => _market.IsHiddenChute(chute.Chute)).Select(chute => chute.Grid).ToHashSet();
+        var chutes = all
+            .Where(chute => !blockaded.Contains(chute.Grid)
+                            && !hidden.Contains(chute.Grid)
+                            && !HasComp<WFEncounterGridComponent>(chute.Grid))
             .ToList();
         var taken = new HashSet<EntityUid>();
         var query = EntityQueryEnumerator<WFConsignmentComponent>();

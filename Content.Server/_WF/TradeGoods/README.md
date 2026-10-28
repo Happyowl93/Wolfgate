@@ -12,7 +12,8 @@ tab groups stations by faction (`marketFactions`, matched by chute). Hidden mark
 Underground fence) go to a separate Underground tab, and only holders of an `undergroundCompanies` company (PDV and the
 Underground's godfathers and fugitives) are sent them, along with alerts naming them. UI state reaches every client near a PDA, so for those holders the networked state is a public stand-in and the
 full state goes to the viewers alone (`WFMarketPrivateStateEvent`, kept by the client `WFMarketSystem`). Radio lines
-naming a hidden market go only to the underground companies (`WFTradeMarketSystem.Announce`).
+naming a hidden market go only to the underground companies (`WFTradeMarketSystem.Announce`), and a low sale's "best now"
+hint never names one.
 
 Buy prices move too (`WFTradeMarketSystem.Buy`). Station trade vendors (`WFTradeVendorComponent`, on
 `VendingMachineTraderBaikal` and its children) charge each trade good's base price times its scarcity there: every crate
@@ -42,7 +43,7 @@ warrant (`contrabandWarrant`) goes on the bounty board in their name and securit
 `contrabandAlertChannel`; a flagged seller isn't flagged again for `contrabandWarrantCooldown`. Hidden markets don't buy it.
 
 Priority deliveries (consignments in code, `WFTradeSpecialCrateSystem`): a crate appears at one station's chute, bound
-for another station at least a haul away and never a wandering merchant, and pays well at that station's chute on time
+for another station at least a haul away, never a wandering merchant or a hidden market, and pays well at that station's chute on time
 and less when late. One left at its origin past its deadline is withdrawn;
 one carried off is recalled a window after its deadline, or as soon as its destination is gone.
 

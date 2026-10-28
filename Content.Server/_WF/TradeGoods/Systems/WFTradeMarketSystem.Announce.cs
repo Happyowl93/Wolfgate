@@ -46,15 +46,20 @@ public sealed partial class WFTradeMarketSystem
     /// <summary>Whether a grid holds an off-the-books market, listed only under the app's Underground tab.</summary>
     public bool IsHiddenMarket(EntityUid grid)
     {
-        var hidden = _proto.Index(DefaultProfile).HiddenChutes;
-        var query = EntityQueryEnumerator<DispenserComponent, TransformComponent, MetaDataComponent>();
-        while (query.MoveNext(out _, out _, out var xform, out var meta))
+        var query = EntityQueryEnumerator<DispenserComponent, TransformComponent>();
+        while (query.MoveNext(out var chute, out _, out var xform))
         {
-            if (xform.GridUid == grid && meta.EntityPrototype is { } proto && hidden.Contains(proto.ID))
+            if (xform.GridUid == grid && IsHiddenChute(chute))
                 return true;
         }
 
         return false;
+    }
+
+    /// <summary>Whether a chute is an off-the-books market's, such as PDV Helios or the Underground fence.</summary>
+    public bool IsHiddenChute(EntityUid chute)
+    {
+        return MetaData(chute).EntityPrototype is { } proto && _proto.Index(DefaultProfile).HiddenChutes.Contains(proto.ID);
     }
 
     /// <summary>Tells the players aboard some grids, as the Sector Exchange.</summary>
