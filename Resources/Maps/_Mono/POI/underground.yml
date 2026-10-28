@@ -5,7 +5,7 @@ meta:
   forkId: wolfgate-mapping
   forkVersion: 20261023-201310-d5515d3-tm231-b5e79818
   time: 10/25/2026 17:14:38
-  entityCount: 4694
+  entityCount: 4695
 maps: []
 grids:
 - 1
@@ -29663,7 +29663,14 @@ entities:
     components:
     - type: Transform
       parent: 1
-      pos: -5.5,-3.5
+      pos: 12.5,11.5
+- proto: WFVendingMachineFence
+  entities:
+  - uid: 4828
+    components:
+    - type: Transform
+      parent: 1
+      pos: 12.5,10.5
 - proto: WFLockableButtonUnderground
   entities:
   - uid: 2791

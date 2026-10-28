@@ -30,7 +30,16 @@ What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifie
 - Rush orders: a station wants a few crates fast (`WFTradeRushSystem`, `wfTradeRush`).
 - NPC freight (`WFTradeFreightSystem`): a run's crates carry a manifest seal and pay 60% at lawful chutes, full price at
   a fence (the Underground fence chute, PDV Helios) and a bonus at their destination. A freighter docking at a stop
-  supplies it (tagged *supplied*); a run lost to attack leaves its remaining stops short.
+  supplies it (tagged *supplied*); a run lost to attack leaves its remaining stops short. The Underground fence takes
+  sealed freight only (`sealedOnlyChutes`), so it is where pirates unload what they take off haulers.
+
+Contraband (`WFTradeContrabandSystem`, `contrabandGoods`): the smuggling crate is sold by the Underground's fence vendor
+(`WFVendingMachineFence`) and bought well by every open chute, after the usual
+haul and with the usual saturation, but at a fixed street price: no event raises what chutes pay for it and buying it
+never makes the vendor dearer. It is Frontier contraband, so security can seize it at their contraband pallet for
+faction credits. Each sale at an open chute has a `contrabandWarrantChance` of customs flagging the seller: a criminal
+warrant (`contrabandWarrant`) goes on the bounty board in their name and security hears who sold it where on
+`contrabandAlertChannel`; a flagged seller isn't flagged again for `contrabandWarrantCooldown`. Hidden markets don't buy it.
 
 Priority deliveries (consignments in code, `WFTradeSpecialCrateSystem`): a crate appears at one station's chute, bound
 for another station at least a haul away and never a wandering merchant, and pays well at that station's chute on time
@@ -79,6 +88,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 - [`Content.Server/_WF/TradeGoods/Components/WFTradeMarketComponent.cs`](Components/WFTradeMarketComponent.cs)
 - [`Content.Server/_WF/TradeGoods/DispenserSystem.TradeGoods.cs`](DispenserSystem.TradeGoods.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFMarketCartridgeSystem.cs`](Systems/WFMarketCartridgeSystem.cs)
+- [`Content.Server/_WF/TradeGoods/Systems/WFTradeContrabandSystem.cs`](Systems/WFTradeContrabandSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeCrateMarketSystem.cs`](Systems/WFTradeCrateMarketSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeFreightSystem.cs`](Systems/WFTradeFreightSystem.cs)
 - [`Content.Server/_WF/TradeGoods/Systems/WFTradeMarketSystem.Announce.cs`](Systems/WFTradeMarketSystem.Announce.cs)
@@ -118,6 +128,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCommandTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCommandTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeConsignmentTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeConsignmentTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeContrabandTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeContrabandTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeFreightTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeFreightTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeMarketTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeMarketTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradePricingTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradePricingTest.cs)
@@ -140,6 +151,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 ### Textures
 
 - [`Resources/Textures/_WF/TradeGoods/market.rsi/`](../../../Resources/Textures/_WF/TradeGoods/market.rsi/)
+- [`Resources/Textures/_WF/TradeGoods/smuggling.rsi/`](../../../Resources/Textures/_WF/TradeGoods/smuggling.rsi/)
 
 ## Non-modular edits
 
@@ -150,9 +162,10 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
   - chutes also take consignments they don't list
   - pay the live quote, print live prices
 - [`Content.Server/VendingMachines/VendingMachineSystem.cs`](../../VendingMachines/VendingMachineSystem.cs): trade vendors charge the station's live price
-- [`Resources/Maps/_Mono/POI/underground.yml`](../../../Resources/Maps/_Mono/POI/underground.yml): The fence chute in the vendor room, beside the contraband vendor.
+- [`Resources/Maps/_Mono/POI/underground.yml`](../../../Resources/Maps/_Mono/POI/underground.yml): The fence chute and the smuggling-crate vendor in the cargo bay, beside the sell pallets.
 - [`Resources/Prototypes/_Crescent/Entities/Objects/Misc/trade.yml`](../../../Resources/Prototypes/_Crescent/Entities/Objects/Misc/trade.yml): chutes check where a crate was made
 - [`Resources/Prototypes/_Mono/Entities/Structures/dispensers.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/dispensers.yml)
+  - open stations pay well for contraband
   - match the CC manifest, which lists no ship components and metals at 5000
   - match the Halcyon manifest, which buys fertilizer and no components
 - [`Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml)

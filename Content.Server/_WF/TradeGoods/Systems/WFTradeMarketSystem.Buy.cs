@@ -89,6 +89,14 @@ public sealed partial class WFTradeMarketSystem
     private float BuyFactor(EntityUid grid, string good, out LocId reason)
     {
         var profile = Profile(grid);
+
+        // Contraband has a fixed street price: buying it never makes it dearer.
+        if (profile.ContrabandGoods.Contains(good))
+        {
+            reason = "wf-trade-reason-steady";
+            return 1f;
+        }
+
         var scarcity = Math.Min(Scarcity(grid, good), profile.BuyScarcityCap);
 
         var ev = new WFTradeBuyQuoteEvent(grid, good);
@@ -129,12 +137,13 @@ public sealed partial class WFTradeMarketSystem
         return (int) MathF.Round(price * BuyFactor(grid, proto.ID, out _));
     }
 
-    /// <summary>A trade good bought from a vendor makes it scarcer at the vendor's station.</summary>
+    /// <summary>A trade good bought from a vendor makes it scarcer at the vendor's station; contraband doesn't.</summary>
     private void OnPurchased(Entity<VendingMachinePurchaseComponent> ent, ref ComponentStartup args)
     {
         if (!HasComp<WFTradeOriginComponent>(ent)
             || Transform(ent).GridUid is not { } grid
-            || MetaData(ent).EntityPrototype?.ID is not { } good)
+            || MetaData(ent).EntityPrototype?.ID is not { } good
+            || Profile(grid).ContrabandGoods.Contains(good))
             return;
 
         AddScarcity(grid, good, Profile(grid).BuyPerPurchase);

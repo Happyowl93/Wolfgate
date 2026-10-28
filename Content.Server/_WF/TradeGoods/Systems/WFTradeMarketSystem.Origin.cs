@@ -120,12 +120,15 @@ public sealed partial class WFTradeMarketSystem
 
     /// <summary>
     /// Why a chute refuses a crate for its origin, or null if it was hauled far enough. A crate whose origin is unknown
-    /// or on another map is stamped at the chute and refused.
+    /// or on another map is stamped at the chute and refused. A sealed-only chute refuses a crate without a seal.
     /// </summary>
     public LocId? CheckHaul(EntityUid chute, EntityUid crate)
     {
         if (!TryComp<WFTradeOriginComponent>(crate, out var origin))
             return null;
+
+        if (origin.Run == null && IsSealedOnly(chute))
+            return "wf-trade-refuse-unsealed";
 
         var chuteXform = Transform(chute);
         if (origin.Pending || origin.Point.MapId != chuteXform.MapID)
@@ -139,6 +142,13 @@ public sealed partial class WFTradeMarketSystem
 
         var distance = (origin.Point.Position - _transform.GetWorldPosition(chuteXform)).Length();
         return distance < Profile(chuteXform.GridUid).MinHaulDistance ? "wf-trade-refuse-too-close" : null;
+    }
+
+    /// <summary>Whether a chute takes only freight with a manifest seal, such as the Underground fence.</summary>
+    public bool IsSealedOnly(EntityUid chute)
+    {
+        return MetaData(chute).EntityPrototype is { } proto
+               && Profile(Transform(chute).GridUid).SealedOnlyChutes.Contains(proto.ID);
     }
 
     /// <summary>Whether a crate passed the haul test at a chute, for rewards that require a real haul.</summary>

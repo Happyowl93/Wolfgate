@@ -56,12 +56,12 @@
   - type: WFCargoMass
     class: Bulk
 
-# The Underground's fence: takes anything at middling prices, and sealed freight at full price.
+# The Underground's fence: takes freight with a manifest seal, at full price, and nothing else.
 - type: entity
   parent: BaseCargoChute
   id: WFCargoChuteUnderground
   name: Underground fence chute
-  description: An unlicensed turn-in chute. It takes almost anything, sealed freight included.
+  description: An unlicensed turn-in chute. It only takes sealed freight off the haulers, no questions asked.
   components:
   - type: Dispenser
     defaultItem: PaperWrittenDispenserInstructions
@@ -82,3 +82,53 @@
       TradeGoodLuxuries: SpaceCash9000
       TradeGoodFabric: SpaceCash2500
       TradeGoodMetals: SpaceCash2500
+
+# Contraband: a smuggling crate sold at the Underground. Open stations pay well for it, but customs flags some sellers,
+# and security can seize it for faction credits.
+- type: entity
+  parent: BaseTradeItem
+  id: WFTradeGoodContraband
+  name: smuggling crate
+  description: A blacked-out crate striped in red warning paint, its labels scraped off and its seals replaced. Someone pays well for whatever is inside, that's all that matters.
+  components:
+  - type: Sprite
+    sprite: _WF/TradeGoods/smuggling.rsi
+    layers:
+    - state: icon
+  - type: Item
+    size: Ginormous
+    sprite: _Mono/Objects/TradeGoods/trade.rsi
+  - type: StaticPrice
+    vendPrice: 10000
+  - type: Contraband
+    severity: Class3General
+    turnInValues:
+      FederationMilitaryCredit: 15
+  - type: WFCargoMass
+    class: Standard
+
+# What open chutes list a smuggling crate at; it pays well over any legal good to cover the risk.
+- type: entity
+  parent: SpaceCash
+  id: WFSpaceCash45000
+  suffix: 45000
+  components:
+  - type: Icon
+    sprite: _NF/Objects/Economy/cash.rsi
+    state: cash_25000
+  - type: Stack
+    count: 45000
+
+- type: entity
+  parent: VendingMachineTraderBaikal
+  id: WFVendingMachineFence
+  name: Underground fence vendor
+  description: Sells smuggling crates to anyone who asks no questions.
+  components:
+  - type: VendingMachine
+    pack: WFFenceInventory
+
+- type: vendingMachineInventory
+  id: WFFenceInventory
+  startingInventory:
+    WFTradeGoodContraband: 4294967295 # Infinite

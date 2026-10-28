@@ -3,6 +3,7 @@ wf-trade-refuse-made-here = Made on this station. Haul it at least {$distance} k
 wf-trade-refuse-too-close = Made too close to this market. Haul it at least {$distance} km before selling here.
 wf-trade-refuse-unknown = No record of where this was made, so it now counts as made here. Haul it about {$distance} km before selling.
 wf-trade-refuse-shunned = The merchant won't buy from someone who hurt them.
+wf-trade-refuse-unsealed = The fence only takes sealed freight off the haulers.
 
 wf-encounter-name-merchant = Merchant {$designation}
 wf-encounter-announce-merchant = {$name} is in the sector buying luxury goods, medicine, reactor fuel, weapon parts and fabric at a premium. Bring cargo alongside before it moves on.
@@ -32,6 +33,7 @@ wf-trade-reason-sealed = sealed freight
 wf-trade-reason-salvage = salvage bonus
 wf-trade-reason-defector = enemy buyer
 wf-trade-reason-scarce = scarce
+wf-trade-reason-sealed-only = sealed only
 
 wf-trade-goods-medical = medical supplies
 wf-trade-goods-supplies = supplies
@@ -65,6 +67,13 @@ wf-trade-navy-tsf = the TSF
 wf-trade-navy-pdv = the PDV
 wf-trade-war-effort = War effort: {$navy} adds {$credits} credits.
 wf-trade-defector-warrant = Sold war goods to {$navy} in wartime.
+
+## Contraband
+
+wf-trade-contraband-customs = Customs
+wf-trade-contraband-warrant = Sold contraband at {$station}.
+wf-trade-contraband-flagged = Customs flag: {$seller} sold contraband at {$station}. A warrant is posted.
+wf-trade-contraband-flagged-ship = Customs flag: {$seller} of {$ship} sold contraband at {$station}. A warrant is posted.
 
 ## Priority deliveries
 

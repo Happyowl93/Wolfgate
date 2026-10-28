@@ -5,6 +5,7 @@
   # Goods the economy lathes print cheaply saturate faster.
   perSaleOverrides:
     TradeGoodFertilizer: 0.05
+    WFTradeGoodContraband: 0.08
     TradeGoodComponents: 0.05
     TradeGoodScrap: 0.05
   halfLife: 1500
@@ -26,6 +27,7 @@
     TradeGoodAmmo: 2500
     TradeGoodFissionFuel: 6000
     TradeGoodFusionFuel: 3000
+    WFTradeGoodContraband: 10000
   # Cargo-console trading crates share one demand per station; the floor still covers the console price.
   tradeCratePerSale: 0.05
   tradeCrateFloor: 0.3
@@ -48,6 +50,14 @@
     Agriculture: [ TradeGoodFertilizer ]
     Textiles: [ TradeGoodFabric ]
   hotCargoChutes: [ CargoChuteHideout, WFCargoChuteUnderground ]
+  # The Underground fence only fences freight taken off NPC haulers.
+  sealedOnlyChutes: [ WFCargoChuteUnderground ]
+  # Smuggling crates from the Underground: open chutes pay well, but customs flags some sellers with a warrant.
+  contrabandGoods: [ WFTradeGoodContraband ]
+  contrabandWarrantChance: 0.05
+  contrabandWarrant: 10000
+  contrabandWarrantCooldown: 1800
+  contrabandAlertChannel: Nfsd
   # Off the books: the app lists these under its Underground tab, shown only to the companies below.
   hiddenChutes: [ CargoChuteHideout, WFCargoChuteUnderground ]
   undergroundCompanies: [ PDV, PDVCivilian, PDVHighComm, WFUnderground ]

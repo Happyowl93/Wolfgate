@@ -1,4 +1,5 @@
 using Content.Shared._Mono.Company;
+using Content.Shared.Radio;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._WF.TradeGoods;
@@ -65,6 +66,30 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     /// <summary>Chutes that pay full price for sealed freight.</summary>
     [DataField]
     public List<EntProtoId> HotCargoChutes = new();
+
+    /// <summary>Chutes that take sealed freight only, refusing any crate without a manifest seal.</summary>
+    [DataField]
+    public List<EntProtoId> SealedOnlyChutes = new();
+
+    /// <summary>Contraband goods: open chutes buy them, but a sale may get the seller flagged by customs.</summary>
+    [DataField]
+    public List<EntProtoId> ContrabandGoods = new();
+
+    /// <summary>Chance one contraband sale at an open chute gets the seller flagged.</summary>
+    [DataField]
+    public float ContrabandWarrantChance = 0.05f;
+
+    /// <summary>The warrant posted on a flagged seller.</summary>
+    [DataField]
+    public int ContrabandWarrant = 10000;
+
+    /// <summary>After a flag, how long before the same seller can be flagged again.</summary>
+    [DataField]
+    public TimeSpan ContrabandWarrantCooldown = TimeSpan.FromMinutes(30);
+
+    /// <summary>The radio channel security hears a flagged sale on.</summary>
+    [DataField]
+    public ProtoId<RadioChannelPrototype> ContrabandAlertChannel = "Nfsd";
 
     /// <summary>Chutes the Market app lists under its Underground tab instead of the open exchange.</summary>
     [DataField]

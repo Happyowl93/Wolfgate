@@ -24,11 +24,11 @@ public sealed partial class WFTradeMarketSystem
 
     private EntityUid? _exchange;
 
-    /// <summary>Says a market line on the common channel as the Sector Exchange.</summary>
-    public void Radio(string message)
+    /// <summary>Says a market line as the Sector Exchange, on the common channel unless another is given.</summary>
+    public void Radio(string message, ProtoId<RadioChannelPrototype>? channel = null)
     {
         if (Exchange() is { } exchange)
-            _radio.SendRadioMessage(exchange, message, ExchangeChannel, exchange);
+            _radio.SendRadioMessage(exchange, message, channel ?? ExchangeChannel, exchange);
     }
 
     /// <summary>

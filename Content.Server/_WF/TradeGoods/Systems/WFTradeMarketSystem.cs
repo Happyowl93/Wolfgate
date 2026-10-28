@@ -183,12 +183,20 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
             }
         }
 
+        // Contraband has a fixed street price: no event raises it.
+        if (profile.ContrabandGoods.Contains(good))
+        {
+            raise = 1f;
+            raiseReason = null;
+        }
+
         raise = Math.Min(raise, profile.ModifierCap);
         var amount = (int) MathF.Round(price * raise * lower);
         var supplied = _supplied.TryGetValue((grid, good), out var until) && _timing.CurTime < until;
         var reason = lowerReason
                      ?? raiseReason
-                     ?? (supplied && pressure >= SuppliedPressure ? "wf-trade-reason-supplied"
+                     ?? (crate == null && IsSealedOnly(chute) ? "wf-trade-reason-sealed-only"
+                         : supplied && pressure >= SuppliedPressure ? "wf-trade-reason-supplied"
                          : pressure < 0.15f ? "wf-trade-reason-steady"
                          : "wf-trade-reason-glutted");
         return new WFTradeQuote(basePrice, amount, amount / (float) basePrice, reason);
