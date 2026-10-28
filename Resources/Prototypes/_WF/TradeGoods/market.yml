@@ -45,6 +45,8 @@
     Agriculture: [ TradeGoodFertilizer ]
     Textiles: [ TradeGoodFabric ]
   hotCargoChutes: [ CargoChuteHideout, WFCargoChuteUnderground ]
+  # Off the books: the app lists these under its Underground section.
+  hiddenChutes: [ CargoChuteHideout, WFCargoChuteUnderground ]
   warDemandChutes: [ CargoChuteTSFMC, CargoChuteHideout ]
   blockadeGroups: [ Medical, Supplies, Ammo, ShipComponents ]
   blockadeFactor: 1.8

@@ -111,6 +111,9 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
             if (!stations.TryGetValue(grid, out var station))
                 stations[grid] = station = new WFMarketStation { Name = Name(grid) };
 
+            if (MetaData(chute).EntityPrototype is { } chuteProto && profile.HiddenChutes.Contains(chuteProto.ID))
+                station.Underground = true;
+
             foreach (var good in dispenser.Inventory.Keys)
             {
                 if (_market.Quote(chute, good) is not { } quote || station.Prices.Any(price => price.Good == _market.GoodName(good)))

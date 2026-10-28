@@ -29,6 +29,9 @@ public sealed class MarketAppTest
             var state = new WFMarketUiState { Ship = "ISV Mule", HoldTonnes = 21f, StoredTonnes = 3f, Thrust = 0.75f };
             state.Stations.Add(station);
             state.Stations.Add(rival);
+            var fence = new WFMarketStation { Name = "WF test fence", Underground = true };
+            fence.Prices.Add(new WFMarketPrice("medical supplies", 12000, 1f, "steady", 1f, false));
+            state.Stations.Add(fence);
             state.Alerts.Add(new WFMarketAlert("Freighter Plutomkii inbound to Halcyon with medical supplies", null, false, WFMarketAlertKind.Traffic));
             state.Alerts.Add(new WFMarketAlert("RUSH Halcyon", System.TimeSpan.FromHours(1), true));
             state.Hold.Add(new WFMarketHoldEntry("metals", 5f, "Camelot", 4000));
@@ -44,6 +47,10 @@ public sealed class MarketAppTest
             Assert.That(texts, Has.Some.Contains("9500/t"), "Prices should show the per-tonne figure.");
             Assert.That(texts, Has.Some.EqualTo("★"), "The best price for a good in the sector should be starred.");
             Assert.That(texts, Has.Some.Contains("best for 1"));
+            Assert.That(texts, Has.Some.EqualTo("UNDERGROUND UPLINK"), "Hidden markets should get their own section.");
+            Assert.That(texts, Has.Some.EqualTo("WF test fence"));
+            Assert.That(texts.Count(text => text == "★"), Is.EqualTo(1), "Stars rank each section on its own.");
+            Assert.That(texts, Has.Some.StartsWith("2 markets open"), "The open-market count should leave hidden markets out.");
             Assert.That(texts, Has.Some.Contains("Plutomkii"));
             Assert.That(texts, Has.Some.EqualTo("TRAFFIC"), "Alerts should be tagged by kind.");
             Assert.That(texts, Has.Some.Contains("RUSH Halcyon"));

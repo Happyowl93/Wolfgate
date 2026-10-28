@@ -28,6 +28,9 @@ public sealed class WFMarketStation
 {
     public string Name = string.Empty;
     public List<WFMarketPrice> Prices = new();
+
+    /// <summary>An off-the-books market, listed under the app's Underground section.</summary>
+    public bool Underground;
 }
 
 /// <summary>One good's live quote at a station; <c>Reason</c> is already localized.</summary>

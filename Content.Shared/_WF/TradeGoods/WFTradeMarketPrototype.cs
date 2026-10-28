@@ -58,6 +58,10 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public List<EntProtoId> HotCargoChutes = new();
 
+    /// <summary>Chutes the Market app lists under its Underground section instead of the open exchange.</summary>
+    [DataField]
+    public List<EntProtoId> HiddenChutes = new();
+
     /// <summary>Navy chutes that pay war demand while the war is hot.</summary>
     [DataField]
     public List<EntProtoId> WarDemandChutes = new();
