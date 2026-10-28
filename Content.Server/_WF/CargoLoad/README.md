@@ -8,8 +8,7 @@ planet lift and gravgen support; and a heavy hold spools FTL up to `spoolCap` se
 airlock, down a conveyor or by undocking a pod gives the thrust back at the next sweep.
 
 Players see the weight on crate examine, the load, thrust penalty and spool on helm examine, popups to the helm's
-pilots as the load crosses each band (with hysteresis), the cargo hint in the descent warning and on the PA when a
-hull loses lift mid-air (a crate carried or tractored aboard), the cargo row of the Planets flight panel, the Hold tab
+pilots as the load crosses each band (with hysteresis), the cargo hint in the descent warning, the cargo row of the Planets flight panel, the Hold tab
 of the Market app, price per tonne at the chutes and the rated load in the ship previewer. Frontier's cargo-console
 trading crates are Heavy (normal) and Bulk (express).
 

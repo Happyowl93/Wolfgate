@@ -5,12 +5,10 @@ using Robust.Server.GameObjects;
 using Content.Server._CE.ZLevels.Core;
 using Content.Server._CE.ZLevels.Core.Components;
 using Content.Server._WF.ShipPa;
-using Content.Server.Popups;
 using Content.Shared._CE.ZLevels.Core.Components;
 using Content.Shared._WF.Planets.Flight;
 using Content.Shared._WF.Planets;
 using Content.Shared._WF.ShipPa;
-using Content.Shared.Popups;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Physics;
@@ -33,7 +31,6 @@ public sealed partial class WFFlightSystem : EntitySystem
     [Dependency] private SharedPhysicsSystem _physics = default!;
     [Dependency] private ShipAlertSystem _alert = default!;
     [Dependency] private ShipPaSystem _pa = default!;
-    [Dependency] private PopupSystem _popup = default!;
 
     /// <summary>Caution chime the moment the lift goes, before any callout.</summary>
     public const string AlertLiftLost = "WFAlertLiftLost";
@@ -175,21 +172,6 @@ public sealed partial class WFFlightSystem : EntitySystem
 
         StartAlarmLoop(grid, comp);
         Callout(grid, AlertLiftLost);
-        NameLiftCause(grid, ratio);
-    }
-
-    /// <summary>Tells the crew what would restore lift, such as dropping cargo, when a module knows.</summary>
-    private void NameLiftCause(EntityUid grid, float ratio)
-    {
-        var warning = new WFLiftWarningEvent(grid, ratio, CEZLevelsSystem.WFFullLiftRatio);
-        RaiseLocalEvent(ref warning);
-        if (warning.Hint is not { } hint || _pa.Announce(grid, hint))
-            return;
-
-        foreach (var session in _audience.Aboard(grid).Recipients)
-        {
-            _popup.PopupCursor(hint, session, PopupType.MediumCaution);
-        }
     }
 
     /// <summary>Planar velocity a fall starts with; a stationary hull is nudged along its facing.</summary>
