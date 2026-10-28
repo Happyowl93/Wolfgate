@@ -224,16 +224,17 @@ public sealed class WFTradeSpecialCrateSystem : EntitySystem
         return grid is { } uid && !TerminatingOrDeleted(uid) ? Name(uid) : Loc.GetString("wf-trade-unknown-station");
     }
 
-    /// <summary>Open consignments for the Market app.</summary>
-    public IEnumerable<(EntityUid Destination, string? Carrier, TimeSpan Deadline)> Consignments()
+    /// <summary>Open consignments for the Market app: where they go, where they wait, who carries them and what they pay.</summary>
+    public IEnumerable<(EntityUid Destination, string Origin, string? Carrier, TimeSpan Deadline, int Value)> Consignments()
     {
         var query = EntityQueryEnumerator<WFConsignmentComponent>();
         while (query.MoveNext(out var consignment))
         {
             if (consignment.Destination is { } dest && !TerminatingOrDeleted(dest))
             {
-                yield return (dest, consignment.Announced is { } ship && !TerminatingOrDeleted(ship) ? Name(ship) : null,
-                    consignment.Deadline);
+                yield return (dest, StationLabel(consignment.Origin),
+                    consignment.Announced is { } ship && !TerminatingOrDeleted(ship) ? Name(ship) : null,
+                    consignment.Deadline, consignment.Value + consignment.OnTimeBonus);
             }
         }
     }

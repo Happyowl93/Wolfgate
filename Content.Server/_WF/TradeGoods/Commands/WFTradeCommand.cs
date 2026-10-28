@@ -76,7 +76,7 @@ public sealed partial class WFTradeCommand : LocalizedEntityCommands
             shell.WriteLine(Loc.GetString("cmd-wf_trade-status-shortage",
                 ("station", shortage.Grid is { } grid ? Name(grid) : Loc.GetString("cmd-wf_trade-status-sector")),
                 ("goods", Loc.GetString(shortage.Name)),
-                ("factor", shortage.Factor),
+                ("factor", WFTradeMarketSystem.Shown(shortage.Factor)),
                 ("seconds", Seconds(shortage.Ends, now))));
         }
 
@@ -88,11 +88,11 @@ public sealed partial class WFTradeCommand : LocalizedEntityCommands
                 ("goods", Loc.GetString(rush.Goods)),
                 ("left", rush.Remaining),
                 ("count", rush.Total),
-                ("factor", rush.Factor),
+                ("factor", WFTradeMarketSystem.Shown(rush.Factor)),
                 ("seconds", Seconds(rush.Ends, now))));
         }
 
-        foreach (var (destination, carrier, deadline) in _special.Consignments())
+        foreach (var (destination, _, carrier, deadline, _) in _special.Consignments())
         {
             lines++;
             shell.WriteLine(Loc.GetString("cmd-wf_trade-status-consignment",

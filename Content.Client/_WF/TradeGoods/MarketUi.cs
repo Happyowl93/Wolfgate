@@ -11,7 +11,7 @@ using Robust.Shared.Utility;
 
 namespace Content.Client._WF.TradeGoods;
 
-/// <summary>The Market PDA app: live chute prices, sector alerts and the holder's hold.</summary>
+/// <summary>The Market PDA app: live station prices and sector alerts.</summary>
 public sealed partial class MarketUi : UIFragment
 {
     private MarketUiFragment? _fragment;
@@ -33,7 +33,7 @@ public sealed partial class MarketUi : UIFragment
     }
 }
 
-/// <summary>A header and three tabs: prices by station as cards, alerts tagged by kind, and the hold with its thrust.</summary>
+/// <summary>A header and two tabs: prices by station as cards, and alerts tagged by kind; hidden markets get a third.</summary>
 public sealed class MarketUiFragment : BoxContainer
 {
     [Dependency] private IGameTiming _timing = default!;
@@ -62,7 +62,6 @@ public sealed class MarketUiFragment : BoxContainer
     private readonly LineEdit _filter;
     private readonly BoxContainer _prices;
     private readonly BoxContainer _alerts;
-    private readonly BoxContainer _hold;
     private readonly BoxContainer _underground;
 
     private WFMarketUiState? _state;
@@ -111,7 +110,6 @@ public sealed class MarketUiFragment : BoxContainer
         AddTab(pricesTab, Loc.GetString("wf-market-tab-prices"));
 
         _alerts = AddScroll(null);
-        _hold = AddScroll(null);
         _underground = AddScroll(null);
         _tabs.SetTabTitle(UndergroundTab, Loc.GetString("wf-market-tab-underground"));
         _tabs.SetTabVisible(UndergroundTab, false);
@@ -119,7 +117,7 @@ public sealed class MarketUiFragment : BoxContainer
     }
 
     /// <summary>The Underground tab, shown only when the server sends hidden markets.</summary>
-    private const int UndergroundTab = 3;
+    private const int UndergroundTab = 2;
 
     /// <summary>A scrolling list, added to a parent or as a tab of its own.</summary>
     private BoxContainer AddScroll(BoxContainer? parent)
@@ -144,7 +142,6 @@ public sealed class MarketUiFragment : BoxContainer
     private void SetTitles(int alerts)
     {
         _tabs.SetTabTitle(1, alerts > 0 ? Loc.GetString("wf-market-tab-alerts-count", ("count", alerts)) : Loc.GetString("wf-market-tab-alerts"));
-        _tabs.SetTabTitle(2, Loc.GetString("wf-market-tab-hold"));
     }
 
     /// <summary>A panel with a flat background and an accent border.</summary>
@@ -221,14 +218,11 @@ public sealed class MarketUiFragment : BoxContainer
     {
         _state = state;
         var open = state.Stations.Count(station => !station.Underground);
-        _status.Text = state.Ship is { } ship
-            ? Loc.GetString("wf-market-status-ship", ("stations", open), ("ship", ship))
-            : Loc.GetString("wf-market-status", ("stations", open));
+        _status.Text = Loc.GetString("wf-market-status", ("stations", open));
 
         SetTitles(state.Alerts.Count);
         UpdatePrices();
         UpdateAlerts(state);
-        UpdateHold(state);
     }
 
     private void UpdatePrices()
@@ -403,95 +397,48 @@ public sealed class MarketUiFragment : BoxContainer
     private void UpdateAlerts(WFMarketUiState state)
     {
         _alerts.RemoveAllChildren();
-        foreach (var alert in state.Alerts)
+        // Soonest deadline first; alerts without one keep their order after them.
+        var ordered = state.Alerts
+            .Select((alert, index) => (alert, index))
+            .OrderBy(entry => entry.alert.Ends ?? TimeSpan.MaxValue)
+            .ThenBy(entry => entry.index)
+            .Select(entry => entry.alert);
+
+        foreach (var alert in ordered)
         {
             var accent = KindColour(alert.Kind);
-            var row = new BoxContainer { Orientation = LayoutOrientation.Horizontal, HorizontalExpand = true };
             var body = new BoxContainer { Orientation = LayoutOrientation.Vertical, HorizontalExpand = true };
-            body.AddChild(new Label
+
+            // The tag and the time left share the top line, so the text below gets the card's full width to wrap in.
+            var top = new BoxContainer { Orientation = LayoutOrientation.Horizontal, HorizontalExpand = true };
+            top.AddChild(new Label
             {
                 Text = Loc.GetString($"wf-market-alert-kind-{alert.Kind.ToString().ToLowerInvariant()}"),
                 FontColorOverride = accent,
                 StyleClasses = { "LabelSmall" },
+                HorizontalExpand = true,
             });
-
-            var text = new RichTextLabel { HorizontalExpand = true };
-            text.SetMessage(FormattedMessage.FromUnformatted(alert.Text), alert.Urgent ? Bright : Dim);
-            body.AddChild(text);
-            row.AddChild(body);
 
             if (alert.Ends is { } ends)
             {
                 var minutes = Math.Max(0, (int) Math.Ceiling((ends - _timing.CurTime).TotalMinutes));
-                row.AddChild(Panel(new Label
-                    {
-                        Text = Loc.GetString("wf-market-minutes", ("minutes", minutes)),
-                        FontColorOverride = minutes <= 5 ? Down : accent,
-                        StyleClasses = { "LabelSmall" },
-                    },
-                    HeaderBackground, accent, new Thickness(1), new Thickness(5, 1)));
+                top.AddChild(new Label
+                {
+                    Text = Loc.GetString("wf-market-minutes-left", ("minutes", minutes)),
+                    FontColorOverride = minutes <= 5 ? Down : accent,
+                    StyleClasses = { "LabelSmall" },
+                });
             }
 
-            _alerts.AddChild(Card(row, accent));
+            body.AddChild(top);
+            var text = new RichTextLabel { HorizontalExpand = true, Margin = new Thickness(0, 1, 0, 0) };
+            text.SetMessage(FormattedMessage.FromUnformatted(alert.Text), alert.Urgent ? Bright : Dim);
+            body.AddChild(text);
+            _alerts.AddChild(Card(body, accent));
         }
 
         if (state.Alerts.Count == 0)
             _alerts.AddChild(new Label { Text = Loc.GetString("wf-market-no-alerts"), FontColorOverride = Dim });
-    }
-
-    private void UpdateHold(WFMarketUiState state)
-    {
-        _hold.RemoveAllChildren();
-        if (state.Ship == null)
-        {
-            _hold.AddChild(new Label { Text = Loc.GetString("wf-market-no-ship"), FontColorOverride = Dim });
-            return;
-        }
-
-        _hold.AddChild(Card(new Label
-        {
-            Text = Loc.GetString("wf-market-hold-summary", ("ship", state.Ship), ("count", state.Hold.Count)),
-            StyleClasses = { "LabelHeading" },
-            FontColorOverride = Bright,
-            ClipText = true,
-        }, Hot));
-
-        if (state.Hold.Count == 0)
-        {
-            _hold.AddChild(new Label { Text = Loc.GetString("wf-market-hold-empty"), FontColorOverride = Dim });
-            return;
-        }
-
-        // Identical crates bound for the same best sale share one row.
-        var groups = state.Hold
-            .GroupBy(entry => (entry.Good, entry.Best, entry.BestAmount, entry.Bound))
-            .OrderByDescending(group => group.Key.BestAmount * group.Count())
-            .ToList();
-
-        var crates = new BoxContainer { Orientation = LayoutOrientation.Vertical, HorizontalExpand = true };
-        for (var i = 0; i < groups.Count; i++)
-        {
-            var group = groups[i];
-            var (good, station, amount, bound) = group.Key;
-            var row = new BoxContainer { Orientation = LayoutOrientation.Horizontal, HorizontalExpand = true };
-            row.AddChild(new Label
-            {
-                Text = group.Count() > 1 ? Loc.GetString("wf-market-hold-count", ("good", good), ("count", group.Count())) : good,
-                HorizontalExpand = true,
-                ClipText = true,
-            });
-            row.AddChild(new Label
-            {
-                Text = Loc.GetString(bound ? "wf-market-hold-bound" : "wf-market-hold-best", ("station", station), ("amount", amount)),
-                FontColorOverride = amount <= 0 ? Quiet : bound ? Hot : Up,
-                Align = Label.AlignMode.Right,
-                MinWidth = 150,
-                ClipText = true,
-            });
-            crates.AddChild(i % 2 == 1 ? Panel(row, RowShade, Color.Transparent, new Thickness(0), new Thickness(0)) : row);
-        }
-
-        _hold.AddChild(Card(crates, Quiet));
     }
 
     private static string Trend(float factor)

@@ -184,7 +184,7 @@ public sealed class WFTradeRushSystem : EntitySystem
         _active.Add(rush);
         _market.Announce(Loc.GetString("wf-trade-rush-start",
             ("station", Name(rush.Grid)), ("count", count), ("goods", Loc.GetString(rush.Goods)),
-            ("factor", rush.Factor), ("minutes", minutes)), rush.Grid);
+            ("factor", WFTradeMarketSystem.Shown(rush.Factor)), ("minutes", minutes)), rush.Grid);
 
         return rush;
     }

@@ -2,19 +2,15 @@ using Robust.Shared.Serialization;
 
 namespace Content.Shared._WF.TradeGoods;
 
-/// <summary>What the Market PDA app shows: live chute prices, sector alerts and the holder's hold.</summary>
+/// <summary>What the Market PDA app shows: live station prices and sector alerts.</summary>
 [Serializable, NetSerializable]
 public sealed class WFMarketUiState : BoundUserInterfaceState
 {
     public List<WFMarketStation> Stations = new();
     public List<WFMarketAlert> Alerts = new();
-    public List<WFMarketHoldEntry> Hold = new();
-
-    /// <summary>Name of the holder's ship, or null when not aboard one.</summary>
-    public string? Ship;
 
     /// <summary>
-    /// This copy leaves out the hidden markets, the holder's own alerts and hold: the full one was sent to the viewers
+    /// This copy leaves out the hidden markets and the holder's own alerts: the full one was sent to the viewers
     /// alone in a <see cref="WFMarketPrivateStateEvent"/>, since UI state reaches every client near the PDA.
     /// </summary>
     public bool Private;
@@ -72,7 +68,3 @@ public enum WFMarketAlertKind : byte
     /// <summary>About the holder alone: their faction's war pay, their convoy.</summary>
     Personal,
 }
-
-/// <summary>One crate aboard the holder's ship and where it sells best now, or the one place it sells when bound.</summary>
-[Serializable, NetSerializable]
-public readonly record struct WFMarketHoldEntry(string Good, string Best, int BestAmount, bool Bound = false);

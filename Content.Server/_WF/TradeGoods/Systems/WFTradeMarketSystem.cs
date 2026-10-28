@@ -312,6 +312,15 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
         return lines.OrderByDescending(line => line.Amount).Select(line => line.Text).ToList();
     }
 
+    /// <summary>
+    /// A price factor as players read it, to two decimals. A float handed to Fluent widens to double first, so 2.3 would
+    /// print as 2.29999995.
+    /// </summary>
+    public static double Shown(float factor)
+    {
+        return Math.Round((double) factor, 2);
+    }
+
     /// <summary>An arrow for a price against its base.</summary>
     public static string Trend(float factor)
     {

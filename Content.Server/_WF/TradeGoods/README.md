@@ -5,16 +5,12 @@ pressure that lowers its price at that station and decays over about half an hou
 with a reason players can see. Crates must be hauled about 3 km from where they were made before a chute takes them,
 which closes the lathe faucet. The Market PDA app, chute examine and the chute's empty-hand paper show live prices,
 each with its weight and price per tonne. The app's Alerts tab lists every event below with its countdown, plus alerts
-for the holder alone: traders who won't deal with them, what the war pays their faction, and the convoy they are
-escorting or that escorts them. Its Hold tab prices each crate aboard as a chute would (`WFMarketCartridgeSystem.BestFor`):
-seals, destination bonuses, the seller's faction and special payouts count, and chutes that would refuse it, including
-for a crate not yet stamped, are skipped; consignments and console trading crates show where they are bound. Every PDA
-gets the app: `WFMarketCartridgeSystem` appends it to each PDA's preinstalled programs at startup, since most PDA
-prototypes replace the base list. Only open copies refresh, every 5 s, and the hold's cargo is swept once per refresh.
-Its Prices tab groups stations by faction (`marketFactions`, matched by chute). Hidden markets (`hiddenChutes`: PDV
-Helios and the Underground fence) go to a separate Underground tab, and only holders of an `undergroundCompanies`
-company (PDV and the Underground's godfathers and fugitives) are sent them, along with alerts naming them and hold sales
-there. UI state reaches every client near a PDA, so for those holders the networked state is a public stand-in and the
+for the holder alone: traders who won't deal with them and what the war pays their faction; soonest deadline first. The app holds no ship information: what a ship carries is the
+helm's business (CargoLoad). Every PDA gets the app: `WFMarketCartridgeSystem` appends it to each PDA's preinstalled
+programs at startup, since most PDA prototypes replace the base list. Only open copies refresh, every 5 s. Its Prices
+tab groups stations by faction (`marketFactions`, matched by chute). Hidden markets (`hiddenChutes`: PDV Helios and the
+Underground fence) go to a separate Underground tab, and only holders of an `undergroundCompanies` company (PDV and the
+Underground's godfathers and fugitives) are sent them, along with alerts naming them. UI state reaches every client near a PDA, so for those holders the networked state is a public stand-in and the
 full state goes to the viewers alone (`WFMarketPrivateStateEvent`, kept by the client `WFMarketSystem`). Radio lines
 naming a hidden market go only to the underground companies (`WFTradeMarketSystem.Announce`).
 
@@ -36,8 +32,9 @@ What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifie
   a fence (the Underground fence chute, PDV Helios) and a bonus at their destination. A freighter docking at a stop
   supplies it (tagged *supplied*); a run lost to attack leaves its remaining stops short.
 
-Priority consignments (`WFTradeSpecialCrateSystem`) appear at one chute for another station at least a haul away, never
-a wandering merchant's, and pay well on time and less when late. One left at its origin past its deadline is withdrawn;
+Priority deliveries (consignments in code, `WFTradeSpecialCrateSystem`): a crate appears at one station's chute, bound
+for another station at least a haul away and never a wandering merchant, and pays well at that station's chute on time
+and less when late. One left at its origin past its deadline is withdrawn;
 one carried off is recalled a window after its deadline, or as soon as its destination is gone.
 
 Traffic and rewards: a blockade attempt that traffic breaks is announced with the ships that ran it, who split a relief
@@ -116,7 +113,6 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketAppTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketAppTest.cs)
-- [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketHoldTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketHoldTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketPdaTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketPdaTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketUndergroundTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketUndergroundTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeBuyPriceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeBuyPriceTest.cs)

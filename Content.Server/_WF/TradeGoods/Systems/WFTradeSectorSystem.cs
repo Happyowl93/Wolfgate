@@ -170,7 +170,7 @@ public sealed class WFTradeSectorSystem : EntitySystem
             {
                 var profile = _market.Profile(station);
                 _market.Announce(Loc.GetString("wf-trade-blockade-landed",
-                    ("station", Name(station)), ("factor", profile.BlockadeFactor)), station);
+                    ("station", Name(station)), ("factor", WFTradeMarketSystem.Shown(profile.BlockadeFactor))), station);
             }
 
             return;
@@ -256,7 +256,7 @@ public sealed class WFTradeSectorSystem : EntitySystem
             if (stations.Count == 0)
                 continue;
 
-            var message = Loc.GetString("wf-trade-war-demand", ("stations", string.Join(", ", stations)), ("factor", profile.WarFactor));
+            var message = Loc.GetString("wf-trade-war-demand", ("stations", string.Join(", ", stations)), ("factor", WFTradeMarketSystem.Shown(profile.WarFactor)));
             if (hidden)
                 _market.TellCompanies(profile.UndergroundCompanies, message);
             else

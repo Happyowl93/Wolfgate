@@ -28,7 +28,7 @@ public sealed class MarketAppTest
             station.Buys.Add(new WFMarketPrice("fabric", 1130, 1.13f, "scarce", 1f, false));
             var rival = new WFMarketStation { Name = "Camelot", Faction = "USSP" };
             rival.Prices.Add(new WFMarketPrice("medical supplies", 6000, 1f, "steady", 1f, false));
-            var state = new WFMarketUiState { Ship = "ISV Mule" };
+            var state = new WFMarketUiState();
             state.Stations.Add(station);
             state.Stations.Add(rival);
             var fence = new WFMarketStation { Name = "WF test fence", Underground = true, Faction = "The Underground" };
@@ -36,9 +36,6 @@ public sealed class MarketAppTest
             state.Stations.Add(fence);
             state.Alerts.Add(new WFMarketAlert("Freighter Plutomkii inbound to Halcyon with medical supplies", null, false, WFMarketAlertKind.Traffic));
             state.Alerts.Add(new WFMarketAlert("RUSH Halcyon", System.TimeSpan.FromHours(1), true));
-            state.Hold.Add(new WFMarketHoldEntry("metals", "Camelot", 4000));
-            state.Hold.Add(new WFMarketHoldEntry("metals", "Camelot", 4000));
-            state.Hold.Add(new WFMarketHoldEntry("express cargo trading crate", "Cargo Depot A", 9000, true));
 
             var fragment = new MarketUiFragment(EntityUid.Invalid);
             fragment.UpdatePublicState(state);
@@ -59,11 +56,8 @@ public sealed class MarketAppTest
             Assert.That(texts, Has.Some.Contains("Plutomkii"));
             Assert.That(texts, Has.Some.EqualTo("TRAFFIC"), "Alerts should be tagged by kind.");
             Assert.That(texts, Has.Some.Contains("RUSH Halcyon"));
-            Assert.That(texts, Has.Some.Contains("min"), "A timed alert should show its countdown.");
-            Assert.That(texts, Has.Some.Contains("ISV Mule").And.Contains("3 crates"), "The hold summary should count the crates.");
-            Assert.That(texts.Any(text => text.Contains("Thrust") || text.Contains("stored")), Is.False, "Ship load belongs on the helm, not the app.");
-            Assert.That(texts, Has.Some.Contains("metals").And.Contains("2"), "Identical crates should share a row with a count.");
-            Assert.That(texts, Has.Some.Contains("Cargo Depot A").And.Contains("9000"));
+            Assert.That(texts, Has.Some.EndsWith("min left"), "A timed alert should show its countdown.");
+            Assert.That(texts.Any(text => text.Contains("Hold") || text.Contains("aboard")), Is.False, "The app shows no ship information.");
             Assert.That(texts, Has.Some.EqualTo("SELL HERE"), "A card with both lists should label them.");
             Assert.That(texts, Has.Some.EqualTo("BUY HERE"), "Vendor prices should show on the station's card.");
             Assert.That(texts, Has.Some.EqualTo("1130"));
@@ -75,7 +69,6 @@ public sealed class MarketAppTest
             texts = Texts(fragment).ToList();
             Assert.That(texts, Has.Some.Contains("No stations"));
             Assert.That(texts, Has.Some.Contains("Nothing happening"));
-            Assert.That(texts, Has.Some.Contains("not aboard"));
         });
 
         await pair.CleanReturnAsync();

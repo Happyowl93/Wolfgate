@@ -66,14 +66,14 @@ wf-trade-navy-pdv = the PDV
 wf-trade-war-effort = War effort: {$navy} adds {$credits} credits.
 wf-trade-defector-warrant = Sold war goods to {$navy} in wartime.
 
-## Consignments
+## Priority deliveries
 
-wf-trade-consignment-start = A priority consignment for {$station} is waiting at {$origin}: {$value} if delivered within {$minutes} minutes.
-wf-trade-consignment-taken = {$ship} has taken the {$station} consignment.
-wf-trade-consignment-delivered = {$ship} delivered the {$station} consignment on time.
-wf-trade-consignment-examine = [color=#e8c46a]Priority consignment for {$station}.[/color] Pays {$value} if delivered within {$minutes} min, less after. Any other chute pays {$elsewhere}.
-wf-trade-consignment-lapsed = The {$station} consignment lapsed and was recalled.
-wf-trade-consignment-cancelled = The consignment's destination is gone; it was recalled.
+wf-trade-consignment-start = Priority delivery: collect a crate at {$origin} and turn it in at {$station}'s chute within {$minutes} minutes for {$value}.
+wf-trade-consignment-taken = {$ship} picked up the priority delivery for {$station}.
+wf-trade-consignment-delivered = {$ship} made the priority delivery to {$station} on time.
+wf-trade-consignment-examine = [color=#e8c46a]Priority delivery for {$station}.[/color] Turn it in at {$station}'s chute within {$minutes} min for {$value}, less if late. Any other chute pays {$elsewhere}.
+wf-trade-consignment-lapsed = The priority delivery for {$station} ran out of time and was recalled.
+wf-trade-consignment-cancelled = The priority delivery's destination is gone; it was recalled.
 wf-trade-unknown-station = an unknown station
 wf-trade-rush-fill = {$seller} {$count}
 
@@ -89,11 +89,9 @@ wf-trade-escort-paid = Convoy bonus: {$ships} paid {$amount} for escorting {$tra
 wf-market-program-name = Market
 wf-market-title = Sector Exchange
 wf-market-status = {$stations} markets open
-wf-market-status-ship = {$stations} markets open · aboard {$ship}
 wf-market-tab-prices = Prices
 wf-market-tab-alerts = Alerts
 wf-market-tab-alerts-count = Alerts ({$count})
-wf-market-tab-hold = Hold
 wf-market-filter = Filter goods...
 wf-market-price-amount = {$amount}
 wf-market-price-weight = {$tonnes}t · {$perTonne}/t
@@ -112,14 +110,14 @@ wf-market-faction-pdv = Phaethon Dynasty
 wf-market-faction-underground = The Underground
 wf-market-faction-independent = Independent
 wf-market-no-alerts = Nothing happening in the sector right now.
-wf-market-minutes = {$minutes} min
+wf-market-minutes-left = {$minutes} min left
 wf-market-alert-kind-deal = DEAL
 wf-market-alert-kind-traffic = TRAFFIC
 wf-market-alert-kind-warning = WARNING
 wf-market-alert-kind-personal = FOR YOU
 wf-market-alert-rush = RUSH {$station}: {$left} of {$count} crates of {$goods} wanted at {$factor}x
-wf-market-alert-consignment = Consignment for {$station} waiting for a carrier
-wf-market-alert-consignment-carried = Consignment for {$station}, carried by {$ship}
+wf-market-alert-consignment = Priority delivery: collect a crate at {$origin} and take it to {$station}'s chute. Pays {$value} on time.
+wf-market-alert-consignment-carried = Priority delivery to {$station} is aboard {$ship}. Pays {$value} on time.
 wf-market-alert-relief = {$station} pays relief rates ({$factor}x) while the blockade is contested; ships that break it split {$bounty}
 wf-market-alert-raid = Raid on {$station}: ship components and medical supplies pay {$factor}x
 wf-market-alert-blockade = {$station} is blockaded: essentials pay up to {$factor}x
@@ -132,18 +130,6 @@ wf-market-alert-shunned = {$station} won't trade with you: you hurt its people
 wf-market-alert-war-effort = War effort: {$navy} pays you {$credits} faction credits a crate for munitions and ship parts
 wf-market-alert-defector = {$navy} pays you {$factor}x for war goods
 wf-market-alert-defector-warrant = {$navy} pays you {$factor}x for war goods, but {$own} posts a {$warrant} warrant on anyone who sells
-wf-market-alert-escorting = Escorting {$trader}: you share {$percent}% when it sells {$threshold} within 10 min ({$sold} so far)
-wf-market-alert-escorted = Escorted by {$ships}: they share {$percent}% on top when you sell {$threshold} within 10 min ({$sold} so far)
-wf-market-nowhere = nowhere
-wf-market-no-ship = You are not aboard a ship.
-wf-market-hold-summary = {$ship}: {$count} {$count ->
-    [one] crate
-   *[other] crates
-} aboard
-wf-market-hold-count = {$good} ×{$count}
-wf-market-hold-best = → {$station} {$amount}
-wf-market-hold-bound = bound for {$station}: {$amount}
-wf-market-hold-empty = The hold is empty.
 
 ## wf_trade command
 

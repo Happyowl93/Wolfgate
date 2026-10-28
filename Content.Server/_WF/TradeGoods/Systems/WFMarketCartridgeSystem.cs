@@ -7,8 +7,6 @@ using Content.Server._WF.TradeGoods.Components;
 using Content.Server.CartridgeLoader;
 using Content.Shared._Crescent.Dispenser;
 using Content.Shared._Mono.Company;
-using Content.Shared._NF.Shipyard.Components;
-using Content.Shared._WF.CargoLoad;
 using Content.Shared._WF.SectorControl;
 using Content.Shared._WF.TradeGoods;
 using Content.Shared.CartridgeLoader;
@@ -20,7 +18,7 @@ using Robust.Shared.Timing;
 
 namespace Content.Server._WF.TradeGoods.Systems;
 
-/// <summary>Marks the Market PDA app: live chute prices, sector alerts and the holder's hold.</summary>
+/// <summary>Marks the Market PDA app: live station prices and sector alerts.</summary>
 [RegisterComponent]
 public sealed partial class WFMarketCartridgeComponent : Component;
 
@@ -41,8 +39,6 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     [Dependency] private WFTradeSectorSystem _sector = default!;
     [Dependency] private WFTradeSpecialCrateSystem _special = default!;
     [Dependency] private WFTradeFreightSystem _freight = default!;
-    [Dependency] private WFTradeCrateMarketSystem _crates = default!;
-    [Dependency] private WFTradeEscortSystem _escort = default!;
     [Dependency] private WFSectorTerritorySystem _territory = default!;
     [Dependency] private WFCargoLoadSystem _cargo = default!;
     [Dependency] private WarLevelSystem _war = default!;
@@ -50,9 +46,6 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     public static readonly EntProtoId MarketCartridge = "WFMarketCartridge";
 
     private static readonly TimeSpan RefreshInterval = TimeSpan.FromSeconds(5);
-
-    /// <summary>Hold crates whose origins fall in the same square of this many metres share one best-price lookup.</summary>
-    private const float OriginCell = 250f;
 
     private TimeSpan _nextRefresh;
 
@@ -110,7 +103,6 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         _cartridgeLoader.UpdateCartridgeUiState(loader, new WFMarketUiState
         {
             Private = true,
-            Ship = state.Ship,
             Stations = sector.Stations.Where(station => !station.Underground).ToList(),
             Alerts = sector.Alerts.Where(entry => !entry.Hidden).Select(entry => entry.Alert).ToList(),
         }, loader: loaderComp);
@@ -145,41 +137,12 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         }
     }
 
-    /// <summary>
-    /// What every copy is built from this refresh: all markets and alerts, which of them are off the books, and the
-    /// cargo on each grid, gathered once on first use.
-    /// </summary>
+    /// <summary>What every copy is built from this refresh: all markets and alerts, and which of them are off the books.</summary>
     private sealed record MarketSnapshot(
         List<WFMarketStation> Stations,
         List<(WFMarketAlert Alert, bool Hidden)> Alerts,
         List<(EntityUid Chute, DispenserComponent Dispenser, EntityUid Grid)> Chutes,
-        HashSet<EntityUid> HiddenChutes)
-    {
-        public Dictionary<EntityUid, List<(EntityUid Uid, MetaDataComponent Meta)>>? Cargo;
-    }
-
-    /// <summary>The cargo aboard each grid, swept once per refresh however many copies are open.</summary>
-    private Dictionary<EntityUid, List<(EntityUid Uid, MetaDataComponent Meta)>> Cargo(MarketSnapshot sector)
-    {
-        if (sector.Cargo is { } cached)
-            return cached;
-
-        var cargo = new Dictionary<EntityUid, List<(EntityUid, MetaDataComponent)>>();
-        var query = EntityQueryEnumerator<WFCargoMassComponent, TransformComponent, MetaDataComponent>();
-        while (query.MoveNext(out var uid, out _, out var xform, out var meta))
-        {
-            if (xform.GridUid is not { } grid || meta.EntityPrototype == null)
-                continue;
-
-            if (!cargo.TryGetValue(grid, out var list))
-                cargo[grid] = list = new List<(EntityUid, MetaDataComponent)>();
-
-            list.Add((uid, meta));
-        }
-
-        sector.Cargo = cargo;
-        return cargo;
-    }
+        HashSet<EntityUid> HiddenChutes);
 
     /// <summary>The prices and alerts every copy shows, and the hidden markets.</summary>
     private MarketSnapshot Sector()
@@ -262,37 +225,38 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         foreach (var rush in _rush.Active)
         {
             Add(new WFMarketAlert(Loc.GetString("wf-market-alert-rush", ("station", Name(rush.Grid)),
-                ("left", rush.Remaining), ("count", rush.Total), ("goods", Loc.GetString(rush.Goods)), ("factor", rush.Factor)), rush.Ends, true), Name(rush.Grid));
+                ("left", rush.Remaining), ("count", rush.Total), ("goods", Loc.GetString(rush.Goods)), ("factor", WFTradeMarketSystem.Shown(rush.Factor))), rush.Ends, true), Name(rush.Grid));
         }
 
-        foreach (var (destination, carrier, deadline) in _special.Consignments())
+        foreach (var (destination, origin, carrier, deadline, value) in _special.Consignments())
         {
             var name = Name(destination);
             Add(new WFMarketAlert(carrier == null
-                ? Loc.GetString("wf-market-alert-consignment", ("station", name))
-                : Loc.GetString("wf-market-alert-consignment-carried", ("station", name), ("ship", carrier)), deadline, true), name);
+                ? Loc.GetString("wf-market-alert-consignment", ("station", name), ("origin", origin), ("value", value))
+                : Loc.GetString("wf-market-alert-consignment-carried", ("station", name), ("ship", carrier), ("value", value)),
+                deadline, true), name);
         }
 
         foreach (var (station, deadline) in _sector.Attempts())
         {
-            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-relief", ("station", Name(station)), ("factor", profile.ReliefFactor),
+            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-relief", ("station", Name(station)), ("factor", WFTradeMarketSystem.Shown(profile.ReliefFactor)),
                 ("bounty", _market.Profile(station).ReliefBounty)), deadline, true), Name(station));
         }
 
         foreach (var station in _sector.Blockaded())
         {
-            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-blockade", ("station", Name(station)), ("factor", profile.BlockadeFactor)), null, false, WFMarketAlertKind.Warning), Name(station));
+            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-blockade", ("station", Name(station)), ("factor", WFTradeMarketSystem.Shown(profile.BlockadeFactor))), null, false, WFMarketAlertKind.Warning), Name(station));
         }
 
         foreach (var (station, ends) in _sector.Raided())
         {
-            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-raid", ("station", Name(station)), ("factor", _market.Profile(station).RaidFactor)), ends, false), Name(station));
+            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-raid", ("station", Name(station)), ("factor", WFTradeMarketSystem.Shown(_market.Profile(station).RaidFactor))), ends, false), Name(station));
         }
 
         foreach (var shortage in _shortages.Active)
         {
             Add(new WFMarketAlert(shortage.Grid is { } grid
-                ? Loc.GetString("wf-market-alert-shortage", ("station", Name(grid)), ("goods", Loc.GetString(shortage.Name)), ("factor", shortage.Factor))
+                ? Loc.GetString("wf-market-alert-shortage", ("station", Name(grid)), ("goods", Loc.GetString(shortage.Name)), ("factor", WFTradeMarketSystem.Shown(shortage.Factor)))
                 : Loc.GetString("wf-market-alert-boom", ("goods", Loc.GetString(shortage.Name)), ("percent", (int) MathF.Round((shortage.Factor - 1f) * 100f))),
                 shortage.Ends, false), shortage.Grid is { } shortageGrid ? Name(shortageGrid) : null);
         }
@@ -310,7 +274,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         }
 
         if (_war.GetWarLevel(EntityUid.Invalid))
-            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-war", ("factor", profile.WarFactor)), null, false));
+            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-war", ("factor", WFTradeMarketSystem.Shown(profile.WarFactor))), null, false));
 
         // Grouped by faction in the profile's order, then by name.
         var sorted = stations
@@ -322,8 +286,8 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     }
 
     /// <summary>
-    /// One copy's state: the shared prices and alerts, its holder's own alerts, and their hold. Hidden markets, alerts
-    /// naming them and hold sales there go only to holders of an underground company.
+    /// One copy's state: the shared prices and alerts, and its holder's own alerts. Hidden markets and alerts naming them
+    /// go only to holders of an underground company.
     /// </summary>
     private WFMarketUiState State(EntityUid loader, MarketSnapshot sector, out bool underground)
     {
@@ -341,84 +305,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
 
         var chutes = sees ? sector.Chutes : sector.Chutes.Where(chute => !sector.HiddenChutes.Contains(chute.Chute)).ToList();
         state.Alerts.AddRange(PersonalAlerts(holder, company, profile, chutes));
-
-        if (Transform(loader).GridUid is not { } grid || !HasComp<ShuttleDeedComponent>(grid))
-            return state;
-
-        state.Ship = Name(grid);
-        state.Alerts.AddRange(EscortAlerts(grid));
-        var cargo = Cargo(sector);
-        var best = new Dictionary<(string, EntityUid?, string?, EntityUid?, int, int), (string Station, int Amount)?>();
-        var aboardCargo = _cargo.GetCargoSet(grid)
-            .SelectMany(aboard => cargo.TryGetValue(aboard, out var crates) ? crates : Enumerable.Empty<(EntityUid Uid, MetaDataComponent Meta)>());
-        foreach (var (uid, meta) in aboardCargo)
-        {
-            // The list is the trade goods, which are what the app can price.
-            var proto = meta.EntityPrototype!;
-
-            // A console trading crate sells only at its destination.
-            if (_crates.Destination(uid) is { } destination)
-            {
-                state.Hold.Add(new WFMarketHoldEntry(meta.EntityName, destination.Station, destination.Amount, true));
-                continue;
-            }
-
-            if (!TryComp<WFTradeOriginComponent>(uid, out var origin))
-                continue;
-
-            if (TryComp<WFConsignmentComponent>(uid, out var consignment) && consignment.Destination is { } consignee
-                && !TerminatingOrDeleted(consignee))
-            {
-                state.Hold.Add(new WFMarketHoldEntry(meta.EntityName, Name(consignee),
-                    _special.ConsignmentPayout(consignment), true));
-                continue;
-            }
-
-            (string Station, int Amount)? top;
-            var special = _special.IsSpecial(uid);
-            if (special)
-            {
-                top = BestFor(uid, proto.ID, grid, holder, chutes);
-            }
-            else
-            {
-                // Crates of one good from one run and place get the same answer, so a full hold stays cheap.
-                var key = (proto.ID, origin.Grid, origin.Run, origin.Destination,
-                    (int) MathF.Floor(origin.Point.Position.X / OriginCell), (int) MathF.Floor(origin.Point.Position.Y / OriginCell));
-                if (!best.TryGetValue(key, out top))
-                    best[key] = top = BestFor(uid, proto.ID, grid, holder, chutes);
-            }
-
-            state.Hold.Add(new WFMarketHoldEntry(special ? meta.EntityName : _market.GoodName(proto.ID),
-                top?.Station ?? Loc.GetString("wf-market-nowhere"), top?.Amount ?? 0));
-        }
-
         return state;
-    }
-
-    /// <summary>
-    /// Where one crate sells best now, pricing it as the chute would: its seal, destination bonus, the seller's faction and
-    /// special payouts count, and chutes that would refuse it (too close to its origin, not yet stamped, or a trader the
-    /// seller hurt) are skipped. Chutes on the seller's own ship are left out.
-    /// </summary>
-    public (string Station, int Amount)? BestFor(EntityUid crate, string good, EntityUid? except, EntityUid? seller,
-        List<(EntityUid Chute, DispenserComponent Dispenser, EntityUid Grid)> chutes)
-    {
-        var special = _special.IsSpecial(crate);
-        (string Station, int Amount)? best = null;
-        foreach (var (chute, _, grid) in chutes)
-        {
-            if (grid == except
-                || !_market.WasHauled(chute, crate)
-                || seller is { } user && _market.Shunned(chute, user))
-                continue;
-
-            var amount = special ? _special.Price(chute, crate) : _market.Quote(chute, good, crate, seller)?.Amount;
-            if (amount is { } price && (best is not { } current || price > current.Amount))
-                best = (_market.StationName(chute), price);
-        }
-
-        return best;
     }
 
     /// <summary>Alerts about the holder: traders who won't deal with them and what the war offers their faction.</summary>
@@ -450,27 +337,8 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         foreach (var navy in profile.Navies.Where(navy => navy.Enemies.Contains(own)))
         {
             yield return new WFMarketAlert(Loc.GetString(home is { PostsDefectorWarrants: true } ? "wf-market-alert-defector-warrant" : "wf-market-alert-defector",
-                ("navy", Loc.GetString(navy.Name)), ("factor", profile.DefectorFactor), ("warrant", profile.DefectorWarrant),
+                ("navy", Loc.GetString(navy.Name)), ("factor", WFTradeMarketSystem.Shown(profile.DefectorFactor)), ("warrant", profile.DefectorWarrant),
                 ("own", home is { } ownNavy ? Loc.GetString(ownNavy.Name) : string.Empty)), null, false, WFMarketAlertKind.Personal);
-        }
-    }
-
-    /// <summary>Convoy alerts for the holder's ship: the traders it is escorting, or the escorts beside it.</summary>
-    private IEnumerable<WFMarketAlert> EscortAlerts(EntityUid ship)
-    {
-        foreach (var trader in _escort.EscortedBy(ship))
-        {
-            var (sold, threshold) = _escort.Progress(trader);
-            yield return new WFMarketAlert(Loc.GetString("wf-market-alert-escorting", ("trader", Name(trader)),
-                ("percent", WFTradeEscortSystem.SharePercent), ("sold", sold), ("threshold", threshold)), null, false, WFMarketAlertKind.Personal);
-        }
-
-        var escorts = _escort.EscortsOf(ship).Where(escort => !TerminatingOrDeleted(escort)).ToList();
-        if (escorts.Count > 0)
-        {
-            var (sold, threshold) = _escort.Progress(ship);
-            yield return new WFMarketAlert(Loc.GetString("wf-market-alert-escorted", ("ships", string.Join(", ", escorts.Select(escort => Name(escort)))),
-                ("percent", WFTradeEscortSystem.SharePercent), ("sold", sold), ("threshold", threshold)), null, false, WFMarketAlertKind.Personal);
         }
     }
 }

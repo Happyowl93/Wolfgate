@@ -22,11 +22,11 @@
     price: 50
     vendPrice: 500
 
-# Priority consignments: sealed crates for one station, worth most if delivered before the deadline.
+# Priority deliveries: sealed crates for one station, worth most if delivered before the deadline.
 - type: entity
   parent: BaseTradeItem
   id: WFTradeConsignment
-  name: priority consignment
+  name: priority delivery crate
   description: A sealed, stamped crate bound for one station, with a delivery deadline on the label.
   components:
   - type: Sprite
@@ -42,7 +42,7 @@
 - type: entity
   parent: WFTradeConsignment
   id: WFTradeConsignmentHeavy
-  name: heavy priority consignment
+  name: heavy priority delivery crate
   description: A sealed, stamped crate of heavy machinery bound for one station, with a delivery deadline on the label.
   components:
   - type: Sprite
