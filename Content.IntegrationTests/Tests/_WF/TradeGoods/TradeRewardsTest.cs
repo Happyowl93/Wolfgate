@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Generic;
 using System.Numerics;
 using Content.Server._WF.TradeGoods;
 using Content.Server._WF.TradeGoods.Systems;
