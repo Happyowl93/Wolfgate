@@ -8,7 +8,7 @@ namespace Content.Client._WF.CargoLoad;
 
 /// <summary>
 /// The helm's cargo strip: tonnes aboard against the load that bottoms out thrust, tinted by the thrust cut, with the
-/// cut, FTL spool and stored materials in its tooltip. Hidden while the ship carries nothing.
+/// cut, FTL spool and stored materials in its tooltip. Collapsed while the ship carries nothing.
 /// </summary>
 public sealed class WFCargoGauge : BoxContainer
 {
@@ -73,8 +73,12 @@ public sealed class WFCargoGauge : BoxContainer
 
     private void Refresh()
     {
+        // Collapsing rather than hiding keeps FrameUpdate running, which Robust skips for invisible controls, so the
+        // strip still notices cargo arriving after it was built.
         var cargo = Readout;
-        Visible = cargo != null;
+        _gauge.Visible = cargo != null;
+        SetHeight = cargo != null ? 44 : 0;
+        HorizontalExpand = cargo != null;
         if (cargo == null)
         {
             _shown = null;
