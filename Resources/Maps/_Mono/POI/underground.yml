@@ -5,7 +5,7 @@ meta:
   forkId: wolfgate-mapping
   forkVersion: 20261023-201310-d5515d3-tm231-b5e79818
   time: 10/25/2026 17:14:38
-  entityCount: 4695
+  entityCount: 4694
 maps: []
 grids:
 - 1
@@ -29692,13 +29692,6 @@ entities:
         210:
         - - Pressed
           - Toggle
-- proto: WFVendingMachineFence
-  entities:
-  - uid: 4828
-    components:
-    - type: Transform
-      parent: 1
-      pos: -5.5,-4.5
 - proto: WindoorSecure
   entities:
   - uid: 4799

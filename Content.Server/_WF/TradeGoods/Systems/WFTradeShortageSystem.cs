@@ -136,9 +136,10 @@ public sealed class WFTradeShortageSystem : EntitySystem
 
         var goodsName = Loc.GetString(picked.Goods);
         var minutes = (int) picked.Duration.TotalMinutes;
-        _market.Radio(target is { } grid
+        _market.Announce(target is { } grid
             ? Loc.GetString("wf-trade-shortage-start", ("station", Name(grid)), ("goods", goodsName), ("factor", factor), ("minutes", minutes))
-            : Loc.GetString("wf-trade-boom-start", ("goods", goodsName), ("percent", (int) MathF.Round((factor - 1f) * 100f)), ("minutes", minutes)));
+            : Loc.GetString("wf-trade-boom-start", ("goods", goodsName), ("percent", (int) MathF.Round((factor - 1f) * 100f)), ("minutes", minutes)),
+            target);
 
         return shortage;
     }

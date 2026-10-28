@@ -1,5 +1,6 @@
 #nullable enable
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Content.Server._WF.CargoLoad;
 using Content.Server._WF.TradeGoods.Components;
@@ -192,22 +193,13 @@ public sealed class TradeMarketTest
             comp.Destination = grid;
             comp.Deadline = timing.CurTime + System.TimeSpan.FromMinutes(10);
             Assert.That(special.IsSpecial(consignment), Is.True);
-            Assert.That(special.TryPrice(setup.Chute, consignment, setup.User, out var onTime), Is.True);
-            Assert.That(onTime, Is.EqualTo(comp.Value + comp.OnTimeBonus));
+            Assert.That(special.Price(setup.Chute, consignment), Is.EqualTo(comp.Value + comp.OnTimeBonus));
 
             comp.Destination = setup.Far;
-            Assert.That(special.TryPrice(setup.Chute, consignment, setup.User, out var elsewhere), Is.True);
-            Assert.That(elsewhere, Is.EqualTo(comp.Elsewhere));
+            Assert.That(special.Price(setup.Chute, consignment), Is.EqualTo(comp.Elsewhere));
 
-            // A dormant classified crate is just cargo; an awake one is only taken at its drop-offs.
-            var crate = entMan.SpawnEntity(CrateProto, map.GridCoords);
-            Assert.That(special.TryMakeClassified(crate, force: true), Is.True);
-            Assert.That(special.IsSpecial(crate), Is.False);
-            entMan.GetComponent<WFClassifiedCargoComponent>(crate).Awake = true;
-            Assert.That(special.IsSpecial(crate), Is.True);
-            Assert.That(special.TryPrice(setup.Chute, crate, setup.User, out var classified), Is.True,
-                $"{ChuteProto} should be a TSF drop-off for classified cargo.");
-            Assert.That(classified, Is.EqualTo(profile.ClassifiedCarrierReward));
+            // Any other crate is priced from the chute's own table.
+            Assert.That(special.IsSpecial(entMan.SpawnEntity(CrateProto, map.GridCoords)), Is.False);
         });
 
         await pair.CleanReturnAsync();
@@ -245,6 +237,32 @@ public sealed class TradeMarketTest
             // A glutted station still pays the floor.
             market.AddPressure(grid, entMan.GetComponent<WFTradeCrateMarketComponent>(crate).Good, 10f);
             Assert.That(PalletPrice(entMan, crate), Is.EqualTo(full * profile.TradeCrateFloor).Within(1));
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>A pallet sale prices all its crates in one tick: each one as if those priced before it had sold.</summary>
+    [Test]
+    public async Task PalletBatchPricesEachCrateAfterTheOnesBefore()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var market = entMan.System<WFTradeMarketSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var profile = market.Profile(map.Grid.Owner);
+            var crates = Enumerable.Range(0, 3).Select(_ => entMan.SpawnEntity("CrateTradeSecureHigh", map.GridCoords)).ToList();
+            var prices = crates.Select(crate => PalletPrice(entMan, crate)).ToList();
+            Assert.That(PalletPrice(entMan, crates[0]), Is.EqualTo(prices[0]), "Pricing a crate twice in a tick moved it in line.");
+            for (var i = 1; i < prices.Count; i++)
+            {
+                Assert.That(prices[i], Is.EqualTo(prices[0] * (1 - i * profile.TradeCratePerSale)).Within(prices[0] * 0.01),
+                    "A batch on the pallets skipped the saturation.");
+            }
         });
 
         await pair.CleanReturnAsync();

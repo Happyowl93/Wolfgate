@@ -16,6 +16,13 @@ public sealed partial class WFTradeOriginComponent : Component
     [ViewVariables]
     public EntityUid? Grid;
 
+    /// <summary>
+    /// Grids docked to <see cref="Grid"/> when stamped, or null for none. A chute on one of them counts the crate as made
+    /// there, so riding docked to a moving market doesn't haul it.
+    /// </summary>
+    [ViewVariables]
+    public HashSet<EntityUid>? Docked;
+
     /// <summary>Where the crate was when stamped.</summary>
     [ViewVariables]
     public MapCoordinates Point = MapCoordinates.Nullspace;

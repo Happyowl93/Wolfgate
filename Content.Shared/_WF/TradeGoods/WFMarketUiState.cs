@@ -12,6 +12,20 @@ public sealed class WFMarketUiState : BoundUserInterfaceState
 
     /// <summary>Name of the holder's ship, or null when not aboard one.</summary>
     public string? Ship;
+
+    /// <summary>
+    /// This copy leaves out the hidden markets, the holder's own alerts and hold: the full one was sent to the viewers
+    /// alone in a <see cref="WFMarketPrivateStateEvent"/>, since UI state reaches every client near the PDA.
+    /// </summary>
+    public bool Private;
+}
+
+/// <summary>The full Market app state for a holder who sees the hidden markets, sent only to the players viewing it.</summary>
+[Serializable, NetSerializable]
+public sealed class WFMarketPrivateStateEvent(NetEntity loader, WFMarketUiState state) : EntityEventArgs
+{
+    public NetEntity Loader = loader;
+    public WFMarketUiState State = state;
 }
 
 [Serializable, NetSerializable]
@@ -52,9 +66,6 @@ public enum WFMarketAlertKind : byte
 
     /// <summary>About the holder alone: their faction's war pay, their convoy.</summary>
     Personal,
-
-    /// <summary>Classified cargo sightings for the hunting companies.</summary>
-    Hunt,
 }
 
 /// <summary>One crate aboard the holder's ship and where it sells best now, or the one place it sells when bound.</summary>

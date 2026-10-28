@@ -89,8 +89,9 @@ public sealed class WFTradeRushSystem : EntitySystem
             return;
 
         _active.Remove(rush);
-        var fills = string.Join(", ", rush.Filled.OrderByDescending(fill => fill.Value).Select(fill => $"{fill.Key} {fill.Value}"));
-        _market.Radio(Loc.GetString("wf-trade-rush-filled", ("station", Name(rush.Grid)), ("fills", fills)));
+        var fills = string.Join(", ", rush.Filled.OrderByDescending(fill => fill.Value)
+            .Select(fill => Loc.GetString("wf-trade-rush-fill", ("seller", fill.Key), ("count", fill.Value))));
+        _market.Announce(Loc.GetString("wf-trade-rush-filled", ("station", Name(rush.Grid)), ("fills", fills)), rush.Grid);
     }
 
     public override void Update(float frameTime)
@@ -112,7 +113,7 @@ public sealed class WFTradeRushSystem : EntitySystem
                 continue;
 
             _active.Remove(rush);
-            _market.Radio(Loc.GetString("wf-trade-rush-expired", ("station", Name(rush.Grid)), ("goods", Loc.GetString(rush.Goods))));
+            _market.Announce(Loc.GetString("wf-trade-rush-expired", ("station", Name(rush.Grid)), ("goods", Loc.GetString(rush.Goods))), rush.Grid);
         }
 
         var profile = _proto.Index(WFTradeMarketSystem.DefaultProfile);
@@ -181,9 +182,9 @@ public sealed class WFTradeRushSystem : EntitySystem
         };
 
         _active.Add(rush);
-        _market.Radio(Loc.GetString("wf-trade-rush-start",
+        _market.Announce(Loc.GetString("wf-trade-rush-start",
             ("station", Name(rush.Grid)), ("count", count), ("goods", Loc.GetString(rush.Goods)),
-            ("factor", rush.Factor), ("minutes", minutes)));
+            ("factor", rush.Factor), ("minutes", minutes)), rush.Grid);
 
         return rush;
     }

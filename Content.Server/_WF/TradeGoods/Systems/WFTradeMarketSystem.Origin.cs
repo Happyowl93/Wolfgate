@@ -92,13 +92,29 @@ public sealed partial class WFTradeMarketSystem
         Stamp(crate);
     }
 
-    /// <summary>Records where a crate is now as its origin.</summary>
+    /// <summary>Records where a crate is now as its origin, and what its grid is docked to.</summary>
     public void Stamp(Entity<WFTradeOriginComponent> crate)
     {
+        var grid = Transform(crate).GridUid;
         crate.Comp.Point = _transform.GetMapCoordinates(crate);
-        crate.Comp.Grid = Transform(crate).GridUid;
+        crate.Comp.Grid = grid;
+        crate.Comp.Docked = null;
+        if (grid is { } own)
+        {
+            var docked = _cargo.GetCargoSet(own);
+            docked.Remove(own);
+            if (docked.Count > 0)
+                crate.Comp.Docked = docked;
+        }
+
         crate.Comp.Pending = false;
         _pending.Remove(crate);
+    }
+
+    /// <summary>Whether a crate was stamped on a chute's grid or on a ship docked to it.</summary>
+    private static bool MadeAt(WFTradeOriginComponent origin, EntityUid? chuteGrid)
+    {
+        return chuteGrid is { } grid && (origin.Grid == grid || origin.Docked?.Contains(grid) == true);
     }
 
     /// <summary>
@@ -117,7 +133,7 @@ public sealed partial class WFTradeMarketSystem
             return "wf-trade-refuse-unknown";
         }
 
-        if (origin.Grid is { } grid && grid == chuteXform.GridUid)
+        if (MadeAt(origin, chuteXform.GridUid))
             return "wf-trade-refuse-made-here";
 
         var distance = (origin.Point.Position - _transform.GetWorldPosition(chuteXform)).Length();
@@ -132,7 +148,7 @@ public sealed partial class WFTradeMarketSystem
 
         var chuteXform = Transform(chute);
         return origin.Point.MapId == chuteXform.MapID
-               && origin.Grid != chuteXform.GridUid
+               && !MadeAt(origin, chuteXform.GridUid)
                && (origin.Point.Position - _transform.GetWorldPosition(chuteXform)).Length()
                >= Profile(chuteXform.GridUid).MinHaulDistance;
     }

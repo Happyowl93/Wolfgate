@@ -16,7 +16,7 @@ wf-trade-sale-low = Paying {$amount}. Best now: {$station}, {$best}.
 wf-trade-examine-header = [color=#d9a441]Live prices:[/color]
 wf-trade-price-line = {$good}: {$amount} {$trend} ({$reason}), {$tonnes}t, {$perTonne}/t
 wf-trade-paper-header = [bold]{$station}: live turn-in prices[/bold]
-wf-trade-paper-footer = Prices fall as crates come in and recover over half an hour. Sector events raise them. The Market app on your PDA has every station's prices.
+wf-trade-paper-footer = Prices fall as crates come in and win back half the drop every 25 minutes. Sector events raise them. The Market app on your PDA has every station's prices.
 
 wf-trade-reason-steady = steady
 wf-trade-reason-glutted = glutted
@@ -71,19 +71,10 @@ wf-trade-consignment-start = A priority consignment for {$station} is waiting at
 wf-trade-consignment-taken = {$ship} has taken the {$station} consignment.
 wf-trade-consignment-delivered = {$ship} delivered the {$station} consignment on time.
 wf-trade-consignment-examine = [color=#e8c46a]Priority consignment for {$station}.[/color] Pays {$value} if delivered within {$minutes} min, less after. Any other chute pays {$elsewhere}.
-
-## Classified cargo
-
-wf-trade-classified-detected = Classified TSF cargo detected aboard {$ship}, near {$cell}.
-wf-trade-classified-warning = Your hold is carrying classified TSF cargo. Its transponder is pinging; PDV and the Underground have been told. Turn it in at Halcyon or CC.
-wf-trade-classified-moved = Classified TSF cargo is now aboard {$ship}, near {$cell}.
-wf-trade-classified-adrift = Classified TSF cargo is adrift near {$cell}.
-wf-trade-classified-jammed = The classified cargo's transponder went silent near {$cell}.
-wf-trade-classified-delivered = Classified TSF cargo was turned in at {$station} by {$ship}.
-wf-trade-classified-destroyed = The classified TSF cargo was destroyed.
-wf-trade-classified-refused = This chute won't take classified cargo.
-wf-trade-classified-examine = [color=#e05050]A TSF transponder blinks under the label.[/color]
-wf-trade-jammer-used = The transponder goes quiet for {$minutes} minutes.
+wf-trade-consignment-lapsed = The {$station} consignment lapsed and was recalled.
+wf-trade-consignment-cancelled = The consignment's destination is gone; it was recalled.
+wf-trade-unknown-station = an unknown station
+wf-trade-rush-fill = {$seller} {$count}
 
 ## Freight
 
@@ -123,7 +114,6 @@ wf-market-alert-kind-deal = DEAL
 wf-market-alert-kind-traffic = TRAFFIC
 wf-market-alert-kind-warning = WARNING
 wf-market-alert-kind-personal = FOR YOU
-wf-market-alert-kind-hunt = HUNT
 wf-market-alert-rush = RUSH {$station}: {$left} of {$count} crates of {$goods} wanted at {$factor}x
 wf-market-alert-consignment = Consignment for {$station} waiting for a carrier
 wf-market-alert-consignment-carried = Consignment for {$station}, carried by {$ship}
@@ -141,9 +131,6 @@ wf-market-alert-defector = {$navy} pays you {$factor}x for war goods
 wf-market-alert-defector-warrant = {$navy} pays you {$factor}x for war goods, but {$own} posts a {$warrant} warrant on anyone who sells
 wf-market-alert-escorting = Escorting {$trader}: you share {$percent}% when it sells {$threshold} within 10 min ({$sold} so far)
 wf-market-alert-escorted = Escorted by {$ships}: they share {$percent}% on top when you sell {$threshold} within 10 min ({$sold} so far)
-wf-market-alert-classified = Classified cargo last heard near {$cell}, {$minutes} min ago, aboard {$ship}
-wf-market-alert-classified-jammed = Classified cargo jammed, last heard near {$cell}, {$minutes} min ago, aboard {$ship}
-wf-market-adrift = nothing (adrift)
 wf-market-nowhere = nowhere
 wf-market-no-ship = You are not aboard a ship.
 wf-market-hold-summary = {$ship}: {$count} {$count ->
@@ -157,27 +144,22 @@ wf-market-hold-empty = The hold is empty.
 
 ## wf_trade command
 
-cmd-wf_trade-desc = Shows and starts trade events: shortages, rush orders, consignments and classified cargo.
-cmd-wf_trade-help = Usage: {$command} status | shortage [prototype] | rush [prototype] | consignment | classified <crate> | clear
+cmd-wf_trade-desc = Shows and starts trade events: shortages, rush orders and consignments.
+cmd-wf_trade-help = Usage: {$command} status | shortage [prototype] | rush [prototype] | consignment | clear
 cmd-wf_trade-hint-sub = <subcommand>
 cmd-wf_trade-hint-shortage = [shortage prototype, random if left out]
 cmd-wf_trade-hint-rush = [rush prototype, random if left out]
-cmd-wf_trade-hint-crate = <trade crate entity>
-cmd-wf_trade-status-empty = No shortages, rush orders, consignments or classified cargo right now.
+cmd-wf_trade-status-empty = No shortages, rush orders or consignments right now.
 cmd-wf_trade-status-sector = whole sector
 cmd-wf_trade-status-shortage = Shortage: {$goods} at {$station}, {$factor}x, {$seconds}s left.
 cmd-wf_trade-status-rush = Rush: {$left}/{$count} {$goods} at {$station}, {$factor}x, {$seconds}s left.
 cmd-wf_trade-status-consignment = Consignment for {$station}, carrier {$ship}, {$seconds}s to deadline.
-cmd-wf_trade-status-classified = Classified cargo near {$cell} aboard {$ship}, heard {$seconds}s ago, jammed {$jammed}.
 cmd-wf_trade-bad-shortage = {$arg} is not a shortage prototype.
 cmd-wf_trade-bad-rush = {$arg} is not a rush prototype.
-cmd-wf_trade-bad-crate = {$arg} is not an entity.
 cmd-wf_trade-shortage = Started a {$goods} shortage at {$station}.
 cmd-wf_trade-shortage-failed = No station buys those goods, or each one that does already has that shortage.
 cmd-wf_trade-rush = Posted a rush order for {$goods} at {$station}.
 cmd-wf_trade-rush-failed = No unblockaded station without an open rush buys those goods.
 cmd-wf_trade-consignment = Posted a consignment as {$uid}.
 cmd-wf_trade-consignment-failed = Couldn't post a consignment. It needs two unblockaded chute stations and one that isn't already a destination.
-cmd-wf_trade-classified = {$crate} now carries a TSF transponder. It wakes once it leaves its grid.
-cmd-wf_trade-classified-failed = {$crate} isn't a trade crate, or it already carries a transponder.
 cmd-wf_trade-cleared = Ended {$shortages} shortages and booms and {$rushes} rush orders.

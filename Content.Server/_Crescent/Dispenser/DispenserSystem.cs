@@ -71,7 +71,7 @@ public sealed partial class DispenserSystem : SharedDispenserSystem
             }
             QueueDel(used);
         }
-        // WOLFGATE(TradeGoods) START: chutes also take consignments and classified cargo they don't list
+        // WOLFGATE(TradeGoods) START: chutes also take consignments they don't list
         else if (WfTakeSpecialCrate(uid, component, used, args.User, virtualItem, args.Used))
         {
             args.Handled = true;

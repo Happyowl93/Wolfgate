@@ -11,12 +11,17 @@ contents too: a material's loose weight per unit (its sheet or ore's weight over
 so packing a haul into a silo halves its weight rather than hiding it.
 
 Players see the weight on crate and material-storage examine, the load, thrust penalty and spool on helm examine, popups to the helm's
-pilots as the load crosses each band (with hysteresis), the cargo hint in the descent warning, the cargo row of the Planets flight panel,
+pilots as the load crosses the bands (with hysteresis; at most one per pilot a sweep however many bands it crosses, and the standing
+warning once to a pilot who takes a loaded helm), the cargo hint in the descent warning, the cargo row of the Planets flight panel,
 price per tonne at the chutes and the rated load in the ship previewer. The helm shows a CARGO strip (`WFCargoGauge`)
-under FUEL on the windowed console's navigation page and beside FUEL in the cockpit, while anything is aboard: tonnes
-against the load that bottoms out thrust, green, amber or red by the thrust cut, with the cut, spool and stored
-materials in its tooltip. The sweep keeps the figures in the networked `WFCargoReadoutComponent` on the ship's grid,
-dirtied only when a shown figure changes. Frontier's cargo-console trading crates are Heavy (normal) and Bulk (express).
+under FUEL on the windowed console's navigation page and beside FUEL in the cockpit, while at least
+`WFCargoReadoutComponent.ShownLoad` (half a tonne) is aboard: tonnes against the load that bottoms out thrust, green,
+amber or red by the thrust cut, with the cut, spool and stored materials in its tooltip. The sweep keeps the figures in
+the networked `WFCargoReadoutComponent` on the ship's grid only past that threshold, dirtied only when a shown figure
+changes. Frontier's cargo-console trading crates are Heavy (normal) and Bulk (express).
+
+The sweep indexes every docked port once and walks the cargo sets and the gauge's spool sets from that index, so its
+cost doesn't grow with docks times loaded grids. The jump itself still asks `GetAllDockedShuttles`.
 
 Entry points: `WFCargoLoadSystem` (`GetLoad`, `GetSetLoad`, `GetSetStored`, `GetSpaceFactor`, `GetCargoSet`, `IsAnchor`,
 `MaterialWeight`, `SpoolPenalty`), the partials `MoverController.CargoLoad` (the space factor, applied through the Planets
@@ -27,7 +32,7 @@ Which grids each effect weighs (don't unify these):
 | Effect | Set | Why |
 |---|---|---|
 | Space thrust | `GetCargoSet`: the dock graph, ignoring FTL locks, never a map, stopping at anchors | Everything welded to the ship is pushed with it |
-| Planet lift and gravgens | Planets' `CollectRigidSet`, through `WFGridLiftLoadEvent` | Unchanged; a docked grid with its lock off is judged as its own set |
+| Planet lift, gravgens and the descent hint | Planets' `CollectRigidSet`, through `WFGridLiftLoadEvent`; the hint reads the set's hull and load from `WFLiftWarningEvent` | Unchanged; a docked grid with its lock off is judged as its own set |
 | FTL spool | `GetAllDockedShuttles` (FTL lock respected) | Only grids that jump |
 
 An anchor is a grid that can't fly: `ForceAnchorComponent` or a static body (round-start stations, outposts, landed or

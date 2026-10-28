@@ -2,6 +2,7 @@ using System.Linq;
 using System.Numerics;
 using Content.Server.Chat.Systems;
 using Content.Server.Radio.EntitySystems;
+using Content.Shared._Crescent.Dispenser;
 using Content.Shared._Mono.Company;
 using Content.Shared.Radio;
 using Content.Shared.Radio.Components;
@@ -28,6 +29,32 @@ public sealed partial class WFTradeMarketSystem
     {
         if (Exchange() is { } exchange)
             _radio.SendRadioMessage(exchange, message, ExchangeChannel, exchange);
+    }
+
+    /// <summary>
+    /// Says a market line about some stations: on the common channel, or only to the underground companies when any of
+    /// them is an off-the-books market.
+    /// </summary>
+    public void Announce(string message, params EntityUid?[] stations)
+    {
+        if (stations.Any(station => station is { } grid && IsHiddenMarket(grid)))
+            TellCompanies(_proto.Index(DefaultProfile).UndergroundCompanies, message);
+        else
+            Radio(message);
+    }
+
+    /// <summary>Whether a grid holds an off-the-books market, listed only under the app's Underground tab.</summary>
+    public bool IsHiddenMarket(EntityUid grid)
+    {
+        var hidden = _proto.Index(DefaultProfile).HiddenChutes;
+        var query = EntityQueryEnumerator<DispenserComponent, TransformComponent, MetaDataComponent>();
+        while (query.MoveNext(out _, out _, out var xform, out var meta))
+        {
+            if (xform.GridUid == grid && meta.EntityPrototype is { } proto && hidden.Contains(proto.ID))
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>Tells the players aboard some grids, as the Sector Exchange.</summary>

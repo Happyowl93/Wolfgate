@@ -7,12 +7,16 @@ which closes the lathe faucet. The Market PDA app, chute examine and the chute's
 each with its weight and price per tonne. The app's Alerts tab lists every event below with its countdown, plus alerts
 for the holder alone: traders who won't deal with them, what the war pays their faction, and the convoy they are
 escorting or that escorts them. Its Hold tab prices each crate aboard as a chute would (`WFMarketCartridgeSystem.BestFor`):
-seals, destination bonuses, the seller's faction and special payouts count, and chutes that would refuse it are skipped;
-consignments and console trading crates show where they are bound. Every PDA gets the app: `WFMarketCartridgeSystem` appends
-it to each PDA's preinstalled programs at startup, since most PDA prototypes replace the base list. Its Prices tab groups
-stations by faction (`marketFactions`, matched by chute). Hidden markets (`hiddenChutes`: PDV Helios and the Underground
-fence) go to a separate Underground tab, and only holders of an `undergroundCompanies` company (PDV and the
-Underground's godfathers and fugitives) are sent them, along with alerts naming them and hold sales there.
+seals, destination bonuses, the seller's faction and special payouts count, and chutes that would refuse it, including
+for a crate not yet stamped, are skipped; consignments and console trading crates show where they are bound. Every PDA
+gets the app: `WFMarketCartridgeSystem` appends it to each PDA's preinstalled programs at startup, since most PDA
+prototypes replace the base list. Only open copies refresh, every 5 s, and the hold's cargo is swept once per refresh.
+Its Prices tab groups stations by faction (`marketFactions`, matched by chute). Hidden markets (`hiddenChutes`: PDV
+Helios and the Underground fence) go to a separate Underground tab, and only holders of an `undergroundCompanies`
+company (PDV and the Underground's godfathers and fugitives) are sent them, along with alerts naming them and hold sales
+there. UI state reaches every client near a PDA, so for those holders the networked state is a public stand-in and the
+full state goes to the viewers alone (`WFMarketPrivateStateEvent`, kept by the client `WFMarketSystem`). Radio lines
+naming a hidden market go only to the underground companies (`WFTradeMarketSystem.Announce`).
 
 What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifierCap`):
 - Shortages at one station and sector-wide booms (`WFTradeShortageSystem`, `wfTradeShortage`).
@@ -23,22 +27,22 @@ What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifie
   a fence (the Underground fence chute, PDV Helios) and a bonus at their destination. A freighter docking at a stop
   supplies it (tagged *supplied*); a run lost to attack leaves its remaining stops short.
 
-Crates worth chasing (`WFTradeSpecialCrateSystem`): priority consignments appear at one chute for another station and
-pay well on time; a bought or freighted crate sometimes carries a TSF transponder that wakes when it leaves its
-station, tells PDV and the Underground roughly where it is (pings on cell change, at least 3 and at most 6 minutes
-apart, shown in their Market app) and pays whoever turns it in at their own drop-off. A transponder jammer from the
-Underground's fence vendor silences it for five minutes.
+Priority consignments (`WFTradeSpecialCrateSystem`) appear at one chute for another station at least a haul away, never
+a wandering merchant's, and pay well on time and less when late. One left at its origin past its deadline is withdrawn;
+one carried off is recalled a window after its deadline, or as soon as its destination is gone.
 
 Traffic and rewards: a blockade attempt that traffic breaks is announced with the ships that ran it, who split a relief
 bounty; real deliveries stamp the station's cell as traffic. Crewed ships that fly beside a laden trader split an
-escort bonus when it sells a big haul (`WFTradeEscortSystem`). Wandering merchants (`WFEncounterWanderingMerchant`) carry a chute
+escort bonus when it sells a big haul (`WFTradeEscortSystem`); players seen aboard the trader in the window get none of
+it, so a crew can't pay itself by splitting into two ships. Wandering merchants (`WFEncounterWanderingMerchant`) carry a chute
 that buys a few goods at a premium; a merchant won't buy from someone who hurt them.
 
 Cargo-console trading crates (Frontier's `TradeCrate`, normal and express) sell at their destination's pallet, not a
 chute. `WFTradeCrateMarketSystem` puts them in the same markets: their pallet price is scaled by the selling grid's
 demand for one shared good (`WFTradeCrate`), each sale adds `tradeCratePerSale` there, the price never falls below
-`tradeCrateFloor`, and they count toward a ship's cargo value for raids and extortion. A batch sold in one pallet sale is
-priced before any of it adds pressure.
+`tradeCrateFloor`, and they count toward a ship's cargo value for raids and extortion. A pallet sale prices its whole
+batch in one tick before any of it adds pressure, so each crate priced in a tick is priced as if the ones before it had
+sold. Cargo value is worked out once per tick for every grid, however many ships a raider weighs.
 
 Entry points: `WFTradeMarketSystem` (quotes, pressure, sales, payout, provenance, the Sector Exchange's radio), the
 partial `DispenserSystem.TradeGoods` hooked into the Crescent chute, `WFMarketCartridgeSystem` and the client `MarketUi`.
@@ -49,8 +53,10 @@ map (the sector map, or a map with `WFTradeMarketMapComponent`): at map init, on
 that catches shipyard docking and z-level moves, or at sale as a last resort. An unknown origin counts as local, so a
 crate printed in hyperspace, orbit or on an expedition is local to where the ship returns, and a ship bought or
 reloaded at the shipyard is local to the station it is delivered to. A chute that moves (Jupiter, a merchant) and flies
-to the crates has made the haul itself. A crate is refused if it was bought on the chute's grid, stamped on it, or
-stamped within `minHaulDistance` of the chute's current position.
+to the crates has made the haul itself, but one that carried them docked has not: a stamp records the grids docked to
+the crate's ship (`WFTradeOriginComponent.Docked`). A crate is refused if it was bought on the chute's grid, stamped on
+it or on a ship docked to it, or stamped within `minHaulDistance` of the chute's current position. A crate already
+taken by a chute and waiting for deletion is refused, so one crate can't pay at two chutes in a tick.
 
 Faucet bound: above the floor, steady income per station and good is about `base x ln2 / (perSale x halfLife)` per
 half-life. Fertilizer at 7000 with `perSale` 0.05 and a 25 minute half-life sells about 14 crates per half-life before
@@ -91,6 +97,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 ### Client
 
 - [`Content.Client/_WF/TradeGoods/MarketUi.cs`](../../../Content.Client/_WF/TradeGoods/MarketUi.cs)
+- [`Content.Client/_WF/TradeGoods/WFMarketSystem.cs`](../../../Content.Client/_WF/TradeGoods/WFMarketSystem.cs)
 
 ### Integration tests
 
@@ -101,6 +108,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCargoTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCargoTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCommandTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCommandTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeConsignmentTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeConsignmentTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeFreightTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeFreightTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeMarketTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeMarketTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradePricingTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradePricingTest.cs)
@@ -128,16 +136,14 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 
 - [`Content.Server/_Crescent/Dispenser/DispenserSystem.cs`](../../_Crescent/Dispenser/DispenserSystem.cs)
   - chutes refuse goods not hauled away from where they were made, and quote the rest live
-  - chutes also take consignments and classified cargo they don't list
+  - chutes also take consignments they don't list
   - pay the live quote, print live prices
-- [`Resources/Maps/_Mono/POI/underground.yml`](../../../Resources/Maps/_Mono/POI/underground.yml): The fence chute and fence vendor in the vendor room, beside the contraband vendor.
+- [`Resources/Maps/_Mono/POI/underground.yml`](../../../Resources/Maps/_Mono/POI/underground.yml): The fence chute in the vendor room, beside the contraband vendor.
 - [`Resources/Prototypes/_Crescent/Entities/Objects/Misc/trade.yml`](../../../Resources/Prototypes/_Crescent/Entities/Objects/Misc/trade.yml): chutes check where a crate was made
-- [`Resources/Prototypes/_Mono/Catalogs/VendingMachines/Inventories/traders.yml`](../../../Resources/Prototypes/_Mono/Catalogs/VendingMachines/Inventories/traders.yml): the Market app
 - [`Resources/Prototypes/_Mono/Entities/Structures/dispensers.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/dispensers.yml)
   - match the CC manifest, which lists no ship components and metals at 5000
   - match the Halcyon manifest, which buys fertilizer and no components
 - [`Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml): no free crates from the eject wire or wrecking the vendor
 - [`Resources/Prototypes/_NF/Entities/Structures/Specific/TradingCrates/crates.yml`](../../../Resources/Prototypes/_NF/Entities/Structures/Specific/TradingCrates/crates.yml): the pallet price follows the selling station's demand
-- [`Resources/Prototypes/_NF/Loadouts/contractor_loadout_groups.yml`](../../../Resources/Prototypes/_NF/Loadouts/contractor_loadout_groups.yml): the Market app
 
 <!-- WOLFGATE-GENERATED END -->

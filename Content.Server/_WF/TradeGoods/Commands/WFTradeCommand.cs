@@ -9,7 +9,7 @@ using Robust.Shared.Timing;
 
 namespace Content.Server._WF.TradeGoods.Commands;
 
-/// <summary>Trade events from the console: show them, start a shortage or rush order, post a consignment, classify a crate, clear them.</summary>
+/// <summary>Trade events from the console: show them, start a shortage or rush order, post a consignment, clear them.</summary>
 [AdminCommand(AdminFlags.Admin)]
 public sealed partial class WFTradeCommand : LocalizedEntityCommands
 {
@@ -19,7 +19,7 @@ public sealed partial class WFTradeCommand : LocalizedEntityCommands
     [Dependency] private WFTradeRushSystem _rushes = default!;
     [Dependency] private WFTradeSpecialCrateSystem _special = default!;
 
-    private static readonly string[] Subcommands = { "status", "shortage", "rush", "consignment", "classified", "clear" };
+    private static readonly string[] Subcommands = { "status", "shortage", "rush", "consignment", "clear" };
 
     public override string Command => "wf_trade";
 
@@ -42,9 +42,6 @@ public sealed partial class WFTradeCommand : LocalizedEntityCommands
                 else
                     shell.WriteLine(Loc.GetString("cmd-wf_trade-consignment-failed"));
                 break;
-            case "classified" when args.Length == 2:
-                Classified(shell, args[1]);
-                break;
             case "clear" when args.Length == 1:
                 shell.WriteLine(Loc.GetString("cmd-wf_trade-cleared", ("shortages", _shortages.Clear()), ("rushes", _rushes.Clear())));
                 break;
@@ -65,7 +62,6 @@ public sealed partial class WFTradeCommand : LocalizedEntityCommands
             2 when args[0] == "rush" => CompletionResult.FromHintOptions(
                 _prototypes.EnumeratePrototypes<WFTradeRushPrototype>().Select(proto => proto.ID).Order(),
                 Loc.GetString("cmd-wf_trade-hint-rush")),
-            2 when args[0] == "classified" => CompletionResult.FromHint(Loc.GetString("cmd-wf_trade-hint-crate")),
             _ => CompletionResult.Empty,
         };
     }
@@ -100,19 +96,9 @@ public sealed partial class WFTradeCommand : LocalizedEntityCommands
         {
             lines++;
             shell.WriteLine(Loc.GetString("cmd-wf_trade-status-consignment",
-                ("station", destination),
+                ("station", Name(destination)),
                 ("ship", carrier ?? "-"),
                 ("seconds", Seconds(deadline, now))));
-        }
-
-        foreach (var (cell, heard, ship, jammed) in _special.Sightings())
-        {
-            lines++;
-            shell.WriteLine(Loc.GetString("cmd-wf_trade-status-classified",
-                ("cell", cell),
-                ("ship", ship ?? "-"),
-                ("seconds", Math.Max(0, (int) (now - heard).TotalSeconds)),
-                ("jammed", jammed.ToString())));
         }
 
         if (lines == 0)
@@ -163,20 +149,6 @@ public sealed partial class WFTradeCommand : LocalizedEntityCommands
         }
 
         shell.WriteLine(Loc.GetString("cmd-wf_trade-rush", ("station", Name(rush.Grid)), ("goods", Loc.GetString(rush.Goods))));
-    }
-
-    /// <summary>wf_trade classified &lt;crate uid&gt;: fits a TSF transponder to a trade crate, even with another one out.</summary>
-    private void Classified(IConsoleShell shell, string arg)
-    {
-        if (!NetEntity.TryParse(arg, out var net) || !EntityManager.TryGetEntity(net, out var crate))
-        {
-            shell.WriteLine(Loc.GetString("cmd-wf_trade-bad-crate", ("arg", arg)));
-            return;
-        }
-
-        shell.WriteLine(Loc.GetString(_special.TryMakeClassified(crate.Value, force: true)
-            ? "cmd-wf_trade-classified"
-            : "cmd-wf_trade-classified-failed", ("crate", Name(crate.Value))));
     }
 
     private string Name(EntityUid uid)

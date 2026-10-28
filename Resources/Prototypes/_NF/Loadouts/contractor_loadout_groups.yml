@@ -1461,7 +1461,6 @@
   - ContractorMedTekCartridge
   - ContractorNetProbeCartridge
   - ContractorLogProbeCartridge
-  - WFContractorMarketCartridge # WOLFGATE(TradeGoods): the Market app
 
 - type: loadoutGroup
   id: ContractorImplanter

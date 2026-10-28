@@ -47,7 +47,8 @@ public sealed partial class WFOrbitEntrySystem
             && ratio < CEZLevelsSystem.WFFullLiftRatio)
         {
             reason = Loc.GetString("wf-flight-lift-warning", ("percent", CEZLevelsSystem.WfLiftPercent(ratio)));
-            var warning = new WFLiftWarningEvent(grid, ratio, CEZLevelsSystem.WFFullLiftRatio);
+            _zLevels.WfGetSetLiftMass(grid, out var setHull, out var setLoad);
+            var warning = new WFLiftWarningEvent(grid, ratio, CEZLevelsSystem.WFFullLiftRatio, setHull, setLoad);
             RaiseLocalEvent(ref warning);
             if (warning.Hint is { } hint)
                 reason += " " + hint;

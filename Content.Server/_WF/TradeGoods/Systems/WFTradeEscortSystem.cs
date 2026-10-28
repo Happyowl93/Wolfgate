@@ -6,13 +6,16 @@ using Content.Server._WF.SectorControl.Systems;
 using Content.Server.GameTicking;
 using Content.Shared._NF.Shipyard.Components;
 using Content.Shared.GameTicking;
+using Robust.Shared.Network;
+using Robust.Shared.Player;
 using Robust.Shared.Timing;
 
 namespace Content.Server._WF.TradeGoods.Systems;
 
 /// <summary>
 /// Pays crewed ships that fly beside a laden trader a shared bonus when it sells a big haul. The bonus is paid on top
-/// of the sale, not taken from the trader.
+/// of the sale, not taken from the trader, so anyone seen aboard the trader in the window is left out of it: its own
+/// crew can't split off in a second ship and pay themselves.
 /// </summary>
 public sealed class WFTradeEscortSystem : EntitySystem
 {
@@ -52,6 +55,9 @@ public sealed class WFTradeEscortSystem : EntitySystem
 
     private readonly Dictionary<EntityUid, Vector2> _lastPositions = new();
 
+    /// <summary>Per trader ship: the players seen aboard it, and when last.</summary>
+    private readonly Dictionary<EntityUid, Dictionary<NetUserId, TimeSpan>> _crews = new();
+
     public override void Initialize()
     {
         base.Initialize();
@@ -64,6 +70,7 @@ public sealed class WFTradeEscortSystem : EntitySystem
         _samples.Clear();
         _sales.Clear();
         _lastPositions.Clear();
+        _crews.Clear();
     }
 
     public override void Update(float frameTime)
@@ -92,11 +99,35 @@ public sealed class WFTradeEscortSystem : EntitySystem
             _lastPositions[ship] = position;
         }
 
+        var players = new Dictionary<EntityUid, List<NetUserId>>();
+        var actors = EntityQueryEnumerator<ActorComponent, TransformComponent>();
+        while (actors.MoveNext(out _, out var actor, out var actorXform))
+        {
+            if (actorXform.GridUid is not { } grid)
+                continue;
+
+            if (!players.TryGetValue(grid, out var aboard))
+                players[grid] = aboard = new List<NetUserId>();
+
+            aboard.Add(actor.PlayerSession.UserId);
+        }
+
         foreach (var trader in crewed)
         {
             var set = _cargo.GetCargoSet(trader);
             if (_cargo.GetSetLoad(set) <= 0f)
                 continue;
+
+            if (players.TryGetValue(trader, out var crew))
+            {
+                if (!_crews.TryGetValue(trader, out var seen))
+                    _crews[trader] = seen = new Dictionary<NetUserId, TimeSpan>();
+
+                foreach (var user in crew)
+                {
+                    seen[user] = now;
+                }
+            }
 
             var owner = CompOrNull<ShuttleDeedComponent>(trader)?.ShuttleOwner;
             var escorts = new HashSet<EntityUid>();
@@ -121,6 +152,13 @@ public sealed class WFTradeEscortSystem : EntitySystem
         {
             _samples.Remove(ship);
             _sales.Remove(ship);
+            _crews.Remove(ship);
+        }
+
+        // Ships not sampled this time start over, so one that comes back after a long gap isn't counted as moving.
+        foreach (var ship in _lastPositions.Keys.Where(ship => !positions.ContainsKey(ship)).ToList())
+        {
+            _lastPositions.Remove(ship);
         }
     }
 
@@ -187,8 +225,12 @@ public sealed class WFTradeEscortSystem : EntitySystem
             return;
 
         var bonus = (int) (total * Share);
-        // No crew aboard the escorts means no payout and no message.
-        if (_rewards.PayCrews(Loc.GetString("wf-trade-escort-name", ("ship", Name(ship))), $"escort of {ToPrettyString(ship)}", bonus, paid, "escorting") == 0)
+        var traderCrew = _crews.TryGetValue(ship, out var seen)
+            ? seen.Where(entry => now - entry.Value <= Window).Select(entry => entry.Key).ToHashSet()
+            : new HashSet<NetUserId>();
+
+        // No crew aboard the escorts, other than the trader's own, means no payout and no message.
+        if (_rewards.PayCrews(Loc.GetString("wf-trade-escort-name", ("ship", Name(ship))), $"escort of {ToPrettyString(ship)}", bonus, paid, "escorting", traderCrew) == 0)
             return;
 
         _market.TellAboard(paid.Append(ship).ToList(), Loc.GetString("wf-trade-escort-paid",

@@ -15,10 +15,13 @@ public sealed partial class DispenserSystem
 
     /// <summary>
     /// Refuses goods bought from a vendor on the dispenser's own grid, or made too close to it, so trade goods only pay
-    /// once hauled elsewhere.
+    /// once hauled elsewhere. A crate already sold this tick, still waiting to be deleted, is refused silently.
     /// </summary>
     private bool RefuseLocalGoods(EntityUid uid, DispenserComponent component, EntityUid used, EntityUid user)
     {
+        if (WfAlreadySold(used))
+            return true;
+
         LocId? reason;
         if (_wfMarket.Shunned(uid, user))
             reason = "wf-trade-refuse-shunned";
@@ -47,22 +50,22 @@ public sealed partial class DispenserSystem
         return _wfMarket.Payout(uid, component, itemId);
     }
 
+    /// <summary>Whether a crate was already taken by a chute and only waits for its deletion.</summary>
+    private bool WfAlreadySold(EntityUid used)
+    {
+        return TerminatingOrDeleted(used) || EntityManager.IsQueuedForDeletion(used);
+    }
+
     /// <summary>
-    /// Takes a crate priced by who carries it where, such as a consignment or classified cargo, whether or not the
-    /// chute lists it. False for any other item.
+    /// Takes a crate priced by who carries it where, such as a consignment, whether or not the chute lists it. False for
+    /// any other item.
     /// </summary>
     private bool WfTakeSpecialCrate(EntityUid uid, DispenserComponent component, EntityUid used, EntityUid user, VirtualItemComponent? virtualItem, EntityUid usedHand)
     {
         if (!_wfSpecialCrates.IsSpecial(used))
             return false;
 
-        if (!_wfSpecialCrates.TryPrice(uid, used, user, out var amount))
-        {
-            _audioSystem.PlayPvs(component.DenySound, uid);
-            return true;
-        }
-
-        if (RefuseLocalGoods(uid, component, used, user))
+        if (RefuseLocalGoods(uid, component, used, user) || _wfSpecialCrates.Price(uid, used) is not { } amount)
             return true;
 
         _wfMarket.Sell(uid, used, user, amount);

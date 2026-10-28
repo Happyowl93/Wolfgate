@@ -155,8 +155,8 @@ public sealed class WFTradeSectorSystem : EntitySystem
                 && !_activity.IsNeutralStation(args.Faction, station))
             {
                 var profile = _market.Profile(station);
-                _market.Radio(Loc.GetString("wf-trade-blockade-landed",
-                    ("station", Name(station)), ("factor", profile.BlockadeFactor)));
+                _market.Announce(Loc.GetString("wf-trade-blockade-landed",
+                    ("station", Name(station)), ("factor", profile.BlockadeFactor)), station);
             }
 
             return;
@@ -170,7 +170,7 @@ public sealed class WFTradeSectorSystem : EntitySystem
         var sourceAlive = attempt.Source is not { } source || !TerminatingOrDeleted(source);
         if (!sourceAlive && now < attempt.Deadline)
         {
-            _market.Radio(Loc.GetString("wf-trade-blockade-driven-off", ("station", Name(station))));
+            _market.Announce(Loc.GetString("wf-trade-blockade-driven-off", ("station", Name(station))), station);
             return;
         }
 
@@ -183,7 +183,7 @@ public sealed class WFTradeSectorSystem : EntitySystem
             return;
 
         var names = string.Join(", ", ships.Select(ship => Name(ship)));
-        _market.Radio(Loc.GetString("wf-trade-blockade-broken", ("station", Name(station)), ("ships", names)));
+        _market.Announce(Loc.GetString("wf-trade-blockade-broken", ("station", Name(station)), ("ships", names)), station);
 
         var bounty = _market.Profile(station).ReliefBounty;
         if (bounty > 0)
@@ -229,16 +229,24 @@ public sealed class WFTradeSectorSystem : EntitySystem
             return;
 
         var profile = _proto.Index(WFTradeMarketSystem.DefaultProfile);
-        var stations = _market.Chutes()
+        var grids = _market.Chutes()
             .Where(chute => MetaData(chute.Chute).EntityPrototype is { } proto && profile.WarDemandChutes.Contains(proto.ID))
-            .Select(chute => Name(chute.Grid))
+            .Select(chute => chute.Grid)
             .Distinct()
             .ToList();
 
-        if (stations.Count > 0)
+        // Off-the-books stations are only named to the underground companies.
+        foreach (var hidden in new[] { false, true })
         {
-            _market.Radio(Loc.GetString("wf-trade-war-demand",
-                ("stations", string.Join(", ", stations)), ("factor", profile.WarFactor)));
+            var stations = grids.Where(grid => _market.IsHiddenMarket(grid) == hidden).Select(grid => Name(grid)).ToList();
+            if (stations.Count == 0)
+                continue;
+
+            var message = Loc.GetString("wf-trade-war-demand", ("stations", string.Join(", ", stations)), ("factor", profile.WarFactor));
+            if (hidden)
+                _market.TellCompanies(profile.UndergroundCompanies, message);
+            else
+                _market.Radio(message);
         }
     }
 

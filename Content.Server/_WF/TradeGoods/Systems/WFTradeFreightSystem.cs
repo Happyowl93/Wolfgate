@@ -7,6 +7,7 @@ using Content.Shared.Examine;
 using Content.Shared.GameTicking;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
+using Robust.Shared.Timing;
 
 namespace Content.Server._WF.TradeGoods.Systems;
 
@@ -21,7 +22,7 @@ public sealed class WFTradeFreightSystem : EntitySystem
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private WFTradeMarketSystem _market = default!;
     [Dependency] private WFTradeShortageSystem _shortages = default!;
-    [Dependency] private WFTradeSpecialCrateSystem _special = default!;
+    [Dependency] private IGameTiming _timing = default!;
 
     /// <summary>Most pressure one freighter's dock adds to one good.</summary>
     private const float SupplyCap = 0.3f;
@@ -39,6 +40,11 @@ public sealed class WFTradeFreightSystem : EntitySystem
 
     /// <summary>The hulls each run loaded cargo onto.</summary>
     private readonly Dictionary<EntityUid, HashSet<EntityUid>> _freighters = new();
+
+    /// <summary>Trade cargo value per grid, worked out once per tick for every grid asked about in it.</summary>
+    private readonly Dictionary<EntityUid, int> _values = new();
+
+    private GameTick _valuesTick;
 
     public override void Initialize()
     {
@@ -72,7 +78,6 @@ public sealed class WFTradeFreightSystem : EntitySystem
         hulls.Add(args.Grid);
         origin.Run = Name(args.Grid);
         origin.Destination = _random.Pick(encounter.Stops);
-        _special.TryMakeClassified(args.Crate);
     }
 
     private void OnQuote(WFTradeQuoteEvent args)
@@ -138,8 +143,8 @@ public sealed class WFTradeFreightSystem : EntitySystem
 
         if (supplied.Count > 0)
         {
-            _market.Radio(Loc.GetString("wf-trade-freight-supplied",
-                ("ship", Name(args.Grid)), ("goods", string.Join(", ", supplied.Take(3))), ("station", Name(args.Station))));
+            _market.Announce(Loc.GetString("wf-trade-freight-supplied",
+                ("ship", Name(args.Grid)), ("goods", string.Join(", ", supplied.Take(3))), ("station", Name(args.Station))), args.Station);
         }
     }
 
@@ -168,7 +173,7 @@ public sealed class WFTradeFreightSystem : EntitySystem
                 continue;
 
             _shortages.StartLocal(stop, goods, LostFactor, LostDuration, manifest.Name);
-            _market.Radio(Loc.GetString("wf-trade-freight-lost", ("station", Name(stop)), ("run", Loc.GetString(manifest.Name))));
+            _market.Announce(Loc.GetString("wf-trade-freight-lost", ("station", Name(stop)), ("run", Loc.GetString(manifest.Name))), stop);
         }
     }
 
@@ -209,12 +214,25 @@ public sealed class WFTradeFreightSystem : EntitySystem
     /// <summary>Values a ship's trade cargo at the best base price any chute pays for each crate.</summary>
     private void OnCargoValue(ref WFCargoValueQueryEvent args)
     {
+        if (_valuesTick != _timing.CurTick)
+        {
+            _valuesTick = _timing.CurTick;
+            ValueAllCargo();
+        }
+
+        args.Value += _values.GetValueOrDefault(args.Grid);
+    }
+
+    /// <summary>Values the trade cargo on every grid in one pass, so raiders weighing several ships sweep once.</summary>
+    private void ValueAllCargo()
+    {
+        _values.Clear();
         var chutes = _market.Chutes();
         var prices = new Dictionary<string, int>();
         var query = EntityQueryEnumerator<WFTradeOriginComponent, TransformComponent, MetaDataComponent>();
         while (query.MoveNext(out _, out _, out var xform, out var meta))
         {
-            if (xform.GridUid != args.Grid || meta.EntityPrototype is not { } proto)
+            if (xform.GridUid is not { } grid || meta.EntityPrototype is not { } proto)
                 continue;
 
             if (!prices.TryGetValue(proto.ID, out var price))
@@ -223,7 +241,7 @@ public sealed class WFTradeFreightSystem : EntitySystem
                 prices[proto.ID] = price;
             }
 
-            args.Value += price;
+            _values[grid] = _values.GetValueOrDefault(grid) + price;
         }
     }
 
@@ -234,7 +252,7 @@ public sealed class WFTradeFreightSystem : EntitySystem
 
         if (ent.Comp.Run is { } run)
         {
-            var destination = ent.Comp.Destination is { } dest && !TerminatingOrDeleted(dest) ? Name(dest) : "?";
+            var destination = ent.Comp.Destination is { } dest && !TerminatingOrDeleted(dest) ? Name(dest) : Loc.GetString("wf-trade-unknown-station");
             var profile = _market.Profile(null);
             args.PushMarkup(Loc.GetString("wf-trade-seal-examine",
                 ("run", run), ("station", destination), ("percent", (int) MathF.Round(profile.HotCargoLawful * 100f))));

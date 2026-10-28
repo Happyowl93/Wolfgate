@@ -5,6 +5,7 @@ using Content.Client._WF.TradeGoods;
 using Content.Shared._WF.TradeGoods;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
+using Robust.Shared.GameObjects;
 
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
@@ -38,8 +39,8 @@ public sealed class MarketAppTest
             state.Hold.Add(new WFMarketHoldEntry("metals", "Camelot", 4000));
             state.Hold.Add(new WFMarketHoldEntry("express cargo trading crate", "Cargo Depot A", 9000, true));
 
-            var fragment = new MarketUiFragment();
-            fragment.UpdateState(state);
+            var fragment = new MarketUiFragment(EntityUid.Invalid);
+            fragment.UpdatePublicState(state);
             var texts = Texts(fragment).ToList();
 
             Assert.That(texts, Has.Some.Contains("Halcyon"));
@@ -65,7 +66,7 @@ public sealed class MarketAppTest
             Assert.That(texts.Any(text => text.Contains('{') || text.Contains("wf-market")), Is.False, "Every string should resolve.");
 
             // An empty state says so on every tab.
-            fragment.UpdateState(new WFMarketUiState());
+            fragment.UpdatePublicState(new WFMarketUiState());
             texts = Texts(fragment).ToList();
             Assert.That(texts, Has.Some.Contains("No stations"));
             Assert.That(texts, Has.Some.Contains("Nothing happening"));

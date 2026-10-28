@@ -48,11 +48,6 @@ public sealed class TradeCommandTest
             Assert.That(consignments, Has.Count.EqualTo(1), "wf_trade consignment posted no consignment.");
             Assert.That(stations, Does.Contain(consignments[0].Destination));
 
-            var crate = entMan.SpawnEntity(TradeTestWorld.Fabric, map.GridCoords);
-            console.ExecuteCommand(null, $"wf_trade classified {entMan.GetNetEntity(crate)}");
-            Assert.That(entMan.HasComponent<WFClassifiedCargoComponent>(crate), Is.True,
-                "wf_trade classified fitted no transponder.");
-
             console.ExecuteCommand(null, "wf_trade status");
             console.ExecuteCommand(null, "wf_trade clear");
             Assert.That(shortages.Active, Is.Empty, "wf_trade clear left a shortage running.");

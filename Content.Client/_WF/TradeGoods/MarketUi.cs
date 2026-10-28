@@ -23,13 +23,13 @@ public sealed partial class MarketUi : UIFragment
 
     public override void Setup(BoundUserInterface userInterface, EntityUid? fragmentOwner)
     {
-        _fragment = new MarketUiFragment();
+        _fragment = new MarketUiFragment(userInterface.Owner);
     }
 
     public override void UpdateState(BoundUserInterfaceState state)
     {
         if (state is WFMarketUiState cast)
-            _fragment?.UpdateState(cast);
+            _fragment?.UpdatePublicState(cast);
     }
 }
 
@@ -38,6 +38,7 @@ public sealed class MarketUiFragment : BoxContainer
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IResourceCache _resources = default!;
+    [Dependency] private IEntityManager _entities = default!;
 
     private static readonly ResPath IconRsi = new("/Textures/_WF/TradeGoods/market.rsi");
 
@@ -66,9 +67,18 @@ public sealed class MarketUiFragment : BoxContainer
 
     private WFMarketUiState? _state;
 
-    public MarketUiFragment()
+    private readonly EntityUid _loader;
+    /// <summary>Null outside a running game, such as a UI test with no entity systems.</summary>
+    private readonly WFMarketSystem? _market;
+
+    /// <summary>The private state shown, or -1 while the public copy is the whole picture.</summary>
+    private int _privateVersion = -1;
+
+    public MarketUiFragment(EntityUid loader)
     {
         IoCManager.InjectDependencies(this);
+        _loader = loader;
+        _entities.EntitySysManager.TryGetEntitySystem(out _market);
         Orientation = LayoutOrientation.Vertical;
         VerticalExpand = true;
         HorizontalExpand = true;
@@ -171,7 +181,43 @@ public sealed class MarketUiFragment : BoxContainer
         return new Label { Text = text, FontColorOverride = Dim, StyleClasses = { "LabelSmall" }, MinWidth = minWidth, VerticalAlignment = VAlignment.Center };
     }
 
-    public void UpdateState(WFMarketUiState state)
+    /// <summary>
+    /// Takes the networked state. One marked private is a stand-in: the full state comes separately, and is shown as
+    /// soon as it is here.
+    /// </summary>
+    public void UpdatePublicState(WFMarketUiState state)
+    {
+        if (!state.Private)
+        {
+            _market?.Forget(_loader);
+            _privateVersion = -1;
+            UpdateState(state);
+            return;
+        }
+
+        if (_market?.Private(_loader) is { } full)
+        {
+            _privateVersion = full.Version;
+            UpdateState(full.State);
+        }
+        else
+        {
+            _privateVersion = 0;
+            UpdateState(state);
+        }
+    }
+
+    protected override void FrameUpdate(FrameEventArgs args)
+    {
+        base.FrameUpdate(args);
+        if (_privateVersion < 0 || _market?.Private(_loader) is not { } full || full.Version == _privateVersion)
+            return;
+
+        _privateVersion = full.Version;
+        UpdateState(full.State);
+    }
+
+    private void UpdateState(WFMarketUiState state)
     {
         _state = state;
         var open = state.Stations.Count(station => !station.Underground);
@@ -431,7 +477,6 @@ public sealed class MarketUiFragment : BoxContainer
             WFMarketAlertKind.Traffic => Color.FromHex("#70a8e0"),
             WFMarketAlertKind.Warning => Down,
             WFMarketAlertKind.Personal => Up,
-            WFMarketAlertKind.Hunt => Color.FromHex("#c080e0"),
             _ => Dim,
         };
     }

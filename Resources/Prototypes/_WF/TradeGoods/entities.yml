@@ -22,16 +22,6 @@
     price: 50
     vendPrice: 500
 
-- type: loadout
-  id: WFContractorMarketCartridge
-  effects:
-  - !type:GroupLoadoutEffect
-    proto: ContractorT1
-  price: 0
-  storage:
-    back:
-    - WFMarketCartridge
-
 # Priority consignments: sealed crates for one station, worth most if delivered before the deadline.
 - type: entity
   parent: BaseTradeItem
@@ -66,25 +56,7 @@
   - type: WFCargoMass
     class: Bulk
 
-# Silences a classified crate's transponder for a while. One use.
-- type: entity
-  parent: BaseItem
-  id: WFTransponderJammer
-  name: transponder jammer
-  description: A single-use jammer. Clamp it to a crate's transponder to silence it for a while.
-  components:
-  - type: Sprite
-    sprite: Objects/Devices/jammer.rsi
-    state: jammer
-  - type: Item
-    sprite: Objects/Devices/jammer.rsi
-    size: Small
-  - type: WFTransponderJammer
-  - type: StaticPrice
-    price: 500
-    vendPrice: 6000
-
-# The Underground's fence: takes anything at middling prices, sealed freight at full price, and classified cargo.
+# The Underground's fence: takes anything at middling prices, and sealed freight at full price.
 - type: entity
   parent: BaseCargoChute
   id: WFCargoChuteUnderground
@@ -110,17 +82,3 @@
       TradeGoodLuxuries: SpaceCash9000
       TradeGoodFabric: SpaceCash2500
       TradeGoodMetals: SpaceCash2500
-
-- type: entity
-  parent: VendingMachineTraderBaikal
-  id: WFVendingMachineFence
-  name: Underground fence vendor
-  description: Sells transponder jammers to the fence's customers.
-  components:
-  - type: VendingMachine
-    pack: WFFenceInventory
-
-- type: vendingMachineInventory
-  id: WFFenceInventory
-  startingInventory:
-    WFTransponderJammer: 4294967295 # Infinite

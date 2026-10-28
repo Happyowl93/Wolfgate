@@ -83,18 +83,6 @@
   consignments:
     WFTradeConsignment: 0.7
     WFTradeConsignmentHeavy: 0.3
-  classifiedChance: 0.015
-  classifiedGap: 2700
-  classifiedHunters: [ PDV, PDVCivilian, WFUnderground ]
-  classifiedCarrierChutes: [ CargoChuteTSFMC, CargoChuteTradeMall, CargoChuteExped ]
-  classifiedCarrierReward: 30000
-  classifiedPdvChutes: [ CargoChuteHideout, CargoChuteJupiter ]
-  classifiedPdvReward: 30000
-  classifiedWarBonus: 1.5
-  classifiedUndergroundChutes: [ WFCargoChuteUnderground ]
-  classifiedUndergroundReward: 30000
-  pingMinGap: 180
-  pingMaxSilence: 360
   # While the war is hot, a navy pays its own people faction credits for munitions and ship parts, and pays the enemy's
   # people more for war goods. The TSF posts a warrant on its own who sell war goods to the PDV.
   navies:

@@ -1,7 +1,7 @@
 namespace Content.Server._WF.CargoLoad;
 
 /// <summary>A grid's cargo: its own load and the thrust factor its whole docked set flies with in space.</summary>
-[RegisterComponent]
+[RegisterComponent, UnsavedComponent]
 public sealed partial class WFCargoLoadComponent : Component
 {
     /// <summary>Tonnes of cargo aboard this grid alone.</summary>
@@ -30,7 +30,7 @@ public sealed partial class WFCargoLoadComponent : Component
 }
 
 /// <summary>A helm on a loaded ship: its examine line, and which load warnings its pilots have had.</summary>
-[RegisterComponent]
+[RegisterComponent, UnsavedComponent]
 public sealed partial class WFCargoHelmComponent : Component
 {
     /// <summary>Bands whose warning has gone out and not yet re-armed.</summary>

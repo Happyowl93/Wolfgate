@@ -133,51 +133,6 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public Dictionary<EntProtoId, float> Consignments = new();
 
-    /// <summary>Chance a crate bought from a vendor or loaded on a freighter carries a TSF transponder.</summary>
-    [DataField]
-    public float ClassifiedChance = 0.015f;
-
-    /// <summary>Shortest time between one classified crate and the next.</summary>
-    [DataField]
-    public TimeSpan ClassifiedGap = TimeSpan.FromMinutes(45);
-
-    /// <summary>Companies told about a classified crate and paid for seizing it.</summary>
-    [DataField]
-    public List<ProtoId<CompanyPrototype>> ClassifiedHunters = new();
-
-    /// <summary>Chutes where whoever carries a classified crate turns it in to the TSF.</summary>
-    [DataField]
-    public List<EntProtoId> ClassifiedCarrierChutes = new();
-
-    [DataField]
-    public int ClassifiedCarrierReward = 30000;
-
-    /// <summary>Chutes where PDV turns in a seized classified crate.</summary>
-    [DataField]
-    public List<EntProtoId> ClassifiedPdvChutes = new();
-
-    [DataField]
-    public int ClassifiedPdvReward = 30000;
-
-    /// <summary>What PDV's reward is multiplied by while the war is hot.</summary>
-    [DataField]
-    public float ClassifiedWarBonus = 1.5f;
-
-    /// <summary>Chutes where the Underground fences a seized classified crate.</summary>
-    [DataField]
-    public List<EntProtoId> ClassifiedUndergroundChutes = new();
-
-    [DataField]
-    public int ClassifiedUndergroundReward = 30000;
-
-    /// <summary>Shortest time between two transponder pings when the crate changes cell.</summary>
-    [DataField]
-    public TimeSpan PingMinGap = TimeSpan.FromMinutes(3);
-
-    /// <summary>Longest a transponder stays silent, so a parked carrier still shows.</summary>
-    [DataField]
-    public TimeSpan PingMaxSilence = TimeSpan.FromMinutes(6);
-
     /// <summary>The navies: whose chutes are whose, and who they're at war with.</summary>
     [DataField]
     public List<WFTradeNavy> Navies = new();

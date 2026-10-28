@@ -45,7 +45,7 @@ public sealed class WFCargoGauge : BoxContainer
 
     /// <summary>The ship's cargo, or null while it carries nothing.</summary>
     public WFCargoReadoutComponent? Readout =>
-        _ship() is { } ship && _entities.TryGetComponent(ship, out WFCargoReadoutComponent? readout) && readout.Load >= 0.5f
+        _ship() is { } ship && _entities.TryGetComponent(ship, out WFCargoReadoutComponent? readout) && readout.Load >= WFCargoReadoutComponent.ShownLoad
             ? readout
             : null;
 

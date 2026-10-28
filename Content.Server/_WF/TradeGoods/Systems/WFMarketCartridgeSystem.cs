@@ -13,6 +13,8 @@ using Content.Shared._WF.SectorControl;
 using Content.Shared._WF.TradeGoods;
 using Content.Shared.CartridgeLoader;
 using Content.Shared.PDA;
+using Robust.Server.GameObjects;
+using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -22,13 +24,17 @@ namespace Content.Server._WF.TradeGoods.Systems;
 [RegisterComponent]
 public sealed partial class WFMarketCartridgeComponent : Component;
 
-/// <summary>Pushes the Market app's state to every installed copy every few seconds and when one opens.</summary>
+/// <summary>
+/// Pushes the Market app's state to every open copy every few seconds and when one opens. UI state reaches every client
+/// near the PDA, so a holder who sees the hidden markets gets a public copy there and the full one sent to the viewers.
+/// </summary>
 public sealed class WFMarketCartridgeSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _proto = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private CartridgeLoaderSystem _cartridgeLoader = default!;
+    [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private WFTradeMarketSystem _market = default!;
     [Dependency] private WFTradeShortageSystem _shortages = default!;
     [Dependency] private WFTradeRushSystem _rush = default!;
@@ -69,13 +75,45 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
 
     private void OnUiReady(Entity<WFMarketCartridgeComponent> ent, ref CartridgeUiReadyEvent args)
     {
-        _cartridgeLoader.UpdateCartridgeUiState(args.Loader, BuildState(args.Loader));
+        Push(args.Loader, Sector());
     }
 
-    /// <summary>What one loader's Market app shows right now.</summary>
+    /// <summary>What one loader's Market app shows right now, hidden markets included for those who see them.</summary>
     public WFMarketUiState BuildState(EntityUid loader)
     {
-        return State(loader, Sector());
+        return State(loader, Sector(), out _);
+    }
+
+    /// <summary>
+    /// Sends one loader its state. A holder who sees the hidden markets gets them in a private event to the viewers, and
+    /// only the open markets in the networked UI state.
+    /// </summary>
+    private void Push(EntityUid loader, MarketSnapshot sector)
+    {
+        if (!TryComp<CartridgeLoaderComponent>(loader, out var loaderComp))
+            return;
+
+        var state = State(loader, sector, out var underground);
+        if (!underground)
+        {
+            _cartridgeLoader.UpdateCartridgeUiState(loader, state, loader: loaderComp);
+            return;
+        }
+
+        var ev = new WFMarketPrivateStateEvent(GetNetEntity(loader), state);
+        foreach (var actor in _ui.GetActors(loader, loaderComp.UiKey))
+        {
+            if (TryComp<ActorComponent>(actor, out var actorComp))
+                RaiseNetworkEvent(ev, actorComp.PlayerSession);
+        }
+
+        _cartridgeLoader.UpdateCartridgeUiState(loader, new WFMarketUiState
+        {
+            Private = true,
+            Ship = state.Ship,
+            Stations = sector.Stations.Where(station => !station.Underground).ToList(),
+            Alerts = sector.Alerts.Where(entry => !entry.Hidden).Select(entry => entry.Alert).ToList(),
+        }, loader: loaderComp);
     }
 
     public override void Update(float frameTime)
@@ -89,9 +127,11 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         var query = EntityQueryEnumerator<WFMarketCartridgeComponent, CartridgeComponent>();
         while (query.MoveNext(out var uid, out _, out var cartridge))
         {
-            // Only a loader showing the Market app gets its state; any other would have its own screen replaced.
+            // Only an open loader showing the Market app gets its state; any other would have its own screen replaced.
             if (cartridge.LoaderUid is { } loader
-                && CompOrNull<CartridgeLoaderComponent>(loader)?.ActiveProgram == uid)
+                && TryComp<CartridgeLoaderComponent>(loader, out var loaderComp)
+                && loaderComp.ActiveProgram == uid
+                && _ui.IsUiOpen(loader, loaderComp.UiKey))
                 loaders.Add(loader);
         }
 
@@ -101,19 +141,47 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         var sector = Sector();
         foreach (var loader in loaders)
         {
-            _cartridgeLoader.UpdateCartridgeUiState(loader, State(loader, sector));
+            Push(loader, sector);
         }
     }
 
-    /// <summary>What every copy is built from this refresh: all markets and alerts, and which of them are off the books.</summary>
+    /// <summary>
+    /// What every copy is built from this refresh: all markets and alerts, which of them are off the books, and the
+    /// cargo on each grid, gathered once on first use.
+    /// </summary>
     private sealed record MarketSnapshot(
         List<WFMarketStation> Stations,
         List<(WFMarketAlert Alert, bool Hidden)> Alerts,
-        List<WFMarketAlert> HunterAlerts,
         List<(EntityUid Chute, DispenserComponent Dispenser, EntityUid Grid)> Chutes,
-        HashSet<EntityUid> HiddenChutes);
+        HashSet<EntityUid> HiddenChutes)
+    {
+        public Dictionary<EntityUid, List<(EntityUid Uid, MetaDataComponent Meta)>>? Cargo;
+    }
 
-    /// <summary>The prices and alerts every copy shows, the extra alerts only hunters see, and the hidden markets.</summary>
+    /// <summary>The cargo aboard each grid, swept once per refresh however many copies are open.</summary>
+    private Dictionary<EntityUid, List<(EntityUid Uid, MetaDataComponent Meta)>> Cargo(MarketSnapshot sector)
+    {
+        if (sector.Cargo is { } cached)
+            return cached;
+
+        var cargo = new Dictionary<EntityUid, List<(EntityUid, MetaDataComponent)>>();
+        var query = EntityQueryEnumerator<WFCargoMassComponent, TransformComponent, MetaDataComponent>();
+        while (query.MoveNext(out var uid, out _, out var xform, out var meta))
+        {
+            if (xform.GridUid is not { } grid || meta.EntityPrototype == null)
+                continue;
+
+            if (!cargo.TryGetValue(grid, out var list))
+                cargo[grid] = list = new List<(EntityUid, MetaDataComponent)>();
+
+            list.Add((uid, meta));
+        }
+
+        sector.Cargo = cargo;
+        return cargo;
+    }
+
+    /// <summary>The prices and alerts every copy shows, and the hidden markets.</summary>
     private MarketSnapshot Sector()
     {
         var profile = _proto.Index(WFTradeMarketSystem.DefaultProfile);
@@ -168,9 +236,10 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
 
         foreach (var (destination, carrier, deadline) in _special.Consignments())
         {
+            var name = Name(destination);
             Add(new WFMarketAlert(carrier == null
-                ? Loc.GetString("wf-market-alert-consignment", ("station", destination))
-                : Loc.GetString("wf-market-alert-consignment-carried", ("station", destination), ("ship", carrier)), deadline, true), destination);
+                ? Loc.GetString("wf-market-alert-consignment", ("station", name))
+                : Loc.GetString("wf-market-alert-consignment-carried", ("station", name), ("ship", carrier)), deadline, true), name);
         }
 
         foreach (var (station, deadline) in _sector.Attempts())
@@ -212,44 +281,34 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         if (_war.GetWarLevel(EntityUid.Invalid))
             Add(new WFMarketAlert(Loc.GetString("wf-market-alert-war", ("factor", profile.WarFactor)), null, false));
 
-        var hunterAlerts = new List<WFMarketAlert>();
-        foreach (var (cell, heard, ship, jammed) in _special.Sightings())
-        {
-            var minutes = (int) (_timing.CurTime - heard).TotalMinutes;
-            hunterAlerts.Add(new WFMarketAlert(Loc.GetString(jammed ? "wf-market-alert-classified-jammed" : "wf-market-alert-classified",
-                ("cell", cell), ("minutes", minutes), ("ship", ship ?? Loc.GetString("wf-market-adrift"))), null, true, WFMarketAlertKind.Hunt));
-        }
-
         // Grouped by faction in the profile's order, then by name.
         var sorted = stations
             .OrderBy(entry => order[entry.Key])
             .ThenBy(entry => entry.Value.Name)
             .Select(entry => entry.Value)
             .ToList();
-        return new MarketSnapshot(sorted, alerts, hunterAlerts, chutes, hiddenChutes);
+        return new MarketSnapshot(sorted, alerts, chutes, hiddenChutes);
     }
 
     /// <summary>
     /// One copy's state: the shared prices and alerts, its holder's own alerts, and their hold. Hidden markets, alerts
     /// naming them and hold sales there go only to holders of an underground company.
     /// </summary>
-    private WFMarketUiState State(EntityUid loader, MarketSnapshot sector)
+    private WFMarketUiState State(EntityUid loader, MarketSnapshot sector, out bool underground)
     {
         var holder = Transform(loader).ParentUid;
         var profile = _proto.Index(WFTradeMarketSystem.DefaultProfile);
         var company = CompOrNull<CompanyComponent>(holder)?.CompanyName;
-        var underground = company is { } member && profile.UndergroundCompanies.Contains(member);
+        var sees = company is { } member && profile.UndergroundCompanies.Contains(member);
+        underground = sees;
 
         var state = new WFMarketUiState
         {
-            Stations = underground ? sector.Stations : sector.Stations.Where(station => !station.Underground).ToList(),
-            Alerts = sector.Alerts.Where(entry => underground || !entry.Hidden).Select(entry => entry.Alert).ToList(),
+            Stations = sees ? sector.Stations : sector.Stations.Where(station => !station.Underground).ToList(),
+            Alerts = sector.Alerts.Where(entry => sees || !entry.Hidden).Select(entry => entry.Alert).ToList(),
         };
 
-        if (company is { } hunter && profile.ClassifiedHunters.Contains(hunter))
-            state.Alerts.InsertRange(0, sector.HunterAlerts);
-
-        var chutes = underground ? sector.Chutes : sector.Chutes.Where(chute => !sector.HiddenChutes.Contains(chute.Chute)).ToList();
+        var chutes = sees ? sector.Chutes : sector.Chutes.Where(chute => !sector.HiddenChutes.Contains(chute.Chute)).ToList();
         state.Alerts.AddRange(PersonalAlerts(holder, company, profile, chutes));
 
         if (Transform(loader).GridUid is not { } grid || !HasComp<ShuttleDeedComponent>(grid))
@@ -257,15 +316,14 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
 
         state.Ship = Name(grid);
         state.Alerts.AddRange(EscortAlerts(grid));
-        var set = _cargo.GetCargoSet(grid);
-
+        var cargo = Cargo(sector);
         var best = new Dictionary<(string, EntityUid?, string?, EntityUid?, int, int), (string Station, int Amount)?>();
-        var query = EntityQueryEnumerator<WFCargoMassComponent, TransformComponent, MetaDataComponent>();
-        while (query.MoveNext(out var uid, out var mass, out var xform, out var meta))
+        var aboardCargo = _cargo.GetCargoSet(grid)
+            .SelectMany(aboard => cargo.TryGetValue(aboard, out var crates) ? crates : Enumerable.Empty<(EntityUid Uid, MetaDataComponent Meta)>());
+        foreach (var (uid, meta) in aboardCargo)
         {
-            // The total counts every load; the list is the trade goods, which are what the app can price.
-            if (xform.GridUid is not { } aboard || !set.Contains(aboard) || meta.EntityPrototype is not { } proto)
-                continue;
+            // The list is the trade goods, which are what the app can price.
+            var proto = meta.EntityPrototype!;
 
             // A console trading crate sells only at its destination.
             if (_crates.Destination(uid) is { } destination)
@@ -277,7 +335,8 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
             if (!TryComp<WFTradeOriginComponent>(uid, out var origin))
                 continue;
 
-            if (TryComp<WFConsignmentComponent>(uid, out var consignment) && consignment.Destination is { } consignee)
+            if (TryComp<WFConsignmentComponent>(uid, out var consignment) && consignment.Destination is { } consignee
+                && !TerminatingOrDeleted(consignee))
             {
                 state.Hold.Add(new WFMarketHoldEntry(meta.EntityName, Name(consignee),
                     _special.ConsignmentPayout(consignment), true));
@@ -308,19 +367,18 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
 
     /// <summary>
     /// Where one crate sells best now, pricing it as the chute would: its seal, destination bonus, the seller's faction and
-    /// special payouts count, and chutes that would refuse it (too close to its origin, or a trader the seller hurt) are
-    /// skipped. Chutes on the seller's own ship are left out.
+    /// special payouts count, and chutes that would refuse it (too close to its origin, not yet stamped, or a trader the
+    /// seller hurt) are skipped. Chutes on the seller's own ship are left out.
     /// </summary>
     public (string Station, int Amount)? BestFor(EntityUid crate, string good, EntityUid? except, EntityUid? seller,
         List<(EntityUid Chute, DispenserComponent Dispenser, EntityUid Grid)> chutes)
     {
-        var pending = CompOrNull<WFTradeOriginComponent>(crate)?.Pending ?? true;
         var special = _special.IsSpecial(crate);
         (string Station, int Amount)? best = null;
         foreach (var (chute, _, grid) in chutes)
         {
             if (grid == except
-                || !pending && !_market.WasHauled(chute, crate)
+                || !_market.WasHauled(chute, crate)
                 || seller is { } user && _market.Shunned(chute, user))
                 continue;
 

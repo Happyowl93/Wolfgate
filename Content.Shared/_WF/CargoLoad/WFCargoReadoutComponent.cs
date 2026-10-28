@@ -3,11 +3,15 @@ using Robust.Shared.GameStates;
 namespace Content.Shared._WF.CargoLoad;
 
 /// <summary>
-/// A loaded ship's cargo as its helm shows it, kept by the server's cargo sweep. Absent on a ship with nothing aboard.
+/// A loaded ship's cargo as its helm shows it, kept by the server's cargo sweep. Absent on a ship carrying less than
+/// <see cref="ShownLoad"/>.
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState, UnsavedComponent]
 public sealed partial class WFCargoReadoutComponent : Component
 {
+    /// <summary>Tonnes aboard at which the helm shows the cargo gauge, and the server keeps this readout.</summary>
+    public const float ShownLoad = 0.5f;
+
     /// <summary>Tonnes aboard the ship's docked set.</summary>
     [DataField, AutoNetworkedField]
     public float Load;
