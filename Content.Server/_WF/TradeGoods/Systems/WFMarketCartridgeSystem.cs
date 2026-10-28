@@ -53,14 +53,14 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<WFMarketCartridgeComponent, CartridgeUiReadyEvent>(OnUiReady);
-        SubscribeLocalEvent<PdaComponent, ComponentStartup>(OnPdaStartup);
+        SubscribeLocalEvent<PdaComponent, MapInitEvent>(OnPdaMapInit, before: [typeof(CartridgeLoaderSystem)]);
     }
 
     /// <summary>
-    /// Adds the Market app to every PDA's preinstalled programs before they install at map init, since most PDA
+    /// Adds the Market app to every PDA's preinstalled programs just before they install at map init, since most PDA
     /// prototypes replace the base list. Last in the list, so a full disk drops it rather than a job program.
     /// </summary>
-    private void OnPdaStartup(Entity<PdaComponent> ent, ref ComponentStartup args)
+    private void OnPdaMapInit(Entity<PdaComponent> ent, ref MapInitEvent args)
     {
         if (TryComp<CartridgeLoaderComponent>(ent, out var loader) && !loader.PreinstalledPrograms.Contains(MarketCartridge))
             loader.PreinstalledPrograms.Add(MarketCartridge);

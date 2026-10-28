@@ -1,5 +1,6 @@
 #nullable enable
 using System.Numerics;
+using Content.Server._NF.SectorServices;
 using Content.Server._WF.TradeGoods.Systems;
 using Content.Shared._WF.TradeGoods;
 using Content.Shared.Contraband;
@@ -46,7 +47,10 @@ public sealed class TradeContrabandTest
             var crate = entMan.SpawnEntity(Contraband, map.GridCoords);
             Assert.That(entMan.HasComponent<ContrabandComponent>(crate), Is.True, "Security should be able to seize it.");
 
-            // A flagged seller gets a warrant in their name, and no second one while the first is fresh.
+            // A flagged seller gets a warrant in their name, and no second one while the first is fresh. The board lives
+            // on the sector service; a test map hosts one if the server has none.
+            if (!entMan.EntityExists(entMan.System<SectorServiceSystem>().GetServiceEntity()))
+                entMan.AddComponent<StationSectorServiceHostComponent>(map.MapUid);
             var seller = entMan.SpawnEntity(null, map.GridCoords);
             entMan.System<MetaDataSystem>().SetEntityName(seller, "WF contraband test seller");
             var warrant = contraband.Flag(seller, map.Grid.Owner, null);

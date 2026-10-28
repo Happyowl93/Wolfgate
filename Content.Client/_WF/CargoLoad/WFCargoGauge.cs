@@ -2,13 +2,12 @@ using Content.Client._WF.CombatConsole;
 using Content.Shared._WF.CargoLoad;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
-using Robust.Shared.Timing;
 
 namespace Content.Client._WF.CargoLoad;
 
 /// <summary>
 /// Helm strip showing the tonnes aboard against the load where thrust bottoms out, coloured by how much thrust is lost.
-/// The tooltip gives the thrust cut, FTL spool and stored materials. Collapsed while the ship carries nothing.
+/// The tooltip gives the thrust cut, FTL spool and stored materials. Hidden while the ship carries nothing.
 /// </summary>
 public sealed class WFCargoGauge : BoxContainer
 {
@@ -20,7 +19,6 @@ public sealed class WFCargoGauge : BoxContainer
 
     private readonly Func<EntityUid?> _ship;
     private readonly WFGlassGauge _gauge;
-    private float _poll;
     private (float, float, float, float)? _shown;
 
     /// <summary>Tracks the cargo of the ship a screen is showing; control names use the fuel bank's prefix.</summary>
@@ -60,25 +58,24 @@ public sealed class WFCargoGauge : BoxContainer
         return WFGaugeReading.Number(cargo.Load, 0, Math.Max(cargo.FullScale, cargo.Load), "wf-cargo-gauge-unit", tint: tint);
     }
 
-    protected override void FrameUpdate(FrameEventArgs args)
+    protected override void EnteredTree()
     {
-        base.FrameUpdate(args);
-        _poll += args.DeltaSeconds;
-        if (_poll < 0.25f)
-            return;
-
-        _poll = 0f;
-        Refresh();
+        base.EnteredTree();
+        _entities.System<WFCargoGaugeSystem>().Track(this);
     }
 
-    private void Refresh()
+    protected override void ExitedTree()
     {
-        // Collapsing rather than hiding keeps FrameUpdate running, which Robust skips for invisible controls, so the
-        // strip still notices cargo arriving after it was built.
+        base.ExitedTree();
+        _entities.System<WFCargoGaugeSystem>().Untrack(this);
+    }
+
+    /// <summary>Shows or hides the strip for the ship's current cargo and updates its tooltip.</summary>
+    public void Refresh()
+    {
+        // Hidden rather than collapsed, so the strip's row or column leaves no gap for it.
         var cargo = Readout;
-        _gauge.Visible = cargo != null;
-        SetHeight = cargo != null ? 44 : 0;
-        HorizontalExpand = cargo != null;
+        Visible = cargo != null;
         if (cargo == null)
         {
             _shown = null;

@@ -62,6 +62,7 @@ a rope already pull with their real mass of about 55.
 
 - [`Content.Client/_WF/CargoLoad/NavScreen.CargoLoad.cs`](../../../Content.Client/_WF/CargoLoad/NavScreen.CargoLoad.cs)
 - [`Content.Client/_WF/CargoLoad/WFCargoGauge.cs`](../../../Content.Client/_WF/CargoLoad/WFCargoGauge.cs)
+- [`Content.Client/_WF/CargoLoad/WFCargoGaugeSystem.cs`](../../../Content.Client/_WF/CargoLoad/WFCargoGaugeSystem.cs)
 
 ### Integration tests
 
