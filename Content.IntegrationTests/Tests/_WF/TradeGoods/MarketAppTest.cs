@@ -21,22 +21,22 @@ public sealed class MarketAppTest
 
         await client.WaitAssertion(() =>
         {
-            var station = new WFMarketStation { Name = "Halcyon" };
+            var station = new WFMarketStation { Name = "Halcyon", Faction = "Trans-Solarian Federation" };
             station.Prices.Add(new WFMarketPrice("medical supplies", 9500, 1.9f, "blockade", 1f, true));
             station.Prices.Add(new WFMarketPrice("metals", 2000, 0.5f, "glutted", 5f, false));
-            var rival = new WFMarketStation { Name = "Camelot" };
+            var rival = new WFMarketStation { Name = "Camelot", Faction = "USSP" };
             rival.Prices.Add(new WFMarketPrice("medical supplies", 6000, 1f, "steady", 1f, false));
-            var state = new WFMarketUiState { Ship = "ISV Mule", HoldTonnes = 21f, StoredTonnes = 3f, Thrust = 0.75f };
+            var state = new WFMarketUiState { Ship = "ISV Mule" };
             state.Stations.Add(station);
             state.Stations.Add(rival);
-            var fence = new WFMarketStation { Name = "WF test fence", Underground = true };
+            var fence = new WFMarketStation { Name = "WF test fence", Underground = true, Faction = "The Underground" };
             fence.Prices.Add(new WFMarketPrice("medical supplies", 12000, 1f, "steady", 1f, false));
             state.Stations.Add(fence);
             state.Alerts.Add(new WFMarketAlert("Freighter Plutomkii inbound to Halcyon with medical supplies", null, false, WFMarketAlertKind.Traffic));
             state.Alerts.Add(new WFMarketAlert("RUSH Halcyon", System.TimeSpan.FromHours(1), true));
-            state.Hold.Add(new WFMarketHoldEntry("metals", 5f, "Camelot", 4000));
-            state.Hold.Add(new WFMarketHoldEntry("metals", 5f, "Camelot", 4000));
-            state.Hold.Add(new WFMarketHoldEntry("express cargo trading crate", 5f, "Cargo Depot A", 9000, true));
+            state.Hold.Add(new WFMarketHoldEntry("metals", "Camelot", 4000));
+            state.Hold.Add(new WFMarketHoldEntry("metals", "Camelot", 4000));
+            state.Hold.Add(new WFMarketHoldEntry("express cargo trading crate", "Cargo Depot A", 9000, true));
 
             var fragment = new MarketUiFragment();
             fragment.UpdateState(state);
@@ -47,7 +47,10 @@ public sealed class MarketAppTest
             Assert.That(texts, Has.Some.Contains("9500/t"), "Prices should show the per-tonne figure.");
             Assert.That(texts, Has.Some.EqualTo("★"), "The best price for a good in the sector should be starred.");
             Assert.That(texts, Has.Some.Contains("best for 1"));
-            Assert.That(texts, Has.Some.EqualTo("UNDERGROUND UPLINK"), "Hidden markets should get their own section.");
+            Assert.That(texts, Has.Some.EqualTo("UNDERGROUND UPLINK"), "Hidden markets should get their own tab.");
+            Assert.That(texts, Has.Some.EqualTo("TRANS-SOLARIAN FEDERATION"), "Stations should be grouped under their faction.");
+            Assert.That(texts, Has.Some.EqualTo("USSP"));
+            Assert.That(texts, Has.Some.EqualTo("THE UNDERGROUND"));
             Assert.That(texts, Has.Some.EqualTo("WF test fence"));
             Assert.That(texts.Count(text => text == "★"), Is.EqualTo(1), "Stars rank each section on its own.");
             Assert.That(texts, Has.Some.StartsWith("2 markets open"), "The open-market count should leave hidden markets out.");
@@ -55,11 +58,10 @@ public sealed class MarketAppTest
             Assert.That(texts, Has.Some.EqualTo("TRAFFIC"), "Alerts should be tagged by kind.");
             Assert.That(texts, Has.Some.Contains("RUSH Halcyon"));
             Assert.That(texts, Has.Some.Contains("min"), "A timed alert should show its countdown.");
-            Assert.That(texts, Has.Some.Contains("ISV Mule").And.Contains("25"), "The hold summary should show the thrust cut.");
-            Assert.That(texts, Has.Some.Contains("Thrust 75%"));
+            Assert.That(texts, Has.Some.Contains("ISV Mule").And.Contains("3 crates"), "The hold summary should count the crates.");
+            Assert.That(texts.Any(text => text.Contains("Thrust") || text.Contains("stored")), Is.False, "Ship load belongs on the helm, not the app.");
             Assert.That(texts, Has.Some.Contains("metals").And.Contains("2"), "Identical crates should share a row with a count.");
             Assert.That(texts, Has.Some.Contains("Cargo Depot A").And.Contains("9000"));
-            Assert.That(texts, Has.Some.Contains("3t").And.Contains("stored"), "The hold should say how much is stored materials.");
             Assert.That(texts.Any(text => text.Contains('{') || text.Contains("wf-market")), Is.False, "Every string should resolve.");
 
             // An empty state says so on every tab.

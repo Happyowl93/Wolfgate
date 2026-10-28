@@ -11,9 +11,12 @@ contents too: a material's loose weight per unit (its sheet or ore's weight over
 so packing a haul into a silo halves its weight rather than hiding it.
 
 Players see the weight on crate and material-storage examine, the load, thrust penalty and spool on helm examine, popups to the helm's
-pilots as the load crosses each band (with hysteresis), the cargo hint in the descent warning, the cargo row of the Planets flight panel, the Hold tab
-of the Market app, price per tonne at the chutes and the rated load in the ship previewer. Frontier's cargo-console
-trading crates are Heavy (normal) and Bulk (express).
+pilots as the load crosses each band (with hysteresis), the cargo hint in the descent warning, the cargo row of the Planets flight panel,
+price per tonne at the chutes and the rated load in the ship previewer. The helm shows a CARGO strip (`WFCargoGauge`)
+under FUEL on the windowed console's navigation page and beside FUEL in the cockpit, while anything is aboard: tonnes
+against the load that bottoms out thrust, green, amber or red by the thrust cut, with the cut, spool and stored
+materials in its tooltip. The sweep keeps the figures in the networked `WFCargoReadoutComponent` on the ship's grid,
+dirtied only when a shown figure changes. Frontier's cargo-console trading crates are Heavy (normal) and Bulk (express).
 
 Entry points: `WFCargoLoadSystem` (`GetLoad`, `GetSetLoad`, `GetSetStored`, `GetSpaceFactor`, `GetCargoSet`, `IsAnchor`,
 `MaterialWeight`, `SpoolPenalty`), the partials `MoverController.CargoLoad` (the space factor, applied through the Planets
@@ -48,6 +51,12 @@ a rope already pull with their real mass of about 55.
 ### Shared
 
 - [`Content.Shared/_WF/CargoLoad/WFCargoMassComponent.cs`](../../../Content.Shared/_WF/CargoLoad/WFCargoMassComponent.cs)
+- [`Content.Shared/_WF/CargoLoad/WFCargoReadoutComponent.cs`](../../../Content.Shared/_WF/CargoLoad/WFCargoReadoutComponent.cs)
+
+### Client
+
+- [`Content.Client/_WF/CargoLoad/NavScreen.CargoLoad.cs`](../../../Content.Client/_WF/CargoLoad/NavScreen.CargoLoad.cs)
+- [`Content.Client/_WF/CargoLoad/WFCargoGauge.cs`](../../../Content.Client/_WF/CargoLoad/WFCargoGauge.cs)
 
 ### Integration tests
 

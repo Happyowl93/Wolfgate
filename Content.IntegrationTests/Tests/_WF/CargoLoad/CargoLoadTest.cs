@@ -152,6 +152,13 @@ public sealed class CargoLoadTest
             Assert.That(cargo.GetSetStored(new[] { ship }), Is.EqualTo(expected).Within(0.01f));
             Assert.That(cargo.GetSpaceFactor(ship), Is.LessThan(1f));
 
+            // The helm's gauge reads the networked readout the sweep keeps on the ship.
+            var readout = entMan.GetComponent<WFCargoReadoutComponent>(ship);
+            Assert.That(readout.Load, Is.EqualTo(expected).Within(0.1f));
+            Assert.That(readout.Stored, Is.EqualTo(expected).Within(0.1f));
+            Assert.That(readout.Thrust, Is.EqualTo(cargo.GetSpaceFactor(ship)).Within(0.005f));
+            Assert.That(readout.FullScale, Is.GreaterThan(readout.Load), "Full scale is the load that bottoms out thrust.");
+
             storage.TryChangeMaterialAmount(silo, "Steel", -10000);
         });
 
@@ -160,6 +167,7 @@ public sealed class CargoLoadTest
         await server.WaitAssertion(() =>
         {
             Assert.That(cargo.GetLoad(ship), Is.EqualTo(0f).Within(0.001f), "An emptied silo should weigh nothing.");
+            Assert.That(entMan.HasComponent<WFCargoReadoutComponent>(ship), Is.False, "An empty ship shows no cargo gauge.");
         });
 
         await pair.CleanReturnAsync();

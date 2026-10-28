@@ -58,9 +58,24 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public List<EntProtoId> HotCargoChutes = new();
 
-    /// <summary>Chutes the Market app lists under its Underground section instead of the open exchange.</summary>
+    /// <summary>Chutes the Market app lists under its Underground tab instead of the open exchange.</summary>
     [DataField]
     public List<EntProtoId> HiddenChutes = new();
+
+    /// <summary>Companies whose members see the hidden markets.</summary>
+    [DataField]
+    public List<ProtoId<CompanyPrototype>> UndergroundCompanies = new();
+
+    /// <summary>The factions the Market app groups stations under, in order, by the chutes they run.</summary>
+    [DataField]
+    public List<WFTradeMarketFaction> MarketFactions = new();
+
+    /// <summary>The group for a station whose chute no faction lists.</summary>
+    [DataField]
+    public LocId DefaultMarketFaction = "wf-market-faction-independent";
+
+    [DataField]
+    public Color DefaultMarketFactionColor = Color.FromHex("#9aa7b1");
 
     /// <summary>Navy chutes that pay war demand while the war is hot.</summary>
     [DataField]
@@ -207,6 +222,20 @@ public sealed partial class WFTradeNavy
     /// <summary>Whether it posts a warrant on one of its own who sells war goods to the enemy.</summary>
     [DataField]
     public bool PostsDefectorWarrants;
+}
+
+/// <summary>A faction the Market app groups stations under: its name, colour and the chutes its stations run.</summary>
+[DataDefinition]
+public sealed partial class WFTradeMarketFaction
+{
+    [DataField(required: true)]
+    public LocId Name;
+
+    [DataField]
+    public Color Color = Color.Gray;
+
+    [DataField]
+    public List<EntProtoId> Chutes = new();
 }
 
 /// <summary>A shortage at one station, or a boom across the sector when <see cref="SectorWide"/> is set.</summary>

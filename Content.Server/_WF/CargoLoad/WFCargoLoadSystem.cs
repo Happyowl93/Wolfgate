@@ -275,6 +275,7 @@ public sealed class WFCargoLoadSystem : EntitySystem
             var load = set.Sum(member => _loads.GetValueOrDefault(member));
             var hull = set.Sum(member => CompOrNull<PhysicsComponent>(member)?.FixturesMass ?? 0f);
             var factor = load <= 0f ? 1f : Math.Max(profile.ThrustFloor, hull / Math.Max(0.001f, hull + load));
+            var stored = set.Sum(member => _stored.GetValueOrDefault(member));
             foreach (var member in set)
             {
                 if (!_touched.Add(member))
@@ -285,6 +286,8 @@ public sealed class WFCargoLoadSystem : EntitySystem
                 comp.OwnStored = _stored.GetValueOrDefault(member);
                 comp.SetLoad = load;
                 comp.SpaceFactor = factor;
+                comp.SetStored = stored;
+                comp.SetHull = hull;
             }
         }
 
@@ -301,7 +304,54 @@ public sealed class WFCargoLoadSystem : EntitySystem
             RemComp<WFCargoLoadComponent>(uid);
         }
 
+        UpdateReadouts(profile);
         UpdateHelms(profile);
+    }
+
+    /// <summary>Publishes each loaded ship's cargo to its helm screens, resending only when a shown figure changes.</summary>
+    private void UpdateReadouts(WFCargoLoadPrototype profile)
+    {
+        var query = EntityQueryEnumerator<WFCargoLoadComponent>();
+        while (query.MoveNext(out var uid, out var cargo))
+        {
+            if (IsAnchor(uid))
+                continue;
+
+            var spool = _shuttle.TryGetFTLDrive(uid, out _, out var drive) ? SpoolPenalty(uid, drive) : 0f;
+            var fullScale = cargo.SetHull * (1f / Math.Max(0.01f, profile.ThrustFloor) - 1f);
+            var readout = EnsureComp<WFCargoReadoutComponent>(uid);
+            if (Near(readout.Load, cargo.SetLoad, 0.1f)
+                && Near(readout.Stored, cargo.SetStored, 0.1f)
+                && Near(readout.Thrust, cargo.SpaceFactor, 0.005f)
+                && Near(readout.FullScale, fullScale, 1f)
+                && Near(readout.Spool, spool, 0.25f))
+                continue;
+
+            readout.Load = cargo.SetLoad;
+            readout.Stored = cargo.SetStored;
+            readout.Thrust = cargo.SpaceFactor;
+            readout.FullScale = fullScale;
+            readout.Spool = spool;
+            Dirty(uid, readout);
+        }
+
+        var stale = new List<EntityUid>();
+        var readouts = EntityQueryEnumerator<WFCargoReadoutComponent>();
+        while (readouts.MoveNext(out var uid, out _))
+        {
+            if (!HasComp<WFCargoLoadComponent>(uid) || IsAnchor(uid))
+                stale.Add(uid);
+        }
+
+        foreach (var uid in stale)
+        {
+            RemComp<WFCargoReadoutComponent>(uid);
+        }
+    }
+
+    private static bool Near(float a, float b, float step)
+    {
+        return MathF.Abs(a - b) < step;
     }
 
     /// <summary>Gives loaded ships' helms their readout and warns their pilots as the load crosses a band.</summary>

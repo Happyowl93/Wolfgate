@@ -10,3 +10,8 @@ wf-cargo-load-restored = Thrust restored: -{$percent}%.
 wf-cargo-load-helm = Cargo: hold {$tonnes}t, thrust -{$percent}%, FTL spool +{$spool}s.
 wf-cargo-load-helm-heavy = [color=#e0b050]Cargo: hold {$tonnes}t, thrust -{$percent}%, FTL spool +{$spool}s.[/color]
 wf-cargo-load-lift-hint = Cargo is {$tonnes}t over lift: drop about {$crates} Heavy crates.
+wf-cargo-gauge = CARGO
+wf-cargo-gauge-unit = t
+wf-cargo-gauge-help = Hold {$tonnes}t: thrust -{$percent}%, FTL spool +{$spool}s.
+wf-cargo-gauge-stored = {$tonnes}t of it is materials packed in silos and lathes.
+wf-cargo-gauge-dump = Full scale is the load that cuts thrust to its floor. Dump cargo to win thrust back.

@@ -9,7 +9,10 @@ for the holder alone: traders who won't deal with them, what the war pays their 
 escorting or that escorts them. Its Hold tab prices each crate aboard as a chute would (`WFMarketCartridgeSystem.BestFor`):
 seals, destination bonuses, the seller's faction and special payouts count, and chutes that would refuse it are skipped;
 consignments and console trading crates show where they are bound. Every PDA gets the app: `WFMarketCartridgeSystem` appends
-it to each PDA's preinstalled programs at startup, since most PDA prototypes replace the base list.
+it to each PDA's preinstalled programs at startup, since most PDA prototypes replace the base list. Its Prices tab groups
+stations by faction (`marketFactions`, matched by chute). Hidden markets (`hiddenChutes`: PDV Helios and the Underground
+fence) go to a separate Underground tab, and only holders of an `undergroundCompanies` company (PDV and the
+Underground's godfathers and fugitives) are sent them, along with alerts naming them and hold sales there.
 
 What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifierCap`):
 - Shortages at one station and sector-wide booms (`WFTradeShortageSystem`, `wfTradeShortage`).
@@ -95,6 +98,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketAppTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketAppTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketHoldTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketHoldTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketPdaTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketPdaTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketUndergroundTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketUndergroundTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCargoTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCargoTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeFreightTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeFreightTest.cs)

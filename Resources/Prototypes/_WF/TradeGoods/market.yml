@@ -45,8 +45,26 @@
     Agriculture: [ TradeGoodFertilizer ]
     Textiles: [ TradeGoodFabric ]
   hotCargoChutes: [ CargoChuteHideout, WFCargoChuteUnderground ]
-  # Off the books: the app lists these under its Underground section.
+  # Off the books: the app lists these under its Underground tab, shown only to the companies below.
   hiddenChutes: [ CargoChuteHideout, WFCargoChuteUnderground ]
+  undergroundCompanies: [ PDV, PDVCivilian, PDVHighComm, WFUnderground ]
+  # The app groups stations by faction, in this order; a chute listed nowhere is Independent.
+  marketFactions:
+  - name: wf-market-faction-caelestinus
+    color: "#5fa8d3"
+    chutes: [ CargoChuteTradeMall, CargoChuteDepot, CargoChuteDepotAlt, CargoChuteExped, CargoChuteMD ]
+  - name: wf-market-faction-tsf
+    color: "#5b7fe0"
+    chutes: [ CargoChuteTSFMC ]
+  - name: wf-market-faction-ussp
+    color: "#d0573f"
+    chutes: [ CargoChuteBaikal ]
+  - name: wf-market-faction-pdv
+    color: "#d4a83a"
+    chutes: [ CargoChuteJupiter, CargoChuteHideout ]
+  - name: wf-market-faction-underground
+    color: "#d84a4a"
+    chutes: [ WFCargoChuteUnderground ]
   warDemandChutes: [ CargoChuteTSFMC, CargoChuteHideout ]
   blockadeGroups: [ Medical, Supplies, Ammo, ShipComponents ]
   blockadeFactor: 1.8

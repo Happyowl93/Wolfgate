@@ -19,6 +19,14 @@ public sealed partial class WFCargoLoadComponent : Component
     /// <summary>Share of thrust the set keeps in space.</summary>
     [ViewVariables]
     public float SpaceFactor = 1f;
+
+    /// <summary>Tonnes of <see cref="SetLoad"/> held as stored materials.</summary>
+    [ViewVariables]
+    public float SetStored;
+
+    /// <summary>Hull mass of the grid's cargo set, in the same units as the load.</summary>
+    [ViewVariables]
+    public float SetHull;
 }
 
 /// <summary>A helm on a loaded ship: its examine line, and which load warnings its pilots have had.</summary>

@@ -62,6 +62,7 @@ public sealed class MarketUiFragment : BoxContainer
     private readonly BoxContainer _prices;
     private readonly BoxContainer _alerts;
     private readonly BoxContainer _hold;
+    private readonly BoxContainer _underground;
 
     private WFMarketUiState? _state;
 
@@ -101,8 +102,14 @@ public sealed class MarketUiFragment : BoxContainer
 
         _alerts = AddScroll(null);
         _hold = AddScroll(null);
-        SetTitles(0, null);
+        _underground = AddScroll(null);
+        _tabs.SetTabTitle(UndergroundTab, Loc.GetString("wf-market-tab-underground"));
+        _tabs.SetTabVisible(UndergroundTab, false);
+        SetTitles(0);
     }
+
+    /// <summary>The Underground tab, shown only when the server sends hidden markets.</summary>
+    private const int UndergroundTab = 3;
 
     /// <summary>A scrolling list, added to a parent or as a tab of its own.</summary>
     private BoxContainer AddScroll(BoxContainer? parent)
@@ -124,10 +131,10 @@ public sealed class MarketUiFragment : BoxContainer
         _tabs.SetTabTitle(_tabs.ChildCount - 1, title);
     }
 
-    private void SetTitles(int alerts, float? tonnes)
+    private void SetTitles(int alerts)
     {
         _tabs.SetTabTitle(1, alerts > 0 ? Loc.GetString("wf-market-tab-alerts-count", ("count", alerts)) : Loc.GetString("wf-market-tab-alerts"));
-        _tabs.SetTabTitle(2, tonnes is { } load ? Loc.GetString("wf-market-tab-hold-tonnes", ("tonnes", (int) MathF.Round(load))) : Loc.GetString("wf-market-tab-hold"));
+        _tabs.SetTabTitle(2, Loc.GetString("wf-market-tab-hold"));
     }
 
     /// <summary>A panel with a flat background and an accent border.</summary>
@@ -172,7 +179,7 @@ public sealed class MarketUiFragment : BoxContainer
             ? Loc.GetString("wf-market-status-ship", ("stations", open), ("ship", ship))
             : Loc.GetString("wf-market-status", ("stations", open));
 
-        SetTitles(state.Alerts.Count, state.Ship != null ? state.HoldTonnes : null);
+        SetTitles(state.Alerts.Count);
         UpdatePrices();
         UpdateAlerts(state);
         UpdateHold(state);
@@ -181,40 +188,44 @@ public sealed class MarketUiFragment : BoxContainer
     private void UpdatePrices()
     {
         _prices.RemoveAllChildren();
+        _underground.RemoveAllChildren();
         if (_state is not { } state)
             return;
 
-        var filter = _filter.Text.Trim();
         var open = state.Stations.Where(station => !station.Underground).ToList();
         var hidden = state.Stations.Where(station => station.Underground).ToList();
-        var shown = AddSection(open, filter, false);
-        if (hidden.Count > 0)
-        {
-            var banner = new BoxContainer { Orientation = LayoutOrientation.Vertical, HorizontalExpand = true };
-            banner.AddChild(new Label { Text = Loc.GetString("wf-market-underground-title"), StyleClasses = { "LabelHeading" }, FontColorOverride = Red });
-            banner.AddChild(new Label { Text = Loc.GetString("wf-market-underground-subtitle"), StyleClasses = { "LabelSmall" }, FontColorOverride = RedDim });
-            var panel = Panel(banner, RedBackground, Red, new Thickness(0, 2, 0, 2), new Thickness(8, 4));
-            panel.Margin = new Thickness(0, 6, 0, 5);
-            _prices.AddChild(panel);
-
-            if (AddSection(hidden, filter, true) == 0)
-                _prices.AddChild(new Label { Text = Loc.GetString("wf-market-no-match"), FontColorOverride = RedDim });
-        }
-        else if (shown == 0)
+        if (AddSection(_prices, open, _filter.Text.Trim(), false) == 0)
         {
             _prices.AddChild(new Label
             {
-                Text = Loc.GetString(state.Stations.Count == 0 ? "wf-market-no-stations" : "wf-market-no-match"),
+                Text = Loc.GetString(open.Count == 0 ? "wf-market-no-stations" : "wf-market-no-match"),
                 FontColorOverride = Dim,
             });
         }
+
+        _tabs.SetTabVisible(UndergroundTab, hidden.Count > 0);
+        if (hidden.Count == 0)
+        {
+            if (_tabs.CurrentTab == UndergroundTab)
+                _tabs.CurrentTab = 0;
+
+            return;
+        }
+
+        var banner = new BoxContainer { Orientation = LayoutOrientation.Vertical, HorizontalExpand = true };
+        banner.AddChild(new Label { Text = Loc.GetString("wf-market-underground-title"), StyleClasses = { "LabelHeading" }, FontColorOverride = Red });
+        banner.AddChild(new Label { Text = Loc.GetString("wf-market-underground-subtitle"), StyleClasses = { "LabelSmall" }, FontColorOverride = RedDim });
+        var panel = Panel(banner, RedBackground, Red, new Thickness(0, 2, 0, 2), new Thickness(8, 4));
+        panel.Margin = new Thickness(0, 0, 0, 5);
+        _underground.AddChild(panel);
+        AddSection(_underground, hidden, string.Empty, true);
     }
 
     /// <summary>
-    /// Adds one card per station with a price matching the filter, and returns how many. Stars mark the best price for
-    /// a good within the section, where more than one of its stations buys it.
+    /// Adds the stations with a price matching the filter as cards under a header per faction, and returns how many.
+    /// Stars mark the best price for a good within the list, where more than one of its stations buys it.
     /// </summary>
-    private int AddSection(List<WFMarketStation> stations, string filter, bool underground)
+    private int AddSection(BoxContainer target, List<WFMarketStation> stations, string filter, bool underground)
     {
         var best = new Dictionary<string, int>();
         var buyers = new Dictionary<string, int>();
@@ -228,6 +239,7 @@ public sealed class MarketUiFragment : BoxContainer
 
         var accent = underground ? Red : Hot;
         var shown = 0;
+        string? faction = null;
         foreach (var station in stations)
         {
             var prices = station.Prices
@@ -235,6 +247,21 @@ public sealed class MarketUiFragment : BoxContainer
                 .ToList();
             if (prices.Count == 0)
                 continue;
+
+            // The server sends stations sorted by faction; a header starts each group.
+            if (station.Faction != faction)
+            {
+                faction = station.Faction;
+                var header = Panel(new Label
+                    {
+                        Text = station.Faction.ToUpperInvariant(),
+                        FontColorOverride = station.FactionColor,
+                        StyleClasses = { "LabelSmall" },
+                    },
+                    Color.Transparent, station.FactionColor, new Thickness(0, 0, 0, 1), new Thickness(2, 0, 0, 1));
+                header.Margin = new Thickness(0, shown == 0 ? 0 : 6, 0, 4);
+                target.AddChild(header);
+            }
 
             shown++;
             var tops = prices.Count(IsTop);
@@ -283,11 +310,10 @@ public sealed class MarketUiFragment : BoxContainer
                 content.AddChild(i % 2 == 1 ? Panel(row, RowShade, Color.Transparent, new Thickness(0), new Thickness(0)) : row);
             }
 
-            var card = Panel(content, underground ? RedCard : CardBackground,
-                underground ? Red : tops > 0 || prices.Any(price => price.Highlight) ? Hot : Quiet,
+            var card = Panel(content, underground ? RedCard : CardBackground, station.FactionColor,
                 new Thickness(3, 0, 0, 0), new Thickness(8, 4, 6, 5));
             card.Margin = new Thickness(0, 0, 0, 5);
-            _prices.AddChild(card);
+            target.AddChild(card);
         }
 
         return shown;
@@ -341,36 +367,13 @@ public sealed class MarketUiFragment : BoxContainer
             return;
         }
 
-        var cut = (int) MathF.Round((1f - state.Thrust) * 100f);
-        var thrustColour = state.Thrust >= 0.8f ? Up : state.Thrust >= 0.6f ? Hot : Down;
-        var summary = new BoxContainer { Orientation = LayoutOrientation.Vertical, HorizontalExpand = true };
-        summary.AddChild(new Label
+        _hold.AddChild(Card(new Label
         {
-            Text = Loc.GetString("wf-market-hold-summary", ("ship", state.Ship), ("tonnes", (int) MathF.Round(state.HoldTonnes)), ("percent", cut)),
+            Text = Loc.GetString("wf-market-hold-summary", ("ship", state.Ship), ("count", state.Hold.Count)),
             StyleClasses = { "LabelHeading" },
             FontColorOverride = Bright,
             ClipText = true,
-        });
-
-        var thrust = new BoxContainer { Orientation = LayoutOrientation.Horizontal, HorizontalExpand = true, Margin = new Thickness(0, 3, 0, 1) };
-        thrust.AddChild(Dimmed(Loc.GetString("wf-market-hold-thrust", ("percent", 100 - cut)), 84));
-        thrust.AddChild(new ProgressBar
-        {
-            MinValue = 0f,
-            MaxValue = 1f,
-            Value = state.Thrust,
-            HorizontalExpand = true,
-            MinHeight = 10,
-            VerticalAlignment = VAlignment.Center,
-            BackgroundStyleBoxOverride = new StyleBoxFlat { BackgroundColor = HeaderBackground, BorderColor = Quiet, BorderThickness = new Thickness(1) },
-            ForegroundStyleBoxOverride = new StyleBoxFlat { BackgroundColor = thrustColour },
-        });
-        summary.AddChild(thrust);
-
-        if (state.StoredTonnes >= 0.05f)
-            summary.AddChild(Dimmed(Loc.GetString("wf-market-hold-stored", ("tonnes", MathF.Round(state.StoredTonnes, 1)))));
-
-        _hold.AddChild(Card(summary, thrustColour));
+        }, Hot));
 
         if (state.Hold.Count == 0)
         {
@@ -396,7 +399,6 @@ public sealed class MarketUiFragment : BoxContainer
                 HorizontalExpand = true,
                 ClipText = true,
             });
-            row.AddChild(Dimmed(Loc.GetString("wf-market-hold-tonnes", ("tonnes", MathF.Round(group.Sum(entry => entry.Tonnes), 1))), 40));
             row.AddChild(new Label
             {
                 Text = Loc.GetString(bound ? "wf-market-hold-bound" : "wf-market-hold-best", ("station", station), ("amount", amount)),
