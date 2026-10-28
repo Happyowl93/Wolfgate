@@ -24,8 +24,8 @@ public sealed class WFTradeRush
 }
 
 /// <summary>
-/// Rush orders: every so often a station wants a number of crates of one group fast and pays a premium for each until
-/// the order is filled or runs out. The first ships there split it.
+/// Every so often a station posts a rush order for a number of crates of one group and pays a premium for each until
+/// the order is filled or expires. The first ships to deliver split it.
 /// </summary>
 public sealed class WFTradeRushSystem : EntitySystem
 {
@@ -43,6 +43,14 @@ public sealed class WFTradeRushSystem : EntitySystem
     private TimeSpan? _next;
 
     public IReadOnlyList<WFTradeRush> Active => _active;
+
+    /// <summary>Withdraws every open rush order without an announcement, and returns how many.</summary>
+    public int Clear()
+    {
+        var count = _active.Count;
+        _active.Clear();
+        return count;
+    }
 
     public override void Initialize()
     {

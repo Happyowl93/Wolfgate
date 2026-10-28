@@ -33,7 +33,7 @@ public sealed class WFMarketStation
 [Serializable, NetSerializable]
 public readonly record struct WFMarketPrice(string Good, int Amount, float Factor, string Reason, float Tonnes, bool Highlight);
 
-/// <summary>A sector event worth chasing; <c>Ends</c> is game time, or null for no countdown.</summary>
+/// <summary>A sector event in the Alerts tab; <c>Ends</c> is game time, or null for no countdown.</summary>
 [Serializable, NetSerializable]
 public readonly record struct WFMarketAlert(string Text, TimeSpan? Ends, bool Urgent, WFMarketAlertKind Kind = WFMarketAlertKind.Deal);
 

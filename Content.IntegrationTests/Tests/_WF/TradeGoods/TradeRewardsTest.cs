@@ -14,7 +14,7 @@ using Robust.Shared.Timing;
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
 /// <summary>
-/// What the market pays out beyond the chute: rush orders raise a station's quote until filled or expired, and ships
+/// Payouts beyond the chute price: rush orders raise a station's quote until filled or expired, and ships
 /// that fly beside a laden trader split a bonus when it sells a big haul.
 /// </summary>
 [TestFixture]

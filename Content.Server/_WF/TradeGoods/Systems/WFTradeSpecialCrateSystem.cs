@@ -17,9 +17,10 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.TradeGoods.Systems;
 
 /// <summary>
-/// Crates worth chasing. Priority consignments appear at a station for another one, pay well on time and are announced
-/// when a ship takes them. Now and then a bought or freighted crate carries a TSF transponder: once it leaves its
-/// station, PDV and the Underground are told roughly where it is, and whoever turns it in at their own drop-off is paid.
+/// Priority consignments and classified cargo. A consignment appears at one station bound for another, pays well if
+/// delivered on time and is announced when a ship takes it. Now and then a bought or freighted crate carries a TSF
+/// transponder: once it leaves its station, PDV and the Underground are told roughly where it is, and whoever turns it
+/// in at their own drop-off is paid.
 /// </summary>
 public sealed class WFTradeSpecialCrateSystem : EntitySystem
 {

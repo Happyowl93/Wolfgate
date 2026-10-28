@@ -18,7 +18,7 @@ using Robust.Shared.Timing;
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
 /// <summary>
-/// Cargo as the market and its predators see it: a ship's trade crates and console trading crates add up to a value
+/// Cargo value: a ship's trade crates and console trading crates add up to a value
 /// that raises extortion tolls and draws raids, and the Market app names where a console crate is bound and what it
 /// fetches there now.
 /// </summary>

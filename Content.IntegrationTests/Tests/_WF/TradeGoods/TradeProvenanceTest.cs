@@ -14,7 +14,7 @@ using Robust.Shared.Timing;
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
 /// <summary>
-/// Where a crate was made: one from off the market maps is pending until it shows up on one, then stamped where it
+/// Crate origins: one from off the market maps is pending until it shows up on one, then stamped where it
 /// arrives by FTL, by the sweep, or at the chute it's offered to, and only sells after a haul from there.
 /// </summary>
 [TestFixture]

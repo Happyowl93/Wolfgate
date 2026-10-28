@@ -11,7 +11,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.TradeGoods.Systems;
 
-/// <summary>The Sector Exchange's voice: market lines on the common channel and private lines to some players.</summary>
+/// <summary>Sector Exchange announcements on the common channel, and private messages to some players.</summary>
 public sealed partial class WFTradeMarketSystem
 {
     [Dependency] private RadioSystem _radio = default!;
@@ -64,7 +64,7 @@ public sealed partial class WFTradeMarketSystem
             _chat.DispatchFilteredAnnouncement(filter, message, sender: Loc.GetString("wf-trade-exchange"), playSound: false, colorOverride: ExchangeColor);
     }
 
-    /// <summary>The Exchange's radio: an entity on the sector map, heard without a telecom server.</summary>
+    /// <summary>The entity on the sector map that speaks for the Exchange, heard without a telecom server.</summary>
     private EntityUid? Exchange()
     {
         if (_exchange is { } existing && !TerminatingOrDeleted(existing))

@@ -11,8 +11,8 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.TradeGoods.Systems;
 
 /// <summary>
-/// Escort pay: crewed ships that fly beside a laden trader share a bonus when it sells a big haul. Paid on top of the sale,
-/// never taken from the trader.
+/// Pays crewed ships that fly beside a laden trader a shared bonus when it sells a big haul. The bonus is paid on top
+/// of the sale, not taken from the trader.
 /// </summary>
 public sealed class WFTradeEscortSystem : EntitySystem
 {
@@ -187,7 +187,7 @@ public sealed class WFTradeEscortSystem : EntitySystem
             return;
 
         var bonus = (int) (total * Share);
-        // Nobody aboard to pay means nothing earned.
+        // No crew aboard the escorts means no payout and no message.
         if (_rewards.PayCrews(Loc.GetString("wf-trade-escort-name", ("ship", Name(ship))), $"escort of {ToPrettyString(ship)}", bonus, paid, "escorting") == 0)
             return;
 

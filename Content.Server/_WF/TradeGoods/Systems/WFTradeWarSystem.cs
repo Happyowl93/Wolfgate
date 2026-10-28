@@ -12,9 +12,9 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._WF.TradeGoods.Systems;
 
 /// <summary>
-/// The war and the market. While the war is hot a navy pays its own people faction credits on top for munitions and
-/// ship parts at its chutes, and pays the enemy's people more for war goods; a navy that posts them puts a warrant on
-/// one of its own who sells to the enemy.
+/// War pricing at the navy chutes. While the war is hot a navy pays its own people faction credits on top for munitions
+/// and ship parts, and pays the enemy's people more for war goods. A navy that posts warrants puts one on any of its
+/// own people who sell to the enemy.
 /// </summary>
 public sealed class WFTradeWarSystem : EntitySystem
 {

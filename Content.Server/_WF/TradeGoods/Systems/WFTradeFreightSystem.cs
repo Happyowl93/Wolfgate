@@ -11,9 +11,9 @@ using Robust.Shared.Random;
 namespace Content.Server._WF.TradeGoods.Systems;
 
 /// <summary>
-/// NPC freight joins the market. A run's crates carry a manifest seal naming the run and where it was bound; a freighter
-/// docking at a stop supplies that station, and a run lost to attack leaves its remaining stops short. Sealed crates pay
-/// less at lawful chutes, full price at a fence, and a bonus at their own destination.
+/// Feeds NPC freight into the market. Each run's crates carry a manifest seal naming the run and its destination. A
+/// freighter docking at a stop supplies that station, and a run lost to attack leaves its remaining stops short. Sealed
+/// crates pay less at lawful chutes, full price at a fence, and a bonus at their own destination.
 /// </summary>
 public sealed class WFTradeFreightSystem : EntitySystem
 {

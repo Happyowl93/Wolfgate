@@ -5,7 +5,7 @@
   parent: BaseCargoChute
   id: WFCargoChuteMerchant
   name: merchant's turn-in chute
-  description: A merchant's intake chute. It buys a few goods well, and nothing else.
+  description: A merchant's intake chute. It only buys a few goods, but pays well for them.
   components:
   - type: Dispenser
     defaultItem: PaperWrittenDispenserInstructions

@@ -7,14 +7,14 @@ using Robust.Shared.Timing;
 namespace Content.Client._WF.CargoLoad;
 
 /// <summary>
-/// The helm's cargo strip: tonnes aboard against the load that bottoms out thrust, tinted by the thrust cut, with the
-/// cut, FTL spool and stored materials in its tooltip. Collapsed while the ship carries nothing.
+/// Helm strip showing the tonnes aboard against the load where thrust bottoms out, coloured by how much thrust is lost.
+/// The tooltip gives the thrust cut, FTL spool and stored materials. Collapsed while the ship carries nothing.
 /// </summary>
 public sealed class WFCargoGauge : BoxContainer
 {
     [Dependency] private IEntityManager _entities = default!;
 
-    /// <summary>Thrust kept at or above which the strip stays green, then amber down to the next.</summary>
+    /// <summary>Thrust factors where the strip turns from green to amber, and from amber to red.</summary>
     private const float Fine = 0.8f;
     private const float Heavy = 0.6f;
 
@@ -23,7 +23,7 @@ public sealed class WFCargoGauge : BoxContainer
     private float _poll;
     private (float, float, float, float)? _shown;
 
-    /// <summary>Reads the cargo of the ship a screen is showing; the prefix names the strip, as the fuel bank's does.</summary>
+    /// <summary>Tracks the cargo of the ship a screen is showing; control names use the fuel bank's prefix.</summary>
     public WFCargoGauge(Func<EntityUid?> ship, string prefix = "Cockpit")
     {
         IoCManager.InjectDependencies(this);

@@ -1,6 +1,6 @@
 namespace Content.Server._WF.Encounters.Systems;
 
-/// <summary>Cargo-aware predators: extorters look over the nearest ships for the richest hold and price the toll by it.</summary>
+/// <summary>Lets extorters pick the richest hold among the nearest ships and set the toll by its value.</summary>
 public sealed partial class WFEncounterSystem
 {
     /// <summary>How many of the nearest crewed ships an extorter weighs before picking a mark.</summary>

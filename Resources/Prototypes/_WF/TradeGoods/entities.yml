@@ -3,7 +3,7 @@
   parent: NFBasePDACartridge
   id: WFMarketCartridge
   name: market cartridge
-  description: A program showing what every station's turn-in chute pays right now, and why.
+  description: A PDA program listing what every station's turn-in chute pays right now, and the reason for each price.
   components:
   - type: Sprite
     sprite: _WF/TradeGoods/market.rsi
@@ -53,7 +53,7 @@
   parent: WFTradeConsignment
   id: WFTradeConsignmentHeavy
   name: heavy priority consignment
-  description: A sealed, stamped crate of machinery bound for one station. It weighs a ton, and then some.
+  description: A sealed, stamped crate of heavy machinery bound for one station, with a delivery deadline on the label.
   components:
   - type: Sprite
     layers:
@@ -71,7 +71,7 @@
   parent: BaseItem
   id: WFTransponderJammer
   name: transponder jammer
-  description: A one-shot burst jammer. Clamp it to a crate's transponder and nobody hears it for a while.
+  description: A single-use jammer. Clamp it to a crate's transponder to silence it for a while.
   components:
   - type: Sprite
     sprite: Objects/Devices/jammer.rsi
@@ -89,7 +89,7 @@
   parent: BaseCargoChute
   id: WFCargoChuteUnderground
   name: Underground fence chute
-  description: A chute that leads somewhere nobody asks about. It takes anything, and pays without questions.
+  description: An unlicensed turn-in chute. It takes almost anything, sealed freight included.
   components:
   - type: Dispenser
     defaultItem: PaperWrittenDispenserInstructions
@@ -115,7 +115,7 @@
   parent: VendingMachineTraderBaikal
   id: WFVendingMachineFence
   name: Underground fence vendor
-  description: Sells what a fence's customers need and nobody else sells.
+  description: Sells transponder jammers to the fence's customers.
   components:
   - type: VendingMachine
     pack: WFFenceInventory

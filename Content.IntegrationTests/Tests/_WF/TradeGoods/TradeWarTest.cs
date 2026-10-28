@@ -16,7 +16,7 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
 /// <summary>
-/// The war and the market: while the war is hot a navy pays the enemy's people more for war goods and its own people
+/// War pricing: while the war is hot a navy pays the enemy's people more for war goods and its own people
 /// faction credits on top; freight runs are drawn to stations that are short.
 /// </summary>
 [TestFixture]

@@ -6,8 +6,8 @@ using Content.Shared._WF.TradeGoods;
 namespace Content.Server._WF.TradeGoods.Systems;
 
 /// <summary>
-/// Provenance: every trade crate is stamped where it first appears on a market map, and a chute refuses one stamped on
-/// its own grid or within the haul distance of it. An unknown origin always counts as local.
+/// Stamps every trade crate with where it first appears on a market map. A chute refuses a crate stamped on its own
+/// grid or within the haul distance of it. An unknown origin always counts as local.
 /// </summary>
 public sealed partial class WFTradeMarketSystem
 {

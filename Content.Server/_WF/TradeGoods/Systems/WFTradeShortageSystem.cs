@@ -31,6 +31,14 @@ public sealed class WFTradeShortageSystem : EntitySystem
 
     public IReadOnlyList<WFTradeShortage> Active => _active;
 
+    /// <summary>Ends every shortage and boom without an announcement, and returns how many.</summary>
+    public int Clear()
+    {
+        var count = _active.Count;
+        _active.Clear();
+        return count;
+    }
+
     public override void Initialize()
     {
         base.Initialize();

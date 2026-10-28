@@ -14,4 +14,4 @@ wf-cargo-gauge = CARGO
 wf-cargo-gauge-unit = t
 wf-cargo-gauge-help = Hold {$tonnes}t: thrust -{$percent}%, FTL spool +{$spool}s.
 wf-cargo-gauge-stored = {$tonnes}t of it is materials packed in silos and lathes.
-wf-cargo-gauge-dump = Full scale is the load that cuts thrust to its floor. Dump cargo to win thrust back.
+wf-cargo-gauge-dump = Full scale is the load at which thrust bottoms out. Dump cargo to get thrust back.

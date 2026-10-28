@@ -19,7 +19,7 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WF.CargoLoad;
 
 /// <summary>
-/// What a load does and shows: the FTL spool penalty, the helm readout and its band warnings, scaled thrust in space,
+/// Load effects and readouts: the FTL spool penalty, the helm readout and its band warnings, scaled thrust in space,
 /// the encounter lift exemption, and every trade good's weight class.
 /// </summary>
 [TestFixture]

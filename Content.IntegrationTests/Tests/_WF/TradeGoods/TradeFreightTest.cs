@@ -168,7 +168,7 @@ public sealed class TradeFreightTest
             Assert.That(quote.Reason, Is.EqualTo((LocId) "wf-trade-reason-short"));
             Assert.That(quote.Factor, Is.GreaterThan(1f));
 
-            // A run that gets through leaves nobody short.
+            // A run that arrives leaves no station short.
             var completed = Run(entMan, MedicalManifest, finished);
             encounters.Resolve(completed, WFEncounterResolution.Completed);
             Assert.That(shortages.Active.Any(shortage => shortage.Grid == finished), Is.False, "A completed run left its stop short.");
@@ -207,7 +207,7 @@ public sealed class TradeFreightTest
             Assert.That(lawful.Reason, Is.EqualTo((LocId) "wf-trade-reason-sealed"));
             Assert.That(lawful.Amount, Is.EqualTo((int) System.MathF.Round(basePrice * profile.HotCargoLawful)).Within(1));
 
-            // A fence asks no questions.
+            // The fence pays full price for sealed freight.
             var fenced = market.Quote(fence, Fabric, sealedCrate)!.Value;
             Assert.That(fenced.Amount, Is.EqualTo(fenced.Base), $"{Fence} should pay full price for sealed freight.");
             Assert.That(fenced.Reason, Is.Not.EqualTo((LocId) "wf-trade-reason-sealed"));

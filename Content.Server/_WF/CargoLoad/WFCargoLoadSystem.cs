@@ -19,7 +19,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.CargoLoad;
 
 /// <summary>
-/// Cargo weight. Each grid sums the weight of the cargo aboard once a second; a loaded docked set accelerates more slowly
+/// Sums the weight of the cargo aboard each grid once a second. A loaded docked set accelerates more slowly
 /// in space, cargo counts against planet lift through <see cref="WFGridLiftLoadEvent"/>, and a heavy hold spools FTL
 /// longer. Anchors (grids that cannot fly) bound a set, so ships at one station never share a penalty.
 /// </summary>

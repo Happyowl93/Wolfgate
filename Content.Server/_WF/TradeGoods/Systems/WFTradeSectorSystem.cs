@@ -23,9 +23,9 @@ public sealed class WFTradeBlockadeAttempt
 }
 
 /// <summary>
-/// The sector moves prices: blockaded stations pay more for essentials, a station under a blockade attempt pays relief
-/// rates, the navies pay war demand while the war is hot, and a raided station pays more for repairs. When traffic breaks
-/// a blockade attempt, the ships that ran it are named and paid.
+/// Price modifiers from the sector. Blockaded stations pay more for essentials, a station under a blockade attempt pays
+/// relief rates, the navies pay war demand while the war is hot, and a raided station pays more for repairs. When
+/// traffic breaks a blockade attempt, the ships that ran it are named and paid.
 /// </summary>
 public sealed class WFTradeSectorSystem : EntitySystem
 {
