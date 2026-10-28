@@ -3,6 +3,7 @@ using System.Numerics;
 using Content.Server._WF.CargoLoad;
 using Content.Server._WF.Planets.Flight;
 using Content.Shared._WF.CargoLoad;
+using Content.Shared.Materials;
 using Content.Shared.Stacks;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
@@ -10,6 +11,7 @@ using Robust.Shared.Maths;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Systems;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.CargoLoad;
 
@@ -94,6 +96,69 @@ public sealed class CargoLoadTest
             var perUnit = entMan.GetComponent<WFCargoMassComponent>(sheets).PerUnit;
             Assert.That(perUnit, Is.GreaterThan(0f), "Steel sheets should carry a per-sheet weight.");
             Assert.That(cargo.Weight(sheets), Is.EqualTo(perUnit * count).Within(0.001f));
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task StoredMaterialsWeighTheirPackedShare()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var protos = server.ResolveDependency<IPrototypeManager>();
+        var cargo = entMan.System<WFCargoLoadSystem>();
+        var mapSys = entMan.System<SharedMapSystem>();
+        var physics = entMan.System<SharedPhysicsSystem>();
+        var storage = entMan.System<SharedMaterialStorageSystem>();
+        var profile = protos.Index(WFCargoLoadSystem.DefaultProfile);
+
+        EntityUid ship = default;
+        EntityUid silo = default;
+
+        await server.WaitAssertion(() =>
+        {
+            var grid = mapSys.CreateGridEntity(map.MapId);
+            for (var x = 0; x < 10; x++)
+            {
+                for (var y = 0; y < 10; y++)
+                {
+                    mapSys.SetTile(grid.Owner, grid.Comp, new Vector2i(x, y), map.Tile.Tile);
+                }
+            }
+
+            ship = grid.Owner;
+            physics.SetBodyType(ship, BodyType.Dynamic);
+            silo = entMan.SpawnEntity("MachineMaterialSilo", new EntityCoordinates(ship, 2.5f, 2.5f));
+            Assert.That(storage.TryChangeMaterialAmount(silo, "Steel", 10000), Is.True);
+        });
+
+        await pair.RunTicksSync(90);
+
+        await server.WaitAssertion(() =>
+        {
+            // 10000 units is 100 sheets of steel; packed, they weigh StoredFactor of the same sheets loose.
+            var sheet = protos.Index<EntityPrototype>("SheetSteel1");
+            Assert.That(sheet.TryGetComponent<WFCargoMassComponent>(out var mass, entMan.ComponentFactory), Is.True);
+            var loose = mass!.PerUnit * 100f;
+            Assert.That(cargo.MaterialWeight("Steel") * 10000f, Is.EqualTo(loose).Within(0.001f));
+
+            var expected = loose * profile.StoredFactor;
+            Assert.That(expected, Is.GreaterThan(0f));
+            Assert.That(cargo.GetLoad(ship), Is.EqualTo(expected).Within(0.01f), "A silo's materials should load the ship.");
+            Assert.That(cargo.GetSetStored(new[] { ship }), Is.EqualTo(expected).Within(0.01f));
+            Assert.That(cargo.GetSpaceFactor(ship), Is.LessThan(1f));
+
+            storage.TryChangeMaterialAmount(silo, "Steel", -10000);
+        });
+
+        await pair.RunTicksSync(90);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(cargo.GetLoad(ship), Is.EqualTo(0f).Within(0.001f), "An emptied silo should weigh nothing.");
         });
 
         await pair.CleanReturnAsync();

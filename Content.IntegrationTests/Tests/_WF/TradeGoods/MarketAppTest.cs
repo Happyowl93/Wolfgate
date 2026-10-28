@@ -24,7 +24,7 @@ public sealed class MarketAppTest
             var station = new WFMarketStation { Name = "Halcyon" };
             station.Prices.Add(new WFMarketPrice("medical supplies", 9500, 1.9f, "blockade", 1f, true));
             station.Prices.Add(new WFMarketPrice("metals", 2000, 0.5f, "glutted", 5f, false));
-            var state = new WFMarketUiState { Ship = "ISV Mule", HoldTonnes = 21f, Thrust = 0.75f };
+            var state = new WFMarketUiState { Ship = "ISV Mule", HoldTonnes = 21f, StoredTonnes = 3f, Thrust = 0.75f };
             state.Stations.Add(station);
             state.Alerts.Add(new WFMarketAlert("Freighter Plutomkii inbound to Halcyon with medical supplies", null, false));
             state.Alerts.Add(new WFMarketAlert("RUSH Halcyon", System.TimeSpan.FromHours(1), true));
@@ -41,6 +41,7 @@ public sealed class MarketAppTest
             Assert.That(texts, Has.Some.Contains("RUSH Halcyon").And.Contains("min"), "A timed alert should show its countdown.");
             Assert.That(texts, Has.Some.Contains("ISV Mule").And.Contains("25"), "The hold summary should show the thrust cut.");
             Assert.That(texts, Has.Some.Contains("Cargo Depot A").And.Contains("9000"));
+            Assert.That(texts, Has.Some.Contains("3t").And.Contains("stored"), "The hold should say how much is stored materials.");
             Assert.That(texts.Any(text => text.Contains('{') || text.Contains("wf-market")), Is.False, "Every string should resolve.");
 
             // An empty state says so on every tab.

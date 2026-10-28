@@ -4,8 +4,11 @@ The trade-crate economy. Every station with a turn-in chute is a market whose pr
 pressure that lowers its price at that station and decays over about half an hour, and sector events raise prices
 with a reason players can see. Crates must be hauled about 3 km from where they were made before a chute takes them,
 which closes the lathe faucet. The Market PDA app, chute examine and the chute's empty-hand paper show live prices,
-each with its weight and price per tonne. The app's Alerts tab also lists announced NPC freighters inbound and their
-next stop, and its Hold tab shows console trading crates with where they are bound and what they fetch there now.
+each with its weight and price per tonne. The app's Alerts tab lists every event below with its countdown, plus alerts
+for the holder alone: traders who won't deal with them, what the war pays their faction, and the convoy they are
+escorting or that escorts them. Its Hold tab prices each crate aboard as a chute would (`WFMarketCartridgeSystem.BestFor`):
+seals, destination bonuses, the seller's faction and special payouts count, and chutes that would refuse it are skipped;
+consignments and console trading crates show where they are bound.
 
 What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifierCap`):
 - Shortages at one station and sector-wide booms (`WFTradeShortageSystem`, `wfTradeShortage`).
@@ -89,6 +92,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketAppTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketAppTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketHoldTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketHoldTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCargoTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeCargoTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeChuteTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeFreightTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeFreightTest.cs)

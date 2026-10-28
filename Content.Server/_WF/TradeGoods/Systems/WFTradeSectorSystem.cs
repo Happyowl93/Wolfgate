@@ -261,6 +261,17 @@ public sealed class WFTradeSectorSystem : EntitySystem
         }
     }
 
+    /// <summary>Chute stations under a raid alert and when it lapses, for the Market app.</summary>
+    public IEnumerable<(EntityUid Station, TimeSpan Ends)> Raided()
+    {
+        foreach (var grid in _market.Chutes().Select(chute => chute.Grid).Distinct())
+        {
+            var window = _market.Profile(grid).RaidWindow;
+            if (_reaver.LastRaid(grid) is { } at && _timing.CurTime - at < window)
+                yield return (grid, at + window);
+        }
+    }
+
     /// <summary>Chute stations held by a blockading faction now.</summary>
     public IEnumerable<EntityUid> Blockaded()
     {

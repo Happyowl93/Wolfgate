@@ -57,4 +57,8 @@ public sealed partial class WFCargoLoadPrototype : IPrototype
     /// <summary>How far the factor must climb back past a band before it warns again.</summary>
     [DataField]
     public float Hysteresis = 0.05f;
+
+    /// <summary>Share of their loose weight that materials keep inside a silo, lathe or other material storage.</summary>
+    [DataField]
+    public float StoredFactor = 0.5f;
 }

@@ -32,3 +32,5 @@
   spoolCap: 6
   bands: [ 0.8, 0.6 ]
   hysteresis: 0.05
+  # Materials in a silo or lathe weigh half what the same sheets and ore weigh loose.
+  storedFactor: 0.5

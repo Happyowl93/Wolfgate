@@ -128,6 +128,35 @@ public sealed class WFTradeEscortSystem : EntitySystem
         }
     }
 
+    /// <summary>Ships beside a laden trader at its latest sample.</summary>
+    public IReadOnlyCollection<EntityUid> EscortsOf(EntityUid trader)
+    {
+        return _samples.TryGetValue(trader, out var samples) && samples.Count > 0
+            ? samples[^1].Escorts
+            : Array.Empty<EntityUid>();
+    }
+
+    /// <summary>Laden traders a ship was beside at their latest sample.</summary>
+    public IEnumerable<EntityUid> EscortedBy(EntityUid escort)
+    {
+        foreach (var (trader, samples) in _samples)
+        {
+            if (samples.Count > 0 && samples[^1].Escorts.Contains(escort) && !TerminatingOrDeleted(trader))
+                yield return trader;
+        }
+    }
+
+    /// <summary>A trader's sales in the window, and the total at which its escorts are paid.</summary>
+    public (int Sold, int Threshold) Progress(EntityUid trader)
+    {
+        var now = _timing.CurTime;
+        var sold = _sales.TryGetValue(trader, out var sales) ? sales.Where(sale => now - sale.At <= Window).Sum(sale => sale.Amount) : 0;
+        return (sold, Threshold);
+    }
+
+    /// <summary>Escort share of a big haul, as a percentage.</summary>
+    public static int SharePercent => (int) (Share * 100f);
+
     private void OnSale(WFTradeSaleEvent args)
     {
         if (args.Ship is not { } ship || !_market.WasHauled(args.Chute, args.Crate))

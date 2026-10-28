@@ -73,39 +73,47 @@ public sealed class WFTradeSpecialCrateSystem : EntitySystem
     /// <summary>What a chute pays for a special crate; false, with a popup, if it won't take it.</summary>
     public bool TryPrice(EntityUid chute, EntityUid crate, EntityUid user, out int amount)
     {
-        amount = 0;
-        var grid = Transform(chute).GridUid;
-        if (TryComp<WFConsignmentComponent>(crate, out var consignment))
+        if (Price(chute, crate) is { } price)
         {
-            if (consignment.Destination != grid)
-            {
-                amount = consignment.Elsewhere;
-                return true;
-            }
-
-            amount = Math.Max(0, consignment.Value
-                                 + (_timing.CurTime <= consignment.Deadline ? consignment.OnTimeBonus : -consignment.LatePenalty));
+            amount = price;
             return true;
         }
 
+        amount = 0;
+        if (CompOrNull<WFClassifiedCargoComponent>(crate)?.Awake == true)
+            _popup.PopupEntity(Loc.GetString("wf-trade-classified-refused"), chute, user);
+
+        return false;
+    }
+
+    /// <summary>What a chute pays for a special crate now, or null if it won't take it.</summary>
+    public int? Price(EntityUid chute, EntityUid crate)
+    {
+        if (TryComp<WFConsignmentComponent>(crate, out var consignment))
+            return consignment.Destination == Transform(chute).GridUid ? ConsignmentPayout(consignment) : consignment.Elsewhere;
+
         if (!TryComp<WFClassifiedCargoComponent>(crate, out var classified) || !classified.Awake)
-            return false;
+            return null;
 
         var profile = Profile;
         var chuteId = MetaData(chute).EntityPrototype?.ID;
-        if (chuteId != null && profile.ClassifiedCarrierChutes.Contains(chuteId))
-            amount = profile.ClassifiedCarrierReward;
-        else if (chuteId != null && profile.ClassifiedPdvChutes.Contains(chuteId))
-            amount = (int) (profile.ClassifiedPdvReward * (_war.GetWarLevel(chute) ? profile.ClassifiedWarBonus : 1f));
-        else if (chuteId != null && profile.ClassifiedUndergroundChutes.Contains(chuteId))
-            amount = profile.ClassifiedUndergroundReward;
-        else
-        {
-            _popup.PopupEntity(Loc.GetString("wf-trade-classified-refused"), chute, user);
-            return false;
-        }
+        if (chuteId == null)
+            return null;
 
-        return true;
+        if (profile.ClassifiedCarrierChutes.Contains(chuteId))
+            return profile.ClassifiedCarrierReward;
+
+        if (profile.ClassifiedPdvChutes.Contains(chuteId))
+            return (int) (profile.ClassifiedPdvReward * (_war.GetWarLevel(chute) ? profile.ClassifiedWarBonus : 1f));
+
+        return profile.ClassifiedUndergroundChutes.Contains(chuteId) ? profile.ClassifiedUndergroundReward : null;
+    }
+
+    /// <summary>What a consignment pays at its destination now: on-time bonus before the deadline, late penalty after.</summary>
+    public int ConsignmentPayout(WFConsignmentComponent consignment)
+    {
+        return Math.Max(0, consignment.Value
+                           + (_timing.CurTime <= consignment.Deadline ? consignment.OnTimeBonus : -consignment.LatePenalty));
     }
 
     private void OnSale(WFTradeSaleEvent args)

@@ -263,11 +263,18 @@ public sealed partial class WFReaverCampaignSystem
     /// </summary>
     public bool RecentlyRaided(EntityUid station, TimeSpan window)
     {
+        return LastRaid(station) is { } at && _timing.CurTime - at < window;
+    }
+
+    /// <summary>When a raid was last launched at a station's grid, or null; null while the campaign is held.</summary>
+    public TimeSpan? LastRaid(EntityUid station)
+    {
         return !Held
                && HasComp<StationMemberComponent>(station)
                && State() is { } state
                && state.Raided.TryGetValue(station, out var at)
-               && _timing.CurTime - at < window;
+            ? at
+            : null;
     }
 
     /// <summary>Marks a launched raid, its target's cooldown and the tallies.</summary>

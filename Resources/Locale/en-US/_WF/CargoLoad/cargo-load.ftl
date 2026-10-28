@@ -1,5 +1,6 @@
 wf-cargo-load-examine = [color=#9aa7b1]{$class} cargo: {$tonnes}t.[/color]
 wf-cargo-load-examine-stack = [color=#9aa7b1]Cargo: {$tonnes}t.[/color]
+wf-cargo-load-examine-stored = [color=#9aa7b1]Stored materials: {$tonnes}t, packed to {$percent}% of their loose weight.[/color]
 wf-cargo-load-class-light = Light
 wf-cargo-load-class-standard = Standard
 wf-cargo-load-class-heavy = Heavy

@@ -126,6 +126,15 @@ public sealed class MarketUiFragment : BoxContainer
             StyleClasses = { "LabelHeading" },
         });
 
+        if (state.StoredTonnes >= 0.05f)
+        {
+            _hold.AddChild(new Label
+            {
+                Text = Loc.GetString("wf-market-hold-stored", ("tonnes", MathF.Round(state.StoredTonnes, 1))),
+                FontColorOverride = Dim,
+            });
+        }
+
         foreach (var entry in state.Hold)
         {
             var row = new BoxContainer { Orientation = LayoutOrientation.Horizontal, HorizontalExpand = true };

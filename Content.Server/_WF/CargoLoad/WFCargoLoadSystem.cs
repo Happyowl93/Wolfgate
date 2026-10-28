@@ -7,6 +7,7 @@ using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Systems;
 using Content.Shared._WF.CargoLoad;
 using Content.Shared.Examine;
+using Content.Shared.Materials;
 using Content.Shared.Stacks;
 using Content.Shared._Mono.Ships;
 using Robust.Shared.Map.Components;
@@ -29,13 +30,18 @@ public sealed class WFCargoLoadSystem : EntitySystem
     [Dependency] private DockingSystem _docking = default!;
     [Dependency] private ShuttleSystem _shuttle = default!;
     [Dependency] private PopupSystem _popup = default!;
+    [Dependency] private IComponentFactory _factory = default!;
 
     public static readonly ProtoId<WFCargoLoadPrototype> DefaultProfile = "WFCargoLoadDefault";
     private static readonly TimeSpan SweepInterval = TimeSpan.FromSeconds(1);
 
     private TimeSpan _nextSweep;
     private readonly Dictionary<EntityUid, float> _loads = new();
+    private readonly Dictionary<EntityUid, float> _stored = new();
     private readonly HashSet<EntityUid> _touched = new();
+
+    /// <summary>Loose tonnes per unit of each material, from its sheet or ore.</summary>
+    private readonly Dictionary<string, float> _materialWeights = new();
 
     public override void Initialize()
     {
@@ -43,7 +49,9 @@ public sealed class WFCargoLoadSystem : EntitySystem
         SubscribeLocalEvent<WFCargoLoadComponent, WFGridLiftLoadEvent>(OnLiftLoad);
         SubscribeLocalEvent<WFCargoMassComponent, ExaminedEvent>(OnCargoExamined);
         SubscribeLocalEvent<WFCargoHelmComponent, ExaminedEvent>(OnHelmExamined);
+        SubscribeLocalEvent<MaterialStorageComponent, ExaminedEvent>(OnStorageExamined);
         SubscribeLocalEvent<WFLiftWarningEvent>(OnLiftWarning);
+        SubscribeLocalEvent<PrototypesReloadedEventArgs>(_ => _materialWeights.Clear());
     }
 
     /// <summary>Names cargo in the descent warning when dropping some would restore full lift.</summary>
@@ -82,6 +90,45 @@ public sealed class WFCargoLoadSystem : EntitySystem
 
         cls ??= profile.DefaultClass;
         return profile.Classes.GetValueOrDefault(cls) * profile.MassScale;
+    }
+
+    /// <summary>Loose tonnes one unit of a material weighs: its sheet or ore's weight over its units; 0 if it has none.</summary>
+    public float MaterialWeight(string material)
+    {
+        if (_materialWeights.TryGetValue(material, out var cached))
+            return cached;
+
+        var weight = 0f;
+        if (_proto.TryIndex<MaterialPrototype>(material, out var proto)
+            && proto.StackEntity is { } stack
+            && _proto.TryIndex(stack, out var item)
+            && item.TryGetComponent<WFCargoMassComponent>(out var cargo, _factory)
+            && cargo.PerUnit > 0f
+            && item.TryGetComponent<PhysicalCompositionComponent>(out var composition, _factory)
+            && composition.MaterialComposition.TryGetValue(material, out var units)
+            && units > 0)
+            weight = cargo.PerUnit / units;
+
+        _materialWeights[material] = weight;
+        return weight;
+    }
+
+    /// <summary>Tonnes the materials in a storage weigh, compacted by <see cref="WFCargoLoadPrototype.StoredFactor"/>.</summary>
+    public float StoredWeight(MaterialStorageComponent storage)
+    {
+        var loose = 0f;
+        foreach (var (material, amount) in storage.Storage)
+        {
+            loose += amount * MaterialWeight(material);
+        }
+
+        return loose * Profile.StoredFactor * Profile.MassScale;
+    }
+
+    /// <summary>Tonnes of a set's load held as stored materials.</summary>
+    public float GetSetStored(IEnumerable<EntityUid> grids)
+    {
+        return grids.Sum(grid => CompOrNull<WFCargoLoadComponent>(grid)?.OwnStored ?? 0f);
     }
 
     /// <summary>Tonnes one crate of a good weighs, from the class table.</summary>
@@ -201,6 +248,22 @@ public sealed class WFCargoLoadSystem : EntitySystem
             _loads[grid] = _loads.GetValueOrDefault(grid) + Weight(uid, mass);
         }
 
+        // Sheets and ore put into storage become numbers, so storage weighs its contents itself.
+        _stored.Clear();
+        var storages = EntityQueryEnumerator<MaterialStorageComponent, TransformComponent>();
+        while (storages.MoveNext(out var storage, out var xform))
+        {
+            if (xform.GridUid is not { } grid || HasComp<MapComponent>(grid) || storage.Storage.Count == 0)
+                continue;
+
+            var weight = StoredWeight(storage);
+            if (weight <= 0f)
+                continue;
+
+            _stored[grid] = _stored.GetValueOrDefault(grid) + weight;
+            _loads[grid] = _loads.GetValueOrDefault(grid) + weight;
+        }
+
         _touched.Clear();
         var profile = Profile;
         foreach (var grid in _loads.Keys.ToList())
@@ -219,6 +282,7 @@ public sealed class WFCargoLoadSystem : EntitySystem
 
                 var comp = EnsureComp<WFCargoLoadComponent>(member);
                 comp.OwnLoad = _loads.GetValueOrDefault(member);
+                comp.OwnStored = _stored.GetValueOrDefault(member);
                 comp.SetLoad = load;
                 comp.SpaceFactor = factor;
             }
@@ -305,6 +369,14 @@ public sealed class WFCargoLoadSystem : EntitySystem
         var cls = ClassOf(ent, ent.Comp);
         args.PushMarkup(Loc.GetString("wf-cargo-load-examine", ("class", Loc.GetString($"wf-cargo-load-class-{cls.ToLowerInvariant()}")),
             ("tonnes", Weight(ent, ent.Comp))));
+    }
+
+    private void OnStorageExamined(Entity<MaterialStorageComponent> ent, ref ExaminedEvent args)
+    {
+        var weight = StoredWeight(ent.Comp);
+        if (weight >= 0.05f)
+            args.PushMarkup(Loc.GetString("wf-cargo-load-examine-stored", ("tonnes", MathF.Round(weight, 2)),
+                ("percent", (int) MathF.Round(Profile.StoredFactor * 100f))));
     }
 
     private void OnHelmExamined(Entity<WFCargoHelmComponent> ent, ref ExaminedEvent args)

@@ -13,6 +13,9 @@ public sealed class WFMarketUiState : BoundUserInterfaceState
     /// <summary>Cargo aboard the holder's ship, in tonnes.</summary>
     public float HoldTonnes;
 
+    /// <summary>Tonnes of <see cref="HoldTonnes"/> held as materials in silos, lathes and other material storage.</summary>
+    public float StoredTonnes;
+
     /// <summary>The ship's thrust in space as a fraction of empty.</summary>
     public float Thrust = 1f;
 

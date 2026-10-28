@@ -8,6 +8,10 @@ public sealed partial class WFCargoLoadComponent : Component
     [ViewVariables]
     public float OwnLoad;
 
+    /// <summary>Tonnes of <see cref="OwnLoad"/> held as materials in silos, lathes and other material storage.</summary>
+    [ViewVariables]
+    public float OwnStored;
+
     /// <summary>Tonnes aboard the grid's cargo set.</summary>
     [ViewVariables]
     public float SetLoad;
