@@ -155,6 +155,8 @@ public sealed class WFRoundSetupLobby
     public Color CompanyColour = Color.White;
     /// <summary>A company hangar launch: the design is fixed and the company pays.</summary>
     public bool Hangar;
+    /// <summary>Recipient only: their company rank's job is one this crew can field, so they may join as it.</summary>
+    public bool CanJoinAsRank;
 }
 
 /// <summary>A per-recipient snapshot of the round setup browser and their membership.</summary>

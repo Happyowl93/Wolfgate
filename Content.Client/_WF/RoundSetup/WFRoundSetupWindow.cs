@@ -189,7 +189,7 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
             lobby.Started && !lobby.AllowLateJoin ? "latejoin-closed" : "no-roles";
         if (available && NeedsJoinWarning(lobby))
             content.AddChild(JoinWarning());
-        if (!invitation && state.OwnCompany != null && state.CompanyRank != null &&
+        if (!invitation && lobby.CanJoinAsRank && state.CompanyRank != null &&
             state.OwnLobby == null && (state.CanJoin || live) && lobby.Access is not (WFLobbyAccess.Invite or WFLobbyAccess.Closed))
         {
             var asRank = Button("join-as-rank", () => SendRequest(new WFRoundSetupRequest(WFRoundSetupAction.Join)
@@ -371,7 +371,7 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
                first.Scenario == second.Scenario && first.Faction == second.Faction && first.ShipName == second.ShipName && first.ShipStart == second.ShipStart && first.Access == second.Access && first.AllowLateJoin == second.AllowLateJoin &&
                first.Started == second.Started && first.MemberCount == second.MemberCount && first.Code == second.Code &&
                first.Recruiting == second.Recruiting && first.RecruitingOn == second.RecruitingOn && first.CompanyId == second.CompanyId &&
-               first.CompanyName == second.CompanyName && first.CompanyTag == second.CompanyTag && first.CompanyColour == second.CompanyColour && first.LiveJoin == second.LiveJoin && first.NextPosting == second.NextPosting &&
+               first.CompanyName == second.CompanyName && first.CompanyTag == second.CompanyTag && first.CompanyColour == second.CompanyColour && first.LiveJoin == second.LiveJoin && first.NextPosting == second.NextPosting && first.CanJoinAsRank == second.CanJoinAsRank &&
                first.CurrentShip == second.CurrentShip && first.ShipCondition == second.ShipCondition && first.Vessel == second.Vessel && first.Roles.SequenceEqual(second.Roles) &&
                first.Roster.SequenceEqual(second.Roster) && first.Members.SequenceEqual(second.Members) && first.Requests.SequenceEqual(second.Requests);
     }

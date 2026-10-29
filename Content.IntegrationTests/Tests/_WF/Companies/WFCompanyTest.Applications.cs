@@ -147,7 +147,7 @@ public sealed partial class WFCompanyTest
             var issue = typeof(WFCompanySystem).GetMethod("IssueRankLoadout", BindingFlags.Instance | BindingFlags.NonPublic)!;
             var item = WFCompanyLoadouts.Items(prototypes, paid)[0];
             var walkInSlot = preferences.GetPreferences(walkIn.UserId).SelectedCharacterIndex;
-            await Request(new(WFCompanyAction.Deposit) { CompanyId = id.Value, Amount = paid.Price });
+            await Request(new(WFCompanyAction.Deposit) { CompanyId = id.Value, Amount = paid.Price * 2 });
             await server.WaitPost(() =>
             {
                 issue.Invoke(companies, new object[] { walkIn, em.SpawnEntity("MobHuman", map.GridCoords), walkInSlot });
@@ -156,7 +156,7 @@ public sealed partial class WFCompanyTest
             await Run(() => companies.Flush());
             await server.WaitAssertion(() =>
             {
-                Assert.That(companies.GetBalance(id.Value), Is.EqualTo(0), "The company paid for the first spawn.");
+                Assert.That(companies.GetBalance(id.Value), Is.EqualTo(paid.Price), "The company pays for one spawn per member per round.");
                 Assert.That(((HumanoidCharacterProfile) preferences.GetPreferences(walkIn.UserId).SelectedCharacter).BankBalance,
                     Is.EqualTo(100000 - paid.Price), "The member paid for the second.");
                 var issued = 0;

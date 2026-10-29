@@ -245,6 +245,7 @@ public sealed partial class WFCompanySystem : EntitySystem
         _memberKeys.Clear();
         _launched.Clear();
         _reserved.Clear();
+        _companyPaidLoadouts.Clear();
         foreach (var company in _companies.Values)
             company.Invitations.Clear();
         _loading = Reload();

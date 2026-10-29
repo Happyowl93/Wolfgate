@@ -728,8 +728,12 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                 scenarioJobs[lobby.Scenario] = jobs = GetJobs(session, lobby, eligibility);
             return jobs;
         }
-        WFRoundSetupLobby ForRecipient(Lobby lobby) => Snapshot(lobby, session.UserId, canEnter, canJoinLive,
-            canEnter ? JobsFor(lobby) : Array.Empty<WFRoundSetupJob>());
+        WFRoundSetupLobby ForRecipient(Lobby lobby)
+        {
+            var snapshot = Snapshot(lobby, session.UserId, canEnter, canJoinLive, canEnter ? JobsFor(lobby) : Array.Empty<WFRoundSetupJob>());
+            snapshot.CanJoinAsRank = JoinsAsRank(lobby, session);
+            return snapshot;
+        }
         var state = new WFRoundSetupState
         {
             InRound = _ticker.RunLevel != GameRunLevel.PreRoundLobby,

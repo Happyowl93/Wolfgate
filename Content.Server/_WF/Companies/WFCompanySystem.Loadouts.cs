@@ -19,6 +19,9 @@ public sealed partial class WFCompanySystem
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private LoadoutSystem _loadouts = default!;
 
+    /// <summary>Members whose loadout the company has paid for this round; later spawns are on the member.</summary>
+    private readonly HashSet<int> _companyPaidLoadouts = new();
+
     /// <summary>The owner edits their own rank's loadout; others need Edit ranks and to outrank the rank.</summary>
     private static bool CanEditLoadout(Company company, Member you, Rank rank)
     {
@@ -44,7 +47,8 @@ public sealed partial class WFCompanySystem
         return null;
     }
 
-    /// <summary>Spawns the member's rank loadout; the company pays while it can, then the member, and anything unpaid is skipped.</summary>
+    /// <summary>Spawns the member's rank loadout. The company pays once per member per round while its account covers it, so
+    /// respawning can't farm it; otherwise the member pays, and anything unpaid is skipped.</summary>
     private void IssueRankLoadout(ICommonSession session, EntityUid body, int slot)
     {
         if (!_profileIds.TryGetValue(session.UserId, out var ids) || !ids.TryGetValue(slot, out var profile) ||
@@ -54,7 +58,7 @@ public sealed partial class WFCompanySystem
         if (IconRankOf(company, member) is not { Loadout.Count: > 0 } rank)
             return;
         var allowed = WFCompanyLoadouts.Catalogue(_prototypes).ToDictionary(entry => entry.Loadout.ID, entry => entry.Loadout);
-        var budget = company.Frozen ? 0 : company.Balance;
+        var budget = company.Frozen || _companyPaidLoadouts.Contains(profile) ? 0 : company.Balance;
         long companyPaid = 0;
         long memberPaid = 0;
         var issued = new List<LoadoutPrototype>();
@@ -76,7 +80,10 @@ public sealed partial class WFCompanySystem
             issued.Add(loadout);
         }
         if (companyPaid > 0)
+        {
             Transact(company, WFCompanyLedgerKind.Loadout, -companyPaid, member.Profile, member.Name, rank.Title);
+            _companyPaidLoadouts.Add(profile);
+        }
 
         var coordinates = Transform(body).Coordinates;
         foreach (var loadout in issued)

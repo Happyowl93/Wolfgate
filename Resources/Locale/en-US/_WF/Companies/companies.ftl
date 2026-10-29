@@ -238,7 +238,7 @@ wf-company-loadout-summary = Loadout: { $count } { $count ->
     [one] item
    *[other] items
     }, { $cost } per spawn
-wf-company-loadout-tooltip = Issued each time a member of this rank spawns. The company pays while it can, then the member's own bank; anything neither can pay for is skipped.
+wf-company-loadout-tooltip = Issued each time a member of this rank spawns. The company pays for the first spawn each round while it can; after that, or when it can't, the member's own bank pays. Anything neither can pay for is skipped.
 wf-company-loadout-edit = Edit loadout
 wf-company-loadout-title = Loadout: { $rank }
 wf-company-loadout-help = Pick what this rank gets at each spawn, from any crew job's loadouts. It goes into their bag, or their hands if the bag is full.

@@ -26,8 +26,8 @@ can set it, otherwise the lowest. The owner can turn on open access at one rank 
 Join as <rank> in the Companies list without applying.
 
 Each rank (and the owner's) can have a loadout of up to twenty entries from the loadouts any ship crew job can pick in the
-character loadout. At every spawn as that character, the company pays for each entry while its account covers it, then
-the member's bank, and anything neither can pay for is skipped. The items go into the bag, or the hands if it's full.
+character loadout. At every spawn as that character, the company pays for each entry while its account covers it (once
+per member per round, so respawning can't farm it), then the member's bank, and anything neither can pay for is skipped. The items go into the bag, or the hands if it's full.
 Job icon presets in the rank icon editor are read by the server, because packaged clients pack RSIs into one file.
 
 Payroll counts a minute at a time while a member plays the character the membership belongs to: a living or critical

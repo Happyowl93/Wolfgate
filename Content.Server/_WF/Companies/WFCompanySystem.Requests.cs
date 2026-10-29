@@ -98,9 +98,16 @@ public sealed partial class WFCompanySystem
                     break;
                 }
                 var wanted = msg.RankId is { } wantedId && target.Ranks.Any(rank => rank.Id == wantedId) ? msg.RankId : null;
+                var isNew = !target.Applications.ContainsKey(character.ProfileId);
                 target.Applications[character.ProfileId] = new Applicant(character.User, character.Profile.Name, character.Slot, wanted, reason);
                 Track(_db.SaveCompanyApplicationAsync(target.Id, character.ProfileId, wanted, reason));
-                NotifyApplication(target, character.Profile.Name, wanted);
+                // Edits and cancel-and-reapply loops don't ping the officers again.
+                if (isNew && (!_applicationNotified.TryGetValue((target.Id, character.ProfileId), out var notified) ||
+                              _timing.RealTime - notified >= ApplicationNotifyCooldown))
+                {
+                    _applicationNotified[(target.Id, character.ProfileId)] = _timing.RealTime;
+                    NotifyApplication(target, character.Profile.Name, wanted);
+                }
                 error = null;
                 success = "wf-company-applied";
                 touched = target;
@@ -451,6 +458,11 @@ public sealed partial class WFCompanySystem
         if (applied)
             Track(_db.DeleteCompanyApplicationsAsync(profile, null));
     }
+
+    /// <summary>How long before the same character's application to the same company notifies its officers again.</summary>
+    private static readonly TimeSpan ApplicationNotifyCooldown = TimeSpan.FromMinutes(5);
+
+    private readonly Dictionary<(int Company, int Profile), TimeSpan> _applicationNotified = new();
 
     /// <summary>Whether one of the player's characters is already a member; a player has one character per company.</summary>
     private static bool HasPlayer(Company company, Robust.Shared.Network.NetUserId user) =>
