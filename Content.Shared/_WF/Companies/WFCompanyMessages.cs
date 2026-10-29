@@ -161,6 +161,11 @@ public sealed class WFCompanyState : EntityEventArgs
     /// <summary>The member can late-join the round as their rank now.</summary>
     public bool CanJoinRound;
     public int? CharacterBalance;
+    /// <summary>What creating a company costs, and the hours of play it needs.</summary>
+    public int CreateFee;
+    public int CreateHours;
+    /// <summary>The player's total hours played, once loaded.</summary>
+    public int? PlayedHours;
     public WFCompanyListing[] Directory = Array.Empty<WFCompanyListing>();
     public WFCompanyListing[] Invitations = Array.Empty<WFCompanyListing>();
     public int[] Applications = Array.Empty<int>();

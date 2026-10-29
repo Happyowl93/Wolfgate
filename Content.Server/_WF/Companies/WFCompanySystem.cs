@@ -2,14 +2,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Content.Server.Database;
 using Content.Server.GameTicking;
+using Content.Server.Players.PlayTimeTracking;
 using Content.Server.Preferences.Managers;
 using Content.Shared._WF.Companies;
 using Content.Shared.GameTicking;
 using Content.Shared.Ghost;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
+using Content.Shared.Players.PlayTimeTracking;
 using Content.Shared.Preferences;
 using Robust.Server.Player;
+using Robust.Shared.Configuration;
 using Robust.Shared.Enums;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
@@ -24,6 +27,8 @@ public sealed partial class WFCompanySystem : EntitySystem
     [Dependency] private IPlayerManager _players = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private PlayTimeTrackingManager _playTime = default!;
+    [Dependency] private IConfigurationManager _config = default!;
 
     private ISawmill _log = default!;
 
@@ -442,6 +447,15 @@ public sealed partial class WFCompanySystem : EntitySystem
     private static int? OpenRankOf(Company company) =>
         company.OpenRank is { } open && company.Ranks.Any(rank => rank.Id == open) ? open : null;
 
+    /// <summary>Whole hours the player has played in total, or null until their playtime has loaded.</summary>
+    private int? PlayedHours(ICommonSession session)
+    {
+        if (!_playTime.TryGetTrackerTimes(session, out var times))
+            return null;
+        _playTime.FlushTracker(session);
+        return (int) times.GetValueOrDefault(PlayTimeTrackingShared.TrackerOverall).TotalHours;
+    }
+
     /// <summary>Builds the snapshot for the session's acting character.</summary>
     private void SendState(ICommonSession session, string? message = null)
     {
@@ -465,6 +479,9 @@ public sealed partial class WFCompanySystem : EntitySystem
             var own = CompanyOf(character.ProfileId);
             state.CharacterName = character.Profile.Name;
             state.CharacterBalance = character.Profile.BankBalance;
+            state.CreateFee = _config.GetCVar(WFCompanyCVars.CreateFee);
+            state.CreateHours = _config.GetCVar(WFCompanyCVars.CreateHours);
+            state.PlayedHours = PlayedHours(session);
             state.CanJoin = own == null && !IsIronman(character.Profile);
             state.Directory = _companies.Values.OrderByDescending(company => company.Members.Count)
                 .ThenByDescending(CompanyValue).Select(Listing).ToArray();

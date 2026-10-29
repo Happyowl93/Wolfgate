@@ -105,10 +105,14 @@ public sealed partial class WFCompanyWindow
         colour.OnColorChanged += value => _newColour = value;
         create.AddChild(colour);
         create.AddChild(Paragraph(Text("create-logo-help")));
+        var enoughHours = state.PlayedHours is { } played && played >= state.CreateHours;
+        var enoughMoney = state.CharacterBalance is { } balance && balance >= state.CreateFee;
+        create.AddChild(Paragraph(Text("create-cost", ("fee", Credits(state.CreateFee)), ("hours", state.CreateHours),
+            ("played", state.PlayedHours ?? 0))));
         create.AddChild(Button("create-button", () => Send(new WFCompanyRequest(WFCompanyAction.Create)
         {
             Name = _newName, Tag = _newTag, Description = Rope.Collapse(_newDescription), Colour = _newColour,
-        }), !state.CanJoin));
+        }), !state.CanJoin || !enoughHours || !enoughMoney));
         return Card(create);
     }
 

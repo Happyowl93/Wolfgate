@@ -328,6 +328,24 @@ public sealed partial class WFCompanySystem
             return ("wf-company-error-description", null);
         if (_companies.Values.Any(other => string.Equals(other.Name, name, StringComparison.OrdinalIgnoreCase) || other.Tag == tag))
             return ("wf-company-error-name-taken", null);
+        if (!_players.TryGetSessionById(character.User, out var session) || PlayedHours(session) is not { } played ||
+            played < _config.GetCVar(WFCompanyCVars.CreateHours))
+            return ("wf-company-error-hours", null);
+        // The fee is taken first and refunded if the company can't be made.
+        var fee = Math.Max(0, _config.GetCVar(WFCompanyCVars.CreateFee));
+        if (fee > 0 && (_preferences.GetPreferencesOrNull(character.User) is not { } prefs ||
+                        !_bank.TryBankWithdraw(session, prefs, character.Profile, fee, out _)))
+            return ("wf-company-error-create-fee", null);
+        var (error, made) = await CreateRow(character, name, tag, description, msg);
+        if (error != null && fee > 0 && _preferences.GetPreferencesOrNull(character.User) is { } refund &&
+            refund.Characters.GetValueOrDefault(character.Slot) is Content.Shared.Preferences.HumanoidCharacterProfile current)
+            _bank.TryBankDeposit(session, refund, current, fee, out _);
+        return (error, made);
+    }
+
+    private async Task<(string? Error, Company? Company)> CreateRow(Character character, string name, string tag, string description,
+        WFCompanyRequest msg)
+    {
         var now = DateTime.UtcNow;
         var row = new WolfgateCompany
         {

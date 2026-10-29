@@ -41,7 +41,7 @@ public sealed partial class WFCompanyTest
                 preferences.HavePreferencesLoaded(player)));
             await server.WaitPost(() =>
             {
-                preferences.SetProfile(owner.UserId, slot, original.WithName("Ada Owner").WithBankBalance(10000)).Wait();
+                preferences.SetProfile(owner.UserId, slot, original.WithName("Ada Owner").WithBankBalance(100000)).Wait();
                 foreach (var (player, name) in new[] { (applicant, "Bea Applicant"), (walkIn, "Cal Walkin") })
                 {
                     var prefs = preferences.GetPreferences(player.UserId);
@@ -49,7 +49,19 @@ public sealed partial class WFCompanyTest
                         ((HumanoidCharacterProfile) prefs.SelectedCharacter).WithName(name).WithBankBalance(100000)).Wait();
                 }
             });
+            // Creating needs enough hours played and the fee from the founder's bank.
+            await server.WaitPost(() => server.CfgMan.SetCVar(WFCompanyCVars.CreateHours, 100000));
             var state = await Request(new(WFCompanyAction.Create) { Name = "Open Door Freight", Tag = "DOOR" });
+            Assert.That(state.Own, Is.Null, "Too few hours played.");
+            await server.WaitPost(() =>
+            {
+                server.CfgMan.SetCVar(WFCompanyCVars.CreateHours, 0);
+                server.CfgMan.SetCVar(WFCompanyCVars.CreateFee, 20000);
+            });
+            state = await Request(new(WFCompanyAction.Create) { Name = "Open Door Freight", Tag = "DOOR" });
+            await server.WaitPost(() => server.CfgMan.SetCVar(WFCompanyCVars.CreateFee, 0));
+            Assert.That(state.Own, Is.Not.Null, state.Message);
+            Assert.That(state.CharacterBalance, Is.EqualTo(80000), "The fee comes out of the founder's bank.");
             id = state.Own!.Id;
             var member = state.Own.Ranks[1];
             var recruit = state.Own.Ranks[^1];
@@ -159,7 +171,12 @@ public sealed partial class WFCompanyTest
             if (id is { } left)
                 await server.WaitPost(() => companies.AdminDisband(left));
             await Run(() => companies.Flush());
-            await server.WaitPost(() => preferences.SetProfile(owner.UserId, slot, original).Wait());
+            await server.WaitPost(() =>
+            {
+                server.CfgMan.SetCVar(WFCompanyCVars.CreateHours, 0);
+                server.CfgMan.SetCVar(WFCompanyCVars.CreateFee, 0);
+                preferences.SetProfile(owner.UserId, slot, original).Wait();
+            });
             await server.RemoveAllDummySessions();
         }
         await pair.CleanReturnAsync();

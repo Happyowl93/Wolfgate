@@ -14,6 +14,9 @@ every send and receive, as for crew radio. A Crew Setup host whose rank has Fiel
 company: its tag shows on crew rows, details and postings, members of the company see its crews first, and its ship
 carries `WFCompanyShipComponent`, which the IFF label shows as `[TAG] Name`.
 
+Creating a company needs 25 hours played in total (`wf.companies.create_hours`) and takes a 100,000 fee from the
+founder's bank (`wf.companies.create_fee`), refunded if creation fails. The fee leaves the economy.
+
 Apply opens a form: the rank the character wants and up to 500 characters on why. Applications are saved, so they
 survive restarts, and online members who can accept them are told. Accepting gives the asked-for rank when the accepter
 can set it, otherwise the lowest. The owner can turn on open access at one rank in Settings; anyone can then press
@@ -126,6 +129,7 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 
 ### Shared
 
+- [`Content.Shared/_WF/Companies/WFCompanyCVars.cs`](../../../Content.Shared/_WF/Companies/WFCompanyCVars.cs)
 - [`Content.Shared/_WF/Companies/WFCompanyLoadouts.cs`](../../../Content.Shared/_WF/Companies/WFCompanyLoadouts.cs)
 - [`Content.Shared/_WF/Companies/WFCompanyMessages.cs`](../../../Content.Shared/_WF/Companies/WFCompanyMessages.cs)
 - [`Content.Shared/_WF/Companies/WFCompanyPolicy.cs`](../../../Content.Shared/_WF/Companies/WFCompanyPolicy.cs)
@@ -174,6 +178,9 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 ## Non-modular edits
 
 - [`Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs`](../../../Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs)
+- [`Content.IntegrationTests/PoolManager.Cvars.cs`](../../../Content.IntegrationTests/PoolManager.Cvars.cs)
+  - test players have no playtime
+  - tests check balances without the creation fee
 - [`Content.Server.Database/Model.cs`](../../../Content.Server.Database/Model.cs)
   - player-run companies, their ranks, members and ledger
   - names and tags are unique; a character's membership goes with the character
