@@ -255,6 +255,11 @@ public sealed partial class WFRoundSetupSystem
             if (!ScenarioJobs(lobby.Scenario, lobby.Faction).Contains(member.Job))
                 return false;
         }
+        if (WFRoundSetupPolicy.IsFormed(lobby.Scenario) && !_ships.HasAssignedShip(lobby.Id))
+        {
+            error = "wf-round-setup-formed-no-ship";
+            return false;
+        }
         if (_ships.HasAssignedShip(lobby.Id))
         {
             error = "wf-round-setup-ship-gone";

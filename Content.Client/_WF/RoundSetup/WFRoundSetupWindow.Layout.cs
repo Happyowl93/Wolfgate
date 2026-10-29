@@ -165,7 +165,7 @@ public sealed partial class WFRoundSetupWindow
             if (own == null)
             {
                 _navigation.AddChild(NavigationButton("flow-browse", () => Navigate(SetupView.Browse), _view == SetupView.Browse));
-                _navigation.AddChild(NavigationButton("flow-create", OpenCreate, _view is SetupView.Create or SetupView.Saved, !state.CanJoin));
+                _navigation.AddChild(NavigationButton("flow-create", OpenCreate, _view is SetupView.Create or SetupView.Saved, !state.CanJoin && !state.CanJoinLive));
             }
             switch (_view)
             {
@@ -204,7 +204,7 @@ public sealed partial class WFRoundSetupWindow
         _body.AddChild(Heading("browse"));
         var lobbies = state.Lobbies.Where(lobby => lobby.Id != state.OwnLobby)
             .OrderByDescending(lobby => state.Invitations.Any(invitation => invitation.Id == lobby.Id))
-            .ThenBy(lobby => lobby.Started).ToArray();
+            .ThenByDescending(lobby => lobby.Recruiting).ThenBy(lobby => lobby.Started).ToArray();
         var selected = lobbies.FirstOrDefault(lobby => lobby.Id == _focusedLobby);
         if (selected != null)
         {
@@ -227,6 +227,11 @@ public sealed partial class WFRoundSetupWindow
     /// <summary>Shows full-width scenario briefs with one explicit create action per scenario.</summary>
     private void BuildScenarios(WFRoundSetupState state)
     {
+        if (!state.CanJoin && state.CanJoinLive)
+        {
+            BuildFormedScenario();
+            return;
+        }
         var load = Button("load-saved-scenario", () => { _selectedSavedId = null; Navigate(SetupView.Saved); },
             state.SavedSetups.Length == 0, "saved-empty-help");
         load.Name = "RoundSetupLoadSaved";
@@ -402,7 +407,7 @@ public sealed partial class WFRoundSetupWindow
             if (host && player.UserId != lobby.Host)
             {
                 var actions = FlowRow(Button("transfer", () => SendTarget(WFRoundSetupAction.TransferHost, lobby.Id, player.UserId)));
-                if (!player.Spawned)
+                if (!player.Spawned || player.Live)
                     actions.AddChild(Button("kick", () => SendTarget(WFRoundSetupAction.Kick, lobby.Id, player.UserId)));
                 content.AddChild(actions);
             }

@@ -16,7 +16,7 @@ public sealed partial class WFRoundSetupSystem
 {
     private static string[] ScenarioJobs(WFRoundScenario scenario, WFCrewFaction faction) => scenario switch
     {
-        WFRoundScenario.Ship or WFRoundScenario.Doomed => WFShipCrewJobs.Jobs,
+        WFRoundScenario.Ship or WFRoundScenario.Doomed or WFRoundScenario.Formed => WFShipCrewJobs.Jobs,
         WFRoundScenario.FactionShip => WFFactionCrewPolicy.Jobs(faction),
         _ => WFCrashScenarioSystem.AllowedJobs,
     };

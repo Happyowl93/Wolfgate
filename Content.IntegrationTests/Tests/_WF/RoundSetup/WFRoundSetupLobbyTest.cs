@@ -989,7 +989,7 @@ public sealed partial class WFRoundSetupLobbyTest
                 var portrait = member.GetType().GetField("Portrait")!;
                 var before = portrait.GetValue(member);
                 typeof(WFRoundSetupSystem).GetMethod("Snapshot", BindingFlags.Instance | BindingFlags.NonPublic)!
-                    .Invoke(system, new object[] { lobby, pair.Player!.UserId, true, System.Array.Empty<WFRoundSetupJob>() });
+                    .Invoke(system, new object[] { lobby, pair.Player!.UserId, true, false, System.Array.Empty<WFRoundSetupJob>() });
                 Assert.That(portrait.GetValue(member), Is.SameAs(before), "Serialization must not refresh or clone a portrait.");
                 recorder.Calls.Clear();
                 recorder.DenyContractor = true;

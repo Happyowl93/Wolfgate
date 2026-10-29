@@ -13,4 +13,8 @@ public sealed class WFRoundSetupCVars
     /// <summary>The connected player's exact name to use as the local playtest host.</summary>
     public static readonly CVarDef<string> DemoHost =
         CVarDef.Create("wf.round_setup.demo_host", "RoundSetupHost", CVar.SERVERONLY);
+
+    /// <summary>Whether this player receives crew postings in chat and as cards.</summary>
+    public static readonly CVarDef<bool> ShowPostings =
+        CVarDef.Create("wf.round_setup.show_postings", true, CVar.CLIENT | CVar.REPLICATED | CVar.ARCHIVE);
 }

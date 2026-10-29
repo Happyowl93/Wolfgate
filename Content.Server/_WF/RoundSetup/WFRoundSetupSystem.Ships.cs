@@ -18,7 +18,8 @@ public sealed partial class WFRoundSetupSystem
     private int _nextShipChangeId;
 
     /// <summary>Uses an explicit replacement before either original scenario's ship.</summary>
-    private IReadOnlyCollection<EntityUid> CrewGrids(Lobby lobby) => _ships.HasAssignedShip(lobby.Id) || WFRoundSetupPolicy.IsShip(lobby.Scenario)
+    private IReadOnlyCollection<EntityUid> CrewGrids(Lobby lobby) => _ships.HasAssignedShip(lobby.Id) || WFRoundSetupPolicy.IsShip(lobby.Scenario) ||
+        WFRoundSetupPolicy.IsFormed(lobby.Scenario)
         ? _ships.GetActiveGrids(lobby.Id)
         : lobby.Scenario == WFRoundScenario.Doomed ? _doomed.GetGrids(lobby.Id) : _crash.GetGrids(lobby.Id);
 

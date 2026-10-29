@@ -4,6 +4,7 @@ using Content.Client._NF.LateJoin.ListItems;
 using Content.Client.Lobby;
 using Content.Client.Players.PlayTimeTracking;
 using Content.Shared._NF.Shipyard.Prototypes;
+using Content.Client._WF.RoundSetup; // WOLFGATE(RoundSetup)
 using Content.Shared._WF.Roles; // WOLFGATE(Roles)
 using Content.Shared.GameTicking;
 using Content.Shared.Preferences;
@@ -50,6 +51,8 @@ public sealed partial class CrewPickerControl : PickerControl
         {
             var item = new CrewListItem(stationViewState);
             item.StationButton.OnPressed += _ => OnStationPressed(stationViewState);
+            if (WFRecruitingGlow.IsRecruitingStation(stationViewState.StationEntity)) // WOLFGATE(RoundSetup): recruiting crews pulse
+                item.AddChild(new WFRecruitingGlow()); // WOLFGATE(RoundSetup)
             StationItemList.AddChild(item);
 
             // Update displayed information if we get a new state update.
@@ -174,7 +177,7 @@ public sealed partial class CrewPickerControl : PickerControl
 
         // Sort 0 to the end of the list in the order it is in the dictionary.
         // Sort 1 first, 2 second, etc.
-        return viewStateList.ToList();
+        return viewStateList.OrderByDescending(view => WFRecruitingGlow.IsRecruitingStation(view.StationEntity)).ToList(); // WOLFGATE(RoundSetup): recruiting crews first
     }
 
     private FormattedMessage BuildDescription(CrewListItem.ViewState? state)

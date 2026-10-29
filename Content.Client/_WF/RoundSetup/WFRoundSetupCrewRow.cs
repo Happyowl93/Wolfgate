@@ -27,6 +27,8 @@ public sealed class WFRoundSetupCrewRow : Button
         var living = WFCrewStatusPolicy.Living(statuses);
         var deployed = WFCrewStatusPolicy.Deployed(statuses);
         var warning = WFCrewStatusPolicy.NeedsJoinWarning(lobby.Started, statuses, lobby.ShipCondition);
+        if (lobby.Recruiting)
+            ToolTip += "\n" + Loc.GetString("wf-round-setup-row-recruiting-tooltip");
         if (lobby.Started)
             ToolTip += "\n" + Loc.GetString("wf-round-setup-row-alive-tooltip", ("living", living), ("deployed", deployed),
                 ("ship", Loc.GetString("wf-round-setup-ship-condition-short-" + lobby.ShipCondition.ToString().ToLowerInvariant())));
@@ -34,6 +36,15 @@ public sealed class WFRoundSetupCrewRow : Button
         var row = new BoxContainer { SeparationOverride = 8, HorizontalExpand = true, MouseFilter = MouseFilterMode.Ignore };
         row.AddChild(JobIcon(lobby.HostJob ?? (WFRoundSetupPolicy.IsShip(lobby.Scenario) ? "Pilot" : "Contractor")));
         row.AddChild(new Label { Text = title, ClipText = true, HorizontalExpand = true, MouseFilter = MouseFilterMode.Ignore });
+        if (lobby.Recruiting)
+        {
+            row.AddChild(new Label
+            {
+                Text = Loc.GetString("wf-round-setup-row-recruiting"),
+                FontColorOverride = WFRecruitingGlow.Accent,
+                MouseFilter = MouseFilterMode.Ignore,
+            });
+        }
         var difficulty = WFRoundSetupPolicy.Difficulty(lobby.Scenario);
         row.AddChild(new Label
         {
@@ -50,6 +61,8 @@ public sealed class WFRoundSetupCrewRow : Button
             MouseFilter = MouseFilterMode.Ignore,
         });
         AddChild(row);
+        if (lobby.Recruiting)
+            AddChild(new WFRecruitingGlow());
         OnPressed += _ => open();
     }
 
@@ -68,6 +81,6 @@ public sealed class WFRoundSetupCrewRow : Button
     /// <summary>Avoids rebuilding rows for unrelated readiness and admission changes.</summary>
     public static bool SameListing(WFRoundSetupLobby first, WFRoundSetupLobby second) =>
         first.Id == second.Id && first.Scenario == second.Scenario && first.Title == second.Title && first.HostName == second.HostName && first.Portrait?.Name == second.Portrait?.Name && first.HostJob == second.HostJob &&
-        first.MemberCount == second.MemberCount && first.Started == second.Started && Openings(first) == Openings(second) &&
+        first.MemberCount == second.MemberCount && first.Started == second.Started && Openings(first) == Openings(second) && first.Recruiting == second.Recruiting &&
         first.ShipCondition == second.ShipCondition && first.Roster.Select(mate => mate.Status).SequenceEqual(second.Roster.Select(mate => mate.Status));
 }

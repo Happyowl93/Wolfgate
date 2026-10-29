@@ -176,10 +176,13 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
             if (!lobby.Started)
                 content.AddChild(Description(ShipStartKey(lobby.ShipStart)));
         }
-        var available = state.CanJoin && state.OwnLobby == null && lobby.MemberCount < WFRoundSetupPolicy.MaximumMembers &&
+        var live = !state.CanJoin && state.CanJoinLive && lobby.LiveJoin;
+        var available = (state.CanJoin || live) && state.OwnLobby == null && lobby.MemberCount < WFRoundSetupPolicy.MaximumMembers &&
                         (!lobby.Started || lobby.AllowLateJoin);
         available &= BuildBrowseRoles(content, lobby, available);
-        var disabledReason = !state.CanJoin ? "disabled-join" : state.OwnLobby != null ? "disabled-own-crew" :
+        if (available && live)
+            content.AddChild(Description("live-join-help"));
+        var disabledReason = !state.CanJoin && !live ? state.CanJoinLive ? "live-unavailable" : "disabled-join" : state.OwnLobby != null ? "disabled-own-crew" :
             lobby.MemberCount >= WFRoundSetupPolicy.MaximumMembers ? "disabled-full" :
             lobby.Started && !lobby.AllowLateJoin ? "latejoin-closed" : "no-roles";
         if (available && NeedsJoinWarning(lobby))
@@ -233,6 +236,7 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
             _draftDescription = lobby.Description;
         }
         BuildInvitations(lobby, state);
+        BuildRecruiting(lobby);
         var settings = Column(6);
         settings.AddChild(Heading("crew-title"));
         var title = new LineEdit { Text = _draftTitle, PlaceHolder = Text("crew-title-placeholder"), HorizontalExpand = true };
@@ -286,7 +290,8 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
                 Button("rotate-code", () => Send(WFRoundSetupAction.RegenerateCode, lobby.Id))));
         }
         _body.AddChild(Panel(settings));
-        BuildSaveSetup(lobby, state);
+        if (!WFRoundSetupPolicy.IsFormed(lobby.Scenario))
+            BuildSaveSetup(lobby, state);
 
         if (lobby.Requests.Length > 0)
         {
@@ -337,7 +342,8 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
     private static bool SameState(WFRoundSetupState first, WFRoundSetupState second)
     {
         return first.Payment == second.Payment && first.CrewShips.SequenceEqual(second.CrewShips) && first.PendingShip == second.PendingShip &&
-               first.InRound == second.InRound && first.CanJoin == second.CanJoin && first.OwnLobby == second.OwnLobby &&
+               first.InRound == second.InRound && first.CanJoin == second.CanJoin && first.CanJoinLive == second.CanJoinLive && first.OwnLobby == second.OwnLobby &&
+               first.RecruitingStations.SequenceEqual(second.RecruitingStations) &&
                first.CrashlandedAvailable == second.CrashlandedAvailable && first.DoomedAvailable == second.DoomedAvailable && first.Factions.SequenceEqual(second.Factions) && first.HostBalance == second.HostBalance &&
                SameSavedSetups(first.SavedSetups, second.SavedSetups) && first.Vessels.SequenceEqual(second.Vessels) &&
                first.Jobs.SequenceEqual(second.Jobs) && first.RoleJobs.SequenceEqual(second.RoleJobs) && first.InviteTargets.SequenceEqual(second.InviteTargets) &&
@@ -351,6 +357,7 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
         return first.Id == second.Id && first.Host == second.Host && first.HostJob == second.HostJob && Equals(first.Portrait, second.Portrait) && first.HostName == second.HostName && first.Title == second.Title && first.Description == second.Description &&
                first.Scenario == second.Scenario && first.Faction == second.Faction && first.ShipName == second.ShipName && first.ShipStart == second.ShipStart && first.Access == second.Access && first.AllowLateJoin == second.AllowLateJoin &&
                first.Started == second.Started && first.MemberCount == second.MemberCount && first.Code == second.Code &&
+               first.Recruiting == second.Recruiting && first.RecruitingOn == second.RecruitingOn && first.LiveJoin == second.LiveJoin && first.NextPosting == second.NextPosting &&
                first.CurrentShip == second.CurrentShip && first.ShipCondition == second.ShipCondition && first.Vessel == second.Vessel && first.Roles.SequenceEqual(second.Roles) &&
                first.Roster.SequenceEqual(second.Roster) && first.Members.SequenceEqual(second.Members) && first.Requests.SequenceEqual(second.Requests);
     }
@@ -392,6 +399,7 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
         WFRoundScenario.Ship => "scenario-ship",
         WFRoundScenario.FactionShip => "scenario-faction",
         WFRoundScenario.Doomed => "scenario-doomed",
+        WFRoundScenario.Formed => "scenario-formed",
         _ => "scenario-normal",
     });
 
@@ -401,6 +409,7 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
         WFRoundScenario.Ship => "ship-description",
         WFRoundScenario.FactionShip => "faction-description",
         WFRoundScenario.Doomed => "doomed-description",
+        WFRoundScenario.Formed => "formed-description",
         _ => "normal-description",
     };
 

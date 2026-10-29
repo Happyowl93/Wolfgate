@@ -129,7 +129,7 @@ public sealed partial class WFRoundSetupSystem
         ? WFFactionCrewPolicy.Jobs(lobby.Faction).Where(job => IsFactionJob(lobby.Faction, job) && FactionJobAvailable(job) &&
                 WFFactionCrewPolicy.CanRecruit(lobby.Faction, lobby.Members[lobby.Host].Job, job))
             .Select(job => new WFRoundSetupJob(job, null, string.Empty)).ToList()
-        : lobby.Scenario == WFRoundScenario.Ship
+        : WFRoundSetupPolicy.UsesShipRoles(lobby.Scenario)
         ? WFShipCrewJobs.Jobs.Where(job => _prototypes.HasIndex<Content.Shared.Roles.JobPrototype>(job))
             .Select(job => new WFRoundSetupJob(job, null, string.Empty)).ToList()
         : GetJobs(host, lobby);
@@ -137,7 +137,7 @@ public sealed partial class WFRoundSetupSystem
     /// <summary>Adds missing preset openings without changing occupied roles or existing recruitment choices.</summary>
     private bool ApplyRoster(Lobby lobby, WFCrewRoster roster)
     {
-        if (lobby.Scenario != WFRoundScenario.Ship || !Enum.IsDefined(roster))
+        if (!WFRoundSetupPolicy.UsesShipRoles(lobby.Scenario) || !Enum.IsDefined(roster))
             return false;
         var additions = WFShipCrewJobs.Roster(roster)
             .Select(role => (Name: Loc.GetString("wf-round-setup-roster-role-" + role.Name), role.Job, role.Capacity))
@@ -209,10 +209,11 @@ public sealed partial class WFRoundSetupSystem
     }
 
     /// <summary>Publishes openings without exposing character choices or bypassing recipient restrictions.</summary>
-    private static WFRoundSetupRole[] SnapshotRoles(Lobby lobby, NetUserId user, bool canEnter, IReadOnlyCollection<WFRoundSetupJob> jobs)
+    private static WFRoundSetupRole[] SnapshotRoles(Lobby lobby, NetUserId user, bool canEnter, bool live, IReadOnlyCollection<WFRoundSetupJob> jobs)
     {
         return lobby.Roles.Values.Select(role => new WFRoundSetupRole(role.Id, role.Name, role.Job, role.Station,
-            role.Capacity, RoleOccupancy(lobby, role.Id), canEnter && IsRoleSelectable(lobby, user, role, jobs))).ToArray();
+            role.Capacity, RoleOccupancy(lobby, role.Id),
+            canEnter && IsRoleSelectable(lobby, user, role, jobs) || live && IsLiveRoleOpen(lobby, role))).ToArray();
     }
 
     /// <summary>Requires the player to confirm choices or purchase responsibility again.</summary>

@@ -7,7 +7,7 @@ namespace Content.Shared._WF.RoundSetup;
 
 /// <summary>The crew starting conditions; Normal is reserved and cannot create a scenario lobby.</summary>
 [Serializable, NetSerializable]
-public enum WFRoundScenario : byte { Normal, Crashlanded, Ship, FactionShip, Doomed }
+public enum WFRoundScenario : byte { Normal, Crashlanded, Ship, FactionShip, Doomed, Formed }
 
 /// <summary>How hard a scenario is to survive, shown on its card.</summary>
 [Serializable, NetSerializable]
@@ -27,7 +27,7 @@ public enum WFRoundSetupAction : byte
 {
     Refresh, Create, Configure, Join, Leave, AcceptRequest, RejectRequest,
     Invite, AcceptInvite, DeclineInvite, SelectJob, SetReady, Launch, RegenerateCode, Kick, TransferHost,
-    SelectVessel, UpsertRole, RemoveRole, SelectRole, ConfirmJoin, ChangeScenario, SelectShipStart, ApplyRoster, SetTitle, SaveSetup, LoadSetup, DeleteSetup, SetShipName, AssignShip, ApproveShip, CancelShip, SetContribution, Watch,
+    SelectVessel, UpsertRole, RemoveRole, SelectRole, ConfirmJoin, ChangeScenario, SelectShipStart, ApplyRoster, SetTitle, SaveSetup, LoadSetup, DeleteSetup, SetShipName, AssignShip, ApproveShip, CancelShip, SetContribution, Watch, SetRecruiting, Post,
 }
 
 /// <summary>A request whose actor is always taken from its network session.</summary>
@@ -60,6 +60,8 @@ public sealed class WFRoundSetupRequest : EntityEventArgs
     public WFCrewRoster Roster;
     public int SavedId;
     public string? SaveName;
+    public bool Recruiting;
+    public string? Posting;
 
     public WFRoundSetupRequest(WFRoundSetupAction action) { Action = action; }
 }
@@ -70,7 +72,7 @@ public sealed record WFRoundSetupPlayer(NetUserId UserId, string Name, int? Role
 
 /// <summary>A member's own job and readiness, with no character profile data.</summary>
 [Serializable, NetSerializable]
-public sealed record WFRoundSetupMember(NetUserId UserId, string Name, string? Job, NetEntity? Station, bool Ready, bool Spawned, bool Connected, int? RoleId = null, string Title = "", int Contribution = 0, WFCrewMemberStatus Status = WFCrewMemberStatus.Waiting);
+public sealed record WFRoundSetupMember(NetUserId UserId, string Name, string? Job, NetEntity? Station, bool Ready, bool Spawned, bool Connected, int? RoleId = null, string Title = "", int Contribution = 0, WFCrewMemberStatus Status = WFCrewMemberStatus.Waiting, bool Live = false);
 
 /// <summary>A public crew roster entry containing only character identity and readiness.</summary>
 [Serializable, NetSerializable]
@@ -131,6 +133,14 @@ public sealed class WFRoundSetupLobby
     public string? Code;
     public string? Vessel;
     public WFRoundSetupRole[] Roles = Array.Empty<WFRoundSetupRole>();
+    /// <summary>Shown at the top of crew lists with a pulsing border.</summary>
+    public bool Recruiting;
+    /// <summary>Whether players already in the round can join with their current character.</summary>
+    public bool LiveJoin;
+    /// <summary>Host only: the host's recruiting switch, which shows only while an opening is available.</summary>
+    public bool RecruitingOn;
+    /// <summary>Host only: when the next posting is allowed.</summary>
+    public TimeSpan? NextPosting;
 }
 
 /// <summary>A per-recipient snapshot of the round setup browser and their membership.</summary>
@@ -140,6 +150,10 @@ public sealed class WFRoundSetupState : EntityEventArgs
     public bool InRound;
     public bool JoinConfirmed;
     public bool CanJoin;
+    /// <summary>The recipient is playing a living character and belongs to no crew.</summary>
+    public bool CanJoinLive;
+    /// <summary>Stations whose crew is recruiting, for the ordinary late-join picker.</summary>
+    public NetEntity[] RecruitingStations = Array.Empty<NetEntity>();
     public bool CrashlandedAvailable;
     public bool DoomedAvailable;
     public WFCrewFaction[] Factions = Array.Empty<WFCrewFaction>();

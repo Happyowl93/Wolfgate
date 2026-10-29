@@ -162,7 +162,7 @@ public sealed partial class WFRoundSetupWindow
     {
         _body.AddChild(Heading("roles"));
         _body.AddChild(Description(lobby.Roles.Length == 0 ? "roles-empty-host" : "roles-help"));
-        if (lobby.Scenario == WFRoundScenario.Ship)
+        if (WFRoundSetupPolicy.UsesShipRoles(lobby.Scenario))
         {
             _body.AddChild(Description("ship-roster-help"));
             _body.AddChild(FlowRow(Enum.GetValues<WFCrewRoster>().Select(roster =>

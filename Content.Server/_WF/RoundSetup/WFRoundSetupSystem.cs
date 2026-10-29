@@ -53,6 +53,8 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
         public bool Spawned;
         public EntityUid? Body;
         public WFShipAccessKey? AccessKey;
+        /// <summary>Joined with a character already in the round instead of spawning through the crew.</summary>
+        public bool Live;
     }
 
     /// <summary>Round-scoped lobby state; private admission data never enters public snapshots.</summary>
@@ -74,6 +76,8 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
         public string? Vessel;
         public int NextRoleId;
         public int PaymentRevision;
+        public bool Recruiting;
+        public TimeSpan? NextPosting;
         public readonly Dictionary<int, LobbyRole> Roles = new();
         public readonly Dictionary<NetUserId, Member> Members = new();
         public readonly Dictionary<NetUserId, int> Requests = new();
@@ -201,7 +205,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                 error = "wf-round-setup-save-failed";
                 success = DeleteSetup(user, msg.SavedId);
                 break;
-            case WFRoundSetupAction.SaveSetup when own != null && own.Id == msg.LobbyId && own.Host == user:
+            case WFRoundSetupAction.SaveSetup when own != null && own.Id == msg.LobbyId && own.Host == user && !WFRoundSetupPolicy.IsFormed(own.Scenario):
                 error = "wf-round-setup-save-failed";
                 success = (msg.Title == null || HostRequest(own, new WFRoundSetupRequest(WFRoundSetupAction.Configure)
                     { Title = msg.Title, Description = msg.Description, Access = msg.Access, AllowLateJoin = msg.AllowLateJoin }, session)) && SaveSetup(own, session, msg.SaveName);
@@ -215,6 +219,21 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
             case WFRoundSetupAction.SetTitle when own != null && own.Id == msg.LobbyId && own.Host == user && !own.Members[user].Spawned:
                 error = "wf-round-setup-error-role";
                 success = SetPersonalTitle(own, user, msg.RoleName);
+                break;
+            case WFRoundSetupAction.Create when own == null && msg.Scenario == WFRoundScenario.Formed && CanJoinLive(session):
+                if (_lobbies.Count >= 64)
+                    break;
+                if (!WFRoundSetupPolicy.TryNormalizeTitle(msg.Title, out var formedTitle))
+                {
+                    error = "wf-round-setup-error-title";
+                    break;
+                }
+                if (!WFRoundSetupPolicy.TryNormalizeDescription(msg.Description, out var formedDescription))
+                {
+                    error = "wf-round-setup-error-description";
+                    break;
+                }
+                success = CreateFormed(session, formedTitle, formedDescription);
                 break;
             case WFRoundSetupAction.Create when own == null && CanEnter(session):
                 if (!IsScenarioAvailable(msg.Scenario) || _lobbies.Count >= 64)
@@ -241,12 +260,18 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                 RegisterMember(created, session, new Member { Name = session.Name });
                 success = true;
                 break;
-            case WFRoundSetupAction.Join when own == null && target != null && CanEnter(session):
+            case WFRoundSetupAction.Join when own == null && target != null && (CanEnter(session) || CanJoinLive(session)):
                 if (_nextCodeAttempt.TryGetValue(user, out var codeNext) && codeNext > _timing.CurTime)
                     break;
                 _nextCodeAttempt[user] = _timing.CurTime + TimeSpan.FromSeconds(1);
                 var validCode = WFRoundSetupPolicy.TryNormalizeCode(msg.Code, out var code) && code == target.Code;
-                if (!TryGetRole(target, session, msg.RoleId, out var requestedRole))
+                if (!CanAdmit(target, session))
+                {
+                    error = CanEnter(session) ? "wf-round-setup-formed-no-ship" : "wf-round-setup-live-unavailable";
+                    break;
+                }
+                LobbyRole requestedRole;
+                if (CanEnter(session) ? !TryGetRole(target, session, msg.RoleId, out requestedRole) : !TryGetLiveRole(target, msg.RoleId, out requestedRole))
                 {
                     error = "wf-round-setup-error-role";
                     break;
@@ -264,7 +289,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                     return;
                 }
                 break;
-            case WFRoundSetupAction.AcceptInvite when own == null && target != null && CanEnter(session):
+            case WFRoundSetupAction.AcceptInvite when own == null && target != null && CanAdmit(target, session):
                 if (target.Invitations.Contains(user) && Admission(target, true, false) == WFLobbyJoinDecision.Join)
                 {
                     success = AddMember(target, session, msg.RoleId);
@@ -318,6 +343,15 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                 break;
             case WFRoundSetupAction.Launch when own != null && msg.LobbyId == own.Id && CanEnter(session):
                 success = Launch(own, session, out error);
+                break;
+            case WFRoundSetupAction.Post when own != null && msg.LobbyId == own.Id && own.Host == user:
+                success = PostCrew(own, session, msg.Posting, out error);
+                if (success)
+                {
+                    SendState(session, "wf-round-setup-posting-sent");
+                    Broadcast();
+                    return;
+                }
                 break;
             default:
                 if (own != null && own.Host == user && msg.LobbyId == own.Id)
@@ -403,6 +437,9 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
             case WFRoundSetupAction.RegenerateCode:
                 lobby.Code = NewCode();
                 return true;
+            case WFRoundSetupAction.SetRecruiting:
+                lobby.Recruiting = msg.Recruiting;
+                return true;
             case WFRoundSetupAction.ChangeScenario:
                 if (lobby.Started || !IsScenarioAvailable(msg.Scenario))
                     return false;
@@ -479,12 +516,12 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                 if (!lobby.Requests.TryGetValue(accepted, out var requestedRole) ||
                     msg.RoleId != null && msg.RoleId != requestedRole || lobby.Access != WFLobbyAccess.Requests ||
                     Admission(lobby, true, false) != WFLobbyJoinDecision.Join ||
-                    FindLobby(accepted) != null || !_players.TryGetSessionById(accepted, out var requester) || !CanEnter(requester))
+                    FindLobby(accepted) != null || !_players.TryGetSessionById(accepted, out var requester) || !CanAdmit(lobby, requester))
                     return false;
                 return AddMember(lobby, requester, requestedRole);
             case WFRoundSetupAction.Invite when msg.Target is { } invited:
                 if (lobby.Invitations.Count >= WFRoundSetupPolicy.MaximumMembers || FindLobby(invited) != null ||
-                    !_players.TryGetSessionById(invited, out var invitee) || !CanEnter(invitee) ||
+                    !_players.TryGetSessionById(invited, out var invitee) || !CanAdmit(lobby, invitee) ||
                     Admission(lobby, true, false) != WFLobbyJoinDecision.Join)
                     return false;
                 lobby.Invitations.Add(invited);
@@ -492,7 +529,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                 SendState(invitee, "wf-round-setup-invited");
                 return true;
             case WFRoundSetupAction.Kick when msg.Target is { } kicked && kicked != lobby.Host:
-                if (!lobby.Members.TryGetValue(kicked, out var member) || member.Spawned)
+                if (!lobby.Members.TryGetValue(kicked, out var member) || member.Spawned && !member.Live)
                     return false;
                 RemoveMember(lobby, kicked);
                 return true;
@@ -513,6 +550,8 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
     /// <summary>Grants membership and clears competing requests and invitations.</summary>
     private bool AddMember(Lobby lobby, ICommonSession session, int? roleId)
     {
+        if (!CanEnter(session))
+            return AddLiveMember(lobby, session, roleId);
         if (FindLobby(session.UserId) != null || lobby.Members.Count >= WFRoundSetupPolicy.MaximumMembers ||
             !TryGetRole(lobby, session, roleId, out var role))
             return false;
@@ -546,6 +585,8 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
             _ticker.ToggleReady(session, false);
         if (lobby.Members.Count == 0)
         {
+            if (lobby.NextPosting != null)
+                RaiseNetworkEvent(new WFCrewPostingRevokedEvent(lobby.Id));
             _lobbies.Remove(lobby.Id);
             _crash.RemoveScenario(lobby.Id);
             _doomed.RemoveScenario(lobby.Id);
@@ -603,7 +644,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
             member.Portrait = new WFCrewPortrait(profile.Name, profile.Species.Id, profile.Sex, profile.Appearance.Clone());
             member.Name = profile.Name;
         }
-        if (member.Portrait == null)
+        if (member.Portrait == null && !member.Spawned)
             member.Name = Loc.GetString("wf-round-setup-unknown-character");
     }
 
@@ -616,7 +657,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
     }
 
     /// <summary>Includes private member and admission details only for authorized recipients.</summary>
-    private WFRoundSetupLobby Snapshot(Lobby lobby, NetUserId user, bool canEnter, IReadOnlyCollection<WFRoundSetupJob> jobs)
+    private WFRoundSetupLobby Snapshot(Lobby lobby, NetUserId user, bool canEnter, bool canJoinLive, IReadOnlyCollection<WFRoundSetupJob> jobs)
     {
         var member = lobby.Members.ContainsKey(user);
         var host = lobby.Host == user;
@@ -630,11 +671,15 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
             Roster = lobby.Members.Select(pair => new WFRoundSetupCrewmate(pair.Value.Name, pair.Value.Job,
                 string.IsNullOrEmpty(pair.Value.Title) && pair.Value.RoleId is { } roleId && lobby.Roles.TryGetValue(roleId, out var role) ? role.Name : pair.Value.Title,
                 IsReadyForLobby(lobby, pair.Key, pair.Value), pair.Value.Spawned, MemberStatus(pair.Value))).ToArray(),
-            Roles = SnapshotRoles(lobby, user, canEnter, jobs),
+            Roles = SnapshotRoles(lobby, user, canEnter && (!WFRoundSetupPolicy.IsFormed(lobby.Scenario) || _ships.HasAssignedShip(lobby.Id)), canJoinLive && WFRoundSetupPolicy.AllowsLiveMembers(lobby.Scenario, lobby.Started), jobs),
+            Recruiting = ShowsRecruiting(lobby),
+            LiveJoin = WFRoundSetupPolicy.AllowsLiveMembers(lobby.Scenario, lobby.Started),
+            RecruitingOn = host && lobby.Recruiting,
+            NextPosting = host ? lobby.NextPosting : null,
             Code = host && lobby.Access == WFLobbyAccess.Code ? lobby.Code : null,
             Members = member ? lobby.Members.Select(pair => new WFRoundSetupMember(pair.Key, pair.Value.Name,
                 pair.Value.Job, pair.Value.Station, IsReadyForLobby(lobby, pair.Key, pair.Value), pair.Value.Spawned,
-                _players.TryGetSessionById(pair.Key, out _), pair.Value.RoleId, pair.Value.Title, pair.Value.Contribution, MemberStatus(pair.Value))).ToArray() : Array.Empty<WFRoundSetupMember>(),
+                _players.TryGetSessionById(pair.Key, out _), pair.Value.RoleId, pair.Value.Title, pair.Value.Contribution, MemberStatus(pair.Value), pair.Value.Live)).ToArray() : Array.Empty<WFRoundSetupMember>(),
             Requests = host ? lobby.Requests.Keys.Where(id => _players.TryGetSessionById(id, out _))
                 .Select(id => new WFRoundSetupPlayer(id, CharacterName(id), lobby.Requests[id])).ToArray() : Array.Empty<WFRoundSetupPlayer>(),
         };
@@ -650,6 +695,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
         if (refreshPortraits)
             RefreshPortraits();
         var canEnter = CanEnter(session);
+        var canJoinLive = own == null && CanJoinLive(session);
         var eligibility = new Dictionary<string, bool>();
         var scenarioJobs = new Dictionary<WFRoundScenario, List<WFRoundSetupJob>>();
         List<WFRoundSetupJob> JobsFor(Lobby lobby)
@@ -660,17 +706,17 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                 scenarioJobs[lobby.Scenario] = jobs = GetJobs(session, lobby, eligibility);
             return jobs;
         }
-        WFRoundSetupLobby ForRecipient(Lobby lobby) => Snapshot(lobby, session.UserId, canEnter,
+        WFRoundSetupLobby ForRecipient(Lobby lobby) => Snapshot(lobby, session.UserId, canEnter, canJoinLive,
             canEnter ? JobsFor(lobby) : Array.Empty<WFRoundSetupJob>());
         var state = new WFRoundSetupState
         {
             InRound = _ticker.RunLevel != GameRunLevel.PreRoundLobby,
             JoinConfirmed = joinConfirmed,
-            CanJoin = canEnter, CrashlandedAvailable = _crash.IsAvailable, DoomedAvailable = _doomed.IsAvailable, OwnLobby = own?.Id,
+            CanJoin = canEnter, CanJoinLive = canJoinLive, RecruitingStations = RecruitingStations(), CrashlandedAvailable = _crash.IsAvailable, DoomedAvailable = _doomed.IsAvailable, OwnLobby = own?.Id,
             Lobbies = _lobbies.Values.Select(ForRecipient).ToArray(),
             Invitations = _lobbies.Values.Where(l => l.Invitations.Contains(session.UserId))
                 .Select(ForRecipient).ToArray(),
-            InviteTargets = own?.Host == session.UserId ? _players.Sessions.Where(s => CanEnter(s) && FindLobby(s.UserId) == null)
+            InviteTargets = own?.Host == session.UserId ? _players.Sessions.Where(s => FindLobby(s.UserId) == null && CanAdmit(own, s))
                 .Select(s => new WFRoundSetupPlayer(s.UserId, CharacterName(s.UserId))).ToArray() : Array.Empty<WFRoundSetupPlayer>(),
             Jobs = own != null && (canEnter || own.Host == session.UserId) ? JobsFor(own).ToArray() : Array.Empty<WFRoundSetupJob>(),
             SavedSetups = GetSavedSetups(session.UserId).ToArray(),
@@ -697,14 +743,14 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                 lobby.PendingShip = null;
                 changed = true;
             }
-            foreach (var user in lobby.Requests.Keys.Where(IsUnavailable).ToArray())
+            foreach (var user in lobby.Requests.Keys.Where(user => IsUnavailable(lobby, user)).ToArray())
                 changed |= lobby.Requests.Remove(user);
-            changed |= lobby.Invitations.RemoveWhere(IsUnavailable) > 0;
+            changed |= lobby.Invitations.RemoveWhere(user => IsUnavailable(lobby, user)) > 0;
         }
         return changed;
 
-        bool IsUnavailable(NetUserId user) =>
-            !_players.TryGetSessionById(user, out var session) || !CanEnter(session) || FindLobby(user) != null;
+        bool IsUnavailable(Lobby lobby, NetUserId user) =>
+            !_players.TryGetSessionById(user, out var session) || !CanAdmit(lobby, session) || FindLobby(user) != null;
     }
 
     /// <summary>Coalesces mutations into a bounded stream of snapshots for other viewers.</summary>

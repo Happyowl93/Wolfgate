@@ -47,6 +47,9 @@ public sealed class WFCrewHudSystem : EntitySystem
     /// <summary>Whether a captain has an outstanding approval card.</summary>
     public bool RequestVisible => _request.Visible;
 
+    /// <summary>The approval card's height, so other cards can stack above it.</summary>
+    public float RequestHeight => _request.Height;
+
     public override void Initialize()
     {
         base.Initialize();
