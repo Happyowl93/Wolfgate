@@ -109,8 +109,10 @@ public sealed partial class WFCompanyTest
             state = await Request(new(WFCompanyAction.Refresh));
             Assert.That(state.Own!.Members.Single(entry => entry.Name == "Cal Walkin").Rank, Is.EqualTo(recruit.Id));
 
-            // Rank loadouts: only loadouts the base job can take, saved with the rank.
-            var allowed = WFCompanyLoadouts.Allowed(prototypes, recruit.BaseJob);
+            // Rank loadouts: only loadouts a crew job can take, saved with the rank.
+            var allowed = WFCompanyLoadouts.Catalogue(prototypes).Select(entry => entry.Loadout).ToList();
+            Assert.That(allowed.Count, Is.GreaterThan(WFCompanyLoadouts.Catalogue(prototypes).Count(entry => entry.Group.ID.StartsWith("Contractor"))),
+                "The catalogue spans every crew job, not one.");
             var paid = allowed.First(loadout => loadout.Price > 0 && WFCompanyLoadouts.Items(prototypes, loadout).Count > 0);
             state = await Request(new(WFCompanyAction.SetRankLoadout) { CompanyId = id.Value, RankId = recruit.Id, Loadouts = new[] { "NotALoadout" } });
             Assert.That(state.Own!.Ranks[^1].Loadouts, Is.Empty, "Unknown loadouts are refused.");
@@ -121,9 +123,12 @@ public sealed partial class WFCompanyTest
             await RenderWindow();
             await pair.Client.WaitPost(() =>
             {
-                var picker = new WFCompanyLoadoutWindow("Loadout", recruit.BaseJob, new[] { paid.ID }, _ => { });
+                var picker = new WFCompanyLoadoutWindow("Loadout", new[] { paid.ID }, _ => { });
                 picker.OpenCentered();
                 picker.Close();
+                var lateJoin = new Content.Client._NF.LateJoin.Windows.PickerWindow();
+                lateJoin.OpenCentered();
+                lateJoin.Close();
             });
 
             // Issuing: the company pays while it can, then the member's own bank.

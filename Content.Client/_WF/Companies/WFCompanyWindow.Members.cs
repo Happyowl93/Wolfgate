@@ -250,7 +250,7 @@ public sealed partial class WFCompanyWindow
         });
         if (editable)
         {
-            row.AddChild(Button("loadout-edit", () => new WFCompanyLoadoutWindow(Text("loadout-title", ("rank", rank.Title)), rank.BaseJob, loadouts,
+            row.AddChild(Button("loadout-edit", () => new WFCompanyLoadoutWindow(Text("loadout-title", ("rank", rank.Title)), loadouts,
                 picked => Send(new WFCompanyRequest(WFCompanyAction.SetRankLoadout) { CompanyId = own.Id, RankId = rank.Id, Loadouts = picked }))
                 .OpenCentered()));
         }

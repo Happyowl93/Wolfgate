@@ -33,7 +33,7 @@ public sealed partial class WFCompanySystem
         var picked = (loadouts ?? Array.Empty<string>()).Distinct().ToList();
         if (picked.Count > WFCompanyPolicy.MaximumRankLoadouts)
             return "wf-company-error-loadout";
-        var allowed = WFCompanyLoadouts.Allowed(_prototypes, rank.BaseJob).Select(loadout => loadout.ID).ToHashSet();
+        var allowed = WFCompanyLoadouts.AllowedIds(_prototypes);
         if (picked.Any(id => !allowed.Contains(id)))
             return "wf-company-error-loadout";
         rank.Loadout = picked;
@@ -53,7 +53,7 @@ public sealed partial class WFCompanySystem
         var member = company.Members[profile];
         if (IconRankOf(company, member) is not { Loadout.Count: > 0 } rank)
             return;
-        var allowed = WFCompanyLoadouts.Allowed(_prototypes, rank.BaseJob).ToDictionary(loadout => loadout.ID);
+        var allowed = WFCompanyLoadouts.Catalogue(_prototypes).ToDictionary(entry => entry.Loadout.ID, entry => entry.Loadout);
         var budget = company.Frozen ? 0 : company.Balance;
         long companyPaid = 0;
         long memberPaid = 0;

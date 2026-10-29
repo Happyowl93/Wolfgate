@@ -279,7 +279,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                     error = CanEnter(session) ? "wf-round-setup-formed-no-ship" : "wf-round-setup-live-unavailable";
                     break;
                 }
-                // A member of the crew's company may join as their company rank instead of taking an opening.
+                // A company member may join as their company rank instead of taking an opening.
                 var asRank = msg.AsRank && JoinsAsRank(target, session);
                 LobbyRole requestedRole = default!;
                 if (!asRank && (CanEnter(session) ? !TryGetRole(target, session, msg.RoleId, out requestedRole) : !TryGetLiveRole(target, msg.RoleId, out requestedRole)))

@@ -22,7 +22,7 @@ survive restarts, and online members who can accept them are told. Accepting giv
 can set it, otherwise the lowest. The owner can turn on open access at one rank in Settings; anyone can then press
 Join as <rank> in the Companies list without applying.
 
-Each rank (and the owner's) can have a loadout of up to eight entries from the loadouts its base job can pick in the
+Each rank (and the owner's) can have a loadout of up to twenty entries from the loadouts any ship crew job can pick in the
 character loadout. At every spawn as that character, the company pays for each entry while its account covers it, then
 the member's bank, and anything neither can pay for is skipped. The items go into the bag, or the hands if it's full.
 Job icon presets in the rank icon editor are read by the server, because packaged clients pack RSIs into one file.
@@ -142,6 +142,7 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 - [`Content.Client/_WF/Companies/WFCompanyApplyWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyApplyWindow.cs)
 - [`Content.Client/_WF/Companies/WFCompanyClientSystem.cs`](../../../Content.Client/_WF/Companies/WFCompanyClientSystem.cs)
 - [`Content.Client/_WF/Companies/WFCompanyIconResources.cs`](../../../Content.Client/_WF/Companies/WFCompanyIconResources.cs)
+- [`Content.Client/_WF/Companies/WFCompanyJoinAsRankBar.cs`](../../../Content.Client/_WF/Companies/WFCompanyJoinAsRankBar.cs)
 - [`Content.Client/_WF/Companies/WFCompanyLoadoutWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyLoadoutWindow.cs)
 - [`Content.Client/_WF/Companies/WFCompanyLogoCanvas.cs`](../../../Content.Client/_WF/Companies/WFCompanyLogoCanvas.cs)
 - [`Content.Client/_WF/Companies/WFCompanyLogoWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyLogoWindow.cs)
@@ -177,6 +178,9 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 
 ## Non-modular edits
 
+- [`Content.Client/_NF/LateJoin/Windows/PickerWindow.xaml`](../../../Content.Client/_NF/LateJoin/Windows/PickerWindow.xaml)
+  - xmlns:companies for the join as rank bar
+  - company members can join the round as their rank
 - [`Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs`](../../../Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs)
 - [`Content.IntegrationTests/PoolManager.Cvars.cs`](../../../Content.IntegrationTests/PoolManager.Cvars.cs)
   - test players have no playtime

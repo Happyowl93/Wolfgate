@@ -189,7 +189,7 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
             lobby.Started && !lobby.AllowLateJoin ? "latejoin-closed" : "no-roles";
         if (available && NeedsJoinWarning(lobby))
             content.AddChild(JoinWarning());
-        if (!invitation && lobby.CompanyId != null && lobby.CompanyId == state.OwnCompany && state.CompanyRank != null &&
+        if (!invitation && state.OwnCompany != null && state.CompanyRank != null &&
             state.OwnLobby == null && (state.CanJoin || live) && lobby.Access is not (WFLobbyAccess.Invite or WFLobbyAccess.Closed))
         {
             var asRank = Button("join-as-rank", () => SendRequest(new WFRoundSetupRequest(WFRoundSetupAction.Join)

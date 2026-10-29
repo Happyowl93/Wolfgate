@@ -59,7 +59,7 @@ public static class WFCompanyPolicy
     public const int MaximumApplicationLength = 500;
 
     /// <summary>The most loadouts a rank can be issued.</summary>
-    public const int MaximumRankLoadouts = 8;
+    public const int MaximumRankLoadouts = 20;
 
     /// <summary>The longest note on a direct payment.</summary>
     public const int MaximumPaymentNote = 64;

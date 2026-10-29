@@ -9,17 +9,20 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Client._WF.Companies;
 
-/// <summary>Picks the loadouts a rank is issued at each spawn, from those its base job can take.</summary>
+/// <summary>Picks the loadouts a rank is issued at each spawn, from any crew job's loadouts.</summary>
 public sealed class WFCompanyLoadoutWindow : DefaultWindow
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IEntityManager _entities = default!;
 
-    /// <summary>Search results shown at once; typing narrows the rest.</summary>
-    private const int ShownResults = 60;
+    /// <summary>Search results shown at once; typing or a category narrows the rest.</summary>
+    private const int ShownResults = 250;
 
-    private readonly List<LoadoutPrototype> _allowed;
+    private readonly List<LoadoutPrototype> _allowed = new();
     private readonly Dictionary<string, string> _names = new();
+    private readonly Dictionary<string, string> _categories = new();
+    private readonly OptionButton _category = new() { MinWidth = 180 };
+    private readonly List<string> _categoryNames = new();
     private readonly List<string> _picked;
     private readonly LineEdit _search = new() { HorizontalExpand = true, PlaceHolder = Loc.GetString("wf-company-loadout-search") };
     private readonly BoxContainer _results = new() { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 2 };
@@ -27,7 +30,7 @@ public sealed class WFCompanyLoadoutWindow : DefaultWindow
     private readonly Label _total = new();
     private readonly Action<string[]> _save;
 
-    public WFCompanyLoadoutWindow(string title, string job, string[] current, Action<string[]> save)
+    public WFCompanyLoadoutWindow(string title, string[] current, Action<string[]> save)
     {
         IoCManager.InjectDependencies(this);
         Title = title;
@@ -35,14 +38,27 @@ public sealed class WFCompanyLoadoutWindow : DefaultWindow
         SetSize = new Vector2(760, 540);
         _save = save;
         var loadouts = _entities.System<LoadoutSystem>();
-        _allowed = WFCompanyLoadouts.Allowed(_prototypes, job);
-        foreach (var loadout in _allowed)
+        foreach (var (group, loadout) in WFCompanyLoadouts.Catalogue(_prototypes))
+        {
+            _allowed.Add(loadout);
             _names[loadout.ID] = loadouts.GetName(loadout);
+            _categories[loadout.ID] = Loc.GetString(group.Name);
+        }
         _allowed.Sort((a, b) => string.Compare(_names[a.ID], _names[b.ID], StringComparison.CurrentCultureIgnoreCase));
+        _categoryNames.AddRange(_categories.Values.Distinct().OrderBy(name => name, StringComparer.CurrentCultureIgnoreCase));
+        _category.AddItem(Loc.GetString("wf-company-loadout-all"), 0);
+        for (var i = 0; i < _categoryNames.Count; i++)
+            _category.AddItem(_categoryNames[i], i + 1);
+        _category.OnItemSelected += args =>
+        {
+            _category.SelectId(args.Id);
+            Rebuild();
+        };
         _picked = current.Where(_names.ContainsKey).Distinct().ToList();
 
         var left = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 6, HorizontalExpand = true };
-        left.AddChild(_search);
+        left.AddChild(new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 6,
+            Children = { _search, _category } });
         left.AddChild(new ScrollContainer { HScrollEnabled = false, VerticalExpand = true, Children = { _results } });
         var right = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 6, HorizontalExpand = true };
         right.AddChild(new Label { Text = Loc.GetString("wf-company-loadout-picked"), StyleClasses = { "LabelHeading" } });
@@ -76,8 +92,9 @@ public sealed class WFCompanyLoadoutWindow : DefaultWindow
         _results.RemoveAllChildren();
         var full = _picked.Count >= WFCompanyPolicy.MaximumRankLoadouts;
         var query = _search.Text.Trim();
-        foreach (var loadout in _allowed.Where(entry => query.Length == 0 ||
-                     _names[entry.ID].Contains(query, StringComparison.CurrentCultureIgnoreCase)).Take(ShownResults))
+        var category = _category.SelectedId == 0 ? null : _categoryNames[_category.SelectedId - 1];
+        foreach (var loadout in _allowed.Where(entry => (category == null || _categories[entry.ID] == category) && (query.Length == 0 ||
+                     _names[entry.ID].Contains(query, StringComparison.CurrentCultureIgnoreCase))).Take(ShownResults))
         {
             var button = Entry(loadout);
             button.Disabled = full || _picked.Contains(loadout.ID);
@@ -113,7 +130,8 @@ public sealed class WFCompanyLoadoutWindow : DefaultWindow
         view.SetPrototype(_entities.System<LoadoutSystem>().GetFirstOrNull(loadout));
         var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 6 };
         row.AddChild(view);
-        row.AddChild(new Label { Text = _names[loadout.ID], HorizontalExpand = true, ClipText = true, VerticalAlignment = VAlignment.Center });
+        row.AddChild(new Label { Text = _names[loadout.ID], HorizontalExpand = true, ClipText = true, VerticalAlignment = VAlignment.Center,
+            ToolTip = _categories[loadout.ID] });
         row.AddChild(new Label { Text = Loc.GetString("wf-company-credits", ("amount", loadout.Price)), VerticalAlignment = VAlignment.Center });
         return new Button { HorizontalExpand = true, Children = { row } };
     }

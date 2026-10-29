@@ -50,10 +50,10 @@ public sealed partial class WFRoundSetupSystem
     /// <summary>The request and membership role id of a member who joined as their company rank.</summary>
     private const int RankRole = -1;
 
-    /// <summary>Whether the session's character may join this crew as their company rank.</summary>
+    /// <summary>Whether the session's character may join this crew as their company rank, in any crew that can field it.</summary>
     private bool JoinsAsRank(Lobby lobby, ICommonSession session)
     {
-        if (lobby.CompanyId is not { } company || _companies.CompanyIdOf(session) != company || _companies.RankFor(session) is not { } rank)
+        if (_companies.CompanyIdOf(session) == null || _companies.RankFor(session) is not { } rank)
             return false;
         // A live member keeps their job; a new spawn needs the rank's job to be one this crew can field.
         return !CanEnter(session) || ScenarioJobs(lobby.Scenario, lobby.Faction).Contains(rank.Job) && IsJobAllowed(session, rank.Job);
