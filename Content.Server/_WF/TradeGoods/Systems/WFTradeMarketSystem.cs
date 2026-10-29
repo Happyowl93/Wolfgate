@@ -241,6 +241,9 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
         EnsureComp<WFTradeChuteComponent>(chute).PendingAmount = amount;
 
         var ship = CompOrNull<WFTradeOriginComponent>(crate)?.Carrier;
+        if (ship is { } carrier && TerminatingOrDeleted(carrier))
+            ship = null;
+
         RaiseLocalEvent(new WFTradeSaleEvent(grid, chute, good, amount, seller, ship, crate));
     }
 

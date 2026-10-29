@@ -63,6 +63,14 @@ public sealed class TradeRewardsTest
             Assert.That(rush.Remaining, Is.EqualTo(rush.Total - 1));
             Assert.That(rush.Filled.GetValueOrDefault(hauler), Is.EqualTo(1));
 
+            // A crate whose carrier ship is gone credits the seller.
+            var orphan = TradeTestWorld.Hauled(entMan, far, map.GridCoords, Metals);
+            var sunk = entMan.SpawnEntity(null, map.GridCoords);
+            entMan.GetComponent<WFTradeOriginComponent>(orphan).Carrier = sunk;
+            entMan.DeleteEntity(sunk);
+            Assert.DoesNotThrow(() => market.Sell(chute, orphan, seller), "A sale threw on a deleted carrier.");
+            Assert.That(rush.Filled.GetValueOrDefault(hauler), Is.EqualTo(2));
+
             for (var i = 0; i < 20 && rush.Remaining > 0; i++)
             {
                 market.Sell(chute, TradeTestWorld.Hauled(entMan, far, map.GridCoords, Metals), seller);

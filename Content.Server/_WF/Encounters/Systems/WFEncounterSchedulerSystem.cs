@@ -315,10 +315,6 @@ public sealed partial class WFEncounterSchedulerSystem : EntitySystem
         return TryPlaceAtStations(prototype, _ticker.DefaultMap, out origin, out stops);
     }
 
-    /// <summary>
-    /// Chooses the stations an encounter is placed by and flies to, and its origin: beside the first for a
-    /// station or a route, out at the approach distance from the first for a circuit.
-    /// </summary>
     /// <summary>A station picked at random, each as likely as the weight <see cref="WFEncounterStationWeightEvent"/> gives it.</summary>
     private Entity<MapGridComponent> PickWeightedStation(WFEncounterPrototype prototype, List<Entity<MapGridComponent>> stations)
     {
@@ -347,6 +343,10 @@ public sealed partial class WFEncounterSchedulerSystem : EntitySystem
         return stations[^1];
     }
 
+    /// <summary>
+    /// Chooses the stations an encounter is placed by and flies to, and its origin: beside the first for a
+    /// station or a route, out at the approach distance from the first for a circuit.
+    /// </summary>
     internal bool TryPlaceAtStations(WFEncounterPrototype prototype, MapId map, out MapCoordinates origin, out List<EntityUid> stops)
     {
         stops = new List<EntityUid>();
