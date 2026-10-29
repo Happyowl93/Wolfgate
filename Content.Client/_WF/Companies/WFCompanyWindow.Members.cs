@@ -117,9 +117,15 @@ public sealed partial class WFCompanyWindow
             invite.AddChild(Heading("applications"));
             foreach (var applicant in own.Applications)
             {
-                invite.AddChild(Row(new Label { Text = applicant.Name, HorizontalExpand = true },
+                var wanted = own.Ranks.FirstOrDefault(rank => rank.Id == applicant.RankId)?.Title ?? Text("apply-any-rank");
+                var entry = Column(4);
+                entry.AddChild(Row(new Label { Text = Text("application-header", ("name", applicant.Name), ("rank", wanted)), HorizontalExpand = true },
                     Button("accept", () => Send(WFCompanyAction.AcceptApplication, own.Id, applicant.Profile)),
                     Button("reject", () => Send(WFCompanyAction.RejectApplication, own.Id, applicant.Profile))));
+                entry.AddChild(applicant.Message.Length > 0
+                    ? Paragraph(applicant.Message)
+                    : new Label { Text = Text("application-no-message"), FontColorOverride = Color.Gray });
+                invite.AddChild(Card(entry));
             }
         }
         return invite;
@@ -214,6 +220,7 @@ public sealed partial class WFCompanyWindow
             : WFRoundSetupCrewRow.JobIcon(rank.BaseJob);
         editor.AddChild(Row(icon, title, job));
         editor.AddChild(Paragraph(Text("rank-owner-help")));
+        editor.AddChild(LoadoutRow(own, rank, editable));
         if (!editable)
             return editor;
         var actions = Row(Button("rank-save", () => Send(new WFCompanyRequest(WFCompanyAction.UpsertRank)
@@ -229,6 +236,25 @@ public sealed partial class WFCompanyWindow
         }
         editor.AddChild(actions);
         return editor;
+    }
+
+    /// <summary>What the rank is issued at each spawn and what it costs, with an editor for those who may change it.</summary>
+    private Control LoadoutRow(WFCompanyDetail own, WFCompanyRank rank, bool editable)
+    {
+        var loadouts = rank.Loadouts ?? Array.Empty<string>();
+        var row = Row(new Label
+        {
+            Text = loadouts.Length == 0 ? Text("loadout-empty")
+                : Text("loadout-summary", ("count", loadouts.Length), ("cost", Credits(WFCompanyLoadoutWindow.Cost(_prototypes, loadouts)))),
+            HorizontalExpand = true, ToolTip = Text("loadout-tooltip"),
+        });
+        if (editable)
+        {
+            row.AddChild(Button("loadout-edit", () => new WFCompanyLoadoutWindow(Text("loadout-title", ("rank", rank.Title)), rank.BaseJob, loadouts,
+                picked => Send(new WFCompanyRequest(WFCompanyAction.SetRankLoadout) { CompanyId = own.Id, RankId = rank.Id, Loadouts = picked }))
+                .OpenCentered()));
+        }
+        return row;
     }
 
     /// <summary>One rank's fields; read-only unless the member may edit it.</summary>
@@ -269,6 +295,8 @@ public sealed partial class WFCompanyWindow
             grid.AddChild(box);
         }
         editor.AddChild(grid);
+        if (rank != null)
+            editor.AddChild(LoadoutRow(own, rank, editable));
         if (rank != null && Has(own, WFCompanyPermissions.Design) && !own.ArtLocked && WFCompanyPolicy.Outranks(YourOrder(own), rank.Order))
         {
             editor.AddChild(Button("rank-icon-edit", () => new WFCompanyLogoWindow(Text("rank-icon-title", ("rank", rank.Title)),

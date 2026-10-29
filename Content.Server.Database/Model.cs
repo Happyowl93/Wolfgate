@@ -64,6 +64,7 @@ namespace Content.Server.Database
         public DbSet<WolfgateCompanyMember> WolfgateCompanyMember { get; set; } = null!;
         public DbSet<WolfgateCompanyLedger> WolfgateCompanyLedger { get; set; } = null!;
         public DbSet<WolfgateCompanyLicence> WolfgateCompanyLicence { get; set; } = null!;
+        public DbSet<WolfgateCompanyApplication> WolfgateCompanyApplication { get; set; } = null!;
         // WOLFGATE END
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -527,6 +528,22 @@ namespace Content.Server.Database
                 .WithMany()
                 .HasForeignKey(l => l.CompanyId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<WolfgateCompanyApplication>()
+                .HasOne(a => a.Company)
+                .WithMany()
+                .HasForeignKey(a => a.CompanyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<WolfgateCompanyApplication>()
+                .HasOne(a => a.Profile)
+                .WithMany()
+                .HasForeignKey(a => a.ProfileId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<WolfgateCompanyApplication>()
+                .HasIndex(a => new { a.CompanyId, a.ProfileId })
+                .IsUnique();
             // WOLFGATE END
         }
 
@@ -1936,6 +1953,13 @@ namespace Content.Server.Database
 
         public int OwnerIconVersion { get; set; }
 
+        /// <summary>The rank anyone may join at without applying; null when joining needs an invitation or application.</summary>
+        public int? OpenRankId { get; set; }
+
+        /// <summary>Loadout prototype ids issued to the owner, comma-separated.</summary>
+        [Required, MaxLength(2048)]
+        public string OwnerLoadout { get; set; } = "";
+
         public DateTime CreatedAt { get; set; }
 
         public List<WolfgateCompanyRank> Ranks { get; set; } = null!;
@@ -1970,6 +1994,10 @@ namespace Content.Server.Database
         public byte[]? Icon { get; set; }
 
         public int IconVersion { get; set; }
+
+        /// <summary>Loadout prototype ids issued at each spawn, comma-separated.</summary>
+        [Required, MaxLength(2048)]
+        public string Loadout { get; set; } = "";
     }
 
     /// <summary>A character's membership; one company per character.</summary>
@@ -2038,6 +2066,27 @@ namespace Content.Server.Database
         public long PricePaid { get; set; }
 
         public DateTime BoughtAt { get; set; }
+    }
+
+    /// <summary>A character's request to join a company, with the rank they want and why.</summary>
+    public class WolfgateCompanyApplication
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public int CompanyId { get; set; }
+        public WolfgateCompany Company { get; set; } = null!;
+
+        public int ProfileId { get; set; }
+        public Profile Profile { get; set; } = null!;
+
+        /// <summary>The rank asked for; null for any.</summary>
+        public int? RankId { get; set; }
+
+        [Required, MaxLength(500)]
+        public string Message { get; set; } = "";
+
+        public DateTime CreatedAt { get; set; }
     }
     // WOLFGATE END
 }

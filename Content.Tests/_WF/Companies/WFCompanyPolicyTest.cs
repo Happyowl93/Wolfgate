@@ -57,4 +57,18 @@ public sealed class WFCompanyPolicyTest
             Assert.That(WFCompanyPolicy.WithinWithdrawCap(true, 0, 0, 1000000), Is.True);
         });
     }
+
+    [Test]
+    public void ApplicationsArePlainLines()
+    {
+        Assert.Multiple(() =>
+        {
+            Assert.That(WFCompanyPolicy.TryNormalizeApplication(" I fly.\r\nI fix. ", out var message), Is.True);
+            Assert.That(message, Is.EqualTo("I fly.\nI fix."));
+            Assert.That(WFCompanyPolicy.TryNormalizeApplication(null, out message), Is.True);
+            Assert.That(message, Is.Empty);
+            Assert.That(WFCompanyPolicy.TryNormalizeApplication(new string('a', WFCompanyPolicy.MaximumApplicationLength + 1), out _), Is.False);
+            Assert.That(WFCompanyPolicy.TryNormalizeApplication("bell\u0007", out _), Is.False);
+        });
+    }
 }

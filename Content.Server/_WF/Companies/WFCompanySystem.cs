@@ -58,6 +58,8 @@ public sealed partial class WFCompanySystem : EntitySystem
         public byte[]? Logo;
         public int LogoVersion;
         public int LaunchFee;
+        /// <summary>The rank anyone may join at without applying.</summary>
+        public int? OpenRank;
         /// <summary>The owner's own title, base job and icon; its id is the company id negated.</summary>
         public Rank OwnerRank = new();
         public readonly List<Licence> Licences = new();
@@ -80,6 +82,8 @@ public sealed partial class WFCompanySystem : EntitySystem
         public string BaseJob = string.Empty;
         public byte[]? Icon;
         public int IconVersion;
+        /// <summary>Loadout prototype ids bought for the member at each spawn.</summary>
+        public List<string> Loadout = new();
     }
 
     private sealed class Member
@@ -94,7 +98,7 @@ public sealed partial class WFCompanySystem : EntitySystem
         public DateTime WithdrawDay;
     }
 
-    private sealed record Applicant(NetUserId User, string Name, int Slot);
+    private sealed record Applicant(NetUserId User, string Name, int Slot, int? RankId = null, string Message = "");
 
     /// <summary>The character a session acts as: the one being played, or the one selected in the lobby.</summary>
     private readonly record struct Character(NetUserId User, int Slot, HumanoidCharacterProfile Profile, int ProfileId);
@@ -159,18 +163,21 @@ public sealed partial class WFCompanySystem : EntitySystem
                 Colour = Color.TryFromHex(row.Colour, out var colour) ? colour : Color.White, Owner = row.OwnerProfileId, Balance = row.Balance,
                 Cut = row.Cut, Recruiting = row.Recruiting, Frozen = row.Frozen, ArtLocked = row.ArtLocked,
                 Logo = row.Logo?.Length == WFCompanyPolicy.LogoBytes ? row.Logo : null, LogoVersion = row.LogoVersion, LaunchFee = row.LaunchFee,
+                OpenRank = row.OpenRankId,
             };
             company.OwnerRank = new Rank
             {
                 Id = -row.Id, Title = row.OwnerTitle.Length > 0 ? row.OwnerTitle : Loc.GetString("wf-company-owner"),
                 BaseJob = row.OwnerJob.Length > 0 ? row.OwnerJob : "Contractor", Permissions = WFCompanyPermissions.All,
                 Icon = row.OwnerIcon?.Length == WFCompanyPolicy.IconBytes ? row.OwnerIcon : null, IconVersion = row.OwnerIconVersion,
+                Loadout = SplitLoadout(row.OwnerLoadout),
             };
             foreach (var rank in row.Ranks.OrderBy(rank => rank.Order))
             {
                 company.Ranks.Add(new Rank { Id = rank.Id, Title = rank.Title, Permissions = (WFCompanyPermissions) rank.Permissions,
                     Wage = rank.Wage, WithdrawCap = rank.WithdrawCap, BaseJob = rank.BaseJob,
-                    Icon = rank.Icon?.Length == WFCompanyPolicy.IconBytes ? rank.Icon : null, IconVersion = rank.IconVersion });
+                    Icon = rank.Icon?.Length == WFCompanyPolicy.IconBytes ? rank.Icon : null, IconVersion = rank.IconVersion,
+                    Loadout = SplitLoadout(rank.Loadout) });
             }
             foreach (var member in entry.Members)
             {
@@ -185,6 +192,11 @@ public sealed partial class WFCompanySystem : EntitySystem
             company.Ledger.AddRange(entry.Ledger);
             foreach (var licence in entry.Licences)
                 company.Licences.Add(new Licence { Id = licence.Id, Vessel = licence.Vessel });
+            foreach (var application in entry.Applications)
+            {
+                company.Applications[application.ProfileId] = new Applicant(new NetUserId(application.UserId), application.CharacterName,
+                    application.Slot, application.RankId, application.Message);
+            }
             _companies[company.Id] = company;
             RepairOwnership(company);
         }
@@ -243,6 +255,7 @@ public sealed partial class WFCompanySystem : EntitySystem
         _spawnedSlots[args.Player.UserId] = slot;
         EnsureComp<WFCompanyRankHudComponent>(args.Mob);
         ApplyMemberIdentity(args.Player, args.Mob, slot);
+        IssueRankLoadout(args.Player, args.Mob, slot);
     }
 
     private void OnPlayerStatus(object? sender, SessionStatusEventArgs args)
@@ -330,7 +343,10 @@ public sealed partial class WFCompanySystem : EntitySystem
         member.Profile == company.Owner ? company.OwnerRank : RankOf(company, member);
 
     private void PersistOwnerRank(Company company) => Track(_db.SetCompanyOwnerRankAsync(company.Id, company.OwnerRank.Title,
-        company.OwnerRank.BaseJob, company.OwnerRank.Icon, company.OwnerRank.IconVersion));
+        company.OwnerRank.BaseJob, company.OwnerRank.Icon, company.OwnerRank.IconVersion, string.Join(',', company.OwnerRank.Loadout)));
+
+    private static List<string> SplitLoadout(string stored) =>
+        stored.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
 
     private static WFCompanyPermissions Permissions(Company company, Member member) =>
         member.Profile == company.Owner ? WFCompanyPermissions.All : RankOf(company, member)?.Permissions ?? WFCompanyPermissions.None;
@@ -363,6 +379,7 @@ public sealed partial class WFCompanySystem : EntitySystem
             {
                 Id = rank.Id, CompanyId = company.Id, Order = order, Title = rank.Title, Permissions = (int) rank.Permissions,
                 Wage = rank.Wage, WithdrawCap = rank.WithdrawCap, BaseJob = rank.BaseJob, Icon = rank.Icon, IconVersion = rank.IconVersion,
+                Loadout = string.Join(',', rank.Loadout),
             }));
         }
     }
@@ -418,7 +435,12 @@ public sealed partial class WFCompanySystem : EntitySystem
 
     private WFCompanyListing Listing(Company company) => new(company.Id, company.Name, company.Tag, company.Description,
         company.Colour, company.Members.TryGetValue(company.Owner, out var owner) ? owner.Name : string.Empty,
-        company.Members.Count, company.Recruiting, company.Logo == null ? 0 : company.LogoVersion, CompanyValue(company));
+        company.Members.Count, company.Recruiting, company.Logo == null ? 0 : company.LogoVersion, CompanyValue(company),
+        company.Ranks.Select(rank => new WFCompanyOpenRank(rank.Id, rank.Title, rank.BaseJob)).ToArray(), OpenRankOf(company));
+
+    /// <summary>The open-access rank, if it still exists.</summary>
+    private static int? OpenRankOf(Company company) =>
+        company.OpenRank is { } open && company.Ranks.Any(rank => rank.Id == open) ? open : null;
 
     /// <summary>Builds the snapshot for the session's acting character.</summary>
     private void SendState(ICommonSession session, string? message = null)
@@ -476,17 +498,17 @@ public sealed partial class WFCompanySystem : EntitySystem
             OwnerProfile = company.Owner, OwnerName = company.Members.TryGetValue(company.Owner, out var owner) ? owner.Name : string.Empty,
             Balance = company.Balance, Cut = company.Cut, Recruiting = company.Recruiting, Frozen = company.Frozen,
             ArtLocked = company.ArtLocked, LogoVersion = company.Logo == null ? 0 : company.LogoVersion,
-            LaunchFee = company.LaunchFee, LaunchedThisRound = LaunchedCount(company), Licences = SnapshotLicences(company),
+            LaunchFee = company.LaunchFee, OpenRankId = OpenRankOf(company), LaunchedThisRound = LaunchedCount(company), Licences = SnapshotLicences(company),
             LicenceOffers = you.Profile == company.Owner ? LicenceOffers(company) : Array.Empty<WFCompanyLicenceOffer>(),
             Ranks = company.Ranks.Select((rank, order) => new WFCompanyRank(rank.Id, order, rank.Title, rank.Permissions, rank.Wage,
-                rank.WithdrawCap, rank.BaseJob, rank.Icon == null ? 0 : rank.IconVersion)).ToArray(),
+                rank.WithdrawCap, rank.BaseJob, rank.Icon == null ? 0 : rank.IconVersion, rank.Loadout.ToArray())).ToArray(),
             OwnerRank = new WFCompanyRank(company.OwnerRank.Id, -1, company.OwnerRank.Title, WFCompanyPermissions.All, 0, 0,
-                company.OwnerRank.BaseJob, company.OwnerRank.Icon == null ? 0 : company.OwnerRank.IconVersion),
+                company.OwnerRank.BaseJob, company.OwnerRank.Icon == null ? 0 : company.OwnerRank.IconVersion, company.OwnerRank.Loadout.ToArray()),
             Members = company.Members.Values.OrderBy(member => RankOrder(company, member) ?? -1).ThenBy(member => member.Name)
                 .Select(member => new WFCompanyMember(member.Profile, member.Name, member.Rank,
                     IsOnline(member.User) && CurrentCharacterProfile(member.User) == member.Profile)).ToArray(),
             Applications = (permissions & WFCompanyPermissions.Invite) != 0
-                ? company.Applications.Select(pair => new WFCompanyApplicant(pair.Key, pair.Value.Name)).ToArray()
+                ? company.Applications.Select(pair => new WFCompanyApplicant(pair.Key, pair.Value.Name, pair.Value.RankId, pair.Value.Message)).ToArray()
                 : Array.Empty<WFCompanyApplicant>(),
             YourProfile = you.Profile, YourRank = you.Rank, YourPermissions = permissions,
             WithdrawnToday = you.WithdrawDay == DateTime.UtcNow.Date ? you.WithdrawnToday : 0,

@@ -31,6 +31,11 @@ public sealed partial class WFCompanySystem
                 RaiseNetworkEvent(new WFCompanyRankIconEvent(found.Id, found.IconVersion, found.Icon), session.Channel);
             return;
         }
+        if (msg.Action == WFCompanyAction.RequestIconPreset)
+        {
+            SendIconPreset(session, msg.Name);
+            return;
+        }
         if (msg.Action == WFCompanyAction.RequestLogo)
         {
             if (Loaded && _companies.TryGetValue(msg.CompanyId, out var shown))
@@ -80,15 +85,28 @@ public sealed partial class WFCompanySystem
                 error = null;
                 break;
             case WFCompanyAction.Apply when own == null && target != null && !IsIronman(character.Profile):
-                if (target.Applications.Count >= WFCompanyPolicy.MaximumMembers)
+                if (target.Applications.Count >= WFCompanyPolicy.MaximumMembers && !target.Applications.ContainsKey(character.ProfileId))
                     break;
-                target.Applications[character.ProfileId] = new Applicant(character.User, character.Profile.Name, character.Slot);
+                if (!WFCompanyPolicy.TryNormalizeApplication(msg.Description, out var reason))
+                {
+                    error = "wf-company-error-application";
+                    break;
+                }
+                var wanted = msg.RankId is { } wantedId && target.Ranks.Any(rank => rank.Id == wantedId) ? msg.RankId : null;
+                target.Applications[character.ProfileId] = new Applicant(character.User, character.Profile.Name, character.Slot, wanted, reason);
+                Track(_db.SaveCompanyApplicationAsync(target.Id, character.ProfileId, wanted, reason));
+                NotifyApplication(target, character.Profile.Name, wanted);
                 error = null;
                 success = "wf-company-applied";
                 touched = target;
                 break;
+            case WFCompanyAction.JoinOpen when own == null && target != null && OpenRankOf(target) is { } openRank:
+                error = Join(target, character.ProfileId, character.User, character.Profile.Name, character.Slot, character.Profile, openRank);
+                success = error == null ? "wf-company-joined" : null;
+                touched = target;
+                break;
             case WFCompanyAction.CancelApplication when target != null:
-                error = target.Applications.Remove(character.ProfileId) ? null : error;
+                error = DropApplication(target, character.ProfileId) ? null : error;
                 touched = target;
                 break;
             case WFCompanyAction.Leave when own != null && you != null:
@@ -140,11 +158,24 @@ public sealed partial class WFCompanySystem
                 return null;
             case WFCompanyAction.AcceptApplication when Has(company, you, WFCompanyPermissions.Invite) && msg.Target is { } applicantId &&
                                                        company.Applications.TryGetValue(applicantId, out var applicant):
-                company.Applications.Remove(applicantId);
+                DropApplication(company, applicantId);
                 var profileRef = _preferences.GetPreferencesOrNull(applicant.User)?.Characters.GetValueOrDefault(applicant.Slot) as Content.Shared.Preferences.HumanoidCharacterProfile;
-                return Join(company, applicantId, applicant.User, applicant.Name, applicant.Slot, profileRef);
+                // The asked-for rank, when the accepter may hand it out; otherwise the lowest.
+                var granted = company.Ranks.FindIndex(rank => rank.Id == applicant.RankId) is >= 0 and var grantedOrder &&
+                              Has(company, you, WFCompanyPermissions.SetRanks) && WFCompanyPolicy.Outranks(RankOrder(company, you), grantedOrder)
+                    ? applicant.RankId
+                    : null;
+                return Join(company, applicantId, applicant.User, applicant.Name, applicant.Slot, profileRef, granted);
             case WFCompanyAction.RejectApplication when Has(company, you, WFCompanyPermissions.Invite) && msg.Target is { } rejected:
-                return company.Applications.Remove(rejected) ? null : "wf-company-error-denied";
+                return DropApplication(company, rejected) ? null : "wf-company-error-denied";
+            case WFCompanyAction.SetOpenRank when owner:
+                if (msg.RankId is { } open && company.Ranks.All(rank => rank.Id != open))
+                    return "wf-company-error-rank";
+                company.OpenRank = msg.RankId;
+                Track(_db.SetCompanyOpenRankAsync(company.Id, msg.RankId));
+                return null;
+            case WFCompanyAction.SetRankLoadout when FindRank(msg.RankId) is { } loadoutRank && CanEditLoadout(company, you, loadoutRank):
+                return SetRankLoadout(company, loadoutRank, msg.Loadouts);
             case WFCompanyAction.Kick when member != null && Has(company, you, WFCompanyPermissions.Kick) &&
                                           WFCompanyPolicy.Outranks(RankOrder(company, you), RankOrder(company, member)):
                 RemoveMember(company, member);
@@ -186,6 +217,11 @@ public sealed partial class WFCompanySystem
                     return "wf-company-error-rank-in-use";
                 company.Ranks.RemoveAt(removeOrder);
                 Track(_db.DeleteCompanyRankAsync(msg.RankId!.Value));
+                if (company.OpenRank == msg.RankId)
+                {
+                    company.OpenRank = null;
+                    Track(_db.SetCompanyOpenRankAsync(company.Id, null));
+                }
                 PersistRanks(company);
                 return null;
             case WFCompanyAction.MoveRank when Has(company, you, WFCompanyPermissions.EditRanks) &&
@@ -342,17 +378,17 @@ public sealed partial class WFCompanySystem
 
     /// <summary>Adds a character at the lowest rank; null on success.</summary>
     private string? Join(Company company, int profile, Robust.Shared.Network.NetUserId user, string name, int slot,
-        Content.Shared.Preferences.HumanoidCharacterProfile? character)
+        Content.Shared.Preferences.HumanoidCharacterProfile? character, int? rankId = null)
     {
         company.Invitations.Remove(profile);
-        company.Applications.Remove(profile);
+        DropApplication(company, profile);
         if (CompanyOf(profile) != null)
             return "wf-company-error-member";
         if (character != null && IsIronman(character))
             return "wf-company-error-ironman";
         if (company.Members.Count >= WFCompanyPolicy.MaximumMembers)
             return "wf-company-error-full";
-        var member = new Member { Profile = profile, User = user, Name = name, Slot = slot, Rank = company.Ranks[^1].Id,
+        var member = new Member { Profile = profile, User = user, Name = name, Slot = slot, Rank = rankId ?? company.Ranks[^1].Id,
             WithdrawDay = DateTime.UtcNow.Date };
         company.Members[profile] = member;
         _memberCompany[profile] = company.Id;
@@ -379,10 +415,34 @@ public sealed partial class WFCompanySystem
 
     private void ClearInvitations(int profile)
     {
+        var applied = false;
         foreach (var other in _companies.Values)
         {
             other.Invitations.Remove(profile);
-            other.Applications.Remove(profile);
+            applied |= other.Applications.Remove(profile);
+        }
+        if (applied)
+            Track(_db.DeleteCompanyApplicationsAsync(profile, null));
+    }
+
+    /// <summary>Removes one application from memory and the database; false if there was none.</summary>
+    private bool DropApplication(Company company, int profile)
+    {
+        if (!company.Applications.Remove(profile))
+            return false;
+        Track(_db.DeleteCompanyApplicationsAsync(profile, company.Id));
+        return true;
+    }
+
+    /// <summary>Tells online members who can accept applications that one arrived.</summary>
+    private void NotifyApplication(Company company, string name, int? rankId)
+    {
+        var rank = company.Ranks.FirstOrDefault(entry => entry.Id == rankId)?.Title ?? Loc.GetString("wf-company-apply-any-rank");
+        foreach (var member in company.Members.Values)
+        {
+            if (Has(company, member, WFCompanyPermissions.Invite) && _players.TryGetSessionById(member.User, out var session) &&
+                CurrentCharacterProfile(member.User) == member.Profile)
+                _chat.DispatchServerMessage(session, Loc.GetString("wf-company-application-received", ("name", name), ("rank", rank)));
         }
     }
 

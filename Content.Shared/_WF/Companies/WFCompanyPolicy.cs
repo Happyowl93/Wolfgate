@@ -22,7 +22,7 @@ public enum WFCompanyPermissions
 /// <summary>Kinds of credit movement recorded in a company's ledger.</summary>
 public enum WFCompanyLedgerKind : byte
 {
-    Deposit, Withdraw, Wage, Cut, LicenceBuy, LicenceUpkeep, RegistryFee, LaunchFee, AdminAdjust, AdminRefund, Payment,
+    Deposit, Withdraw, Wage, Cut, LicenceBuy, LicenceUpkeep, RegistryFee, LaunchFee, AdminAdjust, AdminRefund, Payment, Loadout,
 }
 
 /// <summary>Limits and validation shared by the company server and window.</summary>
@@ -54,6 +54,12 @@ public static class WFCompanyPolicy
 
     /// <summary>Members a company needs before it can buy or launch fleet licences.</summary>
     public const int MinimumFleetMembers = 3;
+
+    /// <summary>The longest message on an application to join.</summary>
+    public const int MaximumApplicationLength = 500;
+
+    /// <summary>The most loadouts a rank can be issued.</summary>
+    public const int MaximumRankLoadouts = 8;
 
     /// <summary>The longest note on a direct payment.</summary>
     public const int MaximumPaymentNote = 64;
@@ -124,15 +130,22 @@ public static class WFCompanyPolicy
     }
 
     /// <summary>Plain text with paragraphs and no control or formatting characters.</summary>
-    public static bool TryNormalizeDescription(string? input, out string description)
+    public static bool TryNormalizeDescription(string? input, out string description) =>
+        TryNormalizeText(input, MaximumDescriptionLength, out description);
+
+    /// <summary>An applicant's reasons for joining: plain lines of text, empty allowed.</summary>
+    public static bool TryNormalizeApplication(string? input, out string message) =>
+        TryNormalizeText(input, MaximumApplicationLength, out message);
+
+    private static bool TryNormalizeText(string? input, int maximum, out string description)
     {
         description = string.Empty;
         if (input == null)
             return true;
-        if (input.Length > MaximumDescriptionLength * 2)
+        if (input.Length > maximum * 2)
             return false;
         var normalized = input.Replace("\r\n", "\n").Replace('\r', '\n').Trim();
-        if (normalized.Length > MaximumDescriptionLength)
+        if (normalized.Length > maximum)
             return false;
         for (var index = 0; index < normalized.Length; index++)
         {

@@ -1849,6 +1849,10 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("character varying(32)")
                         .HasColumnName("name");
 
+                    b.Property<int?>("OpenRankId")
+                        .HasColumnType("integer")
+                        .HasColumnName("open_rank_id");
+
                     b.Property<byte[]>("OwnerIcon")
                         .HasColumnType("bytea")
                         .HasColumnName("owner_icon");
@@ -1862,6 +1866,12 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("owner_job");
+
+                    b.Property<string>("OwnerLoadout")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("owner_loadout");
 
                     b.Property<int>("OwnerProfileId")
                         .HasColumnType("integer")
@@ -1893,6 +1903,49 @@ namespace Content.Server.Database.Migrations.Postgres
                         .IsUnique();
 
                     b.ToTable("wolfgate_company", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompanyApplication", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("wolfgate_company_application_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("integer")
+                        .HasColumnName("company_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("message");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("profile_id");
+
+                    b.Property<int?>("RankId")
+                        .HasColumnType("integer")
+                        .HasColumnName("rank_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK_wolfgate_company_application");
+
+                    b.HasIndex("ProfileId")
+                        .HasDatabaseName("IX_wolfgate_company_application_profile_id");
+
+                    b.HasIndex("CompanyId", "ProfileId")
+                        .IsUnique();
+
+                    b.ToTable("wolfgate_company_application", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.WolfgateCompanyLedger", b =>
@@ -2049,6 +2102,12 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Property<int>("IconVersion")
                         .HasColumnType("integer")
                         .HasColumnName("icon_version");
+
+                    b.Property<string>("Loadout")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("loadout");
 
                     b.Property<int>("Order")
                         .HasColumnType("integer")
@@ -2932,6 +2991,27 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasConstraintName("FK_wayfarer_safety_deposit_box_item_wayfarer_safety_deposit_bo~");
 
                     b.Navigation("Box");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompanyApplication", b =>
+                {
+                    b.HasOne("Content.Server.Database.WolfgateCompany", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_wolfgate_company_application_wolfgate_company_company_id");
+
+                    b.HasOne("Content.Server.Database.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_wolfgate_company_application_profile_profile_id");
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("Content.Server.Database.WolfgateCompanyLedger", b =>

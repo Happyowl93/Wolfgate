@@ -14,6 +14,16 @@ every send and receive, as for crew radio. A Crew Setup host whose rank has Fiel
 company: its tag shows on crew rows, details and postings, members of the company see its crews first, and its ship
 carries `WFCompanyShipComponent`, which the IFF label shows as `[TAG] Name`.
 
+Apply opens a form: the rank the character wants and up to 500 characters on why. Applications are saved, so they
+survive restarts, and online members who can accept them are told. Accepting gives the asked-for rank when the accepter
+can set it, otherwise the lowest. The owner can turn on open access at one rank in Settings; anyone can then press
+Join as <rank> in the Companies list without applying.
+
+Each rank (and the owner's) can have a loadout of up to eight entries from the loadouts its base job can pick in the
+character loadout. At every spawn as that character, the company pays for each entry while its account covers it, then
+the member's bank, and anything neither can pay for is skipped. The items go into the bag, or the hands if it's full.
+Job icon presets in the rank icon editor are read by the server, because packaged clients pack RSIs into one file.
+
 Payroll counts a minute at a time while a member plays the character the membership belongs to: a living or critical
 body spawned from it, not a ghost, not AFK. Each full hour pays the rank's wage from the account into the character's
 bank; the owner has no wage. If the account can't cover every wage due at once, everyone due gets the same percentage
@@ -106,7 +116,9 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 - [`Content.Server/_WF/Companies/WFCompanySystem.Admin.cs`](WFCompanySystem.Admin.cs)
 - [`Content.Server/_WF/Companies/WFCompanySystem.cs`](WFCompanySystem.cs)
 - [`Content.Server/_WF/Companies/WFCompanySystem.Hangar.cs`](WFCompanySystem.Hangar.cs)
+- [`Content.Server/_WF/Companies/WFCompanySystem.IconPresets.cs`](WFCompanySystem.IconPresets.cs)
 - [`Content.Server/_WF/Companies/WFCompanySystem.Identity.cs`](WFCompanySystem.Identity.cs)
+- [`Content.Server/_WF/Companies/WFCompanySystem.Loadouts.cs`](WFCompanySystem.Loadouts.cs)
 - [`Content.Server/_WF/Companies/WFCompanySystem.Payroll.cs`](WFCompanySystem.Payroll.cs)
 - [`Content.Server/_WF/Companies/WFCompanySystem.Report.cs`](WFCompanySystem.Report.cs)
 - [`Content.Server/_WF/Companies/WFCompanySystem.Requests.cs`](WFCompanySystem.Requests.cs)
@@ -114,6 +126,7 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 
 ### Shared
 
+- [`Content.Shared/_WF/Companies/WFCompanyLoadouts.cs`](../../../Content.Shared/_WF/Companies/WFCompanyLoadouts.cs)
 - [`Content.Shared/_WF/Companies/WFCompanyMessages.cs`](../../../Content.Shared/_WF/Companies/WFCompanyMessages.cs)
 - [`Content.Shared/_WF/Companies/WFCompanyPolicy.cs`](../../../Content.Shared/_WF/Companies/WFCompanyPolicy.cs)
 - [`Content.Shared/_WF/Companies/WFCompanyRankIconComponent.cs`](../../../Content.Shared/_WF/Companies/WFCompanyRankIconComponent.cs)
@@ -122,8 +135,10 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 ### Client
 
 - [`Content.Client/_WF/Companies/HumanoidProfileEditor.Companies.cs`](../../../Content.Client/_WF/Companies/HumanoidProfileEditor.Companies.cs)
+- [`Content.Client/_WF/Companies/WFCompanyApplyWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyApplyWindow.cs)
 - [`Content.Client/_WF/Companies/WFCompanyClientSystem.cs`](../../../Content.Client/_WF/Companies/WFCompanyClientSystem.cs)
 - [`Content.Client/_WF/Companies/WFCompanyIconResources.cs`](../../../Content.Client/_WF/Companies/WFCompanyIconResources.cs)
+- [`Content.Client/_WF/Companies/WFCompanyLoadoutWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyLoadoutWindow.cs)
 - [`Content.Client/_WF/Companies/WFCompanyLogoCanvas.cs`](../../../Content.Client/_WF/Companies/WFCompanyLogoCanvas.cs)
 - [`Content.Client/_WF/Companies/WFCompanyLogoWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyLogoWindow.cs)
 - [`Content.Client/_WF/Companies/WFCompanyRankHudSystem.cs`](../../../Content.Client/_WF/Companies/WFCompanyRankHudSystem.cs)
@@ -134,6 +149,7 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/Companies/WFCompanyTest.Applications.cs`](../../../Content.IntegrationTests/Tests/_WF/Companies/WFCompanyTest.Applications.cs)
 - [`Content.IntegrationTests/Tests/_WF/Companies/WFCompanyTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Companies/WFCompanyTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Companies/WFCompanyTest.Hangar.cs`](../../../Content.IntegrationTests/Tests/_WF/Companies/WFCompanyTest.Hangar.cs)
 - [`Content.IntegrationTests/Tests/_WF/Companies/WFCompanyTest.Identity.cs`](../../../Content.IntegrationTests/Tests/_WF/Companies/WFCompanyTest.Identity.cs)

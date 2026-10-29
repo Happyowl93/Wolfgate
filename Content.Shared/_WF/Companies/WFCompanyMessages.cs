@@ -10,6 +10,7 @@ public enum WFCompanyAction : byte
     Refresh, Create, Invite, AcceptInvite, DeclineInvite, Apply, CancelApplication, AcceptApplication, RejectApplication,
     Leave, Kick, SetMemberRank, UpsertRank, RemoveRank, MoveRank, EditDetails, Rename, SetCut, Transfer, Disband,
     Deposit, Withdraw, JoinAsRank, SetLogo, RequestLogo, SetRankIcon, RequestRankIcon, BuyLicence, SellLicence, Launch, SetLaunchFee, Pay,
+    SetRankLoadout, RequestIconPreset, SetOpenRank, JoinOpen,
 }
 
 /// <summary>A request from the Company window.</summary>
@@ -41,21 +42,27 @@ public sealed class WFCompanyRequest(WFCompanyAction action) : EntityEventArgs
     public string? Vessel;
     /// <summary>SellLicence and Launch: the licence.</summary>
     public int LicenceId;
+    /// <summary>SetRankLoadout: loadout prototype ids bought for the rank at each spawn.</summary>
+    public string[]? Loadouts;
 }
 
 [Serializable, NetSerializable]
 public sealed record WFCompanyListing(int Id, string Name, string Tag, string Description, Color Colour, string OwnerName,
-    int Members, bool Recruiting, int LogoVersion = 0, long Value = 0);
+    int Members, bool Recruiting, int LogoVersion = 0, long Value = 0, WFCompanyOpenRank[]? Ranks = null, int? OpenRankId = null);
+
+/// <summary>A rank an applicant can ask for.</summary>
+[Serializable, NetSerializable]
+public sealed record WFCompanyOpenRank(int Id, string Title, string BaseJob);
 
 [Serializable, NetSerializable]
 public sealed record WFCompanyRank(int Id, int Order, string Title, WFCompanyPermissions Permissions, int Wage, int WithdrawCap,
-    string BaseJob, int IconVersion = 0);
+    string BaseJob, int IconVersion = 0, string[]? Loadouts = null);
 
 [Serializable, NetSerializable]
 public sealed record WFCompanyMember(int Profile, string Name, int? Rank, bool Online);
 
 [Serializable, NetSerializable]
-public sealed record WFCompanyApplicant(int Profile, string Name);
+public sealed record WFCompanyApplicant(int Profile, string Name, int? RankId = null, string Message = "");
 
 [Serializable, NetSerializable]
 public sealed record WFCompanyPlayer(NetUserId User, string Name);
@@ -95,6 +102,8 @@ public sealed class WFCompanyDetail
     public bool ArtLocked;
     public int LogoVersion;
     public int LaunchFee;
+    /// <summary>The rank anyone may join at directly, if open access is on.</summary>
+    public int? OpenRankId;
     /// <summary>How many company ships are out this round, which sets the next registry fee.</summary>
     public int LaunchedThisRound;
     public WFCompanyLicence[] Licences = Array.Empty<WFCompanyLicence>();
@@ -131,6 +140,14 @@ public sealed class WFCompanyRankIconEvent(int rankId, int version, byte[]? icon
     public int RankId = rankId;
     public int Version = version;
     public byte[]? Icon = icon;
+}
+
+/// <summary>A job icon's pixels, read by the server because packaged clients can't read RSI images.</summary>
+[Serializable, NetSerializable]
+public sealed class WFCompanyIconPresetEvent(string icon, byte[]? pixels) : EntityEventArgs
+{
+    public string Icon = icon;
+    public byte[]? Pixels = pixels;
 }
 
 /// <summary>A personal snapshot of the company service for the sender's current character.</summary>

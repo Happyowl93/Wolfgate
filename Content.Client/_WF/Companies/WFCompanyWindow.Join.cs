@@ -59,6 +59,9 @@ public sealed partial class WFCompanyWindow
                 StyleClasses = { "LabelHeading" } });
             if (company.Recruiting)
                 header.AddChild(new Label { Text = Text("recruiting"), FontColorOverride = Color.FromHex("#7FD3C4") });
+            var openRank = company.Ranks?.FirstOrDefault(rank => rank.Id == company.OpenRankId);
+            if (openRank != null)
+                header.AddChild(new Label { Text = Text("open-access-badge"), FontColorOverride = Color.FromHex("#E3B65C") });
             details.AddChild(header);
             details.AddChild(new Label { Text = Text("directory-headline", ("count", company.Members), ("value", Credits(company.Value))),
                 FontColorOverride = Color.FromHex("#C8C8C8") });
@@ -67,9 +70,18 @@ public sealed partial class WFCompanyWindow
                 details.AddChild(Paragraph(company.Description));
             if (state.Own == null && state.CharacterName != null)
             {
-                details.AddChild(state.Applications.Contains(company.Id)
+                var actions = Row();
+                if (openRank != null)
+                {
+                    var join = new Button { Text = Text("join-open", ("rank", openRank.Title)), Disabled = !state.CanJoin };
+                    join.AddStyleClass("ButtonAccept");
+                    join.OnPressed += _ => Send(WFCompanyAction.JoinOpen, company.Id);
+                    actions.AddChild(join);
+                }
+                actions.AddChild(state.Applications.Contains(company.Id)
                     ? Button("apply-cancel", () => Send(WFCompanyAction.CancelApplication, company.Id))
-                    : Button("apply", () => Send(WFCompanyAction.Apply, company.Id), !state.CanJoin));
+                    : Button("apply", () => new WFCompanyApplyWindow(company, Send).OpenCentered(), !state.CanJoin));
+                details.AddChild(actions);
             }
             page.AddChild(Card(Row(Logo(company.Id, company.LogoVersion, 64), details)));
         }
@@ -166,6 +178,18 @@ public sealed partial class WFCompanyWindow
         owner.AddChild(Row(new Label { Text = Text("cut-label") }, cut, Button("save", () =>
             Send(new WFCompanyRequest(WFCompanyAction.SetCut) { CompanyId = own.Id, Amount = ParseNumber(cut) }))));
         owner.AddChild(Paragraph(Text("cut-help")));
+        var open = new OptionButton { MinWidth = 180 };
+        open.AddItem(Text("open-access-off"), 0);
+        for (var i = 0; i < own.Ranks.Length; i++)
+            open.AddItem(own.Ranks[i].Title, i + 1);
+        open.SelectId(Array.FindIndex(own.Ranks, rank => rank.Id == own.OpenRankId) + 1);
+        open.OnItemSelected += args =>
+        {
+            open.SelectId(args.Id);
+            Send(new WFCompanyRequest(WFCompanyAction.SetOpenRank) { CompanyId = own.Id, RankId = args.Id == 0 ? null : own.Ranks[args.Id - 1].Id });
+        };
+        owner.AddChild(Row(new Label { Text = Text("open-access") }, open));
+        owner.AddChild(Paragraph(Text("open-access-help")));
         var name = new LineEdit { Text = own.Name, HorizontalExpand = true };
         var tag = new LineEdit { Text = own.Tag, MinWidth = 90 };
         owner.AddChild(Row(name, tag, Button("rename", () =>

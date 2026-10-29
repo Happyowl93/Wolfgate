@@ -99,6 +99,7 @@ wf-company-rank-icon-custom = This rank's custom job icon. It shows on HUDs over
 wf-company-icon-saved = Job icon saved.
 wf-company-icon-presets = Start from a job icon:
 wf-company-icon-preset-loaded = Loaded. Change it, then save.
+wf-company-icon-preset-failed = Couldn't load that job icon.
 wf-company-error-icon = That icon isn't 8 by 8.
 wf-company-error-licences-full = The company holds the most licences it can.
 wf-company-error-licence = That licence isn't available.
@@ -143,6 +144,7 @@ wf-company-ledger-kind-launchfee = Launch fee
 wf-company-ledger-kind-adminadjust = Admin
 wf-company-ledger-kind-adminrefund = Refund
 wf-company-ledger-kind-payment = Payment
+wf-company-ledger-kind-loadout = Loadout
 
 wf-company-details = Details
 wf-company-colour = Colour
@@ -212,6 +214,42 @@ wf-company-creator-roster = Companies on this server
 wf-company-invited = { $name } invited { $character } to join { $company }. Open the Company window to answer.
 wf-company-created = Company created.
 wf-company-applied = Application sent.
+wf-company-joined = You joined the company.
+wf-company-apply-title = Apply to { $company }
+wf-company-apply-rank = Rank you want
+wf-company-apply-any-rank = Any rank
+wf-company-apply-message = Why do you want to join?
+wf-company-apply-placeholder = Tell them about your character and what you'd bring.
+wf-company-apply-count = { $count }/{ $max }
+wf-company-apply-send = Send application
+wf-company-application-header = { $name } wants { $rank }
+wf-company-application-no-message = No message.
+wf-company-application-received = { $name } applied to join your company as { $rank }. Check the Overview tab.
+wf-company-open-access = Open access
+wf-company-open-access-off = Off: invite or application only
+wf-company-open-access-help = Anyone can join straight away at this rank, without applying.
+wf-company-open-access-badge = OPEN
+wf-company-join-open = Join as { $rank }
+wf-company-loadout-empty = Loadout: none
+wf-company-loadout-summary = Loadout: { $count } { $count ->
+    [one] item
+   *[other] items
+    }, { $cost } per spawn
+wf-company-loadout-tooltip = Issued each time a member of this rank spawns. The company pays while it can, then the member's own bank; anything neither can pay for is skipped.
+wf-company-loadout-edit = Edit loadout
+wf-company-loadout-title = Loadout: { $rank }
+wf-company-loadout-help = Pick what this rank gets at each spawn, from the loadouts its base job can take. It goes into their bag, or their hands if the bag is full.
+wf-company-loadout-none = This rank's base job has no loadouts to pick from.
+wf-company-loadout-search = Search loadouts
+wf-company-loadout-picked = Issued
+wf-company-loadout-remove = Click to remove.
+wf-company-loadout-total = { $count }/{ $max } picked, { $cost } spesos per spawn
+wf-company-loadout-save = Save loadout
+wf-company-loadout-issued = { $company } issued your loadout ({ $count } { $count ->
+    [one] item
+   *[other] items
+    }): the company paid { $company_paid }, you paid { $member_paid }.
+wf-company-loadout-missed = Not issued, nobody could pay: { $items }.
 wf-company-invite-sent = Invitation sent.
 wf-company-deposited = Deposited.
 wf-company-withdrew = Withdrawn.
@@ -249,6 +287,8 @@ wf-company-error-balance = The account doesn't have that much.
 wf-company-error-cap = That's over your rank's daily withdraw cap.
 wf-company-error-offline = That member isn't online.
 wf-company-error-note = Notes are one line of up to 64 characters.
+wf-company-error-application = Applications are up to 500 characters of plain text.
+wf-company-error-loadout = That loadout can't be issued to this rank.
 wf-company-error-fleet-members = A company needs at least 3 members for fleet licences.
 wf-company-error-join-closed = You can't join the round right now.
 wf-company-error-job = You can't play your rank's base job.

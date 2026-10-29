@@ -17,7 +17,10 @@ public partial interface IServerDbManager
     Task UpdateCompanyAsync(int id, string name, string tag, string description, string colour, int owner, int cut,
         bool recruiting, bool frozen, CancellationToken cancel = default);
     Task DeleteCompanyAsync(int id, CancellationToken cancel = default);
-    Task SetCompanyOwnerRankAsync(int id, string title, string job, byte[]? icon, int version, CancellationToken cancel = default);
+    Task SetCompanyOwnerRankAsync(int id, string title, string job, byte[]? icon, int version, string loadout, CancellationToken cancel = default);
+    Task SetCompanyOpenRankAsync(int id, int? rankId, CancellationToken cancel = default);
+    Task SaveCompanyApplicationAsync(int companyId, int profileId, int? rankId, string message, CancellationToken cancel = default);
+    Task DeleteCompanyApplicationsAsync(int profileId, int? companyId, CancellationToken cancel = default);
     Task<int> AddCompanyLicenceAsync(WolfgateCompanyLicence licence, CancellationToken cancel = default);
     Task DeleteCompanyLicenceAsync(int id, CancellationToken cancel = default);
     Task SetCompanyLaunchFeeAsync(int id, int fee, CancellationToken cancel = default);
@@ -89,10 +92,29 @@ public sealed partial class ServerDbManager
         return RunDbCommand(() => _db.SetCompanyLaunchFeeAsync(id, fee, cancel));
     }
 
-    public Task SetCompanyOwnerRankAsync(int id, string title, string job, byte[]? icon, int version, CancellationToken cancel = default)
+    public Task SetCompanyOwnerRankAsync(int id, string title, string job, byte[]? icon, int version, string loadout,
+        CancellationToken cancel = default)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.SetCompanyOwnerRankAsync(id, title, job, icon, version, cancel));
+        return RunDbCommand(() => _db.SetCompanyOwnerRankAsync(id, title, job, icon, version, loadout, cancel));
+    }
+
+    public Task SetCompanyOpenRankAsync(int id, int? rankId, CancellationToken cancel = default)
+    {
+        DbWriteOpsMetric.Inc();
+        return RunDbCommand(() => _db.SetCompanyOpenRankAsync(id, rankId, cancel));
+    }
+
+    public Task SaveCompanyApplicationAsync(int companyId, int profileId, int? rankId, string message, CancellationToken cancel = default)
+    {
+        DbWriteOpsMetric.Inc();
+        return RunDbCommand(() => _db.SaveCompanyApplicationAsync(companyId, profileId, rankId, message, cancel));
+    }
+
+    public Task DeleteCompanyApplicationsAsync(int profileId, int? companyId, CancellationToken cancel = default)
+    {
+        DbWriteOpsMetric.Inc();
+        return RunDbCommand(() => _db.DeleteCompanyApplicationsAsync(profileId, companyId, cancel));
     }
 
     public Task DeleteCompanyAsync(int id, CancellationToken cancel = default)

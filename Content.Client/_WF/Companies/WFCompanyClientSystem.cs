@@ -25,6 +25,9 @@ public sealed class WFCompanyClientSystem : EntitySystem
     /// <summary>Raised when a logo arrives, so open windows can redraw.</summary>
     public event Action? LogosChanged;
 
+    /// <summary>Raised with a job icon's pixels, or null when the server couldn't read it.</summary>
+    public event Action<string, byte[]?>? IconPresetReceived;
+
     private WFCompanyWindow? _window;
     private readonly Dictionary<int, (int Version, Texture? Texture, byte[]? Pixels)> _logos = new();
     private readonly HashSet<(int, int)> _requested = new();
@@ -37,6 +40,7 @@ public sealed class WFCompanyClientSystem : EntitySystem
         SubscribeNetworkEvent<WFCompanyState>(OnState);
         SubscribeNetworkEvent<WFCompanyLogoEvent>(OnLogo);
         SubscribeNetworkEvent<WFCompanyRankIconEvent>(OnRankIcon);
+        SubscribeNetworkEvent<WFCompanyIconPresetEvent>(args => IconPresetReceived?.Invoke(args.Icon, args.Pixels));
     }
 
     public override void Shutdown()
@@ -126,6 +130,9 @@ public sealed class WFCompanyClientSystem : EntitySystem
         _logos.TryGetValue(companyId, out var known) && known.Version == version ? known.Pixels : null;
 
     public void Send(WFCompanyRequest request) => RaiseNetworkEvent(request);
+
+    /// <summary>Asks the server for a job icon's pixels; packaged clients can't read RSI images.</summary>
+    public void RequestIconPreset(string icon) => RaiseNetworkEvent(new WFCompanyRequest(WFCompanyAction.RequestIconPreset) { Name = icon });
 
     /// <summary>Opens the Company window, or brings it forward.</summary>
     public void OpenWindow()

@@ -28,8 +28,13 @@ public abstract partial class ServerDbBase
                 .ToListAsync(cancel);
         }
         var licences = await ctx.WolfgateCompanyLicence.AsNoTracking().ToListAsync(cancel);
+        var applications = await ctx.WolfgateCompanyApplication.AsNoTracking()
+            .OrderBy(a => a.Id)
+            .Select(a => new WFStoredApplication(a.CompanyId, a.ProfileId, a.RankId, a.Message, a.Profile.Preference.UserId,
+                a.Profile.CharacterName, a.Profile.Slot))
+            .ToListAsync(cancel);
         return companies.Select(c => new WFStoredCompany(c, members.Where(m => m.CompanyId == c.Id).ToList(), ledgers[c.Id],
-            licences.Where(l => l.CompanyId == c.Id).ToList())).ToList();
+            licences.Where(l => l.CompanyId == c.Id).ToList(), applications.Where(a => a.CompanyId == c.Id).ToList())).ToList();
     }
 
     public async Task<Dictionary<int, int>> GetProfileIdsAsync(Guid userId, CancellationToken cancel = default)
@@ -86,7 +91,8 @@ public abstract partial class ServerDbBase
     }
 
     /// <summary>Writes the owner's own rank.</summary>
-    public async Task SetCompanyOwnerRankAsync(int id, string title, string job, byte[]? icon, int version, CancellationToken cancel = default)
+    public async Task SetCompanyOwnerRankAsync(int id, string title, string job, byte[]? icon, int version, string loadout,
+        CancellationToken cancel = default)
     {
         await using var db = await GetDb(cancel);
         var company = await db.DbContext.WolfgateCompany.SingleOrDefaultAsync(c => c.Id == id, cancel);
@@ -96,7 +102,50 @@ public abstract partial class ServerDbBase
         company.OwnerJob = job;
         company.OwnerIcon = icon;
         company.OwnerIconVersion = version;
+        company.OwnerLoadout = loadout;
         await db.DbContext.SaveChangesAsync(cancel);
+    }
+
+    public async Task SetCompanyOpenRankAsync(int id, int? rankId, CancellationToken cancel = default)
+    {
+        await using var db = await GetDb(cancel);
+        var company = await db.DbContext.WolfgateCompany.SingleOrDefaultAsync(c => c.Id == id, cancel);
+        if (company == null)
+            return;
+        company.OpenRankId = rankId;
+        await db.DbContext.SaveChangesAsync(cancel);
+    }
+
+    /// <summary>Adds or replaces a character's application to a company.</summary>
+    public async Task SaveCompanyApplicationAsync(int companyId, int profileId, int? rankId, string message, CancellationToken cancel = default)
+    {
+        await using var db = await GetDb(cancel);
+        var ctx = db.DbContext;
+        if (!await ctx.WolfgateCompany.AnyAsync(c => c.Id == companyId, cancel) || !await ctx.Profile.AnyAsync(p => p.Id == profileId, cancel))
+            return;
+        var row = await ctx.WolfgateCompanyApplication.SingleOrDefaultAsync(a => a.CompanyId == companyId && a.ProfileId == profileId, cancel);
+        if (row == null)
+        {
+            row = new WolfgateCompanyApplication { CompanyId = companyId, ProfileId = profileId, CreatedAt = DateTime.UtcNow };
+            ctx.WolfgateCompanyApplication.Add(row);
+        }
+        row.RankId = rankId;
+        row.Message = message;
+        await ctx.SaveChangesAsync(cancel);
+    }
+
+    /// <summary>Removes a character's application to one company, or to every company when none is given.</summary>
+    public async Task DeleteCompanyApplicationsAsync(int profileId, int? companyId, CancellationToken cancel = default)
+    {
+        await using var db = await GetDb(cancel);
+        var ctx = db.DbContext;
+        var rows = await ctx.WolfgateCompanyApplication
+            .Where(a => a.ProfileId == profileId && (companyId == null || a.CompanyId == companyId))
+            .ToListAsync(cancel);
+        if (rows.Count == 0)
+            return;
+        ctx.WolfgateCompanyApplication.RemoveRange(rows);
+        await ctx.SaveChangesAsync(cancel);
     }
 
     /// <summary>Writes a company's logo and art lock.</summary>

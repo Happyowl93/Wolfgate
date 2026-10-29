@@ -24,7 +24,6 @@ public sealed class WFCompanyLogoWindow : DefaultWindow
 {
     [Dependency] private IFileDialogManager _dialog = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
-    [Dependency] private IResourceCache _resources = default!;
     [Dependency] private IEntityManager _entities = default!;
 
     /// <summary>Largest file the importer will read.</summary>
@@ -105,6 +104,10 @@ public sealed class WFCompanyLogoWindow : DefaultWindow
         layout.AddChild(_canvas);
         layout.AddChild(tools);
         Contents.AddChild(layout);
+
+        var companies = _entities.System<WFCompanyClientSystem>();
+        companies.IconPresetReceived += OnPreset;
+        OnClose += () => companies.IconPresetReceived -= OnPreset;
     }
 
     /// <summary>Every job icon of the right size, to start a rank icon from.</summary>
@@ -112,52 +115,32 @@ public sealed class WFCompanyLogoWindow : DefaultWindow
     {
         var box = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 4, VerticalExpand = true };
         box.AddChild(new Label { Text = Loc.GetString("wf-company-icon-presets") });
-        var grid = new GridContainer { Columns = 10 };
+        var grid = new GridContainer { Columns = 8 };
         var sprites = _entities.System<SpriteSystem>();
         foreach (var icon in _prototypes.EnumeratePrototypes<JobIconPrototype>().OrderBy(icon => icon.ID))
         {
-            if (icon.Icon is not SpriteSpecifier.Rsi rsi)
+            if (icon.Icon is not SpriteSpecifier.Rsi)
                 continue;
             var button = new Button { MinSize = new Vector2(30, 30), ToolTip = icon.ID };
             button.AddChild(new TextureRect { Texture = sprites.Frame0(icon.Icon), Stretch = TextureRect.StretchMode.KeepAspectCentered,
                 TextureScale = new Vector2(2, 2), MouseFilter = MouseFilterMode.Ignore });
-            button.OnPressed += _ => LoadPreset(rsi);
+            button.OnPressed += _ => _entities.System<WFCompanyClientSystem>().RequestIconPreset(icon.ID);
             grid.AddChild(button);
         }
         box.AddChild(new ScrollContainer { HScrollEnabled = false, VerticalExpand = true, MinHeight = 140, Children = { grid } });
         return box;
     }
 
-    /// <summary>Copies the first frame of a job icon's RSI state onto the canvas.</summary>
-    private void LoadPreset(SpriteSpecifier.Rsi rsi)
+    /// <summary>Copies a job icon the server read onto the canvas.</summary>
+    private void OnPreset(string icon, byte[]? pixels)
     {
-        try
+        if (pixels?.Length != _size * _size * 4)
         {
-            using var stream = _resources.ContentFileRead(rsi.RsiPath / $"{rsi.RsiState}.png");
-            using var image = Image.Load<Rgba32>(stream);
-            if (image.Width < _size || image.Height < _size)
-                return;
-            var source = image.GetPixelSpan();
-            var pixels = new byte[_size * _size * 4];
-            for (var y = 0; y < _size; y++)
-            {
-                for (var x = 0; x < _size; x++)
-                {
-                    var pixel = source[y * image.Width + x];
-                    var i = (y * _size + x) * 4;
-                    pixels[i] = pixel.R;
-                    pixels[i + 1] = pixel.G;
-                    pixels[i + 2] = pixel.B;
-                    pixels[i + 3] = pixel.A;
-                }
-            }
-            _canvas.Pixels = pixels;
-            _status.Text = Loc.GetString("wf-company-icon-preset-loaded");
+            _status.Text = Loc.GetString("wf-company-icon-preset-failed");
+            return;
         }
-        catch (Exception)
-        {
-            _status.Text = Loc.GetString("wf-company-logo-import-failed");
-        }
+        _canvas.Pixels = (byte[]) pixels.Clone();
+        _status.Text = Loc.GetString("wf-company-icon-preset-loaded");
     }
 
     private void SetBrush(Color colour)
