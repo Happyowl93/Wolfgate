@@ -39,6 +39,9 @@ public sealed partial class WFRoundSetupWindow
         _body.AddChild(Panel(card));
     }
 
+    /// <summary>When the posting cooldown shown ends, so the button re-enables without a new state.</summary>
+    private TimeSpan? _postingReadyAt;
+
     /// <summary>The host's recruiting switch and open-invitation posting.</summary>
     private void BuildRecruiting(WFRoundSetupLobby lobby)
     {
@@ -62,6 +65,7 @@ public sealed partial class WFRoundSetupWindow
         text.IsValid = value => value.Length <= WFRoundSetupPolicy.MaximumPostingLength;
         text.OnTextChanged += _ => _postingDraft = text.Text;
         var wait = lobby.NextPosting is { } next && next > _watchTiming.CurTime ? next - _watchTiming.CurTime : (TimeSpan?) null;
+        _postingReadyAt = lobby.NextPosting is { } ready && wait != null ? ready : null;
         var post = Button("posting-send", () =>
         {
             if (!WFRoundSetupPolicy.TryNormalizePosting(_postingDraft, out var posting))

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Numerics;
 using Content.Client.Stylesheets;
 using Content.Shared._WF.RoundSetup;
@@ -84,13 +85,16 @@ public sealed class WFCrewPostingCardSystem : EntitySystem
         Refresh();
     }
 
-    // Joining any crew makes every open invitation moot.
+    // Joining any crew makes every open invitation moot; otherwise drop crews that stopped recruiting.
     private void OnState(WFRoundSetupState state)
     {
-        if (state.OwnLobby == null || _postings.Count == 0)
+        if (_postings.Count == 0)
             return;
-        _postings.Clear();
-        Refresh();
+        var removed = state.OwnLobby != null
+            ? _postings.RemoveAll(_ => true)
+            : _postings.RemoveAll(entry => !state.Lobbies.Any(lobby => lobby.Id == entry.Posting.LobbyId && lobby.Recruiting));
+        if (removed > 0)
+            Refresh();
     }
 
     private void OnDisconnect(object? sender, NetDisconnectedArgs args) => Clear();

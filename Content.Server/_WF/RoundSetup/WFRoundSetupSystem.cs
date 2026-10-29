@@ -127,6 +127,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
     private void OnRestart(RoundRestartCleanupEvent args)
     {
         _lobbies.Clear();
+        _postingCooldowns.Clear();
         SyncCrewSignals();
         SyncCrewShips();
         _savedSetups.Clear();
@@ -744,7 +745,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                 .Select(s => new WFRoundSetupPlayer(s.UserId, CharacterName(s.UserId))).ToArray() : Array.Empty<WFRoundSetupPlayer>(),
             Jobs = own != null && (canEnter || own.Host == session.UserId) ? JobsFor(own).ToArray() : Array.Empty<WFRoundSetupJob>(),
             SavedSetups = GetSavedSetups(session.UserId).ToArray(),
-            RoleJobs = own?.Host == session.UserId ? (WFRoundSetupPolicy.IsShip(own.Scenario) ? GetRoleJobs(session, own) : JobsFor(own)).ToArray() : Array.Empty<WFRoundSetupJob>(),
+            RoleJobs = own?.Host == session.UserId ? (WFRoundSetupPolicy.IsShip(own.Scenario) || WFRoundSetupPolicy.IsFormed(own.Scenario) ? GetRoleJobs(session, own) : JobsFor(own)).ToArray() : Array.Empty<WFRoundSetupJob>(),
             Factions = WFFactionCrewPolicy.All.Where(faction => CanCreateFaction(session, faction, eligibility)).ToArray(),
             Vessels = !shipHost ? Array.Empty<WFRoundSetupVessel>() : own!.HangarLicence != null ? HangarVessels(own)
                 : _ships.GetVessels(own.Faction, EligiblePurchaseJob(own, session)).ToArray(),

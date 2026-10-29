@@ -37,6 +37,11 @@ public sealed partial class WFRoundSetupWindow
             _layoutRefreshPending = false;
             Redraw();
         }
+        if (_postingReadyAt is { } ready && _watchTiming.CurTime >= ready)
+        {
+            _postingReadyAt = null;
+            _deferredRefresh = true;
+        }
         if (_deferredRefresh && !IsEditingControls())
             Redraw();
         base.FrameUpdate(args);

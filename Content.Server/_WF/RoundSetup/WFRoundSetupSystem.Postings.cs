@@ -6,6 +6,7 @@ using Content.Shared.Chat;
 using Content.Shared.Database;
 using Robust.Shared.Configuration;
 using Robust.Shared.Enums;
+using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Utility;
 
@@ -19,6 +20,9 @@ public sealed partial class WFRoundSetupSystem
 
     private static readonly Color PostingColor = Color.FromHex("#7FD3C4");
 
+    /// <summary>Each host's next allowed posting, so a new crew doesn't reset the cooldown.</summary>
+    private readonly Dictionary<NetUserId, TimeSpan> _postingCooldowns = new();
+
     private static int Openings(Lobby lobby) => lobby.Roles.Values.Sum(role => Math.Max(0, role.Capacity - RoleOccupancy(lobby, role.Id)));
 
     private static bool ShowsRecruiting(Lobby lobby) => WFRoundSetupPolicy.ShowsRecruiting(lobby.Recruiting, lobby.Access,
@@ -31,13 +35,15 @@ public sealed partial class WFRoundSetupSystem
         if (!WFRoundSetupPolicy.TryNormalizePosting(input, out var posting))
             return false;
         error = "wf-round-setup-posting-too-soon";
+        if (_postingCooldowns.TryGetValue(host.UserId, out var hostNext) && hostNext > _timing.CurTime)
+            lobby.NextPosting = hostNext;
         if (lobby.NextPosting is { } next && next > _timing.CurTime)
             return false;
         lobby.Recruiting = true;
         error = "wf-round-setup-posting-closed";
         if (!ShowsRecruiting(lobby))
             return false;
-        lobby.NextPosting = _timing.CurTime + WFRoundSetupPolicy.PostingCooldown;
+        lobby.NextPosting = _postingCooldowns[host.UserId] = _timing.CurTime + WFRoundSetupPolicy.PostingCooldown;
 
         var crew = TaggedCrewName(lobby);
         var hostName = lobby.Members[lobby.Host].Name;
