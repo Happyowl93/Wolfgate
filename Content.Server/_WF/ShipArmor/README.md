@@ -67,12 +67,15 @@ worn through first.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_r.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_r.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/kresta.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/kresta.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/kynda.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/kynda.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/layak.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/layak.yml): PDV hull with a shield generator, kept on plastitanium instead of adamantite.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/motleyanne.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/motleyanne.yml): PDV hull with a shield generator, kept on plastitanium instead of adamantite.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/inertia.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/inertia.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/mock.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/mock.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/snakelet.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/snakelet.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/neptune.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/neptune.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/ontos.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/ontos.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/osa.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/osa.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/saturn.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/saturn.yml): PDV hull with a shield generator, kept on plastitanium instead of adamantite.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/scorpion.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/scorpion.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/tethys.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/tethys.yml): PDV hull refit from plastitanium to adamantite walls.
 

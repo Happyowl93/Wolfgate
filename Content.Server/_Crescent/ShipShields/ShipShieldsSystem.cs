@@ -58,6 +58,7 @@ public sealed partial class ShipShieldsSystem : EntitySystem
             }
 
             float healed = emitter.HealPerSecond * EmitterUpdateRate;
+            healed /= WolfgateShuntStrength(emitter); // WOLFGATE(ShipShields): a shunted field regenerates no faster than an even one
 
             if (emitter.Recharging)
                 healed *= emitter.UnpoweredBonus;

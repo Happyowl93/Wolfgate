@@ -164,7 +164,7 @@ public sealed class WFShipShieldOverlay : Overlay
                 Shader.SetParameter("shuntDirection", new Vector2(MathF.Cos(direction), MathF.Sin(direction)));
                 Shader.SetParameter("shuntConcentration", concentration);
                 Shader.SetParameter("shuntCosHalfArc", MathF.Cos(arc * 0.5f));
-                Shader.SetParameter("shuntBoost", 1f + concentration * (MathF.Tau / arc - 1f));
+                Shader.SetParameter("shuntBoost", WFShipShieldShuntMath.PeakStrength(concentration, arc));
                 _shuntCenter = center;
                 _shuntDirection = direction;
                 _shuntConcentration = concentration;

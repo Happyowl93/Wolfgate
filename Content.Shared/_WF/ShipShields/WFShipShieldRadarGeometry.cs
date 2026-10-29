@@ -38,7 +38,7 @@ public sealed class WFShipShieldRadarGeometry
                 Segments.Add(new Segment(start, end, 1f));
                 continue;
             }
-            AddSector(start, end, direction, arc, 1f + concentration * (MathF.Tau / arc - 1f));
+            AddSector(start, end, direction, arc, WFShipShieldShuntMath.PeakStrength(concentration, arc));
             if (concentration < 1f)
                 AddSector(start, end, direction + MathF.PI, MathF.Tau - arc, 1f - concentration);
         }

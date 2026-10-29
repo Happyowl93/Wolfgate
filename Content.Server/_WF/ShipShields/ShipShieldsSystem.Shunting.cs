@@ -47,8 +47,8 @@ public sealed partial class ShipShieldsSystem
             }
             ApplyWolfgateShieldShunt(grid, mapGrid, allocation,
                 WFShipShieldShuntMath.StepAngle(allocation.DirectionRadians, allocation.TargetDirectionRadians, dt),
-                WFShipShieldShuntMath.Step(allocation.Concentration, allocation.TargetConcentration, dt, 0.5f),
-                WFShipShieldShuntMath.Step(allocation.ArcRadians, allocation.TargetArcRadians, dt, MathF.PI / 2f));
+                WFShipShieldShuntMath.Step(allocation.Concentration, allocation.TargetConcentration, dt, WFShipShieldShuntMath.TransferSpeed),
+                WFShipShieldShuntMath.Step(allocation.ArcRadians, allocation.TargetArcRadians, dt, WFShipShieldShuntMath.TurnSpeed));
             if (MathF.Abs(WFShipShieldShuntMath.NormalizeAngle(allocation.DirectionRadians - allocation.TargetDirectionRadians)) < 0.00001f &&
                 allocation.Concentration == allocation.TargetConcentration && allocation.ArcRadians == allocation.TargetArcRadians)
                 finished.Add(grid);
@@ -79,6 +79,12 @@ public sealed partial class ShipShieldsSystem
         }
         return true;
     }
+
+    /// <summary>An active field's peak shunt strength, which divides its regeneration so concentrating doesn't speed up recovery.</summary>
+    private float WolfgateShuntStrength(ShipShieldEmitterComponent emitter) =>
+        !emitter.Recharging && TryComp<WFShipShieldShuntComponent>(emitter.Shielded, out var allocation)
+            ? WFShipShieldShuntMath.PeakStrength(allocation.Concentration, allocation.ArcRadians)
+            : 1f;
 
     /// <summary>Checks the persistent manual operating state for installed emitters.</summary>
     private bool IsWolfgateShieldEnabled(EntityUid grid)
