@@ -3,6 +3,7 @@ using Content.Server._WF.Cockpit;
 using Content.Server._WF.CombatConsole;
 using Content.Shared._Mono.FireControl;
 using Content.Shared._WF.CombatConsole;
+using Content.Shared._WF.ShipCombat;
 
 namespace Content.Server._Mono.FireControl;
 
@@ -60,6 +61,13 @@ public sealed partial class FireControlSystem
                 UiKey = FireControlConsoleUiKey.Key,
             };
             OnFire(uid, console, forwarded);
+            return true;
+        }
+        if (command is WFTurretAimMessage aim)
+        {
+            if (aim.Selected == null || aim.Selected.Count > WFWeaponGroups.MaximumWeapons)
+                return false;
+            _wfTraverse.Aim(server, aim.Selected, aim.Coordinates);
             return true;
         }
         if (command is FireControlConsoleRefreshServerMessage)

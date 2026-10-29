@@ -56,7 +56,6 @@ public sealed class WFTurretTraverseSystem : EntitySystem
         traverse.AimUntil = _timing.CurTime + AimHold;
     }
 
-    /// <summary>Lays the gunner's selected guns on the cursor before they fire.</summary>
     private void OnAim(EntityUid uid, FireControlConsoleComponent component, WFTurretAimMessage args)
     {
         if (component.ConnectedServer is not { } serverUid ||
@@ -64,8 +63,17 @@ public sealed class WFTurretTraverseSystem : EntitySystem
             !server.Consoles.Contains(uid))
             return;
 
-        var target = GetCoordinates(args.Coordinates);
-        foreach (var netWeapon in args.Selected)
+        Aim(server, args.Selected, args.Coordinates);
+    }
+
+    /// <summary>Lays the gunner's selected guns on the cursor before they fire.</summary>
+    public void Aim(FireControlServerComponent server, List<NetEntity> selected, NetCoordinates coordinates)
+    {
+        if (!float.IsFinite(coordinates.X) || !float.IsFinite(coordinates.Y))
+            return;
+
+        var target = GetCoordinates(coordinates);
+        foreach (var netWeapon in selected)
         {
             var weapon = GetEntity(netWeapon);
             if (server.Controlled.Contains(weapon) && _rotateQuery.HasComp(weapon) &&

@@ -80,12 +80,6 @@ public sealed partial class ShipShieldsSystem
         return true;
     }
 
-    /// <summary>An active field's peak shunt strength, which divides its regeneration so concentrating doesn't speed up recovery.</summary>
-    private float WolfgateShuntStrength(ShipShieldEmitterComponent emitter) =>
-        !emitter.Recharging && TryComp<WFShipShieldShuntComponent>(emitter.Shielded, out var allocation)
-            ? WFShipShieldShuntMath.PeakStrength(allocation.Concentration, allocation.ArcRadians)
-            : 1f;
-
     /// <summary>Checks the persistent manual operating state for installed emitters.</summary>
     private bool IsWolfgateShieldEnabled(EntityUid grid)
     {

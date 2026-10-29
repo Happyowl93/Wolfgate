@@ -3,8 +3,8 @@
 Ship gun turn rates. A rotating ship gun (`FireControlRotate`) with `WFTurretTraverse` turns toward its target at
 `turnRate` degrees per second and holds fire until it is within `tolerance` degrees (3 by default) of the target
 bearing. Gunnery consoles, the cockpit and NPC gunners all fire through `FireControlSystem.AttemptFire`, so held or
-repeated fire goes off as soon as the gun is lined up. The guns selected on a gunnery console also follow the cursor
-before firing. A gun keeps following its last aim point for three seconds, turns with its ship, and does not turn
+repeated fire goes off as soon as the gun is lined up. The guns selected on a gunnery console or in the cockpit also
+follow the cursor before firing. A gun keeps following its last aim point for three seconds, turns with its ship, and does not turn
 without power. A gun following a point it has no line of fire to (the native check: its own grid's walls and
 structures) stops at the last bearing it can still fire along; turning onto a point it can fire at may cross blocked
 bearings.

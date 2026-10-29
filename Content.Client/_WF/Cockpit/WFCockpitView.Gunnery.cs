@@ -5,6 +5,7 @@ using Content.Client.Shuttles.UI;
 using Content.Client.UserInterface.Controls;
 using Content.Shared._Mono.FireControl;
 using Content.Shared._WF.Cockpit;
+using Content.Shared._WF.ShipCombat;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
@@ -158,8 +159,12 @@ public sealed partial class WFCockpitView
         if (!_gunneryControlling || _gunneryConsole == null || _gunneryPanel == null || !_gunneryPanel.HasSelectedWeapons)
             return;
         var entities = IoCManager.Resolve<IEntityManager>();
+        var netCoordinates = entities.GetNetCoordinates(coordinates);
         var selected = fire ? _gunneryPanel.SelectedWeapons : new List<NetEntity>();
-        SendGunnery(new FireControlConsoleFireMessage(selected, entities.GetNetCoordinates(coordinates)));
+        SendGunnery(new FireControlConsoleFireMessage(selected, netCoordinates));
+        // Selected guns with a turn rate follow the cursor before firing.
+        if (!fire)
+            SendGunnery(new WFTurretAimMessage(_gunneryPanel.SelectedWeapons, netCoordinates));
     }
 
     private float MeasureGunnery(float width, float height)
