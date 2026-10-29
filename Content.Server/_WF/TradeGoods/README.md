@@ -7,7 +7,9 @@ which closes the lathe faucet. The Market PDA app, chute examine and the chute's
 each with its weight and price per tonne. The app's Alerts tab lists every event below with its countdown, plus alerts
 for the holder alone: traders who won't deal with them and what the war pays their faction; soonest deadline first. The app holds no ship information: what a ship carries is the
 helm's business (CargoLoad). Every PDA gets the app: `WFMarketCartridgeSystem` appends it to each PDA's preinstalled
-programs at startup, since most PDA prototypes replace the base list. Only open copies refresh, every 5 s. Its Prices
+programs at startup, since most PDA prototypes replace the base list. Only open copies refresh, every 5 s. Hitting a
+trade crate with the app open names the station paying most for that crate now (`BestSale`), skipping chutes that
+would refuse it; a hidden market is named only to an underground company's members. Its Prices
 tab groups stations by faction (`marketFactions`, matched by chute). Hidden markets (`hiddenChutes`: PDV Helios and the
 Underground fence) go to a separate Underground tab, and only holders of an `undergroundCompanies` company (PDV and the
 Underground's godfathers and fugitives) are sent them, along with alerts naming them. UI state reaches every client near a PDA, so for those holders the networked state is a public stand-in and the
@@ -122,6 +124,7 @@ it nears its floor of 1000; printing it costs about 260 in materials and a 3 km 
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketAppTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketAppTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketBestSaleTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketBestSaleTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketPdaTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketPdaTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/MarketUndergroundTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/MarketUndergroundTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/TradeGoods/TradeBuyPriceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/TradeGoods/TradeBuyPriceTest.cs)

@@ -164,6 +164,21 @@ public sealed partial class WFTradeMarketSystem
                >= Profile(chuteXform.GridUid).MinHaulDistance;
     }
 
+    /// <summary>
+    /// Whether a chute's haul test would pass a crate, without stamping it as <see cref="CheckHaul"/> does. A crate whose
+    /// origin isn't known yet passes.
+    /// </summary>
+    public bool WouldPassHaul(EntityUid chute, EntityUid crate)
+    {
+        if (!TryComp<WFTradeOriginComponent>(crate, out var origin))
+            return true;
+
+        if (origin.Run == null && IsSealedOnly(chute))
+            return false;
+
+        return origin.Pending || origin.Point.MapId != Transform(chute).MapID || WasHauled(chute, crate);
+    }
+
     /// <summary>Whether a trader aboard the chute's grid refuses to deal with someone who hurt them.</summary>
     public bool Shunned(EntityUid chute, EntityUid user)
     {

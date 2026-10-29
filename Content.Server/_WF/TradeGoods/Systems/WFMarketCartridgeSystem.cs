@@ -1,10 +1,12 @@
 using System.Linq;
 using Content.Server._Mono.AlertLevel;
+using Content.Server._Mono.VendingMachine;
 using Content.Server._WF.CargoLoad;
 using Content.Server._WF.Encounters.Components;
 using Content.Server._WF.SectorControl.Systems;
 using Content.Server._WF.TradeGoods.Components;
 using Content.Server.CartridgeLoader;
+using Content.Server.Popups;
 using Content.Shared._Crescent.Dispenser;
 using Content.Shared._Mono.Company;
 using Content.Shared._WF.SectorControl;
@@ -42,6 +44,8 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     [Dependency] private WFSectorTerritorySystem _territory = default!;
     [Dependency] private WFCargoLoadSystem _cargo = default!;
     [Dependency] private WarLevelSystem _war = default!;
+    [Dependency] private PopupSystem _popup = default!;
+    [Dependency] private VendingMachinePurchaseSystem _vendingPurchase = default!;
 
     public static readonly EntProtoId MarketCartridge = "WFMarketCartridge";
 
@@ -53,6 +57,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<WFMarketCartridgeComponent, CartridgeUiReadyEvent>(OnUiReady);
+        SubscribeLocalEvent<WFMarketCartridgeComponent, CartridgeAfterInteractEvent>(OnAfterInteract);
         SubscribeLocalEvent<PdaComponent, MapInitEvent>(OnPdaMapInit, before: [typeof(CartridgeLoaderSystem)]);
     }
 
@@ -69,6 +74,58 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     private void OnUiReady(Entity<WFMarketCartridgeComponent> ent, ref CartridgeUiReadyEvent args)
     {
         Push(args.Loader, Sector());
+    }
+
+    /// <summary>Hitting a trade good with the open Market app names the station that pays most for it now.</summary>
+    private void OnAfterInteract(Entity<WFMarketCartridgeComponent> ent, ref CartridgeAfterInteractEvent args)
+    {
+        var interact = args.InteractEvent;
+        if (interact.Handled
+            || !interact.CanReach
+            || interact.Target is not { } target
+            || !HasComp<WFTradeOriginComponent>(target) && !_special.IsSpecial(target))
+            return;
+
+        interact.Handled = true;
+        var message = BestSale(target, interact.User) is { } best
+            ? Loc.GetString("wf-market-best-sale", ("item", target), ("station", best.Station), ("amount", best.Amount))
+            : Loc.GetString("wf-market-best-sale-none", ("item", target));
+        _popup.PopupEntity(message, target, interact.User);
+    }
+
+    /// <summary>
+    /// The station paying a seller most for one crate now, skipping chutes that would refuse it. Hidden markets count only
+    /// for members of an underground company.
+    /// </summary>
+    public (string Station, int Amount)? BestSale(EntityUid crate, EntityUid seller)
+    {
+        if (MetaData(crate).EntityPrototype?.ID is not { } good)
+            return null;
+
+        var underground = SeesUnderground(seller);
+        var special = _special.IsSpecial(crate);
+        (string Station, int Amount)? best = null;
+        foreach (var (chute, _, grid) in _market.Chutes())
+        {
+            if (!underground && _market.IsHiddenChute(chute)
+                || _market.Shunned(chute, seller)
+                || _vendingPurchase.WasPurchasedOnGrid(crate, grid)
+                || !_market.WouldPassHaul(chute, crate))
+                continue;
+
+            var amount = special ? _special.Price(chute, crate) : _market.Quote(chute, good, crate, seller)?.Amount;
+            if (amount is { } price && (best is not { } current || price > current.Amount))
+                best = (_market.StationName(chute), price);
+        }
+
+        return best;
+    }
+
+    /// <summary>Whether someone belongs to an underground company, and so sees the hidden markets.</summary>
+    public bool SeesUnderground(EntityUid holder)
+    {
+        return CompOrNull<CompanyComponent>(holder)?.CompanyName is { } company
+               && _proto.Index(WFTradeMarketSystem.DefaultProfile).UndergroundCompanies.Contains(company);
     }
 
     /// <summary>What one loader's Market app shows right now, hidden markets included for those who see them.</summary>
@@ -294,7 +351,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         var holder = Transform(loader).ParentUid;
         var profile = _proto.Index(WFTradeMarketSystem.DefaultProfile);
         var company = CompOrNull<CompanyComponent>(holder)?.CompanyName;
-        var sees = company is { } member && profile.UndergroundCompanies.Contains(member);
+        var sees = SeesUnderground(holder);
         underground = sees;
 
         var state = new WFMarketUiState
