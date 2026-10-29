@@ -47,7 +47,7 @@ public sealed class TradeBuyPriceTest
             Assert.That(market.BuyPrice(vendor, fabric, fresh.Base), Is.EqualTo(fresh.Amount), "The vend hook should charge the quote.");
 
             // Each crate bought from a vendor makes the good scarcer at the station.
-            const int bought = 8;
+            const int bought = 16;
             for (var i = 0; i < bought; i++)
             {
                 var crate = entMan.SpawnEntity(Fabric, map.GridCoords);
