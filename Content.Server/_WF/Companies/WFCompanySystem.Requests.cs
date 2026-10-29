@@ -87,6 +87,11 @@ public sealed partial class WFCompanySystem
             case WFCompanyAction.Apply when own == null && target != null && !IsIronman(character.Profile):
                 if (target.Applications.Count >= WFCompanyPolicy.MaximumMembers && !target.Applications.ContainsKey(character.ProfileId))
                     break;
+                if (HasPlayer(target, character.User))
+                {
+                    error = "wf-company-error-same-player";
+                    break;
+                }
                 if (!WFCompanyPolicy.TryNormalizeApplication(msg.Description, out var reason))
                 {
                     error = "wf-company-error-application";
@@ -150,6 +155,8 @@ public sealed partial class WFCompanySystem
                 if (!_players.TryGetSessionById(user, out var invitee) || CurrentCharacter(invitee) is not { } guest ||
                     CompanyOf(guest.ProfileId) != null || IsIronman(guest.Profile))
                     return "wf-company-error-invite";
+                if (HasPlayer(company, user))
+                    return "wf-company-error-same-player";
                 company.Invitations.Add(guest.ProfileId);
                 _chat.DispatchServerMessage(invitee, Loc.GetString("wf-company-invited", ("company", company.Name),
                     ("name", you.Name), ("character", guest.Profile.Name)));
@@ -406,6 +413,8 @@ public sealed partial class WFCompanySystem
             return "wf-company-error-ironman";
         if (company.Members.Count >= WFCompanyPolicy.MaximumMembers)
             return "wf-company-error-full";
+        if (HasPlayer(company, user))
+            return "wf-company-error-same-player";
         var member = new Member { Profile = profile, User = user, Name = name, Slot = slot, Rank = rankId ?? company.Ranks[^1].Id,
             WithdrawDay = DateTime.UtcNow.Date };
         company.Members[profile] = member;
@@ -442,6 +451,13 @@ public sealed partial class WFCompanySystem
         if (applied)
             Track(_db.DeleteCompanyApplicationsAsync(profile, null));
     }
+
+    /// <summary>Whether one of the player's characters is already a member; a player has one character per company.</summary>
+    private static bool HasPlayer(Company company, Robust.Shared.Network.NetUserId user) =>
+        company.Members.Values.Any(member => member.User == user);
+
+    /// <summary>Members counted by player, so alternate characters joined before the one-per-player rule count once.</summary>
+    private static int PlayerCount(Company company) => company.Members.Values.Select(member => member.User).Distinct().Count();
 
     /// <summary>Removes one application from memory and the database; false if there was none.</summary>
     private bool DropApplication(Company company, int profile)

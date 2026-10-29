@@ -109,6 +109,17 @@ public sealed partial class WFCompanyTest
             state = await Request(new(WFCompanyAction.Refresh));
             Assert.That(state.Own!.Members.Single(entry => entry.Name == "Cal Walkin").Rank, Is.EqualTo(recruit.Id));
 
+            // A player has one character per company: another of the walk-in's characters is turned away.
+            var join = typeof(WFCompanySystem).GetMethod("Join", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var companyField = typeof(WFCompanySystem).GetField("_companies", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            string joinError = null;
+            await server.WaitPost(() =>
+            {
+                var company = ((System.Collections.IDictionary) companyField.GetValue(companies)!)[id.Value]!;
+                joinError = (string) join.Invoke(companies, new object[] { company, int.MaxValue, walkIn.UserId, "Cal Alt", 5, null, null });
+            });
+            Assert.That(joinError, Is.EqualTo("wf-company-error-same-player"));
+
             // Rank loadouts: only loadouts a crew job can take, saved with the rank.
             var allowed = WFCompanyLoadouts.Catalogue(prototypes).Select(entry => entry.Loadout).ToList();
             Assert.That(allowed.Count, Is.GreaterThan(WFCompanyLoadouts.Catalogue(prototypes).Count(entry => entry.Group.ID.StartsWith("Contractor"))),

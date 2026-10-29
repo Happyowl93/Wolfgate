@@ -548,7 +548,8 @@ public sealed partial class WFCompanySystem : EntitySystem
             if (session.Status == SessionStatus.InGame && CurrentCharacter(session) == null)
                 RefreshProfileIdsLater(session.UserId);
             if (session.Status != SessionStatus.InGame || CurrentCharacter(session) is not { } character ||
-                CompanyOf(character.ProfileId) != null || IsIronman(character.Profile) || company.Invitations.Contains(character.ProfileId))
+                CompanyOf(character.ProfileId) != null || IsIronman(character.Profile) || company.Invitations.Contains(character.ProfileId) ||
+                HasPlayer(company, session.UserId))
                 continue;
             targets.Add(new WFCompanyPlayer(session.UserId, character.Profile.Name));
         }

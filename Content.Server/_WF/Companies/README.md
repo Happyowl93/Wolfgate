@@ -17,6 +17,9 @@ carries `WFCompanyShipComponent`, which the IFF label shows as `[TAG] Name`.
 Creating a company needs 25 hours played in total (`wf.companies.create_hours`) and takes a 100,000 fee from the
 founder's bank (`wf.companies.create_fee`), refunded if creation fails. The fee leaves the economy.
 
+A player has one character per company: invitations, applications and open access refuse a character whose player
+already has another in it, and the fleet licence minimum counts players, not characters.
+
 Apply opens a form: the rank the character wants and up to 500 characters on why. Applications are saved, so they
 survive restarts, and online members who can accept them are told. Accepting gives the asked-for rank when the accepter
 can set it, otherwise the lowest. The owner can turn on open access at one rank in Settings; anyone can then press

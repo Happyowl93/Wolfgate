@@ -85,7 +85,7 @@ public sealed partial class WFCompanySystem
         success = null;
         if (company.Licences.Count >= WFCompanyPolicy.MaximumLicences)
             return "wf-company-error-licences-full";
-        if (company.Members.Count < WFCompanyPolicy.MinimumFleetMembers)
+        if (PlayerCount(company) < WFCompanyPolicy.MinimumFleetMembers)
             return "wf-company-error-fleet-members";
         if (vessel == null || LicenceOffers(company).FirstOrDefault(offer => offer.Vessel == vessel) is not { } offer)
             return "wf-company-error-licence";
@@ -128,7 +128,7 @@ public sealed partial class WFCompanySystem
             return "wf-company-error-licence";
         if (_launched.ContainsKey(licenceId) || _reserved.ContainsKey(licenceId))
             return "wf-company-error-licence-out";
-        if (company.Members.Count < WFCompanyPolicy.MinimumFleetMembers)
+        if (PlayerCount(company) < WFCompanyPolicy.MinimumFleetMembers)
             return "wf-company-error-fleet-members";
         if (!_roundSetup.CreateHangarCrew(session, company.Id, licence.Id, licence.Vessel, out var error))
             return error;

@@ -68,7 +68,10 @@ public sealed partial class WFCompanyWindow
             details.AddChild(new Label { Text = Text("owned-by", ("name", company.OwnerName)) });
             if (company.Description.Length > 0)
                 details.AddChild(Paragraph(company.Description));
-            if (state.Own == null && state.CharacterName != null)
+            // A player has one character per company, so another character's company can't be joined.
+            if (state.Characters.Any(character => character.CompanyId == company.Id))
+                details.AddChild(new Label { Text = Text("same-player"), FontColorOverride = Color.FromHex("#C8C8C8") });
+            else if (state.Own == null && state.CharacterName != null)
             {
                 var actions = Row();
                 if (openRank != null)
