@@ -359,6 +359,56 @@ public sealed class DrydockTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>A part whose floor was blown out drifts into space; it is counted missing and rebuilt in place of the drifter.</summary>
+    [Test]
+    public async Task DriftingOriginalCountedMissing()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var grid = map.Grid;
+        var drydock = server.System<WFDrydockSystem>();
+        var console = new WFDrydockConsoleComponent { Berth = "T" };
+
+        EntityUid thruster = default;
+
+        await server.WaitAssertion(() =>
+        {
+            (thruster, _) = BuildHull(pair, grid);
+            server.System<ShipRepairSystem>().GenerateRepairData(grid);
+
+            CutHole(pair, grid, ThrusterTile);
+            Assert.That(em.GetComponent<TransformComponent>(thruster).GridUid, Is.Null, "The thruster should be adrift.");
+
+            var items = drydock.BuildRepairItems(grid, console);
+            Assert.Multiple(() =>
+            {
+                Assert.That(items.Count(i => i.Kind == WFDrydockWorkKind.Tile), Is.EqualTo(1), "Expected the blown-out tile.");
+                Assert.That(items.Count(i => i.Kind == WFDrydockWorkKind.Entity), Is.EqualTo(1), "The drifting thruster was not counted missing.");
+            });
+
+            foreach (var item in items.OrderBy(i => i.Kind != WFDrydockWorkKind.Tile))
+            {
+                drydock.ApplyItem(grid, item);
+            }
+        });
+
+        await server.WaitRunTicks(2);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(em.Deleted(thruster), Is.True, "The drifting original should be removed.");
+                Assert.That(FindThruster(pair, grid, ThrusterTile).IsValid(), Is.True, "The thruster was not rebuilt.");
+                Assert.That(drydock.BuildRepairItems(grid, console), Is.Empty, "A repaired ship should have no work left.");
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     /// <summary>A gun rebuilt after its original was destroyed mounts on the hardpoint the original held.</summary>
     [Test]
     public async Task RebuiltGunMountsOnItsHardpoint()
