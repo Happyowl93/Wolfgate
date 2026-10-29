@@ -1,4 +1,5 @@
 <!-- WOLFGATE(RoundSetup): roundSetup namespace mounts the live player lobby browser -->
+<!-- WOLFGATE(LobbyShenanigans): shenanigans namespace for the layer the lobby fun plays on -->
 <lobbyUi:LobbyGui
     xmlns="https://spacestation14.io"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -9,6 +10,7 @@
     xmlns:style="clr-namespace:Content.Client.Stylesheets"
     xmlns:lobbyUi="clr-namespace:Content.Client.Lobby.UI"
     xmlns:roundSetup="clr-namespace:Content.Client._WF.RoundSetup"
+    xmlns:shenanigans="clr-namespace:Content.Client._WF.LobbyShenanigans"
     xmlns:info="clr-namespace:Content.Client.Info"
     xmlns:widgets="clr-namespace:Content.Client.UserInterface.Systems.Chat.Widgets"
     xmlns:graphics="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client">
@@ -225,5 +227,7 @@
         </PanelContainer>
     </BoxContainer>
     <PanelContainer Name="SkinScanlines" StyleClasses="LobbyScanlines" MouseFilter="Ignore" Visible="False" />
+    <!-- WOLFGATE(LobbyShenanigans): the layer the lobby fun plays on, over everything and never taking a click -->
+    <shenanigans:LobbyShenanigansLayer Name="ShenaniganLayer" />
     <!-- WOLFGATE END -->
 </lobbyUi:LobbyGui>

@@ -99,6 +99,10 @@ public sealed class WolfgateCVars
     public static readonly CVarDef<bool> ChatTabsSubtleAdded =
         CVarDef.Create("wf.chat_tabs_subtle_added", false, CVar.CLIENTONLY | CVar.ARCHIVE);
 
+    /// <summary>Whether saved chat tabs that show LOOC have had the SOOC channel added, done once.</summary>
+    public static readonly CVarDef<bool> ChatTabsSubtleOocAdded =
+        CVarDef.Create("wf.chat_tabs_subtle_ooc_added", false, CVar.CLIENTONLY | CVar.ARCHIVE);
+
     /// <summary>
     /// Comma separated entity prototype ids starred in the spawn menu's Favourites folder.
     /// </summary>

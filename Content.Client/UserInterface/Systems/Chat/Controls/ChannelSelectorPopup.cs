@@ -15,6 +15,7 @@ public sealed class ChannelSelectorPopup : Popup
         ChatSelectChannel.Subtle, // WOLFGATE(Subtle)
         ChatSelectChannel.Radio,
         ChatSelectChannel.LOOC,
+        ChatSelectChannel.SubtleOOC, // WOLFGATE(Subtle)
         ChatSelectChannel.OOC,
         ChatSelectChannel.Dead,
         ChatSelectChannel.Admin, // WOLFGATE(EventStaff): comma for the event channel

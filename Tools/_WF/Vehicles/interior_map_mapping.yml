@@ -1,4 +1,4 @@
-# What convert_interior_map.py changes in a vehicle interior map. Keys are the source's names.
+# What the (since removed) interior map converter changed in each vehicle interior map. Keys are the source's names.
 #
 #   prototypes   source id -> Wolfgate id, or null to delete the placement (and everything parented to it).
 #   map_prototypes   the same, for one output map only (keyed by output file name); it wins over `prototypes`.

@@ -280,6 +280,17 @@ public sealed partial class WFEncounterRewardSystem : EntitySystem
         args.Friendly = onEnemies >= FriendlyFireRatio * (onUs + 1);
     }
 
+    /// <summary>Credits a player who boarded an encounter ship and put it out of the fight as having hit its side <see cref="MinimumHits"/> times.</summary>
+    public void RecordBoarding(WFEncounterComponent encounter, NetUserId player, string side)
+    {
+        if (encounter.Resolution != null)
+            return;
+
+        if (!encounter.Hits.TryGetValue(player, out var bySide))
+            encounter.Hits[player] = bySide = new Dictionary<string, int>();
+        bySide[side] = Math.Max(bySide.GetValueOrDefault(side), MinimumHits);
+    }
+
     /// <summary>Counts a ship weapon hit by a player-crewed ship on an encounter ship as help for the other sides.</summary>
     public void RecordHit(EntityUid victim, EntityUid attacker)
     {

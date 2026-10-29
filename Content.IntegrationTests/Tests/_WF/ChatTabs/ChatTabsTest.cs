@@ -312,13 +312,13 @@ public sealed class ChatTabsTest : InteractionTest
             Assert.That(_tabs.Move(3, 5), Is.EqualTo(3), "a move off the end does nothing");
 
             var saved = _cfg.GetCVar(WolfgateCVars.ChatTabs);
-            Assert.That(saved, Does.EndWith("|Deadchat=Dead|OOC=LOOC,OOC"));
+            Assert.That(saved, Does.EndWith("|Deadchat=Dead|OOC=LOOC,SubtleOOC,OOC"));
 
             // Deleting the selected tab selects its neighbour.
             _tabs.Remove(3);
             Assert.That(_tabs.Tabs, Has.Count.EqualTo(4));
             Assert.That(_tabs.Selected, Is.EqualTo(3));
-            Assert.That(_tabs.SelectedTab.Channels, Is.EqualTo(ChatChannel.OOC | ChatChannel.LOOC));
+            Assert.That(_tabs.SelectedTab.Channels, Is.EqualTo(ChatChannel.OOC | ChatChannel.LOOC | ChatChannel.SubtleOOC));
 
             // The saved value brings the same tabs back.
             saved = _cfg.GetCVar(WolfgateCVars.ChatTabs);

@@ -7,7 +7,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import copy_assets  # noqa: E402
-import import_rmc  # noqa: E402
 import source_paths  # noqa: E402
 
 SOURCES = {"rmc": {"dir": "RMC-14"}, "cmu": {"dir": "ColonialMarinesUniverse"}, "engine": {"dir": "RMC-14/RobustToolbox"}}
@@ -64,16 +63,15 @@ class ToolsTest(unittest.TestCase):
         self.assertNotRegex(raw, r"[A-Za-z]:[/\\]Users")
 
     def test_the_tools_resolve_every_source(self):
-        for sources in (import_rmc.load_config()["sources"], copy_assets.load_sources()):
-            for key in ("rmc", "cmu", "engine"):
-                self.assertTrue(sources[key]["path"], key)
+        sources = copy_assets.load_sources()
+        for key in ("rmc", "cmu", "engine"):
+            self.assertTrue(sources[key]["path"], key)
 
     def test_the_variable_reaches_every_tool(self):
         import os
         old = os.environ.get("WOLFGATE_ENGINE_PATH")
         os.environ["WOLFGATE_ENGINE_PATH"] = "/some/engine"
         try:
-            self.assertEqual(import_rmc.load_config()["sources"]["engine"]["path"], "/some/engine")
             self.assertEqual(copy_assets.load_sources()["engine"]["path"], "/some/engine")
         finally:
             if old is None:

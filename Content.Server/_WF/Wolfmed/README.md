@@ -256,6 +256,8 @@ Skipped ("dirty-disposed").
 - [`Content.Shared/_WF/Wolfmed/Surgery/WolfmedSurgeryProgressComponent.cs`](../../../Content.Shared/_WF/Wolfmed/Surgery/WolfmedSurgeryProgressComponent.cs)
 - [`Content.Shared/_WF/Wolfmed/Targeting/WolfmedAimScatterSystem.cs`](../../../Content.Shared/_WF/Wolfmed/Targeting/WolfmedAimScatterSystem.cs)
 - [`Content.Shared/_WF/Wolfmed/Targeting/WoundTargetResolver.cs`](../../../Content.Shared/_WF/Wolfmed/Targeting/WoundTargetResolver.cs)
+- [`Content.Shared/_WF/Wolfmed/Wounds/PlateletFactoriesComponent.Wolfmed.cs`](../../../Content.Shared/_WF/Wolfmed/Wounds/PlateletFactoriesComponent.Wolfmed.cs)
+- [`Content.Shared/_WF/Wolfmed/Wounds/WolfmedArmorEvents.cs`](../../../Content.Shared/_WF/Wolfmed/Wounds/WolfmedArmorEvents.cs)
 - [`Content.Shared/_WF/Wolfmed/Wounds/WolfmedBleedGateSystem.cs`](../../../Content.Shared/_WF/Wolfmed/Wounds/WolfmedBleedGateSystem.cs)
 - [`Content.Shared/_WF/Wolfmed/Wounds/WolfmedBurnFluidComponents.cs`](../../../Content.Shared/_WF/Wolfmed/Wounds/WolfmedBurnFluidComponents.cs)
 - [`Content.Shared/_WF/Wolfmed/Wounds/WolfmedCauteryProfilePrototype.cs`](../../../Content.Shared/_WF/Wolfmed/Wounds/WolfmedCauteryProfilePrototype.cs)
@@ -432,11 +434,13 @@ Skipped ("dirty-disposed").
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMedicalPatchTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMedicalPatchTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMissingFootTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMissingFootTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMultiToolSurgeryTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedMultiToolSurgeryTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedNaniteDronesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedNaniteDronesTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedNecrosisSurgeryTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedNecrosisSurgeryTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedNpcAimTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedNpcAimTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedOrganTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedOrganTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedOverheatTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedOverheatTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPainTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPainTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPlateletWoundTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPlateletWoundTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPlaytestFixesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPlaytestFixesTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPodLeftoversTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPodLeftoversTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPodReagentSafetyTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Wolfmed/WolfmedPodReagentSafetyTest.cs)
@@ -1059,6 +1063,10 @@ Skipped ("dirty-disposed").
 - [`Content.Server/_Mono/Traits/Physical/HemophiliaSystem.cs`](../../_Mono/Traits/Physical/HemophiliaSystem.cs)
   - Wolfmed wound hosts own their own bleeding.
   - GUARD E4, wound hosts bleed through WoundBleedingSystem; re-express hemophilia as a
+  - the body or its gear refused the bleed.
+- [`Content.Server/_Mono/Traits/Physical/PlateletFactoriesSystem.cs`](../../_Mono/Traits/Physical/PlateletFactoriesSystem.cs)
+  - open wounds outlast the damage; checked below
+  - removed damage barely closes a wound, so the trait mends wounds like a healing chem.
 - [`Content.Server/_NF/Medical/MedicalBountySystem.cs`](../../_NF/Medical/MedicalBountySystem.cs)
   - a wound host's bounty injuries
   - only a bounty whose injuries this body can take
@@ -1342,6 +1350,8 @@ Skipped ("dirty-disposed").
   - compat shim
   - V124: the one damage-driven detach path, so the dismemberment feedback hangs here
   - D8/P3-D15
+  - worn armour with a limb lock may keep the limb on.
+  - asked only once a hit would take the limb, so ordinary hits skip the inventory relay.
   - P3-D15 drops Onyx's BodyPartComponent parameter; the data it read is on WolfmedBodyPartComponent.
   - revival pass, an overflowing hit's whole effect on a capped part, for the blast roll.
   - revival pass, a capped part never reaches its stored thresholds, so its overflow
@@ -1497,6 +1507,7 @@ Skipped ("dirty-disposed").
   - only a wound that just grew rolls, see LastSyncSeverity
   - the body or its gear may refuse a new bleed.
   - a grown wound gets its WoundChangedEvent next, and the bleeding system adds the growth
+  - a refused bleed doesn't deepen an internal one either; it may still ease off.
   - W2: damage removal is a treatment too, so a wound that refuses treatment (an
   - an item working on the wound itself closes it at full strength. HealingMultiplier is how much
   - playtest 5, a wound that refuses treatment (a lodged round) is no potential to heal
@@ -1572,7 +1583,9 @@ Skipped ("dirty-disposed").
   - GUARD F; LOOK adds detailed
   - GUARD F, legacy threshold text is for non-wound-hosts only.
   - GUARD F, a wound host gets a visual inspection instead (P2-D20/D2).
-- [`Content.Shared/Inventory/InventorySystem.Relay.cs`](../../../Content.Shared/Inventory/InventorySystem.Relay.cs): worn items may refuse a bleed.
+- [`Content.Shared/Inventory/InventorySystem.Relay.cs`](../../../Content.Shared/Inventory/InventorySystem.Relay.cs)
+  - worn items may refuse a bleed.
+  - worn items may refuse a wound or a lost limb, or dull pain.
 - [`Content.Shared/Medical/HealingDoAfterEvent.cs`](../../../Content.Shared/Medical/HealingDoAfterEvent.cs): the wound-host limb chosen when treatment started, kept across repeats.
 - [`Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs`](../../../Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs)
   - EXT 2 — Wolfmed diagnostic payload types.
@@ -1766,6 +1779,7 @@ Skipped ("dirty-disposed").
   - as the welder, so a chassis's Cold and Caustic damage can be repaired
 - [`Resources/Prototypes/_Mono/Entities/Objects/Weapons/Guns/Ammunition/Projectiles/12_gauge.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Weapons/Guns/Ammunition/Projectiles/12_gauge.yml): W1: buckshot leaves fragments, not a clean channel.
 - [`Resources/Prototypes/_Mono/Entities/Objects/Weapons/Melee/shockmaul.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Weapons/Melee/shockmaul.yml): a blunt weapon can execute, with bludgeoning lines in place of the throat-slitting ones
+- [`Resources/Prototypes/_Mono/Traits/physical.yml`](../../../Resources/Prototypes/_Mono/Traits/physical.yml): the drones repair a chassis too; flesh-only mending left every chassis wound open
 - [`Resources/Prototypes/_NF/Body/Organs/goblin_organs.yml`](../../../Resources/Prototypes/_NF/Body/Organs/goblin_organs.yml)
   - M4: OD16 parity, Wolfmed lung data (plan 9.2 group A-prime)
   - in the lungs slot; BaseHumanOrgan leaves it blank, so surgery and the analyzer missed it

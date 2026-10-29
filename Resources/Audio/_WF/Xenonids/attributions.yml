@@ -672,3 +672,18 @@
   license: "CC-BY-SA-3.0"
   copyright: "Taken from cmss13"
   source: "https://github.com/cmss13-devs/cmss13/blob/21e6447cc08aea502f671c819fdbcecbb85e6028/sound/voice/xenos_roaring.ogg"
+
+- files: ["Xeno/burrowing_b.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13"
+  source: "https://github.com/cmss13-devs/cmss13/tree/757b5bc4dad2b0834a845c9783a8695c5446ce09/sound/effects/burrowing_b.ogg"
+
+- files: ["Xeno/burrowoff.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13"
+  source: "https://github.com/cmss13-devs/cmss13/tree/757b5bc4dad2b0834a845c9783a8695c5446ce09/sound/effects/burrowoff.ogg"
+
+- files: ["Xeno/pry1.ogg", "Xeno/pry2.ogg", "Xeno/pry3.ogg", "Xeno/pry4.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13, re-encoded in RMC-14 #10302; pry2 to pry4 sit beside it"
+  source: "https://github.com/cmss13-devs/cmss13/tree/757b5bc4dad2b0834a845c9783a8695c5446ce09/sound/effects/pry1.ogg"

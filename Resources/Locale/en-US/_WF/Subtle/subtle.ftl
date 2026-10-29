@@ -17,3 +17,12 @@ hud-chatbox-channel-Subtle = Subtle
 cmd-subtle-desc = Performs an action that only the players right next to you see.
 cmd-subtle-help = Usage: {$command} <action>
 cmd-subtle-hint = <action>
+
+## subtle LOOC
+wf-sooc-wrap-message = SOOC: [bold]{$entityName}:[/bold] {$message}
+wf-sooc-wrap-message-admin = SOOC: [bold]{$entityName} ({$player}):[/bold] {$message}
+hud-chatbox-select-channel-SubtleOOC = SOOC
+hud-chatbox-channel-SubtleOOC = SOOC
+cmd-sooc-desc = Sends LOOC that only the players right next to you and admins see.
+cmd-sooc-help = Usage: {$command} <message>
+cmd-sooc-hint = <message>

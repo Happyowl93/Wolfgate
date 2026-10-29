@@ -30,11 +30,13 @@ public sealed partial class ShuttleConsoleWindow
             ("wf-cockpit-dock", DockContainer.WfCockpitDock(lease)),
             ("wf-cockpit-access", AccessContainer),
             ("wf-cockpit-shield-page", shieldDetails),
+            ("wf-cockpit-mining", WfCockpitMiningPage(lease)),
             ("wf-cockpit-systems", systems),
             ("wf-cockpit-alarms", announcements),
         };
         return new WFCockpitParts(CameraBar.WfCockpitControls(lease), lease.Take(CaptureBanner, restoreVisibility: false),
-            instruments, ShipContainer.WfCockpitFuel(), translation, NavContainer.WfCockpitFlight(lease), shield,
+            instruments, Row(ShipContainer.WfCockpitFuel(), NavContainer.WfCargoGauge("Cockpit")),
+            translation, NavContainer.WfCockpitFlight(lease), shield,
             new WFCockpitTcasPanel(CollisionBanner.WfCockpitTcasReading), pages);
     }
 

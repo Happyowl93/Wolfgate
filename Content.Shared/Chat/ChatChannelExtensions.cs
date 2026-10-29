@@ -3,6 +3,7 @@
 public static class ChatChannelExtensions
 {
     public static readonly Color SubtleColor = Color.FromHex("#c9a9d6"); // WOLFGATE(Subtle): subtle emote tint
+    public static readonly Color SubtleOocColor = Color.FromHex("#7fbfb4"); // WOLFGATE(Subtle): subtle LOOC tint
 
     public static Color TextColor(this ChatChannel channel)
     {
@@ -18,6 +19,7 @@ public static class ChatChannelExtensions
             ChatChannel.AdminChat => Color.HotPink,
             ChatChannel.EventChat => Color.Gold, // WOLFGATE(EventStaff)
             ChatChannel.Subtle => SubtleColor, // WOLFGATE(Subtle)
+            ChatChannel.SubtleOOC => SubtleOocColor, // WOLFGATE(Subtle)
             ChatChannel.Whisper => Color.DarkGray,
             _ => Color.LightGray
         };

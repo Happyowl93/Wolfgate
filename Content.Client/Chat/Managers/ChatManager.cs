@@ -68,6 +68,10 @@ internal sealed partial class ChatManager : IChatManager
             case ChatSelectChannel.Subtle:
                 _consoleHost.ExecuteCommand($"subtle \"{CommandParsing.Escape(str)}\"");
                 break;
+
+            case ChatSelectChannel.SubtleOOC:
+                _consoleHost.ExecuteCommand($"sooc \"{CommandParsing.Escape(str)}\"");
+                break;
             // WOLFGATE END
 
             case ChatSelectChannel.Dead:

@@ -105,6 +105,13 @@ namespace Content.Shared.Chat
         Subtle = 1 << 17,
         // WOLFGATE END
 
+        // WOLFGATE(Subtle) START: subtle LOOC channel
+        /// <summary>
+        ///     LOOC only the players right next to the sender and admins see
+        /// </summary>
+        SubtleOOC = 1 << 18,
+        // WOLFGATE END
+
         /// <summary>
         ///     Channels considered to be IC.
         /// </summary>

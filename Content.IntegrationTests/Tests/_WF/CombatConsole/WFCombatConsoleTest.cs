@@ -505,7 +505,7 @@ public sealed class WFCombatConsoleTest
             var resources = pair.Client.ResolveDependency<IResourceCache>();
             foreach (var cue in new[] { "key", "switch_on", "switch_off", "selector", "bearing", "warning" })
             {
-                var clip = resources.GetResource<AudioResource>($"/Audio/_WF/CombatConsole/HighFleet/{cue}.ogg").AudioStream;
+                var clip = resources.GetResource<AudioResource>($"/Audio/_WF/CombatConsole/Retro/{cue}.ogg").AudioStream;
                 Assert.That(clip.Length.TotalSeconds, Is.GreaterThan(0), $"Console cue {cue} must decode to a non-empty clip.");
             }
         });

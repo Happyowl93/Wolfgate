@@ -1,3 +1,88 @@
+- files: ["effects/reset_key_shortbeep.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13"
+  source: "https://github.com/cmss13-devs/cmss13/blob/d7ac8ccfb28b46621afbb2e2a7b1995c1f3477f1/sound/items/synth_reset_key/shortbeep.ogg"
+
+- files: ["effects/hydraulics_1.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13"
+  source: "https://github.com/cmss13-devs/cmss13/blob/21e6447cc08aea502f671c819fdbcecbb85e6028/sound/machines/hydraulics_1.ogg"
+
+# Origin not confirmed; see the copyright line.
+- files:
+  - "box_van_driving.ogg"
+  - "box_van_horn.ogg"
+  - "box_van_overdrive.ogg"
+  - "honk_1_truck.ogg"
+  - "honk_2_truck.ogg"
+  - "honk_3_ambulence.ogg"
+  - "honk_4_light.ogg"
+  - "overdrive_activate.ogg"
+  - "sound_vehicles_humvee_driving.ogg"
+  - "sound_vehicles_humvee_horn.ogg"
+  - "tank_driving.ogg"
+  license: "CC-BY-SA-3.0"
+  copyright: "Added to RMC-14 without attribution in PR #8791 (Vehicles) by Vixting. Taken to be cmss13 sounds: the names look like cmss13's and smokelauncher_fire.ogg from the same PR is credited to cmss13 in RMC. Origin not confirmed; Colonial Marines Universe lists them as MIT, RMC-14 contributors."
+  source: "https://github.com/RMC-14/RMC-14/pull/8791"
+
+# Origin not confirmed; see the copyright line.
+- files:
+  - "weapons/autocannon_fire.ogg"
+  - "weapons/autocannon_fire_old.ogg"
+  - "weapons/cannon_distant1.ogg"
+  - "weapons/cannon_distant2.ogg"
+  - "weapons/cannon_fire1.ogg"
+  - "weapons/cannon_fire2.ogg"
+  - "weapons/dual_autocannon_fire.ogg"
+  - "weapons/minigun_loop.ogg"
+  - "weapons/minigun_select.ogg"
+  - "weapons/minigun_start.ogg"
+  - "weapons/minigun_stop.ogg"
+  - "weapons/sound_weapons_humvee_cannon.ogg"
+  license: "CC-BY-SA-3.0"
+  copyright: "Added to RMC-14 without attribution in PR #8791 (Vehicles) by Vixting. Taken to be cmss13 sounds, as the sibling smokelauncher_fire.ogg (same length, credited to cmss13 in RMC) is. Origin not confirmed; Colonial Marines Universe lists them as MIT, RMC-14 contributors."
+  source: "https://github.com/RMC-14/RMC-14/pull/8791"
+
+- files: ["effects/metal_crash.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13"
+  source: "https://github.com/cmss13-devs/cmss13/blob/1f56b68258df6c17f460c1e7777f2f0e50c236f0/sound/effects/metal_crash.ogg"
+
+- files: ["effects/metalhit.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13"
+  source: "https://github.com/cmss13-devs/cmss13/blob/41109aa6eebf87892e41b61418b7b06b279d04b6/sound/effects/metalhit.ogg"
+
+- files: ["effects/alien_claw_block.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13"
+  source: "https://github.com/cmss13-devs/cmss13/blob/ef6587e938058c360d4a685015a4f0ba3aa5473a/sound/weapons/alien_claw_block.ogg"
+
+- files: ["weapons/smokelauncher_fire.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13"
+  source: "https://github.com/cmss13-devs/cmss13/blob/fb3119741e4d633260788da7a79d1674abb95ad2/sound/weapons/vehicles/smokelauncher_fire.ogg"
+
+- files: ["guns/gun_ml66a_2.ogg"]
+  license: "CC0-1.0"
+  copyright: "Taken and modified from freesound.org"
+  source: "https://freesound.org/people/SuperPhat/sounds/417686/"
+
+- files: ["guns/m5_shoot.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13"
+  source: "https://github.com/cmss13-devs/cmss13/blob/b72dc18a26d2f4b5072d2b65145d6130036e0755/sound/weapons/gun_rocketlauncher.ogg"
+
+- files: ["guns/gun_sg_reload.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13"
+  source: "https://github.com/cmss13-devs/cmss13/blob/7aec3d478a3bd4f5eb0a1bd42addad54ff00ce43/sound/weapons/handling/gun_sg_reload.ogg"
+
+- files: ["guns/gun_sg_unload.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Taken from cmss13"
+  source: "https://github.com/cmss13-devs/cmss13/blob/7aec3d478a3bd4f5eb0a1bd42addad54ff00ce43/sound/weapons/handling/gun_sg_unload.ogg"
+
 - files: ["guns/gun_flamethrower2.ogg"]
   license: "CC-BY-SA-3.0"
   copyright: "Taken from cmss13"

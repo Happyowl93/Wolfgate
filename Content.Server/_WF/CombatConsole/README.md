@@ -171,13 +171,13 @@ the Wolfgate maintainer. No specific video/channel URL or license text was suppl
 
 ### Audio
 
-- [`Resources/Audio/_WF/CombatConsole/HighFleet/attributions.yml`](../../../Resources/Audio/_WF/CombatConsole/HighFleet/attributions.yml)
-- [`Resources/Audio/_WF/CombatConsole/HighFleet/bearing.ogg`](../../../Resources/Audio/_WF/CombatConsole/HighFleet/bearing.ogg)
-- [`Resources/Audio/_WF/CombatConsole/HighFleet/key.ogg`](../../../Resources/Audio/_WF/CombatConsole/HighFleet/key.ogg)
-- [`Resources/Audio/_WF/CombatConsole/HighFleet/selector.ogg`](../../../Resources/Audio/_WF/CombatConsole/HighFleet/selector.ogg)
-- [`Resources/Audio/_WF/CombatConsole/HighFleet/switch_off.ogg`](../../../Resources/Audio/_WF/CombatConsole/HighFleet/switch_off.ogg)
-- [`Resources/Audio/_WF/CombatConsole/HighFleet/switch_on.ogg`](../../../Resources/Audio/_WF/CombatConsole/HighFleet/switch_on.ogg)
-- [`Resources/Audio/_WF/CombatConsole/HighFleet/warning.ogg`](../../../Resources/Audio/_WF/CombatConsole/HighFleet/warning.ogg)
+- [`Resources/Audio/_WF/CombatConsole/Retro/attributions.yml`](../../../Resources/Audio/_WF/CombatConsole/Retro/attributions.yml)
+- [`Resources/Audio/_WF/CombatConsole/Retro/bearing.ogg`](../../../Resources/Audio/_WF/CombatConsole/Retro/bearing.ogg)
+- [`Resources/Audio/_WF/CombatConsole/Retro/key.ogg`](../../../Resources/Audio/_WF/CombatConsole/Retro/key.ogg)
+- [`Resources/Audio/_WF/CombatConsole/Retro/selector.ogg`](../../../Resources/Audio/_WF/CombatConsole/Retro/selector.ogg)
+- [`Resources/Audio/_WF/CombatConsole/Retro/switch_off.ogg`](../../../Resources/Audio/_WF/CombatConsole/Retro/switch_off.ogg)
+- [`Resources/Audio/_WF/CombatConsole/Retro/switch_on.ogg`](../../../Resources/Audio/_WF/CombatConsole/Retro/switch_on.ogg)
+- [`Resources/Audio/_WF/CombatConsole/Retro/warning.ogg`](../../../Resources/Audio/_WF/CombatConsole/Retro/warning.ogg)
 
 ## Non-modular edits
 

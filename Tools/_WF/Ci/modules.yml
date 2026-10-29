@@ -271,9 +271,15 @@ unmarked:
   - path: Resources/Maps/_Mono/Outpost/caelestinus_central.yml
     module: Traders
     reason: NPC traders, ATMs, deposit consoles and vents placed on the Central Command map.
+  - path: Resources/Maps/_Mono/Outpost/caelestinus_central.yml
+    module: BritishFood
+    reason: Mrs. Luvvit's Pie & Mash in the trade hall kiosk row, in place of a potted plant and its front pane.
   - path: Resources/Maps/_Mono/POI/underground.yml
     module: LockableButtons
     reason: The two blast door buttons take Underground access; the station's crew has no Pirate access.
+  - path: Resources/Maps/_Mono/POI/underground.yml
+    module: TradeGoods
+    reason: The fence chute and the smuggling-crate vendor in the cargo bay, beside the sell pallets.
   - path: Resources/Maps/_Mono/POI/tsfmc_industry.yml
     module: null
     reason: Stellar Blessing lighting, colour-coded distro, fire suit lockers and extinguishers.
@@ -1231,30 +1237,6 @@ unmarked:
   - path: Content.Server/Worldgen/Systems/WorldgenConfigSystem.cs
     module: EngineCompat
     reason: Engine v280 removed IMapManager; uses SharedMapSystem.
-  - path: Content.Server/Xenoarchaeology/Equipment/Components/AnalysisConsoleComponent.cs
-    module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
-  - path: Content.Server/Xenoarchaeology/Equipment/Components/ArtifactAnalyzerComponent.cs
-    module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
-  - path: Content.Server/Xenoarchaeology/Equipment/Components/TraversalDistorterComponent.cs
-    module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
-  - path: Content.Server/Xenoarchaeology/XenoArtifacts/ArtifactComponent.cs
-    module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
-  - path: Content.Server/Xenoarchaeology/XenoArtifacts/ArtifactSystem.Actions.cs
-    module: EngineCompat
-    reason: Engine v289 removed [ValidatePrototypeId]; its constants became ProtoId fields.
-  - path: Content.Server/Xenoarchaeology/XenoArtifacts/Effects/Components/ChemicalPuddleArtifactComponent.cs
-    module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
-  - path: Content.Server/Xenoarchaeology/XenoArtifacts/Effects/Components/FoamArtifactComponent.cs
-    module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
-  - path: Content.Server/Xenoarchaeology/XenoArtifacts/Triggers/Components/ArtifactDamageTriggerComponent.cs
-    module: EngineCompat
-    reason: Engine v289 removed the PrototypeId serializers; uses the EngineCompat copies.
   - path: Content.Server/_CE/Power/Nodes/CECableVerticalNode.cs
     module: EngineCompat
     reason: Engine v280 removed IMapManager; uses SharedMapSystem.
@@ -2290,6 +2272,30 @@ unmarked:
   - path: Resources/SharedMaps/_Mono/Shuttles/Civilian/caracara.yml
     module: null
     reason: PDV pack, top-left thruster was mapped disabled.
+  - path: Resources/SharedMaps/_Mono/Shuttles/Civilian/caracara.yml
+    module: AsteroidMining
+    reason: Its Apollo mining laser is swapped for the M40 Prospector, the heavy asteroid mining laser.
+  - path: Resources/SharedMaps/_Mono/Shuttles/MMC/akasono.yml
+    module: AsteroidMining
+    reason: Its M25 mining pulsar is swapped for the M12 Prospector, the light asteroid mining laser.
+  - path: Resources/SharedMaps/_Mono/Shuttles/MMC/kami.yml
+    module: AsteroidMining
+    reason: Its M25 mining pulsars are swapped for M12 Prospectors, the light asteroid mining laser.
+  - path: Resources/SharedMaps/_Mono/Shuttles/Civilian/noble.yml
+    module: AsteroidMining
+    reason: Its M25 mining pulsars are swapped for M12 Prospectors, the light asteroid mining laser.
+  - path: Resources/SharedMaps/_Mono/Shuttles/Civilian/peregrine.yml
+    module: AsteroidMining
+    reason: Its M25 mining pulsars are swapped for M12 Prospectors, the light asteroid mining laser.
+  - path: Resources/SharedMaps/_Mono/Shuttles/CivilianExp/pelican.yml
+    module: AsteroidMining
+    reason: Its M25 mining pulsar is swapped for the M12 Prospector, the light asteroid mining laser.
+  - path: Resources/SharedMaps/_Mono/Shuttles/Civilian/arribane.yml
+    module: AsteroidMining
+    reason: Its M25 mining pulsars are swapped for M12 Prospectors, the light asteroid mining laser.
+  - path: Resources/SharedMaps/_Mono/Shuttles/Civilian/rosetta.yml
+    module: AsteroidMining
+    reason: Its Apollo mining laser is swapped for the M40 Prospector, the heavy asteroid mining laser.
   - path: Resources/Maps/_Mono/Bluespace/prefracture.yml
     module: null
     reason: Hardpoints mapped under the Unidentified Vessel's Scythe, Sunder and Flayer guns so gunnery links them.
@@ -2338,6 +2344,9 @@ unmarked:
   - path: Resources/SharedMaps/_Mono/Shuttles/TSF/shiv.yml
     module: ArmorBalance
     reason: Reverts Monolith#4845, putting the mapped M82b and M82c suit storage back in place of the M86.
+  - path: Resources/SharedMaps/_Mono/Shuttles/TSF/shiv.yml
+    module: AsteroidMining
+    reason: Its M25 mining pulsars are swapped for M12 Prospectors, the light asteroid mining laser.
   - path: Resources/SharedMaps/_Mono/Shuttles/TSF/spekter.yml
     module: ArmorBalance
     reason: Reverts Monolith#4845, putting the mapped M82b and M82c suit storage back in place of the M86.
@@ -2725,3 +2734,72 @@ unmarked:
   - path: Resources/Textures/_White/Structures/Furniture/
     module: DecorImport
     reason: Resin nest sprite, ported from Goob Station.
+  - path: Resources/Audio/Items/Artifact/artifact-force-activated1.ogg
+    module: Xenoarch
+    reason: Artifact forced activation sound from the wizden xenoarch rework.
+  - path: Resources/Audio/_NF/Items/Artifact/
+    module: Xenoarch
+    reason: Frontier's quieter artifact unlock failure sound.
+  - path: Resources/Textures/Objects/Specific/Xenoarchaeology/xeno_artifacts.rsi/
+    module: Xenoarch
+    reason: Artifact activation state from the wizden xenoarch rework.
+  - path: Resources/Maps/Shuttles/ShuttleEvent/incorporation.yml
+    module: Xenoarch
+    reason: Mapped artifacts use XenoArtifact; BiasedArtifact no longer exists.
+  - path: Resources/Maps/elkridge.yml
+    module: Xenoarch
+    reason: Removed the mapped artifact's BiasedArtifact component, which no longer exists.
+  - path: LICENSES/LicenseRef-Starlight.txt
+    module: null
+    reason: Starlight licence text, required by the Starlight-licensed code under _Starlight and _FarHorizons.
+  - path: Resources/Textures/Objects/Fun/rubber_hammer.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/Objects/Misc/chopstick.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/Structures/Power/Generation/Singularity/collector.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/Structures/Power/cell_recharger.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/nuclear_reactor.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/reactor_component_cap.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/reactor_parts.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/turbine.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Objects/Misc/RadioStation/vinyls.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Objects/Misc/RadioStation/vinylsleeves.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Objects/Weapons/Guns/Battery/lawbringer.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Structures/Machines/StationRadio/radiostationrig.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Structures/Machines/StationRadio/stationradioserver.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Structures/Machines/StationRadio/tapedeck.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Structures/Machines/StationRadio/vinylplayer.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_NF/Effects/mobspawn.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_NF/Structures/Machines/scrap_processor.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.

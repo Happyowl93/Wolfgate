@@ -70,6 +70,13 @@ namespace Content.Shared.Chat
         Subtle = ChatChannel.Subtle,
         // WOLFGATE END
 
+        // WOLFGATE(Subtle) START: subtle LOOC channel
+        /// <summary>
+        ///     LOOC only the players right next to the sender and admins see
+        /// </summary>
+        SubtleOOC = ChatChannel.SubtleOOC,
+        // WOLFGATE END
+
         Console = ChatChannel.Unspecified
     }
 }

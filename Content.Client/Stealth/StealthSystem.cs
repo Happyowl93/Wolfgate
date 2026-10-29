@@ -96,6 +96,15 @@ public sealed partial class StealthSystem : SharedStealthSystem
 
         _shader.SetParameter("reference", reference);
         _shader.SetParameter("visibility", visibility);
+        // WOLFGATE(Stealth) START: a glowing visor keeps its own colour; the blue tint would blacken it.
+        var wfGlow = TryComp<Content.Shared._WF.Stealth.WFStealthGlowComponent>(uid, out var glow) ? glow.Strength : 0f;
+        _shader.SetParameter("glow", wfGlow);
+        if (wfGlow > 0f)
+        {
+            args.Sprite.Color = Color.White;
+            return;
+        }
+        // WOLFGATE END
 
         visibility = MathF.Max(0, visibility);
         args.Sprite.Color = new Color(visibility, visibility, 1, 1);

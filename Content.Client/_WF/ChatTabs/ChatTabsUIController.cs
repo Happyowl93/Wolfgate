@@ -83,13 +83,31 @@ public sealed partial class ChatTabsUIController : UIController
                 _cfg.SetCVar(WolfgateCVars.ChatTabs, ChatTab.Format(_tabs));
         }
 
+        // Every saved tab showing LOOC gets SOOC too, once.
+        if (!_cfg.GetCVar(WolfgateCVars.ChatTabsSubtleOocAdded))
+        {
+            var added = false;
+            foreach (var tab in _tabs)
+            {
+                if ((tab.Channels & ChatChannel.LOOC) == 0 || (tab.Channels & ChatChannel.SubtleOOC) != 0)
+                    continue;
+
+                tab.Channels |= ChatChannel.SubtleOOC;
+                added = true;
+            }
+
+            _cfg.SetCVar(WolfgateCVars.ChatTabsSubtleOocAdded, true);
+            if (added)
+                _cfg.SetCVar(WolfgateCVars.ChatTabs, ChatTab.Format(_tabs));
+        }
+
         if (_tabs.Count == 0)
         {
             _tabs.Add(new ChatTab(Loc.GetString("wf-chat-tabs-default-all"), ChatTab.AllChannels));
             _tabs.Add(new ChatTab(Loc.GetString("wf-chat-tabs-default-local"),
                 ChatChannel.Local | ChatChannel.Whisper | ChatChannel.Emotes | ChatChannel.Subtle));
             _tabs.Add(new ChatTab(Loc.GetString("wf-chat-tabs-default-radio"), ChatChannel.Radio));
-            _tabs.Add(new ChatTab(Loc.GetString("wf-chat-tabs-default-ooc"), ChatChannel.OOC | ChatChannel.LOOC));
+            _tabs.Add(new ChatTab(Loc.GetString("wf-chat-tabs-default-ooc"), ChatChannel.OOC | ChatChannel.LOOC | ChatChannel.SubtleOOC));
         }
 
         Selected = 0;

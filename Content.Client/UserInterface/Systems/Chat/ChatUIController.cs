@@ -86,6 +86,7 @@ public sealed partial class ChatUIController : UIController
         {SharedChatSystem.AdminPrefix, ChatSelectChannel.Admin},
         {SharedChatSystem.EventPrefix, ChatSelectChannel.Event}, // WOLFGATE(EventStaff)
         {SharedChatSystem.SubtlePrefix, ChatSelectChannel.Subtle}, // WOLFGATE(Subtle)
+        {SharedChatSystem.SubtleOocPrefix, ChatSelectChannel.SubtleOOC}, // WOLFGATE(Subtle)
         {SharedChatSystem.RadioCommonPrefix, ChatSelectChannel.Radio},
         {SharedChatSystem.DeadPrefix, ChatSelectChannel.Dead},
         {SharedChatSystem.CollectiveMindPrefix, ChatSelectChannel.CollectiveMind}
@@ -102,6 +103,7 @@ public sealed partial class ChatUIController : UIController
         {ChatSelectChannel.Admin, SharedChatSystem.AdminPrefix},
         {ChatSelectChannel.Event, SharedChatSystem.EventPrefix}, // WOLFGATE(EventStaff)
         {ChatSelectChannel.Subtle, SharedChatSystem.SubtlePrefix}, // WOLFGATE(Subtle)
+        {ChatSelectChannel.SubtleOOC, SharedChatSystem.SubtleOocPrefix}, // WOLFGATE(Subtle)
         {ChatSelectChannel.Radio, SharedChatSystem.RadioCommonPrefix},
         {ChatSelectChannel.Dead, SharedChatSystem.DeadPrefix},
         {ChatSelectChannel.CollectiveMind, SharedChatSystem.CollectiveMindPrefix} // Goobstation - Starlight collective mind port
@@ -533,6 +535,7 @@ public sealed partial class ChatUIController : UIController
         CanSendChannels |= ChatSelectChannel.LOOC;
         FilterableChannels |= ChatChannel.OOC;
         FilterableChannels |= ChatChannel.LOOC;
+        FilterableChannels |= ChatChannel.SubtleOOC; // WOLFGATE(Subtle)
 
         // can always hear server (nobody can actually send server messages).
         FilterableChannels |= ChatChannel.Server;
@@ -556,6 +559,7 @@ public sealed partial class ChatUIController : UIController
                 CanSendChannels |= ChatSelectChannel.Radio;
                 CanSendChannels |= ChatSelectChannel.Emotes;
                 CanSendChannels |= ChatSelectChannel.Subtle; // WOLFGATE(Subtle)
+                CanSendChannels |= ChatSelectChannel.SubtleOOC; // WOLFGATE(Subtle)
             }
         }
 
@@ -945,6 +949,7 @@ public sealed partial class ChatUIController : UIController
                 break;
 
             case ChatChannel.LOOC:
+            case ChatChannel.SubtleOOC: // WOLFGATE(Subtle)
                 if (_config.GetCVar(CCVars.LoocAboveHeadShow))
                     AddSpeechBubble(msg, SpeechBubble.SpeechType.Looc);
                 break;

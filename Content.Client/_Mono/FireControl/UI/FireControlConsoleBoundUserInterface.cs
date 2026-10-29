@@ -4,6 +4,7 @@
 using Content.Shared._Mono.FireControl;
 using Content.Shared._WF.ShipCombat; // WOLFGATE(ShipCombat)
 using Content.Shared._WF.ShipShields; // WOLFGATE(ShipShields)
+using Content.Shared._WF.AsteroidMining; // WOLFGATE(AsteroidMining)
 using JetBrains.Annotations;
 using Robust.Client.UserInterface;
 using Robust.Shared.Map;
@@ -115,6 +116,8 @@ public sealed class FireControlConsoleBoundUserInterface : BoundUserInterface
 
         if (message is WFShipShieldHelmUpdateMessage update)
             _window?.WfUpdateShields(update.ShieldShunt);
+        if (message is WFMiningBeamGunneryUpdateMessage mining) // WOLFGATE(AsteroidMining): the mining laser panel's scan
+            _window?.WfUpdateMining(mining.State);
     }
     // WOLFGATE END
 

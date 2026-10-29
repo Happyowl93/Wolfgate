@@ -44,8 +44,11 @@ namespace Content.Client.Launcher
             ConnectFail.AddChild(_symphonyRow);
             _symphonyRow.SetPositionInParent(1);
 
-            // Over the parallax, under the window: company while they sort the link out.
-            _symphonyMoproach = new SymphonyMoproach { Visible = false };
+            // Over the parallax, under the windows, on every page: it mops up spills while they wait.
+            Control window = ExitButton;
+            while (window.Parent != null && window.Parent != this)
+                window = window.Parent;
+            _symphonyMoproach = new SymphonyMoproach(window, LoginTips);
             AddChild(_symphonyMoproach);
             _symphonyMoproach.SetPositionInParent(1);
         }
@@ -63,8 +66,6 @@ namespace Content.Client.Launcher
 
             if (_symphonyRow != null)
                 _symphonyRow.Visible = _symphonyLink != null;
-            if (_symphonyMoproach != null)
-                _symphonyMoproach.Visible = _symphonyLink != null;
         }
     }
 }

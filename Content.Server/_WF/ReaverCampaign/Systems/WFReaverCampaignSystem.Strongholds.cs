@@ -57,7 +57,7 @@ public sealed partial class WFReaverCampaignSystem
         var ordinary = OrdinaryConvoys();
         if (ordinary > 0
             || state.Finished
-            || standing.Count(stronghold => !stronghold.Comp1.Citadel) + ordinary >= campaign.MaxStrongholds
+            || standing.Count(stronghold => !stronghold.Comp1.Citadel) + ordinary >= campaign.MaxStrongholds + Bracket(campaign, state).Strongholds
             || _territory.Held(_territory.SectorMap, campaign.Faction).Count < campaign.CellsPerStronghold * standing.Count
             || state.LastFounded is { } last && now < last + campaign.FoundInterval
             || now < _nextFoundTry)
@@ -108,12 +108,15 @@ public sealed partial class WFReaverCampaignSystem
             || !WFSectorHex.InSector(_territory.CellOf(at), _territory.CellSize))
             return false;
 
-        var regroup = state.Founded > 0 && Strongholds().Count == 0;
+        SamplePopulation(state);
+        // The first stronghold and a regrouped one stand alone far out, so they are ringed with batteries.
+        var alone = Strongholds().Count == 0;
+        var regroup = state.Founded > 0 && alone;
         if (!SpawnEncounter(encounterPrototype, at, out var uid))
             return false;
 
         ShieldHub(campaign, uid, encounterPrototype.Ships[0].Key);
-        Establish(campaign, state, uid, encounterPrototype.Ships[0].Key, _territory.CellOf(at), at, regroup);
+        Establish(campaign, state, uid, encounterPrototype.Ships[0].Key, _territory.CellOf(at), at, regroup, fortified: alone);
         stronghold = uid;
         return true;
     }
@@ -127,7 +130,7 @@ public sealed partial class WFReaverCampaignSystem
 
     /// <summary>Makes an encounter a stronghold, or the citadel, in a cell: claims the cell and its rings, counts the founding and announces it at a point.</summary>
     private void Establish(WFReaverCampaignPrototype campaign, WFReaverCampaignComponent state, EntityUid uid, string lead,
-        WFSectorCell cell, MapCoordinates at, bool regroup, bool citadel = false)
+        WFSectorCell cell, MapCoordinates at, bool regroup, bool citadel = false, bool fortified = false)
     {
         var now = _timing.CurTime;
         var comp = EnsureComp<WFReaverStrongholdComponent>(uid);
@@ -135,7 +138,7 @@ public sealed partial class WFReaverCampaignSystem
         comp.Tier = state.Tier;
         comp.Lead = lead;
         comp.NextPatrol = now + FirstPatrolDelay;
-        comp.NextReinforcement = now + campaign.ReinforcementInterval;
+        comp.NextReinforcement = now + ReinforcementInterval(campaign);
         comp.Citadel = citadel;
         if (citadel)
             comp.BaseName = Loc.GetString("wf-reaver-name-citadel", ("designation", WFSectorHex.Callsign(cell)));
@@ -144,6 +147,9 @@ public sealed partial class WFReaverCampaignSystem
             SetLevel((uid, comp, encounter), 0);
 
         ClaimCells(campaign, at.MapId, cell, uid, citadel ? campaign.CitadelRings : 1);
+        if (fortified || citadel)
+            Fortify(campaign, state, uid);
+
         state.Founded++;
         state.NoStrongholdSince = null;
         state.Defeated = false;
@@ -155,7 +161,7 @@ public sealed partial class WFReaverCampaignSystem
             state.LastFounded = now;
 
         Recompute();
-        var bounty = ByTier(campaign.StrongholdBounty, state.Tier, 0);
+        var bounty = Scaled(ByTier(campaign.StrongholdBounty, state.Tier, 0));
         AnnouncePlace(campaign, citadel ? "wf-reaver-citadel-raised" : regroup ? "wf-reaver-regrouped" : "wf-reaver-founded", true,
             at.MapId, at.Position,
             ("callsign", WFSectorHex.Callsign(cell)),
@@ -301,11 +307,20 @@ public sealed partial class WFReaverCampaignSystem
         foreach (var stronghold in Strongholds())
         {
             var (uid, comp, encounter) = stronghold;
-            if (!encounter.Ships.TryGetValue(comp.Lead, out var lead) || !_encounters.InFight(lead))
+            encounter.Ships.TryGetValue(comp.Lead, out var lead);
+            if (lead != null)
+                TrackBoarders(comp, lead.Grid);
+
+            if (lead == null || !_encounters.InFight(lead))
             {
+                // A boarding party aboard when the hub went out, its AME blown or its crew gone, put it out: they are
+                // paid as its attackers.
+                if (lead != null)
+                    CreditBoarders(comp, encounter, lead.Side);
+
                 // A hub that went dark with nobody shooting at it has not been beaten: its engineer and the restock
                 // bring the power back. One that stays dark past the grace is broken all the same.
-                if (lead != null && encounter.ShipHits.Count == 0 && encounter.Kills.Count == 0 && comp.NpcHits.Count == 0 && _encounters.OutForWantOfPower(lead))
+                if (lead != null && encounter.ShipHits.Count == 0 && encounter.Kills.Count == 0 && encounter.Hits.Count == 0 && comp.NpcHits.Count == 0 && _encounters.OutForWantOfPower(lead))
                 {
                     if (!comp.Starved)
                     {
@@ -348,6 +363,38 @@ public sealed partial class WFReaverCampaignSystem
             if (playerHits > 0 && _timing.CurTime - comp.LastHit <= SupportWindow)
                 TrackSupport(comp, encounter, _transform.GetWorldPosition(lead.Grid), ships, elapsed);
         }
+    }
+
+    /// <summary>How long after leaving the hub a boarder still counts for putting it out.</summary>
+    private static readonly TimeSpan BoardingWindow = TimeSpan.FromMinutes(5);
+
+    /// <summary>Notes the living players aboard a hub, and forgets those gone past the window.</summary>
+    private void TrackBoarders(WFReaverStrongholdComponent stronghold, EntityUid hub)
+    {
+        var now = _timing.CurTime;
+        var players = EntityQueryEnumerator<ActorComponent, TransformComponent>();
+        while (players.MoveNext(out var uid, out var actor, out var xform))
+        {
+            if (xform.GridUid == hub && !HasComp<GhostComponent>(uid) && !_mobs.IsDead(uid))
+                stronghold.Boarders[actor.PlayerSession.UserId] = now;
+        }
+
+        foreach (var (user, seen) in stronghold.Boarders.ToList())
+        {
+            if (now - seen > BoardingWindow)
+                stronghold.Boarders.Remove(user);
+        }
+    }
+
+    /// <summary>Credits each recent boarder of a hub that went dark as one of its attackers, once.</summary>
+    private void CreditBoarders(WFReaverStrongholdComponent stronghold, WFEncounterComponent encounter, string side)
+    {
+        foreach (var user in stronghold.Boarders.Keys)
+        {
+            _rewards.RecordBoarding(encounter, user, side);
+        }
+
+        stronghold.Boarders.Clear();
     }
 
     /// <summary>
@@ -397,12 +444,14 @@ public sealed partial class WFReaverCampaignSystem
             || !TryComp<WFEncounterComponent>(uid, out var encounter))
         {
             SweepReinforcements(stronghold, false);
+            SweepBatteries(uid, false);
             _territory.Release(uid);
             AfterStrongholdGone(state);
             return;
         }
 
         SweepReinforcements(stronghold, true);
+        SweepBatteries(uid, true);
         var (bounty, paid) = PayStrongholdBounty(campaign, state, (uid, comp, encounter));
         var freed = _territory.Release(uid);
         state.Broken++;

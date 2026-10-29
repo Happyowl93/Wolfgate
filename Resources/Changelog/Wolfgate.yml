@@ -3730,3 +3730,465 @@ Entries:
   id: 100261
   time: '2026-10-27T21:09:13.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/391
+- author: Happyowl93
+  changes:
+    - type: Add
+      message: >-
+        Ore asteroids are now clusters of single rocks that you crack with a
+        ship mining laser. Keep a rock's heat in
+    - type: Add
+      message: >-
+        Added the M40 Prospector (heavy) and M12 Prospector (light) mining
+        lasers. Cargo sells them as flatpacks, and
+    - type: Add
+      message: >-
+        The gunnery console has a mining laser panel, and the cockpit MFD has a
+        MIN page with a power lever, heat dial
+    - type: Add
+      message: >-
+        Rare metallic asteroids, rich in precious ores, appear more often the
+        farther you are from the stations.
+    - type: Add
+      message: Boulders can be pulled aboard and broken by hand.
+    - type: Tweak
+      message: >-
+        The ore magnet now pulls in only the ore it can see, with a visible arc,
+        and has a new sprite.
+    - type: Tweak
+      message: >-
+        Mining ships now come with mining lasers instead of mining pulsers:
+        Caracara, Carabela, Akasono, Kami, Shiv,
+    - type: Tweak
+      message: >-
+        Scrap asteroids now hold only scrap. Some large gas asteroids are now
+        barren rock.
+    - type: Fix
+      message: The radar no longer lags when many grids are in view.
+  id: 100262
+  time: '2026-10-27T23:13:23.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/378
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Platelet Factories now closes wounds as it heals, so they no longer stay
+        open once you're healed.
+    - type: Fix
+      message: Lizards warmed back up after the cold no longer keep the cold slowdown.
+    - type: Fix
+      message: A ship's AI can open its own ship's locked doors.
+    - type: Fix
+      message: >-
+        Boarding a Reaver stronghold and knocking out its power now pays the
+        stronghold bounty.
+    - type: Tweak
+      message: >-
+        Huge lizard claws no longer stop you from shooting, but make your aim
+        worse.
+  id: 100263
+  time: '2026-10-27T23:28:16.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/396
+- author: DriftingSkies
+  changes:
+    - type: Add
+      message: >-
+        Armor specializations! Faction suits now change what wounds do to you,
+        not just how much damage gets through. Examine a suit to see its
+        specialization.
+    - type: Add
+      message: >-
+        Spall Liner (TSF M82c, PDV CV-32 and CV-280, USSP L-27, mercenary SCAF):
+        bullets can't lodge in your body or leave shrapnel behind.
+    - type: Add
+      message: >-
+        Sealed Layer (USSP L-10 and L-10-A, UNSA armored EVA): no chemical burns
+        or frostbite. The TSF M82b has a sealed spall liner that does both.
+    - type: Add
+      message: >-
+        Insulation (Ullman ENFORCER and engineering hardsuit): electric shocks
+        can't burn you internally, and synthetic wearers can't be
+        short-circuited. The engineering hardsuit is also crush-rated.
+    - type: Add
+      message: >-
+        Bone Plating (TSF M86 Mk.3): crushing blows need twice the usual force
+        to injure you, dislocate a joint or cause internal bleeding.
+    - type: Add
+      message: >-
+        Shock Absorbers (TSF M86 Mk.4, Ullman pilot voidsuit): blunt impacts
+        need twice the usual force to concuss you or bruise your organs.
+    - type: Add
+      message: >-
+        Concussion ward (TSF M92 colonel, USSP L-30 and UF-16 commissar suits):
+        you can't be concussed.
+    - type: Add
+      message: >-
+        Tendon Guards (VG RIPPER, MMC Kurogane): blades can't sever your
+        tendons.
+    - type: Add
+      message: >-
+        Trauma Gel (VG JACKAL, Armed Trauma T-53): you can't suffer arterial
+        bleeds.
+    - type: Add
+      message: >-
+        Commander's Weave (PDV CV-67 Vizier): you can't be concussed or suffer
+        arterial bleeds.
+    - type: Add
+      message: >-
+        Limb Lock: covered limbs can't be severed. Total on the PDV Juggernaut
+        and VG IMP; breaks against very heavy hits on the PDV CV-280 and the
+        Asakim exoskeleton.
+    - type: Add
+      message: >-
+        Pain Dampener (USSP M-10 and commissar suits, Underground Warlord):
+        dulls pain like a mild painkiller and stacks with real ones.
+    - type: Add
+      message: >-
+        Ablative Coat (PDV SCAF, Underground Godfather): absorbs half of
+        incoming burn damage until spent, then recovers after a few seconds
+        without being hit.
+    - type: Add
+      message: >-
+        Auto-Tourniquet (PDV CV-82, Armed Trauma T-23): automatically clamps an
+        untreated arterial bleed on a covered limb. It holds 2 charges, which
+        recover over time, and never overrides a medic's treatment.
+    - type: Add
+      message: >-
+        Ricochet Plating (PDV Juggernaut, Ullman VK-1): light rounds like 9mm,
+        .45 and 5.56 FMJ ricochet off and can hit anyone nearby. Rifle rounds
+        and armor-piercing rounds still get through.
+    - type: Add
+      message: >-
+        The stealth hardsuit helmet has a stealth toggle. Your cloak now fades
+        in and out, and while cloaked only the helmet's green visor glows
+        through.
+    - type: Add
+      message: The stealth hardsuit helmet now has night vision and a thermal pulse.
+    - type: Tweak
+      message: >-
+        The stealth suit makes you fully invisible again, and its piercing
+        protection is slightly better.
+    - type: Tweak
+      message: >-
+        The VG MEDUSA and Ullman ENFORCER MKII shields are now soft shields:
+        hits pass through dampened, and you can't bleed while the field is up.
+    - type: Tweak
+      message: The TSF M92-X is now much faster than walking unarmored.
+    - type: Tweak
+      message: >-
+        The TSF M92 colonel's armor is buffed to match the PDV CV-67 as
+        leadership armor.
+    - type: Tweak
+      message: >-
+        Hardsuit helmets now follow their suit's tier: T2 helmets block a little
+        less, T3 helmets a little more.
+    - type: Tweak
+      message: >-
+        PDV tacsuit prices at the pirate uplink are back to normal, since PDV
+        can print them again.
+    - type: Fix
+      message: >-
+        Holding a fast hardsuit in your hand no longer makes you faster, and
+        carrying several no longer stacks.
+    - type: Fix
+      message: >-
+        Stealth no longer shows the background of the level below you instead of
+        hiding you.
+    - type: Fix
+      message: >-
+        Soft shields now stop arterial bleeds and keep internal bleeding from
+        getting worse, as they were meant to.
+  id: 100264
+  time: '2026-10-27T23:31:09.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/351
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Added SOOC, a subtle LOOC that only the people right next to you and
+        admins can see. Use the SOOC channel, start a line with &, or type
+        /sooc.
+  id: 100265
+  time: '2026-10-28T00:06:44.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/398
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Added xenobiology: breed slimes through five tiers of mutations, grind
+        them into extracts and inject those for reagents, items and worse.
+    - type: Add
+      message: >-
+        Added the xenovac, the slime grinder, the slime scanner and the
+        xenobiological bounty console, which pays research points for extracts.
+    - type: Add
+      message: >-
+        Added the Xenobiology research, a xenobiology starter crate in cargo,
+        and slime gear and grey slimes at John Wolfgate and the Wolfgate vendor.
+    - type: Add
+      message: Slimes and amanita jelly now jiggle.
+  id: 100266
+  time: '2026-10-28T00:43:35.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/395
+- author: Happyowl93
+  changes:
+    - type: Fix
+      message: >-
+        Trading crates delivered to Caelestinus Central or Zvezda now pay their
+        full destination value and express bonus.
+  id: 100267
+  time: '2026-10-28T01:13:15.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/399
+- author: Happyowl93
+  changes:
+    - type: Add
+      message: >-
+        Xenoarchaeology rework: artifacts are now node graphs. Perform the
+        listed triggers to unlock nodes, then read and extract research points
+        from the analysis console.
+    - type: Add
+      message: >-
+        New artifact triggers (microwave, offerings, shock, exhaustion,
+        particles, lasers) and effects (lamps, plus BZ, healium, nitrium and
+        pluoxium gas).
+    - type: Add
+      message: >-
+        Artifact glue, made from space glue and artifexium, restores artifact
+        node durability.
+    - type: Add
+      message: >-
+        New guidebook pages for xenoarchaeology, the analysis console and
+        unlocking nodes.
+    - type: Remove
+      message: The traversal distorter and printed artifact reports.
+    - type: Tweak
+      message: Artifexium now starts unlocking an artifact instead of activating it.
+  id: 100268
+  time: '2026-10-28T08:01:15.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/394
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Consent Off and On buttons work again after reopening Game Options.
+  id: 100269
+  time: '2026-10-28T21:57:38.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/403
+- author: Happyowl93
+  changes:
+    - type: Tweak
+      message: >-
+        The Arribane and Phaeron now come with M12 Prospector mining lasers, and
+        the Rosetta with an M40 Prospector.
+    - type: Fix
+      message: The Carabela's drydock bay now has a light.
+  id: 100270
+  time: '2026-10-28T22:33:33.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/401
+- author: Balls2zawall
+  changes:
+    - type: Fix
+      message: Fixed the hammerhead's autoloader not being linked.
+    - type: Fix
+      message: fixed the hammerhead not having a manufacturer name in the shipyard.
+  id: 100271
+  time: '2026-10-29T02:16:08.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/405
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: >-
+        Reavers get stronger the more players are on: better ships, more
+        patrols, faster reinforcements and bigger bounties.
+    - type: Add
+      message: >-
+        The first Reaver stronghold is guarded by gun batteries that strengthen
+        its shield and are rebuilt over time.
+    - type: Add
+      message: Reavers now fly USSP ships, including the Ledokol as a stronghold.
+  id: 100272
+  time: '2026-10-29T05:35:50.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/400
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Fires no longer stop burning for a moment when something burns to
+        pieces.
+    - type: Fix
+      message: >-
+        Pirate ships no longer spawn with their guns offline for the first few
+        seconds.
+    - type: Tweak
+      message: >-
+        Reduced server lag from pirate ship refits, gravity changes, space wind
+        and shuttle movement.
+    - type: Tweak
+      message: >-
+        Reduced lag from asteroid fields, mining and ore magnets. Far-off
+        asteroids still show on radar.
+    - type: Tweak
+      message: >-
+        Reduced lag from buying ships, drydock shipbreaking, ships landed on
+        planets and planet water.
+    - type: Tweak
+      message: >-
+        The client now buffers a little more network state by default, so server
+        hitches are smoother.
+  id: 100273
+  time: '2026-10-29T06:05:50.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/397
+- author: Happyowl93
+  changes:
+    - type: Add
+      message: >-
+        Trade-good prices now change during the round. Selling lowers a
+        station's price for a while, and shortages, booms, blockades, war
+        demand, raids and rush orders raise it.
+    - type: Add
+      message: >-
+        Every PDA has a Market app showing sell and buy prices for every
+        station, with alerts for market events. The best price for each good is
+        starred.
+    - type: Add
+      message: >-
+        Priority deliveries: a crate to carry from one station to another within
+        a deadline.
+    - type: Add
+      message: >-
+        NPC freighters carry sealed freight. Fences pay full price for it,
+        lawful chutes pay 60%.
+    - type: Add
+      message: >-
+        The Underground has a fence chute and sells smuggling crates. Open
+        chutes pay well for them, but customs may issue a warrant.
+    - type: Add
+      message: A wandering merchant encounter buys a few goods at a premium.
+    - type: Add
+      message: >-
+        Cargo has weight. A loaded ship loses thrust, lift and gravgen support,
+        and spools FTL slower. The helm shows a CARGO gauge.
+    - type: Tweak
+      message: >-
+        Trade crates must be hauled at least 3 km from where they were made
+        before a chute takes them.
+    - type: Tweak
+      message: >-
+        Station trade vendors charge more for goods that are scarce at that
+        station.
+    - type: Tweak
+      message: Cargo-console trading crates pay according to the destination's demand.
+    - type: Tweak
+      message: >-
+        Raiders and extorters go after ships with valuable cargo, and extortion
+        tolls grow with the cargo's value.
+  id: 100274
+  time: '2026-10-29T06:19:00.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/402
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: New players can no longer pick the Heretic trait.
+    - type: Fix
+      message: Bodies that die while SSD keep their SSD icon.
+    - type: Fix
+      message: >-
+        Drydock vouchers go to your own ship instead of whatever ship you were
+        standing on.
+    - type: Fix
+      message: The plant analyzer no longer fails to scan when you move slightly.
+    - type: Fix
+      message: Species visor markings show under a Special tab instead of Right Foot.
+    - type: Tweak
+      message: Cargo chutes tell you when they don't buy something.
+    - type: Tweak
+      message: Smelted ore is worth more than raw ore, so running a smeltery pays.
+    - type: Fix
+      message: >-
+        Lodged rounds no longer appear in gunshot wounds with nothing inside to
+        pull out.
+    - type: Tweak
+      message: >-
+        Space no longer toggles camera focus by default. You can still bind it
+        in the controls menu.
+    - type: Fix
+      message: >-
+        Deaf characters now only catch a few letters of nearby speech, and no
+        whispers.
+    - type: Fix
+      message: Nanite Repair Drones now repair chassis wounds.
+    - type: Fix
+      message: Avali who die while entering stasis no longer lie there invisible.
+    - type: Fix
+      message: The ChemMaster no longer drops clicks.
+    - type: Fix
+      message: Unanswered ahelps now ping staff on Discord.
+    - type: Fix
+      message: >-
+        A toggled item's hum stops for its holder when someone else turns it
+        off.
+    - type: Fix
+      message: Ship guns rebuilt at a drydock link back to the gunnery consoles.
+    - type: Remove
+      message: Removed the TRACTOR TEST vessel.
+    - type: Tweak
+      message: Feroxi no longer need to drink water.
+  id: 100275
+  time: '2026-10-29T06:58:29.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/407
+- author: Balls2zawall
+  changes:
+    - type: Add
+      message: >-
+        A hot new shuttle has entered the shipyards of the Underground. The
+        affectionately named UBM Excelsior is perfect for transporting personnel
+        in both style and safety.
+  id: 100276
+  time: '2026-10-29T18:08:04.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/409
+- author: Happyowl93
+  changes:
+    - type: Tweak
+      message: Ore, ingots and sheets now weigh half as much in a ship's hold.
+    - type: Tweak
+      message: >-
+        Trade prices fall about half as fast per crate sold and take about twice
+        as long to recover, so one big haul no longer crashes a market.
+    - type: Add
+      message: >-
+        Selling smuggling crates or fencing stolen freight at the Underground
+        now funds the Ashfall Reavers: their strongholds reinforce and spread
+        faster.
+  id: 100277
+  time: '2026-10-29T18:27:55.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/411
+- author: vinylspiders
+  changes:
+    - type: Add
+      message: >-
+        Adds Mrs. Luvvit's Pie & Mash, the best locally sourced pies in the
+        sector! Find one in the trade hall at Caelestinus Central, or buy the
+        flatpack. Mrs. Luvvit accepts no liability for scalded tongues.
+    - type: Add
+      message: Adds 12 new cookable British dishes.
+    - type: Add
+      message: Adds Irn-Bru and dandelion & burdock cans.
+  id: 100278
+  time: '2026-10-29T18:36:19.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/410
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Fixed licence credits on a number of sprites and sounds.
+  id: 100279
+  time: '2026-10-29T22:55:54.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/413
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Earl Grey tea, served hot from the hot drinks vendor.
+    - type: Add
+      message: Pilots very rarely say "Engage." when they start an FTL jump.
+    - type: Add
+      message: Livingston's aquarium, home of a lionfish named Livingston.
+  id: 100280
+  time: '2026-10-29T22:56:26.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/415

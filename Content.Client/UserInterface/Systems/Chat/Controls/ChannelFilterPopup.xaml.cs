@@ -21,6 +21,7 @@ public sealed partial class ChannelFilterPopup : Popup
         ChatChannel.CollectiveMind,
         ChatChannel.Notifications,
         ChatChannel.LOOC,
+        ChatChannel.SubtleOOC, // WOLFGATE(Subtle)
         ChatChannel.OOC,
         ChatChannel.Dead,
         ChatChannel.Admin,
