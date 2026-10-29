@@ -2558,7 +2558,6 @@ entities:
             25:
               rotation: 1.5707963267948966 rad
               protoIndex: 51
-              originalEntity: invalid
               localPosition: -0.5,3.5
             26:
               protoIndex: 48
