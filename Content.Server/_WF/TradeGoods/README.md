@@ -36,8 +36,8 @@ What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifie
 
 Contraband (`WFTradeContrabandSystem`, `contrabandGoods`): the smuggling crate is sold by the Underground's fence vendor
 (`WFVendingMachineFence`) and bought well by every open chute, after the usual
-haul and with the usual saturation, but at a fixed street price: no event raises what chutes pay for it and buying it
-never makes the vendor dearer. It is Frontier contraband, so security can seize it at their contraband pallet for
+haul, at a fixed street price: sales never glut it, no event raises what chutes pay for it and buying it never makes
+the vendor dearer. It shows on radar from other grids like the PDV supply crates. It is Frontier contraband, so security can seize it at their contraband pallet for
 faction credits. Each sale at an open chute has a `contrabandWarrantChance` of customs flagging the seller: a criminal
 warrant (`contrabandWarrant`) goes on the bounty board in their name and security hears who sold it where on
 `contrabandAlertChannel`; a flagged seller isn't flagged again for `contrabandWarrantCooldown`. Hidden markets don't buy it.

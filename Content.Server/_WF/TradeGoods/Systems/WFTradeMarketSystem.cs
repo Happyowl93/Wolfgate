@@ -151,7 +151,8 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
             return null;
 
         var profile = Profile(grid);
-        var pressure = Pressure(grid, good);
+        // Contraband has a fixed street price: sales never glut it.
+        var pressure = profile.ContrabandGoods.Contains(good) ? 0f : Pressure(grid, good);
         var floor = profile.FloorPrices.TryGetValue(good, out var floorPrice)
             ? Math.Min(floorPrice, basePrice)
             : basePrice * profile.Floor;
@@ -222,7 +223,8 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
 
             amount = quote.Amount;
             var profile = Profile(grid);
-            AddPressure(grid, good, profile.PerSaleOverrides.GetValueOrDefault(good, profile.PerSale));
+            if (!profile.ContrabandGoods.Contains(good))
+                AddPressure(grid, good, profile.PerSaleOverrides.GetValueOrDefault(good, profile.PerSale));
             if (quote.Factor < LowQuote && Best(good, grid) is { } best)
             {
                 _popup.PopupEntity(Loc.GetString("wf-trade-sale-low",

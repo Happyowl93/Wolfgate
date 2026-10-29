@@ -106,18 +106,24 @@
       FederationMilitaryCredit: 15
   - type: WFCargoMass
     class: Standard
+  # Shows on radar like the PDV supply crates.
+  - type: RadarBlip
+    radarColor: "#cc4e0e"
+    scale: 1.5
+    shape: hexagon
+    visibleFromOtherGrids: true
 
 # What open chutes list a smuggling crate at; it pays well over any legal good to cover the risk.
 - type: entity
   parent: SpaceCash
-  id: WFSpaceCash45000
-  suffix: 45000
+  id: WFSpaceCash40000
+  suffix: 40000
   components:
   - type: Icon
     sprite: _NF/Objects/Economy/cash.rsi
     state: cash_25000
   - type: Stack
-    count: 45000
+    count: 40000
 
 - type: entity
   parent: VendingMachineTraderBaikal

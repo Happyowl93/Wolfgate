@@ -64,6 +64,36 @@ public sealed class TradeContrabandTest
     }
 
     [Test]
+    public async Task ContrabandPriceNeverGluts()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var market = entMan.System<WFTradeMarketSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var chute = TradeTestWorld.MarketChute(entMan, map);
+            if (!entMan.EntityExists(entMan.System<SectorServiceSystem>().GetServiceEntity()))
+                entMan.AddComponent<StationSectorServiceHostComponent>(map.MapUid);
+            var far = TradeTestWorld.Grid(entMan, map, new Vector2(5000f, 0f), "WF test far yard");
+            var seller = entMan.SpawnEntity(null, map.GridCoords);
+
+            var before = market.Quote(chute, Contraband)!.Value;
+            Assert.That(before.Amount, Is.EqualTo(40000));
+            for (var i = 0; i < 5; i++)
+            {
+                market.Sell(chute, TradeTestWorld.Hauled(entMan, far, map.GridCoords, Contraband), seller);
+            }
+
+            Assert.That(market.Quote(chute, Contraband)!.Value.Amount, Is.EqualTo(before.Amount), "Selling contraband lowered its price.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
     public async Task FenceTakesSealedFreightOnly()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
