@@ -372,6 +372,10 @@ public sealed class WFCockpitGunneryTest
             Assert.That(cockpit.TryCommand(actor, helm, netGun, new FireControlConsoleFireMessage(new(), target)), Is.True);
             Assert.That(em.System<FireControlSystem>().WfCockpitState(gun, false), Is.SameAs(beforeHover),
                 "Cursor guidance must not rebuild radar/ammunition state.");
+            // The autocannon has a turn rate and holds fire until it faces the target.
+            var xform = em.System<SharedTransformSystem>();
+            var bearing = xform.ToMapCoordinates(em.GetCoordinates(target)).Position - xform.GetWorldPosition(weapon);
+            xform.SetWorldRotation(weapon, Angle.FromWorldVec(bearing));
             ui.RaiseUiMessage(helm, ShuttleConsoleUiKey.Key,
                 new WFCockpitGunneryCommandMessage(netGun, new FireControlConsoleFireMessage(selection, target)) { Actor = actor });
             Assert.That(fireControl.NextFire, Is.GreaterThan(TimeSpan.Zero), "Firing reaches the original weapon cooldown path.");

@@ -505,6 +505,10 @@ public sealed partial class FireControlSystem : EntitySystem
         if (!TryComp<FireControllableComponent>(weapon, out var fireControlComponent))
             return false;
 
+        // WOLFGATE(ShipCombat): a gun with a turn rate turns toward the target and holds fire until laid on it.
+        if (_fireRotateQuery.HasComp(weapon) && !_wfTraverse.TryLay(weapon, coords, direction))
+            return false;
+
         // Check for obstacles in the firing direction
         if (!CanFireInDirection(weapon, weaponPos, direction, targetPos, weaponXform.MapID) && !fireControlComponent.IgnoreLos)
             return false;
