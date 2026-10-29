@@ -38,8 +38,8 @@ The rank icon editor can start from any existing job icon. The round end summary
 moved money that round: members who played and hours, new members, crews fielded, wages, cuts, deposits, withdrawals
 and the account's start and end.
 
-**Hangar.** The owner buys fleet licences (up to 3) for civilian designs any character may fly, at 25x the shipyard
-price and at least 2,000,000, from the account; selling one refunds nothing. A member with Launch presses Launch on the
+**Hangar.** The owner buys fleet licences (up to 3) for civilian designs any character may fly, at 50x the shipyard
+price and at least 20,000,000, from the account; selling one refunds nothing. A member with Launch presses Launch on the
 Hangar tab: that creates a Crew Setup ship crew for the design, flying under the company, with the design fixed and no
 crew payment. When the ship actually spawns, the account pays the registry fee (5%, 15% then 30% of the shipyard price
 by how many company ships are already out) and the launching character pays the owner's launch fee into the account;
