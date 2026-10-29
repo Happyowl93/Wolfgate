@@ -642,7 +642,7 @@
   - type: Projectile
     damage:
       types:
-        Structural: 12000
+        Structural: 6000 # WOLFGATE: CYREXA APHE 12000->6000, its wall DPS at range outclassed every other medium gun
         Blunt: 250
     penetrationThreshold: 3000
   - type: Sprite

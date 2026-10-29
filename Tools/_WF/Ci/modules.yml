@@ -2263,12 +2263,6 @@ unmarked:
   - path: Resources/SharedMaps/_Mono/Shuttles/PDV/kynda.yml
     module: ShipArmor
     reason: PDV hull refit from plastitanium to adamantite walls.
-  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/layak.yml
-    module: ShipArmor
-    reason: PDV hull refit from plastitanium to adamantite walls.
-  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/motleyanne.yml
-    module: ShipArmor
-    reason: PDV hull refit from plastitanium to adamantite walls.
   - path: Resources/SharedMaps/_Mono/Shuttles/PDV/neptune.yml
     module: ShipArmor
     reason: PDV hull refit from plastitanium to adamantite walls.
@@ -2276,9 +2270,6 @@ unmarked:
     module: ShipArmor
     reason: PDV hull refit from plastitanium to adamantite walls.
   - path: Resources/SharedMaps/_Mono/Shuttles/PDV/osa.yml
-    module: ShipArmor
-    reason: PDV hull refit from plastitanium to adamantite walls.
-  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/saturn.yml
     module: ShipArmor
     reason: PDV hull refit from plastitanium to adamantite walls.
   - path: Resources/SharedMaps/_Mono/Shuttles/PDV/scorpion.yml
