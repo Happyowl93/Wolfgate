@@ -175,7 +175,10 @@ public sealed class ExamineCardControl : PanelContainer
         fields.AddChild(Field("id-name", card.IdName, small, bold, regular, idBlank, wrap: true));
 
         var job = Field("occupation", card.IdJob, small, bold, regular, idBlank);
-        if (card.JobIcon is { } icon && prototypes.TryIndex<JobIconPrototype>(icon, out var jobIcon))
+        var companies = entities.System<Content.Client._WF.Companies.WFCompanyClientSystem>();
+        // A company rank's own icon is the job icon its ID shows.
+        var rankIcon = card.Company != null ? companies.GetRankIcon(card.CompanyRankId, card.CompanyIconVersion) : null;
+        if (rankIcon != null || card.JobIcon is { } icon && prototypes.TryIndex<JobIconPrototype>(icon, out _))
         {
             var value = job.GetChild(1);
             job.RemoveChild(value);
@@ -187,7 +190,7 @@ public sealed class ExamineCardControl : PanelContainer
             };
             row.AddChild(new TextureRect
             {
-                Texture = sprites.Frame0(jobIcon.Icon),
+                Texture = rankIcon ?? sprites.Frame0(prototypes.Index<JobIconPrototype>(card.JobIcon!.Value).Icon),
                 TextureScale = new Vector2(2, 2),
                 VerticalAlignment = VAlignment.Center,
             });
@@ -196,6 +199,24 @@ public sealed class ExamineCardControl : PanelContainer
             job.AddChild(row);
         }
         fields.AddChild(job);
+        if (card.Company != null && card.Range == ExamineCardRange.Detailed)
+        {
+            var company = Field("company", card.CompanyRank is { Length: > 0 } rank ? $"{card.Company} · {rank}" : card.Company,
+                small, bold, regular, null, wrap: true);
+            var logo = companies.GetLogo(card.CompanyId, card.CompanyLogoVersion);
+            if (logo != null)
+            {
+                var value = company.GetChild(1);
+                company.RemoveChild(value);
+                var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, HorizontalExpand = true, SeparationOverride = 6 };
+                row.AddChild(new TextureRect { Texture = logo, SetSize = new Vector2(32, 32), Stretch = TextureRect.StretchMode.Scale,
+                    VerticalAlignment = VAlignment.Center });
+                value.HorizontalExpand = true;
+                row.AddChild(value);
+                company.AddChild(row);
+            }
+            fields.AddChild(company);
+        }
         var fieldsHolder = new Control { HorizontalExpand = true, Children = { fields } };
         bodyRow.AddChild(fieldsHolder);
 

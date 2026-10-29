@@ -164,6 +164,26 @@ public sealed partial class WFReaverCampaignPrototype : IPrototype
     [DataField]
     public int CitadelRings = 2;
 
+    /// <summary>What the campaign adds as more players are on, lowest first; the highest bracket reached applies.</summary>
+    [DataField]
+    public List<WFReaverPopulationBracket> Population = new();
+
+    /// <summary>A gun battery that holds station round a fortified hub: the first stronghold, a regrouped one and the citadel.</summary>
+    [DataField]
+    public ProtoId<WFEncounterPrototype> Battery = "WFReaverBattery";
+
+    /// <summary>How far from its hub a battery holds station.</summary>
+    [DataField]
+    public float BatteryRange = 400f;
+
+    /// <summary>Spesos for destroying a battery.</summary>
+    [DataField]
+    public int BatteryBounty = 15000;
+
+    /// <summary>What a hub's shield heals per second is multiplied by while any of its batteries stands.</summary>
+    [DataField]
+    public float BatteryShieldHeal = 2f;
+
     [DataField]
     public ProtoId<WFEncounterPrototype> Patrol = "WFReaverPatrol";
 
@@ -204,6 +224,47 @@ public sealed partial class WFReaverCampaignPrototype : IPrototype
 
     [DataField]
     public Color FallingColor = Color.FromHex("#3FB8AF");
+}
+
+/// <summary>What the campaign adds from a number of living players on: stronger gear, batteries, more ships and a bigger bounty.</summary>
+[DataDefinition]
+public sealed partial class WFReaverPopulationBracket
+{
+    /// <summary>The living players on the sector map from which this bracket applies.</summary>
+    [DataField(required: true)]
+    public int MinPlayers;
+
+    /// <summary>Tiers added to the tier campaign ships pick their hull, refit and skill by; the threat score is unchanged.</summary>
+    [DataField]
+    public int GearTiers;
+
+    /// <summary>Gun batteries round a fortified hub.</summary>
+    [DataField]
+    public int Batteries;
+
+    /// <summary>Levels added to the tier's stronghold level cap.</summary>
+    [DataField]
+    public int Levels;
+
+    /// <summary>Patrols added to each stronghold's count for the tier.</summary>
+    [DataField]
+    public int Patrols;
+
+    /// <summary>Intercepts added to the tier's count.</summary>
+    [DataField]
+    public int Intercepts;
+
+    /// <summary>Strongholds added to the cap.</summary>
+    [DataField]
+    public int Strongholds;
+
+    /// <summary>What the time between reinforcements, and between battery rebuilds, is multiplied by.</summary>
+    [DataField]
+    public float ReinforcementScale = 1f;
+
+    /// <summary>What every campaign bounty and its credits are multiplied by.</summary>
+    [DataField]
+    public float BountyScale = 1f;
 }
 
 /// <summary>Faction credits one navy's members get with a bounty.</summary>

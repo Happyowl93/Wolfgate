@@ -69,33 +69,41 @@
 
 # Core companies
 
-- type: company
-  id: DrakeIndustries
-  name: Drake Industries
-  description: drake-industries-description
-  color: "#C97D7D"
-  image: /Textures/_Mono/Companies/drake_industries.png
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: DrakeIndustries
+#  name: Drake Industries
+#  description: drake-industries-description
+#  color: "#C97D7D"
+#  image: /Textures/_Mono/Companies/drake_industries.png
+# WOLFGATE END
 
-- type: company
-  id: SteelHammerManufacturing
-  name: Steel Hammer Manufacturing
-  description: steel-hammer-description
-  color: "#92a2a1"
-  image: /Textures/_Mono/Companies/steel_hammer.png
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: SteelHammerManufacturing
+#  name: Steel Hammer Manufacturing
+#  description: steel-hammer-description
+#  color: "#92a2a1"
+#  image: /Textures/_Mono/Companies/steel_hammer.png
+# WOLFGATE END
 
-- type: company
-  id: HarmonyMedicalEnterprises
-  name: Harmony Medical Enterprises
-  description: harmony-medical-enterprises-description
-  color: "#FC7303"
-  image: /Textures/_Mono/Companies/HME.png
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: HarmonyMedicalEnterprises
+#  name: Harmony Medical Enterprises
+#  description: harmony-medical-enterprises-description
+#  color: "#FC7303"
+#  image: /Textures/_Mono/Companies/HME.png
+# WOLFGATE END
 
-- type: company
-  id: MidnightArmsCo
-  name: Midnight Arms Co.
-  description: midnight-arms-co-description
-  color: "#FF2E2E"
-  image: /Textures/_Mono/Companies/MACo.png
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: MidnightArmsCo
+#  name: Midnight Arms Co.
+#  description: midnight-arms-co-description
+#  color: "#FF2E2E"
+#  image: /Textures/_Mono/Companies/MACo.png
+# WOLFGATE END
 
 - type: company
   id: USSP
@@ -113,55 +121,69 @@
 
 # Major companies
 
-- type: company
-  id: DarkMatterEnterprises
-  name: Dark Matter Enterprises
-  description: dark-matter-enterprises-description
-  color: "#BF00B9"
-  image: /Textures/_Mono/Companies/dme.png #DME Logo
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: DarkMatterEnterprises
+#  name: Dark Matter Enterprises
+#  description: dark-matter-enterprises-description
+#  color: "#BF00B9"
+#  image: /Textures/_Mono/Companies/dme.png #DME Logo
+# WOLFGATE END
 
-- type: company
-  id: AetherionDynamics
-  name: Aetherion Dynamics
-  description: aetherion-dynamics-description
-  color: "#7E72B2"
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: AetherionDynamics
+#  name: Aetherion Dynamics
+#  description: aetherion-dynamics-description
+#  color: "#7E72B2"
+# WOLFGATE END
 
-- type: company
-  id: HorizonEnergy
-  name: Horizon Energy
-  description: horizon-energy-description
-  color: "#69E37F"
-  image: /Textures/_Mono/Companies/horizon_energy.png
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: HorizonEnergy
+#  name: Horizon Energy
+#  description: horizon-energy-description
+#  color: "#69E37F"
+#  image: /Textures/_Mono/Companies/horizon_energy.png
+#
+#
+## Minor companies
+# WOLFGATE END
 
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: UniversalStatesOfAmerica
+#  name: Universal States of America
+#  description: universal-states-of-america-description
+#  color: "#0A3161"
+#  image: /Textures/_Mono/Companies/UNSA.png
+# WOLFGATE END
 
-# Minor companies
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: CivilDefenseMilita
+#  name: Civil Defense Militia
+#  description: civil-defense-milita-description
+#  color: "#666600"
+# WOLFGATE END
 
-- type: company
-  id: UniversalStatesOfAmerica
-  name: Universal States of America
-  description: universal-states-of-america-description
-  color: "#0A3161"
-  image: /Textures/_Mono/Companies/UNSA.png
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: UllmanIndustries
+#  name: Ullman Industries
+#  description: ullman-industries-description
+#  color: "#52326A"
+#  image: /Textures/_Mono/Companies/ullman_industries.png
+# WOLFGATE END
 
-- type: company
-  id: CivilDefenseMilita
-  name: Civil Defense Militia
-  description: civil-defense-milita-description
-  color: "#666600"
-
-- type: company
-  id: UllmanIndustries
-  name: Ullman Industries
-  description: ullman-industries-description
-  color: "#52326A"
-  image: /Textures/_Mono/Companies/ullman_industries.png
-
-- type: company
-  id: NosskeEienResearchandDevelopment
-  name: Nosske-Eien Research and Development
-  description: nosske-eien-rnd-description
-  color: "#9573AF"
-  image: /Textures/_Mono/Companies/ne_rd.png
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: NosskeEienResearchandDevelopment
+#  name: Nosske-Eien Research and Development
+#  description: nosske-eien-rnd-description
+#  color: "#9573AF"
+#  image: /Textures/_Mono/Companies/ne_rd.png
+# WOLFGATE END
 
 - type: company
   id: blackhawkpmc
@@ -186,13 +208,15 @@
 #  color: "#DEBC50"
 #   image: /Textures/_Mono/Companies/CMG.png
 
-- type: company
-  id: TheHive
-  name: The Hive
-  description: The-Hive-description
-  color: "#5918a8"
-
-# Black Market Companies
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: TheHive
+#  name: The Hive
+#  description: The-Hive-description
+#  color: "#5918a8"
+#
+## Black Market Companies
+# WOLFGATE END
 
 - type: company
   id: paycheckbratva
@@ -200,13 +224,15 @@
   description: paycheck-bratva-description
   color: "#7a0303"
 
-- type: company
-  id: CerberusSurplusProvisions
-  name: Cerberus Surplus Provisions
-  description: cerberus-surplus-provisions
-  color: "#aa1010"
-  image: /Textures/_Mono/Companies/CSP.png
-  whitelisted: true
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: CerberusSurplusProvisions
+#  name: Cerberus Surplus Provisions
+#  description: cerberus-surplus-provisions
+#  color: "#aa1010"
+#  image: /Textures/_Mono/Companies/CSP.png
+#  whitelisted: true
+# WOLFGATE END
 
 - type: company
   id: TheViperGroup
@@ -224,10 +250,12 @@
   image: /Textures/_Mono/Companies/redsailcorsairs.png
   whitelisted: true
 
-- type: company
-  id: PLXCOR
-  name: PLXCOR
-  description: plxcor-description
-  color: "#B500B5"
-  image: /Textures/_Mono/Companies/PLXCOR.png
-  whitelisted: true
+# WOLFGATE(Companies) START: flavour companies replaced by player companies
+#- type: company
+#  id: PLXCOR
+#  name: PLXCOR
+#  description: plxcor-description
+#  color: "#B500B5"
+#  image: /Textures/_Mono/Companies/PLXCOR.png
+#  whitelisted: true
+# WOLFGATE END

@@ -8,7 +8,7 @@ namespace Content.Server._WF.RoundSetup;
 
 public sealed partial class WFRoundSetupSystem
 {
-    private int VesselPrice(Lobby lobby) => lobby.Vessel != null && _prototypes.TryIndex<VesselPrototype>(lobby.Vessel, out var vessel) ? vessel.Price : 0;
+    private int VesselPrice(Lobby lobby) => lobby.HangarLicence == null && lobby.Vessel != null && _prototypes.TryIndex<VesselPrototype>(lobby.Vessel, out var vessel) ? vessel.Price : 0;
 
     private string? EligiblePurchaseJob(Lobby lobby, ICommonSession host) =>
         lobby.Members[host.UserId].Job is { } job && IsJobAllowed(host, job) ? job : null;
@@ -42,7 +42,7 @@ public sealed partial class WFRoundSetupSystem
     private bool ValidatePaymentQuote(Lobby lobby, ICommonSession session, int? revision, out string error)
     {
         error = "wf-round-setup-payment-changed";
-        if (lobby.Started || !WFRoundSetupPolicy.IsShip(lobby.Scenario))
+        if (lobby.Started || !WFRoundSetupPolicy.IsShip(lobby.Scenario) || lobby.HangarLicence != null)
             return true;
         // A zero-share passenger never authorizes a withdrawal.
         return (lobby.Members[session.UserId].Contribution == 0 && lobby.Host != session.UserId || revision == lobby.PaymentRevision) &&
@@ -51,6 +51,10 @@ public sealed partial class WFRoundSetupSystem
 
     private bool ValidatePaymentFunds(Lobby lobby, ICommonSession session, out string error)
     {
+        error = string.Empty;
+        // A hangar launch is paid by the company when the ship spawns.
+        if (lobby.HangarLicence != null)
+            return true;
         error = "wf-round-setup-payment-total-error";
         var price = VesselPrice(lobby);
         if (price <= 0 || lobby.Members.Values.Sum(member => (long) member.Contribution) != price)
@@ -78,13 +82,16 @@ public sealed partial class WFRoundSetupSystem
     {
         if (lobby.Started || !WFRoundSetupPolicy.IsShip(lobby.Scenario))
             return true;
+        if (lobby.HangarLicence != null)
+            return _players.TryGetSessionById(lobby.Host, out var hangarHost) && CanEnter(hangarHost) &&
+                   HasShipPurchaseConsent(lobby, hangarHost) && CanSpawnRole(lobby, hangarHost);
         return VesselPrice(lobby) > 0 && lobby.Members.Values.Sum(member => (long) member.Contribution) == VesselPrice(lobby) &&
             lobby.Members.Where(pair => pair.Key == lobby.Host || pair.Value.Contribution > 0).All(pair =>
                 _players.TryGetSessionById(pair.Key, out var player) && CanEnter(player) &&
                 HasShipPurchaseConsent(lobby, player) && CanSpawnRole(lobby, player));
     }
 
-    private WFRoundSetupPayment? PaymentFor(Lobby lobby, NetUserId user) => lobby.Started || !WFRoundSetupPolicy.IsShip(lobby.Scenario)
+    private WFRoundSetupPayment? PaymentFor(Lobby lobby, NetUserId user) => lobby.Started || !WFRoundSetupPolicy.IsShip(lobby.Scenario) || lobby.HangarLicence != null
         ? null : new WFRoundSetupPayment(lobby.PaymentRevision, VesselPrice(lobby), lobby.Members[user].Contribution,
             lobby.Members.Values.Sum(member => (long) member.Contribution), AllPaymentsApproved(lobby));
 
@@ -94,6 +101,8 @@ public sealed partial class WFRoundSetupSystem
         error = "wf-round-setup-payment-waiting";
         if (!AllPaymentsApproved(lobby))
             return false;
+        if (lobby.HangarLicence != null)
+            return ChargeHangar(lobby, host, out error);
         var contributions = lobby.Members.Where(pair => pair.Value.Contribution > 0).Select(pair =>
             new WFShipScenarioSystem.Contribution(_players.GetSessionById(pair.Key), pair.Value.PurchaseCharacterSlot!.Value,
                 pair.Value.Contribution)).ToArray();

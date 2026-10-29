@@ -35,6 +35,11 @@ public sealed partial class WFShipAccessServerSystem
             Popup(console, args.Actor, "ship-access-no-crew");
             return;
         }
+        if (args.Mode == WFShipAccessMode.Company && !TryLinkCompany(ship, args.Actor))
+        {
+            Popup(console, args.Actor, "ship-access-no-company");
+            return;
+        }
         if (!SetMode(ship, args.Mode))
             Popup(console, args.Actor, "ship-access-mode-unavailable");
     }

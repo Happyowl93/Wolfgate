@@ -78,6 +78,9 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
         public int PaymentRevision;
         public bool Recruiting;
         public TimeSpan? NextPosting;
+        public int? CompanyId;
+        /// <summary>The company hangar licence this crew launches, when it is one.</summary>
+        public int? HangarLicence;
         public readonly Dictionary<int, LobbyRole> Roles = new();
         public readonly Dictionary<NetUserId, Member> Members = new();
         public readonly Dictionary<NetUserId, int> Requests = new();
@@ -110,6 +113,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
             var pruned = PrunePendingAdmissions();
             UpdateDemo();
             SyncCrewShips();
+            SyncCompanyShips();
             BroadcastIfChanged(pruned | UpdateCrewStatus());
         }
         if (!_broadcastPending || now < _nextBroadcast)
@@ -205,7 +209,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                 error = "wf-round-setup-save-failed";
                 success = DeleteSetup(user, msg.SavedId);
                 break;
-            case WFRoundSetupAction.SaveSetup when own != null && own.Id == msg.LobbyId && own.Host == user && !WFRoundSetupPolicy.IsFormed(own.Scenario):
+            case WFRoundSetupAction.SaveSetup when own != null && own.Id == msg.LobbyId && own.Host == user && !WFRoundSetupPolicy.IsFormed(own.Scenario) && own.HangarLicence == null:
                 error = "wf-round-setup-save-failed";
                 success = (msg.Title == null || HostRequest(own, new WFRoundSetupRequest(WFRoundSetupAction.Configure)
                     { Title = msg.Title, Description = msg.Description, Access = msg.Access, AllowLateJoin = msg.AllowLateJoin }, session)) && SaveSetup(own, session, msg.SaveName);
@@ -234,6 +238,8 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                     break;
                 }
                 success = CreateFormed(session, formedTitle, formedDescription);
+                if (success && FindLobby(user) is { } formed && msg.CompanyId is { } formedCompany && _companies.CanFieldCrew(session, formedCompany))
+                    formed.CompanyId = formedCompany;
                 break;
             case WFRoundSetupAction.Create when own == null && CanEnter(session):
                 if (!IsScenarioAvailable(msg.Scenario) || _lobbies.Count >= 64)
@@ -258,6 +264,8 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                     Code = NewCode(), Title = title, Description = description };
                 _lobbies.Add(created.Id, created);
                 RegisterMember(created, session, new Member { Name = session.Name });
+                if (msg.CompanyId is { } createdCompany && _companies.CanFieldCrew(session, createdCompany))
+                    created.CompanyId = createdCompany;
                 success = true;
                 break;
             case WFRoundSetupAction.Join when own == null && target != null && (CanEnter(session) || CanJoinLive(session)):
@@ -270,8 +278,10 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                     error = CanEnter(session) ? "wf-round-setup-formed-no-ship" : "wf-round-setup-live-unavailable";
                     break;
                 }
-                LobbyRole requestedRole;
-                if (CanEnter(session) ? !TryGetRole(target, session, msg.RoleId, out requestedRole) : !TryGetLiveRole(target, msg.RoleId, out requestedRole))
+                // A member of the crew's company may join as their company rank instead of taking an opening.
+                var asRank = msg.AsRank && JoinsAsRank(target, session);
+                LobbyRole requestedRole = default!;
+                if (!asRank && (CanEnter(session) ? !TryGetRole(target, session, msg.RoleId, out requestedRole) : !TryGetLiveRole(target, msg.RoleId, out requestedRole)))
                 {
                     error = "wf-round-setup-error-role";
                     break;
@@ -279,11 +289,11 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
                 var decision = Admission(target, false, validCode);
                 if (decision == WFLobbyJoinDecision.Join)
                 {
-                    success = AddMember(target, session, msg.RoleId);
+                    success = AddMember(target, session, asRank ? RankRole : msg.RoleId);
                 }
                 else if (decision == WFLobbyJoinDecision.Request && target.Requests.Count < WFRoundSetupPolicy.MaximumMembers)
                 {
-                    target.Requests[user] = requestedRole.Id;
+                    target.Requests[user] = asRank ? RankRole : requestedRole.Id;
                     SendState(session, "wf-round-setup-request-sent");
                     Broadcast();
                     return;
@@ -440,8 +450,10 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
             case WFRoundSetupAction.SetRecruiting:
                 lobby.Recruiting = msg.Recruiting;
                 return true;
+            case WFRoundSetupAction.SetCompany:
+                return lobby.HangarLicence == null && SetCrewCompany(lobby, session, msg.CompanyId);
             case WFRoundSetupAction.ChangeScenario:
-                if (lobby.Started || !IsScenarioAvailable(msg.Scenario))
+                if (lobby.Started || lobby.HangarLicence != null || !IsScenarioAvailable(msg.Scenario))
                     return false;
                 if (msg.Scenario == WFRoundScenario.FactionShip && !CanCreateFaction(session, msg.Faction))
                     return false;
@@ -492,7 +504,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
             case WFRoundSetupAction.SetContribution:
                 return SetContribution(lobby, msg);
             case WFRoundSetupAction.SelectVessel:
-                if (lobby.Started || !WFRoundSetupPolicy.IsShip(lobby.Scenario) || msg.Vessel == null || !CanBuyVessel(lobby, session, msg.Vessel))
+                if (lobby.Started || lobby.HangarLicence != null || !WFRoundSetupPolicy.IsShip(lobby.Scenario) || msg.Vessel == null || !CanBuyVessel(lobby, session, msg.Vessel))
                     return false;
                 // Re-confirming the same ship keeps the payment split but still revokes purchase consent.
                 if (lobby.Vessel == msg.Vessel)
@@ -550,6 +562,8 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
     /// <summary>Grants membership and clears competing requests and invitations.</summary>
     private bool AddMember(Lobby lobby, ICommonSession session, int? roleId)
     {
+        if (roleId == RankRole)
+            return AddRankMember(lobby, session);
         if (!CanEnter(session))
             return AddLiveMember(lobby, session, roleId);
         if (FindLobby(session.UserId) != null || lobby.Members.Count >= WFRoundSetupPolicy.MaximumMembers ||
@@ -587,6 +601,8 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
         {
             if (lobby.NextPosting != null)
                 RaiseNetworkEvent(new WFCrewPostingRevokedEvent(lobby.Id));
+            if (lobby.HangarLicence is { } licence && !lobby.Started)
+                _companies.ReleaseLicence(licence);
             _lobbies.Remove(lobby.Id);
             _crash.RemoveScenario(lobby.Id);
             _doomed.RemoveScenario(lobby.Id);
@@ -675,6 +691,11 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
             Recruiting = ShowsRecruiting(lobby),
             LiveJoin = WFRoundSetupPolicy.AllowsLiveMembers(lobby.Scenario, lobby.Started),
             RecruitingOn = host && lobby.Recruiting,
+            Hangar = lobby.HangarLicence != null,
+            CompanyId = CrewCompany(lobby) != null ? lobby.CompanyId : null,
+            CompanyName = CrewCompany(lobby)?.Name ?? string.Empty,
+            CompanyTag = CrewCompany(lobby)?.Tag ?? string.Empty,
+            CompanyColour = CrewCompany(lobby)?.Colour ?? Color.White,
             NextPosting = host ? lobby.NextPosting : null,
             Code = host && lobby.Access == WFLobbyAccess.Code ? lobby.Code : null,
             Members = member ? lobby.Members.Select(pair => new WFRoundSetupMember(pair.Key, pair.Value.Name,
@@ -712,7 +733,10 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
         {
             InRound = _ticker.RunLevel != GameRunLevel.PreRoundLobby,
             JoinConfirmed = joinConfirmed,
-            CanJoin = canEnter, CanJoinLive = canJoinLive, RecruitingStations = RecruitingStations(), CrashlandedAvailable = _crash.IsAvailable, DoomedAvailable = _doomed.IsAvailable, OwnLobby = own?.Id,
+            CanJoin = canEnter, CanJoinLive = canJoinLive, RecruitingStations = RecruitingStations(),
+            OwnCompany = _companies.CompanyIdOf(session),
+            CompanyRank = _companies.RankFor(session)?.Title,
+            FieldCompanies = own == null || own.Host == session.UserId ? FieldCompanies(session) : Array.Empty<WFRoundSetupCompany>(), CrashlandedAvailable = _crash.IsAvailable, DoomedAvailable = _doomed.IsAvailable, OwnLobby = own?.Id,
             Lobbies = _lobbies.Values.Select(ForRecipient).ToArray(),
             Invitations = _lobbies.Values.Where(l => l.Invitations.Contains(session.UserId))
                 .Select(ForRecipient).ToArray(),
@@ -722,7 +746,8 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
             SavedSetups = GetSavedSetups(session.UserId).ToArray(),
             RoleJobs = own?.Host == session.UserId ? (WFRoundSetupPolicy.IsShip(own.Scenario) ? GetRoleJobs(session, own) : JobsFor(own)).ToArray() : Array.Empty<WFRoundSetupJob>(),
             Factions = WFFactionCrewPolicy.All.Where(faction => CanCreateFaction(session, faction, eligibility)).ToArray(),
-            Vessels = shipHost ? _ships.GetVessels(own!.Faction, EligiblePurchaseJob(own, session)).ToArray() : Array.Empty<WFRoundSetupVessel>(),
+            Vessels = !shipHost ? Array.Empty<WFRoundSetupVessel>() : own!.HangarLicence != null ? HangarVessels(own)
+                : _ships.GetVessels(own.Faction, EligiblePurchaseJob(own, session)).ToArray(),
             CrewShips = own is { Started: true } && own.Host == session.UserId ? CrewShipChoices(own) : Array.Empty<WFRoundSetupShipChoice>(),
             PendingShip = own != null ? PendingShipFor(own, session.UserId) : null,
             HostBalance = own != null ? _ships.GetBalance(session) : null,

@@ -100,6 +100,20 @@ public sealed class ExamineCardEvent : EntityEventArgs
 
     public ProtoId<JobIconPrototype>? JobIcon;
 
+    /// <summary>The player company on their ID, as "[TAG] Name"; only the server fills it.</summary>
+    public string? Company;
+
+    public string? CompanyRank;
+
+    public int CompanyId;
+
+    public int CompanyLogoVersion;
+
+    /// <summary>The rank whose job icon their ID carries, or 0.</summary>
+    public int CompanyRankId;
+
+    public int CompanyIconVersion;
+
     public ExamineCardStamp Stamp;
 
     /// <summary>Worn items, then held items under <c>hand-left</c>, <c>hand-right</c> or <c>hand-middle</c>.</summary>

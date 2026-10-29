@@ -146,6 +146,7 @@ public sealed partial class WFReaverCampaignSystem : EntitySystem
     {
         base.Initialize();
         Subs.CVar(_config, ReaverCampaignCVars.Enabled, value => _enabled = value, true);
+        Subs.CVar(_config, ReaverCampaignCVars.PopulationOverride, value => _populationOverride = value, true);
         Subs.CVar(_config, EncountersCVars.Enabled, value => _encountersEnabled = value, true);
         Subs.CVar(_config, EncountersCVars.Preset, _ => _campaignDirty = true, true);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
@@ -222,6 +223,7 @@ public sealed partial class WFReaverCampaignSystem : EntitySystem
             return;
         }
 
+        SamplePopulation(state);
         var ships = Crewed();
         if (CampaignFor(state) is { } reporting)
             ReportPresence(reporting);
@@ -232,6 +234,7 @@ public sealed partial class WFReaverCampaignSystem : EntitySystem
         TendStrongholds(state, ships, elapsed);
         TendConvoys(state, !held);
         TendReinforcements();
+        TendBatteries(CampaignFor(state));
         TendPatrols(state);
         TendRaids();
         TendResponses();
@@ -249,6 +252,7 @@ public sealed partial class WFReaverCampaignSystem : EntitySystem
             TickFounding(campaign, state);
             TickCitadel(campaign, state);
             TickReinforce(campaign, state);
+            TickBatteries(campaign, state);
             TickSpread(campaign, state);
             TickPatrols(campaign, state);
             TickIntercepts(campaign, state, ships);
@@ -278,6 +282,7 @@ public sealed partial class WFReaverCampaignSystem : EntitySystem
 
         state = EnsureComp<WFReaverCampaignComponent>(uid);
         state.Campaign = campaign.ID;
+        SamplePopulation(state);
         return state;
     }
 
@@ -417,6 +422,8 @@ public sealed partial class WFReaverCampaignSystem : EntitySystem
             ReinforcementResolved((args.Encounter, reinforcement), args.Resolution);
         else if (TryComp<WFReaverResponseComponent>(args.Encounter, out var response))
             ResponseResolved((args.Encounter, response), args.Resolution);
+        else if (TryComp<WFReaverBatteryComponent>(args.Encounter, out var battery))
+            BatteryResolved((args.Encounter, battery), args.Resolution);
     }
 
     /// <summary>Scales the storyteller's own Reaver encounters by the tier, within the campaign's cap.</summary>
@@ -462,7 +469,8 @@ public sealed partial class WFReaverCampaignSystem : EntitySystem
         {
             if (encounter.Resolution == null && (HasComp<WFReaverStrongholdComponent>(uid) || HasComp<WFReaverConvoyComponent>(uid)
                     || HasComp<WFReaverPatrolComponent>(uid) || HasComp<WFReaverRaidComponent>(uid)
-                    || HasComp<WFReaverReinforcementComponent>(uid) || HasComp<WFReaverResponseComponent>(uid)))
+                    || HasComp<WFReaverReinforcementComponent>(uid) || HasComp<WFReaverResponseComponent>(uid)
+                    || HasComp<WFReaverBatteryComponent>(uid)))
                 ended.Add(uid);
         }
 

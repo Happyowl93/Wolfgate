@@ -153,6 +153,8 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
     {
         var content = Column(12);
         content.AddChild(CrewIdentity(lobby));
+        if (lobby.CompanyTag.Length > 0)
+            content.AddChild(PlainDescription(Text("company-crew", ("tag", lobby.CompanyTag), ("company", lobby.CompanyName))));
         if (!string.IsNullOrEmpty(lobby.Description))
             content.AddChild(PlainDescription(lobby.Description));
         content.AddChild(PlainDescription(Text("lobby-info", ("count", lobby.MemberCount), ("access", AccessName(lobby.Access)),
@@ -187,6 +189,15 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
             lobby.Started && !lobby.AllowLateJoin ? "latejoin-closed" : "no-roles";
         if (available && NeedsJoinWarning(lobby))
             content.AddChild(JoinWarning());
+        if (!invitation && lobby.CompanyId != null && lobby.CompanyId == state.OwnCompany && state.CompanyRank != null &&
+            state.OwnLobby == null && (state.CanJoin || live) && lobby.Access is not (WFLobbyAccess.Invite or WFLobbyAccess.Closed))
+        {
+            var asRank = Button("join-as-rank", () => SendRequest(new WFRoundSetupRequest(WFRoundSetupAction.Join)
+                { LobbyId = lobby.Id, AsRank = true, Code = _enteredCodes.GetValueOrDefault(lobby.Id) }));
+            asRank.Text = Text("join-as-rank", ("rank", state.CompanyRank));
+            asRank.AddStyleClass("ButtonAccept");
+            content.AddChild(asRank);
+        }
         if (invitation)
         {
             content.AddChild(FlowRow(JoinButton(lobby, "accept-invite", () => JoinLobby(WFRoundSetupAction.AcceptInvite, lobby.Id), !available, disabledReason),
@@ -237,6 +248,7 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
         }
         BuildInvitations(lobby, state);
         BuildRecruiting(lobby);
+        BuildCrewCompany(lobby, state);
         var settings = Column(6);
         settings.AddChild(Heading("crew-title"));
         var title = new LineEdit { Text = _draftTitle, PlaceHolder = Text("crew-title-placeholder"), HorizontalExpand = true };
@@ -343,7 +355,8 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
     {
         return first.Payment == second.Payment && first.CrewShips.SequenceEqual(second.CrewShips) && first.PendingShip == second.PendingShip &&
                first.InRound == second.InRound && first.CanJoin == second.CanJoin && first.CanJoinLive == second.CanJoinLive && first.OwnLobby == second.OwnLobby &&
-               first.RecruitingStations.SequenceEqual(second.RecruitingStations) &&
+               first.RecruitingStations.SequenceEqual(second.RecruitingStations) && first.OwnCompany == second.OwnCompany &&
+               first.FieldCompanies.SequenceEqual(second.FieldCompanies) && first.CompanyRank == second.CompanyRank &&
                first.CrashlandedAvailable == second.CrashlandedAvailable && first.DoomedAvailable == second.DoomedAvailable && first.Factions.SequenceEqual(second.Factions) && first.HostBalance == second.HostBalance &&
                SameSavedSetups(first.SavedSetups, second.SavedSetups) && first.Vessels.SequenceEqual(second.Vessels) &&
                first.Jobs.SequenceEqual(second.Jobs) && first.RoleJobs.SequenceEqual(second.RoleJobs) && first.InviteTargets.SequenceEqual(second.InviteTargets) &&
@@ -357,7 +370,8 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
         return first.Id == second.Id && first.Host == second.Host && first.HostJob == second.HostJob && Equals(first.Portrait, second.Portrait) && first.HostName == second.HostName && first.Title == second.Title && first.Description == second.Description &&
                first.Scenario == second.Scenario && first.Faction == second.Faction && first.ShipName == second.ShipName && first.ShipStart == second.ShipStart && first.Access == second.Access && first.AllowLateJoin == second.AllowLateJoin &&
                first.Started == second.Started && first.MemberCount == second.MemberCount && first.Code == second.Code &&
-               first.Recruiting == second.Recruiting && first.RecruitingOn == second.RecruitingOn && first.LiveJoin == second.LiveJoin && first.NextPosting == second.NextPosting &&
+               first.Recruiting == second.Recruiting && first.RecruitingOn == second.RecruitingOn && first.CompanyId == second.CompanyId &&
+               first.CompanyName == second.CompanyName && first.CompanyTag == second.CompanyTag && first.CompanyColour == second.CompanyColour && first.LiveJoin == second.LiveJoin && first.NextPosting == second.NextPosting &&
                first.CurrentShip == second.CurrentShip && first.ShipCondition == second.ShipCondition && first.Vessel == second.Vessel && first.Roles.SequenceEqual(second.Roles) &&
                first.Roster.SequenceEqual(second.Roster) && first.Members.SequenceEqual(second.Members) && first.Requests.SequenceEqual(second.Requests);
     }

@@ -753,11 +753,11 @@ public sealed class ShipAccessTest
                 Assert.That(Find<Label>(screen, "ReadOnlyLabel").Visible, Is.False, "The deed holder's tab is not read-only.");
                 Assert.That(Find<CheckBox>(screen, "LockedCheck").Visible, Is.True, "The deed holder can flip the lock.");
                 Assert.That(Find<OptionButton>(screen, "ShipModeButton").Visible, Is.True);
-                Assert.That(Find<OptionButton>(screen, "ShipModeButton").ItemCount, Is.EqualTo(2), "Civilian owners choose Private or Crew.");
+                Assert.That(Find<OptionButton>(screen, "ShipModeButton").ItemCount, Is.EqualTo(3), "Civilian owners choose Private, Crew or Company.");
                 Assert.That(Find<OptionButton>(screen, "ShipModeButton").GetItemId(1), Is.EqualTo((int) WFShipAccessMode.Crew));
                 Assert.That(Find<OptionButton>(screen, "ShipModeButton").ToolTip, Does.Contain("Crew Setup"));
                 Assert.That(Find<BoxContainer>(screen, "AllDoorsBox").Visible, Is.True, "The deed holder gets the set-all control.");
-                Assert.That(Find<OptionButton>(screen, "AllDoorsRuleButton").ItemCount, Is.EqualTo(8), "Every rule is offered for all doors.");
+                Assert.That(Find<OptionButton>(screen, "AllDoorsRuleButton").ItemCount, Is.EqualTo(9), "Every rule is offered for all doors.");
             });
         });
 

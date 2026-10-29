@@ -63,6 +63,17 @@ public sealed partial class WFShipAccessComponent : Component
     /// <summary>The old "lock ship" toggle. While set, every door and locker reader on the grid admits only the keys above.</summary>
     [DataField, AutoNetworkedField]
     public bool Locked;
+
+    /// <summary>The player company linked for Company access.</summary>
+    [ViewVariables]
+    public int? CompanyId;
+
+    [ViewVariables, AutoNetworkedField]
+    public string? CompanyName;
+
+    /// <summary>Issued IDs of the linked company's members playing this round.</summary>
+    [ViewVariables, AutoNetworkedField]
+    public List<WFShipAccessKey> CompanyKeys = new();
 }
 
 /// <summary>Private admits owners and guests; Faction adds company access, and Crew adds current crew cards.</summary>
@@ -72,6 +83,7 @@ public enum WFShipAccessMode : byte
     Private,
     Faction,
     Crew,
+    Company,
 }
 
 /// <summary>A crew record key as the ship access lists hold it: the record's station and id, as written on an ID card.</summary>

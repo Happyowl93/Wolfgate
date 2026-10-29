@@ -35,6 +35,9 @@ public sealed class WFRoundSetupCrewRow : Button
         Label.Visible = false;
         var row = new BoxContainer { SeparationOverride = 8, HorizontalExpand = true, MouseFilter = MouseFilterMode.Ignore };
         row.AddChild(JobIcon(lobby.HostJob ?? (WFRoundSetupPolicy.IsShip(lobby.Scenario) ? "Pilot" : "Contractor")));
+        if (lobby.CompanyTag.Length > 0)
+            row.AddChild(new Label { Text = $"[{lobby.CompanyTag}]", FontColorOverride = lobby.CompanyColour, MouseFilter = MouseFilterMode.Ignore,
+                ToolTip = lobby.CompanyName });
         row.AddChild(new Label { Text = title, ClipText = true, HorizontalExpand = true, MouseFilter = MouseFilterMode.Ignore });
         if (lobby.Recruiting)
         {
@@ -81,6 +84,6 @@ public sealed class WFRoundSetupCrewRow : Button
     /// <summary>Avoids rebuilding rows for unrelated readiness and admission changes.</summary>
     public static bool SameListing(WFRoundSetupLobby first, WFRoundSetupLobby second) =>
         first.Id == second.Id && first.Scenario == second.Scenario && first.Title == second.Title && first.HostName == second.HostName && first.Portrait?.Name == second.Portrait?.Name && first.HostJob == second.HostJob &&
-        first.MemberCount == second.MemberCount && first.Started == second.Started && Openings(first) == Openings(second) && first.Recruiting == second.Recruiting &&
+        first.MemberCount == second.MemberCount && first.Started == second.Started && Openings(first) == Openings(second) && first.Recruiting == second.Recruiting && first.CompanyTag == second.CompanyTag && first.CompanyColour == second.CompanyColour &&
         first.ShipCondition == second.ShipCondition && first.Roster.Select(mate => mate.Status).SequenceEqual(second.Roster.Select(mate => mate.Status));
 }

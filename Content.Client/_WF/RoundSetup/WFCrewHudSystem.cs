@@ -141,8 +141,10 @@ public sealed class WFCrewHudSystem : EntitySystem
         }
         var key = (own.Id, next.UserId, next.RoleId);
         var role = own.Roles.FirstOrDefault(r => r.Id == next.RoleId);
+        // A request with role -1 is a company member joining as their rank, which takes no opening.
+        var asRank = next.RoleId == -1;
         var canAccept = own.Access == WFLobbyAccess.Requests && own.MemberCount < WFRoundSetupPolicy.MaximumMembers &&
-            (!own.Started || own.AllowLateJoin) && role != null && role.Occupied < role.Capacity;
+            (!own.Started || own.AllowLateJoin) && (asRank || role != null && role.Occupied < role.Capacity);
         if (_shownRequest == key)
         {
             SetAcceptAvailability(canAccept);
@@ -154,7 +156,7 @@ public sealed class WFCrewHudSystem : EntitySystem
         column.AddChild(new Label { Text = Loc.GetString("wf-round-setup-request-popup-title"), Modulate = Color.FromHex("#F1B85A") });
         var copy = new RichTextLabel();
         copy.SetMessage(FormattedMessage.FromUnformatted(Loc.GetString("wf-round-setup-request-popup-body", ("name", next.Name),
-            ("role", role == null ? Loc.GetString("wf-round-setup-job-unselected") : string.IsNullOrEmpty(role.Name)
+            ("role", asRank ? Loc.GetString("wf-round-setup-request-as-rank") : role == null ? Loc.GetString("wf-round-setup-job-unselected") : string.IsNullOrEmpty(role.Name)
                 ? _prototypes.Index<JobPrototype>(role.Job).LocalizedName : role.Name))));
         column.AddChild(copy);
         var buttons = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 6 };

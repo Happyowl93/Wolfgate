@@ -280,6 +280,11 @@ public sealed partial class WFShipAccessServerSystem
             Popup(console, args.Actor, "ship-access-no-crew");
             return;
         }
+        if (args.Rule == WFDoorAccessRule.Company && !TryLinkCompany(ship, args.Actor))
+        {
+            Popup(console, args.Actor, "ship-access-no-company");
+            return;
+        }
 
         // Sealing an open or unpowered door is deferred, so say so rather than leave the owner guessing.
         if (SetDoorRule(ship, door, args.Rule) && args.Rule == WFDoorAccessRule.Sealed
@@ -295,6 +300,11 @@ public sealed partial class WFShipAccessServerSystem
         if (args.Rule == WFDoorAccessRule.Crew && !TryLinkCrew(ship, args.Actor))
         {
             Popup(console, args.Actor, "ship-access-no-crew");
+            return;
+        }
+        if (args.Rule == WFDoorAccessRule.Company && !TryLinkCompany(ship, args.Actor))
+        {
+            Popup(console, args.Actor, "ship-access-no-company");
             return;
         }
         var changed = SetAllDoorRules(ship, args.Rule);

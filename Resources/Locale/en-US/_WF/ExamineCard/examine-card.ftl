@@ -6,6 +6,7 @@ wf-examine-card-field-appearance = APPEARANCE
 wf-examine-card-field-species = SPECIES
 wf-examine-card-field-id-name = ID NAME
 wf-examine-card-field-occupation = OCCUPATION
+wf-examine-card-field-company = COMPANY
 
 wf-examine-card-face-hidden = face covered
 wf-examine-card-blank = none

@@ -71,6 +71,9 @@ public sealed partial class WFRoundSetupWindow
             StyleClasses = { "WFRoundSetupSurface" },
             Children = { layout },
         });
+        var company = new Button { Text = Text("company-open"), HorizontalAlignment = HAlignment.Right, ToolTip = Text("company-open-help") };
+        company.OnPressed += _ => _entities.System<Content.Client._WF.Companies.WFCompanyClientSystem>().OpenWindow();
+        layout.AddChild(company);
         layout.AddChild(_navigation);
         layout.AddChild(_message);
         _pageScroll.AddChild(_body);
@@ -204,6 +207,7 @@ public sealed partial class WFRoundSetupWindow
         _body.AddChild(Heading("browse"));
         var lobbies = state.Lobbies.Where(lobby => lobby.Id != state.OwnLobby)
             .OrderByDescending(lobby => state.Invitations.Any(invitation => invitation.Id == lobby.Id))
+            .ThenByDescending(lobby => state.OwnCompany != null && lobby.CompanyId == state.OwnCompany)
             .ThenByDescending(lobby => lobby.Recruiting).ThenBy(lobby => lobby.Started).ToArray();
         var selected = lobbies.FirstOrDefault(lobby => lobby.Id == _focusedLobby);
         if (selected != null)
@@ -244,6 +248,7 @@ public sealed partial class WFRoundSetupWindow
         _body.AddChild(crewName);
         crewName.ToolTip = Text("crew-title-help");
         _body.AddChild(DescriptionEditor(_newDescription, value => _newDescription = value));
+        BuildCreateCompany(state);
         foreach (var scenario in new[] { WFRoundScenario.Ship, WFRoundScenario.Crashlanded, WFRoundScenario.FactionShip, WFRoundScenario.Doomed })
         {
             var card = Column(8);
@@ -274,6 +279,7 @@ public sealed partial class WFRoundSetupWindow
                 card.AddChild(Description(unavailableReason));
             var create = Button("create", () => SendRequest(new WFRoundSetupRequest(WFRoundSetupAction.Create)
             {
+                CompanyId = CreateCompany(state),
                 Scenario = scenario,
                 Faction = scenario == WFRoundScenario.FactionShip ? _newFaction : WFCrewFaction.None,
                 Title = _newTitle,
@@ -338,12 +344,15 @@ public sealed partial class WFRoundSetupWindow
                     _pageScroll.VScrollEnabled = false;
                     if (!lobby.Started)
                         BuildScenarioSelector(state, lobby);
+                    BuildCrewCompanyRow(lobby, state);
                     BuildMemberSetup(state, lobby, member);
                     break;
                 }
                 _body.AddChild(CrewIdentity(lobby));
                 if (host && !lobby.Started)
                     BuildScenarioSelector(state, lobby);
+                if (host)
+                    BuildCrewCompanyRow(lobby, state);
                 _body.AddChild(WFScenarioDifficultyLabel.Create(lobby.Scenario));
                 _body.AddChild(Description(ScenarioDescription(lobby.Scenario)));
                 if (member is { Spawned: false } && state.CanJoin)

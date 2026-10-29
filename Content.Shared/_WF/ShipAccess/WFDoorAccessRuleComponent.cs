@@ -66,4 +66,7 @@ public enum WFDoorAccessRule : byte
 
     /// <summary>The owner and current members of the linked crew, regardless of ship mode.</summary>
     Crew,
+
+    /// <summary>The owner and members of the linked company, regardless of ship mode.</summary>
+    Company,
 }

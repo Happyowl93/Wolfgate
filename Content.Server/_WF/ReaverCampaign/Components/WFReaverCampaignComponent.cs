@@ -16,6 +16,14 @@ public sealed partial class WFReaverCampaignComponent : Component
     [ViewVariables]
     public float Score;
 
+    /// <summary>The population the campaign scales by: the highest count of living players seen in the last ten minutes.</summary>
+    [ViewVariables]
+    public int Population;
+
+    /// <summary>When <see cref="Population"/> was last set.</summary>
+    [ViewVariables]
+    public TimeSpan PopulationAt;
+
     /// <summary>Since when the score has been below the current tier's threshold.</summary>
     [ViewVariables]
     public TimeSpan? BelowSince;

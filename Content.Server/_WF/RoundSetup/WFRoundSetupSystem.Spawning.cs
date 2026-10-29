@@ -301,7 +301,7 @@ public sealed partial class WFRoundSetupSystem
                 error = "wf-round-setup-error-ship-consent";
                 return false;
             }
-            if (!lobby.Started && !CanBuyVessel(lobby, session, lobby.Vessel))
+            if (!lobby.Started && lobby.HangarLicence == null && !CanBuyVessel(lobby, session, lobby.Vessel))
             {
                 error = "wf-round-setup-ship-invalid";
                 return false;
@@ -321,12 +321,12 @@ public sealed partial class WFRoundSetupSystem
             {
                 error = "wf-round-setup-faction-slot-unavailable";
                 if (!lobby.Started)
-                    _ships.Rollback(lobby.Id);
+                    RollbackShip(lobby);
                 return false;
             }
             if (!lobby.Started && !ChargeCrew(lobby, session, out error))
             {
-                _ships.Rollback(lobby.Id);
+                RollbackShip(lobby);
                 return false;
             }
         }
@@ -347,6 +347,8 @@ public sealed partial class WFRoundSetupSystem
                 return false;
             }
             completed = true;
+            if (buyingShip && lobby.HangarLicence != null)
+                MarkHangarShip(lobby);
             ApplyCrewTitle(lobby, member, session);
             UpdatePortrait(session.UserId, member);
             member.Spawned = true;
@@ -370,7 +372,7 @@ public sealed partial class WFRoundSetupSystem
         {
             _pendingSpawns.Remove(session.UserId);
             if (buyingShip && !completed)
-                _ships.Rollback(lobby.Id);
+                RollbackShip(lobby);
         }
     }
 

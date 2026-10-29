@@ -196,6 +196,11 @@ public sealed partial class WFShipAccessServerSystem
                 foreach (var key in ship.Comp.CrewKeys)
                     keys.Add(_access.ToRecordKey(key));
             }
+            if (ship.Comp.Mode == WFShipAccessMode.Company)
+            {
+                foreach (var key in ship.Comp.CompanyKeys)
+                    keys.Add(_access.ToRecordKey(key));
+            }
             backup.Locked = false;
             backup.OwnLists = true;
             CommitReader(reader);
@@ -228,6 +233,11 @@ public sealed partial class WFShipAccessServerSystem
                 foreach (var key in ship.Comp.CrewKeys)
                     keys.Add(_access.ToRecordKey(key));
                 break;
+            case WFDoorAccessRule.Company:
+                keys.UnionWith(owners);
+                foreach (var key in ship.Comp.CompanyKeys)
+                    keys.Add(_access.ToRecordKey(key));
+                break;
             case WFDoorAccessRule.Players:
             case WFDoorAccessRule.PlayersOrCode:
                 keys.UnionWith(owners);
@@ -242,6 +252,11 @@ public sealed partial class WFShipAccessServerSystem
                 if (ship.Comp.Mode == WFShipAccessMode.Crew)
                 {
                     foreach (var key in ship.Comp.CrewKeys)
+                        keys.Add(_access.ToRecordKey(key));
+                }
+                if (ship.Comp.Mode == WFShipAccessMode.Company)
+                {
+                    foreach (var key in ship.Comp.CompanyKeys)
                         keys.Add(_access.ToRecordKey(key));
                 }
 

@@ -27,7 +27,7 @@ public enum WFRoundSetupAction : byte
 {
     Refresh, Create, Configure, Join, Leave, AcceptRequest, RejectRequest,
     Invite, AcceptInvite, DeclineInvite, SelectJob, SetReady, Launch, RegenerateCode, Kick, TransferHost,
-    SelectVessel, UpsertRole, RemoveRole, SelectRole, ConfirmJoin, ChangeScenario, SelectShipStart, ApplyRoster, SetTitle, SaveSetup, LoadSetup, DeleteSetup, SetShipName, AssignShip, ApproveShip, CancelShip, SetContribution, Watch, SetRecruiting, Post,
+    SelectVessel, UpsertRole, RemoveRole, SelectRole, ConfirmJoin, ChangeScenario, SelectShipStart, ApplyRoster, SetTitle, SaveSetup, LoadSetup, DeleteSetup, SetShipName, AssignShip, ApproveShip, CancelShip, SetContribution, Watch, SetRecruiting, Post, SetCompany,
 }
 
 /// <summary>A request whose actor is always taken from its network session.</summary>
@@ -62,6 +62,9 @@ public sealed class WFRoundSetupRequest : EntityEventArgs
     public string? SaveName;
     public bool Recruiting;
     public string? Posting;
+    public int? CompanyId;
+    /// <summary>Join: a company member joins their company's crew as their company rank instead of an opening.</summary>
+    public bool AsRank;
 
     public WFRoundSetupRequest(WFRoundSetupAction action) { Action = action; }
 }
@@ -91,6 +94,10 @@ public sealed record WFRoundSetupJob(string Id, NetEntity? Station, string Stati
 public sealed record WFRoundSetupRole(int Id, string Name, string Job, NetEntity? Station, int Capacity, int Occupied, bool CanSelect);
 
 /// <summary>A ship offered for purchase when the host launches their crew.</summary>
+/// <summary>A player company a host may run their crew under.</summary>
+[Serializable, NetSerializable]
+public sealed record WFRoundSetupCompany(int Id, string Name, string Tag);
+
 [Serializable, NetSerializable]
 public sealed record WFRoundSetupVessel(string Id, string Name, string Description, int Price);
 
@@ -141,6 +148,13 @@ public sealed class WFRoundSetupLobby
     public bool RecruitingOn;
     /// <summary>Host only: when the next posting is allowed.</summary>
     public TimeSpan? NextPosting;
+    /// <summary>The player company this crew flies under, if any.</summary>
+    public int? CompanyId;
+    public string CompanyName = string.Empty;
+    public string CompanyTag = string.Empty;
+    public Color CompanyColour = Color.White;
+    /// <summary>A company hangar launch: the design is fixed and the company pays.</summary>
+    public bool Hangar;
 }
 
 /// <summary>A per-recipient snapshot of the round setup browser and their membership.</summary>
@@ -154,6 +168,12 @@ public sealed class WFRoundSetupState : EntityEventArgs
     public bool CanJoinLive;
     /// <summary>Stations whose crew is recruiting, for the ordinary late-join picker.</summary>
     public NetEntity[] RecruitingStations = Array.Empty<NetEntity>();
+    /// <summary>The recipient's own player company, so its crews sort first.</summary>
+    public int? OwnCompany;
+    /// <summary>The recipient's company rank title, for joining their company's crews as it.</summary>
+    public string? CompanyRank;
+    /// <summary>Host only: companies the crew may fly under.</summary>
+    public WFRoundSetupCompany[] FieldCompanies = Array.Empty<WFRoundSetupCompany>();
     public bool CrashlandedAvailable;
     public bool DoomedAvailable;
     public WFCrewFaction[] Factions = Array.Empty<WFCrewFaction>();

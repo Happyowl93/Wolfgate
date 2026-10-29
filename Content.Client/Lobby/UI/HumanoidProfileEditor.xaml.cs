@@ -618,6 +618,7 @@ namespace Content.Client.Lobby.UI
             RefreshFlavorText();
             InitializeHeadshot(); // WOLFGATE(Headshot)
             InitializeCustomMarkings(); // WOLFGATE(CustomMarkings)
+            InitializeCompanyCard(); // WOLFGATE(Companies)
             InitializeMismatchedParts(); // WOLFGATE(Species)
             InitializeBiotype(); // WOLFGATE(Biotype)
             InitializeChatFont(); // WOLFGATE(ChatFont)
@@ -854,6 +855,9 @@ namespace Content.Client.Lobby.UI
                         if (BiotypeBlacklistTooltip(trait) is { } biotypeTooltip)
                             tooltipParts.Add(biotypeTooltip);
                         // WOLFGATE END
+
+                        if (trait.NewbieBlocked) // WOLFGATE(Newbie): say why a newbie's saved pick won't apply
+                            tooltipParts.Add(Loc.GetString("wf-newbie-trait-blocked"));
 
                         if (tooltipParts.Count > 0)
                             selector.SetTooltip(string.Join("\n", tooltipParts));
@@ -1101,6 +1105,9 @@ namespace Content.Client.Lobby.UI
                 if (!hide && Profile != null && WFBiotypeGates.TraitBlocked(thisProto, Profile, _prototypeManager))
                     hide = true;
 
+                if (!hide && WfNewbieTraitBlocked(thisProto)) // WOLFGATE(Newbie): new players can't take kill-target traits
+                    hide = true;
+
                 if (!hide)
                 {
                     foreach (var sel in selected)
@@ -1331,6 +1338,7 @@ namespace Content.Client.Lobby.UI
             UpdateFlavorTextEdit();
             UpdateHeadshot(); // WOLFGATE(Headshot)
             UpdateCustomMarkings(); // WOLFGATE(CustomMarkings)
+            UpdateCompanyCard(); // WOLFGATE(Companies)
             UpdateMismatchedParts(); // WOLFGATE(Species)
             UpdateBiotype(); // WOLFGATE(Biotype)
             UpdateLegStyle(); // WOLFGATE(LegStyle)

@@ -39,7 +39,7 @@ public sealed partial class WFRoundSetupSystem
             return false;
         lobby.NextPosting = _timing.CurTime + WFRoundSetupPolicy.PostingCooldown;
 
-        var crew = CrewName(lobby);
+        var crew = TaggedCrewName(lobby);
         var hostName = lobby.Members[lobby.Host].Name;
         var openings = Openings(lobby);
         _postingLog.Add(LogType.Chat, LogImpact.Low, $"{host:player} posted for crew {crew} ({lobby.Id}): {posting}");

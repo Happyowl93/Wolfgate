@@ -214,6 +214,15 @@ public sealed partial class WFShipScenarioSystem : EntitySystem
         }
     }
 
+    /// <summary>Records a company hangar launch as paid by the host, so the deed can be handed out without any refund owed.</summary>
+    public void MarkCompanyPaid(int lobbyId, ICommonSession host)
+    {
+        if (!_scenarios.TryGetValue(lobbyId, out var scenario) || scenario.Paid > 0)
+            return;
+        scenario.Paid = _prototypes.Index<VesselPrototype>(scenario.Vessel).Price;
+        scenario.Buyer = host;
+    }
+
     /// <summary>Gives the successfully spawned buyer a deed and registers normal ship ownership.</summary>
     public bool CompletePurchase(int lobbyId, ICommonSession host, string shipName = "")
     {

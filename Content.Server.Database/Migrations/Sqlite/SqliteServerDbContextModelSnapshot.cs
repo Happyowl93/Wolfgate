@@ -1700,6 +1700,289 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("whitelist", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompany", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("wolfgate_company_id");
+
+                    b.Property<bool>("ArtLocked")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("art_locked");
+
+                    b.Property<long>("Balance")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("balance");
+
+                    b.Property<string>("Colour")
+                        .IsRequired()
+                        .HasMaxLength(9)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("colour");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("Cut")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("cut");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("Frozen")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("frozen");
+
+                    b.Property<int>("LaunchFee")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("launch_fee");
+
+                    b.Property<byte[]>("Logo")
+                        .HasColumnType("BLOB")
+                        .HasColumnName("logo");
+
+                    b.Property<int>("LogoVersion")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("logo_version");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<byte[]>("OwnerIcon")
+                        .HasColumnType("BLOB")
+                        .HasColumnName("owner_icon");
+
+                    b.Property<int>("OwnerIconVersion")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_icon_version");
+
+                    b.Property<string>("OwnerJob")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("owner_job");
+
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<string>("OwnerTitle")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("owner_title");
+
+                    b.Property<bool>("Recruiting")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("recruiting");
+
+                    b.Property<string>("Tag")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("tag");
+
+                    b.HasKey("Id")
+                        .HasName("PK_wolfgate_company");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.HasIndex("Tag")
+                        .IsUnique();
+
+                    b.ToTable("wolfgate_company", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompanyLedger", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("wolfgate_company_ledger_id");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actor_name");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("amount");
+
+                    b.Property<long>("BalanceAfter")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("balance_after");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("company_id");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("note");
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("time");
+
+                    b.HasKey("Id")
+                        .HasName("PK_wolfgate_company_ledger");
+
+                    b.HasIndex("CompanyId", "Time");
+
+                    b.ToTable("wolfgate_company_ledger", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompanyLicence", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("wolfgate_company_licence_id");
+
+                    b.Property<DateTime>("BoughtAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("bought_at");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("company_id");
+
+                    b.Property<long>("PricePaid")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("price_paid");
+
+                    b.Property<string>("Vessel")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("vessel");
+
+                    b.HasKey("Id")
+                        .HasName("PK_wolfgate_company_licence");
+
+                    b.HasIndex("CompanyId")
+                        .HasDatabaseName("IX_wolfgate_company_licence_company_id");
+
+                    b.ToTable("wolfgate_company_licence", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompanyMember", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("company_id");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("joined_at");
+
+                    b.Property<int?>("RankId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("rank_id");
+
+                    b.Property<int>("UnpaidSeconds")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("unpaid_seconds");
+
+                    b.Property<DateTime>("WithdrawDay")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("withdraw_day");
+
+                    b.Property<int>("WithdrawnToday")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("withdrawn_today");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_wolfgate_company_member");
+
+                    b.HasIndex("CompanyId")
+                        .HasDatabaseName("IX_wolfgate_company_member_company_id");
+
+                    b.ToTable("wolfgate_company_member", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompanyRank", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("wolfgate_company_rank_id");
+
+                    b.Property<string>("BaseJob")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("base_job");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("company_id");
+
+                    b.Property<byte[]>("Icon")
+                        .HasColumnType("BLOB")
+                        .HasColumnName("icon");
+
+                    b.Property<int>("IconVersion")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("icon_version");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("order");
+
+                    b.Property<int>("Permissions")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("permissions");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("title");
+
+                    b.Property<int>("Wage")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("wage");
+
+                    b.Property<int>("WithdrawCap")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("withdraw_cap");
+
+                    b.HasKey("Id")
+                        .HasName("PK_wolfgate_company_rank");
+
+                    b.HasIndex("CompanyId")
+                        .HasDatabaseName("IX_wolfgate_company_rank_company_id");
+
+                    b.ToTable("wolfgate_company_rank", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.WolfgateCustomMarking", b =>
                 {
                     b.Property<int>("Id")
@@ -2549,6 +2832,63 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Box");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompanyLedger", b =>
+                {
+                    b.HasOne("Content.Server.Database.WolfgateCompany", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_wolfgate_company_ledger_wolfgate_company_company_id");
+
+                    b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompanyLicence", b =>
+                {
+                    b.HasOne("Content.Server.Database.WolfgateCompany", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_wolfgate_company_licence_wolfgate_company_company_id");
+
+                    b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompanyMember", b =>
+                {
+                    b.HasOne("Content.Server.Database.WolfgateCompany", "Company")
+                        .WithMany("Members")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_wolfgate_company_member_wolfgate_company_company_id");
+
+                    b.HasOne("Content.Server.Database.Profile", "Profile")
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.WolfgateCompanyMember", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_wolfgate_company_member_profile_profile_id");
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompanyRank", b =>
+                {
+                    b.HasOne("Content.Server.Database.WolfgateCompany", "Company")
+                        .WithMany("Ranks")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_wolfgate_company_rank_wolfgate_company_company_id");
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("Content.Server.Database.WolfgateCustomMarking", b =>
                 {
                     b.HasOne("Content.Server.Database.WolfgateCustomMarkingArt", "Art")
@@ -2707,6 +3047,13 @@ namespace Content.Server.Database.Migrations.Sqlite
             modelBuilder.Entity("Content.Server.Database.WayfarerSafetyDepositBox", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.WolfgateCompany", b =>
+                {
+                    b.Navigation("Members");
+
+                    b.Navigation("Ranks");
                 });
 #pragma warning restore 612, 618
         }
