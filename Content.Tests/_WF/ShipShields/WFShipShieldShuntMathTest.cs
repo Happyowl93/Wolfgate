@@ -43,8 +43,8 @@ public sealed class WFShipShieldShuntMathTest
         Assert.That(MathF.Abs(WFShipShieldShuntMath.NormalizeAngle((roundTrip - bearing) * MathF.PI / 180f)), Is.LessThan(0.0001f));
     }
     [TestCase(0f, 1f, 1f)]
-    [TestCase(0.5f, 1.5f, 0.5f)]
-    [TestCase(1f, 2f, 0f)]
+    [TestCase(0.5f, 1.2937f, 0.5f)]
+    [TestCase(1f, 1.5874f, 0f)]
     public void QuarterArcTransfersPowerAndResetRestoresCoverage(float amount, float reinforced, float remainder)
     {
         Assert.That(WFShipShieldShuntMath.StrengthMultiplier(Vector2.UnitX, Vector2.Zero, 0f, amount, MathF.PI / 2f), Is.EqualTo(reinforced).Within(0.0001f));
@@ -72,11 +72,11 @@ public sealed class WFShipShieldShuntMathTest
         Assert.That(total / samples, Is.LessThanOrEqualTo(1.002f), "Shunting must never add total capacity.");
     }
 
-    [TestCase(30f, 3.4641f)]
-    [TestCase(90f, 2f)]
-    [TestCase(180f, 1.4142f)]
+    [TestCase(30f, 2.2894f)]
+    [TestCase(90f, 1.5874f)]
+    [TestCase(180f, 1.2599f)]
     [TestCase(360f, 1f)]
-    public void FullShuntStrengthIsCappedBySquareRoot(float arcDegrees, float expected)
+    public void FullShuntStrengthIsCappedByCubeRoot(float arcDegrees, float expected)
     {
         Assert.That(WFShipShieldShuntMath.PeakStrength(1f, arcDegrees * MathF.PI / 180f), Is.EqualTo(expected).Within(0.001f));
         Assert.That(WFShipShieldShuntMath.PeakStrength(0f, arcDegrees * MathF.PI / 180f), Is.EqualTo(1f));

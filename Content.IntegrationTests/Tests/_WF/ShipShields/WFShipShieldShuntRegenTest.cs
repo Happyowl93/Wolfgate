@@ -1,6 +1,7 @@
 using Content.Server._Crescent.ShipShields;
 using Content.Server.Power.Components;
 using Content.Shared._Crescent.ShipShields;
+using Content.Shared._WF.ShipShields;
 using Robust.Shared.GameObjects;
 
 namespace Content.IntegrationTests.Tests._WF.ShipShields;
@@ -37,7 +38,7 @@ public sealed class WFShipShieldShuntRegenTest
             var even = Heal(false);
             Assert.That(even, Is.EqualTo(emitter.HealPerSecond * 1.5f).Within(0.01f));
             Assert.That(shields.SetWolfgateShieldShunt(map.Grid.Owner, 0f, 1f, MathF.PI / 2f), Is.True);
-            Assert.That(Heal(false), Is.EqualTo(even / 2f).Within(0.01f), "A full 90-degree shunt is 2x strong.");
+            Assert.That(Heal(false), Is.EqualTo(even / WFShipShieldShuntMath.PeakStrength(1f, MathF.PI / 2f)).Within(0.01f));
             Assert.That(Heal(true), Is.EqualTo(even * emitter.UnpoweredBonus).Within(0.01f),
                 "Recharge mode recovers at the full rate whatever the allocation.");
         });

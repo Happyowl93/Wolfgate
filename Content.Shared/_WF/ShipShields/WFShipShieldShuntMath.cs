@@ -43,9 +43,9 @@ public static class WFShipShieldShuntMath
         return MathF.IEEERemainder(angle, FullArc);
     }
 
-    /// <summary>Strength inside the arc. The square root caps narrow arcs: a full 30-degree shunt gives about 3.5x, 90 degrees gives 2x.</summary>
+    /// <summary>Strength inside the arc. The cube root caps narrow arcs: a full 30-degree shunt gives about 2.3x, 90 degrees about 1.6x.</summary>
     public static float PeakStrength(float concentration, float arcRadians) =>
-        1f + concentration * (MathF.Sqrt(FullArc / arcRadians) - 1f);
+        1f + concentration * (MathF.Cbrt(FullArc / arcRadians) - 1f);
 
     /// <summary>Returns local strength: <see cref="PeakStrength"/> inside the arc, what's left of the perimeter outside it.</summary>
     public static float StrengthMultiplier(Vector2 position, Vector2 center, float directionRadians, float concentration, float arcRadians)
