@@ -168,17 +168,29 @@ public sealed partial class WFCompanyTest
         {
             if (id is { } left)
                 await server.WaitPost(() => companies.AdminDisband(left));
+            // The synchronous test database takes one request at a time: let company writes land, save the profile, then restart.
+            await FlushCompanies();
+            await server.WaitPost(() => preferences.SetProfile(owner.UserId, slot, original).Wait());
             await server.WaitPost(() =>
             {
                 ticker.RestartRound();
                 ticker.SetGamePreset(preset);
                 server.CfgMan.SetCVar(CCVars.GameRoleTimers, timers);
                 server.CfgMan.SetCVar(CCVars.AutoVoteEnabled, autoVote);
-                preferences.SetProfile(owner.UserId, slot, original).Wait();
             });
+            await FlushCompanies();
         }
         await pair.RunTicksSync(2);
         await pair.CleanReturnAsync();
+
+        async Task FlushCompanies()
+        {
+            Task task = null;
+            await server.WaitPost(() => task = companies.Flush());
+            for (var i = 0; i < 600 && !task.IsCompleted; i++)
+                await pair.RunTicksSync(1);
+            await task;
+        }
 
         async Task<WFCompanyState> Send(WFCompanyRequest request)
         {
