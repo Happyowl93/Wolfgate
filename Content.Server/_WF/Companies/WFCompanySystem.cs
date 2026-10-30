@@ -148,14 +148,23 @@ public sealed partial class WFCompanySystem : EntitySystem
         await Task.WhenAll(_pendingWrites.ToArray());
         _pendingWrites.Clear();
         List<WFStoredCompany> stored;
-        try
+        for (var attempt = 0; ; attempt++)
         {
-            stored = await _db.LoadCompaniesAsync();
-        }
-        catch (Exception e)
-        {
-            _log.Error($"Could not load companies: {e}");
-            return;
+            try
+            {
+                stored = await _db.LoadCompaniesAsync();
+                break;
+            }
+            // A synchronous database refuses overlapping requests, such as another system's write still finishing; retry.
+            catch (InvalidOperationException) when (attempt < 10)
+            {
+                await Task.Delay(50);
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Could not load companies: {e}");
+                return;
+            }
         }
         _companies.Clear();
         _memberCompany.Clear();
