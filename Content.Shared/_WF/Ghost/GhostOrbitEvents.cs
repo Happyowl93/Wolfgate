@@ -43,6 +43,9 @@ public record struct GhostOrbitTarget
 
     public ProtoId<JobIconPrototype>? JobIcon;
 
+    /// <summary>The company rank whose custom job icon replaces <see cref="JobIcon"/>, or 0.</summary>
+    public int CompanyRank;
+
     /// <summary>Damage as a fraction of the dead threshold, 0 to 1. Null when the target has no health.</summary>
     public float? Damage;
 

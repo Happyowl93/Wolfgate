@@ -742,7 +742,8 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
             OwnCompany = _companies.CompanyIdOf(session),
             CompanyRank = _companies.RankFor(session)?.Title,
             FieldCompanies = own == null || own.Host == session.UserId ? FieldCompanies(session) : Array.Empty<WFRoundSetupCompany>(), CrashlandedAvailable = _crash.IsAvailable, DoomedAvailable = _doomed.IsAvailable, OwnLobby = own?.Id,
-            Lobbies = _lobbies.Values.Select(ForRecipient).ToArray(),
+            // A launched crew whose members are all dead, gone or in cryosleep drops off everyone else's list.
+            Lobbies = _lobbies.Values.Where(lobby => lobby == own || !lobby.Started || HasActiveMembers(lobby)).Select(ForRecipient).ToArray(),
             Invitations = _lobbies.Values.Where(l => l.Invitations.Contains(session.UserId))
                 .Select(ForRecipient).ToArray(),
             InviteTargets = own?.Host == session.UserId ? _players.Sessions.Where(s => FindLobby(s.UserId) == null && CanAdmit(own, s))

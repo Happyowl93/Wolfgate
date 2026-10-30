@@ -126,6 +126,19 @@ public sealed partial class WFCompanyTest
                 Assert.That(em.GetComponent<ActiveRadioComponent>(body).Channels, Does.Contain(WFCompanySystem.CompanyChannel));
                 Assert.That(companies.CompanyRadioName(body), Is.EqualTo("Company · RANK"));
             });
+            // The station record carries the rank, so the crew manifest and records show its icon.
+            await pair.RunTicksSync(pair.SecondsToTicks(2.5f));
+            await server.WaitAssertion(() =>
+            {
+                Assert.That(server.System<SharedIdCardSystem>().TryFindIdCard(owner.AttachedEntity!.Value, out var card), Is.True);
+                var key = em.GetComponent<Content.Shared.StationRecords.StationRecordKeyStorageComponent>(card).Key;
+                Assert.That(key, Is.Not.Null);
+                Assert.That(server.System<Content.Server.StationRecords.Systems.StationRecordsSystem>()
+                    .TryGetRecord<Content.Shared.StationRecords.GeneralStationRecord>(key!.Value, out var record), Is.True);
+                Assert.That(record!.WFCompanyRank, Is.EqualTo(topRank));
+            });
+            await pair.Client.WaitAssertion(() => Assert.That(Content.Client._WF.Companies.WFCompanyRankIcons.Get(topRank), Is.Not.Null,
+                "Screens that draw job icons get the rank icon."));
 
             // A Formed crew run by the owner flies under the company.
             var crews = pair.Client.System<WFRoundSetupClientSystem>();

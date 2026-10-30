@@ -28,6 +28,8 @@ Join as <rank> in the Companies list without applying.
 Each rank (and the owner's) can have a loadout of up to twenty entries from the loadouts any ship crew job can pick in the
 character loadout. At every spawn as that character, the company pays for each entry while its account covers it (once
 per member per round, so respawning can't farm it), then the member's bank, and anything neither can pay for is skipped. The items go into the bag, or the hands if it's full.
+Custom rank icons also replace the job icon on HUDs, the examine card, the ghost orbit menu, the crew manifest, crew
+monitoring and criminal records: the ID carries the rank, and the station record and suit sensor status copy it.
 Job icon presets in the rank icon editor are read by the server, because packaged clients pack RSIs into one file.
 
 Payroll counts a minute at a time while a member plays the character the membership belongs to: a living or critical
@@ -150,6 +152,7 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 - [`Content.Client/_WF/Companies/WFCompanyLogoCanvas.cs`](../../../Content.Client/_WF/Companies/WFCompanyLogoCanvas.cs)
 - [`Content.Client/_WF/Companies/WFCompanyLogoWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyLogoWindow.cs)
 - [`Content.Client/_WF/Companies/WFCompanyRankHudSystem.cs`](../../../Content.Client/_WF/Companies/WFCompanyRankHudSystem.cs)
+- [`Content.Client/_WF/Companies/WFCompanyRankIcons.cs`](../../../Content.Client/_WF/Companies/WFCompanyRankIcons.cs)
 - [`Content.Client/_WF/Companies/WFCompanyWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyWindow.cs)
 - [`Content.Client/_WF/Companies/WFCompanyWindow.Hangar.cs`](../../../Content.Client/_WF/Companies/WFCompanyWindow.Hangar.cs)
 - [`Content.Client/_WF/Companies/WFCompanyWindow.Join.cs`](../../../Content.Client/_WF/Companies/WFCompanyWindow.Join.cs)
@@ -184,7 +187,10 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 - [`Content.Client/_NF/LateJoin/Windows/PickerWindow.xaml`](../../../Content.Client/_NF/LateJoin/Windows/PickerWindow.xaml)
   - xmlns:companies for the join as rank bar
   - company members can join the round as their rank
+- [`Content.Client/CrewManifest/UI/CrewManifestSection.cs`](../../../Content.Client/CrewManifest/UI/CrewManifestSection.cs): rank icon
+- [`Content.Client/CriminalRecords/CriminalRecordsConsoleWindow.xaml.cs`](../../../Content.Client/CriminalRecords/CriminalRecordsConsoleWindow.xaml.cs): rank icon
 - [`Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs`](../../../Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs)
+- [`Content.Client/Medical/CrewMonitoring/CrewMonitoringWindow.xaml.cs`](../../../Content.Client/Medical/CrewMonitoring/CrewMonitoringWindow.xaml.cs): rank icon
 - [`Content.IntegrationTests/PoolManager.Cvars.cs`](../../../Content.IntegrationTests/PoolManager.Cvars.cs)
   - test players have no playtime
   - tests check balances without the creation fee
@@ -194,7 +200,12 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 - [`Content.Server/_Mono/Company/CompanySystem.cs`](../../_Mono/Company/CompanySystem.cs): player companies replace the profile company; jobs still set factions
 - [`Content.Server/_NF/Shipyard/Systems/ShipyardSystem.cs`](../../_NF/Shipyard/Systems/ShipyardSystem.cs): company hangar ships belong to the company and can't be sold
 - [`Content.Server/Cargo/Systems/CargoSystem.Shuttle.cs`](../../Cargo/Systems/CargoSystem.Shuttle.cs): the seller's company takes its cut
+- [`Content.Server/CrewManifest/CrewManifestSystem.cs`](../../CrewManifest/CrewManifestSystem.cs)
+- [`Content.Server/Medical/SuitSensors/SuitSensorSystem.cs`](../../Medical/SuitSensors/SuitSensorSystem.cs): the company rank on the ID, for its custom job icon
+- [`Content.Shared/CrewManifest/SharedCrewManifestSystem.cs`](../../../Content.Shared/CrewManifest/SharedCrewManifestSystem.cs): rank whose custom icon replaces JobIcon
+- [`Content.Shared/Medical/SuitSensor/SharedSuitSensor.cs`](../../../Content.Shared/Medical/SuitSensor/SharedSuitSensor.cs): rank whose custom icon replaces JobIcon
 - [`Content.Shared/Shuttles/Systems/SharedShuttleSystem.IFF.cs`](../../../Content.Shared/Shuttles/Systems/SharedShuttleSystem.IFF.cs): a player company's ship shows its tag and name
+- [`Content.Shared/StationRecords/GeneralStationRecord.cs`](../../../Content.Shared/StationRecords/GeneralStationRecord.cs): the holder's company rank, whose custom job icon screens show instead of JobIcon
 - [`Resources/Prototypes/_Mono/companies.yml`](../../../Resources/Prototypes/_Mono/companies.yml): flavour companies replaced by player companies
 
 <!-- WOLFGATE-GENERATED END -->

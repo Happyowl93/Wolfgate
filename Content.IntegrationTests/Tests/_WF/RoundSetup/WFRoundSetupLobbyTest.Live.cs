@@ -153,6 +153,15 @@ public sealed partial class WFRoundSetupLobbyTest
             await pair.RunTicksSync(pair.SecondsToTicks(0.5f));
             await server.WaitAssertion(() => Assert.That(em.HasComponent<WFPlayerCrewRadioComponent>(clientBody), Is.False));
 
+            // A launched crew with nobody left alive drops off other players' lists, and comes back with them.
+            var mobStates = server.System<Content.Shared.Mobs.Systems.MobStateSystem>();
+            await server.WaitPost(() => mobStates.ChangeMobState(host.AttachedEntity!.Value, Content.Shared.Mobs.MobState.Dead));
+            state = await Request(pair, new(WFRoundSetupAction.Refresh));
+            Assert.That(state.Lobbies.Any(entry => entry.Id == id), Is.False, "A crew whose members are all dead isn't listed.");
+            await server.WaitPost(() => mobStates.ChangeMobState(host.AttachedEntity!.Value, Content.Shared.Mobs.MobState.Alive));
+            state = await Request(pair, new(WFRoundSetupAction.Refresh));
+            Assert.That(state.Lobbies.Any(entry => entry.Id == id), Is.True);
+
             await pair.Client.WaitPost(() => pair.Client.CfgMan.SetCVar(WFRoundSetupCVars.ShowPostings, false));
             await pair.RunTicksSync(5);
             await server.WaitPost(() => findLobby.Invoke(setup, new object[] { host.UserId })!.GetType().GetField("NextPosting")!

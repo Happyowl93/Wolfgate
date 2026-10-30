@@ -110,6 +110,10 @@ public sealed class WFCompanyClientSystem : EntitySystem
         return GetRankIconPath(rankId) is { } path ? _cache.GetResource<TextureResource>(path).Texture : null;
     }
 
+    /// <summary>A rank's current job icon, fetched once and kept current by change broadcasts; null when it has none.</summary>
+    public Texture? GetRankIconLatest(int rankId) =>
+        GetRankIconPath(rankId) is { } path ? _cache.GetResource<TextureResource>(path).Texture : null;
+
     /// <summary>A rank icon's pixels, if they have arrived; for the editor.</summary>
     public byte[]? GetRankIconPixels(int rankId) => _rankIcons.TryGetValue(rankId, out var known) ? known.Pixels : null;
 

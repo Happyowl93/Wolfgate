@@ -46,6 +46,7 @@ public sealed class GhostOrbitSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private IAdminManager _admin = default!;
+    [Dependency] private Content.Shared.Access.Systems.SharedIdCardSystem _idCards = default!;
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private FollowerSystem _follower = default!;
     [Dependency] private JobSystem _jobs = default!;
@@ -252,6 +253,8 @@ public sealed class GhostOrbitSystem : EntitySystem
                 Detail = detail,
                 Prototype = meta.EntityPrototype?.ID,
                 JobIcon = icon,
+                CompanyRank = _idCards.TryFindIdCard(uid, out var card) &&
+                              TryComp<Content.Shared._WF.Companies.WFCompanyRankIconComponent>(card, out var rankIcon) ? rankIcon.RankId : 0,
                 Damage = dead ? 1f : GetDamage(uid),
                 Followers = CountFollowers(uid, isAdmin),
                 Disconnected = playerOwned && !hasClient && !dead,

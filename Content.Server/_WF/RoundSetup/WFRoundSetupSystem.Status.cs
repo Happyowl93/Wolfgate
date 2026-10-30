@@ -10,6 +10,7 @@ namespace Content.Server._WF.RoundSetup;
 public sealed partial class WFRoundSetupSystem
 {
     [Dependency] private SharedMapSystem _statusMap = default!;
+    [Dependency] private Content.Server._NF.CryoSleep.CryoSleepSystem _cryoSleep = default!;
 
     /// <summary>The largest deck seen since a crew's current ship was assigned.</summary>
     private sealed class ShipHealth
@@ -21,6 +22,7 @@ public sealed partial class WFRoundSetupSystem
 
     private readonly Dictionary<int, ShipHealth> _shipHealth = new();
     private readonly Dictionary<NetUserId, WFCrewMemberStatus> _knownStatuses = new();
+    private readonly HashSet<int> _activeCrews = new();
 
     /// <summary>Reads a member's condition from their spawned body.</summary>
     private WFCrewMemberStatus MemberStatus(Member member)
@@ -38,6 +40,14 @@ public sealed partial class WFRoundSetupSystem
             _ => WFCrewMemberStatus.Alive,
         };
     }
+
+    /// <summary>Whether a launched crew still has someone in it: alive and out of cryosleep, or connected and yet to spawn.</summary>
+    private bool HasActiveMembers(Lobby lobby) => lobby.Members.Any(pair => MemberStatus(pair.Value) switch
+    {
+        WFCrewMemberStatus.Alive or WFCrewMemberStatus.Critical => !_cryoSleep.HasCryosleepingBody(pair.Key),
+        WFCrewMemberStatus.Waiting => _players.TryGetSessionById(pair.Key, out _),
+        _ => false,
+    });
 
     private WFCrewShipCondition ShipCondition(Lobby lobby) =>
         _shipHealth.TryGetValue(lobby.Id, out var health) ? health.Condition : WFCrewShipCondition.None;
@@ -58,6 +68,14 @@ public sealed partial class WFRoundSetupSystem
         }
         foreach (var user in _knownStatuses.Keys.Where(user => !seen.Contains(user)).ToArray())
             _knownStatuses.Remove(user);
+        // Cryosleep leaves the body alive, so it's watched apart from status: it decides whether a crew is still listed.
+        var active = _lobbies.Values.Where(lobby => lobby.Started && HasActiveMembers(lobby)).Select(lobby => lobby.Id).ToHashSet();
+        if (!active.SetEquals(_activeCrews))
+        {
+            changed = true;
+            _activeCrews.Clear();
+            _activeCrews.UnionWith(active);
+        }
 
         foreach (var id in _shipHealth.Keys.Where(id => !_lobbies.TryGetValue(id, out var lobby) || !lobby.Started).ToArray())
             _shipHealth.Remove(id);

@@ -4,6 +4,7 @@ using Content.Shared._WF.Companies;
 using Content.Shared._WF.ShipAccess;
 using Content.Shared.Shuttles.Components;
 using Content.Shared.Shuttles.Systems;
+using Content.Shared.StationRecords;
 using Robust.Shared.Player;
 
 namespace Content.Server._WF.Companies;
@@ -29,6 +30,18 @@ public sealed partial class WFCompanySystem
     {
         if (_shipKeys.TryGetKey(card, out var key))
             _memberKeys[profile] = key;
+    }
+
+    /// <summary>Copies the rank on a member's ID into their station record, for screens that show its job icon.</summary>
+    private void SyncRecordRank(EntityUid card)
+    {
+        var rank = CompOrNull<WFCompanyRankIconComponent>(card)?.RankId ?? 0;
+        if (TryComp<StationRecordKeyStorageComponent>(card, out var storage) && storage.Key is { } key &&
+            _records.TryGetRecord<GeneralStationRecord>(key, out var record) && record.WFCompanyRank != rank)
+        {
+            record.WFCompanyRank = rank;
+            _records.Synchronize(key);
+        }
     }
 
     /// <summary>Links a ship to the company of the player setting Company access.</summary>
@@ -57,6 +70,7 @@ public sealed partial class WFCompanySystem
                 !ids.TryGetValue(slot, out var profile))
                 continue;
             CaptureMemberKey(profile, card);
+            SyncRecordRank(card);
         }
         var ships = EntityQueryEnumerator<WFShipAccessComponent>();
         while (ships.MoveNext(out var uid, out var access))
