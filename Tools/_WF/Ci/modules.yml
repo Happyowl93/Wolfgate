@@ -271,6 +271,9 @@ unmarked:
   - path: Resources/Maps/_Mono/Outpost/caelestinus_central.yml
     module: Traders
     reason: NPC traders, ATMs, deposit consoles and vents placed on the Central Command map.
+  - path: Resources/Maps/_Mono/Outpost/caelestinus_central.yml
+    module: BritishFood
+    reason: Mrs. Luvvit's Pie & Mash in the trade hall kiosk row, in place of a potted plant and its front pane.
   - path: Resources/Maps/_Mono/POI/underground.yml
     module: LockableButtons
     reason: The two blast door buttons take Underground access; the station's crew has no Pirate access.
@@ -2212,6 +2215,9 @@ unmarked:
   - path: Resources/Audio/_Mono/RadioStation/
     module: null
     reason: Nulb vinyl tracks (Monolith#4835) re-encoded to mono Vorbis q0 to cut download size.
+  - path: Resources/SharedMaps/_Mono/Shuttles/Civilian/guppy.yml
+    module: Shipyard
+    reason: Saved with its air filled in; the starter ship spawned as vacuum.
   - path: Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/inertia.yml
     module: ShipArmor
     reason: PDV hull refit from plastitanium to adamantite walls.
@@ -2746,3 +2752,57 @@ unmarked:
   - path: Resources/Maps/elkridge.yml
     module: Xenoarch
     reason: Removed the mapped artifact's BiasedArtifact component, which no longer exists.
+  - path: LICENSES/LicenseRef-Starlight.txt
+    module: null
+    reason: Starlight licence text, required by the Starlight-licensed code under _Starlight and _FarHorizons.
+  - path: Resources/Textures/Objects/Fun/rubber_hammer.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/Objects/Misc/chopstick.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/Structures/Power/Generation/Singularity/collector.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/Structures/Power/cell_recharger.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/nuclear_reactor.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/reactor_component_cap.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/reactor_parts.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/turbine.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Objects/Misc/RadioStation/vinyls.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Objects/Misc/RadioStation/vinylsleeves.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Objects/Weapons/Guns/Battery/lawbringer.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Structures/Machines/StationRadio/radiostationrig.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Structures/Machines/StationRadio/stationradioserver.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Structures/Machines/StationRadio/tapedeck.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_Goobstation/Structures/Machines/StationRadio/vinylplayer.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_NF/Effects/mobspawn.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+  - path: Resources/Textures/_NF/Structures/Machines/scrap_processor.rsi/
+    module: null
+    reason: Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.

@@ -1,8 +1,5 @@
 wf-trade-chute-local-goods = This chute only takes goods shipped in from elsewhere.
 wf-trade-chute-not-bought = This chute doesn't buy that. Its manifest lists what it takes.
-wf-trade-refuse-made-here = Made on this station. Haul it at least {$distance} km away before selling it here.
-wf-trade-refuse-too-close = Made too close to this market. Haul it at least {$distance} km before selling here.
-wf-trade-refuse-unknown = No record of where this was made, so it now counts as made here. Haul it about {$distance} km before selling.
 wf-trade-refuse-shunned = The merchant won't buy from someone who hurt them.
 wf-trade-refuse-unsealed = The fence only takes sealed freight off the haulers.
 

@@ -635,26 +635,12 @@ map conversion and YAML translation scripts are in `Tools/_WF/Vehicles`; namespa
 ### Tools
 
 - [`Tools/_WF/Vehicles/asset_files.yml`](../../../Tools/_WF/Vehicles/asset_files.yml)
-- [`Tools/_WF/Vehicles/check_conventions.py`](../../../Tools/_WF/Vehicles/check_conventions.py)
-- [`Tools/_WF/Vehicles/check_sprite_states.py`](../../../Tools/_WF/Vehicles/check_sprite_states.py)
-- [`Tools/_WF/Vehicles/cmu_translation.yml`](../../../Tools/_WF/Vehicles/cmu_translation.yml)
-- [`Tools/_WF/Vehicles/convert_interior_map.py`](../../../Tools/_WF/Vehicles/convert_interior_map.py)
 - [`Tools/_WF/Vehicles/copy_assets.py`](../../../Tools/_WF/Vehicles/copy_assets.py)
-- [`Tools/_WF/Vehicles/csharp_scan.py`](../../../Tools/_WF/Vehicles/csharp_scan.py)
-- [`Tools/_WF/Vehicles/fix_namespaces.py`](../../../Tools/_WF/Vehicles/fix_namespaces.py)
 - [`Tools/_WF/Vehicles/import_files.yml`](../../../Tools/_WF/Vehicles/import_files.yml)
-- [`Tools/_WF/Vehicles/import_rmc.py`](../../../Tools/_WF/Vehicles/import_rmc.py)
 - [`Tools/_WF/Vehicles/interior_map_mapping.yml`](../../../Tools/_WF/Vehicles/interior_map_mapping.yml)
 - [`Tools/_WF/Vehicles/source_paths.py`](../../../Tools/_WF/Vehicles/source_paths.py)
-- [`Tools/_WF/Vehicles/test_check_conventions.py`](../../../Tools/_WF/Vehicles/test_check_conventions.py)
-- [`Tools/_WF/Vehicles/test_check_sprite_states.py`](../../../Tools/_WF/Vehicles/test_check_sprite_states.py)
-- [`Tools/_WF/Vehicles/test_convert_interior_map.py`](../../../Tools/_WF/Vehicles/test_convert_interior_map.py)
 - [`Tools/_WF/Vehicles/test_copy_assets.py`](../../../Tools/_WF/Vehicles/test_copy_assets.py)
-- [`Tools/_WF/Vehicles/test_fix_namespaces.py`](../../../Tools/_WF/Vehicles/test_fix_namespaces.py)
-- [`Tools/_WF/Vehicles/test_import_rmc.py`](../../../Tools/_WF/Vehicles/test_import_rmc.py)
 - [`Tools/_WF/Vehicles/test_source_paths.py`](../../../Tools/_WF/Vehicles/test_source_paths.py)
-- [`Tools/_WF/Vehicles/test_translate_cmu_yaml.py`](../../../Tools/_WF/Vehicles/test_translate_cmu_yaml.py)
-- [`Tools/_WF/Vehicles/translate_cmu_yaml.py`](../../../Tools/_WF/Vehicles/translate_cmu_yaml.py)
 
 ### Docs
 

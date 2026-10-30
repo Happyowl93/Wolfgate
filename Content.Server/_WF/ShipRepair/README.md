@@ -54,8 +54,8 @@ links, hand-on, the merge) and the marked edits in `SharedShipRepairSystem.Tool`
   - target the hull or section under the click, not planet ground; a section is reattached.
   - never rebuild under another grid, where a detached section belongs, or apart from the hull.
   - an original that is debris of this hull does not stop the rebuild.
-  - never rebuild under another grid or where a detached section belongs.
-  - a grid may have moved into the spot while the repair ran.
+  - never rebuild under another grid, where a detached section belongs, or onto something anchored there since.
+  - a grid, or something anchored, may have moved into the spot while the repair ran.
   - an unhandled query blocks unless the original is debris of this hull.
   - a grid may have moved into the spot, or the hull beside it gone, while the repair ran.
 

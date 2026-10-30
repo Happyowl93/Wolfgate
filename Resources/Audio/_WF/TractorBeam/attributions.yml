@@ -1,0 +1,4 @@
+- files: ["tractorbeam_engage.ogg", "tractorbeam_loop.ogg", "tractorbeam_disengage.ogg", "creak1.ogg", "creak2.ogg", "creak3.ogg"]
+  license: "CC-BY-SA-3.0"
+  copyright: "Original tractor beam sounds by Gandalf (Gandalf2k15), made for Wolfgate. Converted to mono OGG Vorbis; the engage, loop and disengage clips are attenuated by 2 dB."
+  source: "https://github.com/Gandalf2k15"

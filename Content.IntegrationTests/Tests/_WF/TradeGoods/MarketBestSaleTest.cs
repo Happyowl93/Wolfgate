@@ -67,10 +67,10 @@ public sealed class MarketBestSaleTest
             Assert.That(cartridge.BestSale(crate, lawful)?.Station, Is.Not.EqualTo(fenceName).And.Not.Null,
                 "A lawful holder should never be pointed at the fence.");
 
-            // Made next to every chute: nobody takes it, and asking doesn't stamp it anew.
-            var local = TradeTestWorld.Hauled(entMan, near, map.GridCoords);
+            // Made on the mall's own station: still named, and asking doesn't stamp it anew.
+            var local = TradeTestWorld.Hauled(entMan, map.Grid.Owner, map.GridCoords);
             var stamped = entMan.GetComponent<WFTradeOriginComponent>(local).Point;
-            Assert.That(cartridge.BestSale(local, underground), Is.Null);
+            Assert.That(cartridge.BestSale(local, lawful), Is.Not.Null);
             Assert.That(entMan.GetComponent<WFTradeOriginComponent>(local).Point, Is.EqualTo(stamped));
         });
 

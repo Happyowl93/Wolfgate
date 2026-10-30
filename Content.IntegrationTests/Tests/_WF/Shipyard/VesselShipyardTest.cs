@@ -5,6 +5,7 @@ using Content.Server._WF.NpcCrew.Systems;
 using Content.Server._WF.RoundSetup;
 using Content.Server.Atmos.EntitySystems;
 using Content.Server.Shuttles.Components;
+using Content.Server.Spawners.Components;
 using Content.Shared._Crescent.Hardpoints;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared._WF.NpcCrew;
@@ -29,6 +30,9 @@ namespace Content.IntegrationTests.Tests._WF.Shipyard;
 public sealed class VesselShipyardTest
 {
     private const int CrewStartPicks = 10;
+
+    /// <summary>Vessels built to fly without air.</summary>
+    private static readonly HashSet<string> AirlessVessels = new() { "Baeg" };
 
     /// <summary>Every vessel loads as a shuttle, every hardpoint-only gun on it mounts on a hardpoint, and the crew planner posts the pilot by a square helm, and crew starts land inside the hull.</summary>
     [Test]
@@ -73,6 +77,18 @@ public sealed class VesselShipyardTest
                     guns++;
                     if (mount.anchoredTo == null)
                         failures.Add($"{vessel.ID}: {entities.ToPrettyString(gun)} at {xform.LocalPosition} has no compatible hardpoint on its tile.");
+                }
+
+                // Players arrive at spawn points, so the saved grid must hold air there.
+                var gridMap = entities.GetComponent<TransformComponent>(grid.Value).MapUid;
+                var spawns = entities.EntityQueryEnumerator<SpawnPointComponent, TransformComponent>();
+                while (spawns.MoveNext(out _, out _, out var spawnXform))
+                {
+                    if (spawnXform.GridUid != grid.Value.Owner || AirlessVessels.Contains(vessel.ID))
+                        continue;
+                    var tile = maps.TileIndicesFor(grid.Value, spawnXform.Coordinates);
+                    if (atmos.GetTileMixture(grid.Value.Owner, gridMap, tile) is not { Pressure: >= 80f })
+                        failures.Add($"{vessel.ID}: the spawn point at {tile} has no breathable air.");
                 }
 
                 // The pilot is posted beside a console square to the hull when the grid has one with room beside it.
@@ -128,6 +144,24 @@ public sealed class VesselShipyardTest
         Assert.That(guns, Is.Positive, "No hardpoint-only guns were found on any vessel.");
         Assert.That(helmShips, Is.Positive, "No vessel with a square console was planned.");
         Assert.That(crewStarts, Is.Positive, "No vessel took a crew start.");
+        Assert.That(failures, Is.Empty, string.Join("\n", failures));
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>A vessel's game map names its station after the vessel; the console looks it up by vessel ID after charging.</summary>
+    [Test]
+    public async Task VesselGameMapsKeyStationByVesselId()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var prototypes = pair.Server.ResolveDependency<IPrototypeManager>();
+        var failures = new List<string>();
+
+        foreach (var vessel in prototypes.EnumeratePrototypes<VesselPrototype>())
+        {
+            if (prototypes.TryIndex<GameMapPrototype>(vessel.ID, out var gameMap) && !gameMap.Stations.ContainsKey(vessel.ID))
+                failures.Add($"{vessel.ID}: game map stations are [{string.Join(", ", gameMap.Stations.Keys)}], not {vessel.ID}.");
+        }
+
         Assert.That(failures, Is.Empty, string.Join("\n", failures));
         await pair.CleanReturnAsync();
     }

@@ -96,6 +96,13 @@ public class SharedHardpointSystem : EntitySystem
     {
         if (args.Anchored || comp.anchoring is null || TerminatingOrDeleted(target))
             return;
+        // WOLFGATE(Shuttles) START: a gun destroyed in the same impact is already gone; unanchoring it threw mid-crash
+        if (TerminatingOrDeleted(comp.anchoring.Value))
+        {
+            comp.anchoring = null;
+            return;
+        }
+        // WOLFGATE END
         _transformSystem.Unanchor(comp.anchoring.Value);
     }
 

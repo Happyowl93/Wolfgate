@@ -4,7 +4,7 @@
   parent: BaseVessel
   name: 'UBM Excelsior'
   description: 'A sleek transport shuttle with an elegant backroom for all your executive needs, furbished with dispensers, a drinks cabinet and a RealLeather™ long sofa! Lightly armed and armored, with both a basic FTL drive and a shield.'
-  price: 124400 # appraised at 118445
+  price: 161800 # appraised at 118444
   category: Small # 234 tiles
   group: Syndicate # Underground
   shuttlePath: /SharedMaps/_WF/Shipyard/Shuttles/ubm_excelsior.yml

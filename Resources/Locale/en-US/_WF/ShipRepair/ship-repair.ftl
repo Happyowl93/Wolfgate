@@ -1,4 +1,5 @@
 wf-ship-repair-blocked = unable to repair: another grid is in the way
+wf-ship-repair-occupied = unable to repair: something else is anchored there
 wf-ship-repair-reserved = unable to repair: a detached section belongs here, reattach it first
 wf-ship-repair-edge = unable to repair: rebuild from the ship's edge inward
 wf-ship-repair-reattach-no-hull = unable to reattach: this wreck no longer belongs to a ship

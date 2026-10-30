@@ -259,8 +259,14 @@ def run(config: dict, sources: dict, wps: set[int] | None, list_only: bool, over
             written += count
             problems += issues
     for att_file, rows in attributions.items():
+        path = REPO / att_file
+        # A --wp run sees only some groups: keep the file and append rows for files it doesn't list yet.
+        kept = path.read_text(encoding="utf-8-sig") if wps is not None and path.exists() else ""
+        listed = {f for e in (yaml.safe_load(kept) or []) for f in e.get("files", [])} if kept else set()
         grouped: list[dict] = []
         for row in rows:
+            if row["file"] in listed:
+                continue
             if "license" not in row:
                 continue
             key = (row["license"], row["copyright"], row["source"], row.get("uncertain", False))
@@ -270,8 +276,12 @@ def run(config: dict, sources: dict, wps: set[int] | None, list_only: bool, over
                                 "source": row["source"], "uncertain": row.get("uncertain", False)})
             else:
                 existing["files"].append(row["file"])
-        text = render_attributions(grouped).replace("\n", NEWLINE)
-        write_if_changed(REPO / att_file, text.encode("utf-8"))
+        if kept and not grouped:
+            continue
+        text = render_attributions(grouped)
+        if kept:
+            text = kept.replace("\r\n", "\n").rstrip("\n") + "\n\n" + text
+        write_if_changed(path, text.replace("\n", NEWLINE).encode("utf-8"))
     if not list_only:
         print(f"{written} files written")
     for p in problems:

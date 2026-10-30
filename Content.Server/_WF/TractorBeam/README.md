@@ -245,10 +245,10 @@ piloted thrust/braking, crowded battles and the appearance of long beams.
 
 ### Audio
 
+- [`Resources/Audio/_WF/TractorBeam/attributions.yml`](../../../Resources/Audio/_WF/TractorBeam/attributions.yml)
 - [`Resources/Audio/_WF/TractorBeam/creak1.ogg`](../../../Resources/Audio/_WF/TractorBeam/creak1.ogg)
 - [`Resources/Audio/_WF/TractorBeam/creak2.ogg`](../../../Resources/Audio/_WF/TractorBeam/creak2.ogg)
 - [`Resources/Audio/_WF/TractorBeam/creak3.ogg`](../../../Resources/Audio/_WF/TractorBeam/creak3.ogg)
-- [`Resources/Audio/_WF/TractorBeam/meta.yml`](../../../Resources/Audio/_WF/TractorBeam/meta.yml)
 - [`Resources/Audio/_WF/TractorBeam/tractorbeam_disengage.ogg`](../../../Resources/Audio/_WF/TractorBeam/tractorbeam_disengage.ogg)
 - [`Resources/Audio/_WF/TractorBeam/tractorbeam_engage.ogg`](../../../Resources/Audio/_WF/TractorBeam/tractorbeam_engage.ogg)
 - [`Resources/Audio/_WF/TractorBeam/tractorbeam_loop.ogg`](../../../Resources/Audio/_WF/TractorBeam/tractorbeam_loop.ogg)

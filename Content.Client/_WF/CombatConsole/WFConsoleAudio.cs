@@ -51,7 +51,7 @@ public sealed class WFConsoleAudio : EntitySystem
         var gain = _configuration.GetCVar(CCVars.InterfaceVolume);
         if (gain <= 0)
             return;
-        _audio.PlayGlobal($"/Audio/_WF/CombatConsole/HighFleet/{cue}.ogg", Filter.Local(), false,
+        _audio.PlayGlobal($"/Audio/_WF/CombatConsole/Retro/{cue}.ogg", Filter.Local(), false,
             AudioParams.Default.WithVolume(-12f + SharedAudioSystem.GainToVolume(gain)));
     }
 }

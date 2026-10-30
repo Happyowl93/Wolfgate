@@ -25,7 +25,7 @@ public sealed partial class LatheSystem
 
         foreach (var stored in storage.Contents.ContainedEntities)
         {
-            if (MetaData(stored).EntityPrototype?.ID == prototype.Id)
+            if (_fabricationSilo.IsRecipePart(stored, prototype))
                 count += _stackQuery.TryComp(stored, out var stack) ? stack.Count : 1;
         }
 
@@ -42,7 +42,7 @@ public sealed partial class LatheSystem
         {
             foreach (var stored in storage.Contents.ContainedEntities.ToArray())
             {
-                if (MetaData(stored).EntityPrototype?.ID != prototype.Id)
+                if (!_fabricationSilo.IsRecipePart(stored, prototype))
                     continue;
 
                 _stackQuery.TryComp(stored, out var stack);

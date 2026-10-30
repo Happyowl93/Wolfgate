@@ -4160,3 +4160,79 @@ Entries:
   id: 100277
   time: '2026-10-29T18:27:55.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/411
+- author: vinylspiders
+  changes:
+    - type: Add
+      message: >-
+        Adds Mrs. Luvvit's Pie & Mash, the best locally sourced pies in the
+        sector! Find one in the trade hall at Caelestinus Central, or buy the
+        flatpack. Mrs. Luvvit accepts no liability for scalded tongues.
+    - type: Add
+      message: Adds 12 new cookable British dishes.
+    - type: Add
+      message: Adds Irn-Bru and dandelion & burdock cans.
+  id: 100278
+  time: '2026-10-29T18:36:19.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/410
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Fixed licence credits on a number of sprites and sounds.
+  id: 100279
+  time: '2026-10-29T22:55:54.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/413
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Earl Grey tea, served hot from the hot drinks vendor.
+    - type: Add
+      message: Pilots very rarely say "Engage." when they start an FTL jump.
+    - type: Add
+      message: Livingston's aquarium, home of a lionfish named Livingston.
+  id: 100280
+  time: '2026-10-29T22:56:26.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/415
+- author: Happyowl93
+  changes:
+    - type: Fix
+      message: >-
+        The drydock now rebuilds thrusters and guns that floated away after the
+        floor under them was destroyed.
+  id: 100281
+  time: '2026-10-30T00:02:43.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/416
+- author: Happyowl93
+  changes:
+    - type: Tweak
+      message: >-
+        Trade crates can be sold at any chute, including on the station or ship
+        where they were made. Crates bought from a station's own vendor still
+        can't be sold back there.
+  id: 100282
+  time: '2026-10-30T00:37:17.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/419
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Buying a Hammerhead now links it to your ID and gives you the deed
+        instead of charging you for a ship you can't use.
+    - type: Fix
+      message: The Guppy and Dredger now spawn with air inside.
+    - type: Fix
+      message: >-
+        The precision assembler accepts crafted screws and lathe-printed
+        crowbars.
+    - type: Fix
+      message: >-
+        The SRD no longer rebuilds a machine on top of one anchored in its
+        place.
+    - type: Fix
+      message: Ships docked to an FTLing shuttle no longer arrive inside other grids.
+    - type: Fix
+      message: >-
+        Fixed a crash during ship impacts that could leave a ship stuck in
+        mid-air over a planet.
+  id: 100283
+  time: '2026-10-30T00:42:21.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/417

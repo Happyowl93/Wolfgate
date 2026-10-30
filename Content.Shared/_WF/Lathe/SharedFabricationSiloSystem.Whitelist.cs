@@ -52,7 +52,10 @@ public abstract partial class SharedFabricationSiloSystem
     /// </summary>
     public bool IsAcceptedPart(EntityUid item)
     {
-        return MetaData(item).EntityPrototype?.ID is { } id && _acceptedParts.Contains(id);
+        if (MetaData(item).EntityPrototype?.ID is not { } id)
+            return false;
+
+        return _acceptedParts.Contains(id) || _acceptedParts.Any(part => IsRecipePart(item, part));
     }
 
     /// <summary>

@@ -83,7 +83,7 @@ public sealed partial class FabricationSiloSystem : SharedFabricationSiloSystem
         var consumed = 0;
         foreach (var part in parts.ContainedEntities.ToArray())
         {
-            if (MetaData(part).EntityPrototype?.ID != prototype.Id)
+            if (!IsRecipePart(part, prototype))
                 continue;
 
             var available = GetItemCount(part);

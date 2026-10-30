@@ -89,6 +89,7 @@ A jump's mass-scaled startup, travel and cooldown times use the mass of every gr
 
 - [`Content.Server/_WF/Shuttles/ApplyIFFFlagsToDockedShipsSystem.Wolfgate.cs`](ApplyIFFFlagsToDockedShipsSystem.Wolfgate.cs)
 - [`Content.Server/_WF/Shuttles/DockedHostIffFlagsComponent.cs`](DockedHostIffFlagsComponent.cs)
+- [`Content.Server/_WF/Shuttles/FTLAntiCollisionSystem.DockedGroup.cs`](FTLAntiCollisionSystem.DockedGroup.cs)
 - [`Content.Server/_WF/Shuttles/NavMapSystem.Wolfgate.cs`](NavMapSystem.Wolfgate.cs)
 - [`Content.Server/_WF/Shuttles/ShuttleConsoleSystem.FtlDrive.cs`](ShuttleConsoleSystem.FtlDrive.cs)
 - [`Content.Server/_WF/Shuttles/ShuttleSystem.FtlMass.cs`](ShuttleSystem.FtlMass.cs)
@@ -143,6 +144,7 @@ A jump's mass-scaled startup, travel and cooldown times use the mass of every gr
 
 - [`Content.IntegrationTests/Tests/_WF/Shuttles/CollisionWarningTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Shuttles/CollisionWarningTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Shuttles/DockedShipIffTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Shuttles/DockedShipIffTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Shuttles/FTLDockedGroupArrivalTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Shuttles/FTLDockedGroupArrivalTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Shuttles/FtlGroupMassTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Shuttles/FtlGroupMassTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Shuttles/FTLToDockTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Shuttles/FTLToDockTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Shuttles/RadarDisplaySettingsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Shuttles/RadarDisplaySettingsTest.cs)
@@ -213,6 +215,11 @@ A jump's mass-scaled startup, travel and cooldown times use the mass of every gr
   - the host can be grid B, since grid A is the side that undocked, usually the ship.
   - a ship loses only flags hosts added, once no host it is still docked to provides them.
 - [`Content.Server/Shuttles/Components/ShuttleConsoleComponent.cs`](../../Shuttles/Components/ShuttleConsoleComponent.cs): use the supplied quiet autopilot disengagement cue.
+- [`Content.Server/Shuttles/Systems/FTLAntiCollisionSystem.cs`](../../Shuttles/Systems/FTLAntiCollisionSystem.cs)
+  - the docked grids arrive too, so check their hulls as well as the pilot's
+  - a docked grid may reach another hull
+  - clear room for the whole docked group
+  - the docked grids move with it
 - [`Content.Server/Shuttles/Systems/ShuttleConsoleSystem.cs`](../../Shuttles/Systems/ShuttleConsoleSystem.cs)
   - a console off any grid has no drive
   - keep the FTL page current when a drive is built, removed or loses power
@@ -227,6 +234,7 @@ A jump's mass-scaled startup, travel and cooldown times use the mass of every gr
 - [`Content.Server/Shuttles/Systems/ShuttleSystem.FasterThanLight.cs`](../../Shuttles/Systems/ShuttleSystem.FasterThanLight.cs)
   - takes the jumping group's mass
   - docked grids that jumped along count toward the mass
+- [`Content.Shared/_Crescent/Hardpoints/SharedHardpointSystem.cs`](../../../Content.Shared/_Crescent/Hardpoints/SharedHardpointSystem.cs): a gun destroyed in the same impact is already gone; unanchoring it threw mid-crash
 - [`Content.Shared/Maps/TileSystem.cs`](../../../Content.Shared/Maps/TileSystem.cs): cutting the last lattice leaves the hull survey before any split copies it.
 - [`Content.Shared/RCD/Systems/RCDSystem.cs`](../../../Content.Shared/RCD/Systems/RCDSystem.cs)
   - removing the last lattice leaves the hull survey before any split copies it.

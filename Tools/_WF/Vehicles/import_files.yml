@@ -1,5 +1,5 @@
-# The explicit file list and rewrite rules for Tools/_WF/Vehicles/import_rmc.py (the Vehicles port; see
-# Docs/_WF/Vehicles/design.md). A file is imported only if it is listed here under its work package.
+# The explicit file list and rewrite rules the Vehicles port was imported with (see Docs/_WF/Vehicles/design.md). The
+# importer has been removed; this stays as the record of what came from where, and copy_assets.py reads `sources`.
 #
 # A group copies files from `from` (a folder in the source repo) to `to` (a folder in this repo). An entry in `files`
 # is a path relative to both folders, or `{source path: destination path}` to rename or flatten the copy. Anything

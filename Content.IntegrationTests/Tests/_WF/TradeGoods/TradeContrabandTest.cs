@@ -109,11 +109,11 @@ public sealed class TradeContrabandTest
             var far = TradeTestWorld.Grid(entMan, map, new Vector2(5000f, 0f), "WF test far yard");
 
             var plain = TradeTestWorld.Hauled(entMan, far, map.GridCoords);
-            Assert.That(market.CheckHaul(fence, plain), Is.EqualTo((LocId?) "wf-trade-refuse-unsealed"));
+            Assert.That(market.CheckSeal(fence, plain), Is.EqualTo((LocId?) "wf-trade-refuse-unsealed"));
 
             var sealedCrate = TradeTestWorld.Hauled(entMan, far, map.GridCoords);
             entMan.GetComponent<WFTradeOriginComponent>(sealedCrate).Run = "WF test freighter";
-            Assert.That(market.CheckHaul(fence, sealedCrate), Is.Null, "The fence refused sealed freight.");
+            Assert.That(market.CheckSeal(fence, sealedCrate), Is.Null, "The fence refused sealed freight.");
             Assert.That(market.Quote(fence, TradeTestWorld.Fabric)!.Value.Reason, Is.EqualTo((LocId) "wf-trade-reason-sealed-only"));
         });
 

@@ -427,7 +427,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
             !IsMissing(ship, spec))
             return;
 
-        // Only a debris original can still be here; remove it before rebuilding.
+        // Only a drifting or debris original can still be here; remove it before rebuilding.
         if (TryGetOriginal(spec, out var original))
             QueueDel(original);
 
@@ -956,14 +956,15 @@ public sealed partial class WFDrydockSystem : EntitySystem
         return false;
     }
 
-    /// <summary>Whether a snapshot entity is gone, or its original sits on debris of the ship.</summary>
+    /// <summary>Whether a snapshot entity is gone, or its original drifts in space or sits on debris of the ship.</summary>
     private bool IsMissing(EntityUid ship, ShipRepairEntitySpecifier spec)
     {
         if (!TryGetOriginal(spec, out var original))
             return true;
 
+        // A part whose floor was blown out is deparented into space; it is lost, as the repair tool treats it.
         var grid = Transform(original).GridUid;
-        return grid is { } onGrid && onGrid != ship && _hull.IsDebrisOf(onGrid, ship);
+        return grid == null || grid != ship && _hull.IsDebrisOf(grid, ship);
     }
 
     /// <summary>Resolves a spec's recorded original entity, or false if it no longer exists.</summary>

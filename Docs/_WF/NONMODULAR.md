@@ -160,9 +160,20 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
 - [`Content.Shared/Projectiles/SharedProjectileSystem.cs`](../../Content.Shared/Projectiles/SharedProjectileSystem.cs): the client replays a thrown embed's collision in prediction, and the projectile is already in
 - [`Content.Shared/Temperature/Systems/SharedTemperatureSystem.cs`](../../Content.Shared/Temperature/Systems/SharedTemperatureSystem.cs): a band takes the slowdown of the lowest threshold above it; warming past a threshold gave it that threshold's heavier slowdown
 - [`Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.Revolver.cs`](../../Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.Revolver.cs): C# % keeps the sign, index 0 gave -1 and crashed the server
-- [`README.md`](../../README.md): reworded for Wolfgate build differences
+- [`LEGAL.md`](../../LEGAL.md)
+  - licence files live in LICENSES/
+  - credit the Starlight licence and the Goonstation-derived reactor
+- [`LICENSES/LicenseRef-Starlight.txt`](../../LICENSES/LicenseRef-Starlight.txt): Starlight licence text, required by the Starlight-licensed code under _Starlight and _FarHorizons.
+- [`README.md`](../../README.md)
+  - reworded for Wolfgate build differences
+  - credit the Starlight licence and the Goonstation-derived reactor
+- [`Resources/Audio/_Goobstation/Flock/attributions.yml`](../../Resources/Audio/_Goobstation/Flock/attributions.yml): Goon-sourced audio is CC-BY-NC-SA-3.0, not the label it was imported with
 - [`Resources/Audio/_Goobstation/RadioStation/`](../../Resources/Audio/_Goobstation/RadioStation/): Radio host tracks (Monolith#4833) re-encoded to mono Vorbis q0 to cut download size.
+- [`Resources/Audio/_Goobstation/RadioStation/ads/attributions.yml`](../../Resources/Audio/_Goobstation/RadioStation/ads/attributions.yml): Goon-sourced audio is CC-BY-NC-SA-3.0, not the label it was imported with
+- [`Resources/Audio/_Goobstation/RadioStation/misc/attributions.yml`](../../Resources/Audio/_Goobstation/RadioStation/misc/attributions.yml): Goon-sourced audio is CC-BY-NC-SA-3.0, not the label it was imported with
+- [`Resources/Audio/_Goobstation/RadioStation/music/goonstation/attributions.yml`](../../Resources/Audio/_Goobstation/RadioStation/music/goonstation/attributions.yml): Goon-sourced audio is CC-BY-NC-SA-3.0, not the label it was imported with
 - [`Resources/Audio/_Mono/RadioStation/`](../../Resources/Audio/_Mono/RadioStation/): Nulb vinyl tracks (Monolith#4835) re-encoded to mono Vorbis q0 to cut download size.
+- [`Resources/Audio/Effects/Gasp/attributions.yml`](../../Resources/Audio/Effects/Gasp/attributions.yml): Goon-sourced audio is CC-BY-NC-SA-3.0, not the label it was imported with
 - [`Resources/keybinds.yml`](../../Resources/keybinds.yml): camera focus toggle unbound by default; players hit it with Space by accident
 - [`Resources/Locale/en-US/_Mono/guidebook/guides.ftl`](../../Resources/Locale/en-US/_Mono/guidebook/guides.ftl): was Monolith Rules
 - [`Resources/Locale/en-US/_Mono/poi/stations.ftl`](../../Resources/Locale/en-US/_Mono/poi/stations.ftl)
@@ -269,3 +280,20 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
 - [`Resources/ServerInfo/Guidebook/ServerRules/WizDenMRPRules.xml`](../../Resources/ServerInfo/Guidebook/ServerRules/WizDenMRPRules.xml): was 16
 - [`Resources/ServerInfo/Rules.txt`](../../Resources/ServerInfo/Rules.txt): Monolith renamed to Wolfgate in the intro and section headings (#19); the file is unused (server.rules_file is MonolithRuleset).
 - [`Resources/SharedMaps/_Mono/Shuttles/Civilian/caracara.yml`](../../Resources/SharedMaps/_Mono/Shuttles/Civilian/caracara.yml): PDV pack, top-left thruster was mapped disabled.
+- [`Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/nuclear_reactor.rsi/`](../../Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/nuclear_reactor.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/reactor_component_cap.rsi/`](../../Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/reactor_component_cap.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/reactor_parts.rsi/`](../../Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/reactor_parts.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/turbine.rsi/`](../../Resources/Textures/_FarHorizons/Structures/Power/Generation/FissionGenerator/turbine.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_Goobstation/Objects/Misc/RadioStation/vinyls.rsi/`](../../Resources/Textures/_Goobstation/Objects/Misc/RadioStation/vinyls.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_Goobstation/Objects/Misc/RadioStation/vinylsleeves.rsi/`](../../Resources/Textures/_Goobstation/Objects/Misc/RadioStation/vinylsleeves.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_Goobstation/Objects/Weapons/Guns/Battery/lawbringer.rsi/`](../../Resources/Textures/_Goobstation/Objects/Weapons/Guns/Battery/lawbringer.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_Goobstation/Structures/Machines/StationRadio/radiostationrig.rsi/`](../../Resources/Textures/_Goobstation/Structures/Machines/StationRadio/radiostationrig.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_Goobstation/Structures/Machines/StationRadio/stationradioserver.rsi/`](../../Resources/Textures/_Goobstation/Structures/Machines/StationRadio/stationradioserver.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_Goobstation/Structures/Machines/StationRadio/tapedeck.rsi/`](../../Resources/Textures/_Goobstation/Structures/Machines/StationRadio/tapedeck.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_Goobstation/Structures/Machines/StationRadio/vinylplayer.rsi/`](../../Resources/Textures/_Goobstation/Structures/Machines/StationRadio/vinylplayer.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_NF/Effects/mobspawn.rsi/`](../../Resources/Textures/_NF/Effects/mobspawn.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/_NF/Structures/Machines/scrap_processor.rsi/`](../../Resources/Textures/_NF/Structures/Machines/scrap_processor.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/Objects/Fun/rubber_hammer.rsi/`](../../Resources/Textures/Objects/Fun/rubber_hammer.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/Objects/Misc/chopstick.rsi/`](../../Resources/Textures/Objects/Misc/chopstick.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/Structures/Power/cell_recharger.rsi/`](../../Resources/Textures/Structures/Power/cell_recharger.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.
+- [`Resources/Textures/Structures/Power/Generation/Singularity/collector.rsi/`](../../Resources/Textures/Structures/Power/Generation/Singularity/collector.rsi/): Licence corrected to CC-BY-NC-SA-3.0, as the sprite is taken from Goonstation, whose assets are BY-NC-SA.

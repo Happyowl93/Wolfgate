@@ -10,7 +10,6 @@ using Content.Server.GameTicking;
 using Content.Shared.GameTicking;
 using Content.Shared._WF.TradeGoods;
 using Robust.Shared.GameObjects;
-using Robust.Shared.Localization;
 using Robust.Shared.Map;
 using Robust.Shared.Timing;
 
@@ -124,10 +123,8 @@ public sealed class TradeConsignmentTest
             xformSys.SetCoordinates(docked, xformSys.GetMoverCoordinates(chute));
             xformSys.SetCoordinates(undocked, xformSys.GetMoverCoordinates(chute));
 
-            Assert.That(market.CheckHaul(chute, docked), Is.EqualTo((LocId?) "wf-trade-refuse-made-here"),
-                "Riding docked to a moving market counted as a haul.");
-            Assert.That(market.WasHauled(chute, docked), Is.False);
-            Assert.That(market.CheckHaul(chute, undocked), Is.Null, "A crate hauled from a ship that was never docked was refused.");
+            Assert.That(market.WasHauled(chute, docked), Is.False, "Riding docked to a moving market counted as a haul.");
+            Assert.That(market.WasHauled(chute, undocked), Is.True, "A crate hauled from a ship that was never docked didn't count.");
         });
 
         await pair.CleanReturnAsync();

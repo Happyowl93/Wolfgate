@@ -77,7 +77,7 @@ public abstract partial class SharedFabricationSiloSystem : EntitySystem
         var count = 0;
         foreach (var part in parts.ContainedEntities)
         {
-            if (MetaData(part).EntityPrototype?.ID == prototype.Id)
+            if (IsRecipePart(part, prototype))
                 count += GetItemCount(part);
         }
 

@@ -11,7 +11,7 @@ Structures/Xenos, xeno-named Actions, Interface, Effects and Objects entries, Au
     Resources/Audio/_RMC14/<sub>     ->  Resources/Audio/_WF/Xenonids/<sub>
 
 A file Wolfgate already has with identical bytes at the same `_RMC14` path is not copied; those paths are written to
-Tools/_WF/Xenonids/asset_reuse.txt so import_rmc.py leaves them pointing at `_RMC14`. The audio attributions are built
+Tools/_WF/Xenonids/asset_reuse.txt so the (since removed) importer left them pointing at `_RMC14`. The audio attributions are built
 from the RMC attributions.yml next to each file. Rerunning is safe: unchanged files are left alone.
 """
 from __future__ import annotations

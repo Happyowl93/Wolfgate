@@ -24,7 +24,7 @@
   mapPath: /SharedMaps/_WF/Shipyard/Shuttles/hammerhead.yml
   minPlayers: 0
   stations:
-    WFHammerheadMk2:
+    WFHammerhead:
       stationProto: StandardFrontierVessel
       components:
       - type: StationNameSetup

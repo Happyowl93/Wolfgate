@@ -28,13 +28,13 @@ public sealed partial class DispenserSystem
         else if (Transform(uid).GridUid is { } grid && _vendingPurchase.WasPurchasedOnGrid(used, grid))
             reason = "wf-trade-chute-local-goods";
         else
-            reason = _wfMarket.CheckHaul(uid, used);
+            reason = _wfMarket.CheckSeal(uid, used);
 
         if (reason is not { } refusal)
             return false;
 
         _audioSystem.PlayPvs(component.DenySound, uid);
-        _popup.PopupEntity(Loc.GetString(refusal, ("distance", _wfMarket.HaulKilometres(uid))), uid, user);
+        _popup.PopupEntity(Loc.GetString(refusal), uid, user);
         return true;
     }
 

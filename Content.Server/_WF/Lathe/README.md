@@ -37,6 +37,7 @@ use, editing queued totals), `FabricationSiloMenu` and `LatheMenu.Wolfgate`.
 - [`Content.Shared/_WF/Lathe/LatheUpdateState.Wolfgate.cs`](../../../Content.Shared/_WF/Lathe/LatheUpdateState.Wolfgate.cs)
 - [`Content.Shared/_WF/Lathe/SharedFabricationSiloSystem.cs`](../../../Content.Shared/_WF/Lathe/SharedFabricationSiloSystem.cs)
 - [`Content.Shared/_WF/Lathe/SharedFabricationSiloSystem.Filling.cs`](../../../Content.Shared/_WF/Lathe/SharedFabricationSiloSystem.Filling.cs)
+- [`Content.Shared/_WF/Lathe/SharedFabricationSiloSystem.Parts.cs`](../../../Content.Shared/_WF/Lathe/SharedFabricationSiloSystem.Parts.cs)
 - [`Content.Shared/_WF/Lathe/SharedFabricationSiloSystem.Whitelist.cs`](../../../Content.Shared/_WF/Lathe/SharedFabricationSiloSystem.Whitelist.cs)
 - [`Content.Shared/_WF/Lathe/SharedLatheSystem.Wolfgate.cs`](../../../Content.Shared/_WF/Lathe/SharedLatheSystem.Wolfgate.cs)
 - [`Content.Shared/_WF/Lathe/SharedOreSiloSystem.Wolfgate.cs`](../../../Content.Shared/_WF/Lathe/SharedOreSiloSystem.Wolfgate.cs)
@@ -56,6 +57,7 @@ use, editing queued totals), `FabricationSiloMenu` and `LatheMenu.Wolfgate`.
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WF/Lathe/FabricationSiloTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Lathe/FabricationSiloTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Lathe/LathePartMatchTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Lathe/LathePartMatchTest.cs)
 
 ### Prototypes
 
@@ -75,6 +77,9 @@ use, editing queued totals), `FabricationSiloMenu` and `LatheMenu.Wolfgate`.
 
 ## Non-modular edits
 
+- [`Content.Client/Lathe/LatheSystem.cs`](../../../Content.Client/Lathe/LatheSystem.cs)
+  - recipe part matching
+  - variants and other stacks of a part count, as the server counts them
 - [`Content.Client/Lathe/UI/LatheBoundUserInterface.cs`](../../../Content.Client/Lathe/UI/LatheBoundUserInterface.cs)
   - send edited queue totals
   - pass the printing batch and recipe readiness to the menu
@@ -87,6 +92,7 @@ use, editing queued totals), `FabricationSiloMenu` and `LatheMenu.Wolfgate`.
   - count reagents in the linked chemical silo
   - queue cards with editable totals, updated in place
   - fixed icon size so recipe and queue rows line up
+  - variants and other stacks of a part count, as the server counts them
 - [`Content.Client/Lathe/UI/RecipeControl.xaml`](../../../Content.Client/Lathe/UI/RecipeControl.xaml): availability subtitle, clipped name and queue affordance
 - [`Content.Client/Lathe/UI/RecipeControl.xaml.cs`](../../../Content.Client/Lathe/UI/RecipeControl.xaml.cs): recipes stay queueable while supplies are missing
 - [`Content.Client/Materials/UI/MaterialStorageControl.xaml.cs`](../../../Content.Client/Materials/UI/MaterialStorageControl.xaml.cs)

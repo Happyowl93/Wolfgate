@@ -17,8 +17,8 @@ using Robust.Shared.Timing;
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
 /// <summary>
-/// Chute markets: sales lower a good's price and time restores it, the chute pays what it quoted, crates must be hauled
-/// away from where they were made, raises are capped, and consignments and rush orders pay their premiums.
+/// Chute markets: sales lower a good's price and time restores it, the chute pays what it quoted, crates made anywhere
+/// sell but only a haul counts as one, raises are capped, and consignments and rush orders pay their premiums.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFTradeMarketSystem))]
@@ -122,7 +122,7 @@ public sealed class TradeMarketTest
     }
 
     [Test]
-    public async Task ChutePaysTheQuoteAndRefusesUnhauledGoods()
+    public async Task ChutePaysTheQuoteAndCountsOnlyRealHauls()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
         var server = pair.Server;
@@ -149,26 +149,27 @@ public sealed class TradeMarketTest
             entMan.System<SharedTransformSystem>().SetCoordinates(unknown, map.GridCoords);
             entMan.DeleteEntity(elsewhere);
 
-            Assert.That(market.CheckHaul(setup.Chute, madeHere), Is.EqualTo((LocId?) "wf-trade-refuse-made-here"));
-            Assert.That(market.CheckHaul(setup.Chute, madeNear), Is.EqualTo((LocId?) "wf-trade-refuse-too-close"));
-            Assert.That(market.CheckHaul(setup.Chute, hauled), Is.Null);
+            foreach (var crate in new[] { madeHere, madeNear, hauled, unknown })
+            {
+                Assert.That(market.CheckSeal(setup.Chute, crate), Is.Null, "An open chute refused an unsealed crate.");
+            }
 
+            Assert.That(market.WasHauled(setup.Chute, madeHere), Is.False, "A crate made on the chute's station counted as a haul.");
+            Assert.That(market.WasHauled(setup.Chute, madeNear), Is.False, "A crate made nearby counted as a haul.");
+            Assert.That(market.WasHauled(setup.Chute, unknown), Is.False, "A crate of unknown origin counted as a haul.");
+            Assert.That(market.WasHauled(setup.Chute, hauled), Is.True);
+
+            // A crate made on the chute's own station sells there, as a lathe print does.
             quoted = market.Quote(setup.Chute, CrateProto)!.Value.Amount;
-            Assert.That(interaction.InteractUsing(setup.User, hauled, setup.Chute, map.GridCoords, false, false), Is.True);
+            Assert.That(interaction.InteractUsing(setup.User, madeHere, setup.Chute, map.GridCoords, false, false), Is.True);
         });
 
         await pair.RunTicksSync(30);
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(entMan.Deleted(hauled), Is.True, "The chute refused a hauled crate.");
+            Assert.That(entMan.Deleted(madeHere), Is.True, "The chute refused a crate made on its station.");
             Assert.That(TradeTestHelpers.CashOnMap(entMan, map.MapId), Is.EqualTo(quoted), "The chute didn't pay what it quoted.");
-
-            // The unknown crate is stamped where it was first seen on a market map: by the chute, so refused there.
-            // (Crates spawned on one tile shove each other, so it may be stamped just off the grid: too close either way.)
-            Assert.That(market.CheckHaul(setup.Chute, unknown), Is.Not.Null);
-            Assert.That(entMan.GetComponent<WFTradeOriginComponent>(unknown).Pending, Is.False,
-                "A crate checked at a chute should have its origin recorded there.");
         });
 
         await pair.CleanReturnAsync();

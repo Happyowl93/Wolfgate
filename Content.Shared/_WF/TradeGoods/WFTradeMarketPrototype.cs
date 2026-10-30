@@ -51,7 +51,10 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public float ModifierCap = 2.5f;
 
-    /// <summary>How far a crate must be hauled from where it was made before a chute takes it, in metres.</summary>
+    /// <summary>
+    /// How far a crate must be hauled from where it was made to earn haul rewards (freight bonus, war-effort credits, traffic), and
+    /// how far a priority delivery's destination sits from its origin, in metres. Chutes still take nearer crates.
+    /// </summary>
     [DataField]
     public float MinHaulDistance = 3000f;
 

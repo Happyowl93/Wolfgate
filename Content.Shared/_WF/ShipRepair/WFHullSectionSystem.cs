@@ -3,6 +3,8 @@ using System.Numerics;
 using Content.Shared._Mono.ShipRepair.Components;
 using Content.Shared.Charges.Components;
 using Content.Shared.Charges.Systems;
+using Content.Shared.Construction.Components;
+using Content.Shared.Construction.EntitySystems;
 using Content.Shared.DoAfter;
 using Content.Shared.Popups;
 using Content.Shared.Whitelist;
@@ -12,14 +14,19 @@ using Robust.Shared.Configuration;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Network;
+using Robust.Shared.Physics;
+using Robust.Shared.Prototypes;
 
 namespace Content.Shared._WF.ShipRepair;
 
 /// <summary>SRD rules for broken hulls: which grid a click works on, where the hull may be rebuilt, and reattaching sections.</summary>
 public sealed partial class WFHullSectionSystem : EntitySystem
 {
+    [Dependency] private AnchorableSystem _anchorable = default!;
     [Dependency] private EntityWhitelistSystem _whitelist = default!;
+    [Dependency] private IComponentFactory _factory = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
+    [Dependency] private IPrototypeManager _proto = default!;
     [Dependency] private INetManager _net = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private SharedChargesSystem _charges = default!;
@@ -165,6 +172,39 @@ public sealed partial class WFHullSectionSystem : EntitySystem
             return Refuse(tool, user, "wf-ship-repair-reserved");
 
         return true;
+    }
+
+    /// <summary>Whether the SRD may rebuild an entity here: <see cref="CanRebuildAt"/>, and nothing anchored in its way.</summary>
+    public bool CanRebuildEntityAt(EntityUid tool, EntityUid user, EntityUid hull, EntProtoId proto, Vector2i index)
+    {
+        if (!CanRebuildAt(tool, user, hull, index))
+            return false;
+
+        return !IsSpotTaken((hull, Comp<MapGridComponent>(hull)), proto, index) || Refuse(tool, user, "wf-ship-repair-occupied");
+    }
+
+    /// <summary>
+    /// Whether something anchored on the tile would stop a wrench anchoring an entity of this prototype there. Only
+    /// wrenchable entities are checked, as built ones such as windows over grilles follow their construction rules.
+    /// </summary>
+    private bool IsSpotTaken(Entity<MapGridComponent> hull, EntProtoId proto, Vector2i index)
+    {
+        if (!_proto.TryIndex(proto, out var entProto) ||
+            !entProto.TryGetComponent<AnchorableComponent>(out _, _factory) ||
+            !entProto.TryGetComponent<FixturesComponent>(out var fixtures, _factory))
+            return false;
+
+        var layer = 0;
+        var mask = 0;
+        foreach (var fixture in fixtures.Fixtures.Values)
+        {
+            if (!fixture.Hard)
+                continue;
+            layer |= fixture.CollisionLayer;
+            mask |= fixture.CollisionMask;
+        }
+
+        return (layer | mask) != 0 && !_anchorable.TileFree(hull, index, layer, mask);
     }
 
     /// <summary>Whether the SRD may lay this hull tile: <see cref="CanRebuildAt"/>, and joined to the hull.</summary>

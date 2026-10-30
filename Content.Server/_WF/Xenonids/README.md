@@ -1562,12 +1562,7 @@ take half burn damage in place of RMC's tile fire immunity.
 ### Tools
 
 - [`Tools/_WF/Xenonids/asset_reuse.txt`](../../../Tools/_WF/Xenonids/asset_reuse.txt)
-- [`Tools/_WF/Xenonids/component_audit.py`](../../../Tools/_WF/Xenonids/component_audit.py)
 - [`Tools/_WF/Xenonids/copy_assets.py`](../../../Tools/_WF/Xenonids/copy_assets.py)
-- [`Tools/_WF/Xenonids/copy_locale.py`](../../../Tools/_WF/Xenonids/copy_locale.py)
-- [`Tools/_WF/Xenonids/import_rmc.py`](../../../Tools/_WF/Xenonids/import_rmc.py)
-- [`Tools/_WF/Xenonids/namespaces.yml`](../../../Tools/_WF/Xenonids/namespaces.yml)
-- [`Tools/_WF/Xenonids/stage_prototypes.py`](../../../Tools/_WF/Xenonids/stage_prototypes.py)
 - [`Tools/_WF/Xenonids/xeno_sources.py`](../../../Tools/_WF/Xenonids/xeno_sources.py)
 
 ### Docs
