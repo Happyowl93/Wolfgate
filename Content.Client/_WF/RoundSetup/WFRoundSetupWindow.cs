@@ -193,8 +193,8 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
             state.OwnLobby == null && (state.CanJoin || live) && lobby.Access is not (WFLobbyAccess.Invite or WFLobbyAccess.Closed))
         {
             var asRank = Button("join-as-rank", () => SendRequest(new WFRoundSetupRequest(WFRoundSetupAction.Join)
-                { LobbyId = lobby.Id, AsRank = true, Code = _enteredCodes.GetValueOrDefault(lobby.Id) }));
-            asRank.Text = Text("join-as-rank", ("rank", state.CompanyRank));
+                { LobbyId = lobby.Id, AsRank = true, Code = _enteredCodes.GetValueOrDefault(lobby.Id) }),
+                text: Text("join-as-rank", ("rank", state.CompanyRank)));
             asRank.AddStyleClass("ButtonAccept");
             content.AddChild(asRank);
         }
@@ -457,9 +457,9 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
         return label;
     }
 
-    private static Button Button(string key, Action pressed, bool disabled = false, string? disabledReason = null)
+    private static Button Button(string key, Action pressed, bool disabled = false, string? disabledReason = null, string? text = null)
     {
-        var button = new Button { Text = Text(key), Disabled = disabled, MinHeight = 40, HorizontalExpand = true,
+        var button = new Button { Text = text ?? Text(key), Disabled = disabled, MinHeight = 40, HorizontalExpand = true,
             ToolTip = disabled ? Text(disabledReason ?? "disabled-join") : null };
         if (key == "leave")
             button.AddStyleClass("ButtonColorRed");

@@ -9,7 +9,7 @@ commands, and company identity in the round.
 Members whose character is in the lobby during a round get **Join the round as <rank>** in the Company window: they
 spawn at the first standard station with a free slot for the rank's base job (the owner uses the top rank's), with the
 rank title on their ID, mind and station record. Any member who spawns as their member character gets the company on
-their ID's examine text and the company radio channel (`:h`), named after the company tag; membership is checked on
+their ID's examine text and the company radio channel (`:4`), named after the company tag; membership is checked on
 every send and receive, as for crew radio. A Crew Setup host whose rank has Field crews can fly the crew under the
 company: its tag shows on crew rows, details and postings, members of the company see its crews first, and its ship
 carries `WFCompanyShipComponent`, which the IFF label shows as `[TAG] Name`.

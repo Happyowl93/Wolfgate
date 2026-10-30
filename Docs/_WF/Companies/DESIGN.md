@@ -106,7 +106,7 @@ Each rank also has:
   built yet, so it always uses a station.
 - **ID card and examine** show the company name, tag and rank. The HUD job icon is the rank's job icon, and its
   tooltip names the company, so a forged icon is easy to check.
-- **Radio.** One channel per company, live in every crew of that company and outside crews. Key `:h` (free today),
+- **Radio.** One channel per company, live in every crew of that company and outside crews. Key `:4` (`:h` is the headset default),
   routed per company like the crew channel (`:k`).
 - **IFF.** Company ships show the company tag and colour as their IFF label.
 
