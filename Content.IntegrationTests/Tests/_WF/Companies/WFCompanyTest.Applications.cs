@@ -120,6 +120,28 @@ public sealed partial class WFCompanyTest
             });
             Assert.That(joinError, Is.EqualTo("wf-company-error-same-player"));
 
+            // Profiles list members, unless the owner made the company private; members still see their own.
+            state = await Request(new(WFCompanyAction.SetPrivate) { CompanyId = id.Value, Private = true });
+            Assert.That(state.Own!.Private, Is.True);
+            WFCompanyProfileEvent profile = null;
+            await pair.Client.WaitPost(() =>
+            {
+                client.ProfileReceived += received => profile = received;
+                var window = new WFCompanyProfileWindow(state.Directory.Single(), null);
+                window.OpenCentered();
+            });
+            await pair.RunTicksSync(pair.SecondsToTicks(0.5f));
+            Assert.That(profile?.Members, Has.Length.EqualTo(3), "Members see their own company's roster.");
+            var profileOf = typeof(WFCompanySystem).GetMethod("Profile", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            WFCompanyProfileEvent outsider = null;
+            await server.WaitPost(() =>
+            {
+                var company = ((System.Collections.IDictionary) companyField.GetValue(companies)!)[id.Value]!;
+                outsider = (WFCompanyProfileEvent) profileOf.Invoke(companies, new object[] { company, false })!;
+            });
+            Assert.That(outsider.Hidden, Is.True);
+            Assert.That(outsider.Members, Is.Empty, "Outsiders don't see a private company's members.");
+
             // Rank loadouts: only loadouts a crew job can take, saved with the rank.
             var allowed = WFCompanyLoadouts.Catalogue(prototypes).Select(entry => entry.Loadout).ToList();
             Assert.That(allowed.Count, Is.GreaterThan(WFCompanyLoadouts.Catalogue(prototypes).Count(entry => entry.Group.ID.StartsWith("Contractor"))),

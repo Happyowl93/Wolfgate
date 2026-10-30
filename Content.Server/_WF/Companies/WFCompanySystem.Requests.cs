@@ -117,6 +117,9 @@ public sealed partial class WFCompanySystem
                 success = error == null ? "wf-company-joined" : null;
                 touched = target;
                 break;
+            case WFCompanyAction.RequestProfile when target != null:
+                RaiseNetworkEvent(Profile(target, HasPlayer(target, character.User)), session.Channel);
+                return;
             case WFCompanyAction.CancelApplication when target != null:
                 error = DropApplication(target, character.ProfileId) ? null : error;
                 touched = target;
@@ -182,6 +185,10 @@ public sealed partial class WFCompanySystem
                 return Join(company, applicantId, applicant.User, applicant.Name, applicant.Slot, profileRef, granted);
             case WFCompanyAction.RejectApplication when Has(company, you, WFCompanyPermissions.Invite) && msg.Target is { } rejected:
                 return DropApplication(company, rejected) ? null : "wf-company-error-denied";
+            case WFCompanyAction.SetPrivate when owner:
+                company.Private = msg.Private;
+                Track(_db.SetCompanyPrivateAsync(company.Id, msg.Private));
+                return null;
             case WFCompanyAction.SetOpenRank when owner:
                 if (msg.RankId is { } open && company.Ranks.All(rank => rank.Id != open))
                     return "wf-company-error-rank";
@@ -463,6 +470,21 @@ public sealed partial class WFCompanySystem
     private static readonly TimeSpan ApplicationNotifyCooldown = TimeSpan.FromMinutes(5);
 
     private readonly Dictionary<(int Company, int Profile), TimeSpan> _applicationNotified = new();
+
+    /// <summary>Who is in a company, owner first then by rank; empty for outsiders when it is private.</summary>
+    private WFCompanyProfileEvent Profile(Company company, bool member)
+    {
+        if (company.Private && !member)
+            return new WFCompanyProfileEvent(company.Id, true, Array.Empty<WFCompanyProfileMember>());
+        var members = company.Members.Values.OrderBy(entry => RankOrder(company, entry) ?? -1).ThenBy(entry => entry.Name)
+            .Select(entry =>
+            {
+                var rank = IconRankOf(company, entry);
+                return new WFCompanyProfileMember(entry.Name, TitleOf(company, entry), rank?.Id ?? 0,
+                    rank?.Icon == null ? 0 : rank.IconVersion, BaseJob(company, entry));
+            }).ToArray();
+        return new WFCompanyProfileEvent(company.Id, false, members);
+    }
 
     /// <summary>Whether one of the player's characters is already a member; a player has one character per company.</summary>
     private static bool HasPlayer(Company company, Robust.Shared.Network.NetUserId user) =>

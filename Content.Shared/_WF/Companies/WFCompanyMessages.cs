@@ -10,7 +10,7 @@ public enum WFCompanyAction : byte
     Refresh, Create, Invite, AcceptInvite, DeclineInvite, Apply, CancelApplication, AcceptApplication, RejectApplication,
     Leave, Kick, SetMemberRank, UpsertRank, RemoveRank, MoveRank, EditDetails, Rename, SetCut, Transfer, Disband,
     Deposit, Withdraw, JoinAsRank, SetLogo, RequestLogo, SetRankIcon, RequestRankIcon, BuyLicence, SellLicence, Launch, SetLaunchFee, Pay,
-    SetRankLoadout, RequestIconPreset, SetOpenRank, JoinOpen,
+    SetRankLoadout, RequestIconPreset, SetOpenRank, JoinOpen, SetPrivate, RequestProfile,
 }
 
 /// <summary>A request from the Company window.</summary>
@@ -44,11 +44,13 @@ public sealed class WFCompanyRequest(WFCompanyAction action) : EntityEventArgs
     public int LicenceId;
     /// <summary>SetRankLoadout: loadout prototype ids bought for the rank at each spawn.</summary>
     public string[]? Loadouts;
+    /// <summary>SetPrivate: whether only members see who is in the company.</summary>
+    public bool Private;
 }
 
 [Serializable, NetSerializable]
 public sealed record WFCompanyListing(int Id, string Name, string Tag, string Description, Color Colour, string OwnerName,
-    int Members, bool Recruiting, int LogoVersion = 0, long Value = 0, WFCompanyOpenRank[]? Ranks = null, int? OpenRankId = null);
+    int Members, bool Recruiting, int LogoVersion = 0, long Value = 0, WFCompanyOpenRank[]? Ranks = null, int? OpenRankId = null, bool Private = false);
 
 /// <summary>A rank an applicant can ask for.</summary>
 [Serializable, NetSerializable]
@@ -104,6 +106,8 @@ public sealed class WFCompanyDetail
     public int LaunchFee;
     /// <summary>The rank anyone may join at directly, if open access is on.</summary>
     public int? OpenRankId;
+    /// <summary>Only members see who is in the company.</summary>
+    public bool Private;
     /// <summary>How many company ships are out this round, which sets the next registry fee.</summary>
     public int LaunchedThisRound;
     public WFCompanyLicence[] Licences = Array.Empty<WFCompanyLicence>();
@@ -140,6 +144,19 @@ public sealed class WFCompanyRankIconEvent(int rankId, int version, byte[]? icon
     public int RankId = rankId;
     public int Version = version;
     public byte[]? Icon = icon;
+}
+
+/// <summary>One member in a company's profile, with the rank icon to draw.</summary>
+[Serializable, NetSerializable]
+public sealed record WFCompanyProfileMember(string Name, string Rank, int RankId, int IconVersion, string BaseJob);
+
+/// <summary>A company's public profile; members are left out when the company is private and the viewer isn't in it.</summary>
+[Serializable, NetSerializable]
+public sealed class WFCompanyProfileEvent(int companyId, bool hidden, WFCompanyProfileMember[] members) : EntityEventArgs
+{
+    public int CompanyId = companyId;
+    public bool Hidden = hidden;
+    public WFCompanyProfileMember[] Members = members;
 }
 
 /// <summary>A job icon's pixels, read by the server because packaged clients can't read RSI images.</summary>

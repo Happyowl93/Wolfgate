@@ -32,11 +32,14 @@ public sealed class WFRecruitingGlow : Control
     {
         base.Draw(handle);
         var pulse = 0.5f + 0.5f * MathF.Sin((float) _timing.RealTime.TotalSeconds * MathF.Tau / Period);
-        var size = PixelSize;
-        handle.DrawRect(new UIBox2(Vector2.Zero, size), Accent.WithAlpha(0.04f + 0.08f * pulse));
+        // A button lays its children out inside its padding, so cover the parent's whole box instead of this control's.
+        var origin = Parent == null ? Vector2.Zero : -(Vector2) PixelPosition;
+        var size = Parent?.PixelSize ?? PixelSize;
+        var box = UIBox2.FromDimensions(origin, size);
+        handle.DrawRect(box, Accent.WithAlpha(0.04f + 0.08f * pulse));
         for (var inset = 0; inset < 2; inset++)
         {
-            handle.DrawRect(new UIBox2(inset, inset, size.X - inset, size.Y - inset),
+            handle.DrawRect(new UIBox2(box.Left + inset, box.Top + inset, box.Right - inset, box.Bottom - inset),
                 Accent.WithAlpha(0.3f + 0.55f * pulse), false);
         }
     }

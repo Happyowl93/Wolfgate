@@ -23,7 +23,13 @@ public sealed partial class WFRoundSetupSystem
     /// <summary>Each host's next allowed posting, so a new crew doesn't reset the cooldown.</summary>
     private readonly Dictionary<NetUserId, TimeSpan> _postingCooldowns = new();
 
-    private static int Openings(Lobby lobby) => lobby.Roles.Values.Sum(role => Math.Max(0, role.Capacity - RoleOccupancy(lobby, role.Id)));
+    /// <summary>Free slots; members besides the host who joined outside any opening, such as by company rank, fill one too.</summary>
+    private static int Openings(Lobby lobby)
+    {
+        var free = lobby.Roles.Values.Sum(role => Math.Max(0, role.Capacity - RoleOccupancy(lobby, role.Id)));
+        var unassigned = lobby.Members.Count(pair => pair.Key != lobby.Host && (pair.Value.RoleId is not { } id || !lobby.Roles.ContainsKey(id)));
+        return Math.Max(0, free - unassigned);
+    }
 
     private static bool ShowsRecruiting(Lobby lobby) => WFRoundSetupPolicy.ShowsRecruiting(lobby.Recruiting, lobby.Access,
         lobby.Started, lobby.AllowLateJoin, lobby.Members.Count, Openings(lobby));

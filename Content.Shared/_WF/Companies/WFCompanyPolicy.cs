@@ -68,7 +68,7 @@ public static class WFCompanyPolicy
     public const int MaximumLicences = 3;
 
     /// <summary>A licence costs this many times the design's shipyard price.</summary>
-    public const int LicenceMultiplier = 50;
+    public const int LicenceMultiplier = 200;
 
     /// <summary>The least any licence costs.</summary>
     public const long LicenceMinimum = 20_000_000;

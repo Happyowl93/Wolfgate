@@ -19,6 +19,7 @@ public partial interface IServerDbManager
     Task DeleteCompanyAsync(int id, CancellationToken cancel = default);
     Task SetCompanyOwnerRankAsync(int id, string title, string job, byte[]? icon, int version, string loadout, CancellationToken cancel = default);
     Task SetCompanyOpenRankAsync(int id, int? rankId, CancellationToken cancel = default);
+    Task SetCompanyPrivateAsync(int id, bool hidden, CancellationToken cancel = default);
     Task SaveCompanyApplicationAsync(int companyId, int profileId, int? rankId, string message, CancellationToken cancel = default);
     Task DeleteCompanyApplicationsAsync(int profileId, int? companyId, CancellationToken cancel = default);
     Task<int> AddCompanyLicenceAsync(WolfgateCompanyLicence licence, CancellationToken cancel = default);
@@ -103,6 +104,12 @@ public sealed partial class ServerDbManager
     {
         DbWriteOpsMetric.Inc();
         return RunDbCommand(() => _db.SetCompanyOpenRankAsync(id, rankId, cancel));
+    }
+
+    public Task SetCompanyPrivateAsync(int id, bool hidden, CancellationToken cancel = default)
+    {
+        DbWriteOpsMetric.Inc();
+        return RunDbCommand(() => _db.SetCompanyPrivateAsync(id, hidden, cancel));
     }
 
     public Task SaveCompanyApplicationAsync(int companyId, int profileId, int? rankId, string message, CancellationToken cancel = default)

@@ -68,27 +68,37 @@ public sealed partial class WFCompanyWindow
             details.AddChild(new Label { Text = Text("owned-by", ("name", company.OwnerName)) });
             if (company.Description.Length > 0)
                 details.AddChild(Paragraph(company.Description));
-            // A player has one character per company, so another character's company can't be joined.
-            if (state.Characters.Any(character => character.CompanyId == company.Id))
-                details.AddChild(new Label { Text = Text("same-player"), FontColorOverride = Color.FromHex("#C8C8C8") });
-            else if (state.Own == null && state.CharacterName != null)
-            {
-                var actions = Row();
-                if (openRank != null)
-                {
-                    var join = new Button { Text = Text("join-open", ("rank", openRank.Title)), Disabled = !state.CanJoin };
-                    join.AddStyleClass("ButtonAccept");
-                    join.OnPressed += _ => Send(WFCompanyAction.JoinOpen, company.Id);
-                    actions.AddChild(join);
-                }
-                actions.AddChild(state.Applications.Contains(company.Id)
-                    ? Button("apply-cancel", () => Send(WFCompanyAction.CancelApplication, company.Id))
-                    : Button("apply", () => new WFCompanyApplyWindow(company, Send).OpenCentered(), !state.CanJoin));
+            if (JoinActions(state, company) is { } actions)
                 details.AddChild(actions);
-            }
-            page.AddChild(Card(Row(Logo(company.Id, company.LogoVersion, 64), details)));
+            // The whole entry opens the company's profile; its own buttons still work as before.
+            var entry = new ContainerButton { HorizontalExpand = true, ToolTip = Text("profile-open"),
+                Children = { Card(Row(Logo(company.Id, company.LogoVersion, 64), details)) } };
+            entry.OnPressed += _ => new WFCompanyProfileWindow(company, () => JoinActions(state, company) ?? new Control()).OpenCentered();
+            page.AddChild(entry);
         }
         return page;
+    }
+
+    /// <summary>Apply, cancel or join buttons for a company the character isn't in, or a note when they can't use them.</summary>
+    private Control? JoinActions(WFCompanyState state, WFCompanyListing company)
+    {
+        // A player has one character per company, so another character's company can't be joined.
+        if (state.Characters.Any(character => character.CompanyId == company.Id))
+            return new Label { Text = Text("same-player"), FontColorOverride = Color.FromHex("#C8C8C8") };
+        if (state.Own != null || state.CharacterName == null)
+            return null;
+        var actions = Row();
+        if (company.Ranks?.FirstOrDefault(rank => rank.Id == company.OpenRankId) is { } openRank)
+        {
+            var join = new Button { Text = Text("join-open", ("rank", openRank.Title)), Disabled = !state.CanJoin };
+            join.AddStyleClass("ButtonAccept");
+            join.OnPressed += _ => Send(WFCompanyAction.JoinOpen, company.Id);
+            actions.AddChild(join);
+        }
+        actions.AddChild(state.Applications.Contains(company.Id)
+            ? Button("apply-cancel", () => Send(WFCompanyAction.CancelApplication, company.Id))
+            : Button("apply", () => new WFCompanyApplyWindow(company, Send).OpenCentered(), !state.CanJoin));
+        return actions;
     }
 
     private Control BuildCreate(WFCompanyState state)
@@ -196,6 +206,9 @@ public sealed partial class WFCompanyWindow
             Send(new WFCompanyRequest(WFCompanyAction.SetOpenRank) { CompanyId = own.Id, RankId = args.Id == 0 ? null : own.Ranks[args.Id - 1].Id });
         };
         owner.AddChild(Row(new Label { Text = Text("open-access") }, open));
+        var hidden = new CheckBox { Text = Text("private-toggle"), Pressed = own.Private, ToolTip = Text("private-help") };
+        hidden.OnToggled += args => Send(new WFCompanyRequest(WFCompanyAction.SetPrivate) { CompanyId = own.Id, Private = args.Pressed });
+        owner.AddChild(hidden);
         owner.AddChild(Paragraph(Text("open-access-help")));
         var name = new LineEdit { Text = own.Name, HorizontalExpand = true };
         var tag = new LineEdit { Text = own.Tag, MinWidth = 90 };

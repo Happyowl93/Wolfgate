@@ -1791,6 +1791,10 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("owner_title");
 
+                    b.Property<bool>("Private")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("private");
+
                     b.Property<bool>("Recruiting")
                         .HasColumnType("INTEGER")
                         .HasColumnName("recruiting");

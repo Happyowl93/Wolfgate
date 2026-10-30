@@ -1883,6 +1883,10 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("character varying(32)")
                         .HasColumnName("owner_title");
 
+                    b.Property<bool>("Private")
+                        .HasColumnType("boolean")
+                        .HasColumnName("private");
+
                     b.Property<bool>("Recruiting")
                         .HasColumnType("boolean")
                         .HasColumnName("recruiting");

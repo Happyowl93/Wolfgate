@@ -1956,6 +1956,9 @@ namespace Content.Server.Database
         /// <summary>The rank anyone may join at without applying; null when joining needs an invitation or application.</summary>
         public int? OpenRankId { get; set; }
 
+        /// <summary>Set by the owner: only members see who is in the company.</summary>
+        public bool Private { get; set; }
+
         /// <summary>Loadout prototype ids issued to the owner, comma-separated.</summary>
         [Required, MaxLength(2048)]
         public string OwnerLoadout { get; set; } = "";

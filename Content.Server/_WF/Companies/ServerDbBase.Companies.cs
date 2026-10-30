@@ -116,6 +116,16 @@ public abstract partial class ServerDbBase
         await db.DbContext.SaveChangesAsync(cancel);
     }
 
+    public async Task SetCompanyPrivateAsync(int id, bool hidden, CancellationToken cancel = default)
+    {
+        await using var db = await GetDb(cancel);
+        var company = await db.DbContext.WolfgateCompany.SingleOrDefaultAsync(c => c.Id == id, cancel);
+        if (company == null)
+            return;
+        company.Private = hidden;
+        await db.DbContext.SaveChangesAsync(cancel);
+    }
+
     /// <summary>Adds or replaces a character's application to a company.</summary>
     public async Task SaveCompanyApplicationAsync(int companyId, int profileId, int? rankId, string message, CancellationToken cancel = default)
     {

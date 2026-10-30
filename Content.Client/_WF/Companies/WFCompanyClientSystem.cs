@@ -25,6 +25,9 @@ public sealed class WFCompanyClientSystem : EntitySystem
     /// <summary>Raised when a logo arrives, so open windows can redraw.</summary>
     public event Action? LogosChanged;
 
+    /// <summary>Raised with a company profile the player asked to see.</summary>
+    public event Action<WFCompanyProfileEvent>? ProfileReceived;
+
     /// <summary>Raised with a job icon's pixels, or null when the server couldn't read it.</summary>
     public event Action<string, byte[]?>? IconPresetReceived;
 
@@ -40,6 +43,7 @@ public sealed class WFCompanyClientSystem : EntitySystem
         SubscribeNetworkEvent<WFCompanyState>(OnState);
         SubscribeNetworkEvent<WFCompanyLogoEvent>(OnLogo);
         SubscribeNetworkEvent<WFCompanyRankIconEvent>(OnRankIcon);
+        SubscribeNetworkEvent<WFCompanyProfileEvent>(args => ProfileReceived?.Invoke(args));
         SubscribeNetworkEvent<WFCompanyIconPresetEvent>(args => IconPresetReceived?.Invoke(args.Icon, args.Pixels));
     }
 

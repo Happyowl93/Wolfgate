@@ -65,6 +65,7 @@ public sealed partial class WFCompanySystem : EntitySystem
         public int LaunchFee;
         /// <summary>The rank anyone may join at without applying.</summary>
         public int? OpenRank;
+        public bool Private;
         /// <summary>The owner's own title, base job and icon; its id is the company id negated.</summary>
         public Rank OwnerRank = new();
         public readonly List<Licence> Licences = new();
@@ -177,7 +178,7 @@ public sealed partial class WFCompanySystem : EntitySystem
                 Colour = Color.TryFromHex(row.Colour, out var colour) ? colour : Color.White, Owner = row.OwnerProfileId, Balance = row.Balance,
                 Cut = row.Cut, Recruiting = row.Recruiting, Frozen = row.Frozen, ArtLocked = row.ArtLocked,
                 Logo = row.Logo?.Length == WFCompanyPolicy.LogoBytes ? row.Logo : null, LogoVersion = row.LogoVersion, LaunchFee = row.LaunchFee,
-                OpenRank = row.OpenRankId,
+                OpenRank = row.OpenRankId, Private = row.Private,
             };
             company.OwnerRank = new Rank
             {
@@ -451,7 +452,7 @@ public sealed partial class WFCompanySystem : EntitySystem
     private WFCompanyListing Listing(Company company) => new(company.Id, company.Name, company.Tag, company.Description,
         company.Colour, company.Members.TryGetValue(company.Owner, out var owner) ? owner.Name : string.Empty,
         company.Members.Count, company.Recruiting, company.Logo == null ? 0 : company.LogoVersion, CompanyValue(company),
-        company.Ranks.Select(rank => new WFCompanyOpenRank(rank.Id, rank.Title, rank.BaseJob)).ToArray(), OpenRankOf(company));
+        company.Ranks.Select(rank => new WFCompanyOpenRank(rank.Id, rank.Title, rank.BaseJob)).ToArray(), OpenRankOf(company), company.Private);
 
     /// <summary>The open-access rank, if it still exists.</summary>
     private static int? OpenRankOf(Company company) =>
@@ -525,7 +526,7 @@ public sealed partial class WFCompanySystem : EntitySystem
             OwnerProfile = company.Owner, OwnerName = company.Members.TryGetValue(company.Owner, out var owner) ? owner.Name : string.Empty,
             Balance = company.Balance, Cut = company.Cut, Recruiting = company.Recruiting, Frozen = company.Frozen,
             ArtLocked = company.ArtLocked, LogoVersion = company.Logo == null ? 0 : company.LogoVersion,
-            LaunchFee = company.LaunchFee, OpenRankId = OpenRankOf(company), LaunchedThisRound = LaunchedCount(company), Licences = SnapshotLicences(company),
+            LaunchFee = company.LaunchFee, OpenRankId = OpenRankOf(company), Private = company.Private, LaunchedThisRound = LaunchedCount(company), Licences = SnapshotLicences(company),
             LicenceOffers = you.Profile == company.Owner ? LicenceOffers(company) : Array.Empty<WFCompanyLicenceOffer>(),
             Ranks = company.Ranks.Select((rank, order) => new WFCompanyRank(rank.Id, order, rank.Title, rank.Permissions, rank.Wage,
                 rank.WithdrawCap, rank.BaseJob, rank.Icon == null ? 0 : rank.IconVersion, rank.Loadout.ToArray())).ToArray(),

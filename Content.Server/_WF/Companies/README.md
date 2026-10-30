@@ -20,6 +20,9 @@ founder's bank (`wf.companies.create_fee`), refunded if creation fails. The fee 
 A player has one character per company: invitations, applications and open access refuse a character whose player
 already has another in it, and the fleet licence minimum counts players, not characters.
 
+Clicking a company in the list opens its profile: owner, worth, ranks and members with their rank icons. An owner can
+make the member list private in Settings, so only members see it; the company still lists and takes applications.
+
 Apply opens a form: the rank the character wants and up to 500 characters on why. Applications are saved, so they
 survive restarts, and online members who can accept them are told. Accepting gives the asked-for rank when the accepter
 can set it, otherwise the lowest. The owner can turn on open access at one rank in Settings; anyone can then press
@@ -56,7 +59,7 @@ The rank icon editor can start from any existing job icon. The round end summary
 moved money that round: members who played and hours, new members, crews fielded, wages, cuts, deposits, withdrawals
 and the account's start and end.
 
-**Hangar.** The owner buys fleet licences (up to 3) for civilian designs any character may fly, at 50x the shipyard
+**Hangar.** The owner buys fleet licences (up to 3) for civilian designs any character may fly, at 200x the shipyard
 price and at least 20,000,000, from the account; selling one refunds nothing. A member with Launch presses Launch on the
 Hangar tab: that creates a Crew Setup ship crew for the design, flying under the company, with the design fixed and no
 crew payment. When the ship actually spawns, the account pays the registry fee (5%, 15% then 30% of the shipyard price
@@ -151,6 +154,7 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 - [`Content.Client/_WF/Companies/WFCompanyLoadoutWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyLoadoutWindow.cs)
 - [`Content.Client/_WF/Companies/WFCompanyLogoCanvas.cs`](../../../Content.Client/_WF/Companies/WFCompanyLogoCanvas.cs)
 - [`Content.Client/_WF/Companies/WFCompanyLogoWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyLogoWindow.cs)
+- [`Content.Client/_WF/Companies/WFCompanyProfileWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyProfileWindow.cs)
 - [`Content.Client/_WF/Companies/WFCompanyRankHudSystem.cs`](../../../Content.Client/_WF/Companies/WFCompanyRankHudSystem.cs)
 - [`Content.Client/_WF/Companies/WFCompanyRankIcons.cs`](../../../Content.Client/_WF/Companies/WFCompanyRankIcons.cs)
 - [`Content.Client/_WF/Companies/WFCompanyWindow.cs`](../../../Content.Client/_WF/Companies/WFCompanyWindow.cs)
