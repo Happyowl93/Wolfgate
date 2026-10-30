@@ -3,8 +3,8 @@
 The trade-crate economy. Every station with a turn-in chute is a market whose prices move: each sale of a good adds
 pressure that lowers its price at that station and halves every 50 minutes, and sector events raise prices
 with a reason players can see. A chute won't take crates bought from its own station's vendors; anything else,
-printed crates included, sells wherever it was made, while war demand, relief rates and freight bonuses need a haul of
-about 3 km. The Market PDA app, chute examine and the chute's empty-hand paper show live prices,
+printed crates included, sells wherever it was made, while war-effort credits, the freight destination bonus and
+counting as station traffic need a haul of about 3 km. The Market PDA app, chute examine and the chute's empty-hand paper show live prices,
 each with its weight and price per tonne. The app's Alerts tab lists every event below with its countdown, plus alerts
 for the holder alone: traders who won't deal with them and what the war pays their faction; soonest deadline first. The app holds no ship information: what a ship carries is the
 helm's business (CargoLoad). Every PDA gets the app: `WFMarketCartridgeSystem` appends it to each PDA's preinstalled
@@ -75,7 +75,7 @@ crate printed in hyperspace, orbit or on an expedition is local to where the shi
 reloaded at the shipyard is local to the station it is delivered to. A chute that moves (Jupiter, a merchant) and flies
 to the crates has made the haul itself, but one that carried them docked has not: a stamp records the grids docked to
 the crate's ship (`WFTradeOriginComponent.Docked`). The origin only gates rewards for a real haul (`WasHauled`: freight
-bonus, relief, war demand): a crate stamped off the chute's grid and its docked ships, at least `minHaulDistance` from
+bonus, war-effort credits, station traffic): a crate stamped off the chute's grid and its docked ships, at least `minHaulDistance` from
 the chute's current position. A chute refuses a crate bought on its grid (`WasPurchasedOnGrid`), and a sealed-only
 chute one without a seal (`CheckSeal`). A crate already
 taken by a chute and waiting for deletion is refused, so one crate can't pay at two chutes in a tick.
