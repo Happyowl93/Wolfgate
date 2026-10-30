@@ -110,7 +110,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
             if (!underground && _market.IsHiddenChute(chute)
                 || _market.Shunned(chute, seller)
                 || _vendingPurchase.WasPurchasedOnGrid(crate, grid)
-                || !_market.WouldPassHaul(chute, crate))
+                || _market.CheckSeal(chute, crate) != null)
                 continue;
 
             var amount = special ? _special.Price(chute, crate) : _market.Quote(chute, good, crate, seller)?.Amount;

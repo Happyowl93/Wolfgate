@@ -6,7 +6,6 @@ using Content.Server.Shuttles.Events;
 using Content.Shared._WF.TradeGoods;
 using Content.Shared.Interaction;
 using Robust.Shared.GameObjects;
-using Robust.Shared.Localization;
 using Robust.Shared.Map;
 using Robust.Shared.Maths;
 using Robust.Shared.Timing;
@@ -15,7 +14,7 @@ namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
 /// <summary>
 /// Crate origins: one from off the market maps is pending until it shows up on one, then stamped where it
-/// arrives by FTL, by the sweep, or at the chute it's offered to, and only sells after a haul from there.
+/// arrives by FTL or by the sweep, and counts as hauled only far from there. One still unstamped at a chute sells there.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFTradeMarketSystem))]
@@ -89,7 +88,7 @@ public sealed class TradeProvenanceTest
             Assert.That(origin.Point.MapId, Is.EqualTo(map.MapId));
             Assert.That(Vector2.Distance(origin.Point.Position, xformSys.GetWorldPosition(crate)), Is.LessThan(1f),
                 "The crate wasn't stamped where it arrived.");
-            Assert.That(market.CheckHaul(chute, crate), Is.EqualTo((LocId?) "wf-trade-refuse-too-close"));
+            Assert.That(market.WasHauled(chute, crate), Is.False, "A crate stamped near the chute counted as a haul.");
 
             // It flies on to a station past the haul distance; that jump doesn't move its origin.
             var stamped = origin.Point;
@@ -97,7 +96,7 @@ public sealed class TradeProvenanceTest
             var onward = new FTLCompletedEvent(ship, map.MapUid);
             entMan.EventBus.RaiseEvent(EventSource.Local, ref onward);
             Assert.That(origin.Point, Is.EqualTo(stamped), "A second jump on the same map moved the crate's origin.");
-            Assert.That(market.CheckHaul(farChute, crate), Is.Null, "A crate hauled past the haul distance was refused.");
+            Assert.That(market.WasHauled(farChute, crate), Is.True, "A crate hauled past the haul distance didn't count.");
 
             xformSys.SetCoordinates(crate, new EntityCoordinates(far, 0.5f, 0.5f));
             quoted = market.Quote(farChute, CrateProto)!.Value.Amount;
@@ -155,14 +154,14 @@ public sealed class TradeProvenanceTest
             Assert.That(origin.Grid, Is.EqualTo(ship));
             Assert.That(origin.Point.MapId, Is.EqualTo(map.MapId));
             Assert.That(Vector2.Distance(origin.Point.Position, Arrival), Is.LessThan(2f), "The crate wasn't stamped where it arrived.");
-            Assert.That(market.CheckHaul(chute, crate), Is.EqualTo((LocId?) "wf-trade-refuse-too-close"));
+            Assert.That(market.WasHauled(chute, crate), Is.False, "A crate stamped near the chute counted as a haul.");
         });
 
         await pair.CleanReturnAsync();
     }
 
     [Test]
-    public async Task PendingCrateIsRefusedAndStampedAtTheChute()
+    public async Task PendingCrateSellsButIsNotAHaul()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
         var server = pair.Server;
@@ -173,6 +172,7 @@ public sealed class TradeProvenanceTest
         var interaction = entMan.System<SharedInteractionSystem>();
 
         EntityUid crate = default;
+        var quoted = 0;
 
         await server.WaitAssertion(() =>
         {
@@ -188,20 +188,17 @@ public sealed class TradeProvenanceTest
             var origin = entMan.GetComponent<WFTradeOriginComponent>(crate);
             Assert.That(origin.Pending, Is.True);
 
-            Assert.That(interaction.InteractUsing(user, crate, chute, map.GridCoords, false, false), Is.True,
-                "The chute should handle a crate it trades, even when refusing it.");
-            Assert.That(origin.Pending, Is.False, "A pending crate offered at a chute should be stamped there.");
-            Assert.That(origin.Grid, Is.EqualTo(map.Grid.Owner));
-            Assert.That(market.CheckHaul(chute, crate), Is.EqualTo((LocId?) "wf-trade-refuse-made-here"),
-                "Once stamped at the chute, the crate counts as made on its station.");
+            Assert.That(market.WasHauled(chute, crate), Is.False, "A crate of unknown origin counted as a haul.");
+            quoted = market.Quote(chute, CrateProto)!.Value.Amount;
+            Assert.That(interaction.InteractUsing(user, crate, chute, map.GridCoords, false, false), Is.True);
         });
 
         await pair.RunTicksSync(30);
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(entMan.Deleted(crate), Is.False, "The chute took a crate of unknown origin.");
-            Assert.That(TradeTestHelpers.CashOnMap(entMan, map.MapId), Is.Zero, "The chute paid for a crate of unknown origin.");
+            Assert.That(entMan.Deleted(crate), Is.True, "The chute refused a crate of unknown origin.");
+            Assert.That(TradeTestHelpers.CashOnMap(entMan, map.MapId), Is.EqualTo(quoted));
         });
 
         await pair.CleanReturnAsync();

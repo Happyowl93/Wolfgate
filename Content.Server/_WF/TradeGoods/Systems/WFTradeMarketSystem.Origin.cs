@@ -6,8 +6,8 @@ using Content.Shared._WF.TradeGoods;
 namespace Content.Server._WF.TradeGoods.Systems;
 
 /// <summary>
-/// Stamps every trade crate with where it first appears on a market map. A chute refuses a crate stamped on its own
-/// grid or within the haul distance of it. An unknown origin always counts as local.
+/// Stamps every trade crate with where it first appears on a market map, so rewards for a real haul can tell whether it
+/// was hauled. An unknown origin always counts as local.
 /// </summary>
 public sealed partial class WFTradeMarketSystem
 {
@@ -118,30 +118,12 @@ public sealed partial class WFTradeMarketSystem
         return chuteGrid is { } grid && (origin.Grid == grid || origin.Docked?.Contains(grid) == true);
     }
 
-    /// <summary>
-    /// Why a chute refuses a crate for its origin, or null if it was hauled far enough. A crate whose origin is unknown
-    /// or on another map is stamped at the chute and refused. A sealed-only chute refuses a crate without a seal.
-    /// </summary>
-    public LocId? CheckHaul(EntityUid chute, EntityUid crate)
+    /// <summary>Why a sealed-only chute refuses a crate without a manifest seal, or null if the chute takes it.</summary>
+    public LocId? CheckSeal(EntityUid chute, EntityUid crate)
     {
-        if (!TryComp<WFTradeOriginComponent>(crate, out var origin))
-            return null;
-
-        if (origin.Run == null && IsSealedOnly(chute))
-            return "wf-trade-refuse-unsealed";
-
-        var chuteXform = Transform(chute);
-        if (origin.Pending || origin.Point.MapId != chuteXform.MapID)
-        {
-            Stamp((crate, origin));
-            return "wf-trade-refuse-unknown";
-        }
-
-        if (MadeAt(origin, chuteXform.GridUid))
-            return "wf-trade-refuse-made-here";
-
-        var distance = (origin.Point.Position - _transform.GetWorldPosition(chuteXform)).Length();
-        return distance < Profile(chuteXform.GridUid).MinHaulDistance ? "wf-trade-refuse-too-close" : null;
+        return TryComp<WFTradeOriginComponent>(crate, out var origin) && origin.Run == null && IsSealedOnly(chute)
+            ? "wf-trade-refuse-unsealed"
+            : null;
     }
 
     /// <summary>Whether a chute takes only freight with a manifest seal, such as the Underground fence.</summary>
@@ -164,21 +146,6 @@ public sealed partial class WFTradeMarketSystem
                >= Profile(chuteXform.GridUid).MinHaulDistance;
     }
 
-    /// <summary>
-    /// Whether a chute's haul test would pass a crate, without stamping it as <see cref="CheckHaul"/> does. A crate whose
-    /// origin isn't known yet passes.
-    /// </summary>
-    public bool WouldPassHaul(EntityUid chute, EntityUid crate)
-    {
-        if (!TryComp<WFTradeOriginComponent>(crate, out var origin))
-            return true;
-
-        if (origin.Run == null && IsSealedOnly(chute))
-            return false;
-
-        return origin.Pending || origin.Point.MapId != Transform(chute).MapID || WasHauled(chute, crate);
-    }
-
     /// <summary>Whether a trader aboard the chute's grid refuses to deal with someone who hurt them.</summary>
     public bool Shunned(EntityUid chute, EntityUid user)
     {
@@ -191,11 +158,5 @@ public sealed partial class WFTradeMarketSystem
         }
 
         return false;
-    }
-
-    /// <summary>The haul distance players are told, in kilometres.</summary>
-    public float HaulKilometres(EntityUid chute)
-    {
-        return Profile(Transform(chute).GridUid).MinHaulDistance / 1000f;
     }
 }
