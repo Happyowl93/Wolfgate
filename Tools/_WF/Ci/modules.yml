@@ -274,6 +274,9 @@ unmarked:
   - path: Resources/Maps/_Mono/Outpost/caelestinus_central.yml
     module: BritishFood
     reason: Mrs. Luvvit's Pie & Mash in the trade hall kiosk row, in place of a potted plant and its front pane.
+  - path: Resources/Maps/_Mono/Outpost/caelestinus_central.yml
+    module: TradeGoods
+    reason: Both Exped chutes become CC chutes, so every chute on the station pays from one table.
   - path: Resources/Maps/_Mono/POI/underground.yml
     module: LockableButtons
     reason: The two blast door buttons take Underground access; the station's crew has no Pirate access.

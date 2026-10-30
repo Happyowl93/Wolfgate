@@ -21813,7 +21813,7 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -7.7755003,24.683205
-- proto: CargoChuteExped
+- proto: CargoChuteTradeMall
   entities:
   - uid: 2705
     components:
@@ -21825,8 +21825,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -56.5,27.5
-- proto: CargoChuteTradeMall
-  entities:
   - uid: 2707
     components:
     - type: Transform

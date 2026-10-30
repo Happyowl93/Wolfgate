@@ -155,15 +155,21 @@
     inventory:
       TradeGoodAmmo: SpaceCash7000
       TradeGoodSupplies: SpaceCash6000
-      TradeGoodMedicalSupplies: SpaceCash2500
+      # WOLFGATE(TradeGoods) START: every Caelestinus chute is this one, so it pays the Exped chute's higher medical price
+      # TradeGoodMedicalSupplies: SpaceCash2500
+      TradeGoodMedicalSupplies: SpaceCash3000
+      # WOLFGATE END
       TradeGoodChemicalSupplies: SpaceCash5000
       TradeGoodChemicalsVolatile: SpaceCash6000
       TradeGoodScrap: SpaceCash4000
       TradeGoodFusionFuel: SpaceCash12000
       TradeGoodComponents: SpaceCash4000
       TradeGoodFertilizer: SpaceCash4500
-      # WOLFGATE(TradeGoods) START: match the CC manifest, which lists no ship components and metals at 5000
+      # WOLFGATE(TradeGoods) START: match the CC manifest, with metals at 5000 and the goods only the Exped chute bought
       # TradeGoodShipComponents: SpaceCash4000
+      TradeGoodShipComponents: SpaceCash4500
+      TradeGoodWeaponParts: SpaceCash8000
+      TradeGoodEquipment: SpaceCash3000
       TradeGoodFabric: SpaceCash5000
       # TradeGoodMetals: SpaceCash2500
       TradeGoodMetals: SpaceCash5000

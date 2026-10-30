@@ -138,16 +138,20 @@ book-text-cargo-depot-tradecrates-alt = MANIFEST
       This paper will automatically disintegrate after 2 minutes.
 
 
+# WOLFGATE(TradeGoods): the CC manifest lists the merged Caelestinus chute table
 book-text-cargo-depot-trademall = MANIFEST
       AT THIS CHUTE (PER CRATE):
       - AMMO : $7000
       - SUPPLIES : $6000
-      - MED. SUPPLIES : $2500
+      - MED. SUPPLIES : $3000
       - CHEM. SUPPLIES : $5000
       - VOL. CHEM. SUPPLIES : $6000
       - FUS. FUEL : $12000
       - SCRAP : $4000
       - COMPONENTS : $4000
+      - SHIP COMPONENTS : $4500
+      - WEAPON PARTS : $8000
+      - EQUIPMENT : $3000
       - FERTILIZER : $4500
       - FABRIC : $5000
       - METALS : $5000

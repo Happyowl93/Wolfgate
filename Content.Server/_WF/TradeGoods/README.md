@@ -172,11 +172,14 @@ it nears its floor of 1000; printing it costs about 260 in materials.
   - say the chute doesn't buy it instead of only buzzing
   - pay the live quote, print live prices
 - [`Content.Server/VendingMachines/VendingMachineSystem.cs`](../../VendingMachines/VendingMachineSystem.cs): trade vendors charge the station's live price
+- [`Resources/Locale/en-US/paper/paper-misc.ftl`](../../../Resources/Locale/en-US/paper/paper-misc.ftl): the CC manifest lists the merged Caelestinus chute table
+- [`Resources/Maps/_Mono/Outpost/caelestinus_central.yml`](../../../Resources/Maps/_Mono/Outpost/caelestinus_central.yml): Both Exped chutes become CC chutes, so every chute on the station pays from one table.
 - [`Resources/Maps/_Mono/POI/underground.yml`](../../../Resources/Maps/_Mono/POI/underground.yml): The fence chute and the smuggling-crate vendor in the cargo bay, beside the sell pallets.
 - [`Resources/Prototypes/_Crescent/Entities/Objects/Misc/trade.yml`](../../../Resources/Prototypes/_Crescent/Entities/Objects/Misc/trade.yml): chutes check where a crate was made
 - [`Resources/Prototypes/_Mono/Entities/Structures/dispensers.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/dispensers.yml)
   - open stations pay well for contraband
-  - match the CC manifest, which lists no ship components and metals at 5000
+  - every Caelestinus chute is this one, so it pays the Exped chute's higher medical price
+  - match the CC manifest, with metals at 5000 and the goods only the Exped chute bought
   - match the Halcyon manifest, which buys fertilizer and no components
 - [`Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml)
   - no free crates from the eject wire or wrecking the vendor
