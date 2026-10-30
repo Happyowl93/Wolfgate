@@ -118,8 +118,10 @@ public sealed partial class WFShipScenarioSystem : EntitySystem
     }
 
     /// <summary>Loads a selected ship on a clear part of the sector before any money is withdrawn.</summary>
+    /// <param name="licensed">A company hangar launch, whose design the company licensed; it skips the civilian catalogue check.</param>
     public bool TryPrepare(int lobbyId, string? vesselId, out EntityUid station, out string reason,
-        WFShipStartLocation location = WFShipStartLocation.RandomSpace, WFCrewFaction faction = WFCrewFaction.None, string? job = null)
+        WFShipStartLocation location = WFShipStartLocation.RandomSpace, WFCrewFaction faction = WFCrewFaction.None, string? job = null,
+        bool licensed = false)
     {
         station = EntityUid.Invalid;
         if (HasAssignedShip(lobbyId))
@@ -134,7 +136,7 @@ public sealed partial class WFShipScenarioSystem : EntitySystem
         {
             if (existing.Vessel == vesselId && existing.Location == location && existing.Faction == faction && !TerminatingOrDeleted(existing.Station) && TryGetSpawn(lobbyId, out _))
             {
-                if (!existing.Used && !IsVesselAvailable(vesselId, faction, job))
+                if (!existing.Used && !licensed && !IsVesselAvailable(vesselId, faction, job))
                     return false;
                 if (!existing.Used)
                     existing.PurchaseJob = job;
@@ -148,7 +150,8 @@ public sealed partial class WFShipScenarioSystem : EntitySystem
             }
             Rollback(lobbyId);
         }
-        if (!IsVesselAvailable(vesselId, faction, job))
+        if (vesselId == null || !licensed && !IsVesselAvailable(vesselId, faction, job) ||
+            !_prototypes.TryIndex<VesselPrototype>(vesselId, out var prototype) || prototype.Abstract)
             return false;
         var mapId = _ticker.DefaultMap;
         if (!_map.TryGetMap(mapId, out var mapEntity))

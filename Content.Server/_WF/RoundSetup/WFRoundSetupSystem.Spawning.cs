@@ -309,7 +309,8 @@ public sealed partial class WFRoundSetupSystem
             // Recheck every share before loading a hull, then check again immediately before payment.
             if (!lobby.Started && !CanAffordCrew(lobby, out error))
                 return false;
-            if (!_ships.TryPrepare(lobby.Id, lobby.Vessel, out station, out error, lobby.ShipStart, lobby.Faction, lobby.Members[lobby.Host].Job))
+            if (!_ships.TryPrepare(lobby.Id, lobby.Vessel, out station, out error, lobby.ShipStart, lobby.Faction, lobby.Members[lobby.Host].Job,
+                    lobby.HangarLicence != null))
                 return false;
             if (!_ships.TryGetSpawn(lobby.Id, out var spawn))
             {

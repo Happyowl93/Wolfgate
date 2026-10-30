@@ -64,6 +64,9 @@ public static class WFCompanyPolicy
     /// <summary>The longest note on a direct payment.</summary>
     public const int MaximumPaymentNote = 64;
 
+    /// <summary>Ship access tags whose designs only companies can license, on top of the civilian shipyard.</summary>
+    public static readonly string[] CompanyVesselAccess = { "Mercenary", "Mieyo", "MieyoSecurity" };
+
     /// <summary>The most fleet licences a company may hold.</summary>
     public const int MaximumLicences = 3;
 

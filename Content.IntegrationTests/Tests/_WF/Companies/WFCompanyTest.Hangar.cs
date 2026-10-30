@@ -64,6 +64,9 @@ public sealed partial class WFCompanyTest
             await server.WaitPost(() => companies.AdminAdjust(id.Value, WFCompanyPolicy.LicencePrice(guppy) + 100000, "Test", "seed"));
             state = await Send(new(WFCompanyAction.SetLaunchFee) { CompanyId = id.Value, Amount = 250 });
             Assert.That(state.Own!.LicenceOffers.Any(offer => offer.Vessel == "Guppy"), Is.True);
+            var vessels = server.ResolveDependency<Robust.Shared.Prototypes.IPrototypeManager>();
+            Assert.That(state.Own.LicenceOffers.Any(offer => vessels.Index<Content.Shared._NF.Shipyard.Prototypes.VesselPrototype>(offer.Vessel).Access == "Mercenary"),
+                Is.True, "Companies can license Mercenary designs civilians can't buy.");
             state = await Send(new(WFCompanyAction.BuyLicence) { CompanyId = id.Value, Vessel = "Guppy" });
             Assert.That(state.Own!.Licences, Is.Empty, "A one-person company can't buy fleet licences.");
             for (var i = 0; i < 300 && !hands.All(hand => preferences.HavePreferencesLoaded(hand)); i++)

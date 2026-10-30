@@ -76,9 +76,19 @@ public sealed partial class WFCompanySystem
             _launched.ContainsKey(licence.Id) || _reserved.ContainsKey(licence.Id))).ToArray();
 
     /// <summary>Civilian designs any character may fly, that the company doesn't hold yet.</summary>
-    private WFCompanyLicenceOffer[] LicenceOffers(Company company) => _shipScenarios.GetVessels()
-        .Where(vessel => company.Licences.All(licence => licence.Vessel != vessel.Id) && _shipScenarios.IsVesselAvailable(vessel.Id))
-        .Select(vessel => new WFCompanyLicenceOffer(vessel.Id, vessel.Name, WFCompanyPolicy.LicencePrice(vessel.Price))).ToArray();
+    /// <summary>Civilian designs plus the company-only Mercenary and Mieyo designs, cheapest first.</summary>
+    private WFCompanyLicenceOffer[] LicenceOffers(Company company)
+    {
+        var civilian = _shipScenarios.GetVessels().Where(vessel => _shipScenarios.IsVesselAvailable(vessel.Id))
+            .Select(vessel => (vessel.Id, vessel.Name, vessel.Price));
+        var special = _prototypes.EnumeratePrototypes<VesselPrototype>()
+            .Where(vessel => !vessel.Abstract && vessel.Purchasable && vessel.Price > 0 && WFCompanyPolicy.CompanyVesselAccess.Contains(vessel.Access))
+            .Select(vessel => (vessel.ID, vessel.Name, vessel.Price));
+        return civilian.Concat(special).DistinctBy(vessel => vessel.Item1)
+            .Where(vessel => company.Licences.All(licence => licence.Vessel != vessel.Item1))
+            .OrderBy(vessel => vessel.Price).ThenBy(vessel => vessel.Name)
+            .Select(vessel => new WFCompanyLicenceOffer(vessel.Item1, vessel.Name, WFCompanyPolicy.LicencePrice(vessel.Price))).ToArray();
+    }
 
     private string? BuyLicence(Company company, Member owner, string? vessel, out string? success)
     {
