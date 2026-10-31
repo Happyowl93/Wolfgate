@@ -93,6 +93,7 @@
   salvageBonus: 1.25
   shortageMinutes: 25,40
   rushMinutes: 20,35
+  bulkMinutes: 30,60
   consignmentMinutes: 30,45
   consignments:
     WFTradeConsignment: 0.7
@@ -232,3 +233,66 @@
   goods: wf-trade-goods-luxuries
   count: 2,4
   weight: 1
+
+# Bulk orders: an open station wants a hold's worth over a long window, at a small premium and a flat price: posting one
+# clears its goods' sale pressure there and their crates add none, so the last pays what the first did. The count paces
+# how much that adds to the faucet. Luxuries and fuel stay out: their prices are too high for an order this size.
+- type: wfTradeRush
+  id: WFTradeBulkMedical
+  group: Medical
+  goods: wf-trade-goods-medical
+  bulk: true
+  chutes: [ CargoChuteTradeMall, CargoChuteDepot, CargoChuteDepotAlt, CargoChuteBaikal, CargoChuteTSFMC, CargoChuteZvezda ]
+  count: 25,45
+  minutes: 45,60
+  minFactor: 1.15
+  maxFactor: 1.25
+  weight: 3
+
+- type: wfTradeRush
+  id: WFTradeBulkSupplies
+  group: Supplies
+  goods: wf-trade-goods-supplies
+  bulk: true
+  chutes: [ CargoChuteTradeMall, CargoChuteDepot, CargoChuteDepotAlt, CargoChuteBaikal, CargoChuteTSFMC, CargoChuteZvezda ]
+  count: 25,45
+  minutes: 45,60
+  minFactor: 1.15
+  maxFactor: 1.25
+  weight: 3
+
+- type: wfTradeRush
+  id: WFTradeBulkAmmo
+  group: Ammo
+  goods: wf-trade-goods-ammo
+  bulk: true
+  chutes: [ CargoChuteTradeMall, CargoChuteDepot, CargoChuteDepotAlt, CargoChuteBaikal, CargoChuteTSFMC, CargoChuteZvezda ]
+  count: 25,45
+  minutes: 45,60
+  minFactor: 1.15
+  maxFactor: 1.25
+  weight: 2
+
+- type: wfTradeRush
+  id: WFTradeBulkShipComponents
+  group: ShipComponents
+  goods: wf-trade-goods-ship-components
+  bulk: true
+  chutes: [ CargoChuteTradeMall, CargoChuteDepot, CargoChuteDepotAlt, CargoChuteBaikal, CargoChuteTSFMC, CargoChuteZvezda ]
+  count: 25,45
+  minutes: 45,60
+  minFactor: 1.15
+  maxFactor: 1.25
+  weight: 2
+
+- type: wfTradeRush
+  id: WFTradeBulkIndustrial
+  group: Industrial
+  goods: wf-trade-goods-industrial
+  bulk: true
+  chutes: [ CargoChuteTradeMall, CargoChuteDepot, CargoChuteDepotAlt, CargoChuteBaikal, CargoChuteTSFMC, CargoChuteZvezda ]
+  count: 25,45
+  minutes: 45,60
+  minFactor: 1.15
+  maxFactor: 1.25
+  weight: 2

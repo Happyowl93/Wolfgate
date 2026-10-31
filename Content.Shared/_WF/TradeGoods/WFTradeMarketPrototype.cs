@@ -161,6 +161,10 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public Vector2i RushMinutes = new(20, 35);
 
+    /// <summary>How long between one bulk order and the next.</summary>
+    [DataField]
+    public Vector2i BulkMinutes = new(30, 60);
+
     /// <summary>How long between one priority consignment and the next.</summary>
     [DataField]
     public Vector2i ConsignmentMinutes = new(30, 45);
@@ -293,6 +297,13 @@ public sealed partial class WFTradeRushPrototype : IPrototype
 
     [DataField]
     public float MaxFactor = 2.25f;
+
+    /// <summary>
+    /// A big order for a full hold: posted on <see cref="WFTradeMarketPrototype.BulkMinutes"/>, not with rush orders,
+    /// clearing its goods' sale pressure at the station, and its crates add none.
+    /// </summary>
+    [DataField]
+    public bool Bulk;
 
     [DataField(required: true)]
     public LocId Goods;

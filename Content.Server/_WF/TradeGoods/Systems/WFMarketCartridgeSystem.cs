@@ -281,7 +281,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
 
         foreach (var rush in _rush.Active)
         {
-            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-rush", ("station", Name(rush.Grid)),
+            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-rush", ("bulk", rush.Bulk), ("station", Name(rush.Grid)),
                 ("left", rush.Remaining), ("count", rush.Total), ("goods", Loc.GetString(rush.Goods)), ("factor", WFTradeMarketSystem.Shown(rush.Factor))), rush.Ends, true), Name(rush.Grid));
         }
 

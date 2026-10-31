@@ -32,7 +32,11 @@ What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifie
 - Shortages at one station and sector-wide booms (`WFTradeShortageSystem`, `wfTradeShortage`).
 - Blockades, relief rates while a blockade is contested, war demand at the navy chutes and raid alerts
   (`WFTradeSectorSystem`, reading SectorControl, the war level and the Reaver campaign).
-- Rush orders: a station wants a few crates fast (`WFTradeRushSystem`, `wfTradeRush`).
+- Rush orders: a station wants a few crates fast (`WFTradeRushSystem`, `wfTradeRush`). Bulk orders (`bulk: true`, on their
+  own `bulkMinutes` schedule) are the big-hold version: an open station wants 25 to 45 crates of a group within 45 to 60
+  minutes, at 1.15x to 1.25x and a flat price: posting one clears the pressure on its goods at that station and their
+  crates add none (`WFTradeQuote.NoGlut`), so the last pays what the first did. Vendors still get scarcer. Anyone can
+  deliver toward one, but only a big hold can fill it in a run.
 - NPC freight (`WFTradeFreightSystem`): a run's crates carry a manifest seal and pay 60% at lawful chutes, full price at
   a fence (the Underground fence chute, PDV Helios) and a bonus at their destination. A freighter docking at a stop
   supplies it (tagged *supplied*); a run lost to attack leaves its remaining stops short. The Underground fence takes
