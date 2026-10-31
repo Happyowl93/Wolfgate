@@ -4285,3 +4285,25 @@ Entries:
   id: 100288
   time: '2026-10-31T13:45:37.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/426
+- author: Happyowl93
+  changes:
+    - type: Add
+      message: >-
+        Ship turrets now turn toward their target at a rate set by their size
+        and only fire once lined up.
+    - type: Tweak
+      message: >-
+        Shield shunting is much weaker: a fully concentrated 30° arc gives about
+        2.3× protection instead of 12×, and shunted shields no longer regenerate
+        faster.
+    - type: Tweak
+      message: Shield arcs turn and shift power more slowly.
+    - type: Tweak
+      message: The Cyrexa's armour-piercing shell does half as much structural damage.
+    - type: Tweak
+      message: >-
+        Adamantite walls are weaker, and PDV ships with a shield generator are
+        back on plastitanium walls.
+  id: 100289
+  time: '2026-10-31T13:45:56.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/414
