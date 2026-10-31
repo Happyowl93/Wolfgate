@@ -4274,3 +4274,14 @@ Entries:
   id: 100287
   time: '2026-10-30T20:20:56.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/423
+- author: antanananat
+  changes:
+    - type: Tweak
+      message: >-
+        UBM Excelsior's cost has been adjusted to its correct value. Due to
+        budget cuts at Excelsior Astrodynamics, the 2526 model of the Excelsior
+        now features a downgraded FTL drive. We're sincerely sorry for any
+        inconvenience caused.
+  id: 100288
+  time: '2026-10-31T13:45:37.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/426
