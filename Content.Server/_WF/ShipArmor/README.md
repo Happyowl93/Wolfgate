@@ -12,9 +12,10 @@ worn through first.
 - Any backing armor also keeps the mount's floor: explosions treat its tile as blocked until the armor falls,
   so a breached tile can't unanchor the hardpoint and drop its gun first (`ExplosionSystem.ShipArmor.cs`).
 - PDV adamantite walls (`WFWallAdamantite` and its diagonal and capital variants) are plastitanium walls built
-  from PDV composite. They take plastitanium's resistances on every variant and more than three times
-  plastitanium's health (9500, capital 11000), standing in for the shields PDV hulls lack. PDV hulls and the
-  classic PDV (BlackMarket) ships are refit with them.
+  from PDV composite. They take plastitanium's resistances on every variant and twice plastitanium's health
+  (6000, capital 7000), standing in for the shields PDV hulls lack. PDV hulls and the classic PDV (BlackMarket)
+  ships are refit with them, except those that carry a shield generator (Saturn, Layak, Motley Anne, Vulture,
+  Saintie), which keep plastitanium.
 - Tuning lives in the `wf.ship_armor.*` server CVars. The examine window's hull armor verb shows current coverage.
 
 <!-- WOLFGATE-GENERATED START -->
@@ -66,15 +67,15 @@ worn through first.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_r.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_r.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/kresta.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/kresta.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/kynda.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/kynda.yml): PDV hull refit from plastitanium to adamantite walls.
-- [`Resources/SharedMaps/_Mono/Shuttles/PDV/layak.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/layak.yml): PDV hull refit from plastitanium to adamantite walls.
-- [`Resources/SharedMaps/_Mono/Shuttles/PDV/motleyanne.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/motleyanne.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/layak.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/layak.yml): PDV hull with a shield generator, kept on plastitanium instead of adamantite.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/motleyanne.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/motleyanne.yml): PDV hull with a shield generator, kept on plastitanium instead of adamantite.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/inertia.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/inertia.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/mock.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/mock.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/snakelet.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/snakelet.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/neptune.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/neptune.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/ontos.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/ontos.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/osa.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/osa.yml): PDV hull refit from plastitanium to adamantite walls.
-- [`Resources/SharedMaps/_Mono/Shuttles/PDV/saturn.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/saturn.yml): PDV hull refit from plastitanium to adamantite walls.
+- [`Resources/SharedMaps/_Mono/Shuttles/PDV/saturn.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/saturn.yml): PDV hull with a shield generator, kept on plastitanium instead of adamantite.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/scorpion.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/scorpion.yml): PDV hull refit from plastitanium to adamantite walls.
 - [`Resources/SharedMaps/_Mono/Shuttles/PDV/tethys.yml`](../../../Resources/SharedMaps/_Mono/Shuttles/PDV/tethys.yml): PDV hull refit from plastitanium to adamantite walls.
 

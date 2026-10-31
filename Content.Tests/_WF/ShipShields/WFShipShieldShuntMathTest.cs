@@ -19,15 +19,15 @@ public sealed class WFShipShieldShuntMathTest
         var concentration = 0f;
         for (var step = 0; step < 100; step++)
         {
-            var next = WFShipShieldShuntMath.Step(concentration, 1f, 0.1f, 0.5f);
-            Assert.That(next, Is.InRange(concentration, MathF.Min(1f, concentration + 0.051f)));
+            var next = WFShipShieldShuntMath.Step(concentration, 1f, 0.1f, WFShipShieldShuntMath.TransferSpeed);
+            Assert.That(next, Is.InRange(concentration, MathF.Min(1f, concentration + WFShipShieldShuntMath.TransferSpeed * 0.1f + 0.001f)));
             concentration = next;
             direction = WFShipShieldShuntMath.StepAngle(direction, target, 0.1f);
         }
         Assert.That(concentration, Is.EqualTo(1f), "Full diversion must eventually open the unprotected sectors exactly.");
         Assert.That(WFShipShieldShuntMath.NormalizeAngle(direction - target), Is.EqualTo(0f).Within(0.00001f));
         Assert.That(WFShipShieldShuntMath.Step(0.5f, 0f, 0.1f, 0.5f), Is.InRange(0.45f, 0.5f));
-        Assert.That(MathF.Abs(WFShipShieldShuntMath.StepAngle(0f, MathF.PI, 0.1f)), Is.LessThanOrEqualTo(MathF.PI / 20f + 0.00001f));
+        Assert.That(MathF.Abs(WFShipShieldShuntMath.StepAngle(0f, MathF.PI, 0.1f)), Is.LessThanOrEqualTo(WFShipShieldShuntMath.TurnSpeed * 0.1f + 0.00001f));
     }
 
     [TestCase(0f, 90f)]
@@ -43,8 +43,8 @@ public sealed class WFShipShieldShuntMathTest
         Assert.That(MathF.Abs(WFShipShieldShuntMath.NormalizeAngle((roundTrip - bearing) * MathF.PI / 180f)), Is.LessThan(0.0001f));
     }
     [TestCase(0f, 1f, 1f)]
-    [TestCase(0.5f, 2.5f, 0.5f)]
-    [TestCase(1f, 4f, 0f)]
+    [TestCase(0.5f, 1.2937f, 0.5f)]
+    [TestCase(1f, 1.5874f, 0f)]
     public void QuarterArcTransfersPowerAndResetRestoresCoverage(float amount, float reinforced, float remainder)
     {
         Assert.That(WFShipShieldShuntMath.StrengthMultiplier(Vector2.UnitX, Vector2.Zero, 0f, amount, MathF.PI / 2f), Is.EqualTo(reinforced).Within(0.0001f));
@@ -55,7 +55,7 @@ public sealed class WFShipShieldShuntMathTest
     [TestCase(179f, 90f)]
     [TestCase(-191f, 120f)]
     [TestCase(721f, 270f)]
-    public void ArbitraryDirectionsConserveCapacityAndWrap(float directionDegrees, float arcDegrees)
+    public void ArbitraryDirectionsNeverAddCapacityAndWrap(float directionDegrees, float arcDegrees)
     {
         var direction = directionDegrees * MathF.PI / 180f;
         var arc = arcDegrees * MathF.PI / 180f;
@@ -69,7 +69,17 @@ public sealed class WFShipShieldShuntMathTest
             Assert.That(value, Is.EqualTo(WFShipShieldShuntMath.StrengthMultiplier(point, Vector2.Zero, direction + WFShipShieldShuntMath.FullArc, 0.73f, arc)).Within(0.0001f));
             total += value;
         }
-        Assert.That(total / samples, Is.EqualTo(1f).Within(0.002f));
+        Assert.That(total / samples, Is.LessThanOrEqualTo(1.002f), "Shunting must never add total capacity.");
+    }
+
+    [TestCase(30f, 2.2894f)]
+    [TestCase(90f, 1.5874f)]
+    [TestCase(180f, 1.2599f)]
+    [TestCase(360f, 1f)]
+    public void FullShuntStrengthIsCappedByCubeRoot(float arcDegrees, float expected)
+    {
+        Assert.That(WFShipShieldShuntMath.PeakStrength(1f, arcDegrees * MathF.PI / 180f), Is.EqualTo(expected).Within(0.001f));
+        Assert.That(WFShipShieldShuntMath.PeakStrength(0f, arcDegrees * MathF.PI / 180f), Is.EqualTo(1f));
     }
 
     [Test]

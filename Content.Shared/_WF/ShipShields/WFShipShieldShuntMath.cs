@@ -9,6 +9,10 @@ public static class WFShipShieldShuntMath
     public const float MinimumArc = MathF.PI / 6f;
     /// <summary>A full circle of shield coverage.</summary>
     public const float FullArc = MathF.PI * 2f;
+    /// <summary>How fast the allocation's bearing and width turn, in radians per second.</summary>
+    public const float TurnSpeed = MathF.PI / 6f;
+    /// <summary>How fast power moves into or out of the arc, in concentration per second.</summary>
+    public const float TransferSpeed = 0.2f;
 
     /// <summary>Approaches a requested value with a bounded transfer rate.</summary>
     public static float Step(float current, float target, float dt, float maxSpeed)
@@ -24,13 +28,13 @@ public static class WFShipShieldShuntMath
         return MathF.Abs(difference - amount) <= 0.001f ? target : current + amount;
     }
 
-    /// <summary>Turns along the shortest path at no more than ninety degrees per second.</summary>
+    /// <summary>Turns along the shortest path at no more than <see cref="TurnSpeed"/>.</summary>
     public static float StepAngle(float current, float target, float dt)
     {
         if (!float.IsFinite(current) || !float.IsFinite(target))
             return current;
         var destination = current + NormalizeAngle(target - current);
-        return NormalizeAngle(Step(current, destination, dt, MathF.PI / 2f));
+        return NormalizeAngle(Step(current, destination, dt, TurnSpeed));
     }
 
     /// <summary>Normalizes an angle to the range minus pi to pi.</summary>
@@ -39,7 +43,11 @@ public static class WFShipShieldShuntMath
         return MathF.IEEERemainder(angle, FullArc);
     }
 
-    /// <summary>Returns local strength while conserving the angular capacity allocation.</summary>
+    /// <summary>Strength inside the arc. The cube root caps narrow arcs: a full 30-degree shunt gives about 2.3x, 90 degrees about 1.6x.</summary>
+    public static float PeakStrength(float concentration, float arcRadians) =>
+        1f + concentration * (MathF.Cbrt(FullArc / arcRadians) - 1f);
+
+    /// <summary>Returns local strength: <see cref="PeakStrength"/> inside the arc, what's left of the perimeter outside it.</summary>
     public static float StrengthMultiplier(Vector2 position, Vector2 center, float directionRadians, float concentration, float arcRadians)
     {
         if (arcRadians >= FullArc - 0.00001f || concentration <= 0f)
@@ -47,7 +55,7 @@ public static class WFShipShieldShuntMath
         var offset = position - center;
         var angle = MathF.Atan2(offset.Y, offset.X);
         var inside = MathF.Abs(NormalizeAngle(angle - directionRadians)) <= arcRadians * 0.5f + 0.00001f;
-        return inside ? 1f + concentration * (FullArc / arcRadians - 1f) : 1f - concentration;
+        return inside ? PeakStrength(concentration, arcRadians) : 1f - concentration;
     }
 
     /// <summary>Splits an edge at sector rays and returns only its protected intervals.</summary>

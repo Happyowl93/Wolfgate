@@ -47,8 +47,8 @@ public sealed partial class ShipShieldsSystem
             }
             ApplyWolfgateShieldShunt(grid, mapGrid, allocation,
                 WFShipShieldShuntMath.StepAngle(allocation.DirectionRadians, allocation.TargetDirectionRadians, dt),
-                WFShipShieldShuntMath.Step(allocation.Concentration, allocation.TargetConcentration, dt, 0.5f),
-                WFShipShieldShuntMath.Step(allocation.ArcRadians, allocation.TargetArcRadians, dt, MathF.PI / 2f));
+                WFShipShieldShuntMath.Step(allocation.Concentration, allocation.TargetConcentration, dt, WFShipShieldShuntMath.TransferSpeed),
+                WFShipShieldShuntMath.Step(allocation.ArcRadians, allocation.TargetArcRadians, dt, WFShipShieldShuntMath.TurnSpeed));
             if (MathF.Abs(WFShipShieldShuntMath.NormalizeAngle(allocation.DirectionRadians - allocation.TargetDirectionRadians)) < 0.00001f &&
                 allocation.Concentration == allocation.TargetConcentration && allocation.ArcRadians == allocation.TargetArcRadians)
                 finished.Add(grid);

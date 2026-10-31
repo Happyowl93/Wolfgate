@@ -237,12 +237,12 @@ public sealed class WFShipShieldHullDamageTest
         {
             Assert.That(throughProjectile.ProjectileSpent, Is.True, "The same shot must be caught by the reinforced rear.");
             Assert.That(entities.GetComponent<ShipShieldEmitterComponent>(emitterUid).Damage,
-                Is.EqualTo((float)throughProjectile.Damage.GetTotal() / 4f).Within(0.001f));
+                Is.EqualTo((float)throughProjectile.Damage.GetTotal() / WFShipShieldShuntMath.PeakStrength(1f, MathF.PI / 2f)).Within(0.001f));
         });
         foreach (var scenario in new[]
         {
             (Amount: 0.5f, Side: -1f, DamageScale: 2f),
-            (Amount: 0.5f, Side: 1f, DamageScale: 0.4f),
+            (Amount: 0.5f, Side: 1f, DamageScale: 1f / WFShipShieldShuntMath.PeakStrength(0.5f, MathF.PI / 2f)),
             (Amount: 0f, Side: -1f, DamageScale: 1f),
         })
         {

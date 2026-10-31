@@ -54,7 +54,7 @@ public sealed class WFShipShieldRadarGeometryTest
         var radar = new WFShipShieldRadarGeometry();
         radar.Update(Hull(), Center, 0.73f, 0.5f, MathF.PI / 2f);
         Assert.That(radar.Segments.Sum(s => Vector2.Distance(s.Start, s.End)), Is.EqualTo(40f).Within(0.001f));
-        Assert.That(radar.Segments.Select(s => s.Strength).Distinct(), Is.EquivalentTo(new[] { 2.5f, 0.5f }));
+        Assert.That(radar.Segments.Select(s => s.Strength).Distinct(), Is.EquivalentTo(new[] { WFShipShieldShuntMath.PeakStrength(0.5f, MathF.PI / 2f), 0.5f }));
         radar.Update(Hull(10f), Center, 0f, 0f, MathF.PI / 2f);
         Assert.That(radar.Segments.Sum(s => Vector2.Distance(s.Start, s.End)), Is.EqualTo(80f).Within(0.001f));
         radar.Update(Array.Empty<Vector2[]>(), Center, 0f, 0f, MathF.PI / 2f);

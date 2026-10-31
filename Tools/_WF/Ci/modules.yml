@@ -2253,10 +2253,10 @@ unmarked:
     reason: PDV hull refit from plastitanium to adamantite walls.
   - path: Resources/SharedMaps/_Mono/Shuttles/PDV/layak.yml
     module: ShipArmor
-    reason: PDV hull refit from plastitanium to adamantite walls.
+    reason: PDV hull with a shield generator, kept on plastitanium instead of adamantite.
   - path: Resources/SharedMaps/_Mono/Shuttles/PDV/motleyanne.yml
     module: ShipArmor
-    reason: PDV hull refit from plastitanium to adamantite walls.
+    reason: PDV hull with a shield generator, kept on plastitanium instead of adamantite.
   - path: Resources/SharedMaps/_Mono/Shuttles/PDV/neptune.yml
     module: ShipArmor
     reason: PDV hull refit from plastitanium to adamantite walls.
@@ -2268,7 +2268,7 @@ unmarked:
     reason: PDV hull refit from plastitanium to adamantite walls.
   - path: Resources/SharedMaps/_Mono/Shuttles/PDV/saturn.yml
     module: ShipArmor
-    reason: PDV hull refit from plastitanium to adamantite walls.
+    reason: PDV hull with a shield generator, kept on plastitanium instead of adamantite.
   - path: Resources/SharedMaps/_Mono/Shuttles/PDV/scorpion.yml
     module: ShipArmor
     reason: PDV hull refit from plastitanium to adamantite walls.

@@ -69,7 +69,7 @@ public sealed class WFShipShieldHitscanMathTest
         };
         Assert.That(WFShipShieldHitscanMath.TryIntersect(Hull, new Vector2(-10f, 0f), Vector2.UnitX,
             20f, allocation, out _, out _, out var strength), Is.True);
-        Assert.That(strength, Is.EqualTo(4f).Within(0.0001f));
+        Assert.That(strength, Is.EqualTo(1.5874f).Within(0.0001f));
     }
 
     [Test]

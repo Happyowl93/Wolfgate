@@ -35,8 +35,8 @@ public sealed class WFShipShieldLiveShuntTest
             Assert.That(current.DirectionRadians, Is.Zero, "A live request must not teleport protection.");
             Assert.That(current.Concentration, Is.Zero);
             system.UpdateWolfgateShieldShunts(0.1f);
-            Assert.That(current.Concentration, Is.InRange(0.001f, 0.051f));
-            Assert.That(current.DirectionRadians, Is.InRange(0.001f, MathF.PI / 20f + 0.0001f));
+            Assert.That(current.Concentration, Is.InRange(0.001f, WFShipShieldShuntMath.TransferSpeed * 0.1f + 0.001f));
+            Assert.That(current.DirectionRadians, Is.InRange(0.001f, WFShipShieldShuntMath.TurnSpeed * 0.1f + 0.0001f));
             var field = entities.GetComponent<WFShipShieldShuntComponent>(shield);
             Assert.That(field.DirectionRadians, Is.EqualTo(current.DirectionRadians));
             Assert.That(field.Concentration, Is.EqualTo(current.Concentration));

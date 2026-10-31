@@ -6,6 +6,7 @@ using Content.Server.Power.EntitySystems;
 using Content.Server.Shuttles.Components;
 using Content.Shared._Mono.FireControl;
 using Content.Shared._WF.Cockpit;
+using Content.Shared._WF.ShipCombat;
 using Content.Shared.Access.Components;
 using Content.Shared.Access.Systems;
 using Content.Shared.ActionBlocker;
@@ -134,7 +135,7 @@ public sealed partial class WFCockpitGunnerySystem : EntitySystem
             return false;
         if (!_fireControl.WfCockpitCommand(console, actor, command))
             return false;
-        if (command is not FireControlConsoleFireMessage)
+        if (command is not (FireControlConsoleFireMessage or WFTurretAimMessage))
             SendState(actor, session, false);
         return true;
     }

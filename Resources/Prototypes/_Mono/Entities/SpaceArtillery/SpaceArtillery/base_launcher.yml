@@ -323,6 +323,9 @@
       - !type:PlaySoundBehavior
         sound:
           collection: MetalBreak
+  # WOLFGATE(ShipCombat): rotating guns of this class turn at a limited rate.
+  - type: WFTurretTraverse
+    turnRate: 120
 
 - type: entity
   id: BallisticArtilleryTier2HP # Normal weapons, slightly stronger than plastitanium. This is the baseline durability for your average sized anchorable weapon.
@@ -343,6 +346,9 @@
       - !type:PlaySoundBehavior
         sound:
           collection: MetalBreak
+  # WOLFGATE(ShipCombat): rotating guns of this class turn at a limited rate.
+  - type: WFTurretTraverse
+    turnRate: 80
 
 - type: entity
   id: BallisticArtilleryTier3HP # Medium weapons. Reinforced plastitanium level. Typical for medium-class weapons. In-between heavy artillery and standard anchorables.
@@ -369,6 +375,9 @@
       - !type:PlaySoundBehavior
         sound:
           collection: MetalBreak
+  # WOLFGATE(ShipCombat): rotating guns of this class turn at a limited rate.
+  - type: WFTurretTraverse
+    turnRate: 50
 
 - type: entity
   id: BallisticArtilleryTier4HP # Capital Weapons. Cyrexas, main cannons. Anything really big.
@@ -395,6 +404,9 @@
       - !type:PlaySoundBehavior
         sound:
           collection: MetalBreak
+  # WOLFGATE(ShipCombat): rotating guns of this class turn at a limited rate.
+  - type: WFTurretTraverse
+    turnRate: 30
 
 - type: entity
   id: BallisticArtilleryTier5HP # Supercapital class armament, station outpost weaponry and capital pre-fracture weaponry, around 4x Reinforced Plastitanium Health.
@@ -421,3 +433,6 @@
       - !type:PlaySoundBehavior
         sound:
           collection: MetalBreak
+  # WOLFGATE(ShipCombat): rotating guns of this class turn at a limited rate.
+  - type: WFTurretTraverse
+    turnRate: 20

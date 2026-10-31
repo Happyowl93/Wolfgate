@@ -11,6 +11,7 @@ using Content.Server._Mono.FireControl;
 using Content.Server._Mono.Projectiles.TargetSeeking;
 using Content.Server._WF.Cockpit;
 using Content.Server._WF.CombatConsole;
+using Content.Server._WF.ShipCombat;
 using Content.Server.Players.PlayTimeTracking;
 using Content.Server.Power.Components;
 using Content.Server.Shuttles.Components;
@@ -24,6 +25,7 @@ using Content.Shared._Mono.Ships.Components;
 using Content.Shared._WF.CCVar;
 using Content.Shared._WF.Cockpit;
 using Content.Shared._WF.CombatConsole;
+using Content.Shared._WF.ShipCombat;
 using Content.Shared.Access;
 using Content.Shared.Access.Components;
 using Content.Shared.Buckle;
@@ -372,6 +374,15 @@ public sealed class WFCockpitGunneryTest
             Assert.That(cockpit.TryCommand(actor, helm, netGun, new FireControlConsoleFireMessage(new(), target)), Is.True);
             Assert.That(em.System<FireControlSystem>().WfCockpitState(gun, false), Is.SameAs(beforeHover),
                 "Cursor guidance must not rebuild radar/ammunition state.");
+            Assert.That(cockpit.TryCommand(actor, helm, netGun, new WFTurretAimMessage(selection, target)), Is.True);
+            Assert.That(em.GetComponent<WFTurretTraverseComponent>(weapon).AimTarget, Is.EqualTo(em.GetCoordinates(target)),
+                "Cockpit cursor guidance must lay the selected guns before firing.");
+            Assert.That(em.System<FireControlSystem>().WfCockpitState(gun, false), Is.SameAs(beforeHover),
+                "Turret aim must not rebuild radar/ammunition state.");
+            // The autocannon has a turn rate and holds fire until it faces the target.
+            var xform = em.System<SharedTransformSystem>();
+            var bearing = xform.ToMapCoordinates(em.GetCoordinates(target)).Position - xform.GetWorldPosition(weapon);
+            xform.SetWorldRotation(weapon, Angle.FromWorldVec(bearing));
             ui.RaiseUiMessage(helm, ShuttleConsoleUiKey.Key,
                 new WFCockpitGunneryCommandMessage(netGun, new FireControlConsoleFireMessage(selection, target)) { Actor = actor });
             Assert.That(fireControl.NextFire, Is.GreaterThan(TimeSpan.Zero), "Firing reaches the original weapon cooldown path.");

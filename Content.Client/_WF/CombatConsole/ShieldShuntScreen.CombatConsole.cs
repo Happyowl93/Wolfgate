@@ -48,7 +48,7 @@ public sealed partial class WFShipShieldShuntScreen
             _state is { Available: true } ? WFShipShieldShuntMath.StrengthMultiplier(
                 new Vector2(MathF.Cos(_dial.Direction), MathF.Sin(_dial.Direction)), Vector2.Zero,
                 _dial.Direction, _dial.Concentration, _dial.Arc) * 100 : null,
-            0, Math.Max(100, MathF.Tau / Math.Max(0.01f, _dial.Arc) * 100), "wf-gauge-unit-percent"));
+            0, WFShipShieldShuntMath.PeakStrength(1f, Math.Max(0.01f, _dial.Arc)) * 100, "wf-gauge-unit-percent"));
         var outside = new WFGlassGauge("wf-gauge-shield-outside", () => WFGaugeReading.Number(
             _state is { Available: true } ? (_dial.Arc >= MathF.Tau - 0.001f ? 1 : 1 - _dial.Concentration) * 100 : null,
             0, 100, "wf-gauge-unit-percent", tint: _unprotected.Visible ? InstrumentTheme.Red : InstrumentTheme.Accent));
