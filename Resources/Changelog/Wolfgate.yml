@@ -4307,3 +4307,13 @@ Entries:
   id: 100289
   time: '2026-10-31T13:45:56.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/414
+- author: antanananat
+  changes:
+    - type: Tweak
+      message: >-
+        Dead space carp carcasses found stuck in some of the thrusters on the
+        Hammerhead-class Corvette were removed, improving the manoeuvrability
+        slightly.
+  id: 100290
+  time: '2026-10-31T14:30:00.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/424
