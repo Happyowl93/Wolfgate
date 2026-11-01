@@ -165,6 +165,50 @@ public sealed class StationSupplyTest
         await pair.CleanReturnAsync();
     }
 
+    [Test]
+    public async Task ADryStationPaysTheTopRateAndFillsItsShelves()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var market = entMan.System<WFTradeMarketSystem>();
+        var rushes = entMan.System<WFTradeRushSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            // The Trade Mall's chute doesn't list what its own vendor sells; Baikal's sets the rate.
+            var chute = TradeTestWorld.MarketChute(entMan, map);
+            var grid = map.Grid.Owner;
+            var (far, payer) = TradeTestWorld.Station(entMan, map, new Vector2(0f, 60f), "WF test payer", "CargoChuteBaikal");
+            entMan.SpawnEntity(Vendor, map.GridCoords);
+            var profile = market.Profile(grid);
+            var start = (int) MathF.Round(profile.VendorStock * profile.BuyScarcityStart);
+
+            market.SetVendorStock(grid, Luxuries, start);
+            Assert.That(market.Quote(chute, Luxuries), Is.Null, "A chute shouldn't take a good its shelves aren't scarce of.");
+
+            market.SetVendorStock(grid, Luxuries, start - 1);
+            var quote = market.Quote(chute, Luxuries)!.Value;
+            Assert.That(quote.Reason, Is.EqualTo((LocId) "wf-trade-reason-restock"));
+            Assert.That(quote.Base, Is.EqualTo(market.Quote(payer, Luxuries)!.Value.Base), "A dry station should pay the best listed rate.");
+
+            var crate = TradeTestWorld.Hauled(entMan, far, map.GridCoords, Luxuries);
+            Assert.That(market.TakesToRestock(chute, crate), Is.True);
+
+            var rush = rushes.Start(new ProtoId<WFTradeRushPrototype>("WFTradeRushLuxuries"));
+            Assert.That(rush!.Grid, Is.EqualTo(grid), "An order should go to the station scarce of its goods.");
+            rushes.Clear();
+
+            market.Sell(chute, crate, entMan.SpawnEntity(null, map.GridCoords), quote.Amount);
+            Assert.That(market.VendorStock(grid, Luxuries), Is.EqualTo(start), "A delivery should go on the shelf.");
+            Assert.That(market.Pressure(grid, Luxuries), Is.Zero, "Filling a shelf shouldn't dent the price.");
+            Assert.That(market.Quote(chute, Luxuries), Is.Null, "A filled shelf should stop taking crates.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     /// <summary>A good on no such manifest would run out for good at a quiet server.</summary>
     [Test]
     public async Task EveryVendorGoodComesByFreightAtAnyPlayerCount()

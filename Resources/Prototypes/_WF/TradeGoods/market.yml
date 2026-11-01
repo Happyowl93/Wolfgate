@@ -70,9 +70,13 @@
   # Each station rolls what share of a full stock it opens with, per good; the low end stays above buyScarcityStart.
   vendorStockStartMin: 0.25
   vendorStockStartMax: 1
-  # A freighter's stop brings half a full stock of each material and trade good it carries, and ends their shortages.
+  # A freighter shares its hold out along its route: each crate unloaded adds this much vendor stock, and each stop adds
+  # half the target of its manifest's materials and ends shortages of what it brought.
+  freightCrateStock: 25
   freightRestock: 0.5
   materialStockTarget: 10000
+  # Stations use up what they hold, so a glut clears and a station nobody supplies runs down.
+  materialHalfLife: 10800
   materialGlut: 3
   materialPayMax: 1.2
   materialPayMin: 0.5

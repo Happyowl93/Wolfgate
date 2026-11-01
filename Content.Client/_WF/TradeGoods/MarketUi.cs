@@ -390,6 +390,9 @@ public sealed class MarketUiFragment : BoxContainer
             Align = Label.AlignMode.Right,
             Margin = new Thickness(0, 0, 8, 0),
         });
+        if (price.Stock is { } stock)
+            row.AddChild(Dimmed(Loc.GetString("wf-market-price-stock", ("stock", stock)), 48));
+
         row.AddChild(Dimmed(Loc.GetString("wf-market-price-weight", ("tonnes", price.Tonnes),
             ("perTonne", price.Tonnes > 0 ? (int) (price.Amount / price.Tonnes) : 0)), 78));
         var reason = Dimmed(price.Reason, 64);

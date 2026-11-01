@@ -326,6 +326,34 @@ public sealed partial class WFEncounterSystem : EntitySystem
         return false;
     }
 
+    /// <summary>A manifest picked at random, each as likely as <see cref="WFEncounterManifestWeightEvent"/> weighs it.</summary>
+    private WFEncounterManifestPrototype? PickManifest(WFEncounterPrototype prototype, IReadOnlyList<EntityUid>? stops)
+    {
+        var weighed = new List<(WFEncounterManifestPrototype Manifest, float Weight)>();
+        var total = 0f;
+        foreach (var id in prototype.Manifests)
+        {
+            if (!_prototypes.TryIndex(id, out var manifest))
+                continue;
+
+            var ev = new WFEncounterManifestWeightEvent(manifest, stops ?? Array.Empty<EntityUid>(), 1f);
+            RaiseLocalEvent(ref ev);
+            var weight = MathF.Max(0f, ev.Weight);
+            weighed.Add((manifest, weight));
+            total += weight;
+        }
+
+        var roll = _random.NextFloat() * total;
+        foreach (var (manifest, weight) in weighed)
+        {
+            roll -= weight;
+            if (roll <= 0f)
+                return manifest;
+        }
+
+        return weighed.LastOrDefault().Manifest;
+    }
+
     /// <summary>
     /// Spawns an encounter with its origin at a point in space. <paramref name="stops"/> are the stations its
     /// placement chose: orders can aim at the first and last, and a route calls at each in turn. Fails, leaving
@@ -390,9 +418,7 @@ public sealed partial class WFEncounterSystem : EntitySystem
         comp.Simulated = _simulate && prototype.Bounty is not { Target: WFEncounterBountyTarget.Captain };
         comp.Threat = prototype.Threat ?? comp.Tier;
 
-        WFEncounterManifestPrototype? manifest = null;
-        if (prototype.Manifests.Count > 0)
-            _prototypes.TryIndex(_random.Pick(prototype.Manifests), out manifest);
+        var manifest = PickManifest(prototype, stops);
         comp.Manifest = manifest?.ID;
         foreach (var ship in prototype.Ships)
         {

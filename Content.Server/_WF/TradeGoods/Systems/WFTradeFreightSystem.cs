@@ -9,6 +9,7 @@ using Content.Shared.GameTicking;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
+using Robust.Shared.Utility;
 
 namespace Content.Server._WF.TradeGoods.Systems;
 
@@ -38,8 +39,14 @@ public sealed class WFTradeFreightSystem : EntitySystem
     /// <summary>How much likelier a short station is to be a freight run's first stop.</summary>
     private const float ShortageDraw = 4f;
 
+    /// <summary>How much likelier freight is to go where it's needed, per share of a station's goods or per good running low.</summary>
+    private const float NeedDraw = 4f;
+
     /// <summary>Stops each run has reached.</summary>
     private readonly Dictionary<EntityUid, HashSet<EntityUid>> _reached = new();
+
+    /// <summary>What each simulated run has left to unload.</summary>
+    private readonly Dictionary<EntityUid, Dictionary<string, int>> _holds = new();
 
     /// <summary>The hulls each run loaded cargo onto.</summary>
     private readonly Dictionary<EntityUid, HashSet<EntityUid>> _freighters = new();
@@ -57,6 +64,7 @@ public sealed class WFTradeFreightSystem : EntitySystem
         SubscribeLocalEvent<WFEncounterResolvedEvent>(OnResolved);
         SubscribeLocalEvent<WFCargoValueQueryEvent>(OnCargoValue);
         SubscribeLocalEvent<WFEncounterStationWeightEvent>(OnStationWeight);
+        SubscribeLocalEvent<WFEncounterManifestWeightEvent>(OnManifestWeight);
         SubscribeLocalEvent<WFTradeQuoteEvent>(OnQuote);
         SubscribeLocalEvent<WFTradeOriginComponent, ExaminedEvent>(OnExamined);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnCleanup);
@@ -66,6 +74,7 @@ public sealed class WFTradeFreightSystem : EntitySystem
     {
         _reached.Clear();
         _freighters.Clear();
+        _holds.Clear();
     }
 
     private void OnCargoLoaded(ref WFEncounterCargoLoadedEvent args)
@@ -116,45 +125,59 @@ public sealed class WFTradeFreightSystem : EntitySystem
         if (!reached.Add(args.Station))
             return;
 
-        // A crewed hull supplies what is still aboard, so one stripped of its cargo brings nothing; a simulated one,
-        // what its manifest says it carries.
-        var counts = new Dictionary<string, int>();
+        // A crewed hull carries what is still aboard, so cargo taken off it never arrives; a simulated one, its manifest.
+        var aboard = new Dictionary<string, List<EntityUid>>();
         var query = EntityQueryEnumerator<WFTradeOriginComponent, TransformComponent, MetaDataComponent>();
-        while (query.MoveNext(out _, out _, out var xform, out var meta))
+        while (query.MoveNext(out var uid, out _, out var xform, out var meta))
         {
             if (xform.GridUid == args.Grid && meta.EntityPrototype is { } proto)
-                counts[proto.ID] = counts.GetValueOrDefault(proto.ID) + 1;
+                aboard.GetOrNew(proto.ID).Add(uid);
         }
 
-        if (counts.Count == 0 && _freighters.GetValueOrDefault(args.Encounter)?.Contains(args.Grid) != true)
-        {
-            foreach (var crate in manifest.Crates)
-            {
-                counts[crate] = counts.GetValueOrDefault(crate) + 1;
-            }
-        }
+        var simulated = aboard.Count == 0 && _freighters.GetValueOrDefault(args.Encounter)?.Contains(args.Grid) != true;
+        var hold = simulated ? SimulatedHold(args.Encounter, manifest) : aboard.ToDictionary(crates => crates.Key, crates => crates.Value.Count);
 
         var station = args.Station;
         var bought = _market.Chutes().Where(chute => chute.Grid == station).ToList();
         var stocked = _market.StockedGoods(station);
         var supplied = new List<string>();
+        var goods = new HashSet<string>();
         var profile = _market.Profile(args.Station);
-        foreach (var (good, count) in counts)
+        var stopsLeft = Math.Max(1, encounter.Stops.Count - reached.Count + 1);
+        foreach (var (good, count) in hold.ToList())
         {
+            // The hold is shared out along the route, so it arrives lighter the more of it is gone.
+            var unloaded = (int) MathF.Ceiling(count / (float) stopsLeft);
+            if (unloaded <= 0)
+                continue;
+
+            goods.Add(good);
             var buys = bought.Any(chute => chute.Dispenser.Inventory.ContainsKey(good));
             if (buys)
-                _market.AddPressure(args.Station, good, Math.Min(SupplyCap, count * profile.PerSaleOverrides.GetValueOrDefault(good, profile.PerSale)), supplied: true);
+                _market.AddPressure(args.Station, good, Math.Min(SupplyCap, unloaded * profile.PerSaleOverrides.GetValueOrDefault(good, profile.PerSale)), supplied: true);
+
+            if (stocked.Contains(good))
+                _market.RestockVendors(args.Station, unloaded * profile.FreightCrateStock, new HashSet<string> { good });
 
             if (buys || stocked.Contains(good))
                 supplied.Add(_market.GoodName(good));
+
+            if (simulated)
+            {
+                hold[good] = count - unloaded;
+                continue;
+            }
+
+            foreach (var crate in aboard[good].Take(unloaded))
+            {
+                QueueDel(crate);
+            }
         }
 
         // Nothing else refills a station, so stopping the freighters starves it of what they carry.
-        var goods = counts.Keys.ToHashSet();
         if (goods.Count > 0 && _stock.WfRestock(args.Station, profile.FreightRestock, manifest.Materials))
             supplied.Add(Loc.GetString("wf-trade-goods-materials"));
 
-        _market.RestockVendors(args.Station, (int) MathF.Ceiling(profile.VendorStock * profile.FreightRestock), goods);
         _shortages.Relieve(args.Station, goods);
         _supply.NoteStop(args.Station);
 
@@ -165,10 +188,26 @@ public sealed class WFTradeFreightSystem : EntitySystem
         }
     }
 
+    /// <summary>What a simulated run has left to unload, starting from everything on its manifest.</summary>
+    private Dictionary<string, int> SimulatedHold(EntityUid encounter, WFEncounterManifestPrototype manifest)
+    {
+        if (_holds.TryGetValue(encounter, out var hold))
+            return hold;
+
+        _holds[encounter] = hold = new Dictionary<string, int>();
+        foreach (var crate in manifest.Crates)
+        {
+            hold[crate] = hold.GetValueOrDefault(crate) + 1;
+        }
+
+        return hold;
+    }
+
     private void OnResolved(ref WFEncounterResolvedEvent args)
     {
         _reached.Remove(args.Encounter, out var reached);
         _freighters.Remove(args.Encounter, out var hulls);
+        _holds.Remove(args.Encounter);
 
         // A fight decided with a freighter still flying for the run didn't lose it.
         if (args.Resolution == WFEncounterResolution.Decided
@@ -217,7 +256,7 @@ public sealed class WFTradeFreightSystem : EntitySystem
         return inbound;
     }
 
-    /// <summary>Freight runs are likelier to start their route at a station that is short of something.</summary>
+    /// <summary>Freight runs are likelier to start their route at a station that is short of something or running low.</summary>
     private void OnStationWeight(ref WFEncounterStationWeightEvent args)
     {
         if (args.Prototype.Manifests.Count == 0)
@@ -226,6 +265,26 @@ public sealed class WFTradeFreightSystem : EntitySystem
         var station = args.Station;
         if (_shortages.Active.Any(shortage => shortage.Grid == station))
             args.Weight *= ShortageDraw;
+
+        var goods = _market.StockedGoods(station);
+        if (goods.Count > 0)
+            args.Weight *= 1f + NeedDraw * goods.Count(good => _market.RunningLow(station, good)) / goods.Count;
+    }
+
+    /// <summary>Freight runs are likelier to carry what their stops are running low on.</summary>
+    private void OnManifestWeight(ref WFEncounterManifestWeightEvent args)
+    {
+        var needed = 0;
+        foreach (var stop in args.Stops)
+        {
+            foreach (var good in _market.StockedGoods(stop))
+            {
+                if (_market.RunningLow(stop, good) && args.Manifest.Crates.Contains(good))
+                    needed++;
+            }
+        }
+
+        args.Weight *= 1f + NeedDraw * needed;
     }
 
     /// <summary>Values a ship's trade cargo at the best base price any chute pays for each crate.</summary>

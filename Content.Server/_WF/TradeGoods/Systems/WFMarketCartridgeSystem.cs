@@ -238,7 +238,8 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
                 hiddenChutes.Add(chute);
             }
 
-            foreach (var good in dispenser.Inventory.Keys)
+            var restocking = _market.StockedGoods(grid).Where(good => !dispenser.Inventory.ContainsKey(good) && _market.Restocking(grid, good));
+            foreach (var good in dispenser.Inventory.Keys.Concat(restocking))
             {
                 if (_market.Quote(chute, good) is not { } quote || station.Prices.Any(price => price.Good == _market.GoodName(good)))
                     continue;
@@ -272,10 +273,11 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
                 order[grid] = profile.MarketFactions.Count;
             }
 
+            var stocked = _market.StockedGoods(grid);
             foreach (var (good, quote) in _market.StationBuyQuotes(grid))
             {
                 station.Buys.Add(new WFMarketPrice(_market.GoodName(good), quote.Amount, quote.Factor,
-                    Loc.GetString(quote.Reason), _cargo.GoodWeight(good), false));
+                    Loc.GetString(quote.Reason), _cargo.GoodWeight(good), false, stocked.Contains(good) ? _market.VendorStock(grid, good) : null));
             }
 
             station.Buys.Sort((a, b) => a.Amount.CompareTo(b.Amount));

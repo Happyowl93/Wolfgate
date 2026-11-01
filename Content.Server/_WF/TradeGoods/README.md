@@ -23,11 +23,16 @@ Station supply (`WFTradeSupplySystem`): stations start stocked, buying empties t
 station's vendors share one finite stock per good (`vendorStock`, held on `WFTradeMarketComponent` and shown on every
 machine), a sold-out good drops off the Market app and contraband never runs out. Each station rolls its opening stock of
 each good between `vendorStockStartMin` and `vendorStockStartMax` of full, so no two rounds stock alike. Cargo markets open with `supplyMaterials`
-at the target. A freighter stop brings `freightRestock` of a full stock of each trade good aboard and each of its manifest's
-`materials`, and ends the station's shortages of those goods; nothing else refills them. A crewed hull stripped of its cargo
-brings nothing, so what a station runs short of depends on which ships reach it. Every good a station vendor sells has to be
-on a manifest that runs at any player count (`EveryVendorGoodComesByFreightAtAnyPlayerCount`). Plasma, uranium, lithium and
-precious metals only come from miners. `wf_trade status` shows each station's supply and the server logs it hourly.
+at the target. A freighter shares its hold out evenly along its route: each stop unloads its share of the crates aboard, each
+adding `freightCrateStock` to the vendors, brings `freightRestock` of the target of its manifest's `materials`, and ends the
+station's shortages of those goods. Cargo stolen off a crewed hull never arrives, and one stripped bare brings nothing, so what
+a station runs short of depends on which ships reach it. Runs lean toward stations with goods under half stock and toward
+manifests their stops lack. Every good a station vendor sells has to be on a manifest that runs at any player count
+(`EveryVendorGoodComesByFreightAtAnyPlayerCount`). Plasma, uranium, lithium and precious metals only come from miners.
+
+Players fill shelves too. Once a vendor good is scarce, the station's chutes take it even if they don't list it, at the best
+rate any open chute lists and with no price dent, and rush and bulk orders go there first. Any good a chute takes that the
+station's vendors sell goes on their shelves. A chute still refuses a crate bought on its own station, so this can't be looped. `wf_trade status` shows each station's supply and the server logs it hourly.
 
 Stopping the freighters is the blockade: a station they don't reach runs dry as people buy, and a lost run leaves its stops
 short. Players do it by intercepting freighters, outside the 256 m that Conflict Rule 4 protects. Freighters also stay
@@ -56,7 +61,7 @@ What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifie
 - Rush orders: a station wants a few crates fast (`WFTradeRushSystem`, `wfTradeRush`). Bulk orders (`bulk: true`, on their
   own `bulkMinutes` schedule) are the big-hold version: an open station wants 25 to 45 crates of a group within 45 to 60
   minutes, at 1.15x to 1.25x and a flat price: posting one clears the pressure on its goods at that station and their
-  crates add none (`WFTradeQuote.NoGlut`), so the last pays what the first did. Vendors still get scarcer. Anyone can
+  crates add none (`WFTradeQuote.NoGlut`), so the last pays what the first did. Anyone can
   deliver toward one, but only a big hold can fill it in a run.
 - NPC freight (`WFTradeFreightSystem`): a run's crates carry a manifest seal and pay 60% at lawful chutes, full price at
   a fence (the Underground fence chute, PDV Helios) and a bonus at their destination. A freighter docking at a stop
@@ -68,7 +73,8 @@ Materials (`MarketSystem.Materials`, `materialGoods`) trade through each station
 how much of a material the station holds, from 1.2x with none through full value at
 `materialStockTarget` to 0.5x at a glut, and a sale walks down that curve, so one big haul doesn't all fetch the top
 rate. The market console charges by the same stock, from 1.5x near empty to 0.8x at a glut, before its own modifier.
-A sale lands in the stock at once, and stock only leaves by being bought, so every station with a pallet needs a cargo
+Stations use up what they hold, halving it every `materialHalfLife`, so a glut clears and a station nobody supplies runs
+down. A sale lands in the stock at once, and otherwise stock only leaves by being bought, so every station with a pallet needs a cargo
 market and a market console (`EveryPalletStopSellsBackWhatItBuys`). Materials in a console's cart stay part of the stock:
 they still count as supply and follow the live price until they are bought. Everything else the console sells works as it always did. The curves
 keep selling and buying back at a loss on the tightest pallet and console pair on any station, which
@@ -76,7 +82,7 @@ keep selling and buying back at a loss on the tightest pallet and console pair o
 pallet pay rises after it, but a sale cuts pallet pay at once: a delayed glut would let a split sale fetch the top rate and
 be bought back at a profit once the console caught up. Freight moves prices at once. The Market app's Materials tab names each material's best sale and cheapest
 stock. Materials aboard a ship count toward its cargo value (`WFTradeMaterialCargoSystem`), so a full mining hold draws
-raiders. Crates built from materials use about 60% of their vendor price in them; crates built from reagents, parts
+raiders. Crates built from materials use about 90% of their vendor price in them; crates built from reagents, parts
 or cloth only have a heavier steel shell, and fissile fuel is unchanged.
 
 Contraband (`WFTradeContrabandSystem`, `contrabandGoods`): the smuggling crate is sold by the Underground's fence vendor

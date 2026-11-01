@@ -59,13 +59,21 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public float VendorStockStartMax = 1f;
 
-    /// <summary>Share of a full stock of each material and trade good it carries that a freighter's stop adds.</summary>
+    /// <summary>Share of the target of each material on its manifest that a freighter's stop adds.</summary>
     [DataField]
     public float FreightRestock = 0.5f;
+
+    /// <summary>Vendor stock each crate a freighter unloads adds: its hold is bulk cargo, not a shelf's worth of crates.</summary>
+    [DataField]
+    public int FreightCrateStock = 25;
 
     /// <summary>Spesos of one material a station holds at normal prices.</summary>
     [DataField]
     public float MaterialStockTarget = 10000f;
+
+    /// <summary>Time for a station to use up half of the materials it holds.</summary>
+    [DataField]
+    public TimeSpan MaterialHalfLife = TimeSpan.FromHours(3);
 
     /// <summary>Stock, as a multiple of the target, at which prices stop falling.</summary>
     [DataField]

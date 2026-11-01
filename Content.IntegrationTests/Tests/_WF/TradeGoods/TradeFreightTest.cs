@@ -110,7 +110,8 @@ public sealed class TradeFreightTest
             entMan.EventBus.RaiseEvent(EventSource.Local, ref docked);
 
             var profile = market.Profile(stop);
-            var restock = (int) System.MathF.Ceiling(profile.VendorStock * profile.FreightRestock);
+            var listed = server.ProtoMan.Index<WFEncounterManifestPrototype>(GeneralManifest).Crates.Count(crate => crate.Id == Fabric);
+            var restock = listed * profile.FreightCrateStock;
             Assert.That(market.VendorStock(stop, Fabric), Is.EqualTo(restock), "A dock should restock what the freighter carries.");
             Assert.That(market.VendorStock(stop, luxuries), Is.Zero, "A dock shouldn't restock what the freighter doesn't carry.");
             Assert.That(shortages.Active.Any(shortage => shortage.Goods?.Contains(Fabric) == true), Is.False, "A dock should end shortages of what it brings.");
@@ -121,6 +122,86 @@ public sealed class TradeFreightTest
             entMan.EventBus.RaiseEvent(EventSource.Local, ref docked);
             Assert.That(market.VendorStock(stop, Fabric), Is.EqualTo(restock), "A second dock on the same run shouldn't restock it again.");
             shortages.Clear();
+            Drop(entMan, run, ship);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task AFreighterSharesItsHoldAlongItsRoute()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var market = entMan.System<WFTradeMarketSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            const string vendor = "VendingMachineTraderDepotAlt";
+            TradeTestWorld.MarketChute(entMan, map);
+            var first = map.Grid.Owner;
+            var (second, _) = TradeTestWorld.Station(entMan, map, new Vector2(0f, 60f), "WF test second stop");
+            entMan.SpawnEntity(vendor, map.GridCoords);
+            entMan.SpawnEntity(vendor, new EntityCoordinates(second, 0.5f, 0.5f));
+            market.SetVendorStock(first, Medical, 0);
+            market.SetVendorStock(second, Medical, 0);
+
+            var standIn = entMan.SpawnEntity(null, new MapCoordinates(new Vector2(0f, -300f), map.MapId));
+            var run = Run(entMan, MedicalManifest, first, second);
+            Board(entMan, run, standIn);
+
+            var listed = server.ProtoMan.Index<WFEncounterManifestPrototype>(MedicalManifest).Crates.Count(crate => crate.Id == Medical);
+            var share = (listed + 1) / 2 * market.Profile(first).FreightCrateStock;
+            var dock = new WFCrewVirtualDockedEvent(standIn, first);
+            entMan.EventBus.RaiseEvent(EventSource.Local, ref dock);
+            Assert.That(market.VendorStock(first, Medical), Is.EqualTo(share), "A stop should get its share of the hold, not all of it.");
+
+            var last = new WFCrewVirtualDockedEvent(standIn, second);
+            entMan.EventBus.RaiseEvent(EventSource.Local, ref last);
+            var rest = (listed - (listed + 1) / 2) * market.Profile(first).FreightCrateStock;
+            Assert.That(market.VendorStock(second, Medical), Is.EqualTo(rest), "The last stop should get the rest of the hold.");
+
+            Drop(entMan, run, standIn);
+            entMan.DeleteEntity(standIn);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ACrewedFreighterUnloadsRealCrates()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+
+        EntityUid ship = default;
+        EntityUid run = default;
+        var crates = new List<EntityUid>();
+
+        await server.WaitAssertion(() =>
+        {
+            TradeTestWorld.MarketChute(entMan, map);
+            var (second, _) = TradeTestWorld.Station(entMan, map, new Vector2(0f, 60f), "WF test second stop");
+            ship = TradeTestWorld.Grid(entMan, map, new Vector2(0f, -60f), "WF test freighter", 4);
+            run = Run(entMan, GeneralManifest, map.Grid.Owner, second);
+            Board(entMan, run, ship);
+            for (var i = 0; i < 4; i++)
+            {
+                crates.Add(entMan.SpawnEntity(Fabric, new EntityCoordinates(ship, i + 0.5f, 0.5f)));
+            }
+
+            var docked = new WFPilotDockedEvent(EntityUid.Invalid, ship, map.Grid.Owner);
+            entMan.EventBus.RaiseEvent(EventSource.Local, ref docked);
+        });
+
+        await server.WaitRunTicks(1);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(crates.Count(entMan.EntityExists), Is.EqualTo(2), "A stop should take its share off the hull, leaving the rest to steal.");
             Drop(entMan, run, ship);
         });
 

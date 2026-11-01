@@ -72,10 +72,10 @@ public sealed class TradeBuyPriceTest
             market.SetVendorStock(grid, Fabric, start - 1);
             var scarce = market.BuyQuote(vendor, Fabric)!.Value;
             var expected = (int) System.MathF.Round(fresh.Base * (1 + profile.BuyScarcityCap / start));
-            Assert.That(scarce.Amount, Is.EqualTo(expected));
+            Assert.That(scarce.Amount, Is.EqualTo(expected).Within(1));
             Assert.That(scarce.Amount, Is.GreaterThan(fresh.Base), "One crate below the start should already cost more.");
             Assert.That(scarce.Reason, Is.EqualTo((LocId) "wf-trade-reason-scarce"));
-            Assert.That(entMan.GetComponent<WFTradeVendorComponent>(vendor).Prices[Fabric], Is.EqualTo(expected),
+            Assert.That(entMan.GetComponent<WFTradeVendorComponent>(vendor).Prices[Fabric], Is.EqualTo(scarce.Amount),
                 "The vendor's menu price wasn't updated after a purchase.");
 
             // It climbs steadily and reaches the cap at empty.

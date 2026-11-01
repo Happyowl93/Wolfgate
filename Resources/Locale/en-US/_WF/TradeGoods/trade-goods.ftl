@@ -32,6 +32,7 @@ wf-trade-reason-sealed = sealed freight
 wf-trade-reason-salvage = salvage bonus
 wf-trade-reason-defector = enemy buyer
 wf-trade-reason-scarce = scarce
+wf-trade-reason-restock = restocking
 wf-trade-reason-sealed-only = sealed only
 
 wf-trade-goods-medical = medical supplies
@@ -117,6 +118,7 @@ wf-market-no-materials = No station is trading materials.
 wf-market-tab-alerts-count = Alerts ({$count})
 wf-market-filter = Filter goods...
 wf-market-price-amount = {$amount}
+wf-market-price-stock = {$stock} left
 wf-market-price-weight = {$tonnes}t · {$perTonne}/t
 wf-market-station-best = ★ best for {$count}
 wf-market-sell-heading = SELL HERE

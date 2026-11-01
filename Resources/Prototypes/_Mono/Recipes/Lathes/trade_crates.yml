@@ -9,7 +9,7 @@
   completetime: 3
   materialDiscountScale: 0.2
   materials:
-    RawScrap: 6000 # WOLFGATE(TradeGoods): was 1000; crates cost real material
+    RawScrap: 9000 # WOLFGATE(TradeGoods): was 1000; crates cost real material
 
 # Goes for 2000 at lowest, 11000 at highest.
 - type: latheRecipe
@@ -109,10 +109,10 @@
   completetime: 3
   materialDiscountScale: 0.2
   materials:
-    Steel: 1600 # WOLFGATE(TradeGoods): was 200; crates cost real material
-    Silver: 4000 # WOLFGATE(TradeGoods): was 500; crates cost real material
-    Gold: 4000 # WOLFGATE(TradeGoods): was 500; crates cost real material
-    Diamond: 80 # WOLFGATE(TradeGoods): was 10; crates cost real material
+    Steel: 2400 # WOLFGATE(TradeGoods): was 200; crates cost real material
+    Silver: 6000 # WOLFGATE(TradeGoods): was 500; crates cost real material
+    Gold: 6000 # WOLFGATE(TradeGoods): was 500; crates cost real material
+    Diamond: 120 # WOLFGATE(TradeGoods): was 10; crates cost real material
   entities:
     FloorTileItemGold: 1
     FloorTileItemSilver: 1
@@ -127,10 +127,10 @@
   completetime: 3
   materialDiscountScale: 0.3
   materials:
-    Steel: 800 # WOLFGATE(TradeGoods): was 200; crates cost real material
-    Silver: 4000 # WOLFGATE(TradeGoods): was 1000; crates cost real material
-    Gold: 4000 # WOLFGATE(TradeGoods): was 1000; crates cost real material
-    Diamond: 80 # WOLFGATE(TradeGoods): was 20; crates cost real material
+    Steel: 1200 # WOLFGATE(TradeGoods): was 200; crates cost real material
+    Silver: 6000 # WOLFGATE(TradeGoods): was 1000; crates cost real material
+    Gold: 6000 # WOLFGATE(TradeGoods): was 1000; crates cost real material
+    Diamond: 120 # WOLFGATE(TradeGoods): was 20; crates cost real material
 
 # Goes for 18000 at lowest, 24000 at highest.
 - type: latheRecipe
@@ -169,9 +169,9 @@
   completetime: 3
   materialDiscountScale: 0.2
   materials:
-    Steel: 4800 # WOLFGATE(TradeGoods): was 1200; crates cost real material
-    Plasteel: 4000 # WOLFGATE(TradeGoods): was 1000; crates cost real material
-    Copper: 800 # WOLFGATE(TradeGoods): was 200; crates cost real material
+    Steel: 7200 # WOLFGATE(TradeGoods): was 1200; crates cost real material
+    Plasteel: 6000 # WOLFGATE(TradeGoods): was 1000; crates cost real material
+    Copper: 1200 # WOLFGATE(TradeGoods): was 200; crates cost real material
   entities:
     ComponentBrickEconomy2: 1
 
@@ -203,8 +203,8 @@
   completetime: 3
   materialDiscountScale: 0.2
   materials:
-    Steel: 7000 # WOLFGATE(TradeGoods): was 1000; crates cost real material
-    Plasteel: 5600 # WOLFGATE(TradeGoods): was 800; crates cost real material
+    Steel: 10500 # WOLFGATE(TradeGoods): was 1000; crates cost real material
+    Plasteel: 8400 # WOLFGATE(TradeGoods): was 800; crates cost real material
   entities:
     MaterialScrew: 4
 
@@ -217,9 +217,9 @@
   completetime: 3
   materialDiscountScale: 0.2
   materials:
-    Steel: 9000 # WOLFGATE(TradeGoods): was 600; crates cost real material
-    Plasteel: 3000 # WOLFGATE(TradeGoods): was 200; crates cost real material
-    Plasma: 750 # WOLFGATE(TradeGoods): was 50; crates cost real material
+    Steel: 13500 # WOLFGATE(TradeGoods): was 600; crates cost real material
+    Plasteel: 4500 # WOLFGATE(TradeGoods): was 200; crates cost real material
+    Plasma: 1125 # WOLFGATE(TradeGoods): was 50; crates cost real material
   reagents:
     Carbon: 20
 
@@ -232,8 +232,8 @@
   completetime: 3
   materialDiscountScale: 0.2
   materials:
-    Steel: 3600 # WOLFGATE(TradeGoods): was 600; crates cost real material
-    Plasteel: 1200 # WOLFGATE(TradeGoods): was 200; crates cost real material
-    Plasma: 300 # WOLFGATE(TradeGoods): was 50; crates cost real material
+    Steel: 5400 # WOLFGATE(TradeGoods): was 600; crates cost real material
+    Plasteel: 1800 # WOLFGATE(TradeGoods): was 200; crates cost real material
+    Plasma: 450 # WOLFGATE(TradeGoods): was 50; crates cost real material
   reagents:
     Carbon: 20

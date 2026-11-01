@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Server._WF.TradeGoods.Components;
 using Content.Server.Cargo.Systems;
+using Content.Shared._Crescent.Dispenser;
 using Content.Shared._Mono.VendingMachine;
 using Content.Shared._NF.Bank.Components;
 using Content.Shared._WF.TradeGoods;
@@ -242,6 +243,42 @@ public sealed partial class WFTradeMarketSystem
 
         if (changed)
             Dirty(vendor, machine);
+    }
+
+    /// <summary>Whether a station's vendors are under half stock of a good.</summary>
+    public bool RunningLow(EntityUid grid, string good)
+    {
+        return VendorStock(grid, good) < Profile(grid).VendorStock / 2;
+    }
+
+    /// <summary>Whether a station's vendors are scarce of a good, so its chutes take it to fill their shelves.</summary>
+    public bool Restocking(EntityUid grid, string good)
+    {
+        var profile = Profile(grid);
+        return !profile.ContrabandGoods.Contains(good)
+               && TryComp<WFTradeMarketComponent>(grid, out var market)
+               && market.Stock.TryGetValue(good, out var stock)
+               && stock < profile.VendorStock * profile.BuyScarcityStart;
+    }
+
+    /// <summary>What a chute pays for a good its table doesn't list but its station is scarce of: the best any open table lists.</summary>
+    private int? RestockBase(EntityUid grid, string good)
+    {
+        if (!Restocking(grid, good))
+            return null;
+
+        var best = Chutes().Where(chute => !IsHiddenChute(chute.Chute)).Select(chute => BasePrice(chute.Dispenser, good) ?? 0).DefaultIfEmpty(0).Max();
+        return best > 0 ? best : null;
+    }
+
+    /// <summary>Whether a chute would take a crate only because its station's vendors are scarce of it.</summary>
+    public bool TakesToRestock(EntityUid chute, EntityUid crate)
+    {
+        return TryComp<DispenserComponent>(chute, out var dispenser)
+               && Transform(chute).GridUid is { } grid
+               && MetaData(crate).EntityPrototype?.ID is { } good
+               && BasePrice(dispenser, good) == null
+               && RestockBase(grid, good) != null;
     }
 
     /// <summary>The trade goods with finite stock that a station's vendors sell.</summary>

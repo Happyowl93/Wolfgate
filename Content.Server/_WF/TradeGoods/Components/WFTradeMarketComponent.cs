@@ -27,10 +27,14 @@ public sealed partial class WFTradeMarketComponent : Component
     public Dictionary<string, int> Delivered = new();
 }
 
-/// <summary>The stock changes a station's material prices haven't caught up with yet.</summary>
+/// <summary>The stock changes a station's material prices haven't caught up with yet, and what it has part used.</summary>
 [RegisterComponent]
 public sealed partial class WFMaterialPriceLagComponent : Component
 {
+    /// <summary>Fractions of a unit of each material used up, carried until a whole unit is gone.</summary>
+    [ViewVariables]
+    public Dictionary<string, double> Used = new();
+
     /// <summary>Each material's stock when it was last read.</summary>
     [ViewVariables]
     public Dictionary<string, int> Seen = new();

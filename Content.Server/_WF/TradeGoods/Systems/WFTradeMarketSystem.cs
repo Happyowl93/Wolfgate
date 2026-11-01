@@ -154,11 +154,12 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
     public WFTradeQuote? Quote(EntityUid chute, string good, EntityUid? crate = null, EntityUid? seller = null)
     {
         if (!TryComp<DispenserComponent>(chute, out var dispenser)
-            || BasePrice(dispenser, good) is not { } basePrice
-            || basePrice <= 0
-            || Transform(chute).GridUid is not { } grid)
+            || Transform(chute).GridUid is not { } grid
+            || (BasePrice(dispenser, good) ?? RestockBase(grid, good)) is not { } basePrice
+            || basePrice <= 0)
             return null;
 
+        var restocking = BasePrice(dispenser, good) == null;
         var profile = Profile(grid);
         // Contraband has a fixed street price: sales never glut it.
         var pressure = profile.ContrabandGoods.Contains(good) ? 0f : Pressure(grid, good);
@@ -205,7 +206,8 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
         var supplied = _supplied.TryGetValue((grid, good), out var until) && _timing.CurTime < until;
         var reason = lowerReason
                      ?? raiseReason
-                     ?? (crate == null && IsSealedOnly(chute) ? "wf-trade-reason-sealed-only"
+                     ?? (restocking ? "wf-trade-reason-restock"
+                         : crate == null && IsSealedOnly(chute) ? "wf-trade-reason-sealed-only"
                          : supplied && pressure >= SuppliedSales * profile.PerSale ? "wf-trade-reason-supplied"
                          : pressure < GluttedPressure ? "wf-trade-reason-steady"
                          : "wf-trade-reason-glutted");
@@ -248,6 +250,10 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
         var market = EnsureComp<WFTradeMarketComponent>(grid);
         market.Delivered[good] = market.Delivered.GetValueOrDefault(good) + 1;
         EnsureComp<WFTradeChuteComponent>(chute).PendingAmount = amount;
+
+        // A crate of what the station's own vendors sell goes on their shelves.
+        if (StockedGoods(grid).Contains(good))
+            SetVendorStock(grid, good, VendorStock(grid, good) + 1);
 
         var ship = CompOrNull<WFTradeOriginComponent>(crate)?.Carrier;
         if (ship is { } carrier && TerminatingOrDeleted(carrier))

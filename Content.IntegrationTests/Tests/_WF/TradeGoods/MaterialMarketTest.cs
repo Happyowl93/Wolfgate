@@ -93,7 +93,39 @@ public sealed class MaterialMarketTest
             Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo(2000), "A sale should land in the station's stock.");
 
             Reprice(entMan, station);
-            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo(2000), "Stock should only leave by being bought.");
+            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo(2000), "Repricing shouldn't touch the stock.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task StationsUseUpWhatTheyHold()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var market = entMan.System<MarketSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var (station, grid) = Market(entMan, map);
+            var data = new Entity<CargoMarketDataComponent>(station, entMan.GetComponent<CargoMarketDataComponent>(station));
+            var halfLife = entMan.System<WFTradeMarketSystem>().Profile(null).MaterialHalfLife;
+            Sell(entMan, grid, Stacks(entMan, grid, Steel, 20));
+
+            market.WfConsume(data, halfLife);
+            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo(1000).Within(1), "A half-life should use up half the stock.");
+            Assert.That(entMan.GetComponent<WFMaterialPriceLagComponent>(station).Pending, Is.Empty, "Use isn't a trade, so it shouldn't wait to reach prices.");
+
+            // Steps too small to use a whole unit still add up.
+            for (var i = 0; i < 1800; i++)
+            {
+                market.WfConsume(data, halfLife / 1800);
+            }
+
+            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo(500).Within(5), "Small steps should use up the same as one big one.");
         });
 
         await pair.CleanReturnAsync();

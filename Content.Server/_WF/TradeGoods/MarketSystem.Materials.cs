@@ -18,8 +18,8 @@ namespace Content.Server._NF.Market.Systems;
 public readonly record struct WFMaterialQuote(string Good, EntityUid Station, string Name, double Pays, double Charges, int Stock);
 
 /// <summary>
-/// Station stock as a market for materials. Stations start full, buying empties them and freighters fill them back up,
-/// and pallets pay and consoles charge by how much of a material a station holds.
+/// Station stock as a market for materials. Stations use goods up, anyone can bring more, and pallets pay and consoles
+/// charge by how much of a material a station holds.
 /// Materials in a console's cart stay the station's stock until they are bought, so a cart can't move prices or lock one.
 /// Prices follow a purchase or sale after a delay, but a pallet cuts its pay at once: a delayed glut would let a split
 /// sale fetch the top rate and be bought back cheaper once the console caught up.
@@ -52,7 +52,33 @@ public sealed partial class MarketSystem
         var query = EntityQueryEnumerator<CargoMarketDataComponent>();
         while (query.MoveNext(out var uid, out var market))
         {
+            WfConsume((uid, market), WfRepriceInterval);
             WfReprice((uid, market));
+        }
+    }
+
+    /// <summary>A station uses up some of each material it holds, which moves prices at once as it isn't a trade. Carts are left alone.</summary>
+    public void WfConsume(Entity<CargoMarketDataComponent> ent, TimeSpan elapsed)
+    {
+        var profile = _tradeMarket.Profile(null);
+        var lag = EnsureComp<WFMaterialPriceLagComponent>(ent);
+        var carts = WfCarts(ent);
+        var share = 1.0 - Math.Pow(0.5, elapsed.TotalSeconds / Math.Max(profile.MaterialHalfLife.TotalSeconds, 1.0));
+        foreach (var material in profile.MaterialGoods)
+        {
+            var good = material.Id;
+            if (ent.Comp.MarketDataList.FirstOrDefault(entry => entry.Prototype == good) is not { } stock)
+                continue;
+
+            WfPricedSupply(ent, carts, good);
+            var used = lag.Used.GetValueOrDefault(good) + stock.Quantity * share;
+            var whole = (int) Math.Min(used, stock.Quantity);
+            lag.Used[good] = used - whole;
+            if (whole <= 0)
+                continue;
+
+            ent.Comp.MarketDataList.Upsert(good, -whole, stock.Price);
+            lag.Seen[good] = WfSupply(ent.Comp, carts, good);
         }
     }
 

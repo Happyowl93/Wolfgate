@@ -47,9 +47,9 @@ public sealed class WFMarketStation
     public Color FactionColor = Color.Gray;
 }
 
-/// <summary>One good's live sell or buy price at a station; <c>Reason</c> is already localized.</summary>
+/// <summary>One good's live sell or buy price at a station; <c>Reason</c> is already localized. <c>Stock</c> is what a vendor has left, or null if it never runs out.</summary>
 [Serializable, NetSerializable]
-public readonly record struct WFMarketPrice(string Good, int Amount, float Factor, string Reason, float Tonnes, bool Highlight);
+public readonly record struct WFMarketPrice(string Good, int Amount, float Factor, string Reason, float Tonnes, bool Highlight, int? Stock = null);
 
 /// <summary>
 /// A material's best pallet and cheapest console stock across the holder's markets, per unit; a price of zero means none.

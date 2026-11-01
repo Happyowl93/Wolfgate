@@ -44,6 +44,9 @@ public sealed class WFTradeRushSystem : EntitySystem
     /// <summary>Most rush orders, and most bulk orders, open across the sector at once.</summary>
     private const int MaxActive = 2;
 
+    /// <summary>How much likelier an order is for goods a station's vendors are scarce of.</summary>
+    private const float ScarceDraw = 8f;
+
     private readonly List<WFTradeRush> _active = new();
     private TimeSpan? _next;
     private TimeSpan? _nextBulk;
@@ -153,7 +156,7 @@ public sealed class WFTradeRushSystem : EntitySystem
         var profile = _proto.Index(WFTradeMarketSystem.DefaultProfile);
         var blockaded = _sector.Blockaded().ToHashSet();
         var chutes = _market.Chutes();
-        var options = new List<(WFTradeRushPrototype Proto, List<EntityUid> Grids)>();
+        var options = new List<(WFTradeRushPrototype Proto, List<EntityUid> Grids, float Weight)>();
         foreach (var proto in _proto.EnumeratePrototypes<WFTradeRushPrototype>())
         {
             if (forced != null ? proto.ID != forced : proto.Bulk != bulk)
@@ -162,29 +165,33 @@ public sealed class WFTradeRushSystem : EntitySystem
             var goods = _market.Group(profile, proto.Group);
             var grids = chutes
                 .Where(chute => (proto.Chutes.Count == 0 || MetaData(chute.Chute).EntityPrototype is { } chuteProto && proto.Chutes.Contains(chuteProto.ID))
-                                && goods.Any(good => chute.Dispenser.Inventory.ContainsKey(good))
+                                && goods.Any(good => chute.Dispenser.Inventory.ContainsKey(good) || _market.Restocking(chute.Grid, good))
                                 && !blockaded.Contains(chute.Grid)
                                 && _active.All(rush => rush.Grid != chute.Grid))
                 .Select(chute => chute.Grid)
                 .Distinct()
                 .ToList();
 
-            if (grids.Count > 0)
-                options.Add((proto, grids));
+            // A station scarce of the goods posts first.
+            var scarce = grids.Where(grid => goods.Any(good => _market.Restocking(grid, good))).ToList();
+            if (scarce.Count > 0)
+                options.Add((proto, scarce, proto.Weight * ScarceDraw));
+            else if (grids.Count > 0)
+                options.Add((proto, grids, proto.Weight));
         }
 
         if (options.Count == 0)
             return null;
 
-        var total = options.Sum(option => option.Proto.Weight);
+        var total = options.Sum(option => option.Weight);
         var roll = _random.NextFloat() * total;
-        var (picked, candidates) = options[^1];
+        var (picked, candidates, _) = options[^1];
         foreach (var option in options)
         {
-            roll -= option.Proto.Weight;
+            roll -= option.Weight;
             if (roll <= 0f)
             {
-                (picked, candidates) = option;
+                (picked, candidates, _) = option;
                 break;
             }
         }
