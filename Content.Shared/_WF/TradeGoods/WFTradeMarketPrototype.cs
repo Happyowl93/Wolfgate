@@ -43,33 +43,17 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public List<EntProtoId> MaterialGoods = new();
 
-    /// <summary>The everyday materials a station's supply lines restock.</summary>
+    /// <summary>The everyday materials stations start with and freighters bring.</summary>
     [DataField]
     public List<EntProtoId> SupplyMaterials = new();
-
-    /// <summary>How often a station's background supply arrives.</summary>
-    [DataField]
-    public TimeSpan SupplyPulse = TimeSpan.FromMinutes(2);
-
-    /// <summary>Share of the stock target each supply pulse adds to the everyday materials.</summary>
-    [DataField]
-    public float MaterialPulse = 0.03f;
 
     /// <summary>Most of each trade good a station's vendors hold between them.</summary>
     [DataField]
     public int VendorStock = 40;
 
-    /// <summary>Share of a vendor's full stock a freighter's stop adds to each good.</summary>
+    /// <summary>Share of a full stock of each everyday material and trade good a freighter's stop adds.</summary>
     [DataField]
-    public float VendorFreightRestock = 0.5f;
-
-    /// <summary>Crates a station needs delivered to end a shortage early.</summary>
-    [DataField]
-    public Vector2i ShortageCrates = new(4, 8);
-
-    /// <summary>The goods group whose shortages and booms raise what traders charge to refuel a ship.</summary>
-    [DataField]
-    public string RefuelShortageGroup = string.Empty;
+    public float FreightRestock = 0.5f;
 
     /// <summary>Spesos of one material a station holds at normal prices.</summary>
     [DataField]
@@ -94,10 +78,6 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     /// <summary>What a console charges for a material at a glutted station.</summary>
     [DataField]
     public float MaterialChargeMin = 0.8f;
-
-    /// <summary>How long sold materials take to reach a station's console.</summary>
-    [DataField]
-    public TimeSpan MaterialArrival = TimeSpan.FromMinutes(10);
 
     /// <summary>Scarcity one trade good bought from a station's vendor adds there, raising what its vendors charge.</summary>
     [DataField]

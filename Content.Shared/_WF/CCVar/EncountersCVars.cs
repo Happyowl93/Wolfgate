@@ -44,7 +44,7 @@ public sealed class EncountersCVars
 
     /// <summary>The scheduler starts no freight run while this many are unresolved.</summary>
     public static readonly CVarDef<int> FreightMaxActive =
-        CVarDef.Create("wf.encounters.freight_max_active", 2, CVar.SERVERONLY);
+        CVarDef.Create("wf.encounters.freight_max_active", 4, CVar.SERVERONLY);
 
     /// <summary>A resolved encounter's ships are removed once no player is within this distance.</summary>
     public static readonly CVarDef<float> CleanupRange =

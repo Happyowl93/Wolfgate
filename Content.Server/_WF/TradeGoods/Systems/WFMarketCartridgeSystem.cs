@@ -320,7 +320,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         foreach (var shortage in _shortages.Active)
         {
             Add(new WFMarketAlert(shortage.Grid is { } grid
-                ? Loc.GetString("wf-market-alert-shortage", ("station", Name(grid)), ("goods", Loc.GetString(shortage.Name)), ("factor", WFTradeMarketSystem.Shown(shortage.Factor)), ("needed", shortage.Needed))
+                ? Loc.GetString("wf-market-alert-shortage", ("station", Name(grid)), ("goods", Loc.GetString(shortage.Name)), ("factor", WFTradeMarketSystem.Shown(shortage.Factor)))
                 : Loc.GetString("wf-market-alert-boom", ("goods", Loc.GetString(shortage.Name)), ("percent", (int) MathF.Round((shortage.Factor - 1f) * 100f))),
                 shortage.Ends, false), shortage.Grid is { } shortageGrid ? Name(shortageGrid) : null);
         }

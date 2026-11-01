@@ -19,16 +19,17 @@ naming a hidden market go only to the underground companies (`WFTradeMarketSyste
 hint never names one.
 A chute offered something it doesn't buy says so instead of only buzzing.
 
-Station supply (`WFTradeSupplySystem`): a station's vendors share one finite stock per good (`vendorStock`, held on
-`WFTradeMarketComponent` and shown on every machine), a sold-out good drops off the Market app and contraband never runs
-out. Every `supplyPulse` the stock of each good gains a crate and each cargo market gains `materialPulse` of the target in
-`supplyMaterials`, so stations stay healthy until something disrupts them. A freighter stop is a bonus: half a full stock
-and the end of the station's shortages. A blockade stops the materials, and a blockade or a shortage halves the vendors'
-refill. `wf_trade status` shows each station's supply and the server logs it hourly.
+Station supply (`WFTradeSupplySystem`): stations start full, buying empties them and freighters fill them back up. A
+station's vendors share one finite stock per good (`vendorStock`, held on `WFTradeMarketComponent` and shown on every
+machine), a sold-out good drops off the Market app and contraband never runs out. Cargo markets open with `supplyMaterials`
+at the target. A freighter stop brings `freightRestock` of a full stock of both and ends the station's shortages; nothing
+else refills them. `wf_trade status` shows each station's supply and the server logs it hourly.
 
-A blockade is either a faction holding the station's cell (SectorControl) or a `blockades` encounter
-(`WFEncounterStationBlockade`): raiders on the station's approaches, for as long as they stay. Freighters stay away from
-either; destroying the raiders lifts it, announces it and pays whoever did.
+Stopping the freighters is the blockade: a station they don't reach runs dry as people buy, and a lost run leaves its stops
+short. Players do it by intercepting freighters, outside the 256 m that Conflict Rule 4 protects. Freighters also stay
+away from a station under a faction holding its cell (SectorControl) or a `blockades` encounter
+(`WFEncounterStationBlockade`), raiders on its approaches for as long as they stay; destroying the raiders lifts it,
+announces it and pays whoever did.
 
 Fuel vendors (`WFShortagePricedVendorComponent`) charge their shortage factor on everything while the station is short of
 fuel or the sector booms for it.
@@ -60,16 +61,15 @@ What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifie
   freight fenced there funds the Reavers (ReaverCampaign `.Funding`).
 
 Materials (`MarketSystem.Materials`, `materialGoods`) trade through each station's cargo market stock. A pallet pays by
-how much of a material the station holds or has on the way, from 1.2x with none through full value at
+how much of a material the station holds, from 1.2x with none through full value at
 `materialStockTarget` to 0.5x at a glut, and a sale walks down that curve, so one big haul doesn't all fetch the top
 rate. The market console charges by the same stock, from 1.5x near empty to 0.8x at a glut, before its own modifier.
-Sold lots reach the console after `materialArrival`, stock drains at `halfLife`, and station supply tops up
-`supplyMaterials`, never past the target. Materials in a console's cart stay part of the stock: they still count
-as supply, drain and follow the live price until they are bought. Everything else the console sells works as it always did. The curves
+A sale lands in the stock at once, and stock only leaves by being bought, so every station with a pallet needs a cargo
+market and a market console (`EveryPalletStopSellsBackWhatItBuys`). Materials in a console's cart stay part of the stock:
+they still count as supply and follow the live price until they are bought. Everything else the console sells works as it always did. The curves
 keep selling and buying back at a loss on the tightest pallet and console pair on any station, which
 `SellingAndBuyingBackNeverProfits` checks. The Market app's Materials tab names each material's best sale and cheapest
-stock. A station with a pallet needs a cargo market or its sales skip all of this, and one with no market console is
-buy-only, as Cargo Depots and the ASF Lantern Post are: the tab lists it as a sale and never as stock. Materials aboard a ship count toward its cargo value (`WFTradeMaterialCargoSystem`), so a full mining hold draws
+stock. Materials aboard a ship count toward its cargo value (`WFTradeMaterialCargoSystem`), so a full mining hold draws
 raiders. Crates built from materials use about 60% of their vendor price in them; crates built from reagents, parts
 or cloth only have a heavier steel shell, and fissile fuel is unchanged.
 
@@ -127,7 +127,6 @@ it nears its floor of 1000; printing it costs about 260 in materials.
 
 - [`Content.Server/_WF/TradeGoods/CargoSystem.Materials.cs`](CargoSystem.Materials.cs)
 - [`Content.Server/_WF/TradeGoods/Commands/WFTradeCommand.cs`](Commands/WFTradeCommand.cs)
-- [`Content.Server/_WF/TradeGoods/Components/CargoMarketDataComponent.Materials.cs`](Components/CargoMarketDataComponent.Materials.cs)
 - [`Content.Server/_WF/TradeGoods/Components/WFSpecialCrateComponents.cs`](Components/WFSpecialCrateComponents.cs)
 - [`Content.Server/_WF/TradeGoods/Components/WFTradeMarketComponent.cs`](Components/WFTradeMarketComponent.cs)
 - [`Content.Server/_WF/TradeGoods/DispenserSystem.TradeGoods.cs`](DispenserSystem.TradeGoods.cs)
@@ -153,7 +152,6 @@ it nears its floor of 1000; printing it costs about 260 in materials.
 ### Shared
 
 - [`Content.Shared/_WF/TradeGoods/WFMarketUiState.cs`](../../../Content.Shared/_WF/TradeGoods/WFMarketUiState.cs)
-- [`Content.Shared/_WF/TradeGoods/WFShortagePricedVendorComponent.cs`](../../../Content.Shared/_WF/TradeGoods/WFShortagePricedVendorComponent.cs)
 - [`Content.Shared/_WF/TradeGoods/WFTradeCrateMarketComponent.cs`](../../../Content.Shared/_WF/TradeGoods/WFTradeCrateMarketComponent.cs)
 - [`Content.Shared/_WF/TradeGoods/WFTradeMarketPrototype.cs`](../../../Content.Shared/_WF/TradeGoods/WFTradeMarketPrototype.cs)
 - [`Content.Shared/_WF/TradeGoods/WFTradeOriginComponent.cs`](../../../Content.Shared/_WF/TradeGoods/WFTradeOriginComponent.cs)
@@ -213,12 +211,13 @@ it nears its floor of 1000; printing it costs about 260 in materials.
   - chutes also take consignments they don't list
   - say the chute doesn't buy it instead of only buzzing
   - pay the live quote, print live prices
-- [`Content.Server/_NF/Market/Systems/MarketSystem.MarketConsole.cs`](../../_NF/Market/Systems/MarketSystem.MarketConsole.cs): sold materials take time to reach the console
 - [`Content.Server/Cargo/Systems/CargoSystem.Shuttle.cs`](../../Cargo/Systems/CargoSystem.Shuttle.cs): materials pay what the station's stock makes them worth
 - [`Content.Server/VendingMachines/VendingMachineSystem.cs`](../../VendingMachines/VendingMachineSystem.cs): trade vendors charge the station's live price
 - [`Resources/Locale/en-US/paper/paper-misc.ftl`](../../../Resources/Locale/en-US/paper/paper-misc.ftl): the CC manifest lists the merged Caelestinus chute table
 - [`Resources/Maps/_Mono/Outpost/caelestinus_central.yml`](../../../Resources/Maps/_Mono/Outpost/caelestinus_central.yml): Both Exped chutes become CC chutes, so every chute on the station pays from one table.
 - [`Resources/Maps/_Mono/POI/underground.yml`](../../../Resources/Maps/_Mono/POI/underground.yml): The fence chute and the smuggling-crate vendor in the cargo bay, beside the sell pallets.
+- [`Resources/Maps/_NF/POI/cargodepot.yml`](../../../Resources/Maps/_NF/POI/cargodepot.yml): A market console and crate machine, so what a depot buys can be bought back there.
+- [`Resources/Maps/_NF/POI/cargodepotalt.yml`](../../../Resources/Maps/_NF/POI/cargodepotalt.yml): A market console and crate machine, so what a depot buys can be bought back there.
 - [`Resources/Prototypes/_Crescent/Entities/Objects/Misc/trade.yml`](../../../Resources/Prototypes/_Crescent/Entities/Objects/Misc/trade.yml): chutes check where a crate was made
 - [`Resources/Prototypes/_Mono/Entities/Structures/dispensers.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/dispensers.yml)
   - open stations pay well for contraband
@@ -239,7 +238,6 @@ it nears its floor of 1000; printing it costs about 260 in materials.
   - was 600; crates cost real material
   - was 50; crates cost real material
   - was 800; crates cost real material
-- [`Resources/Prototypes/_NF/Entities/Structures/Machines/vending_machines.yml`](../../../Resources/Prototypes/_NF/Entities/Structures/Machines/vending_machines.yml): a fuel shortage raises what the vendor charges
 - [`Resources/Prototypes/_NF/Entities/Structures/Specific/TradingCrates/crates.yml`](../../../Resources/Prototypes/_NF/Entities/Structures/Specific/TradingCrates/crates.yml): the pallet price follows the selling station's demand
 - [`Resources/Prototypes/_NF/PointsOfInterest/depots.yml`](../../../Resources/Prototypes/_NF/PointsOfInterest/depots.yml): was StandardFrontierOutpost; pallets price materials by station stock
 

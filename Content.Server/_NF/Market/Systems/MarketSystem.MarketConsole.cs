@@ -101,8 +101,6 @@ public sealed partial class MarketSystem
 
             // Increase the count in the MarketData for this entity
             // Assuming the quantity to increase is 1 for each sold entity
-            // WOLFGATE(TradeGoods): sold materials take time to reach the console
-            if (!WfQueueMaterial(marketDataComponent, entityPrototype.ID, count))
             marketDataComponent.MarketDataList.Upsert(entityPrototype.ID, count, estimatedPrice, stackPrototypeId);
         }
     }
@@ -202,8 +200,6 @@ public sealed partial class MarketSystem
 
 
             // Increase the count in the MarketData for this material
-            // WOLFGATE(TradeGoods): sold materials take time to reach the console
-            if (!WfQueueMaterial(marketDataComponent, entProto.ID, amountToSpawn))
             marketDataComponent.MarketDataList.Upsert(entProto.ID, amountToSpawn, price, material.StackEntity);
         }
     }

@@ -12,19 +12,22 @@ using Content.Server.Cargo.Systems;
 using Content.Server.Stack;
 using Content.Server.Station.Systems;
 using Content.Shared._NF.Bank.Components;
+using Content.Shared._NF.CrateMachine.Components;
 using Content.Shared._NF.Market.Events;
 using Content.Shared._WF.TradeGoods;
 using Content.Shared.Maps;
 using Content.Shared.Materials;
 using Content.Shared.Stacks;
 using Content.Shared.Station.Components;
+using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
 
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
-/// <summary>Materials trade through station stock: prices follow supply, lots arrive late, stock drains and supply refills it.</summary>
+/// <summary>Materials trade through station stock: sales land at once, prices follow supply and freighters refill it.</summary>
 [TestFixture]
 [TestOf(typeof(MarketSystem))]
 public sealed class MaterialMarketTest
@@ -68,37 +71,27 @@ public sealed class MaterialMarketTest
         entMan.EventBus.RaiseEvent(EventSource.Local, ref ev);
     }
 
-    private static void Step(IEntityManager entMan, EntityUid station, TimeSpan elapsed)
+    private static void Reprice(IEntityManager entMan, EntityUid station)
     {
-        entMan.System<MarketSystem>().WfStep((station, entMan.GetComponent<CargoMarketDataComponent>(station)), elapsed);
+        entMan.System<MarketSystem>().WfReprice((station, entMan.GetComponent<CargoMarketDataComponent>(station)));
     }
 
     [Test]
-    public async Task SoldMaterialsArriveLateAndThenDrain()
+    public async Task SoldMaterialsReachTheConsoleAtOnceAndStay()
     {
         await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
         var map = await pair.CreateTestMap();
         var entMan = server.EntMan;
-        var market = entMan.System<MarketSystem>();
 
         await server.WaitAssertion(() =>
         {
             var (station, grid) = Market(entMan, map);
-            var profile = entMan.System<WFTradeMarketSystem>().Profile(null);
             Sell(entMan, grid, Stacks(entMan, grid, Steel, 20));
-            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.Zero, "A sold lot reached the console at once.");
+            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo(2000), "A sale should land in the station's stock.");
 
-            Step(entMan, station, profile.MaterialArrival / 2);
-            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.Zero, "A sold lot arrived early.");
-
-            // The step it lands on also drains it, which is a few percent over half the delay.
-            Step(entMan, station, profile.MaterialArrival / 2);
-            var stock = TradeTestWorld.Stock(entMan, station, Steel);
-            Assert.That(stock, Is.InRange(1800, 2000), "A sold lot never arrived.");
-
-            Step(entMan, station, profile.HalfLife);
-            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.InRange(stock / 2 - 2, stock / 2 + 2), "Stock should halve over a half-life.");
+            Reprice(entMan, station);
+            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo(2000), "Stock should only leave by being bought.");
         });
 
         await pair.CleanReturnAsync();
@@ -177,7 +170,7 @@ public sealed class MaterialMarketTest
     }
 
     [Test]
-    public async Task SupplyRestocksEverydayMaterialsUpToTheTarget()
+    public async Task FreightRestocksEverydayMaterialsUpToTheTarget()
     {
         await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
@@ -191,17 +184,15 @@ public sealed class MaterialMarketTest
             var profile = entMan.System<WFTradeMarketSystem>().Profile(null);
             var target = (int) (profile.MaterialStockTarget / entMan.System<PricingSystem>().GetPrice(Stack(entMan, grid, Steel, 1)));
 
-            Assert.That(market.WfRestock(grid), Is.True);
-            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo((int) (target * profile.MaterialPulse)).Within(1));
-            Assert.That(TradeTestWorld.Stock(entMan, station, Plasma), Is.Zero, "Supply should leave precious materials to miners.");
+            Assert.That(market.WfRestock(grid, profile.FreightRestock), Is.True);
+            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo((int) (target * profile.FreightRestock)).Within(1));
+            Assert.That(TradeTestWorld.Stock(entMan, station, Plasma), Is.Zero, "Freight should leave precious materials to miners.");
 
-            for (var i = 0; i < 1.5f / profile.MaterialPulse; i++)
-            {
-                market.WfRestock(grid);
-            }
-
-            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo(target).Within(1), "Supply should top up to the target and stop.");
-            Assert.That(market.WfRestock(grid), Is.False, "A full station should take nothing.");
+            market.WfRestock(grid, profile.FreightRestock);
+            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo(target).Within(1), "Freight should top up to the target and stop.");
+            // Rounding can leave a material a unit short of the target after two stops.
+            market.WfRestock(grid, profile.FreightRestock);
+            Assert.That(market.WfRestock(grid, profile.FreightRestock), Is.False, "A full station should take nothing.");
         });
 
         await pair.CleanReturnAsync();
@@ -281,8 +272,8 @@ public sealed class MaterialMarketTest
             Assert.That(empty.Cheapest, Is.Zero);
             Assert.That(empty.CheapestStation, Is.Empty);
 
-            entMan.System<MarketSystem>().WfRestock(grid);
-            Step(entMan, station, TimeSpan.FromSeconds(5));
+            entMan.System<MarketSystem>().WfRestock(grid, 0.5f);
+            Reprice(entMan, station);
             var stocked = cartridge.BuildState(pda).Materials.First(material => material.Good == "steel");
             Assert.That(stocked.Cheapest, Is.GreaterThan(0.0));
             Assert.That(stocked.Stock, Is.GreaterThan(0));
@@ -306,14 +297,56 @@ public sealed class MaterialMarketTest
             entMan.EnsureComponent<WFTradeMarketMapComponent>(map.MapUid);
             var (station, grid) = Market(entMan, map);
             entMan.SpawnEntity("ComputerPalletConsoleNFHighMarket", new EntityCoordinates(grid, 0.5f, 0.5f));
-            entMan.System<MarketSystem>().WfRestock(grid);
-            Step(entMan, station, TimeSpan.FromSeconds(5));
+            entMan.System<MarketSystem>().WfRestock(grid, 0.5f);
+            Reprice(entMan, station);
             Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.GreaterThan(0));
 
             var steel = cartridge.BuildState(entMan.SpawnEntity(null, map.GridCoords)).Materials.First(material => material.Good == "steel");
             Assert.That(steel.BestPayStation, Is.EqualTo("WF test market"), "A pallet with no console should still be listed as a sale.");
             Assert.That(steel.Cheapest, Is.Zero);
             Assert.That(steel.CheapestStation, Is.Empty, "Stock with no console to buy it from shouldn't be listed.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [TestCase("/Maps/_NF/POI/cargodepot.yml")]
+    [TestCase("/Maps/_NF/POI/cargodepotalt.yml")]
+    [TestCase("/Maps/_WF/Asf/lantern.yml")]
+    public async Task EveryPalletStopSellsBackWhatItBuys(string path)
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var loader = entMan.System<MapLoaderSystem>();
+        var transform = entMan.System<SharedTransformSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(loader.TryLoadGrid(map.MapId, new ResPath(path), out var loaded, offset: new Vector2(0f, 200f)), Is.True);
+            var grid = loaded!.Value.Owner;
+            EntityUid? console = null;
+            EntityUid? machine = null;
+            var consoles = entMan.AllEntityQueryEnumerator<MarketConsoleComponent, TransformComponent>();
+            while (consoles.MoveNext(out var uid, out _, out var xform))
+            {
+                if (xform.GridUid == grid)
+                    console = uid;
+            }
+
+            var machines = entMan.AllEntityQueryEnumerator<CrateMachineComponent, TransformComponent>();
+            while (machines.MoveNext(out var uid, out _, out var xform))
+            {
+                if (xform.GridUid == grid)
+                    machine = uid;
+            }
+
+            Assert.That(console, Is.Not.Null, "A pallet stop needs a market console.");
+            Assert.That(machine, Is.Not.Null, "A market console needs a crate machine.");
+            var distance = (transform.GetWorldPosition(console!.Value) - transform.GetWorldPosition(machine!.Value)).Length();
+            Assert.That(distance, Is.LessThanOrEqualTo(entMan.GetComponent<MarketConsoleComponent>(console.Value).MaxCrateMachineDistance));
+            entMan.DeleteEntity(grid);
         });
 
         await pair.CleanReturnAsync();
@@ -347,8 +380,8 @@ public sealed class MaterialMarketTest
         await server.WaitAssertion(() =>
         {
             var (station, grid, console) = Trading(entMan, map);
-            market.WfRestock(grid);
-            Step(entMan, station, TimeSpan.FromSeconds(5));
+            market.WfRestock(grid, 0.5f);
+            Reprice(entMan, station);
             double Pays() => market.WfQuotes().First(quote => quote.Good == Steel).Pays;
             var before = Pays();
             var quantity = TradeTestWorld.Stock(entMan, station, Steel);
@@ -363,12 +396,8 @@ public sealed class MaterialMarketTest
             var cart = entMan.GetComponent<MarketConsoleComponent>(console).CartDataList;
             var calm = cart[0].Price;
             Sell(entMan, grid, Stacks(entMan, grid, Steel, 20));
-            Step(entMan, station, TimeSpan.FromSeconds(5));
+            Reprice(entMan, station);
             Assert.That(cart[0].Price, Is.LessThan(calm), "A cart shouldn't lock in an old price.");
-
-            var held = cart[0].Quantity;
-            Step(entMan, station, entMan.System<WFTradeMarketSystem>().Profile(null).HalfLife);
-            Assert.That(cart[0].Quantity, Is.InRange(held / 2 - 2, held / 2 + 2), "A cart shouldn't keep stock from draining.");
         });
 
         await pair.CleanReturnAsync();
@@ -398,7 +427,7 @@ public sealed class MaterialMarketTest
 
             foreach (var good in profile.SupplyMaterials)
             {
-                Assert.That(profile.MaterialGoods, Does.Contain(good), $"{good} is restocked by supply lines but doesn't trade through stock.");
+                Assert.That(profile.MaterialGoods, Does.Contain(good), $"{good} is restocked by freight but doesn't trade through stock.");
             }
         });
 

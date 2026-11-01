@@ -41,14 +41,14 @@ wf-trade-goods-ship-components = ship components
 wf-trade-goods-chemicals = chemicals
 wf-trade-goods-fuel = reactor fuel
 wf-trade-goods-industrial = industrial goods
+wf-trade-goods-materials = construction materials
 wf-trade-goods-agriculture = fertilizer
 wf-trade-goods-luxuries = luxury goods
 wf-trade-goods-textiles = fabric
 
 ## Sector Exchange radio
 
-wf-trade-shortage-start = {$station} is short of {$goods}: paying {$factor}x for {$minutes} minutes, or until {$needed} crates arrive.
-wf-trade-shortage-filled = {$station} has the {$goods} it needed.
+wf-trade-shortage-start = {$station} is short of {$goods}: paying {$factor}x for {$minutes} minutes.
 wf-trade-boom-start = {CAPITALIZE($goods)} boom: every station pays {$percent}% more for {$minutes} minutes.
 wf-trade-war-demand = War demand: {$stations} pay {$factor}x for ammunition, weapon parts and medical supplies.
 wf-trade-blockade-landed = {$station} is blockaded. It pays up to {$factor}x for essentials while the blockade holds.
@@ -149,7 +149,7 @@ wf-market-alert-consignment-carried = Priority delivery to {$station} is aboard 
 wf-market-alert-relief = {$station} pays relief rates ({$factor}x) while the blockade is contested; ships that break it split {$bounty}
 wf-market-alert-raid = Raid on {$station}: ship components and medical supplies pay {$factor}x
 wf-market-alert-blockade = {$station} is blockaded: essentials pay up to {$factor}x
-wf-market-alert-shortage = {$station} is short of {$goods}: {$factor}x, {$needed} crates to fill
+wf-market-alert-shortage = {$station} is short of {$goods}: {$factor}x
 wf-market-alert-boom = {CAPITALIZE($goods)} boom: +{$percent}% everywhere
 wf-market-alert-war = War demand: the navies pay {$factor}x for munitions and medicine
 wf-market-alert-freight = Freighter {$ship} inbound to {$station} with {$goods}

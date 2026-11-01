@@ -64,7 +64,6 @@ trader-refuel-not-docked = Your ship isn't docked here.
 trader-refuel-no-ship = I don't see your ship.
 trader-refuel-full = Your tanks are already full.
 trader-refuel-quote = { $count } generators, { $cost }.
-trader-refuel-short = Fuel's short right now, so it costs more.
 trader-refuel-done = All done.
 trader-refuel-receipt-name = Refuelling Receipt
 trader-refuel-receipt-header = [head=2]{ $trader }[/head]

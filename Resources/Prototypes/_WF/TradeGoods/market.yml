@@ -34,9 +34,9 @@
   # Each trade good bought from a station's vendor makes it scarcer there; vendors never charge below base.
   buyPerPurchase: 0.03
   buyScarcityCap: 1.5
-  # Mined and refined materials trade through each station's stock: pallets pay and consoles charge by how much of a
-  # material it holds, sold lots take materialArrival to reach the console, and stock drains at halfLife. The tightest
-  # pallet and console pair on a station, 1.25 over 1.5, stays short of a profit on selling and buying back.
+  # Stations start full, buying empties them and freighters fill them back up. Pallets pay and consoles charge by how
+  # much of a material a station holds. The tightest pallet and console pair on a station, 1.25 over 1.5, stays short
+  # of a profit on selling and buying back.
   materialGoods:
   - SheetSteel1
   - SheetGlass1
@@ -61,25 +61,17 @@
   - ScrapOre1
   - Coal1
   - Salt1
-  # Supply lines carry the everyday materials; the rest only come from miners.
+  # Freighters carry the everyday materials; the rest only come from miners.
   supplyMaterials: [ SheetSteel1, SheetGlass1, SheetPlastic1 ]
-  # A station's background supply. A blockade cuts the materials and slows the vendors, and so does a shortage for the
-  # vendors. Each pulse adds a crate per good to the stock a station's vendors share, so 40 crates refill in 80 minutes,
-  # and 3% of the target in everyday materials, which outpaces stock draining at halfLife and holds them at the target.
-  supplyPulse: 120
-  materialPulse: 0.03
   vendorStock: 40
-  vendorFreightRestock: 0.5
-  # Delivering this many hauled crates ends a shortage early; so does a freighter reaching the station.
-  shortageCrates: 4,8
-  refuelShortageGroup: Fuel
+  # A freighter's stop brings half a full stock of everyday materials and of each trade good, and ends shortages.
+  freightRestock: 0.5
   materialStockTarget: 10000
   materialGlut: 3
   materialPayMax: 1.2
   materialPayMin: 0.5
   materialChargeMax: 1.5
   materialChargeMin: 0.8
-  materialArrival: 600
   modifierCap: 2.5
   minHaulDistance: 3000
   highlight: 1.4

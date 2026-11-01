@@ -5,22 +5,20 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using Content.Server._NF.Market.Components;
-using Content.Server._NF.Market.Systems;
 using Content.Server._WF.Encounters.Components;
 using Content.Server._WF.Encounters.Systems;
 using Content.Server._WF.SectorControl.Systems;
 using Content.Server._WF.TradeGoods.Components;
 using Content.Server._WF.TradeGoods.Systems;
-using Content.Server._WF.Traders;
+using Content.Server.Cargo.Systems;
 using Content.Server.GameTicking;
 using Content.Server.Shuttles.Components;
 using Content.Server.Station.Systems;
 using Content.Shared._Mono.VendingMachine;
 using Content.Shared._WF.Encounters;
-using Content.Shared._WF.SectorControl;
 using Content.Shared._WF.TradeGoods;
-using Content.Shared._WF.Traders;
 using Content.Shared.GameTicking;
+using Content.Shared.Maps;
 using Content.Shared.Station.Components;
 using Content.Shared.VendingMachines;
 using Robust.Shared.GameObjects;
@@ -30,7 +28,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
-/// <summary>Vendors hold finite stock, supply lines refill stations, and disruption slows them until it is relieved.</summary>
+/// <summary>Stations start full, vendors hold finite stock, and freighters run on their own schedule.</summary>
 [TestFixture]
 [TestOf(typeof(WFTradeSupplySystem))]
 public sealed class StationSupplyTest
@@ -41,18 +39,6 @@ public sealed class StationSupplyTest
     private const string Contraband = "WFTradeGoodContraband";
     private const string Medicine = "TradeGoodMedicalSupplies";
     private const string Steel = "SheetSteel1";
-    private const string Blockader = "WFTestSupplyBlockader";
-
-    [TestPrototypes]
-    private const string Prototypes = @"
-- type: wfSectorFaction
-  id: WFTestSupplyBlockader
-  name: cmd-wf_sector-hint-faction
-  color: Red
-  blockades: true
-";
-
-    private static readonly TimeSpan Duration = TimeSpan.FromMinutes(30);
 
     /// <summary>A vendor on a grid, repriced so its stock is finite.</summary>
     private static (EntityUid Vendor, VendingMachineInventoryEntry Entry) StockedVendor(IEntityManager entMan, EntityUid grid)
@@ -62,17 +48,14 @@ public sealed class StationSupplyTest
         return (vendor, entMan.GetComponent<VendingMachineComponent>(vendor).Inventory[Luxuries]);
     }
 
-    private static HashSet<string> Medical => new() { "TradeGoodMedicalSupplies" };
-
     [Test]
-    public async Task VendorsRunOutAndSupplyRefillsThem()
+    public async Task VendorsRunOutAndRestock()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
         var server = pair.Server;
         var map = await pair.CreateTestMap();
         var entMan = server.EntMan;
         var market = entMan.System<WFTradeMarketSystem>();
-        var supply = entMan.System<WFTradeSupplySystem>();
 
         await server.WaitAssertion(() =>
         {
@@ -85,8 +68,8 @@ public sealed class StationSupplyTest
             Assert.That(entry.Amount, Is.Zero);
             Assert.That(market.StationBuyQuotes(grid).ContainsKey(Luxuries), Is.False, "A sold-out good should drop off the app.");
 
-            supply.Pulse();
-            Assert.That(entry.Amount, Is.EqualTo(1u), "A pulse should bring a crate.");
+            market.RestockVendors(grid, 1);
+            Assert.That(entry.Amount, Is.EqualTo(1u));
             Assert.That(market.StationBuyQuotes(grid).ContainsKey(Luxuries), Is.True);
 
             market.RestockVendors(grid, full * 2);
@@ -102,126 +85,24 @@ public sealed class StationSupplyTest
     }
 
     [Test]
-    public async Task AShortageHalvesVendorRefillUntilItIsFilled()
+    public async Task StationsStartFull()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
         var server = pair.Server;
         var map = await pair.CreateTestMap();
         var entMan = server.EntMan;
-        var market = entMan.System<WFTradeMarketSystem>();
-        var supply = entMan.System<WFTradeSupplySystem>();
-        var shortages = entMan.System<WFTradeShortageSystem>();
 
         await server.WaitAssertion(() =>
         {
-            var grid = map.Grid.Owner;
-            shortages.Clear();
-            var (_, entry) = StockedVendor(entMan, grid);
-            var chute = TradeTestWorld.MarketChute(entMan, map);
-            var user = entMan.SpawnEntity(null, map.GridCoords);
-            var far = TradeTestWorld.Grid(entMan, map, new Vector2(5000f, 0f), "WF test far");
+            var profile = entMan.System<WFTradeMarketSystem>().Profile(null);
+            var config = server.ProtoMan.Index<GameMapPrototype>("CargoDepot").Stations["CargoDepot"];
+            var station = entMan.System<StationSystem>().InitializeNewStation(config, new[] { map.Grid.Owner }, "WF test depot");
+            var value = entMan.System<PricingSystem>().GetEstimatedPrice(server.ProtoMan.Index<EntityPrototype>(Steel));
 
-            shortages.StartLocal(grid, new HashSet<string> { TradeTestWorld.Fabric }, 1.5f, Duration, "wf-trade-goods-textiles");
-            var shortage = shortages.Active[0];
-            Assert.That(shortage.Needed, Is.GreaterThan(0));
-            Assert.That(shortages.IsShort(grid), Is.True);
-
-            market.SetVendorStock(grid, Luxuries, 0);
-            for (var i = 0; i < 4; i++)
-            {
-                supply.Pulse();
-            }
-
-            Assert.That(entry.Amount, Is.EqualTo(2u), "A short station's vendors should refill at half speed.");
-
-            var needed = shortage.Needed;
-            market.Sell(chute, entMan.SpawnEntity(TradeTestWorld.Fabric, map.GridCoords), user);
-            Assert.That(shortage.Needed, Is.EqualTo(needed), "A crate made on the station shouldn't fill its shortage.");
-
-            for (var i = 0; i < needed; i++)
-            {
-                market.Sell(chute, TradeTestWorld.Hauled(entMan, far, map.GridCoords), user);
-            }
-
-            Assert.That(shortages.IsShort(grid), Is.False, "Enough hauled crates should end a shortage.");
-
-            shortages.StartLocal(grid, Medical, 1.5f, Duration, "wf-trade-goods-medical");
-            shortages.Relieve(grid);
-            Assert.That(shortages.IsShort(grid), Is.False, "A freighter getting through should end a shortage.");
-        });
-
-        await pair.CleanReturnAsync();
-    }
-
-    [Test]
-    public async Task FuelShortagesRaiseRefuelling()
-    {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entMan = server.EntMan;
-        var supply = entMan.System<WFTradeSupplySystem>();
-        var shortages = entMan.System<WFTradeShortageSystem>();
-
-        await server.WaitAssertion(() =>
-        {
-            shortages.Clear();
-            TradeTestWorld.MarketChute(entMan, map);
-            var trader = entMan.SpawnEntity(null, map.GridCoords);
-            var elsewhere = entMan.SpawnEntity(null, new EntityCoordinates(TradeTestWorld.Grid(entMan, map, new Vector2(400f, 0f), "WF test other"), 0.5f, 0.5f));
-            Assert.That(supply.RefuelFactor(trader), Is.EqualTo(1f));
-
-            var shortage = shortages.Start("WFTradeShortageFuel");
-            Assert.That(shortage, Is.Not.Null);
-            Assert.That(supply.RefuelFactor(trader), Is.EqualTo(shortage!.Factor).Within(0.001f));
-            Assert.That(supply.RefuelFactor(elsewhere), Is.EqualTo(1f), "Another station's shortage shouldn't raise refuelling here.");
-            shortages.Clear();
-        });
-
-        await pair.CleanReturnAsync();
-    }
-
-    [Test]
-    public async Task ABlockadeCutsMaterialsAndSlowsVendors()
-    {
-        // Dirty: the test makes its map the sector map in a round, so the pair needs a round restart before reuse.
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entMan = server.EntMan;
-        var stock = entMan.System<MarketSystem>();
-        var supply = entMan.System<WFTradeSupplySystem>();
-        var territory = entMan.System<WFSectorTerritorySystem>();
-        var sector = entMan.System<WFTradeSectorSystem>();
-
-        await server.WaitAssertion(() =>
-        {
-            var ticker = entMan.System<GameTicker>();
-            SetPrivate(ticker, nameof(GameTicker.DefaultMap), map.MapId);
-            SetPrivate(ticker, nameof(GameTicker.RunLevel), GameRunLevel.InRound);
-
-            var blockadedCell = new WFSectorCell(4, -2);
-            var openCell = new WFSectorCell(-4, 2);
-            var (blockaded, blockadedStation) = Station(entMan, map, WFSectorHex.Centre(blockadedCell, territory.CellSize), "WF test cut off");
-            var (open, openStation) = Station(entMan, map, WFSectorHex.Centre(openCell, territory.CellSize), "WF test open");
-            Assert.That(territory.TryClaim(map.MapId, blockadedCell, Blockader, null), Is.True);
-            Assert.That(sector.IsBlockaded(blockaded), Is.True);
-            Assert.That(sector.IsBlockaded(open), Is.False);
-
-            var (_, cutOff) = StockedVendor(entMan, blockaded);
-            var (_, flowing) = StockedVendor(entMan, open);
-            var market = entMan.System<WFTradeMarketSystem>();
-            market.SetVendorStock(blockaded, Luxuries, 0);
-            market.SetVendorStock(open, Luxuries, 0);
-            for (var i = 0; i < 4; i++)
-            {
-                supply.Pulse();
-            }
-
-            Assert.That(TradeTestWorld.Stock(entMan, blockadedStation, Steel), Is.Zero, "A blockade should cut a station's materials.");
-            Assert.That(TradeTestWorld.Stock(entMan, openStation, Steel), Is.GreaterThan(0), "An open station should keep getting them.");
-            Assert.That(cutOff.Amount, Is.EqualTo(2u), "A blockaded station's vendors should still refill slowly.");
-            Assert.That(flowing.Amount, Is.EqualTo(4u));
+            Assert.That(TradeTestWorld.Stock(entMan, station, Steel), Is.EqualTo((int) (profile.MaterialStockTarget / value)).Within(1),
+                "A station should open with a full stock of everyday materials.");
+            Assert.That(TradeTestWorld.Stock(entMan, station, "SheetPlasma1"), Is.Zero, "Precious materials should only come from miners.");
+            entMan.DeleteEntity(station);
         });
 
         await pair.CleanReturnAsync();
@@ -250,71 +131,6 @@ public sealed class StationSupplyTest
             Assert.That(market.VendorStock(grid, Luxuries), Is.EqualTo((int) full - 1), "A purchase should come off the station's stock.");
             Assert.That(first.Amount, Is.EqualTo(full - 1), "Every vendor should show the shared stock.");
             Assert.That(second.Amount, Is.EqualTo(full - 1), "Every vendor should show the shared stock.");
-        });
-
-        await pair.CleanReturnAsync();
-    }
-
-    [Test]
-    public async Task FuelVendorsChargeShortagePrices()
-    {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entMan = server.EntMan;
-        var market = entMan.System<WFTradeMarketSystem>();
-        var shortages = entMan.System<WFTradeShortageSystem>();
-        var protos = server.ResolveDependency<IPrototypeManager>();
-        EntityUid vendor = default;
-        var factor = 1f;
-
-        await server.WaitAssertion(() =>
-        {
-            shortages.Clear();
-            TradeTestWorld.MarketChute(entMan, map);
-            vendor = entMan.SpawnEntity("VendingMachineFuelVend", map.GridCoords);
-            Assert.That(market.BuyPrice(vendor, protos.Index<EntityPrototype>("FuelPlasma"), 100), Is.EqualTo(100));
-            factor = shortages.Start("WFTradeShortageFuel")!.Factor;
-        });
-
-        await pair.RunTicksSync(180);
-
-        await server.WaitAssertion(() =>
-        {
-            var expected = (int) MathF.Round(100 * factor);
-            Assert.That(entMan.GetComponent<WFShortagePricedVendorComponent>(vendor).Factor, Is.EqualTo(factor).Within(0.001f),
-                "The vendor's factor should follow the shortage so its menu shows the price.");
-            Assert.That(market.BuyPrice(vendor, protos.Index<EntityPrototype>("FuelPlasma"), 100), Is.EqualTo(expected));
-            shortages.Clear();
-        });
-
-        await pair.CleanReturnAsync();
-    }
-
-    [Test]
-    public async Task FuelShortagesRaiseTheRefuelQuote()
-    {
-        await using var pair = await PoolManager.GetServerClient();
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entMan = server.EntMan;
-        var refuel = entMan.System<TraderRefuelSystem>();
-        var shortages = entMan.System<WFTradeShortageSystem>();
-
-        await server.WaitAssertion(() =>
-        {
-            shortages.Clear();
-            var grid = map.Grid.Owner;
-            TradeTestWorld.MarketChute(entMan, map);
-            var trader = entMan.SpawnEntity("WFTraderFuelTechnician", map.GridCoords);
-            entMan.SpawnEntity("PortableGeneratorJrPacmanShuttle", map.GridCoords);
-            var comp = entMan.GetComponent<TraderRefuelComponent>(trader);
-
-            Assert.That(refuel.GetQuote((trader, comp), grid, out var calm), Is.Not.Empty, "The generator should need fuel.");
-            var shortage = shortages.Start("WFTradeShortageFuel");
-            refuel.GetQuote((trader, comp), grid, out var dear);
-            Assert.That(dear, Is.EqualTo(calm * shortage!.Factor).Within(1.0), "The final quote should carry the shortage's factor.");
-            shortages.Clear();
         });
 
         await pair.CleanReturnAsync();

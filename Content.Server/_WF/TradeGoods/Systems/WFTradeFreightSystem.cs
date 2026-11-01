@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Server._NF.Market.Systems;
 using Content.Server._WF.Encounters;
 using Content.Server._WF.Encounters.Components;
 using Content.Shared._WF.Encounters;
@@ -22,6 +23,7 @@ public sealed class WFTradeFreightSystem : EntitySystem
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private WFTradeMarketSystem _market = default!;
     [Dependency] private WFTradeShortageSystem _shortages = default!;
+    [Dependency] private MarketSystem _stock = default!;
     [Dependency] private WFTradeSupplySystem _supply = default!;
     [Dependency] private IGameTiming _timing = default!;
 
@@ -142,7 +144,11 @@ public sealed class WFTradeFreightSystem : EntitySystem
             supplied.Add(_market.GoodName(good));
         }
 
-        _market.RestockVendors(args.Station, (int) MathF.Ceiling(profile.VendorStock * profile.VendorFreightRestock));
+        // Nothing else refills a station, so stopping the freighters starves it.
+        if (_stock.WfRestock(args.Station, profile.FreightRestock))
+            supplied.Add(Loc.GetString("wf-trade-goods-materials"));
+
+        _market.RestockVendors(args.Station, (int) MathF.Ceiling(profile.VendorStock * profile.FreightRestock));
         _shortages.Relieve(args.Station);
         _supply.NoteStop(args.Station);
 

@@ -9,7 +9,6 @@ using Content.Shared._WF.TradeGoods;
 using Content.Shared.Stacks;
 using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Random;
 using Robust.Shared.Timing;
 
 namespace Content.Server._NF.Market.Systems;
@@ -18,20 +17,19 @@ namespace Content.Server._NF.Market.Systems;
 public readonly record struct WFMaterialQuote(string Good, EntityUid Station, string Name, double Pays, double Charges, int Stock);
 
 /// <summary>
-/// Station stock as a market for materials. Pallets pay and consoles charge by how much of a material a station holds,
-/// sold lots reach the console after a delay, stock drains over time and supply lines restock the everyday materials.
+/// Station stock as a market for materials. Stations start full, buying empties them and freighters fill them back up,
+/// and pallets pay and consoles charge by how much of a material a station holds.
 /// Materials in a console's cart stay the station's stock until they are bought, so a cart can't move prices or lock one.
 /// Materials are appraised after <c>PriceCalculationEvent</c>, so a pallet adds the difference itself.
 /// </summary>
 public sealed partial class MarketSystem
 {
     [Dependency] private IGameTiming _timing = default!;
-    [Dependency] private IRobustRandom _random = default!;
     [Dependency] private WFTradeMarketSystem _tradeMarket = default!;
 
-    private static readonly TimeSpan WfStepInterval = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan WfRepriceInterval = TimeSpan.FromSeconds(5);
 
-    private TimeSpan _wfNextStep;
+    private TimeSpan _wfNextReprice;
 
     /// <summary>Each entity's adjustment this tick, so an appraisal and a sale agree.</summary>
     private readonly Dictionary<EntityUid, double> _wfAdjusted = new();
@@ -44,60 +42,35 @@ public sealed partial class MarketSystem
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
-        if (_timing.CurTime < _wfNextStep)
+        if (_timing.CurTime < _wfNextReprice)
             return;
 
-        _wfNextStep = _timing.CurTime + WfStepInterval;
+        _wfNextReprice = _timing.CurTime + WfRepriceInterval;
         var query = EntityQueryEnumerator<CargoMarketDataComponent>();
         while (query.MoveNext(out var uid, out var market))
         {
-            WfStep((uid, market), WfStepInterval);
+            WfReprice((uid, market));
         }
     }
 
-    /// <summary>Advances one station's materials: lots arrive, stock drains and console prices follow what is left.</summary>
-    public void WfStep(Entity<CargoMarketDataComponent> ent, TimeSpan elapsed)
+    /// <summary>Sets a station's console prices for materials, in its stock and carts, by how much it holds.</summary>
+    public void WfReprice(Entity<CargoMarketDataComponent> ent)
     {
         var profile = _tradeMarket.Profile(null);
-        var market = ent.Comp;
-        for (var i = market.Arriving.Count - 1; i >= 0; i--)
-        {
-            var lot = market.Arriving[i];
-            lot.Left -= elapsed;
-            if (lot.Left > TimeSpan.Zero)
-                continue;
-
-            market.MarketDataList.Upsert(lot.Good, lot.Count, WfUnitPrice(lot.Good), WfStackId(lot.Good));
-            market.Arriving.RemoveAt(i);
-        }
-
-        var share = 1.0 - Math.Pow(0.5, elapsed.TotalSeconds / Math.Max(1.0, profile.HalfLife.TotalSeconds));
         var carts = WfCarts(ent);
-        WfSettle(market.MarketDataList, market, carts, profile, share);
+        WfReprice(ent.Comp.MarketDataList, ent.Comp, carts, profile);
         foreach (var cart in carts)
         {
-            WfSettle(cart, market, carts, profile, share);
+            WfReprice(cart, ent.Comp, carts, profile);
         }
     }
 
-    /// <summary>Drains and reprices the materials in one list of a station's stock.</summary>
-    private void WfSettle(List<MarketData> stock, CargoMarketDataComponent market, List<List<MarketData>> carts,
-        WFTradeMarketPrototype profile, double share)
+    private void WfReprice(List<MarketData> stock, CargoMarketDataComponent market, List<List<MarketData>> carts, WFTradeMarketPrototype profile)
     {
-        for (var i = stock.Count - 1; i >= 0; i--)
+        foreach (var entry in stock)
         {
-            var entry = stock[i];
             if (!profile.MaterialGoods.Contains(entry.Prototype))
                 continue;
-
-            // Rounded by chance so small stocks of dear materials drain at the same rate.
-            var drained = entry.Quantity * share;
-            entry.Quantity -= (int) drained + (_random.Prob((float) (drained % 1.0)) ? 1 : 0);
-            if (entry.Quantity <= 0)
-            {
-                stock.RemoveAt(i);
-                continue;
-            }
 
             var unit = WfUnitPrice(entry.Prototype);
             entry.Price = unit * WfChargeFactor(profile, WfSaturation(profile, WfSupply(market, carts, entry.Prototype), unit));
@@ -223,7 +196,7 @@ public sealed partial class MarketSystem
         return carts;
     }
 
-    /// <summary>A station's stock of a material, counting what is in carts and on its way to the console.</summary>
+    /// <summary>A station's stock of a material, counting what is in carts.</summary>
     private int WfSupply(CargoMarketDataComponent market, List<List<MarketData>> carts, string good)
     {
         var supply = market.MarketDataList.FirstOrDefault(entry => entry.Prototype == good)?.Quantity ?? 0;
@@ -232,28 +205,11 @@ public sealed partial class MarketSystem
             supply += cart.FirstOrDefault(entry => entry.Prototype == good)?.Quantity ?? 0;
         }
 
-        foreach (var lot in market.Arriving)
-        {
-            if (lot.Good == good)
-                supply += lot.Count;
-        }
-
         return supply;
     }
 
-    /// <summary>Holds a sold material back from the console, or returns false for anything else.</summary>
-    private bool WfQueueMaterial(CargoMarketDataComponent market, string good, int count)
-    {
-        var profile = _tradeMarket.Profile(null);
-        if (!profile.MaterialGoods.Contains(good))
-            return false;
-
-        market.Arriving.Add(new WFArrivingMaterial(good, count, profile.MaterialArrival));
-        return true;
-    }
-
-    /// <summary>One supply pulse of everyday materials at a station, never past the target. Returns whether it added any.</summary>
-    public bool WfRestock(EntityUid grid)
+    /// <summary>Tops up a station's everyday materials by a share of the target, never past it. Returns whether it added any.</summary>
+    public bool WfRestock(EntityUid grid, float share)
     {
         if (_station.GetOwningStation(grid) is not { } station || !TryComp<CargoMarketDataComponent>(station, out var market))
             return false;
@@ -268,7 +224,7 @@ public sealed partial class MarketSystem
                 continue;
 
             var target = profile.MaterialStockTarget / unit;
-            var amount = (int) Math.Min(target * profile.MaterialPulse, target - WfSupply(market, carts, good));
+            var amount = (int) Math.Min(target * share, target - WfSupply(market, carts, good));
             if (amount <= 0)
                 continue;
 

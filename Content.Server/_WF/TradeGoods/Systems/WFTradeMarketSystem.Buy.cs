@@ -20,7 +20,6 @@ public readonly record struct WFTradeBuyQuote(int Base, int Amount, float Factor
 public sealed partial class WFTradeMarketSystem
 {
     [Dependency] private PricingSystem _pricing = default!;
-    [Dependency] private WFTradeShortageSystem _shortages = default!;
 
     private static readonly TimeSpan VendorInterval = TimeSpan.FromSeconds(5);
 
@@ -129,9 +128,6 @@ public sealed partial class WFTradeMarketSystem
     /// </summary>
     public int BuyPrice(EntityUid vendor, EntityPrototype proto, int price)
     {
-        if (price > 0 && TryComp<WFShortagePricedVendorComponent>(vendor, out var priced))
-            return (int) MathF.Round(price * priced.Factor);
-
         if (price <= 0
             || !HasComp<WFTradeVendorComponent>(vendor)
             || Transform(vendor).GridUid is not { } grid
@@ -162,17 +158,6 @@ public sealed partial class WFTradeMarketSystem
 
         _nextVendorRefresh = _timing.CurTime + VendorInterval;
         RefreshVendors(null);
-
-        var priced = EntityQueryEnumerator<WFShortagePricedVendorComponent, TransformComponent>();
-        while (priced.MoveNext(out var uid, out var vendor, out var xform))
-        {
-            var factor = _shortages.Factor(xform.GridUid, vendor.Group);
-            if (MathHelper.CloseTo(vendor.Factor, factor))
-                continue;
-
-            vendor.Factor = factor;
-            Dirty(uid, vendor);
-        }
     }
 
     /// <summary>Recomputes the live prices of the trade vendors on one grid, or on every grid, dirtying those that changed.</summary>

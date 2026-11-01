@@ -589,9 +589,6 @@
     pack: FuelVendAds
   - type: SpeakOnUIClosed
     pack: FuelVendGoodbyes
-  # WOLFGATE(TradeGoods): a fuel shortage raises what the vendor charges
-  - type: WFShortagePricedVendor
-    group: Fuel
   - type: Sprite
     sprite: _NF/Structures/Machines/VendingMachines/fuelvend.rsi
     layers:

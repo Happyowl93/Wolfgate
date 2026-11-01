@@ -2,6 +2,7 @@ using System.Linq;
 using Content.Server._NF.Market.Components;
 using Content.Server._NF.Market.Systems;
 using Content.Server.GameTicking;
+using Content.Server.Station.Events;
 using Content.Server.Station.Systems;
 using Content.Shared._WF.TradeGoods;
 using Content.Shared.GameTicking;
@@ -13,8 +14,8 @@ namespace Content.Server._WF.TradeGoods.Systems;
 public readonly record struct WFSupplyReport(string Station, bool Blockaded, bool Short, int Goods, int SoldOut, int Lowest, int Stops);
 
 /// <summary>
-/// The supply lines that keep stations stocked between freighters. A blockade cuts their materials, and a blockade or
-/// shortage slows what reaches the trade vendors. Stations stay healthy until something disrupts them.
+/// Stations start full, buying empties them and freighters fill them back up, so stopping the freighters starves a
+/// station. Fills cargo markets at round start and reports how each station stands.
 /// </summary>
 public sealed partial class WFTradeSupplySystem : EntitySystem
 {
@@ -28,9 +29,7 @@ public sealed partial class WFTradeSupplySystem : EntitySystem
 
     private static readonly TimeSpan ReportInterval = TimeSpan.FromHours(1);
 
-    private TimeSpan _nextPulse;
     private TimeSpan _nextReport;
-    private int _pulses;
 
     /// <summary>Freighter stops at each station this round.</summary>
     private readonly Dictionary<EntityUid, int> _stops = new();
@@ -38,14 +37,19 @@ public sealed partial class WFTradeSupplySystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
+        SubscribeLocalEvent<CargoMarketDataComponent, StationPostInitEvent>(OnStationPostInit);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnCleanup);
+    }
+
+    private void OnStationPostInit(Entity<CargoMarketDataComponent> ent, ref StationPostInitEvent args)
+    {
+        if (_station.GetLargestGrid(ent.Owner) is { } grid)
+            _stock.WfRestock(grid, 1f);
     }
 
     private void OnCleanup(RoundRestartCleanupEvent args)
     {
-        _nextPulse = TimeSpan.Zero;
         _nextReport = TimeSpan.Zero;
-        _pulses = 0;
         _stops.Clear();
     }
 
@@ -58,50 +62,13 @@ public sealed partial class WFTradeSupplySystem : EntitySystem
         if (_nextReport == TimeSpan.Zero)
             _nextReport = _timing.CurTime + ReportInterval;
 
-        if (_timing.CurTime >= _nextReport)
-        {
-            _nextReport = _timing.CurTime + ReportInterval;
-            foreach (var report in Reports())
-            {
-                Log.Info(report.ToString());
-            }
-        }
-
-        var interval = _market.Profile(null).SupplyPulse;
-        if (_nextPulse == TimeSpan.Zero)
-            _nextPulse = _timing.CurTime + interval;
-
-        if (_timing.CurTime < _nextPulse)
+        if (_timing.CurTime < _nextReport)
             return;
 
-        _nextPulse = _timing.CurTime + interval;
-        Pulse();
-    }
-
-    /// <summary>One delivery from the supply lines to every station.</summary>
-    public void Pulse()
-    {
-        _pulses++;
-        var vendorGrids = new HashSet<EntityUid>();
-        var vendors = EntityQueryEnumerator<WFTradeVendorComponent, TransformComponent>();
-        while (vendors.MoveNext(out _, out var xform))
+        _nextReport = _timing.CurTime + ReportInterval;
+        foreach (var report in Reports())
         {
-            if (xform.GridUid is { } grid)
-                vendorGrids.Add(grid);
-        }
-
-        foreach (var grid in vendorGrids)
-        {
-            // Every second pulse gets through to a disrupted station.
-            if (_pulses % 2 == 0 || !_sector.IsBlockaded(grid) && !_shortages.IsShort(grid))
-                _market.RestockVendors(grid, 1);
-        }
-
-        var markets = EntityQueryEnumerator<CargoMarketDataComponent>();
-        while (markets.MoveNext(out var station, out _))
-        {
-            if (_station.GetLargestGrid(station) is { } grid && !_sector.IsBlockaded(grid))
-                _stock.WfRestock(grid);
+            Log.Info(report.ToString());
         }
     }
 
@@ -134,11 +101,5 @@ public sealed partial class WFTradeSupplySystem : EntitySystem
         }
 
         return reports;
-    }
-
-    /// <summary>What a fuel shortage or boom does to a trader's refuelling prices.</summary>
-    public float RefuelFactor(EntityUid trader)
-    {
-        return _shortages.Factor(Transform(trader).GridUid, _market.Profile(null).RefuelShortageGroup);
     }
 }
