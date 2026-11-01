@@ -12,7 +12,11 @@ namespace Content.Server._WF.TradeGoods.Systems;
 /// An active shortage at one station, or a boom across the sector when <c>Grid</c> is null. It raises a group's goods,
 /// or exactly <c>Goods</c> when set, such as the cargo a lost freight run was bringing.
 /// </summary>
-public sealed record WFTradeShortage(EntityUid? Grid, string Group, float Factor, TimeSpan Ends, LocId Name, HashSet<string>? Goods = null);
+public sealed record WFTradeShortage(EntityUid? Grid, string Group, float Factor, TimeSpan Ends, LocId Name, HashSet<string>? Goods = null)
+{
+    /// <summary>Hauled crates still needed to end it early; a sector-wide boom can't be filled.</summary>
+    public int Needed { get; set; }
+}
 
 /// <summary>
 /// Every so often a station runs short of a group of goods, or the whole sector booms for one, and pays more for it
@@ -44,6 +48,7 @@ public sealed class WFTradeShortageSystem : EntitySystem
         base.Initialize();
         SubscribeLocalEvent<WFTradeQuoteEvent>(OnQuote);
         SubscribeLocalEvent<WFTradeBuyQuoteEvent>(OnBuyQuote);
+        SubscribeLocalEvent<WFTradeSaleEvent>(OnSale);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnCleanup);
     }
 
@@ -82,6 +87,53 @@ public sealed class WFTradeShortageSystem : EntitySystem
                     shortage.Grid == null ? "wf-trade-reason-boom" : "wf-trade-reason-short"));
             }
         }
+    }
+
+    /// <summary>Hauled crates count toward filling a shortage of their good at that station.</summary>
+    private void OnSale(WFTradeSaleEvent args)
+    {
+        if (!_market.WasHauled(args.Chute, args.Crate))
+            return;
+
+        var now = _timing.CurTime;
+        for (var i = _active.Count - 1; i >= 0; i--)
+        {
+            var shortage = _active[i];
+            if (shortage.Grid != args.Grid || shortage.Ends <= now
+                || !(shortage.Goods?.Contains(args.Good) ?? _market.InGroup(args.Good, shortage.Group)))
+                continue;
+
+            if (--shortage.Needed > 0)
+                continue;
+
+            _active.RemoveAt(i);
+            _market.Announce(Loc.GetString("wf-trade-shortage-filled", ("station", Name(args.Grid)), ("goods", Loc.GetString(shortage.Name))), args.Grid);
+        }
+    }
+
+    /// <summary>Whether a station has any shortage running now.</summary>
+    public bool IsShort(EntityUid grid)
+    {
+        return _active.Any(shortage => shortage.Grid == grid && shortage.Ends > _timing.CurTime);
+    }
+
+    /// <summary>How much a station's shortages of a group and any sector boom in it raise prices now.</summary>
+    public float Factor(EntityUid? grid, string group)
+    {
+        var factor = 1f;
+        foreach (var shortage in _active)
+        {
+            if (shortage.Group == group && shortage.Ends > _timing.CurTime && (shortage.Grid == null || shortage.Grid == grid))
+                factor *= shortage.Factor;
+        }
+
+        return Math.Min(factor, _market.Profile(grid).ModifierCap);
+    }
+
+    /// <summary>Ends a station's shortages because a freighter got through.</summary>
+    public void Relieve(EntityUid grid)
+    {
+        _active.RemoveAll(shortage => shortage.Grid == grid);
     }
 
     public override void Update(float frameTime)
@@ -149,12 +201,15 @@ public sealed class WFTradeShortageSystem : EntitySystem
         EntityUid? target = picked.SectorWide ? null : _random.Pick(candidates);
         var factor = MathF.Round(_random.NextFloat(picked.MinFactor, picked.MaxFactor), 1);
         var shortage = new WFTradeShortage(target, picked.Group, factor, _timing.CurTime + picked.Duration, picked.Goods);
+        if (target != null)
+            shortage.Needed = RollNeeded();
+
         _active.Add(shortage);
 
         var goodsName = Loc.GetString(picked.Goods);
         var minutes = (int) picked.Duration.TotalMinutes;
         _market.Announce(target is { } grid
-            ? Loc.GetString("wf-trade-shortage-start", ("station", Name(grid)), ("goods", goodsName), ("factor", WFTradeMarketSystem.Shown(factor)), ("minutes", minutes))
+            ? Loc.GetString("wf-trade-shortage-start", ("station", Name(grid)), ("goods", goodsName), ("factor", WFTradeMarketSystem.Shown(factor)), ("minutes", minutes), ("needed", shortage.Needed))
             : Loc.GetString("wf-trade-boom-start", ("goods", goodsName), ("percent", (int) MathF.Round((factor - 1f) * 100f)), ("minutes", minutes)),
             target);
 
@@ -164,6 +219,12 @@ public sealed class WFTradeShortageSystem : EntitySystem
     /// <summary>Starts a quiet shortage of exact goods at one station, such as those a lost freight run was bringing.</summary>
     public void StartLocal(EntityUid grid, HashSet<string> goods, float factor, TimeSpan duration, LocId name)
     {
-        _active.Add(new WFTradeShortage(grid, string.Empty, factor, _timing.CurTime + duration, name, goods));
+        _active.Add(new WFTradeShortage(grid, string.Empty, factor, _timing.CurTime + duration, name, goods) { Needed = RollNeeded() });
+    }
+
+    private int RollNeeded()
+    {
+        var range = _proto.Index(WFTradeMarketSystem.DefaultProfile).ShortageCrates;
+        return _random.Next(range.X, Math.Max(range.X, range.Y) + 1);
     }
 }

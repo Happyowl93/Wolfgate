@@ -39,13 +39,81 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public float TradeCrateFloor = 0.3f;
 
+    /// <summary>The single-unit stacks that trade through station stock: what pallets and market consoles price by supply.</summary>
+    [DataField]
+    public List<EntProtoId> MaterialGoods = new();
+
+    /// <summary>The everyday materials a station's supply lines and freighters restock.</summary>
+    [DataField]
+    public List<EntProtoId> FreightMaterials = new();
+
+    /// <summary>How often a station's background supply arrives.</summary>
+    [DataField]
+    public TimeSpan SupplyPulse = TimeSpan.FromMinutes(2);
+
+    /// <summary>Share of the stock target each supply pulse adds to the everyday materials.</summary>
+    [DataField]
+    public float MaterialPulse = 0.01f;
+
+    /// <summary>Most of each trade good a station's vendors hold between them.</summary>
+    [DataField]
+    public int VendorStock = 40;
+
+    /// <summary>Share of a vendor's full stock a freighter's stop adds to each good.</summary>
+    [DataField]
+    public float VendorFreightRestock = 0.5f;
+
+    /// <summary>Crates a station needs delivered to end a shortage early.</summary>
+    [DataField]
+    public Vector2i ShortageCrates = new(4, 8);
+
+    /// <summary>The goods group whose shortages and booms raise what traders charge to refuel a ship.</summary>
+    [DataField]
+    public string RefuelShortageGroup = string.Empty;
+
+    /// <summary>Spesos of one material a station holds at normal prices.</summary>
+    [DataField]
+    public float MaterialStockTarget = 10000f;
+
+    /// <summary>Share of the stock target one freighter stop adds, never past the target.</summary>
+    [DataField]
+    public float MaterialRestock = 0.35f;
+
+    /// <summary>Stock, as a multiple of the target, at which prices stop falling.</summary>
+    [DataField]
+    public float MaterialGlut = 3f;
+
+    /// <summary>What a pallet pays for a material a station has none of, as a share of its appraised value.</summary>
+    [DataField]
+    public float MaterialPayMax = 1.2f;
+
+    /// <summary>What a pallet pays for a material at a glutted station.</summary>
+    [DataField]
+    public float MaterialPayMin = 0.5f;
+
+    /// <summary>What a console charges for a material a station is nearly out of, before the console's own modifier.</summary>
+    [DataField]
+    public float MaterialChargeMax = 1.5f;
+
+    /// <summary>What a console charges for a material at a glutted station.</summary>
+    [DataField]
+    public float MaterialChargeMin = 0.8f;
+
+    /// <summary>How long sold materials take to reach a station's console.</summary>
+    [DataField]
+    public TimeSpan MaterialArrival = TimeSpan.FromMinutes(10);
+
+    /// <summary>The goods group whose shortages and booms raise material prices too.</summary>
+    [DataField]
+    public string MaterialShortageGroup = string.Empty;
+
     /// <summary>Scarcity one trade good bought from a station's vendor adds there, raising what its vendors charge.</summary>
     [DataField]
-    public float BuyPerPurchase = 0.015f;
+    public float BuyPerPurchase = 0.03f;
 
     /// <summary>Most scarcity can raise a vendor's price, as a fraction of its base.</summary>
     [DataField]
-    public float BuyScarcityCap = 0.6f;
+    public float BuyScarcityCap = 1.5f;
 
     /// <summary>Cap on the product of the modifiers that raise a price.</summary>
     [DataField]

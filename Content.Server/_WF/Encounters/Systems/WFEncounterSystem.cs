@@ -285,6 +285,20 @@ public sealed partial class WFEncounterSystem : EntitySystem
         return count;
     }
 
+    /// <summary>Freight runs that have not resolved yet, which count against their own cap.</summary>
+    public int ActiveFreight()
+    {
+        var count = 0;
+        var query = EntityQueryEnumerator<WFEncounterComponent>();
+        while (query.MoveNext(out _, out var encounter))
+        {
+            if (encounter.Resolution == null && encounter.Freight)
+                count++;
+        }
+
+        return count;
+    }
+
     /// <summary>The summed cost of the encounters <see cref="ActiveCount"/> counts.</summary>
     public int ActiveCost()
     {
@@ -351,7 +365,9 @@ public sealed partial class WFEncounterSystem : EntitySystem
         comp.Cost = prototype.Cost;
         comp.Lifetime = prototype.Lifetime;
         comp.OffBudget = prototype.Lifetime == WFEncounterLifetime.Persistent || prototype.Start == WFEncounterStart.RoundStart;
-        comp.OffBudget |= offBudget;
+        comp.OffBudget |= offBudget || prototype.Freight;
+        comp.Freight = prototype.Freight;
+        comp.Blockades = prototype.Blockades;
         // A pinned encounter is the admin's to end: no clock, no slot under the cap, and its ships stay however it goes.
         comp.Pinned = pinned;
         if (comp.Pinned)

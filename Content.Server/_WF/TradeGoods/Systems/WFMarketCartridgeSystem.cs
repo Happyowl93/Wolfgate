@@ -1,12 +1,14 @@
 using System.Linq;
 using Content.Server._Mono.AlertLevel;
 using Content.Server._Mono.VendingMachine;
+using Content.Server._NF.Market.Systems;
 using Content.Server._WF.CargoLoad;
 using Content.Server._WF.Encounters.Components;
 using Content.Server._WF.SectorControl.Systems;
 using Content.Server._WF.TradeGoods.Components;
 using Content.Server.CartridgeLoader;
 using Content.Server.Popups;
+using Content.Server.Station.Systems;
 using Content.Shared._Crescent.Dispenser;
 using Content.Shared._Mono.Company;
 using Content.Shared._WF.SectorControl;
@@ -46,6 +48,8 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     [Dependency] private WarLevelSystem _war = default!;
     [Dependency] private PopupSystem _popup = default!;
     [Dependency] private VendingMachinePurchaseSystem _vendingPurchase = default!;
+    [Dependency] private MarketSystem _stock = default!;
+    [Dependency] private StationSystem _station = default!;
 
     public static readonly EntProtoId MarketCartridge = "WFMarketCartridge";
 
@@ -162,6 +166,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
             Private = true,
             Stations = sector.Stations.Where(station => !station.Underground).ToList(),
             Alerts = sector.Alerts.Where(entry => !entry.Hidden).Select(entry => entry.Alert).ToList(),
+            Materials = sector.OpenMaterials,
         }, loader: loaderComp);
     }
 
@@ -199,7 +204,9 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         List<WFMarketStation> Stations,
         List<(WFMarketAlert Alert, bool Hidden)> Alerts,
         List<(EntityUid Chute, DispenserComponent Dispenser, EntityUid Grid)> Chutes,
-        HashSet<EntityUid> HiddenChutes);
+        HashSet<EntityUid> HiddenChutes,
+        List<WFMarketMaterial> OpenMaterials,
+        List<WFMarketMaterial> AllMaterials);
 
     /// <summary>The prices and alerts every copy shows, and the hidden markets.</summary>
     private MarketSnapshot Sector()
@@ -313,7 +320,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         foreach (var shortage in _shortages.Active)
         {
             Add(new WFMarketAlert(shortage.Grid is { } grid
-                ? Loc.GetString("wf-market-alert-shortage", ("station", Name(grid)), ("goods", Loc.GetString(shortage.Name)), ("factor", WFTradeMarketSystem.Shown(shortage.Factor)))
+                ? Loc.GetString("wf-market-alert-shortage", ("station", Name(grid)), ("goods", Loc.GetString(shortage.Name)), ("factor", WFTradeMarketSystem.Shown(shortage.Factor)), ("needed", shortage.Needed))
                 : Loc.GetString("wf-market-alert-boom", ("goods", Loc.GetString(shortage.Name)), ("percent", (int) MathF.Round((shortage.Factor - 1f) * 100f))),
                 shortage.Ends, false), shortage.Grid is { } shortageGrid ? Name(shortageGrid) : null);
         }
@@ -339,7 +346,29 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
             .ThenBy(entry => entry.Value.Name)
             .Select(entry => entry.Value)
             .ToList();
-        return new MarketSnapshot(sorted, alerts, chutes, hiddenChutes);
+
+        var quotes = _stock.WfQuotes();
+        var hiddenStations = chutes
+            .Where(chute => hiddenChutes.Contains(chute.Chute))
+            .Select(chute => _station.GetOwningStation(chute.Grid))
+            .ToHashSet();
+        return new MarketSnapshot(sorted, alerts, chutes, hiddenChutes,
+            Materials(quotes.Where(quote => !hiddenStations.Contains(quote.Station))), Materials(quotes));
+    }
+
+    /// <summary>The best sale and cheapest stock for each material among some quotes, in the order they list it.</summary>
+    private List<WFMarketMaterial> Materials(IEnumerable<WFMaterialQuote> quotes)
+    {
+        var materials = new List<WFMarketMaterial>();
+        foreach (var quote in quotes.GroupBy(quote => quote.Good))
+        {
+            var best = quote.MaxBy(entry => entry.Pays);
+            var sellers = quote.Where(entry => entry.Charges > 0.0).ToList();
+            var cheapest = sellers.Count > 0 ? sellers.MinBy(entry => entry.Charges) : best with { Name = string.Empty, Charges = 0.0, Stock = 0 };
+            materials.Add(new WFMarketMaterial(_market.GoodName(quote.Key), best.Pays, best.Name, cheapest.Charges, cheapest.Name, cheapest.Stock));
+        }
+
+        return materials;
     }
 
     /// <summary>
@@ -358,6 +387,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         {
             Stations = sees ? sector.Stations : sector.Stations.Where(station => !station.Underground).ToList(),
             Alerts = sector.Alerts.Where(entry => sees || !entry.Hidden).Select(entry => entry.Alert).ToList(),
+            Materials = sees ? sector.AllMaterials : sector.OpenMaterials,
         };
 
         var chutes = sees ? sector.Chutes : sector.Chutes.Where(chute => !sector.HiddenChutes.Contains(chute.Chute)).ToList();

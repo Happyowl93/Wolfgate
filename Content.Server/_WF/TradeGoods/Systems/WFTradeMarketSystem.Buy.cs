@@ -20,6 +20,7 @@ public readonly record struct WFTradeBuyQuote(int Base, int Amount, float Factor
 public sealed partial class WFTradeMarketSystem
 {
     [Dependency] private PricingSystem _pricing = default!;
+    [Dependency] private WFTradeShortageSystem _shortages = default!;
 
     private static readonly TimeSpan VendorInterval = TimeSpan.FromSeconds(5);
 
@@ -128,6 +129,9 @@ public sealed partial class WFTradeMarketSystem
     /// </summary>
     public int BuyPrice(EntityUid vendor, EntityPrototype proto, int price)
     {
+        if (price > 0 && TryComp<WFShortagePricedVendorComponent>(vendor, out var priced))
+            return (int) MathF.Round(price * priced.Factor);
+
         if (price <= 0
             || !HasComp<WFTradeVendorComponent>(vendor)
             || Transform(vendor).GridUid is not { } grid
@@ -146,6 +150,7 @@ public sealed partial class WFTradeMarketSystem
             || Profile(grid).ContrabandGoods.Contains(good))
             return;
 
+        SetVendorStock(grid, good, VendorStock(grid, good) - 1);
         AddScarcity(grid, good, Profile(grid).BuyPerPurchase);
     }
 
@@ -157,6 +162,17 @@ public sealed partial class WFTradeMarketSystem
 
         _nextVendorRefresh = _timing.CurTime + VendorInterval;
         RefreshVendors(null);
+
+        var priced = EntityQueryEnumerator<WFShortagePricedVendorComponent, TransformComponent>();
+        while (priced.MoveNext(out var uid, out var vendor, out var xform))
+        {
+            var factor = _shortages.Factor(xform.GridUid, vendor.Group);
+            if (MathHelper.CloseTo(vendor.Factor, factor))
+                continue;
+
+            vendor.Factor = factor;
+            Dirty(uid, vendor);
+        }
     }
 
     /// <summary>Recomputes the live prices of the trade vendors on one grid, or on every grid, dirtying those that changed.</summary>
@@ -168,6 +184,7 @@ public sealed partial class WFTradeMarketSystem
             if (onGrid != null && xform.GridUid != onGrid)
                 continue;
 
+            SyncStock(uid, machine, xform.GridUid);
             var prices = new Dictionary<string, int>();
             foreach (var good in machine.Inventory.Keys)
             {
@@ -183,7 +200,87 @@ public sealed partial class WFTradeMarketSystem
         }
     }
 
-    /// <summary>The live buy prices of every trade vendor on a grid, one per good at the lowest.</summary>
+    /// <summary>Whether a vendor's stock of a good is finite: every trade good but contraband, which never runs out.</summary>
+    private bool HasLimitedStock(string good)
+    {
+        return _proto.TryIndex<EntityPrototype>(good, out var proto)
+               && proto.HasComp<WFTradeOriginComponent>(_factory)
+               && !_proto.Index(DefaultProfile).ContrabandGoods.Contains(good);
+    }
+
+    /// <summary>Crates of a trade good a station's vendors have left between them.</summary>
+    public int VendorStock(EntityUid grid, string good)
+    {
+        return TryComp<WFTradeMarketComponent>(grid, out var market) && market.Stock.TryGetValue(good, out var stock)
+            ? stock
+            : Profile(grid).VendorStock;
+    }
+
+    /// <summary>Sets a station's stock of a trade good, up to full, and shows it on all its vendors.</summary>
+    public void SetVendorStock(EntityUid grid, string good, int amount)
+    {
+        EnsureComp<WFTradeMarketComponent>(grid).Stock[good] = Math.Clamp(amount, 0, Profile(grid).VendorStock);
+        RefreshVendors(grid);
+    }
+
+    /// <summary>Shows a station's shared stock on one of its vendors, replacing the machine's infinite trade goods.</summary>
+    private void SyncStock(EntityUid vendor, VendingMachineComponent machine, EntityUid? grid)
+    {
+        if (grid is not { } onGrid)
+            return;
+
+        var changed = false;
+        foreach (var (good, entry) in machine.Inventory)
+        {
+            if (!HasLimitedStock(good))
+                continue;
+
+            var stock = (uint) VendorStock(onGrid, good);
+            if (entry.Amount == stock)
+                continue;
+
+            entry.Amount = stock;
+            changed = true;
+        }
+
+        if (changed)
+            Dirty(vendor, machine);
+    }
+
+    /// <summary>The trade goods with finite stock that a station's vendors sell.</summary>
+    public HashSet<string> StockedGoods(EntityUid grid)
+    {
+        var goods = new HashSet<string>();
+        var query = EntityQueryEnumerator<WFTradeVendorComponent, VendingMachineComponent, TransformComponent>();
+        while (query.MoveNext(out _, out var machine, out var xform))
+        {
+            if (xform.GridUid != grid)
+                continue;
+
+            foreach (var good in machine.Inventory.Keys)
+            {
+                if (HasLimitedStock(good))
+                    goods.Add(good);
+            }
+        }
+
+        return goods;
+    }
+
+    /// <summary>Adds crates of each good a station's vendors sell, up to their full stock.</summary>
+    public void RestockVendors(EntityUid grid, int amount)
+    {
+        var market = EnsureComp<WFTradeMarketComponent>(grid);
+        var full = Profile(grid).VendorStock;
+        foreach (var good in StockedGoods(grid))
+        {
+            market.Stock[good] = Math.Min(full, VendorStock(grid, good) + amount);
+        }
+
+        RefreshVendors(grid);
+    }
+
+    /// <summary>The live buy prices of every trade vendor on a grid, one per good at the lowest. Sold-out goods aren't listed.</summary>
     public Dictionary<string, WFTradeBuyQuote> StationBuyQuotes(EntityUid grid)
     {
         var quotes = new Dictionary<string, WFTradeBuyQuote>();
@@ -193,9 +290,10 @@ public sealed partial class WFTradeMarketSystem
             if (xform.GridUid != grid)
                 continue;
 
-            foreach (var good in machine.Inventory.Keys)
+            foreach (var (good, entry) in machine.Inventory)
             {
-                if (BuyQuote(uid, good) is { } quote
+                if (entry.Amount > 0
+                    && BuyQuote(uid, good) is { } quote
                     && (!quotes.TryGetValue(good, out var current) || quote.Amount < current.Amount))
                     quotes[good] = quote;
             }

@@ -18,6 +18,10 @@ public sealed partial class WFTradeMarketComponent : Component
     [ViewVariables]
     public Dictionary<string, (float Scarcity, TimeSpan Touched)> Scarcity = new();
 
+    /// <summary>Crates of each good left at this station's vendors; a good not listed is at full stock.</summary>
+    [ViewVariables]
+    public Dictionary<string, int> Stock = new();
+
     /// <summary>Crates of each good delivered here this round.</summary>
     [ViewVariables]
     public Dictionary<string, int> Delivered = new();

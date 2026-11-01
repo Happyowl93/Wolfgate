@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Text;
+using Content.Server._WF.TradeGoods.Systems;
 using Content.Server.GameTicking;
 using Content.Server.Ame.Components;
 using Content.Server.Ame.EntitySystems;
@@ -49,6 +50,7 @@ public sealed partial class TraderRefuelSystem : EntitySystem
     [Dependency] private SharedSolutionContainerSystem _solutionContainer = default!;
     [Dependency] private TraderShopSystem _shop = default!;
     [Dependency] private TraderSystem _trader = default!;
+    [Dependency] private WFTradeSupplySystem _supply = default!;
 
     public override void Initialize()
     {
@@ -91,6 +93,10 @@ public sealed partial class TraderRefuelSystem : EntitySystem
             _trader.SayAndShow(traderEnt, Loc.GetString("trader-refuel-full"));
             return;
         }
+
+        // A station short of fuel charges more, and says why.
+        if (_supply.RefuelFactor(ent) > 1f)
+            _trader.SayAndShow(traderEnt, Loc.GetString("trader-refuel-short"));
 
         ent.Comp.AwaitingConfirmation = true;
         _trader.AskConfirmation(traderEnt, Loc.GetString("trader-refuel-quote",
@@ -239,7 +245,7 @@ public sealed partial class TraderRefuelSystem : EntitySystem
             }
         }
 
-        total = (int) Math.Ceiling(subtotal * (1f + Math.Max(0f, ent.Comp.ServiceFee)));
+        total = (int) Math.Ceiling(subtotal * (1f + Math.Max(0f, ent.Comp.ServiceFee)) * _supply.RefuelFactor(ent));
         return lines;
     }
 

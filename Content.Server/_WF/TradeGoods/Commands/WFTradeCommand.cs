@@ -18,6 +18,7 @@ public sealed partial class WFTradeCommand : LocalizedEntityCommands
     [Dependency] private WFTradeShortageSystem _shortages = default!;
     [Dependency] private WFTradeRushSystem _rushes = default!;
     [Dependency] private WFTradeSpecialCrateSystem _special = default!;
+    [Dependency] private WFTradeSupplySystem _supply = default!;
 
     private static readonly string[] Subcommands = { "status", "shortage", "rush", "consignment", "clear" };
 
@@ -103,6 +104,18 @@ public sealed partial class WFTradeCommand : LocalizedEntityCommands
 
         if (lines == 0)
             shell.WriteLine(Loc.GetString("cmd-wf_trade-status-empty"));
+
+        foreach (var report in _supply.Reports())
+        {
+            shell.WriteLine(Loc.GetString("cmd-wf_trade-status-supply",
+                ("station", report.Station),
+                ("goods", report.Goods),
+                ("soldOut", report.SoldOut),
+                ("lowest", report.Lowest),
+                ("stops", report.Stops),
+                ("blockaded", report.Blockaded),
+                ("short", report.Short)));
+        }
     }
 
     /// <summary>wf_trade shortage [prototype]: a random shortage or boom, or the given one.</summary>

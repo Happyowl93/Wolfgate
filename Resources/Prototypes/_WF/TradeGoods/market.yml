@@ -32,8 +32,57 @@
   tradeCratePerSale: 0.025
   tradeCrateFloor: 0.3
   # Each trade good bought from a station's vendor makes it scarcer there; vendors never charge below base.
-  buyPerPurchase: 0.015
-  buyScarcityCap: 0.6
+  buyPerPurchase: 0.03
+  buyScarcityCap: 1.5
+  # Mined and refined materials trade through each station's stock: pallets pay and consoles charge by how much of a
+  # material it holds, sold lots take materialArrival to reach the console, and stock drains at halfLife. The tightest
+  # pallet and console pair on a station, 1.25 over 1.5, stays short of a profit on selling and buying back.
+  materialGoods:
+  - SheetSteel1
+  - SheetGlass1
+  - SheetPlastic1
+  - SheetPlasteel1
+  - SheetPlasma1
+  - SheetUranium1
+  - SheetCopper1
+  - SheetLithium1
+  - IngotGold1
+  - IngotSilver1
+  - MaterialDiamond1
+  - SteelOre1
+  - SpaceQuartz1
+  - PlasmaOre1
+  - UraniumOre1
+  - CopperOre1
+  - LithiumOre1
+  - GoldOre1
+  - SilverOre1
+  - DiamondOre1
+  - ScrapOre1
+  - Coal1
+  - Salt1
+  # Supply lines and freighters carry the everyday materials; the rest only come from miners.
+  freightMaterials: [ SheetSteel1, SheetGlass1, SheetPlastic1 ]
+  # A station's background supply. Scheduled freighters reach each station only every dozen hours or so, so this pulse
+  # is what keeps stations stocked; freighters top it up. A blockade cuts the materials and slows the vendors, and so
+  # does a shortage for the vendors. Each pulse adds a crate per good to the stock a station's vendors share, so 40
+  # crates refill in 80 minutes.
+  supplyPulse: 120
+  materialPulse: 0.01
+  vendorStock: 40
+  vendorFreightRestock: 0.5
+  # Delivering this many hauled crates ends a shortage early; so does a freighter reaching the station.
+  shortageCrates: 4,8
+  refuelShortageGroup: Fuel
+  materialStockTarget: 10000
+  materialRestock: 0.35
+  materialGlut: 3
+  materialPayMax: 1.2
+  materialPayMin: 0.5
+  materialChargeMax: 1.5
+  materialChargeMin: 0.8
+  materialArrival: 600
+  materialShortageGroup: Industrial
   modifierCap: 2.5
   minHaulDistance: 3000
   highlight: 1.4

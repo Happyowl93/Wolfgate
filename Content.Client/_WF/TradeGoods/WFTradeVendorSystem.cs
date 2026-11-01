@@ -13,11 +13,22 @@ public sealed partial class WFTradeVendorSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<WFTradeVendorComponent, AfterAutoHandleStateEvent>(OnPrices);
+        SubscribeLocalEvent<WFShortagePricedVendorComponent, AfterAutoHandleStateEvent>(OnFactor);
     }
 
     private void OnPrices(Entity<WFTradeVendorComponent> ent, ref AfterAutoHandleStateEvent args)
     {
-        if (_ui.TryGetOpenUi<VendingMachineBoundUserInterface>(ent.Owner, VendingMachineUiKey.Key, out var bui))
+        Refresh(ent);
+    }
+
+    private void OnFactor(Entity<WFShortagePricedVendorComponent> ent, ref AfterAutoHandleStateEvent args)
+    {
+        Refresh(ent);
+    }
+
+    private void Refresh(EntityUid vendor)
+    {
+        if (_ui.TryGetOpenUi<VendingMachineBoundUserInterface>(vendor, VendingMachineUiKey.Key, out var bui))
             bui.Update();
     }
 }

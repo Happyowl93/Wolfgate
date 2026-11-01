@@ -9,6 +9,9 @@ public sealed class WFMarketUiState : BoundUserInterfaceState
     public List<WFMarketStation> Stations = new();
     public List<WFMarketAlert> Alerts = new();
 
+    /// <summary>Where each material sells best and is cheapest to buy.</summary>
+    public List<WFMarketMaterial> Materials = new();
+
     /// <summary>
     /// This copy leaves out the hidden markets and the holder's own alerts: the full one was sent to the viewers
     /// alone in a <see cref="WFMarketPrivateStateEvent"/>, since UI state reaches every client near the PDA.
@@ -47,6 +50,12 @@ public sealed class WFMarketStation
 /// <summary>One good's live sell or buy price at a station; <c>Reason</c> is already localized.</summary>
 [Serializable, NetSerializable]
 public readonly record struct WFMarketPrice(string Good, int Amount, float Factor, string Reason, float Tonnes, bool Highlight);
+
+/// <summary>
+/// A material's best pallet and cheapest console stock across the holder's markets, per unit; a price of zero means none.
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct WFMarketMaterial(string Good, double BestPay, string BestPayStation, double Cheapest, string CheapestStation, int Stock);
 
 /// <summary>A sector event in the Alerts tab; <c>Ends</c> is game time, or null for no countdown.</summary>
 [Serializable, NetSerializable]
