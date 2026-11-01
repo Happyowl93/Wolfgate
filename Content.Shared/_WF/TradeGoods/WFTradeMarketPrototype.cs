@@ -49,7 +49,15 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
 
     /// <summary>Most of each trade good a station's vendors hold between them.</summary>
     [DataField]
-    public int VendorStock = 40;
+    public int VendorStock = 200;
+
+    /// <summary>Lowest share of a full stock a station can open with for a trade good.</summary>
+    [DataField]
+    public float VendorStockStartMin = 0.25f;
+
+    /// <summary>Highest share of a full stock a station can open with for a trade good.</summary>
+    [DataField]
+    public float VendorStockStartMax = 1f;
 
     /// <summary>Share of a full stock of each everyday material and trade good a freighter's stop adds.</summary>
     [DataField]
@@ -79,13 +87,21 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public float MaterialChargeMin = 0.8f;
 
-    /// <summary>Scarcity one trade good bought from a station's vendor adds there, raising what its vendors charge.</summary>
+    /// <summary>Share of a full stock below which a good turns scarce, raising what vendors charge for it.</summary>
     [DataField]
-    public float BuyPerPurchase = 0.03f;
+    public float BuyScarcityStart = 0.2f;
 
-    /// <summary>Most scarcity can raise a vendor's price, as a fraction of its base.</summary>
+    /// <summary>What scarcity adds to a vendor's price at empty, as a fraction of its base.</summary>
     [DataField]
     public float BuyScarcityCap = 1.5f;
+
+    /// <summary>Shortest wait before a purchase or sale moves the prices that follow a station's stock.</summary>
+    [DataField]
+    public TimeSpan PriceDelayMin = TimeSpan.FromMinutes(3);
+
+    /// <summary>Longest wait before a purchase or sale moves the prices that follow a station's stock.</summary>
+    [DataField]
+    public TimeSpan PriceDelayMax = TimeSpan.FromMinutes(4);
 
     /// <summary>Cap on the product of the modifiers that raise a price.</summary>
     [DataField]

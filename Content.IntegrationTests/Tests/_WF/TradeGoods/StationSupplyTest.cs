@@ -28,7 +28,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 
-/// <summary>Stations start full, vendors hold finite stock, and freighters run on their own schedule.</summary>
+/// <summary>Stations start stocked, vendors hold finite stock, and freighters run on their own schedule.</summary>
 [TestFixture]
 [TestOf(typeof(WFTradeSupplySystem))]
 public sealed class StationSupplyTest
@@ -40,11 +40,12 @@ public sealed class StationSupplyTest
     private const string Medicine = "TradeGoodMedicalSupplies";
     private const string Steel = "SheetSteel1";
 
-    /// <summary>A vendor on a grid, repriced so its stock is finite.</summary>
+    /// <summary>A vendor on a grid at full stock of luxuries, repriced so its stock is finite.</summary>
     private static (EntityUid Vendor, VendingMachineInventoryEntry Entry) StockedVendor(IEntityManager entMan, EntityUid grid)
     {
         var vendor = entMan.SpawnEntity(Vendor, new EntityCoordinates(grid, 0.5f, 0.5f));
-        entMan.System<WFTradeMarketSystem>().AddScarcity(grid, Luxuries, 0f);
+        var market = entMan.System<WFTradeMarketSystem>();
+        market.SetVendorStock(grid, Luxuries, market.Profile(grid).VendorStock);
         return (vendor, entMan.GetComponent<VendingMachineComponent>(vendor).Inventory[Luxuries]);
     }
 
@@ -62,7 +63,7 @@ public sealed class StationSupplyTest
             var grid = map.Grid.Owner;
             var (_, entry) = StockedVendor(entMan, grid);
             var full = market.Profile(grid).VendorStock;
-            Assert.That(entry.Amount, Is.EqualTo((uint) full), "A trade vendor should start with a full, finite stock.");
+            Assert.That(entry.Amount, Is.EqualTo((uint) full), "A trade vendor's stock should be finite.");
 
             market.SetVendorStock(grid, Luxuries, 0);
             Assert.That(entry.Amount, Is.Zero);
@@ -76,9 +77,37 @@ public sealed class StationSupplyTest
             Assert.That(entry.Amount, Is.EqualTo((uint) full), "Restocking should stop at a full stock.");
 
             var fence = entMan.SpawnEntity(Fence, map.GridCoords);
-            market.AddScarcity(grid, Luxuries, 0f);
+            market.SetVendorStock(grid, Luxuries, full);
             var contraband = entMan.GetComponent<VendingMachineComponent>(fence).Inventory[Contraband];
             Assert.That(contraband.Amount, Is.EqualTo(uint.MaxValue), "Contraband should never run out.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task VendorsOpenWithARandomStockThatStaysRolled()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var market = entMan.System<WFTradeMarketSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var grid = map.Grid.Owner;
+            var profile = market.Profile(grid);
+            entMan.SpawnEntity(Vendor, map.GridCoords);
+            var goods = market.StockedGoods(grid).ToList();
+            var stocks = goods.ConvertAll(good => market.VendorStock(grid, good));
+
+            Assert.That(stocks, Is.All.InRange(
+                (int) System.MathF.Round(profile.VendorStock * profile.VendorStockStartMin),
+                (int) System.MathF.Round(profile.VendorStock * profile.VendorStockStartMax)));
+            Assert.That(stocks.Distinct().Count(), Is.GreaterThan(1), "Each good should roll its own stock.");
+            Assert.That(goods.ConvertAll(good => market.VendorStock(grid, good)), Is.EqualTo(stocks), "A stock should only roll once.");
+            Assert.That(profile.VendorStockStartMin, Is.GreaterThan(profile.BuyScarcityStart), "No good should open scarce.");
         });
 
         await pair.CleanReturnAsync();

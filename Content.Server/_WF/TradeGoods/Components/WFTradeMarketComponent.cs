@@ -14,17 +14,30 @@ public sealed partial class WFTradeMarketComponent : Component
     [ViewVariables]
     public Dictionary<string, (float Pressure, TimeSpan Touched)> Pressure = new();
 
-    /// <summary>Recent-purchase scarcity per good at this station's vendors and when it was last decayed.</summary>
-    [ViewVariables]
-    public Dictionary<string, (float Scarcity, TimeSpan Touched)> Scarcity = new();
-
-    /// <summary>Crates of each good left at this station's vendors; a good not listed is at full stock.</summary>
+    /// <summary>Crates of each good left at this station's vendors; a good not listed hasn't rolled its starting stock yet.</summary>
     [ViewVariables]
     public Dictionary<string, int> Stock = new();
+
+    /// <summary>When each purchase of a good from this station's vendors reaches its price.</summary>
+    [ViewVariables]
+    public Dictionary<string, List<TimeSpan>> Unpriced = new();
 
     /// <summary>Crates of each good delivered here this round.</summary>
     [ViewVariables]
     public Dictionary<string, int> Delivered = new();
+}
+
+/// <summary>The stock changes a station's material prices haven't caught up with yet.</summary>
+[RegisterComponent]
+public sealed partial class WFMaterialPriceLagComponent : Component
+{
+    /// <summary>Each material's stock when it was last read.</summary>
+    [ViewVariables]
+    public Dictionary<string, int> Seen = new();
+
+    /// <summary>Changes in stock still to reach prices, and when they do.</summary>
+    [ViewVariables]
+    public List<(string Good, int Change, TimeSpan Due)> Pending = new();
 }
 
 /// <summary>A chute's sale in flight: the amount quoted when the crate went in, paid when the chute dispenses.</summary>

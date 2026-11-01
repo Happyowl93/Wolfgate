@@ -19,9 +19,10 @@ naming a hidden market go only to the underground companies (`WFTradeMarketSyste
 hint never names one.
 A chute offered something it doesn't buy says so instead of only buzzing.
 
-Station supply (`WFTradeSupplySystem`): stations start full, buying empties them and freighters fill them back up. A
+Station supply (`WFTradeSupplySystem`): stations start stocked, buying empties them and freighters fill them back up. A
 station's vendors share one finite stock per good (`vendorStock`, held on `WFTradeMarketComponent` and shown on every
-machine), a sold-out good drops off the Market app and contraband never runs out. Cargo markets open with `supplyMaterials`
+machine), a sold-out good drops off the Market app and contraband never runs out. Each station rolls its opening stock of
+each good between `vendorStockStartMin` and `vendorStockStartMax` of full, so no two rounds stock alike. Cargo markets open with `supplyMaterials`
 at the target. A freighter stop brings `freightRestock` of a full stock of both and ends the station's shortages; nothing
 else refills them. `wf_trade status` shows each station's supply and the server logs it hourly.
 
@@ -35,10 +36,11 @@ Fuel vendors (`WFShortagePricedVendorComponent`) charge their shortage factor on
 fuel or the sector booms for it.
 
 Buy prices move too (`WFTradeMarketSystem.Buy`). Station trade vendors (`WFTradeVendorComponent`, on
-`VendingMachineTraderBaikal` and its children) charge each trade good's base price times its scarcity there: every crate
-bought adds `buyPerPurchase`, up to `buyScarcityCap`, decaying with the same half-life, and a freighter supplying the
-station eases it. Shortages, booms, blockades and raids at the station raise it further (`WFTradeBuyQuoteEvent`, capped at
-`modifierCap`). A vendor never charges below base, so the sell floors still cover a bought crate. The server keeps each
+`VendingMachineTraderBaikal` and its children) charge each trade good's base price times its scarcity there: a good with
+`buyScarcityStart` or more of a full stock charges base, and below that its price climbs steadily to `buyScarcityCap`
+over base at empty, until a freighter restocks it. A purchase leaves the stock at once but only reaches the price after
+`priceDelayMin` to `priceDelayMax`, so the crates stay sold while the price catches up. Shortages, booms, blockades and
+raids at the station raise it further (`WFTradeBuyQuoteEvent`, capped at `modifierCap`). A vendor never charges below base, so the sell floors still cover a bought crate. The server keeps each
 vendor's live prices on the networked component, refreshed every 5 s and on each purchase, so the vending menu shows what
 `AuthorizedVend` charges; the Market app lists them as each station card's Buy here rows, cheapest starred. NPC trader
 shops and console trading crates keep their fixed prices.
@@ -68,7 +70,9 @@ A sale lands in the stock at once, and stock only leaves by being bought, so eve
 market and a market console (`EveryPalletStopSellsBackWhatItBuys`). Materials in a console's cart stay part of the stock:
 they still count as supply and follow the live price until they are bought. Everything else the console sells works as it always did. The curves
 keep selling and buying back at a loss on the tightest pallet and console pair on any station, which
-`SellingAndBuyingBackNeverProfits` checks. The Market app's Materials tab names each material's best sale and cheapest
+`SellingAndBuyingBackNeverProfits` checks. Console prices follow a purchase or sale after the same delay as vendors, and
+pallet pay rises after it, but a sale cuts pallet pay at once: a delayed glut would let a split sale fetch the top rate and
+be bought back at a profit once the console caught up. Freight moves prices at once. The Market app's Materials tab names each material's best sale and cheapest
 stock. Materials aboard a ship count toward its cargo value (`WFTradeMaterialCargoSystem`), so a full mining hold draws
 raiders. Crates built from materials use about 60% of their vendor price in them; crates built from reagents, parts
 or cloth only have a heavier steel shell, and fissile fuel is unchanged.

@@ -23,6 +23,7 @@ using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 using Robust.Shared.Utility;
 
 namespace Content.IntegrationTests.Tests._WF.TradeGoods;
@@ -397,7 +398,45 @@ public sealed class MaterialMarketTest
             var calm = cart[0].Price;
             Sell(entMan, grid, Stacks(entMan, grid, Steel, 20));
             Reprice(entMan, station);
+            entMan.GetComponent<WFMaterialPriceLagComponent>(station).Pending.Clear();
+            Reprice(entMan, station);
             Assert.That(cart[0].Price, Is.LessThan(calm), "A cart shouldn't lock in an old price.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task PricesFollowStockAfterADelay()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var market = entMan.System<MarketSystem>();
+        var timing = server.ResolveDependency<IGameTiming>();
+
+        await server.WaitAssertion(() =>
+        {
+            var (station, grid, _) = Trading(entMan, map);
+            var profile = entMan.System<WFTradeMarketSystem>().Profile(null);
+            market.WfRestock(grid, 0.5f);
+            Reprice(entMan, station);
+            WFMaterialQuote Quote() => market.WfQuotes().First(quote => quote.Good == Steel);
+            var before = Quote();
+
+            Sell(entMan, grid, Stacks(entMan, grid, Steel, 20));
+            Reprice(entMan, station);
+            Assert.That(Quote().Charges, Is.EqualTo(before.Charges).Within(0.001), "A sale shouldn't move the console's price yet.");
+            Assert.That(Quote().Pays, Is.LessThan(before.Pays), "A pallet should cut its pay at once, or a split sale could be bought back at a profit.");
+
+            var lag = entMan.GetComponent<WFMaterialPriceLagComponent>(station);
+            Assert.That(lag.Pending, Has.Count.EqualTo(1), "Freight shouldn't wait, only the sale.");
+            Assert.That(lag.Pending[0].Due - timing.CurTime, Is.InRange(profile.PriceDelayMin, profile.PriceDelayMax));
+
+            lag.Pending.Clear();
+            Reprice(entMan, station);
+            Assert.That(Quote().Charges, Is.LessThan(before.Charges), "The console should catch up after the delay.");
         });
 
         await pair.CleanReturnAsync();

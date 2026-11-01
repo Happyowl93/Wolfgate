@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Server._NF.Market.Components;
 using Content.Server._NF.Market.Extensions;
+using Content.Server._WF.TradeGoods.Components;
 using Content.Server._WF.TradeGoods.Systems;
 using Content.Server.Cargo.Components;
 using Content.Shared._NF.Bank.Components;
@@ -20,6 +21,8 @@ public readonly record struct WFMaterialQuote(string Good, EntityUid Station, st
 /// Station stock as a market for materials. Stations start full, buying empties them and freighters fill them back up,
 /// and pallets pay and consoles charge by how much of a material a station holds.
 /// Materials in a console's cart stay the station's stock until they are bought, so a cart can't move prices or lock one.
+/// Prices follow a purchase or sale after a delay, but a pallet cuts its pay at once: a delayed glut would let a split
+/// sale fetch the top rate and be bought back cheaper once the console caught up.
 /// Materials are appraised after <c>PriceCalculationEvent</c>, so a pallet adds the difference itself.
 /// </summary>
 public sealed partial class MarketSystem
@@ -58,14 +61,20 @@ public sealed partial class MarketSystem
     {
         var profile = _tradeMarket.Profile(null);
         var carts = WfCarts(ent);
-        WfReprice(ent.Comp.MarketDataList, ent.Comp, carts, profile);
+        // A material that sold out has no entry to reprice, but its delay still has to start.
+        foreach (var good in profile.MaterialGoods)
+        {
+            WfPricedSupply(ent, carts, good);
+        }
+
+        WfReprice(ent.Comp.MarketDataList, ent, carts, profile);
         foreach (var cart in carts)
         {
-            WfReprice(cart, ent.Comp, carts, profile);
+            WfReprice(cart, ent, carts, profile);
         }
     }
 
-    private void WfReprice(List<MarketData> stock, CargoMarketDataComponent market, List<List<MarketData>> carts, WFTradeMarketPrototype profile)
+    private void WfReprice(List<MarketData> stock, Entity<CargoMarketDataComponent> market, List<List<MarketData>> carts, WFTradeMarketPrototype profile)
     {
         foreach (var entry in stock)
         {
@@ -73,7 +82,7 @@ public sealed partial class MarketSystem
                 continue;
 
             var unit = WfUnitPrice(entry.Prototype);
-            entry.Price = unit * WfChargeFactor(profile, WfSaturation(profile, WfSupply(market, carts, entry.Prototype), unit));
+            entry.Price = unit * WfChargeFactor(profile, WfSaturation(profile, WfPricedSupply(market, carts, entry.Prototype), unit));
         }
     }
 
@@ -109,7 +118,7 @@ public sealed partial class MarketSystem
             var ahead = _wfAhead.GetValueOrDefault(key);
             _wfAhead[key] = ahead + stack.Count;
             // The curve is linear either side of the target, so its midpoint prices the whole stack.
-            var supply = WfSupply(market.Comp, carts, good) + ahead + stack.Count / 2.0;
+            var supply = WfPalletSupply(market, carts, good) + ahead + stack.Count / 2.0;
             adjustment += unit * stack.Count * (WfPayFactor(profile, WfSaturation(profile, supply, unit)) - 1.0);
         }
 
@@ -208,6 +217,27 @@ public sealed partial class MarketSystem
         return supply;
     }
 
+    /// <summary>A material's stock as a console's price sees it, which counts purchases and sales only once their delay has passed.</summary>
+    private int WfPricedSupply(Entity<CargoMarketDataComponent> market, List<List<MarketData>> carts, string good)
+    {
+        var lag = EnsureComp<WFMaterialPriceLagComponent>(market);
+        var supply = WfSupply(market.Comp, carts, good);
+        var now = _timing.CurTime;
+        var change = supply - lag.Seen.GetValueOrDefault(good, supply);
+        if (change != 0)
+            lag.Pending.Add((good, change, now + _tradeMarket.PriceDelay(null)));
+
+        lag.Seen[good] = supply;
+        lag.Pending.RemoveAll(pending => pending.Due <= now);
+        return Math.Max(supply - lag.Pending.Where(pending => pending.Good == good).Sum(pending => pending.Change), 0);
+    }
+
+    /// <summary>The stock a pallet pays by: a sale lowers its pay at once, but stock bought away only raises it after the delay.</summary>
+    private int WfPalletSupply(Entity<CargoMarketDataComponent> market, List<List<MarketData>> carts, string good)
+    {
+        return Math.Max(WfSupply(market.Comp, carts, good), WfPricedSupply(market, carts, good));
+    }
+
     /// <summary>Tops up a station's everyday materials by a share of the target, never past it. Returns whether it added any.</summary>
     public bool WfRestock(EntityUid grid, float share)
     {
@@ -228,7 +258,10 @@ public sealed partial class MarketSystem
             if (amount <= 0)
                 continue;
 
+            // Freight isn't a purchase, so it moves prices at once.
+            WfPricedSupply((station, market), carts, good);
             market.MarketDataList.Upsert(good, amount, unit, WfStackId(good));
+            EnsureComp<WFMaterialPriceLagComponent>(station).Seen[good] = WfSupply(market, carts, good);
             restocked = true;
         }
 
@@ -272,7 +305,7 @@ public sealed partial class MarketSystem
                 quotes.Add(new WFMaterialQuote(good,
                     uid,
                     name,
-                    unit * pay * WfPayFactor(profile, WfSaturation(profile, WfSupply(market, carts, good), unit)),
+                    unit * pay * WfPayFactor(profile, WfSaturation(profile, WfPalletSupply((uid, market), carts, good), unit)),
                     stock > 0 ? entry!.Price * charge : 0.0,
                     stock));
             }

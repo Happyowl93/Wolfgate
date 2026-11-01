@@ -31,9 +31,12 @@
   # Cargo-console trading crates share one demand per station; the floor still covers the console price.
   tradeCratePerSale: 0.025
   tradeCrateFloor: 0.3
-  # Each trade good bought from a station's vendor makes it scarcer there; vendors never charge below base.
-  buyPerPurchase: 0.03
+  # A good turns scarce below this share of a full stock, rising to the cap at empty; vendors never charge below base.
+  buyScarcityStart: 0.2
   buyScarcityCap: 1.5
+  # Prices that follow stock catch up this many seconds after a purchase or sale; freighters move them at once.
+  priceDelayMin: 180
+  priceDelayMax: 240
   # Stations start full, buying empties them and freighters fill them back up. Pallets pay and consoles charge by how
   # much of a material a station holds. The tightest pallet and console pair on a station, 1.25 over 1.5, stays short
   # of a profit on selling and buying back.
@@ -63,7 +66,10 @@
   - Salt1
   # Freighters carry the everyday materials; the rest only come from miners.
   supplyMaterials: [ SheetSteel1, SheetGlass1, SheetPlastic1 ]
-  vendorStock: 40
+  vendorStock: 200
+  # Each station rolls what share of a full stock it opens with, per good; the low end stays above buyScarcityStart.
+  vendorStockStartMin: 0.25
+  vendorStockStartMax: 1
   # A freighter's stop brings half a full stock of everyday materials and of each trade good, and ends shortages.
   freightRestock: 0.5
   materialStockTarget: 10000

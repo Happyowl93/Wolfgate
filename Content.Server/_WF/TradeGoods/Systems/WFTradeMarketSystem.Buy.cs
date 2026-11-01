@@ -6,6 +6,8 @@ using Content.Shared._NF.Bank.Components;
 using Content.Shared._WF.TradeGoods;
 using Content.Shared.VendingMachines;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Random;
+using Robust.Shared.Utility;
 
 namespace Content.Server._WF.TradeGoods.Systems;
 
@@ -13,18 +15,17 @@ namespace Content.Server._WF.TradeGoods.Systems;
 public readonly record struct WFTradeBuyQuote(int Base, int Amount, float Factor, LocId Reason);
 
 /// <summary>
-/// Buy prices at station trade vendors. Each trade good bought raises its scarcity at that station, which decays like
-/// sale pressure; station conditions add modifiers through <see cref="WFTradeBuyQuoteEvent"/>. A vendor never charges
-/// less than its base price, so the sell floors still cover a bought crate.
+/// Buy prices at station trade vendors. A good turns scarce as its stock there runs low, a few minutes after the
+/// purchases that drained it, and only freight restocks it; station conditions add modifiers through
+/// <see cref="WFTradeBuyQuoteEvent"/>. A vendor never charges less than its base price, so the sell floors still cover
+/// a bought crate.
 /// </summary>
 public sealed partial class WFTradeMarketSystem
 {
     [Dependency] private PricingSystem _pricing = default!;
+    [Dependency] private IRobustRandom _random = default!;
 
     private static readonly TimeSpan VendorInterval = TimeSpan.FromSeconds(5);
-
-    /// <summary>Scarcity above which a vendor names it as the reason for a higher price.</summary>
-    private const float ScarceReason = 0.2f;
 
     private TimeSpan _nextVendorRefresh;
 
@@ -33,25 +34,31 @@ public sealed partial class WFTradeMarketSystem
         SubscribeLocalEvent<VendingMachinePurchaseComponent, ComponentStartup>(OnPurchased);
     }
 
-    /// <summary>A good's scarcity at a station now, decayed since it was last touched.</summary>
+    /// <summary>A good's scarcity at a station: none until its priced stock falls below the start, then rising to the cap at empty.</summary>
     public float Scarcity(EntityUid grid, string good)
     {
-        if (!TryComp<WFTradeMarketComponent>(grid, out var market) || !market.Scarcity.TryGetValue(good, out var entry))
-            return 0f;
-
-        var elapsed = (_timing.CurTime - entry.Touched).TotalSeconds;
-        var halfLife = Math.Max(1.0, Profile(grid).HalfLife.TotalSeconds);
-        var scarcity = (float) (entry.Scarcity * Math.Pow(0.5, elapsed / halfLife));
-        market.Scarcity[good] = (scarcity, _timing.CurTime);
-        return scarcity;
+        var profile = Profile(grid);
+        var start = profile.VendorStock * profile.BuyScarcityStart;
+        return start > 0f ? profile.BuyScarcityCap * Math.Clamp(1f - PricedStock(grid, good) / start, 0f, 1f) : 0f;
     }
 
-    /// <summary>Adds scarcity to a good at a station, or eases it with a negative amount, and reprices its vendors.</summary>
-    public void AddScarcity(EntityUid grid, string good, float amount)
+    /// <summary>A good's stock as its price sees it, which counts purchases only once their delay has passed.</summary>
+    private int PricedStock(EntityUid grid, string good)
     {
-        var market = EnsureComp<WFTradeMarketComponent>(grid);
-        market.Scarcity[good] = (Math.Max(0f, Scarcity(grid, good) + amount), _timing.CurTime);
-        RefreshVendors(grid);
+        var stock = VendorStock(grid, good);
+        if (!TryComp<WFTradeMarketComponent>(grid, out var market) || !market.Unpriced.TryGetValue(good, out var purchases))
+            return stock;
+
+        var now = _timing.CurTime;
+        purchases.RemoveAll(due => due <= now);
+        return stock + purchases.Count;
+    }
+
+    /// <summary>A random wait before a purchase or sale moves the prices that follow stock.</summary>
+    public TimeSpan PriceDelay(EntityUid? grid)
+    {
+        var profile = Profile(grid);
+        return _random.Next(profile.PriceDelayMin, profile.PriceDelayMax);
     }
 
     /// <summary>What a vendor charges for a good before the market moves it, as the vending machine works it out.</summary>
@@ -97,7 +104,7 @@ public sealed partial class WFTradeMarketSystem
             return 1f;
         }
 
-        var scarcity = Math.Min(Scarcity(grid, good), profile.BuyScarcityCap);
+        var scarcity = Scarcity(grid, good);
 
         var ev = new WFTradeBuyQuoteEvent(grid, good);
         RaiseLocalEvent(ev);
@@ -118,7 +125,7 @@ public sealed partial class WFTradeMarketSystem
             }
         }
 
-        reason = raiseReason ?? (scarcity >= ScarceReason ? "wf-trade-reason-scarce" : "wf-trade-reason-steady");
+        reason = raiseReason ?? (scarcity > 0f ? "wf-trade-reason-scarce" : "wf-trade-reason-steady");
         return (1f + scarcity) * Math.Min(raise, profile.ModifierCap);
     }
 
@@ -137,7 +144,7 @@ public sealed partial class WFTradeMarketSystem
         return (int) MathF.Round(price * BuyFactor(grid, proto.ID, out _));
     }
 
-    /// <summary>A trade good bought from a vendor makes it scarcer at the vendor's station; contraband doesn't.</summary>
+    /// <summary>A trade good bought from a vendor comes off its station's stock now and reaches its price later; contraband does neither.</summary>
     private void OnPurchased(Entity<VendingMachinePurchaseComponent> ent, ref ComponentStartup args)
     {
         if (!HasComp<WFTradeOriginComponent>(ent)
@@ -146,11 +153,11 @@ public sealed partial class WFTradeMarketSystem
             || Profile(grid).ContrabandGoods.Contains(good))
             return;
 
+        EnsureComp<WFTradeMarketComponent>(grid).Unpriced.GetOrNew(good).Add(_timing.CurTime + PriceDelay(grid));
         SetVendorStock(grid, good, VendorStock(grid, good) - 1);
-        AddScarcity(grid, good, Profile(grid).BuyPerPurchase);
     }
 
-    /// <summary>Reprices every trade vendor every few seconds, so scarcity decay and events show in their menus.</summary>
+    /// <summary>Reprices every trade vendor every few seconds, so delayed purchases and events show in their menus.</summary>
     private void UpdateVendors()
     {
         if (_timing.CurTime < _nextVendorRefresh)
@@ -193,12 +200,17 @@ public sealed partial class WFTradeMarketSystem
                && !_proto.Index(DefaultProfile).ContrabandGoods.Contains(good);
     }
 
-    /// <summary>Crates of a trade good a station's vendors have left between them.</summary>
+    /// <summary>Crates of a trade good a station's vendors have left between them, rolled the first time it is asked.</summary>
     public int VendorStock(EntityUid grid, string good)
     {
-        return TryComp<WFTradeMarketComponent>(grid, out var market) && market.Stock.TryGetValue(good, out var stock)
-            ? stock
-            : Profile(grid).VendorStock;
+        var market = EnsureComp<WFTradeMarketComponent>(grid);
+        if (market.Stock.TryGetValue(good, out var stock))
+            return stock;
+
+        var profile = Profile(grid);
+        stock = (int) MathF.Round(profile.VendorStock * _random.NextFloat(profile.VendorStockStartMin, profile.VendorStockStartMax));
+        market.Stock[good] = stock;
+        return stock;
     }
 
     /// <summary>Sets a station's stock of a trade good, up to full, and shows it on all its vendors.</summary>

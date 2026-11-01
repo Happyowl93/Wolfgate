@@ -14,7 +14,7 @@ namespace Content.Server._WF.TradeGoods.Systems;
 public readonly record struct WFSupplyReport(string Station, bool Blockaded, bool Short, int Goods, int SoldOut, int Lowest, int Stops);
 
 /// <summary>
-/// Stations start full, buying empties them and freighters fill them back up, so stopping the freighters starves a
+/// Stations start stocked, buying empties them and freighters fill them back up, so stopping the freighters starves a
 /// station. Fills cargo markets at round start and reports how each station stands.
 /// </summary>
 public sealed partial class WFTradeSupplySystem : EntitySystem

@@ -125,10 +125,7 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
         return pressure;
     }
 
-    /// <summary>
-    /// Adds pressure to a good at a market, creating the market if needed. Supply from freight is tagged as such, and
-    /// eases the good's scarcity at the station's vendors by the same amount.
-    /// </summary>
+    /// <summary>Adds pressure to a good at a market, creating the market if needed. Supply from freight is tagged as such.</summary>
     public void AddPressure(EntityUid grid, string good, float amount, bool supplied = false)
     {
         var market = EnsureComp<WFTradeMarketComponent>(grid);
@@ -138,7 +135,6 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
             return;
 
         _supplied[(grid, good)] = _timing.CurTime + Profile(grid).HalfLife;
-        AddScarcity(grid, good, -amount);
     }
 
     /// <summary>Clears a good's pressure at a market, back to its full price.</summary>
