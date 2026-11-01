@@ -64,13 +64,13 @@
   - ScrapOre1
   - Coal1
   - Salt1
-  # Freighters carry the everyday materials; the rest only come from miners.
+  # What stations open with. What freighters bring is on their manifests.
   supplyMaterials: [ SheetSteel1, SheetGlass1, SheetPlastic1 ]
   vendorStock: 200
   # Each station rolls what share of a full stock it opens with, per good; the low end stays above buyScarcityStart.
   vendorStockStartMin: 0.25
   vendorStockStartMax: 1
-  # A freighter's stop brings half a full stock of everyday materials and of each trade good, and ends shortages.
+  # A freighter's stop brings half a full stock of each material and trade good it carries, and ends their shortages.
   freightRestock: 0.5
   materialStockTarget: 10000
   materialGlut: 3

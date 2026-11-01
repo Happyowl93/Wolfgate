@@ -178,7 +178,8 @@ resume its own orders, spawn its hull now, or send the encounter away. The Start
 `Reveal` and listens for `WFEncounterStartedEvent` and `WFEncounterResolvedEvent`.
 
 Freight runs (`freight: true`) keep their own schedule and cap (`wf.encounters.freight_interval_min`, `_max` and
-`freight_max_active`), outside the storyteller's, so they arrive steadily and never crowd out the sector's events. A
+`freight_max_active`), outside the storyteller's, so they arrive steadily and never crowd out the sector's events. Several
+runs of one type can fly at once, and a run's `materials` are what its stops restock (TradeGoods). A
 `blockades` encounter counts its station as blockaded while it runs (TradeGoods). Its first reward pays whoever destroys it.
 
 Systems that run encounters of their own (the Reaver campaign, sector control) have more entry points. `TrySpawn(..., offBudget)`

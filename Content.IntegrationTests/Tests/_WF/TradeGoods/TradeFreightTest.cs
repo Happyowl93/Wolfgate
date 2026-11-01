@@ -77,7 +77,7 @@ public sealed class TradeFreightTest
     }
 
     [Test]
-    public async Task ADockRestocksTheStationAndEndsItsShortages()
+    public async Task ADockRestocksWhatTheFreighterCarries()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
         var server = pair.Server;
@@ -97,9 +97,11 @@ public sealed class TradeFreightTest
             entMan.EnsureComponent<StationDataComponent>(station);
             entMan.System<StationSystem>().AddGridToStation(station, stop);
             entMan.EnsureComponent<CargoMarketDataComponent>(station);
-            entMan.SpawnEntity("VendingMachineTraderTradeMall", map.GridCoords);
+            entMan.SpawnEntity("VendingMachineTraderDepot", map.GridCoords);
+            market.SetVendorStock(stop, Fabric, 0);
             market.SetVendorStock(stop, luxuries, 0);
             shortages.StartLocal(stop, new HashSet<string> { Fabric }, 1.5f, System.TimeSpan.FromMinutes(30), "wf-trade-goods-textiles");
+            shortages.StartLocal(stop, new HashSet<string> { luxuries }, 1.5f, System.TimeSpan.FromMinutes(30), "wf-trade-goods-luxuries");
 
             var ship = TradeTestWorld.Grid(entMan, map, new Vector2(0f, -60f), "WF test freighter");
             var run = Run(entMan, GeneralManifest, stop);
@@ -109,12 +111,54 @@ public sealed class TradeFreightTest
 
             var profile = market.Profile(stop);
             var restock = (int) System.MathF.Ceiling(profile.VendorStock * profile.FreightRestock);
-            Assert.That(market.VendorStock(stop, luxuries), Is.EqualTo(restock), "A dock should restock the station's vendors.");
-            Assert.That(shortages.IsShort(stop), Is.False, "A dock should end the station's shortages.");
-            Assert.That(TradeTestWorld.Stock(entMan, station, "SheetSteel1"), Is.GreaterThan(0), "A dock should bring everyday materials.");
+            Assert.That(market.VendorStock(stop, Fabric), Is.EqualTo(restock), "A dock should restock what the freighter carries.");
+            Assert.That(market.VendorStock(stop, luxuries), Is.Zero, "A dock shouldn't restock what the freighter doesn't carry.");
+            Assert.That(shortages.Active.Any(shortage => shortage.Goods?.Contains(Fabric) == true), Is.False, "A dock should end shortages of what it brings.");
+            Assert.That(shortages.Active.Any(shortage => shortage.Goods?.Contains(luxuries) == true), Is.True, "A dock shouldn't end shortages of anything else.");
+            Assert.That(TradeTestWorld.Stock(entMan, station, "SheetSteel1"), Is.GreaterThan(0), "A dock should bring its manifest's materials.");
+            Assert.That(TradeTestWorld.Stock(entMan, station, "SheetPlasteel1"), Is.Zero, "A dock shouldn't bring materials off its manifest.");
 
             entMan.EventBus.RaiseEvent(EventSource.Local, ref docked);
-            Assert.That(market.VendorStock(stop, luxuries), Is.EqualTo(restock), "A second dock on the same run shouldn't restock it again.");
+            Assert.That(market.VendorStock(stop, Fabric), Is.EqualTo(restock), "A second dock on the same run shouldn't restock it again.");
+            shortages.Clear();
+            Drop(entMan, run, ship);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task AFreighterStrippedOfItsCargoBringsNothing()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var market = entMan.System<WFTradeMarketSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            TradeTestWorld.MarketChute(entMan, map);
+            var stop = map.Grid.Owner;
+            var station = entMan.Spawn();
+            entMan.EnsureComponent<StationDataComponent>(station);
+            entMan.System<StationSystem>().AddGridToStation(station, stop);
+            entMan.EnsureComponent<CargoMarketDataComponent>(station);
+            entMan.SpawnEntity("VendingMachineTraderDepot", map.GridCoords);
+            market.SetVendorStock(stop, Fabric, 0);
+
+            var ship = TradeTestWorld.Grid(entMan, map, new Vector2(0f, -60f), "WF test robbed freighter");
+            var run = Run(entMan, GeneralManifest, stop);
+            Board(entMan, run, ship);
+            var crate = entMan.SpawnEntity(Fabric, new EntityCoordinates(ship, 0.5f, 0.5f));
+            var loaded = new WFEncounterCargoLoadedEvent(run, ship, crate);
+            entMan.EventBus.RaiseEvent(EventSource.Local, ref loaded);
+            entMan.DeleteEntity(crate);
+
+            var docked = new WFPilotDockedEvent(EntityUid.Invalid, ship, stop);
+            entMan.EventBus.RaiseEvent(EventSource.Local, ref docked);
+            Assert.That(market.VendorStock(stop, Fabric), Is.Zero, "An empty hold shouldn't restock anything.");
+            Assert.That(TradeTestWorld.Stock(entMan, station, "SheetSteel1"), Is.Zero, "An empty hold shouldn't bring materials.");
             Drop(entMan, run, ship);
         });
 

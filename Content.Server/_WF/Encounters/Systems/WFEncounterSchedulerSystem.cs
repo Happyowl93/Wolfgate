@@ -331,10 +331,10 @@ public sealed partial class WFEncounterSchedulerSystem : EntitySystem
             var cost = prototype.Lifetime == WFEncounterLifetime.Persistent || prototype.Start == WFEncounterStart.RoundStart || prototype.Freight
                 ? 0
                 : prototype.Cost;
-            // One of a kind at a time: an encounter that is still running is not picked again.
+            // One of a kind at a time: an encounter that is still running is not picked again. Freight has its own cap.
             if (!fits || weight <= 0f || players < prototype.MinPlayers || cost > Math.Max(0, room) || skip.Contains(prototype.ID)
                 || prototype.RequiresWar && !atWar
-                || _encounters.IsRunning(prototype.ID)
+                || !prototype.Freight && _encounters.IsRunning(prototype.ID)
                 || _lastStarted.TryGetValue(prototype.ID, out var last)
                     && _timing.CurTime - last < TimeSpan.FromSeconds(prototype.Cooldown))
                 continue;

@@ -105,7 +105,9 @@ public sealed class WFTradeFreightSystem : EntitySystem
 
     private void OnStopReached(ref WFEncounterStopReachedEvent args)
     {
-        if (!TryComp<WFEncounterComponent>(args.Encounter, out var encounter) || encounter.Manifest is not { } manifestId)
+        if (!TryComp<WFEncounterComponent>(args.Encounter, out var encounter)
+            || encounter.Manifest is not { } manifestId
+            || !_proto.TryIndex(manifestId, out var manifest))
             return;
 
         if (!_reached.TryGetValue(args.Encounter, out var reached))
@@ -114,7 +116,8 @@ public sealed class WFTradeFreightSystem : EntitySystem
         if (!reached.Add(args.Station))
             return;
 
-        // A crewed hull supplies what is still aboard; a simulated one, what its manifest says it carries.
+        // A crewed hull supplies what is still aboard, so one stripped of its cargo brings nothing; a simulated one,
+        // what its manifest says it carries.
         var counts = new Dictionary<string, int>();
         var query = EntityQueryEnumerator<WFTradeOriginComponent, TransformComponent, MetaDataComponent>();
         while (query.MoveNext(out _, out _, out var xform, out var meta))
@@ -123,7 +126,7 @@ public sealed class WFTradeFreightSystem : EntitySystem
                 counts[proto.ID] = counts.GetValueOrDefault(proto.ID) + 1;
         }
 
-        if (counts.Count == 0 && _proto.TryIndex(manifestId, out var manifest))
+        if (counts.Count == 0 && _freighters.GetValueOrDefault(args.Encounter)?.Contains(args.Grid) != true)
         {
             foreach (var crate in manifest.Crates)
             {
@@ -133,23 +136,26 @@ public sealed class WFTradeFreightSystem : EntitySystem
 
         var station = args.Station;
         var bought = _market.Chutes().Where(chute => chute.Grid == station).ToList();
+        var stocked = _market.StockedGoods(station);
         var supplied = new List<string>();
         var profile = _market.Profile(args.Station);
         foreach (var (good, count) in counts)
         {
-            if (!bought.Any(chute => chute.Dispenser.Inventory.ContainsKey(good)))
-                continue;
+            var buys = bought.Any(chute => chute.Dispenser.Inventory.ContainsKey(good));
+            if (buys)
+                _market.AddPressure(args.Station, good, Math.Min(SupplyCap, count * profile.PerSaleOverrides.GetValueOrDefault(good, profile.PerSale)), supplied: true);
 
-            _market.AddPressure(args.Station, good, Math.Min(SupplyCap, count * profile.PerSaleOverrides.GetValueOrDefault(good, profile.PerSale)), supplied: true);
-            supplied.Add(_market.GoodName(good));
+            if (buys || stocked.Contains(good))
+                supplied.Add(_market.GoodName(good));
         }
 
-        // Nothing else refills a station, so stopping the freighters starves it.
-        if (_stock.WfRestock(args.Station, profile.FreightRestock))
+        // Nothing else refills a station, so stopping the freighters starves it of what they carry.
+        var goods = counts.Keys.ToHashSet();
+        if (goods.Count > 0 && _stock.WfRestock(args.Station, profile.FreightRestock, manifest.Materials))
             supplied.Add(Loc.GetString("wf-trade-goods-materials"));
 
-        _market.RestockVendors(args.Station, (int) MathF.Ceiling(profile.VendorStock * profile.FreightRestock));
-        _shortages.Relieve(args.Station);
+        _market.RestockVendors(args.Station, (int) MathF.Ceiling(profile.VendorStock * profile.FreightRestock), goods);
+        _shortages.Relieve(args.Station, goods);
         _supply.NoteStop(args.Station);
 
         if (supplied.Count > 0)

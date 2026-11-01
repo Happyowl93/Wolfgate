@@ -90,10 +90,11 @@ public sealed class WFTradeShortageSystem : EntitySystem
         return _active.Any(shortage => shortage.Grid == grid && shortage.Ends > _timing.CurTime);
     }
 
-    /// <summary>Ends a station's shortages because a freighter got through.</summary>
-    public void Relieve(EntityUid grid)
+    /// <summary>Ends a station's shortages of some goods because a freighter brought them.</summary>
+    public void Relieve(EntityUid grid, HashSet<string> goods)
     {
-        _active.RemoveAll(shortage => shortage.Grid == grid);
+        _active.RemoveAll(shortage => shortage.Grid == grid
+                                      && (shortage.Goods?.Overlaps(goods) ?? goods.Any(good => _market.InGroup(good, shortage.Group))));
     }
 
     public override void Update(float frameTime)

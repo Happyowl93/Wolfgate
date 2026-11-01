@@ -43,7 +43,7 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public List<EntProtoId> MaterialGoods = new();
 
-    /// <summary>The everyday materials stations start with and freighters bring.</summary>
+    /// <summary>The everyday materials stations open with; freight manifests list what they bring.</summary>
     [DataField]
     public List<EntProtoId> SupplyMaterials = new();
 
@@ -59,7 +59,7 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public float VendorStockStartMax = 1f;
 
-    /// <summary>Share of a full stock of each everyday material and trade good a freighter's stop adds.</summary>
+    /// <summary>Share of a full stock of each material and trade good it carries that a freighter's stop adds.</summary>
     [DataField]
     public float FreightRestock = 0.5f;
 

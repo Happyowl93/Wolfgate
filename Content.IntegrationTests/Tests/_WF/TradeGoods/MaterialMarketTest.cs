@@ -14,6 +14,7 @@ using Content.Server.Station.Systems;
 using Content.Shared._NF.Bank.Components;
 using Content.Shared._NF.CrateMachine.Components;
 using Content.Shared._NF.Market.Events;
+using Content.Shared._WF.Encounters;
 using Content.Shared._WF.TradeGoods;
 using Content.Shared.Maps;
 using Content.Shared.Materials;
@@ -466,7 +467,15 @@ public sealed class MaterialMarketTest
 
             foreach (var good in profile.SupplyMaterials)
             {
-                Assert.That(profile.MaterialGoods, Does.Contain(good), $"{good} is restocked by freight but doesn't trade through stock.");
+                Assert.That(profile.MaterialGoods, Does.Contain(good), $"{good} opens in stock but doesn't trade through it.");
+            }
+
+            foreach (var manifest in protoMan.EnumeratePrototypes<WFEncounterManifestPrototype>())
+            {
+                foreach (var good in manifest.Materials)
+                {
+                    Assert.That(profile.MaterialGoods, Does.Contain(good), $"{manifest.ID} brings {good}, which doesn't trade through stock.");
+                }
             }
         });
 

@@ -238,8 +238,8 @@ public sealed partial class MarketSystem
         return Math.Max(WfSupply(market.Comp, carts, good), WfPricedSupply(market, carts, good));
     }
 
-    /// <summary>Tops up a station's everyday materials by a share of the target, never past it. Returns whether it added any.</summary>
-    public bool WfRestock(EntityUid grid, float share)
+    /// <summary>Tops up some materials, by default those stations open with, by a share of the target, never past it. Returns whether it added any.</summary>
+    public bool WfRestock(EntityUid grid, float share, List<EntProtoId>? goods = null)
     {
         if (_station.GetOwningStation(grid) is not { } station || !TryComp<CargoMarketDataComponent>(station, out var market))
             return false;
@@ -247,7 +247,7 @@ public sealed partial class MarketSystem
         var profile = _tradeMarket.Profile(null);
         var carts = WfCarts(station);
         var restocked = false;
-        foreach (var good in profile.SupplyMaterials)
+        foreach (var good in goods ?? profile.SupplyMaterials)
         {
             var unit = WfUnitPrice(good);
             if (unit <= 0.0)

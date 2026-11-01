@@ -264,14 +264,15 @@ public sealed partial class WFTradeMarketSystem
         return goods;
     }
 
-    /// <summary>Adds crates of each good a station's vendors sell, up to their full stock.</summary>
-    public void RestockVendors(EntityUid grid, int amount)
+    /// <summary>Adds crates of each good a station's vendors sell, or only of the goods given, up to their full stock.</summary>
+    public void RestockVendors(EntityUid grid, int amount, HashSet<string>? goods = null)
     {
         var market = EnsureComp<WFTradeMarketComponent>(grid);
         var full = Profile(grid).VendorStock;
         foreach (var good in StockedGoods(grid))
         {
-            market.Stock[good] = Math.Min(full, VendorStock(grid, good) + amount);
+            if (goods == null || goods.Contains(good))
+                market.Stock[good] = Math.Min(full, VendorStock(grid, good) + amount);
         }
 
         RefreshVendors(grid);

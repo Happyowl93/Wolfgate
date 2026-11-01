@@ -165,6 +165,38 @@ public sealed class StationSupplyTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>A good on no such manifest would run out for good at a quiet server.</summary>
+    [Test]
+    public async Task EveryVendorGoodComesByFreightAtAnyPlayerCount()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var protoMan = server.ProtoMan;
+        var factory = server.EntMan.ComponentFactory;
+
+        await server.WaitAssertion(() =>
+        {
+            var carried = protoMan.EnumeratePrototypes<WFEncounterPrototype>()
+                .Where(encounter => encounter.Freight && encounter.MinPlayers == 0)
+                .SelectMany(encounter => encounter.Manifests)
+                .SelectMany(manifest => protoMan.Index(manifest).Crates)
+                .Select(crate => crate.Id)
+                .ToHashSet();
+            var contraband = protoMan.Index(WFTradeMarketSystem.DefaultProfile).ContrabandGoods;
+
+            foreach (var pack in new[] { "TraderBaikal", "TraderTradeMall", "TraderDepot", "TraderDepotAlt" })
+            {
+                foreach (var good in protoMan.Index<VendingMachineInventoryPrototype>(pack).StartingInventory.Keys)
+                {
+                    if (protoMan.Index<EntityPrototype>(good).TryGetComponent<WFTradeOriginComponent>(out _, factory) && !contraband.Contains(good))
+                        Assert.That(carried, Does.Contain(good), $"{pack} sells {good}, but no freighter brings it at any player count.");
+                }
+            }
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     [Test]
     public async Task FreightRunsOutsideTheStorytellersCap()
     {

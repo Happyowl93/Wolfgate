@@ -23,8 +23,11 @@ Station supply (`WFTradeSupplySystem`): stations start stocked, buying empties t
 station's vendors share one finite stock per good (`vendorStock`, held on `WFTradeMarketComponent` and shown on every
 machine), a sold-out good drops off the Market app and contraband never runs out. Each station rolls its opening stock of
 each good between `vendorStockStartMin` and `vendorStockStartMax` of full, so no two rounds stock alike. Cargo markets open with `supplyMaterials`
-at the target. A freighter stop brings `freightRestock` of a full stock of both and ends the station's shortages; nothing
-else refills them. `wf_trade status` shows each station's supply and the server logs it hourly.
+at the target. A freighter stop brings `freightRestock` of a full stock of each trade good aboard and each of its manifest's
+`materials`, and ends the station's shortages of those goods; nothing else refills them. A crewed hull stripped of its cargo
+brings nothing, so what a station runs short of depends on which ships reach it. Every good a station vendor sells has to be
+on a manifest that runs at any player count (`EveryVendorGoodComesByFreightAtAnyPlayerCount`). Plasma, uranium, lithium and
+precious metals only come from miners. `wf_trade status` shows each station's supply and the server logs it hourly.
 
 Stopping the freighters is the blockade: a station they don't reach runs dry as people buy, and a lost run leaves its stops
 short. Players do it by intercepting freighters, outside the 256 m that Conflict Rule 4 protects. Freighters also stay
@@ -47,8 +50,7 @@ shops and console trading crates keep their fixed prices.
 
 What raises prices (`WFTradeQuoteEvent` subscribers, capped together at `modifierCap`):
 - Shortages at one station and sector-wide booms (`WFTradeShortageSystem`, `wfTradeShortage`). A shortage ends early
-  once `shortageCrates` hauled crates of its goods arrive, or when a freighter reaches the station. A fuel shortage or
-  boom also raises what traders charge to refuel a ship (`refuelShortageGroup`).
+  when a freighter brings its goods to the station.
 - Blockades, relief rates while a blockade is contested, war demand at the navy chutes and raid alerts
   (`WFTradeSectorSystem`, reading SectorControl, the war level and the Reaver campaign).
 - Rush orders: a station wants a few crates fast (`WFTradeRushSystem`, `wfTradeRush`). Bulk orders (`bulk: true`, on their
