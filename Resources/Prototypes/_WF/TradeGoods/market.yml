@@ -61,28 +61,25 @@
   - ScrapOre1
   - Coal1
   - Salt1
-  # Supply lines and freighters carry the everyday materials; the rest only come from miners.
-  freightMaterials: [ SheetSteel1, SheetGlass1, SheetPlastic1 ]
-  # A station's background supply. Scheduled freighters reach each station only every dozen hours or so, so this pulse
-  # is what keeps stations stocked; freighters top it up. A blockade cuts the materials and slows the vendors, and so
-  # does a shortage for the vendors. Each pulse adds a crate per good to the stock a station's vendors share, so 40
-  # crates refill in 80 minutes.
+  # Supply lines carry the everyday materials; the rest only come from miners.
+  supplyMaterials: [ SheetSteel1, SheetGlass1, SheetPlastic1 ]
+  # A station's background supply. A blockade cuts the materials and slows the vendors, and so does a shortage for the
+  # vendors. Each pulse adds a crate per good to the stock a station's vendors share, so 40 crates refill in 80 minutes,
+  # and 3% of the target in everyday materials, which outpaces stock draining at halfLife and holds them at the target.
   supplyPulse: 120
-  materialPulse: 0.01
+  materialPulse: 0.03
   vendorStock: 40
   vendorFreightRestock: 0.5
   # Delivering this many hauled crates ends a shortage early; so does a freighter reaching the station.
   shortageCrates: 4,8
   refuelShortageGroup: Fuel
   materialStockTarget: 10000
-  materialRestock: 0.35
   materialGlut: 3
   materialPayMax: 1.2
   materialPayMin: 0.5
   materialChargeMax: 1.5
   materialChargeMin: 0.8
   materialArrival: 600
-  materialShortageGroup: Industrial
   modifierCap: 2.5
   minHaulDistance: 3000
   highlight: 1.4

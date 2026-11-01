@@ -2,17 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Content.Server._NF.Market.Components;
-using Content.Server._NF.Market.Systems;
 using Content.Server._WF.Encounters;
 using Content.Server._WF.Encounters.Components;
 using Content.Server._WF.Encounters.Systems;
 using Content.Server._WF.NpcCrew;
 using Content.Server._WF.TradeGoods.Systems;
-using Content.Server.Station.Systems;
 using Content.Shared._WF.Encounters;
 using Content.Shared._WF.TradeGoods;
-using Content.Shared.Station.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Localization;
 using Robust.Shared.Map;
@@ -85,7 +81,6 @@ public sealed class TradeFreightTest
         var entMan = server.EntMan;
         var market = entMan.System<WFTradeMarketSystem>();
         var shortages = entMan.System<WFTradeShortageSystem>();
-        var stock = entMan.System<MarketSystem>();
 
         await server.WaitAssertion(() =>
         {
@@ -93,10 +88,6 @@ public sealed class TradeFreightTest
             shortages.Clear();
             TradeTestWorld.MarketChute(entMan, map);
             var stop = map.Grid.Owner;
-            var station = entMan.Spawn();
-            entMan.EnsureComponent<StationDataComponent>(station);
-            entMan.System<StationSystem>().AddGridToStation(station, stop);
-            entMan.EnsureComponent<CargoMarketDataComponent>(station);
             entMan.SpawnEntity("VendingMachineTraderTradeMall", map.GridCoords);
             market.SetVendorStock(stop, luxuries, 0);
             shortages.StartLocal(stop, new HashSet<string> { Fabric }, 1.5f, System.TimeSpan.FromMinutes(30), "wf-trade-goods-textiles");
@@ -111,7 +102,6 @@ public sealed class TradeFreightTest
             var restock = (int) System.MathF.Ceiling(profile.VendorStock * profile.VendorFreightRestock);
             Assert.That(market.VendorStock(stop, luxuries), Is.EqualTo(restock), "A dock should restock the station's vendors.");
             Assert.That(shortages.IsShort(stop), Is.False, "A dock should end the station's shortages.");
-            Assert.That(TradeTestWorld.Stock(entMan, station, "SheetSteel1"), Is.GreaterThan(0), "A dock should bring everyday materials.");
 
             entMan.EventBus.RaiseEvent(EventSource.Local, ref docked);
             Assert.That(market.VendorStock(stop, luxuries), Is.EqualTo(restock), "A second dock on the same run shouldn't restock it again.");

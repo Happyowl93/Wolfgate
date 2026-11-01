@@ -97,12 +97,11 @@ public sealed partial class WFTradeSupplySystem : EntitySystem
                 _market.RestockVendors(grid, 1);
         }
 
-        var share = _market.Profile(null).MaterialPulse;
         var markets = EntityQueryEnumerator<CargoMarketDataComponent>();
         while (markets.MoveNext(out var station, out _))
         {
             if (_station.GetLargestGrid(station) is { } grid && !_sector.IsBlockaded(grid))
-                _stock.WfRestock(grid, share);
+                _stock.WfRestock(grid);
         }
     }
 

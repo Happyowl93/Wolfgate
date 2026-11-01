@@ -43,9 +43,9 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public List<EntProtoId> MaterialGoods = new();
 
-    /// <summary>The everyday materials a station's supply lines and freighters restock.</summary>
+    /// <summary>The everyday materials a station's supply lines restock.</summary>
     [DataField]
-    public List<EntProtoId> FreightMaterials = new();
+    public List<EntProtoId> SupplyMaterials = new();
 
     /// <summary>How often a station's background supply arrives.</summary>
     [DataField]
@@ -53,7 +53,7 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
 
     /// <summary>Share of the stock target each supply pulse adds to the everyday materials.</summary>
     [DataField]
-    public float MaterialPulse = 0.01f;
+    public float MaterialPulse = 0.03f;
 
     /// <summary>Most of each trade good a station's vendors hold between them.</summary>
     [DataField]
@@ -74,10 +74,6 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     /// <summary>Spesos of one material a station holds at normal prices.</summary>
     [DataField]
     public float MaterialStockTarget = 10000f;
-
-    /// <summary>Share of the stock target one freighter stop adds, never past the target.</summary>
-    [DataField]
-    public float MaterialRestock = 0.35f;
 
     /// <summary>Stock, as a multiple of the target, at which prices stop falling.</summary>
     [DataField]
@@ -102,10 +98,6 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     /// <summary>How long sold materials take to reach a station's console.</summary>
     [DataField]
     public TimeSpan MaterialArrival = TimeSpan.FromMinutes(10);
-
-    /// <summary>The goods group whose shortages and booms raise material prices too.</summary>
-    [DataField]
-    public string MaterialShortageGroup = string.Empty;
 
     /// <summary>Scarcity one trade good bought from a station's vendor adds there, raising what its vendors charge.</summary>
     [DataField]

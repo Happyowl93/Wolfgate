@@ -22,9 +22,9 @@ A chute offered something it doesn't buy says so instead of only buzzing.
 Station supply (`WFTradeSupplySystem`): a station's vendors share one finite stock per good (`vendorStock`, held on
 `WFTradeMarketComponent` and shown on every machine), a sold-out good drops off the Market app and contraband never runs
 out. Every `supplyPulse` the stock of each good gains a crate and each cargo market gains `materialPulse` of the target in
-`freightMaterials`, so stations stay healthy until something disrupts them. A freighter stop is a bonus: half a full stock,
-a larger material restock and the end of the station's shortages. A blockade stops the materials, and a blockade or a
-shortage halves the vendors' refill. `wf_trade status` shows each station's supply and the server logs it hourly.
+`supplyMaterials`, so stations stay healthy until something disrupts them. A freighter stop is a bonus: half a full stock
+and the end of the station's shortages. A blockade stops the materials, and a blockade or a shortage halves the vendors'
+refill. `wf_trade status` shows each station's supply and the server logs it hourly.
 
 A blockade is either a faction holding the station's cell (SectorControl) or a `blockades` encounter
 (`WFEncounterStationBlockade`): raiders on the station's approaches, for as long as they stay. Freighters stay away from
@@ -63,12 +63,13 @@ Materials (`MarketSystem.Materials`, `materialGoods`) trade through each station
 how much of a material the station holds or has on the way, from 1.2x with none through full value at
 `materialStockTarget` to 0.5x at a glut, and a sale walks down that curve, so one big haul doesn't all fetch the top
 rate. The market console charges by the same stock, from 1.5x near empty to 0.8x at a glut, before its own modifier.
-Sold lots reach the console after `materialArrival`, stock drains at `halfLife`, and station supply and freighter stops
-top up `freightMaterials`, never past the target. Materials in a console's cart stay part of the stock: they still count
-as supply, drain and follow the live price until they are bought. Everything else the console sells works as it always did. Industrial shortages and booms raise pallet and console prices alike. The curves
+Sold lots reach the console after `materialArrival`, stock drains at `halfLife`, and station supply tops up
+`supplyMaterials`, never past the target. Materials in a console's cart stay part of the stock: they still count
+as supply, drain and follow the live price until they are bought. Everything else the console sells works as it always did. The curves
 keep selling and buying back at a loss on the tightest pallet and console pair on any station, which
 `SellingAndBuyingBackNeverProfits` checks. The Market app's Materials tab names each material's best sale and cheapest
-stock. Materials aboard a ship count toward its cargo value (`WFTradeMaterialCargoSystem`), so a full mining hold draws
+stock. A station with a pallet needs a cargo market or its sales skip all of this, and one with no market console is
+buy-only, as Cargo Depots and the ASF Lantern Post are: the tab lists it as a sale and never as stock. Materials aboard a ship count toward its cargo value (`WFTradeMaterialCargoSystem`), so a full mining hold draws
 raiders. Crates built from materials use about 60% of their vendor price in them; crates built from reagents, parts
 or cloth only have a heavier steel shell, and fissile fuel is unchanged.
 
@@ -227,6 +228,7 @@ it nears its floor of 1000; printing it costs about 260 in materials.
 - [`Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/Machines/vending_machines.yml)
   - no free crates from the eject wire or wrecking the vendor
   - trade goods cost the station's live price
+- [`Resources/Prototypes/_Mono/PointsOfInterest/tsfmcindustry.yml`](../../../Resources/Prototypes/_Mono/PointsOfInterest/tsfmcindustry.yml): was StandardFrontierOutpost; its market console had no stock to sell
 - [`Resources/Prototypes/_Mono/Recipes/Lathes/trade_crates.yml`](../../../Resources/Prototypes/_Mono/Recipes/Lathes/trade_crates.yml)
   - was 1000; crates cost real material
   - was 200; crates cost real material
@@ -239,5 +241,6 @@ it nears its floor of 1000; printing it costs about 260 in materials.
   - was 800; crates cost real material
 - [`Resources/Prototypes/_NF/Entities/Structures/Machines/vending_machines.yml`](../../../Resources/Prototypes/_NF/Entities/Structures/Machines/vending_machines.yml): a fuel shortage raises what the vendor charges
 - [`Resources/Prototypes/_NF/Entities/Structures/Specific/TradingCrates/crates.yml`](../../../Resources/Prototypes/_NF/Entities/Structures/Specific/TradingCrates/crates.yml): the pallet price follows the selling station's demand
+- [`Resources/Prototypes/_NF/PointsOfInterest/depots.yml`](../../../Resources/Prototypes/_NF/PointsOfInterest/depots.yml): was StandardFrontierOutpost; pallets price materials by station stock
 
 <!-- WOLFGATE-GENERATED END -->

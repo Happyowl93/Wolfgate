@@ -1,5 +1,4 @@
 using System.Linq;
-using Content.Server._NF.Market.Systems;
 using Content.Server._WF.Encounters;
 using Content.Server._WF.Encounters.Components;
 using Content.Shared._WF.Encounters;
@@ -23,7 +22,6 @@ public sealed class WFTradeFreightSystem : EntitySystem
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private WFTradeMarketSystem _market = default!;
     [Dependency] private WFTradeShortageSystem _shortages = default!;
-    [Dependency] private MarketSystem _stock = default!;
     [Dependency] private WFTradeSupplySystem _supply = default!;
     [Dependency] private IGameTiming _timing = default!;
 
@@ -143,9 +141,6 @@ public sealed class WFTradeFreightSystem : EntitySystem
             _market.AddPressure(args.Station, good, Math.Min(SupplyCap, count * profile.PerSaleOverrides.GetValueOrDefault(good, profile.PerSale)), supplied: true);
             supplied.Add(_market.GoodName(good));
         }
-
-        if (_stock.WfRestock(args.Station))
-            supplied.Add(Loc.GetString("wf-trade-goods-materials"));
 
         _market.RestockVendors(args.Station, (int) MathF.Ceiling(profile.VendorStock * profile.VendorFreightRestock));
         _shortages.Relieve(args.Station);

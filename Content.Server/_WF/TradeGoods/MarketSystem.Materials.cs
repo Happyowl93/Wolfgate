@@ -28,7 +28,6 @@ public sealed partial class MarketSystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private WFTradeMarketSystem _tradeMarket = default!;
-    [Dependency] private WFTradeShortageSystem _shortages = default!;
 
     private static readonly TimeSpan WfStepInterval = TimeSpan.FromSeconds(5);
 
@@ -73,18 +72,17 @@ public sealed partial class MarketSystem
         }
 
         var share = 1.0 - Math.Pow(0.5, elapsed.TotalSeconds / Math.Max(1.0, profile.HalfLife.TotalSeconds));
-        var shortage = WfShortageFactor(ent, profile);
         var carts = WfCarts(ent);
-        WfSettle(market.MarketDataList, market, carts, profile, share, shortage);
+        WfSettle(market.MarketDataList, market, carts, profile, share);
         foreach (var cart in carts)
         {
-            WfSettle(cart, market, carts, profile, share, shortage);
+            WfSettle(cart, market, carts, profile, share);
         }
     }
 
     /// <summary>Drains and reprices the materials in one list of a station's stock.</summary>
     private void WfSettle(List<MarketData> stock, CargoMarketDataComponent market, List<List<MarketData>> carts,
-        WFTradeMarketPrototype profile, double share, float shortage)
+        WFTradeMarketPrototype profile, double share)
     {
         for (var i = stock.Count - 1; i >= 0; i--)
         {
@@ -102,7 +100,7 @@ public sealed partial class MarketSystem
             }
 
             var unit = WfUnitPrice(entry.Prototype);
-            entry.Price = unit * shortage * WfChargeFactor(profile, WfSaturation(profile, WfSupply(market, carts, entry.Prototype), unit));
+            entry.Price = unit * WfChargeFactor(profile, WfSaturation(profile, WfSupply(market, carts, entry.Prototype), unit));
         }
     }
 
@@ -122,14 +120,13 @@ public sealed partial class MarketSystem
         if (_wfAdjusted.TryGetValue(sold, out var known))
             return known;
 
-        var profile = _tradeMarket.Profile(null);
-        var adjustment = WfAdjustment(sold, (station, market), WfCarts(station), profile, WfShortageFactor(station, profile));
+        var adjustment = WfAdjustment(sold, (station, market), WfCarts(station), _tradeMarket.Profile(null));
         _wfAdjusted[sold] = adjustment;
         return adjustment;
     }
 
     private double WfAdjustment(EntityUid uid, Entity<CargoMarketDataComponent> market, List<List<MarketData>> carts,
-        WFTradeMarketPrototype profile, float shortage)
+        WFTradeMarketPrototype profile)
     {
         var adjustment = 0.0;
         if (TryComp<StackComponent>(uid, out var stack) && WfGood(stack) is { } good)
@@ -140,7 +137,7 @@ public sealed partial class MarketSystem
             _wfAhead[key] = ahead + stack.Count;
             // The curve is linear either side of the target, so its midpoint prices the whole stack.
             var supply = WfSupply(market.Comp, carts, good) + ahead + stack.Count / 2.0;
-            adjustment += unit * stack.Count * (shortage * WfPayFactor(profile, WfSaturation(profile, supply, unit)) - 1.0);
+            adjustment += unit * stack.Count * (WfPayFactor(profile, WfSaturation(profile, supply, unit)) - 1.0);
         }
 
         if (!TryComp<ContainerManagerComponent>(uid, out var containers))
@@ -150,7 +147,7 @@ public sealed partial class MarketSystem
         {
             foreach (var contained in container.ContainedEntities)
             {
-                adjustment += WfAdjustment(contained, market, carts, profile, shortage);
+                adjustment += WfAdjustment(contained, market, carts, profile);
             }
         }
 
@@ -244,22 +241,6 @@ public sealed partial class MarketSystem
         return supply;
     }
 
-    /// <summary>What a shortage or boom in the materials' goods group does to their prices at a station.</summary>
-    private float WfShortageFactor(EntityUid station, WFTradeMarketPrototype profile)
-    {
-        var factor = 1f;
-        foreach (var shortage in _shortages.Active)
-        {
-            if (shortage.Group != profile.MaterialShortageGroup)
-                continue;
-
-            if (shortage.Grid is not { } grid || !TerminatingOrDeleted(grid) && _station.GetOwningStation(grid) == station)
-                factor *= shortage.Factor;
-        }
-
-        return Math.Min(factor, profile.ModifierCap);
-    }
-
     /// <summary>Holds a sold material back from the console, or returns false for anything else.</summary>
     private bool WfQueueMaterial(CargoMarketDataComponent market, string good, int count)
     {
@@ -271,11 +252,8 @@ public sealed partial class MarketSystem
         return true;
     }
 
-    /// <summary>
-    /// Tops up the everyday materials at a station, by a freighter's share of the target unless given another, never past
-    /// the target. Returns whether it added any.
-    /// </summary>
-    public bool WfRestock(EntityUid grid, float? share = null)
+    /// <summary>One supply pulse of everyday materials at a station, never past the target. Returns whether it added any.</summary>
+    public bool WfRestock(EntityUid grid)
     {
         if (_station.GetOwningStation(grid) is not { } station || !TryComp<CargoMarketDataComponent>(station, out var market))
             return false;
@@ -283,14 +261,14 @@ public sealed partial class MarketSystem
         var profile = _tradeMarket.Profile(null);
         var carts = WfCarts(station);
         var restocked = false;
-        foreach (var good in profile.FreightMaterials)
+        foreach (var good in profile.SupplyMaterials)
         {
             var unit = WfUnitPrice(good);
             if (unit <= 0.0)
                 continue;
 
             var target = profile.MaterialStockTarget / unit;
-            var amount = (int) Math.Min(target * (share ?? profile.MaterialRestock), target - WfSupply(market, carts, good));
+            var amount = (int) Math.Min(target * profile.MaterialPulse, target - WfSupply(market, carts, good));
             if (amount <= 0)
                 continue;
 
@@ -328,7 +306,6 @@ public sealed partial class MarketSystem
             if (!pays.TryGetValue(uid, out var pay) & !charges.TryGetValue(uid, out var charge))
                 continue;
 
-            var shortage = WfShortageFactor(uid, profile);
             var carts = WfCarts(uid);
             var name = Name(_station.GetLargestGrid(uid) ?? uid);
             foreach (var good in profile.MaterialGoods)
@@ -339,7 +316,7 @@ public sealed partial class MarketSystem
                 quotes.Add(new WFMaterialQuote(good,
                     uid,
                     name,
-                    unit * pay * shortage * WfPayFactor(profile, WfSaturation(profile, WfSupply(market, carts, good), unit)),
+                    unit * pay * WfPayFactor(profile, WfSaturation(profile, WfSupply(market, carts, good), unit)),
                     stock > 0 ? entry!.Price * charge : 0.0,
                     stock));
             }

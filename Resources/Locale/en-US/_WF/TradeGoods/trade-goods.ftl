@@ -41,7 +41,6 @@ wf-trade-goods-ship-components = ship components
 wf-trade-goods-chemicals = chemicals
 wf-trade-goods-fuel = reactor fuel
 wf-trade-goods-industrial = industrial goods
-wf-trade-goods-materials = construction materials
 wf-trade-goods-agriculture = fertilizer
 wf-trade-goods-luxuries = luxury goods
 wf-trade-goods-textiles = fabric
