@@ -15,11 +15,11 @@ wf-trade-sale-low = Paying {$amount}. Best now: {$station}, {$best}.
 wf-trade-examine-header = [color=#d9a441]Live prices:[/color]
 wf-trade-price-line = {$good}: {$amount} {$trend} ({$reason}), {$tonnes}t, {$perTonne}/t
 wf-trade-paper-header = [bold]{$station}: live turn-in prices[/bold]
-wf-trade-paper-footer = Prices fall as crates come in and win back half the drop every 50 minutes. Sector events raise them. The Market app on your PDA has every station's prices.
+wf-trade-paper-footer = Prices follow how full this station's shelves are: they fall as crates come in and rise as they run low. Sector events raise them. The Market app on your PDA has every station's prices.
 
 wf-trade-reason-steady = steady
 wf-trade-reason-glutted = glutted
-wf-trade-reason-supplied = supplied
+wf-trade-reason-wanted = in demand
 wf-trade-reason-short = short
 wf-trade-reason-boom = boom
 wf-trade-reason-blockade = blockade
@@ -43,13 +43,43 @@ wf-trade-goods-chemicals = chemicals
 wf-trade-goods-fuel = reactor fuel
 wf-trade-goods-industrial = industrial goods
 wf-trade-goods-materials = construction materials
+materials-wf-munitions = munitions
+materials-wf-reactor-fuel = reactor fuel
+materials-wf-medical-stock = medical stock
+materials-wf-gun-parts = gun parts
+materials-wf-ship-parts = ship parts
+materials-unit-wf-crate-share = share
 wf-trade-goods-agriculture = fertilizer
 wf-trade-goods-luxuries = luxury goods
 wf-trade-goods-textiles = fabric
 
+## Industries
+
+wf-trade-industry-agriculture = Agriculture
+wf-trade-industry-chemicals = Chemicals
+wf-trade-industry-pharmaceuticals = Pharmaceuticals
+wf-trade-industry-food = Food
+wf-trade-industry-munitions = Munitions
+wf-trade-industry-refining = Refining
+wf-trade-industry-fabrication = Fabrication
+wf-trade-industry-ship-works = Ship works
+wf-trade-industry-reclamation = Reclamation
+wf-trade-industry-luxury-goods = Luxury goods
+wf-trade-industry-reactors = Reactors
+
+## Services
+
+wf-trade-service-drydock = Drydock work
+wf-trade-service-patrols = Patrols
+
 ## Sector Exchange radio
 
 wf-trade-shortage-start = {$station} is short of {$goods}: paying {$factor}x for {$minutes} minutes.
+wf-trade-shortage-report = {$station} is short of {$goods}: {$cause}. Paying up to {$factor}x.
+wf-trade-shortage-cause-blockade = the blockade has cut it off
+wf-trade-shortage-cause-lost = a freighter never arrived
+wf-trade-shortage-cause-input = it has no {$input} to make them from
+wf-trade-shortage-cause-supply = supply has fallen behind
 wf-trade-boom-start = {CAPITALIZE($goods)} boom: every station pays {$percent}% more for {$minutes} minutes.
 wf-trade-war-demand = War demand: {$stations} pay {$factor}x for ammunition, weapon parts and medical supplies.
 wf-trade-blockade-landed = {$station} is blockaded. It pays up to {$factor}x for essentials while the blockade holds.
@@ -110,6 +140,12 @@ wf-market-status = {$stations} markets open
 wf-market-tab-prices = Prices
 wf-market-tab-alerts = Alerts
 wf-market-tab-materials = Materials
+wf-market-tab-sector = Sector
+wf-market-sector-stock = {$stock} crates in the sector, {$owed} waiting on freight
+wf-market-sector-flow = {$made} made and {$used} used an hour
+wf-market-sector-short = Short at {$stations}
+wf-market-no-sector = No station is reporting its stocks.
+wf-market-shelf-tooltip = Shelf {$percent}% of target
 wf-market-material-pays = Sell at {$station}: {$amount} each
 wf-market-material-sells = Buy at {$station}: {$amount} each, {$stock} in stock
 wf-market-material-no-buyer = No pallet is buying this.
@@ -152,6 +188,10 @@ wf-market-alert-relief = {$station} pays relief rates ({$factor}x) while the blo
 wf-market-alert-raid = Raid on {$station}: ship components and medical supplies pay {$factor}x
 wf-market-alert-blockade = {$station} is blockaded: essentials pay up to {$factor}x
 wf-market-alert-shortage = {$station} is short of {$goods}: {$factor}x
+wf-market-alert-shortage-report = {$station} is short of {$goods}: {$factor}x ({$cause})
+wf-market-alert-waiting = {$station} is waiting on {$goods}
+wf-market-alert-patrols = Patrols are at {$percent}% strength: the sector is short of ammunition
+wf-market-alert-service = {$service} at {$station} costs {$factor}x: short of {$goods}
 wf-market-alert-boom = {CAPITALIZE($goods)} boom: +{$percent}% everywhere
 wf-market-alert-war = War demand: the navies pay {$factor}x for munitions and medicine
 wf-market-alert-freight = Freighter {$ship} inbound to {$station} with {$goods}
@@ -163,11 +203,14 @@ wf-market-alert-defector-warrant = {$navy} pays you {$factor}x for war goods, bu
 
 ## wf_trade command
 
-cmd-wf_trade-desc = Shows and starts trade events: shortages, rush orders and consignments.
-cmd-wf_trade-help = Usage: {$command} status | shortage [prototype] | rush [prototype] | consignment | clear
+cmd-wf_trade-desc = Shows the sector economy and starts trade events: shortages, rush orders and consignments.
+cmd-wf_trade-help = Usage: {$command} status | ledger [station] | shortage [prototype] | rush [prototype] | consignment | clear
 cmd-wf_trade-hint-sub = <subcommand>
 cmd-wf_trade-hint-shortage = [shortage prototype, random if left out]
 cmd-wf_trade-hint-rush = [rush prototype, random if left out]
+cmd-wf_trade-ledger-good = {$good}: {$stock} crates, {$owed} owed, {$made} made and {$used} used an hour, short at {$short} stations.
+cmd-wf_trade-ledger-station = {$station} ({$role}):
+cmd-wf_trade-ledger-row =   {$good}: {$stock} crates, level {$level}, priced at {$priced}, {$owed} owed, {$made} made and {$used} used an hour.
 cmd-wf_trade-status-empty = No shortages, rush orders or consignments right now.
 cmd-wf_trade-status-sector = whole sector
 cmd-wf_trade-status-shortage = Shortage: {$goods} at {$station}, {$factor}x, {$seconds}s left.

@@ -138,11 +138,11 @@ public sealed class WFTradeSectorSystem : EntitySystem
         return false;
     }
 
-    /// <summary>Freighters and traders stay away from a station raiders are blockading.</summary>
+    /// <summary>Freighters and traders stay away from a blockaded station, which keeps what it's owed building up.</summary>
     private void OnStations(ref WFEncounterStationsEvent args)
     {
         if (!_territory.Unfiltered)
-            args.Stations.RemoveAll(station => RaidersBlockading(station));
+            args.Stations.RemoveAll(station => IsBlockaded(station));
     }
 
     /// <summary>Says how a raider blockade ended.</summary>

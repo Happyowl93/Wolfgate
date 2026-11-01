@@ -19,7 +19,7 @@ public sealed class WFTradeRush
     public float Factor;
     public TimeSpan Ends;
 
-    /// <summary>A big order for a full hold, on its own schedule and wording, that clears and doesn't add pressure.</summary>
+    /// <summary>A big order for a full hold, on its own schedule and wording, paying the same for its last crate as its first.</summary>
     public bool Bulk;
 
     /// <summary>Crates each ship or seller delivered toward it.</summary>
@@ -29,8 +29,7 @@ public sealed class WFTradeRush
 /// <summary>
 /// Every so often a station posts a rush order for a number of crates of one group and pays a premium for each until
 /// the order is filled or expires. The first ships to deliver split it. Bulk orders work the same way, for a hold's
-/// worth of crates over a longer window at a flat price: posting one clears its goods' pressure at the station and
-/// their crates add none.
+/// worth of crates over a longer window at a flat price. Orders go to the stations furthest under target for their goods.
 /// </summary>
 public sealed class WFTradeRushSystem : EntitySystem
 {
@@ -44,7 +43,7 @@ public sealed class WFTradeRushSystem : EntitySystem
     /// <summary>Most rush orders, and most bulk orders, open across the sector at once.</summary>
     private const int MaxActive = 2;
 
-    /// <summary>How much likelier an order is for goods a station's vendors are scarce of.</summary>
+    /// <summary>How much likelier an order is for goods a station is scarce of.</summary>
     private const float ScarceDraw = 8f;
 
     private readonly List<WFTradeRush> _active = new();
@@ -172,12 +171,12 @@ public sealed class WFTradeRushSystem : EntitySystem
                 .Distinct()
                 .ToList();
 
-            // A station scarce of the goods posts first.
-            var scarce = grids.Where(grid => goods.Any(good => _market.Restocking(grid, good))).ToList();
-            if (scarce.Count > 0)
-                options.Add((proto, scarce, proto.Weight * ScarceDraw));
-            else if (grids.Count > 0)
-                options.Add((proto, grids, proto.Weight));
+            if (grids.Count == 0)
+                continue;
+
+            // A station scarce of the goods posts first, and the worst-off of those.
+            var scarce = grids.Any(grid => goods.Any(good => _market.Restocking(grid, good)));
+            options.Add((proto, grids, scarce ? proto.Weight * ScarceDraw : proto.Weight));
         }
 
         if (options.Count == 0)
@@ -196,11 +195,13 @@ public sealed class WFTradeRushSystem : EntitySystem
             }
         }
 
+        _random.Shuffle(candidates);
+        var pickedGoods = _market.Group(profile, picked.Group);
         var count = _random.Next(picked.Count.X, Math.Max(picked.Count.X, picked.Count.Y) + 1);
         var minutes = _random.Next(picked.Minutes.X, Math.Max(picked.Minutes.X, picked.Minutes.Y) + 1);
         var rush = new WFTradeRush
         {
-            Grid = _random.Pick(candidates),
+            Grid = candidates.MinBy(grid => pickedGoods.Min(good => _market.Level(grid, good))),
             Group = picked.Group,
             Goods = picked.Goods,
             Total = count,
@@ -211,14 +212,6 @@ public sealed class WFTradeRushSystem : EntitySystem
         };
 
         _active.Add(rush);
-        if (rush.Bulk)
-        {
-            foreach (var good in _market.Group(profile, rush.Group))
-            {
-                _market.ResetPressure(rush.Grid, good);
-            }
-        }
-
         _market.Announce(Loc.GetString("wf-trade-rush-start", ("bulk", rush.Bulk),
             ("station", Name(rush.Grid)), ("count", count), ("goods", Loc.GetString(rush.Goods)),
             ("factor", WFTradeMarketSystem.Shown(rush.Factor)), ("minutes", minutes)), rush.Grid);

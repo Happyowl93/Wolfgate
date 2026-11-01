@@ -40,6 +40,15 @@
     state: ammo
   - type: StaticPrice
     vendPrice: 2500
+  # WOLFGATE(TradeGoods) START: goes into a lathe like a sheet
+  - type: Tag
+    tags:
+    - RawMaterial
+  - type: Material
+  - type: PhysicalComposition
+    materialComposition:
+      WFMunitions: 10000
+  # WOLFGATE END
 
 - type: entity
   parent: BaseTradeItem
@@ -62,6 +71,15 @@
     state: supplies-med
   - type: StaticPrice
     vendPrice: 1000
+  # WOLFGATE(TradeGoods) START: goes into a lathe like a sheet
+  - type: Tag
+    tags:
+    - RawMaterial
+  - type: Material
+  - type: PhysicalComposition
+    materialComposition:
+      WFMedicalStock: 10000
+  # WOLFGATE END
 
 - type: entity
   parent: BaseTradeItem
@@ -111,6 +129,15 @@
     totalIntensity: 1500
     intensitySlope: 200
     maxIntensity: 400
+  # WOLFGATE(TradeGoods) START: goes into a lathe like a sheet
+  - type: Tag
+    tags:
+    - RawMaterial
+  - type: Material
+  - type: PhysicalComposition
+    materialComposition:
+      WFReactorFuel: 10000
+  # WOLFGATE END
 
 # Yes, yes, I know, this makes zero sense to be explosive or have a critical mass, it's just hydrogen.
 # I answer that with shut up Swadian. You need to watch more things than just pop science youtubers. It's a video game.
@@ -175,6 +202,15 @@
     state: weapon-components
   - type: StaticPrice
     vendPrice: 3000
+  # WOLFGATE(TradeGoods) START: goes into a lathe like a sheet
+  - type: Tag
+    tags:
+    - RawMaterial
+  - type: Material
+  - type: PhysicalComposition
+    materialComposition:
+      WFGunParts: 10000
+  # WOLFGATE END
 
 - type: entity
   parent: BaseTradeItem
@@ -230,6 +266,15 @@
     state: ship-components
   - type: StaticPrice
     vendPrice: 2400
+  # WOLFGATE(TradeGoods) START: goes into a lathe like a sheet
+  - type: Tag
+    tags:
+    - RawMaterial
+  - type: Material
+  - type: PhysicalComposition
+    materialComposition:
+      WFShipParts: 10000
+  # WOLFGATE END
 
 - type: entity
   parent: BaseTradeItemVolatile

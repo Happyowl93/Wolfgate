@@ -43,6 +43,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     [Dependency] private WFTradeSectorSystem _sector = default!;
     [Dependency] private WFTradeSpecialCrateSystem _special = default!;
     [Dependency] private WFTradeFreightSystem _freight = default!;
+    [Dependency] private WFTradeEconomySystem _economy = default!;
     [Dependency] private WFSectorTerritorySystem _territory = default!;
     [Dependency] private WFCargoLoadSystem _cargo = default!;
     [Dependency] private WarLevelSystem _war = default!;
@@ -54,6 +55,9 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
     public static readonly EntProtoId MarketCartridge = "WFMarketCartridge";
 
     private static readonly TimeSpan RefreshInterval = TimeSpan.FromSeconds(5);
+
+    /// <summary>How far a service can fall from normal before the app warns about it.</summary>
+    private const float ServiceWarning = 0.8f;
 
     private TimeSpan _nextRefresh;
 
@@ -167,6 +171,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
             Stations = sector.Stations.Where(station => !station.Underground).ToList(),
             Alerts = sector.Alerts.Where(entry => !entry.Hidden).Select(entry => entry.Alert).ToList(),
             Materials = sector.OpenMaterials,
+            Sector = sector.Goods,
         }, loader: loaderComp);
     }
 
@@ -206,7 +211,8 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         List<(EntityUid Chute, DispenserComponent Dispenser, EntityUid Grid)> Chutes,
         HashSet<EntityUid> HiddenChutes,
         List<WFMarketMaterial> OpenMaterials,
-        List<WFMarketMaterial> AllMaterials);
+        List<WFMarketMaterial> AllMaterials,
+        List<WFMarketSectorGood> Goods);
 
     /// <summary>The prices and alerts every copy shows, and the hidden markets.</summary>
     private MarketSnapshot Sector()
@@ -238,14 +244,14 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
                 hiddenChutes.Add(chute);
             }
 
-            var restocking = _market.StockedGoods(grid).Where(good => !dispenser.Inventory.ContainsKey(good) && _market.Restocking(grid, good));
+            var restocking = _market.ScarceGoods(grid).Where(good => !dispenser.Inventory.ContainsKey(good)).ToList();
             foreach (var good in dispenser.Inventory.Keys.Concat(restocking))
             {
                 if (_market.Quote(chute, good) is not { } quote || station.Prices.Any(price => price.Good == _market.GoodName(good)))
                     continue;
 
                 station.Prices.Add(new WFMarketPrice(_market.GoodName(good), quote.Amount, quote.Factor,
-                    Loc.GetString(quote.Reason), _cargo.GoodWeight(good), quote.Factor >= profile.Highlight));
+                    Loc.GetString(quote.Reason), _cargo.GoodWeight(good), quote.Factor >= profile.Highlight, null, Shelf(grid, good, profile)));
             }
 
             station.Prices.Sort((a, b) => b.Amount.CompareTo(a.Amount));
@@ -277,7 +283,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
             foreach (var (good, quote) in _market.StationBuyQuotes(grid))
             {
                 station.Buys.Add(new WFMarketPrice(_market.GoodName(good), quote.Amount, quote.Factor,
-                    Loc.GetString(quote.Reason), _cargo.GoodWeight(good), false, stocked.Contains(good) ? _market.VendorStock(grid, good) : null));
+                    Loc.GetString(quote.Reason), _cargo.GoodWeight(good), false, stocked.Contains(good) ? _market.VendorStock(grid, good) : null, Shelf(grid, good, profile)));
             }
 
             station.Buys.Sort((a, b) => a.Amount.CompareTo(b.Amount));
@@ -322,14 +328,47 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
         foreach (var shortage in _shortages.Active)
         {
             Add(new WFMarketAlert(shortage.Grid is { } grid
-                ? Loc.GetString("wf-market-alert-shortage", ("station", Name(grid)), ("goods", Loc.GetString(shortage.Name)), ("factor", WFTradeMarketSystem.Shown(shortage.Factor)))
-                : Loc.GetString("wf-market-alert-boom", ("goods", Loc.GetString(shortage.Name)), ("percent", (int) MathF.Round((shortage.Factor - 1f) * 100f))),
-                shortage.Ends, false), shortage.Grid is { } shortageGrid ? Name(shortageGrid) : null);
+                ? Loc.GetString(shortage.Report ? "wf-market-alert-shortage-report" : "wf-market-alert-shortage",
+                    ("station", Name(grid)), ("goods", shortage.Name), ("factor", WFTradeMarketSystem.Shown(shortage.Factor)), ("cause", shortage.Cause ?? string.Empty))
+                : Loc.GetString("wf-market-alert-boom", ("goods", shortage.Name), ("percent", (int) MathF.Round((shortage.Factor - 1f) * 100f))),
+                shortage.Report ? null : shortage.Ends, false), shortage.Grid is { } shortageGrid ? Name(shortageGrid) : null);
         }
 
         foreach (var (ship, station, goods) in _freight.Inbound())
         {
             Add(new WFMarketAlert(Loc.GetString("wf-market-alert-freight", ("ship", ship), ("station", station), ("goods", goods)), null, false, WFMarketAlertKind.Traffic), station);
+        }
+
+        foreach (var (grid, _) in _economy.Stations())
+        {
+            var waiting = _market.ScarceGoods(grid)
+                .Where(good => _market.Owed(grid, new[] { good }) >= profile.FreightCrateStock)
+                .OrderByDescending(good => _market.Owed(grid, new[] { good }))
+                .Take(3)
+                .Select(_market.GoodName)
+                .ToList();
+
+            if (waiting.Count > 0)
+                Add(new WFMarketAlert(Loc.GetString("wf-market-alert-waiting", ("station", Name(grid)), ("goods", string.Join(", ", waiting))), null, false, WFMarketAlertKind.Traffic), Name(grid));
+        }
+
+        // Upkeep: what a shelf running low has done to the services it keeps going.
+        var patrols = _economy.ServiceState(WFTradeEconomySystem.Patrols);
+        if (patrols < ServiceWarning)
+            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-patrols", ("percent", (int) MathF.Round(patrols * 100f))), null, false, WFMarketAlertKind.Warning));
+
+        foreach (var (grid, role) in _economy.Stations())
+        {
+            foreach (var id in role.Services)
+            {
+                var price = _market.ServicePrice(grid, id);
+                if (price < 1f / ServiceWarning)
+                    continue;
+
+                var service = _proto.Index(id);
+                Add(new WFMarketAlert(Loc.GetString("wf-market-alert-service", ("station", Name(grid)), ("service", Loc.GetString(service.Name)),
+                    ("factor", WFTradeMarketSystem.Shown(price)), ("goods", Loc.GetString(service.GoodsName))), null, false, WFMarketAlertKind.Warning), Name(grid));
+            }
         }
 
         // A chute aboard an NPC hull is a wandering merchant's.
@@ -355,7 +394,23 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
             .Select(chute => _station.GetOwningStation(chute.Grid))
             .ToHashSet();
         return new MarketSnapshot(sorted, alerts, chutes, hiddenChutes,
-            Materials(quotes.Where(quote => !hiddenStations.Contains(quote.Station))), Materials(quotes));
+            Materials(quotes.Where(quote => !hiddenStations.Contains(quote.Station))), Materials(quotes), SectorGoods());
+    }
+
+    /// <summary>A good's shelf at a station for its row's bar, or null where the station stands outside the sector economy.</summary>
+    private float? Shelf(EntityUid grid, string good, WFTradeMarketPrototype profile)
+    {
+        return profile.ContrabandGoods.Contains(good) || _market.Role(grid) == null ? null : _market.Level(grid, good);
+    }
+
+    /// <summary>The Sector tab: every good's stock, flow and who is short of it, scarcest first.</summary>
+    private List<WFMarketSectorGood> SectorGoods()
+    {
+        return _economy.Sector()
+            .Select(good => new WFMarketSectorGood(_market.GoodName(good.Good), good.Stock, good.Owed, good.Made, good.Used, good.Short.Select(grid => Name(grid)).ToList()))
+            .OrderByDescending(good => good.Short.Count)
+            .ThenBy(good => good.Stock)
+            .ToList();
     }
 
     /// <summary>The best sale and cheapest stock for each material among some quotes, in the order they list it.</summary>
@@ -390,6 +445,7 @@ public sealed class WFMarketCartridgeSystem : EntitySystem
             Stations = sees ? sector.Stations : sector.Stations.Where(station => !station.Underground).ToList(),
             Alerts = sector.Alerts.Where(entry => sees || !entry.Hidden).Select(entry => entry.Alert).ToList(),
             Materials = sees ? sector.AllMaterials : sector.OpenMaterials,
+            Sector = sector.Goods,
         };
 
         var chutes = sees ? sector.Chutes : sector.Chutes.Where(chute => !sector.HiddenChutes.Contains(chute.Chute)).ToList();

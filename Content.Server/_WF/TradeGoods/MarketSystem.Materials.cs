@@ -294,6 +294,40 @@ public sealed partial class MarketSystem
         return restocked;
     }
 
+    /// <summary>
+    /// An industry works some spesos' worth of materials out of a station's stock, the first listed first, and returns the
+    /// share it found. It isn't a trade, so it moves prices at once.
+    /// </summary>
+    public float WfDraw(EntityUid grid, List<EntProtoId> materials, float value)
+    {
+        if (value <= 0f || _station.GetOwningStation(grid) is not { } station || !TryComp<CargoMarketDataComponent>(station, out var market))
+            return 0f;
+
+        var carts = WfCarts(station);
+        var lag = EnsureComp<WFMaterialPriceLagComponent>(station);
+        var left = (double) value;
+        foreach (var material in materials)
+        {
+            var good = material.Id;
+            var unit = WfUnitPrice(good);
+            if (unit <= 0.0 || market.MarketDataList.FirstOrDefault(entry => entry.Prototype == good) is not { } stock)
+                continue;
+
+            var units = (int) Math.Min(Math.Ceiling(left / unit), stock.Quantity);
+            if (units <= 0)
+                continue;
+
+            WfPricedSupply((station, market), carts, good);
+            market.MarketDataList.Upsert(good, -units, stock.Price);
+            lag.Seen[good] = WfSupply(market, carts, good);
+            left -= units * unit;
+            if (left <= 0.0)
+                return 1f;
+        }
+
+        return (float) Math.Clamp(1.0 - left / value, 0.0, 1.0);
+    }
+
     /// <summary>Every market map station's prices for every material, at its best pallet and cheapest console.</summary>
     public List<WFMaterialQuote> WfQuotes()
     {
