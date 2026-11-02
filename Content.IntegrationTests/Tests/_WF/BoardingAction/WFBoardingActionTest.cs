@@ -1,0 +1,712 @@
+using System.Collections.Generic;
+using System.Numerics;
+using Content.Client._WF.BoardingAction;
+using Content.Server._Mono.FireControl;
+using Content.Server._Crescent.ShipShields;
+using Content.Server._Crescent.ShipShields.Components;
+using Content.Shared._Crescent.ShipShields;
+using Content.Server._Mono.NPC.HTN;
+using Content.Server._WF.BoardingAction;
+using Content.Server._WF.BoardingAction.Components;
+using Content.Server._WF.Encounters.Components;
+using Content.Server._WF.Tether;
+using Content.Server.Power.Components;
+using Content.Server.Power.EntitySystems;
+using Content.Server.Shuttles.Components;
+using Content.Server.Shuttles.Systems;
+using Content.Shared._NF.Shuttles.Events;
+using Content.Shared._WF.BoardingAction;
+using Content.Shared._WF.Tether;
+using Content.Shared._WF.Tether.Harpoon;
+using Content.Shared.Shuttles.Components;
+using Content.Shared.Tiles;
+using Content.Shared.Weapons.Ranged.Components;
+using Content.Shared.Weapons.Ranged.Events;
+using Content.Shared.Weapons.Ranged.Systems;
+using Robust.Shared.GameObjects;
+using Robust.Shared.Map;
+using Robust.Shared.Maths;
+using Robust.Shared.Physics;
+using Robust.Shared.Physics.Components;
+using Robust.Shared.Physics.Systems;
+using Robust.UnitTesting;
+
+namespace Content.IntegrationTests.Tests._WF.BoardingAction;
+
+/// <summary>The FTL block, the disruptor machine, the hacking harpoon and what each does to both ships.</summary>
+[TestFixture]
+public sealed class WFBoardingActionTest
+{
+    [TestPrototypes]
+    private const string Prototypes = @"
+- type: entity
+  id: WFTestFtlDisruptor
+  parent: WFFtlDisruptor
+  components:
+  - type: ApcPowerReceiver
+    needsPower: false
+  - type: WFFtlDisruptor
+    lockTime: 0.2
+
+- type: entity
+  id: WFTestHackGun
+  parent: WFHackHarpoonGun
+  components:
+  - type: BallisticAmmoProvider
+    proto: WFHackDart
+    capacity: 1
+    cycleable: false
+  - type: WFHackHarpoonGun
+    lockdownDelay: 0.5
+    arcInterval: 0.2
+
+# Enough of a ship gun to be asked whether it may fire.
+- type: entity
+  id: WFTestShipGun
+  components:
+  - type: Gun
+  - type: FireControllable
+";
+
+    private const string Wall = "WallSolid";
+    private const string Pilot = "MobHuman";
+    private const string Console = "ComputerShuttle";
+
+    [Test]
+    public async Task HeldShipCantJumpUntilEverythingLetsGo()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var elsewhere = await pair.CreateTestMap();
+        var entities = server.EntMan;
+
+        await server.WaitAssertion(() =>
+        {
+            var shuttles = entities.System<ShuttleSystem>();
+            var disruption = entities.System<WFFtlDisruptionSystem>();
+            var ship = map.Grid.Owner;
+            var shuttle = entities.EnsureComponent<ShuttleComponent>(ship);
+            var first = entities.SpawnEntity(null, MapCoordinates.Nullspace);
+            var second = entities.SpawnEntity(null, MapCoordinates.Nullspace);
+
+            disruption.Disrupt(ship, first, first);
+            disruption.Disrupt(ship, second, second);
+            Assert.That(shuttles.CanFTL(ship, out _), Is.False);
+
+            shuttles.FTLToCoordinates(ship, shuttle, new EntityCoordinates(elsewhere.MapUid, Vector2.Zero), Angle.Zero);
+            Assert.That(entities.HasComponent<FTLComponent>(ship), Is.False,
+                "A jump started by anything but the console is refused too.");
+
+            disruption.Release(ship, first);
+            Assert.That(shuttles.CanFTL(ship, out _), Is.False, "One source letting go leaves the other holding.");
+
+            disruption.Release(ship, second);
+            Assert.That(shuttles.CanFTL(ship, out _), Is.True);
+            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(ship), Is.False);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task DisruptionStopsASpoolAndTheShipCanJumpAfter()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var elsewhere = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var ship = map.Grid.Owner;
+
+        await server.WaitPost(() =>
+        {
+            var shuttle = entities.EnsureComponent<ShuttleComponent>(ship);
+            entities.System<ShuttleSystem>().FTLToCoordinates(ship, shuttle,
+                new EntityCoordinates(elsewhere.MapUid, Vector2.Zero), Angle.Zero, startupTime: 30f, hyperspaceTime: 30f);
+            Assert.That(entities.HasComponent<FTLComponent>(ship), Is.True);
+            entities.System<WFFtlDisruptionSystem>().Disrupt(ship, ship, ship);
+        });
+
+        await server.WaitRunTicks(2);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.HasComponent<FTLComponent>(ship), Is.False, "The spool stops where it was.");
+            Assert.That(entities.GetComponent<TransformComponent>(ship).MapUid, Is.EqualTo(map.MapUid));
+            entities.System<WFFtlDisruptionSystem>().Release(ship, ship);
+
+            var shuttle = entities.GetComponent<ShuttleComponent>(ship);
+            entities.System<ShuttleSystem>().FTLToCoordinates(ship, shuttle,
+                new EntityCoordinates(elsewhere.MapUid, Vector2.Zero), Angle.Zero, startupTime: 30f, hyperspaceTime: 30f);
+            Assert.That(entities.HasComponent<FTLComponent>(ship), Is.True, "Nothing is left behind to stop the next jump.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task DisruptorLocksHoldsAndLosesItsTarget()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+        var transforms = entities.System<SharedTransformSystem>();
+
+        EntityUid ours = default, theirs = default, machine = default, pilot = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(100f, 0f));
+            machine = entities.SpawnEntity("WFTestFtlDisruptor", new EntityCoordinates(ours, new Vector2(1.5f, 1.5f)));
+            var console = entities.SpawnEntity(Console, new EntityCoordinates(ours, new Vector2(0.5f, 1.5f)));
+            pilot = entities.SpawnEntity(Pilot, new EntityCoordinates(ours, new Vector2(0.5f, 0.5f)));
+            entities.EnsureComponent<PilotComponent>(pilot).Console = console;
+        });
+
+        var disruptors = entities.System<WFFtlDisruptorSystem>();
+        var cursor = new MapCoordinates(new Vector2(101f, 1f), map.MapId);
+        await UntilPowered(server, entities, machine, true);
+
+        await server.WaitAssertion(() =>
+        {
+            disruptors.Toggle(pilot, new MapCoordinates(new Vector2(500f, 500f), map.MapId));
+            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Target, Is.Null, "Nothing under the cursor.");
+
+            disruptors.Toggle(pilot, cursor);
+            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Target, Is.EqualTo(theirs));
+            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.False, "It takes time to lock on.");
+        });
+
+        await server.WaitRunTicks(30);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Locked, Is.True);
+            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.True);
+            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(ours)?.DisruptorTarget, Is.Not.Null);
+            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(theirs)?.Disruptors, Has.Length.EqualTo(1));
+            transforms.SetWorldPosition(theirs, new Vector2(2000f, 0f));
+        });
+
+        await server.WaitRunTicks(30);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Target, Is.Null, "Out of range, the lock drops.");
+            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.False);
+
+            transforms.SetWorldPosition(theirs, new Vector2(100f, 0f));
+            disruptors.Toggle(pilot, cursor);
+        });
+
+        await server.WaitRunTicks(30);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.True);
+            entities.System<PowerReceiverSystem>().SetNeedsPower(machine, true);
+        });
+
+        await UntilPowered(server, entities, machine, false);
+        await server.WaitRunTicks(30);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Target, Is.Null, "Without power, the lock drops.");
+            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.False);
+
+            entities.System<PowerReceiverSystem>().SetNeedsPower(machine, false);
+            entities.EnsureComponent<ProtectedGridComponent>(theirs);
+        });
+
+        await UntilPowered(server, entities, machine, true);
+        await server.WaitAssertion(() =>
+        {
+            disruptors.Toggle(pilot, cursor);
+            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Target, Is.Null, "A protected grid can't be held.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task HackLandsInStagesAndEndsWithTheCable()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid ours = default, theirs = default, harpoon = default, ourGun = default, theirGun = default, thruster = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            entities.SpawnEntity(Wall, new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f)));
+            thruster = entities.SpawnEntity("Thruster", new EntityCoordinates(theirs, new Vector2(2.5f, 2.5f)));
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(ours, new Vector2(2.5f, 1.5f)));
+            ourGun = entities.SpawnEntity("WFTestShipGun", new EntityCoordinates(ours, new Vector2(0.5f, 0.5f)));
+            theirGun = entities.SpawnEntity("WFTestShipGun", new EntityCoordinates(theirs, new Vector2(2.5f, 0.5f)));
+        });
+
+        await server.WaitRunTicks(5);
+        await server.WaitPost(() => Fire(entities, harpoon, new MapCoordinates(new Vector2(30.5f, 1.5f), map.MapId)));
+        await server.WaitRunTicks(15);
+
+        var atThem = new MapCoordinates(new Vector2(31f, 1f), map.MapId);
+        var atUs = new MapCoordinates(new Vector2(1.5f, 1.5f), map.MapId);
+        var awayFromUs = new MapCoordinates(new Vector2(60f, 30f), map.MapId);
+
+        await server.WaitAssertion(() =>
+        {
+            var gun = entities.GetComponent<WFHackHarpoonGunComponent>(harpoon);
+            Assert.That(gun.Target, Is.EqualTo(theirs), "A square-on shot latches.");
+            Assert.That(entities.System<ShuttleSystem>().CanFTL(theirs, out _), Is.False, "FTL drops on the latch.");
+            Assert.That(entities.GetComponent<RopeComponent>(gun.Cable!.Value).JointId, Is.Null, "The cable pulls on nothing.");
+
+            Assert.That(Refused(entities, ourGun, atThem), Is.True, "None of the hacker's guns can fire.");
+            Assert.That(Refused(entities, theirGun, atUs), Is.False, "The lockdown hasn't landed yet.");
+            Assert.That(entities.System<ShuttleSystem>().NfGetInertiaDampeningMode(theirs),
+                Is.Not.EqualTo(InertiaDampeningMode.Anchor));
+
+            var helm = entities.System<WFBoardingHelmSystem>();
+            Assert.That(helm.GetState(theirs)?.Hackers, Has.Length.EqualTo(1));
+            Assert.That(helm.GetState(theirs)?.Lockdown, Is.False);
+            Assert.That(helm.GetState(theirs)?.Disruptors, Is.Empty, "A hack isn't reported as a disruptor as well.");
+            Assert.That(helm.GetState(ours)?.CableTarget, Is.Not.Null);
+        });
+
+        await server.WaitRunTicks(40);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.System<ShuttleSystem>().NfGetInertiaDampeningMode(theirs),
+                Is.EqualTo(InertiaDampeningMode.Anchor), "The lockdown parks the ship.");
+            Assert.That(Refused(entities, theirGun, atUs), Is.True, "Its guns can't be laid on the hacker.");
+            Assert.That(Refused(entities, theirGun, awayFromUs), Is.False, "They still bear on anything else.");
+            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(theirs)?.Lockdown, Is.True);
+
+            Assert.That(Arcs(entities, thruster), Is.EqualTo(1), "Each engine carries one arc for as long as the hack runs.");
+
+            var shuttle = entities.GetComponent<ShuttleComponent>(theirs);
+            var body = entities.GetComponent<PhysicsComponent>(theirs);
+            var xform = entities.GetComponent<TransformComponent>(theirs);
+            entities.System<ShuttleSystem>().SetInertiaDampening(theirs, body, shuttle, xform, InertiaDampeningMode.Dampen);
+        });
+
+        await server.WaitRunTicks(2);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.System<ShuttleSystem>().NfGetInertiaDampeningMode(theirs),
+                Is.EqualTo(InertiaDampeningMode.Anchor), "Neither a pilot nor an NPC can leave park.");
+
+            entities.System<WFHackHarpoonSystem>().ReleaseCables(ours);
+        });
+
+        await server.WaitRunTicks(2);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.System<ShuttleSystem>().CanFTL(theirs, out _), Is.True);
+            Assert.That(Refused(entities, ourGun, atThem), Is.False, "The hacker's guns are back.");
+            Assert.That(Refused(entities, theirGun, atUs), Is.False, "So is everyone else's aim.");
+            Assert.That(entities.HasComponent<WFHackedGridComponent>(theirs), Is.False);
+            Assert.That(entities.HasComponent<WFHackSourceGridComponent>(ours), Is.False);
+            Assert.That(Arcs(entities, thruster), Is.Zero, "The arcs go with the hack.");
+            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(ours), Is.Null);
+            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(theirs), Is.Null);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task FiresThroughFireControlAndTurnsOntoItsTarget()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid theirs = default, harpoon = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            var ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            entities.SpawnEntity(Wall, new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f)));
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(ours, new Vector2(2.5f, 1.5f)));
+        });
+
+        await server.WaitRunTicks(5);
+
+        // The way gunnery does it: asked again and again while the gun comes round.
+        var fireControl = entities.System<FireControlSystem>();
+        var aim = new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f));
+        for (var i = 0; i < 180; i++)
+        {
+            await server.WaitPost(() => fireControl.AttemptFire(harpoon, harpoon, aim, noServer: true));
+            await server.WaitRunTicks(1);
+            if (entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Target != null)
+                break;
+        }
+
+        await server.WaitAssertion(() =>
+            Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Target, Is.EqualTo(theirs)));
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task CablePaysOutThenPartsPastItsLength()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+        var transforms = entities.System<SharedTransformSystem>();
+
+        EntityUid ours = default, theirs = default, harpoon = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            entities.SpawnEntity(Wall, new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f)));
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(ours, new Vector2(2.5f, 1.5f)));
+        });
+
+        await server.WaitRunTicks(5);
+        await server.WaitPost(() => Fire(entities, harpoon, new MapCoordinates(new Vector2(30.5f, 1.5f), map.MapId)));
+        await server.WaitRunTicks(15);
+
+        // Eased out rather than teleported, so the cable sees the same steps a flying ship would give it.
+        for (var distance = 35f; distance <= 240f; distance += 5f)
+        {
+            await server.WaitPost(() => transforms.SetWorldPosition(theirs, new Vector2(distance, 0f)));
+            await server.WaitRunTicks(2);
+        }
+
+        await server.WaitAssertion(() =>
+        {
+            var gun = entities.GetComponent<WFHackHarpoonGunComponent>(harpoon);
+            Assert.That(gun.Target, Is.EqualTo(theirs), "The cable pays out with the ships.");
+            Assert.That(entities.GetComponent<RopeComponent>(gun.Cable!.Value).Length, Is.GreaterThan(230f));
+            transforms.SetWorldPosition(theirs, new Vector2(300f, 0f));
+        });
+
+        await server.WaitRunTicks(5);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Target, Is.Null, "It parts past its length.");
+            Assert.That(entities.System<ShuttleSystem>().CanFTL(theirs, out _), Is.True);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ShieldStopsTheDart()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid ours = default, theirs = default, harpoon = default, dart = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            entities.SpawnEntity(Wall, new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f)));
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(ours, new Vector2(2.5f, 1.5f)));
+            var generator = entities.SpawnEntity("ShieldGeneratorSmall", new EntityCoordinates(theirs, new Vector2(2.5f, 2.5f)));
+            entities.GetComponent<ApcPowerReceiverComponent>(generator).NeedsPower = false;
+        });
+
+        await server.WaitRunTicks(100);
+        await server.WaitPost(() =>
+        {
+            Assert.That(entities.HasComponent<ShipShieldedComponent>(theirs), Is.True, "The test needs a field up.");
+            Fire(entities, harpoon, new MapCoordinates(new Vector2(30.5f, 1.5f), map.MapId));
+            dart = entities.GetEntity(entities.GetComponent<ShipHarpoonTurretComponent>(harpoon).Harpoon!.Value);
+        });
+
+        await server.WaitRunTicks(30);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(!entities.EntityExists(dart) || entities.IsQueuedForDeletion(dart), Is.True, "The dart is lost on the field.");
+            Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Target, Is.Null);
+            Assert.That(entities.GetComponent<RopeAttachPointComponent>(harpoon).Ropes, Is.Empty);
+            Assert.That(entities.HasComponent<WFHackedGridComponent>(theirs), Is.False);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task DartLeavesItsOwnShipsShield()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid ours = default, theirs = default, harpoon = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            entities.SpawnEntity(Wall, new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f)));
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(ours, new Vector2(2.5f, 1.5f)));
+            var generator = entities.SpawnEntity("ShieldGeneratorSmall", new EntityCoordinates(ours, new Vector2(0.5f, 0.5f)));
+            entities.GetComponent<ApcPowerReceiverComponent>(generator).NeedsPower = false;
+        });
+
+        await server.WaitRunTicks(100);
+        await server.WaitPost(() =>
+        {
+            Assert.That(entities.HasComponent<ShipShieldedComponent>(ours), Is.True, "The test needs a field up.");
+            Fire(entities, harpoon, new MapCoordinates(new Vector2(30.5f, 1.5f), map.MapId));
+        });
+
+        await server.WaitRunTicks(30);
+        await server.WaitAssertion(() =>
+            Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Target, Is.EqualTo(theirs),
+                "The firing ship's own shield lets its dart out."));
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task SwitchedOffShieldLetsTheDartThrough()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid ours = default, theirs = default, harpoon = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            entities.SpawnEntity(Wall, new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f)));
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(ours, new Vector2(2.5f, 1.5f)));
+            var generator = entities.SpawnEntity("ShieldGeneratorSmall", new EntityCoordinates(theirs, new Vector2(2.5f, 2.5f)));
+            entities.GetComponent<ApcPowerReceiverComponent>(generator).NeedsPower = false;
+        });
+
+        await server.WaitRunTicks(100);
+        await server.WaitPost(() =>
+        {
+            Assert.That(entities.HasComponent<ShipShieldedComponent>(theirs), Is.True, "The test needs a field to switch off.");
+            Assert.That(entities.System<ShipShieldsSystem>().SetWolfgateShieldEnabled(theirs, false), Is.True);
+        });
+
+        await server.WaitRunTicks(100);
+        await server.WaitPost(() =>
+        {
+            Assert.That(entities.HasComponent<ShipShieldedComponent>(theirs), Is.False, "The field drops when switched off.");
+            Fire(entities, harpoon, new MapCoordinates(new Vector2(30.5f, 1.5f), map.MapId));
+        });
+
+        await server.WaitRunTicks(30);
+        await server.WaitAssertion(() =>
+            Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Target, Is.EqualTo(theirs),
+                "A shield that is off stops nothing."));
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ShotOffAProtectedGridLeavesNoHack()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid ours = default, theirs = default, harpoon = default, ourGun = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            entities.EnsureComponent<ProtectedGridComponent>(theirs);
+            entities.SpawnEntity(Wall, new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f)));
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(ours, new Vector2(2.5f, 1.5f)));
+            ourGun = entities.SpawnEntity("WFTestShipGun", new EntityCoordinates(ours, new Vector2(0.5f, 0.5f)));
+        });
+
+        await server.WaitRunTicks(5);
+        await server.WaitPost(() => Fire(entities, harpoon, new MapCoordinates(new Vector2(30.5f, 1.5f), map.MapId)));
+        await server.WaitRunTicks(20);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Cable, Is.Null, "The cable comes straight off.");
+            Assert.That(entities.HasComponent<WFHackedGridComponent>(theirs), Is.False);
+            Assert.That(Refused(entities, ourGun, new MapCoordinates(new Vector2(31f, 1f), map.MapId)), Is.False);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task NpcShipHoldsWhatItShootsAt()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid theirs = default, npc = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            var ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(100f, 0f));
+            npc = entities.SpawnEntity(Pilot, new EntityCoordinates(ours, new Vector2(0.5f, 0.5f)));
+            entities.EnsureComponent<ShipTargetingComponent>(npc).Target = new EntityCoordinates(theirs, Vector2.One);
+        });
+
+        await server.WaitRunTicks(90);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.True);
+            entities.RemoveComponent<ShipTargetingComponent>(npc);
+        });
+
+        await server.WaitRunTicks(90);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.False);
+
+            entities.EnsureComponent<WFEncounterGridComponent>(theirs);
+            entities.EnsureComponent<ShipTargetingComponent>(npc).Target = new EntityCoordinates(theirs, Vector2.One);
+        });
+
+        await server.WaitRunTicks(90);
+        await server.WaitAssertion(() => Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.False,
+            "Encounter ships leave their own fights by jumping, so NPC ships never pin them."));
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task HelmSurvivesTheHolderBeingDeleted()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var holder = MakeShip(entities, maps, map.MapId, new Vector2(100f, 0f));
+            entities.System<WFFtlDisruptionSystem>().Disrupt(map.Grid.Owner, holder, holder);
+            entities.DeleteEntity(holder);
+
+            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(map.Grid.Owner), Is.Null,
+                "A ship that is gone isn't named, and must not throw while a helm refreshes.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task BannerShowsEachRowOnlyWhenItApplies()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        await pair.Client.WaitAssertion(() =>
+        {
+            var banner = new WFBoardingBanner();
+            banner.SetState(null);
+            Assert.That(banner.Visible, Is.False);
+
+            banner.SetState(new WFBoardingHelmState { Hackers = new[] { "Raider" } });
+            Assert.That(banner.Visible, Is.True);
+
+            banner.SetState(new WFBoardingHelmState());
+            Assert.That(banner.Visible, Is.False);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>Runs until a machine's power state has caught up; the power net settles a variable number of ticks later.</summary>
+    private static async Task UntilPowered(RobustIntegrationTest.ServerIntegrationInstance server, IEntityManager entities,
+        EntityUid machine, bool powered)
+    {
+        var receiver = entities.GetComponent<ApcPowerReceiverComponent>(machine);
+        for (var i = 0; i < 240 && receiver.Powered != powered; i++)
+        {
+            await server.WaitRunTicks(1);
+        }
+
+        Assert.That(receiver.Powered, Is.EqualTo(powered));
+    }
+
+    /// <summary>How many arc effects are running on an engine.</summary>
+    private static int Arcs(IEntityManager entities, EntityUid engine)
+    {
+        var arcs = 0;
+        var effects = entities.EntityQueryEnumerator<MetaDataComponent, TransformComponent>();
+        while (effects.MoveNext(out var uid, out var meta, out var xform))
+        {
+            if (meta.EntityPrototype?.ID == "WFEffectHackArc" && xform.ParentUid == engine && !entities.IsQueuedForDeletion(uid))
+                arcs++;
+        }
+
+        return arcs;
+    }
+
+    /// <summary>Whether a ship gun is refused a shot at this point.</summary>
+    private static bool Refused(IEntityManager entities, EntityUid gun, MapCoordinates aim)
+    {
+        var comp = entities.GetComponent<GunComponent>(gun);
+        comp.ShootCoordinates = entities.System<SharedTransformSystem>().ToCoordinates(aim);
+        var ev = new ShotAttemptedEvent { User = gun, Used = (gun, comp) };
+        entities.EventBus.RaiseLocalEvent(gun, ref ev);
+        return ev.Cancelled;
+    }
+
+    /// <summary>Fires a hacking gun the way fire control does, as its own user.</summary>
+    private static void Fire(IEntityManager entities, EntityUid gun, MapCoordinates target)
+    {
+        var comp = entities.GetComponent<GunComponent>(gun);
+        var coordinates = entities.System<SharedTransformSystem>().ToCoordinates(target);
+        entities.System<SharedGunSystem>().AttemptShoot(gun, gun, comp, coordinates);
+        Assert.That(entities.GetComponent<ShipHarpoonTurretComponent>(gun).Harpoon, Is.Not.Null, "The gun must have fired.");
+    }
+
+    /// <summary>A free-flying three by three ship.</summary>
+    private static EntityUid MakeShip(IEntityManager entities, SharedMapSystem maps, MapId map, Vector2 position)
+    {
+        var grid = maps.CreateGridEntity(map);
+        var tiles = new List<(Vector2i GridIndices, Tile Tile)>();
+        for (var x = 0; x < 3; x++)
+        {
+            for (var y = 0; y < 3; y++)
+            {
+                tiles.Add((new Vector2i(x, y), new Tile(1)));
+            }
+        }
+
+        maps.SetTiles(grid.Owner, grid.Comp, tiles);
+        entities.System<SharedPhysicsSystem>().SetBodyType(grid.Owner, BodyType.Dynamic);
+        entities.System<SharedTransformSystem>().SetWorldPosition(grid.Owner, position);
+        entities.EnsureComponent<ShuttleComponent>(grid.Owner);
+        return grid.Owner;
+    }
+}

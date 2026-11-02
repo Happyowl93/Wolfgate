@@ -74,6 +74,10 @@ binds:
 - function: ShuttleBrake
   type: State
   key: Space
+# WOLFGATE(BoardingAction): ship module key, on a key free in the stock layout
+- function: ShuttleModule
+  type: State
+  key: U
 - function: ShuttleAscend
   type: State
   key: R

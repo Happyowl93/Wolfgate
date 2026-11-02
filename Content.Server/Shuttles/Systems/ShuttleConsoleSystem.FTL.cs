@@ -141,6 +141,9 @@ public sealed partial class ShuttleConsoleSystem
         if (shuttleComp.Enabled == false)
             return;
 
+        if (WfRefuseDisruptedFtl(shuttleUid.Value, ent.Owner, wfActor)) // WOLFGATE(BoardingAction): CanFTL's reason never reaches the pilot, so a held ship says why here.
+            return;
+
         // Check shuttle can even FTL
         if (!_shuttle.CanFTL(shuttleUid.Value, out var reason))
         {
@@ -191,6 +194,7 @@ public sealed partial class ShuttleConsoleSystem
         _shuttle.GetAllDockedShuttlesIgnoringFTLLock(shuttleUid.Value, dockedGrids);
 
         // Mono
+        if (WfFtlProximityBlock) // WOLFGATE(BoardingAction): the radius is off by default; disruptors and hacks hold ships instead.
         foreach (var (console, consoleComp) in _lookup.GetEntitiesInRange<ShuttleConsoleComponent>(_transform.GetMapCoordinates(xform), ShuttleFTLRange))
         {
             var consoleXform = Transform(console);

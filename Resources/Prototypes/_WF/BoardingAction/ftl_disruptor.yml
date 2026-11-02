@@ -1,0 +1,68 @@
+# The FTL disruptor: anchor it on any powered tile and the pilot aims it with the ship module key.
+
+- type: entity
+  id: WFFtlDisruptor
+  parent: BaseMachinePowered
+  name: FTL disruptor
+  description: Projects a field that collapses the jump bubble of a locked ship, so it can't leave while the lock holds. A ship can only run one at a time.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Physics
+    bodyType: Static
+  - type: Sprite
+    sprite: _WF/BoardingAction/ftl_disruptor.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+    - state: idle
+      map: [ "enum.WFFtlDisruptorVisualLayers.Status" ]
+      shader: unshaded
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.WFFtlDisruptorVisuals.Status:
+        enum.WFFtlDisruptorVisualLayers.Status:
+          Off: { visible: false }
+          Idle: { visible: true, state: idle }
+          Locking: { visible: true, state: locking }
+          Locked: { visible: true, state: locked }
+  - type: WFFtlDisruptor
+  - type: ApcPowerReceiver
+    powerLoad: 500
+  - type: ExtensionCableReceiver
+  - type: Anchorable
+    delay: 5
+  - type: Pullable
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 500
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+      - !type:PlaySoundBehavior
+        sound:
+          collection: MetalBreak
+  - type: StaticPrice
+    price: 8000
+
+- type: entity
+  parent: BaseFlatpack
+  id: WFFtlDisruptorFlatpack
+  name: FTL disruptor flatpack
+  description: A flatpack used for constructing an FTL disruptor. Unpack it on any powered tile.
+  components:
+  - type: Flatpack
+    entity: WFFtlDisruptor
+  - type: Sprite
+    layers:
+    - state: base
+    - state: overlay
+      color: "#3fa7b5"
+    - state: icon-default
+  - type: StaticPrice
+    price: 2000

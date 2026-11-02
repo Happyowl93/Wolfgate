@@ -15,6 +15,8 @@ using Content.Shared.IdentityManagement; // Frontier
 using Content.Shared.NPC; // Frontier
 using Content.Server._NF.Salvage; // Frontier
 using Content.Server.Shuttles.Components;
+using Content.Server._WF.BoardingAction.Components; // WOLFGATE(BoardingAction)
+using Content.Shared._WF.BoardingAction; // WOLFGATE(BoardingAction)
 
 namespace Content.Server.Salvage;
 
@@ -72,6 +74,16 @@ public sealed partial class SalvageSystem
                 return;
             }
 
+            // WOLFGATE(BoardingAction) START: a held ship can't leave on an expedition, and must hear so before one is generated.
+            if (HasComp<WFFtlDisruptedComponent>(grid))
+            {
+                PlayDenySound(uid, component);
+                _popupSystem.PopupEntity(Loc.GetString("wf-boarding-ftl-disrupted"), uid, PopupType.MediumCaution);
+                UpdateConsoles(station.Value, data);
+                return;
+            }
+            // WOLFGATE END
+
             var xform = Transform(grid);
             var bounds = xform.WorldMatrix.TransformBox(gridComp.LocalAABB).Enlarged(ShuttleFTLRange);
             var bodyQuery = GetEntityQuery<PhysicsComponent>();
@@ -117,6 +129,7 @@ public sealed partial class SalvageSystem
 
             var intersecting = new List<Entity<MapGridComponent>>();
             _mapSystem.FindGridsIntersecting(xform.MapID, bounds, ref intersecting);
+            if (_cfgManager.GetCVar(WFBoardingCVars.ProximityBlock)) // WOLFGATE(BoardingAction): the radius is off by default; disruptors and hacks hold ships instead.
             foreach (var other in intersecting.Select(g => g.Comp))
             {
                 if (other.Owner == grid ||

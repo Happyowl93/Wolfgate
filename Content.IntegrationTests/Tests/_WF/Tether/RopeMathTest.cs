@@ -38,6 +38,38 @@ public sealed class RopeMathTest
     }
 
     [Test]
+    public void ResamplingKeepsTheChainsShape()
+    {
+        var old = new[] { Vector2.Zero, new Vector2(1f, 1f), new Vector2(2f, 0f) };
+        var points = RopeVerlet.Resample(old, 3, 5);
+        Assert.Multiple(() =>
+        {
+            Assert.That(points, Has.Length.EqualTo(5));
+            Assert.That(points[0], Is.EqualTo(old[0]));
+            Assert.That(points[2], Is.EqualTo(old[1]), "The bend stays where it was.");
+            Assert.That(points[4], Is.EqualTo(old[2]));
+        });
+    }
+
+    [Test]
+    public void BendStiffnessOpensUpAFold()
+    {
+        float Fold(float bend)
+        {
+            var points = new[] { Vector2.Zero, new Vector2(3f, 0f), new Vector2(0.5f, 0f), new Vector2(3.5f, 0f), new Vector2(1f, 0f) };
+            var previous = (Vector2[]) points.Clone();
+            for (var i = 0; i < 30; i++)
+            {
+                RopeVerlet.Step(points, previous, 5, points[0], points[4], 3f, 1f / 60f, 0f, 0f, 1, bend);
+            }
+
+            return MathF.Abs(points[1].X - points[2].X);
+        }
+
+        Assert.That(Fold(0.25f), Is.LessThan(Fold(0f)), "A stiff cable doesn't stay doubled back on itself.");
+    }
+
+    [Test]
     public void StiffRopeOnALightBodyCannotExplode()
     {
         // A very light body on a very stiff rope: the impulse may never do more than remove the

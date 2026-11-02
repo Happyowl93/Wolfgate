@@ -123,6 +123,7 @@ namespace Content.Shared.Input
         public static readonly BoundKeyFunction ShuttleBrake = "ShuttleBrake";
         public static readonly BoundKeyFunction ShuttleAscend = "ShuttleAscend"; // Mono
         public static readonly BoundKeyFunction ShuttleDescend = "ShuttleDescend"; // Mono
+        public static readonly BoundKeyFunction ShuttleModule = "ShuttleModule"; // WOLFGATE(BoardingAction): the pilot's ship module key
 
         public static readonly BoundKeyFunction Hotbar0 = "Hotbar0";
         public static readonly BoundKeyFunction Hotbar1 = "Hotbar1";

@@ -323,6 +323,7 @@ namespace Content.Client.Options.UI.Tabs
             AddButton(ContentKeyFunctions.ShuttleBrake);
             AddButton(ContentKeyFunctions.ShuttleAscend); // Mono
             AddButton(ContentKeyFunctions.ShuttleDescend); // Mono
+            AddButton(ContentKeyFunctions.ShuttleModule); // WOLFGATE(BoardingAction): the pilot's ship module key
 
             AddHeader("ui-options-header-map-editor");
             AddButton(EngineKeyFunctions.EditorPlaceObject);
