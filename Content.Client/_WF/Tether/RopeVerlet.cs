@@ -134,6 +134,16 @@ public static class RopeVerlet
         return points;
     }
 
+    /// <summary>
+    /// How far along a rope one of its running sparks is, in metres from the first end. It doesn't depend on the rope's
+    /// length, so sparks hold their speed and their place while a cable pays out.
+    /// </summary>
+    public static float SparkDistance(float time, int index, float speed, float spacing, float offset)
+    {
+        var phase = time * speed / spacing + offset;
+        return (phase - MathF.Floor(phase) + index) * spacing;
+    }
+
     /// <summary>True when either pinned end moved far enough that the chain must be laid out afresh.</summary>
     public static bool NeedsReseed(Vector2 previousEndA, Vector2 previousEndB, Vector2 endA, Vector2 endB)
     {

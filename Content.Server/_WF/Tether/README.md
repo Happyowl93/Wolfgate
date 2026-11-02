@@ -239,6 +239,7 @@ Rerun any Skipped test on its own: pair tests can be skipped by unrelated
 
 ## Non-modular edits
 
+- [`Content.Shared/_CE/ZLevels/Climbing/CEZLevelClimbingSystem.cs`](../../../Content.Shared/_CE/ZLevels/Climbing/CEZLevelClimbingSystem.cs): a fired harpoon strikes another ship's machines, but still clears its own
 - [`Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.cs`](../../../Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.cs)
   - manned turret gun relay
   - a mounted weapon can stand in for whatever the entity is holding, e.g. a manned harpoon turret

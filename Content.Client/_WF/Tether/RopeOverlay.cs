@@ -26,10 +26,10 @@ public sealed class RopeOverlay : Overlay
 
     private readonly Vector2[] _smoothed = new Vector2[MaxDrawnPoints];
 
-    /// <summary>The most sparks one rope runs, and how much of it each covers per second.</summary>
-    private const int MaxSparks = 14;
+    /// <summary>The most sparks one rope runs, and how many metres each covers per second.</summary>
+    private const int MaxSparks = 40;
 
-    private const float SparkSpeed = 0.3f;
+    private const float SparkSpeed = 8f;
 
     /// <summary>Seconds each spark keeps one shape before it flickers to another.</summary>
     private const float SparkFlicker = 0.06f;
@@ -179,12 +179,15 @@ public sealed class RopeOverlay : Overlay
     /// <summary>Sparks running from the gun to the far end, each a little spray that flickers to a new shape.</summary>
     private static void DrawSparks(DrawingHandleWorld handle, RopeChain chain, Vector2[] points, int count, Color color, float time)
     {
-        var sparks = Math.Clamp(chain.Sparks, 2, MaxSparks);
         var offset = Math.Abs(chain.Seed % 97) / 97f;
         var flicker = MathF.Floor(time / SparkFlicker);
-        for (var i = 0; i < sparks; i++)
+        for (var i = 0; i < MaxSparks; i++)
         {
-            var at = Frac(time * SparkSpeed + i / (float) sparks + offset) * (count - 1);
+            var distance = RopeVerlet.SparkDistance(time, i, SparkSpeed, chain.SparkSpacing, offset);
+            if (distance >= chain.Length)
+                break;
+
+            var at = distance / chain.Length * (count - 1);
             var index = Math.Min((int) at, count - 2);
             var point = Vector2.Lerp(points[index], points[index + 1], at - index);
             var tangent = Tangent(points, count, index);

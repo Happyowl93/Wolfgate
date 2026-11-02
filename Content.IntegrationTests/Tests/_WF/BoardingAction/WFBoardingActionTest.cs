@@ -60,6 +60,7 @@ public sealed class WFBoardingActionTest
 ";
 
     private const string Wall = "WallSolid";
+    private const string ShipGun = "WeaponTurretL85Autocannon";
 
     [Test]
     public async Task HeldShipCantJumpUntilEverythingLetsGo()
@@ -128,6 +129,55 @@ public sealed class WFBoardingActionTest
             entities.System<ShuttleSystem>().FTLToCoordinates(ship, shuttle,
                 new EntityCoordinates(elsewhere.MapUid, Vector2.Zero), Angle.Zero, startupTime: 30f, hyperspaceTime: 30f);
             Assert.That(entities.HasComponent<FTLComponent>(ship), Is.True, "Nothing is left behind to stop the next jump.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [TestCase("Thruster")]
+    [TestCase(ShipGun)]
+    public async Task DartSinksIntoAMachineAndGoesWithIt(string machine)
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid theirs = default, harpoon = default, target = default, dart = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            var ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            var at = new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f));
+            if (machine == ShipGun)
+                entities.SpawnEntity("HardpointBallisticLight", at);
+
+            target = entities.SpawnEntity(machine, at);
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(ours, new Vector2(2.5f, 1.5f)));
+        });
+
+        await server.WaitRunTicks(5);
+        await server.WaitPost(() => Fire(entities, harpoon, new MapCoordinates(new Vector2(30.5f, 1.5f), map.MapId)));
+        await server.WaitRunTicks(15);
+
+        await server.WaitAssertion(() =>
+        {
+            var gun = entities.GetComponent<WFHackHarpoonGunComponent>(harpoon);
+            Assert.That(gun.Target, Is.EqualTo(theirs), "A square-on shot latches into a machine as it does a wall.");
+            dart = gun.Dart!.Value;
+            Assert.That(entities.GetComponent<TransformComponent>(dart).ParentUid, Is.EqualTo(target));
+            entities.DeleteEntity(target);
+        });
+
+        await server.WaitRunTicks(3);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Cable, Is.Null);
+            Assert.That(entities.HasComponent<WFHackedGridComponent>(theirs), Is.False, "The hack goes with what held the dart.");
+            Assert.That(entities.System<ShuttleSystem>().CanFTL(theirs, out _), Is.True);
+            Assert.That(entities.Deleted(dart), Is.True, "So does the dart.");
         });
 
         await pair.CleanReturnAsync();

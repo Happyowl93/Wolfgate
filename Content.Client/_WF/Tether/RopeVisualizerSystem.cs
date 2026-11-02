@@ -158,7 +158,8 @@ public sealed partial class RopeVisualizerSystem : EntitySystem
         }
 
         chain.SparkColor = proto.SparkColor;
-        chain.Sparks = (int) (rope.Length / MathF.Max(proto.SparkSpacing, 1f));
+        chain.SparkSpacing = MathF.Max(proto.SparkSpacing, 1f);
+        chain.Length = MathF.Max(rope.Length, RopeMath.MinLength);
         chain.Color = Color.InterpolateBetween(proto.Color, proto.TautColor,
             Math.Clamp(float.IsFinite(rope.Strain) ? rope.Strain : 0f, 0f, 1f));
         chain.Width = MathF.Max(proto.Width, 0.01f);

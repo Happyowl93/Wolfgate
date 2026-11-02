@@ -36,8 +36,11 @@ public sealed class RopeChain
     /// <summary>Colour of the sparks running along it, if it has any.</summary>
     public Color? SparkColor;
 
-    /// <summary>How many sparks run along it at once.</summary>
-    public int Sparks;
+    /// <summary>Metres of rope to each spark.</summary>
+    public float SparkSpacing = 10f;
+
+    /// <summary>The rope's length in metres.</summary>
+    public float Length;
 
     /// <summary>False while the rope is off screen: it keeps its chain but is neither stepped nor drawn.</summary>
     public bool Visible;

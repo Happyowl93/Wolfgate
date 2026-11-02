@@ -52,6 +52,22 @@ public sealed class RopeMathTest
     }
 
     [Test]
+    public void SparksHoldTheirPaceAndSpacing()
+    {
+        const float speed = 8f;
+        const float spacing = 10f;
+        var start = RopeVerlet.SparkDistance(0f, 0, speed, spacing, 0f);
+        var later = RopeVerlet.SparkDistance(0.5f, 0, speed, spacing, 0f);
+        Assert.Multiple(() =>
+        {
+            Assert.That(later - start, Is.EqualTo(4f).Within(0.001f), "Half a second at 8 m/s.");
+            Assert.That(RopeVerlet.SparkDistance(0.5f, 3, speed, spacing, 0f) - later, Is.EqualTo(30f).Within(0.001f));
+            Assert.That(RopeVerlet.SparkDistance(1.25f, 0, speed, spacing, 0f), Is.LessThan(spacing),
+                "A spark hands over to the one behind it instead of running on.");
+        });
+    }
+
+    [Test]
     public void BendStiffnessOpensUpAFold()
     {
         float Fold(float bend)

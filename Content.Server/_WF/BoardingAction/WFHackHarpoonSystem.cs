@@ -199,6 +199,9 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
                 gun.MaxDuration > TimeSpan.Zero && now >= gun.Latched + gun.MaxDuration)
             {
                 _ended.Add(cable);
+                if (gun.Dart is { } dart && HostGone(dart))
+                    QueueDel(dart);
+
                 continue;
             }
 
@@ -252,7 +255,14 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
     {
         return xform.GridUid == gun.Comp.Source && _power.IsPowered(gun.Owner) && gun.Comp.Dart is { } dart &&
                !TerminatingOrDeleted(dart) && Transform(dart).GridUid == gun.Comp.Target &&
-               TryComp<ShipHarpoonComponent>(dart, out var harpoon) && harpoon.Embedded;
+               TryComp<ShipHarpoonComponent>(dart, out var harpoon) && harpoon.Embedded && !HostGone(dart);
+    }
+
+    /// <summary>Whether what the dart was sunk into has been destroyed, leaving it loose on the hull.</summary>
+    private bool HostGone(EntityUid dart)
+    {
+        return TryComp<ShipHarpoonComponent>(dart, out var harpoon) && harpoon.Embedded &&
+               TryComp<EmbeddableProjectileComponent>(dart, out var embedded) && embedded.EmbeddedIntoUid == null;
     }
 
     /// <summary>Keeps the cable slack as the ships move, up to its full length. Past that it parts on its own.</summary>

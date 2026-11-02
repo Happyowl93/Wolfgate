@@ -31,8 +31,9 @@ a little slack, and parts at 250 m. On the latch:
 - For as long as the cable is out, no ship gun on the hacker can fire, flares included. Its helm shows a Release button.
 
 Park only raises damping, so a hacked ship can still crawl. Its crew can end the hack by cutting the cable or prying the
-dart out of the hull. It also ends if the cable parts, either ship jumps, the gun is destroyed or the dart comes out. A
-hack has no time limit unless `maxDuration` is set on the gun.
+dart out of the hull. It also ends if the cable parts, either ship jumps, the gun is destroyed, the dart comes out, or
+the wall or machine holding the dart is destroyed, which takes the dart with it. A hack has no time limit unless
+`maxDuration` is set on the gun.
 
 Both gun rules are one handler on `ShotAttemptedEvent` for `FireControllable` guns, which every gunnery, cockpit, NPC and
 signal shot passes through.
