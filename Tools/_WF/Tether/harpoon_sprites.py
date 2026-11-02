@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Generates the harpoon turret's action icons.
-
-The turret and harpoon art lives in Tools/_WF/BoardingAction/sprites/boarding_sprites.py. Run from
-the repo root:
+"""Generates the harpoon turret's action icons. Run from the repo root:
 
     python Tools/_WF/Tether/harpoon_sprites.py
 """

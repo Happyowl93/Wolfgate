@@ -29,7 +29,7 @@
   id: WFHackDart
   parent: WFShipHarpoon
   name: hacking dart
-  description: A barbed intrusion probe for a hacking harpoon. It has to go in straight and fast, shields stop it cold, and a miss is a lost dart.
+  description: A barbed intrusion probe for the ARACHNE hacking harpoon. Shields stop it.
   components:
   - type: Sprite
     sprite: _WF/BoardingAction/hack_dart.rsi
@@ -77,7 +77,7 @@
   - BallisticArtillery
   - BallisticArtilleryTier1HP
   suffix: Small, T1
-  description: Fires a hacking dart on a data cable into an enemy hull, up to 250 metres out. While the dart is in, the target can't jump and soon can't fight back against you, but none of your ship's guns can fire either. Loaded by hand, one dart at a time.
+  description: Fires a dart on a 250 m data cable. A hit cuts the target's FTL and stops its guns firing on you, but locks your own guns until the cable is gone. Loaded by hand.
   components:
   - type: StaticPrice
     price: 6000

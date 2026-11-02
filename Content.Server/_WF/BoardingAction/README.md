@@ -94,9 +94,6 @@ each other, since they leave their own fights by jumping.
 
 ### Tools
 
-- [`Tools/_WF/BoardingAction/sprites/boarding_sprites.py`](../../../Tools/_WF/BoardingAction/sprites/boarding_sprites.py)
-- [`Tools/_WF/BoardingAction/sprites/build_layered.lua`](../../../Tools/_WF/BoardingAction/sprites/build_layered.lua)
-- [`Tools/_WF/BoardingAction/sprites/build_sources.sh`](../../../Tools/_WF/BoardingAction/sprites/build_sources.sh)
 - [`Tools/_WF/BoardingAction/sprites/hack_arc.aseprite`](../../../Tools/_WF/BoardingAction/sprites/hack_arc.aseprite)
 - [`Tools/_WF/BoardingAction/sprites/hack_dart.aseprite`](../../../Tools/_WF/BoardingAction/sprites/hack_dart.aseprite)
 - [`Tools/_WF/BoardingAction/sprites/hack_harpoon_gun.aseprite`](../../../Tools/_WF/BoardingAction/sprites/hack_harpoon_gun.aseprite)

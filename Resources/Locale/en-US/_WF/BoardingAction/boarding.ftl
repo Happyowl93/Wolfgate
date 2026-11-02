@@ -1,12 +1,12 @@
-wf-boarding-ftl-disrupted = FTL disrupted. Something is holding this ship.
+wf-boarding-ftl-disrupted = FTL disrupted.
 wf-boarding-unknown-ship = Unidentified vessel
 wf-boarding-rope-hack-cable = hacking cable
 
 wf-boarding-helm-hack = HACK IN PROGRESS: {$ships}
-    FTL is down. Cut their cable, or pry the dart out of the hull, before the lockdown lands.
+    FTL offline. Cut the cable or pry out the dart.
 wf-boarding-helm-lockdown = SHIP HACKED: {$ships}
-    FTL is down, the ship is parked and guns won't bear on them. Cut their cable, or pry the dart out of the hull.
+    FTL offline, ship parked, guns can't target them. Cut the cable or pry out the dart.
 wf-boarding-helm-disrupted = FTL DISRUPTED: {$ships}
 wf-boarding-helm-cable = HACKING CABLE IN {$ship}
-    All ship guns are locked until the cable is gone.
+    Ship guns locked.
 wf-boarding-helm-release = Release cable
