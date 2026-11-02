@@ -194,7 +194,7 @@ public sealed partial class ShuttleConsoleSystem
         _shuttle.GetAllDockedShuttlesIgnoringFTLLock(shuttleUid.Value, dockedGrids);
 
         // Mono
-        if (WfFtlProximityBlock) // WOLFGATE(BoardingAction): the radius is off by default; disruptors and hacks hold ships instead.
+        if (WfFtlProximityBlock) // WOLFGATE(BoardingAction): the radius is off by default; hacks and NPC ships hold ships instead.
         foreach (var (console, consoleComp) in _lookup.GetEntitiesInRange<ShuttleConsoleComponent>(_transform.GetMapCoordinates(xform), ShuttleFTLRange))
         {
             var consoleXform = Transform(console);

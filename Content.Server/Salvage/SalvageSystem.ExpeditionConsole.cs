@@ -129,7 +129,7 @@ public sealed partial class SalvageSystem
 
             var intersecting = new List<Entity<MapGridComponent>>();
             _mapSystem.FindGridsIntersecting(xform.MapID, bounds, ref intersecting);
-            if (_cfgManager.GetCVar(WFBoardingCVars.ProximityBlock)) // WOLFGATE(BoardingAction): the radius is off by default; disruptors and hacks hold ships instead.
+            if (_cfgManager.GetCVar(WFBoardingCVars.ProximityBlock)) // WOLFGATE(BoardingAction): the radius is off by default; hacks and NPC ships hold ships instead.
             foreach (var other in intersecting.Select(g => g.Comp))
             {
                 if (other.Owner == grid ||

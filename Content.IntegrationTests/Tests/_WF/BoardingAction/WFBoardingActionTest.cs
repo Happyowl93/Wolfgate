@@ -13,7 +13,6 @@ using Content.Server._WF.BoardingAction.Components;
 using Content.Server._WF.Encounters.Components;
 using Content.Server._WF.Tether;
 using Content.Server.Power.Components;
-using Content.Server.Power.EntitySystems;
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Systems;
 using Content.Shared._NF.Shuttles.Events;
@@ -36,21 +35,12 @@ using Robust.UnitTesting;
 
 namespace Content.IntegrationTests.Tests._WF.BoardingAction;
 
-/// <summary>The FTL block, the disruptor machine, the hacking harpoon and what each does to both ships.</summary>
+/// <summary>The FTL block, the hacking harpoon and what each does to both ships.</summary>
 [TestFixture]
 public sealed class WFBoardingActionTest
 {
     [TestPrototypes]
     private const string Prototypes = @"
-- type: entity
-  id: WFTestFtlDisruptor
-  parent: WFFtlDisruptor
-  components:
-  - type: ApcPowerReceiver
-    needsPower: false
-  - type: WFFtlDisruptor
-    lockTime: 0.2
-
 - type: entity
   id: WFTestHackGun
   parent: WFHackHarpoonGun
@@ -73,7 +63,6 @@ public sealed class WFBoardingActionTest
 
     private const string Wall = "WallSolid";
     private const string Pilot = "MobHuman";
-    private const string Console = "ComputerShuttle";
 
     [Test]
     public async Task HeldShipCantJumpUntilEverythingLetsGo()
@@ -142,90 +131,6 @@ public sealed class WFBoardingActionTest
             entities.System<ShuttleSystem>().FTLToCoordinates(ship, shuttle,
                 new EntityCoordinates(elsewhere.MapUid, Vector2.Zero), Angle.Zero, startupTime: 30f, hyperspaceTime: 30f);
             Assert.That(entities.HasComponent<FTLComponent>(ship), Is.True, "Nothing is left behind to stop the next jump.");
-        });
-
-        await pair.CleanReturnAsync();
-    }
-
-    [Test]
-    public async Task DisruptorLocksHoldsAndLosesItsTarget()
-    {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entities = server.EntMan;
-        var maps = entities.System<SharedMapSystem>();
-        var transforms = entities.System<SharedTransformSystem>();
-
-        EntityUid ours = default, theirs = default, machine = default, pilot = default;
-        await server.WaitPost(() =>
-        {
-            entities.DeleteEntity(map.Grid);
-            ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
-            theirs = MakeShip(entities, maps, map.MapId, new Vector2(100f, 0f));
-            machine = entities.SpawnEntity("WFTestFtlDisruptor", new EntityCoordinates(ours, new Vector2(1.5f, 1.5f)));
-            var console = entities.SpawnEntity(Console, new EntityCoordinates(ours, new Vector2(0.5f, 1.5f)));
-            pilot = entities.SpawnEntity(Pilot, new EntityCoordinates(ours, new Vector2(0.5f, 0.5f)));
-            entities.EnsureComponent<PilotComponent>(pilot).Console = console;
-        });
-
-        var disruptors = entities.System<WFFtlDisruptorSystem>();
-        var cursor = new MapCoordinates(new Vector2(101f, 1f), map.MapId);
-        await UntilPowered(server, entities, machine, true);
-
-        await server.WaitAssertion(() =>
-        {
-            disruptors.Toggle(pilot, new MapCoordinates(new Vector2(500f, 500f), map.MapId));
-            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Target, Is.Null, "Nothing under the cursor.");
-
-            disruptors.Toggle(pilot, cursor);
-            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Target, Is.EqualTo(theirs));
-            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.False, "It takes time to lock on.");
-        });
-
-        await server.WaitRunTicks(30);
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Locked, Is.True);
-            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.True);
-            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(ours)?.DisruptorTarget, Is.Not.Null);
-            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(theirs)?.Disruptors, Has.Length.EqualTo(1));
-            transforms.SetWorldPosition(theirs, new Vector2(2000f, 0f));
-        });
-
-        await server.WaitRunTicks(30);
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Target, Is.Null, "Out of range, the lock drops.");
-            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.False);
-
-            transforms.SetWorldPosition(theirs, new Vector2(100f, 0f));
-            disruptors.Toggle(pilot, cursor);
-        });
-
-        await server.WaitRunTicks(30);
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.True);
-            entities.System<PowerReceiverSystem>().SetNeedsPower(machine, true);
-        });
-
-        await UntilPowered(server, entities, machine, false);
-        await server.WaitRunTicks(30);
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Target, Is.Null, "Without power, the lock drops.");
-            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.False);
-
-            entities.System<PowerReceiverSystem>().SetNeedsPower(machine, false);
-            entities.EnsureComponent<ProtectedGridComponent>(theirs);
-        });
-
-        await UntilPowered(server, entities, machine, true);
-        await server.WaitAssertion(() =>
-        {
-            disruptors.Toggle(pilot, cursor);
-            Assert.That(entities.GetComponent<WFFtlDisruptorComponent>(machine).Target, Is.Null, "A protected grid can't be held.");
         });
 
         await pair.CleanReturnAsync();
@@ -586,6 +491,7 @@ public sealed class WFBoardingActionTest
         await server.WaitAssertion(() =>
         {
             Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.True);
+            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(theirs)?.Disruptors, Has.Length.EqualTo(1));
             entities.RemoveComponent<ShipTargetingComponent>(npc);
         });
 
@@ -653,19 +559,6 @@ public sealed class WFBoardingActionTest
         });
 
         await pair.CleanReturnAsync();
-    }
-
-    /// <summary>Runs until a machine's power state has caught up; the power net settles a variable number of ticks later.</summary>
-    private static async Task UntilPowered(RobustIntegrationTest.ServerIntegrationInstance server, IEntityManager entities,
-        EntityUid machine, bool powered)
-    {
-        var receiver = entities.GetComponent<ApcPowerReceiverComponent>(machine);
-        for (var i = 0; i < 240 && receiver.Powered != powered; i++)
-        {
-            await server.WaitRunTicks(1);
-        }
-
-        Assert.That(receiver.Powered, Is.EqualTo(powered));
     }
 
     /// <summary>How many arc effects are running on an engine.</summary>

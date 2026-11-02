@@ -4,7 +4,7 @@ namespace Content.Server._WF.BoardingAction.Components;
 [RegisterComponent]
 public sealed partial class WFFtlDisruptedComponent : Component
 {
-    /// <summary>What holds the ship (a disruptor, a hacking gun or an NPC ship) and the ship each is on.</summary>
+    /// <summary>What holds the ship (a hacking gun or an NPC ship) and the ship each is on.</summary>
     [ViewVariables]
     public Dictionary<EntityUid, EntityUid> Sources = new();
 }

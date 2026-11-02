@@ -11,7 +11,6 @@ namespace Content.Server._WF.BoardingAction;
 public sealed partial class WFBoardingHelmSystem : EntitySystem
 {
     [Dependency] private ShuttleConsoleSystem _console = default!;
-    [Dependency] private WFFtlDisruptorSystem _disruptor = default!;
     [Dependency] private WFHackHarpoonSystem _hack = default!;
 
     public override void Initialize()
@@ -49,12 +48,6 @@ public sealed partial class WFBoardingHelmSystem : EntitySystem
 
         if (_hack.CableTarget(ship) is { } cable)
             state.CableTarget = ShipName(cable);
-
-        if (_disruptor.TryGetDisruptor(ship, out var disruptor) && disruptor.Comp.Target is { } target)
-        {
-            state.DisruptorTarget = ShipName(target);
-            state.DisruptorLocked = disruptor.Comp.Locked;
-        }
 
         return state.Empty ? null : state;
     }

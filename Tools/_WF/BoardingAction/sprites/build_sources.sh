@@ -15,7 +15,6 @@ build() {
 
 build hack_harpoon_gun pods,frame,cable,dart,reel,lamps 1
 build hack_dart body,lamp 4 "" 0.4,0.1,0.12,0.1
-build ftl_disruptor base,idle,locking,locked 4 idle,locked 0.2,0.2,0.2,0.2
 build hack_arc arc 6 "" 0.09,0.09,0.09,0.09,0.09,0.09
 build harpoon_turret stand,drum,grips,launcher,harpoon 1
 build harpoon harpoon 1

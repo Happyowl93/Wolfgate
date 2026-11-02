@@ -3,9 +3,8 @@
 Ways to pin a ship down, replacing the old rule that any powered console within 1536 m blocked a jump. That radius
 now sits behind the `wf.ftl_proximity_block` CVar, off by default.
 
-Entry points: `WFFtlDisruptionSystem` (the block itself, shared by everything here), `WFFtlDisruptorSystem` (the
-machine and the ship module key), `WFHackHarpoonSystem` (the hack), `WFNpcDisruptionSystem` (NPC ships) and
-`WFBoardingHelmSystem` (the helm banner and its release button).
+Entry points: `WFFtlDisruptionSystem` (the block itself, shared by everything here), `WFHackHarpoonSystem` (the hack),
+`WFNpcDisruptionSystem` (NPC ships) and `WFBoardingHelmSystem` (the helm banner and its release button).
 
 ## FTL block
 
@@ -15,13 +14,6 @@ generating a mission, and a docked group can't leave while any ship in it is hel
 (`ShuttleSystem.WfAbortFtlSpool`).
 
 Stations, protected grids and ships docked to them can't be tackled (`IsTackleable`).
-
-## FTL disruptor
-
-`WFFtlDisruptor` is a flatpack machine that anchors on any powered tile, so no ship needs remapping. It draws 500 W, and
-8 kW while working. The pilot presses the ship module key (default U, under Shuttle in the key options) with the cursor
-on a radar contact or a ship in the world. After 4 seconds that ship can't jump while it stays within 1500 m of the
-machine and the machine keeps power. Pressing the key again lets go. A ship runs one disruptor however many it has.
 
 ## Hacking harpoon
 
@@ -47,7 +39,7 @@ signal shot passes through.
 
 ## NPC ships
 
-NPC ships carry no machine. An encounter ship with a gunner, or a hostile drone, disrupts any ship it is firing on
+An encounter ship with a gunner, or a hostile drone, disrupts any ship it is firing on
 within `wf.npc_disrupt_range` (1500 m by default). Hired crew on a player's ship don't, and encounter ships never hold
 each other, since they leave their own fights by jumping.
 
@@ -65,7 +57,6 @@ each other, since they leave their own fights by jumping.
 - [`Content.Server/_WF/BoardingAction/WFBoardingHelmSystem.cs`](WFBoardingHelmSystem.cs)
 - [`Content.Server/_WF/BoardingAction/WFBoardingMath.cs`](WFBoardingMath.cs)
 - [`Content.Server/_WF/BoardingAction/WFFtlDisruptionSystem.cs`](WFFtlDisruptionSystem.cs)
-- [`Content.Server/_WF/BoardingAction/WFFtlDisruptorSystem.cs`](WFFtlDisruptorSystem.cs)
 - [`Content.Server/_WF/BoardingAction/WFHackHarpoonSystem.cs`](WFHackHarpoonSystem.cs)
 - [`Content.Server/_WF/BoardingAction/WFNpcDisruptionSystem.cs`](WFNpcDisruptionSystem.cs)
 
@@ -73,7 +64,6 @@ each other, since they leave their own fights by jumping.
 
 - [`Content.Shared/_WF/BoardingAction/WFBoardingCVars.cs`](../../../Content.Shared/_WF/BoardingAction/WFBoardingCVars.cs)
 - [`Content.Shared/_WF/BoardingAction/WFBoardingMessages.cs`](../../../Content.Shared/_WF/BoardingAction/WFBoardingMessages.cs)
-- [`Content.Shared/_WF/BoardingAction/WFFtlDisruptorComponent.cs`](../../../Content.Shared/_WF/BoardingAction/WFFtlDisruptorComponent.cs)
 - [`Content.Shared/_WF/BoardingAction/WFHackHarpoonGunComponent.cs`](../../../Content.Shared/_WF/BoardingAction/WFHackHarpoonGunComponent.cs)
 
 ### Client
@@ -81,7 +71,6 @@ each other, since they leave their own fights by jumping.
 - [`Content.Client/_WF/BoardingAction/ShuttleConsoleBoundUserInterface.Boarding.cs`](../../../Content.Client/_WF/BoardingAction/ShuttleConsoleBoundUserInterface.Boarding.cs)
 - [`Content.Client/_WF/BoardingAction/ShuttleConsoleWindow.Boarding.cs`](../../../Content.Client/_WF/BoardingAction/ShuttleConsoleWindow.Boarding.cs)
 - [`Content.Client/_WF/BoardingAction/WFBoardingBanner.cs`](../../../Content.Client/_WF/BoardingAction/WFBoardingBanner.cs)
-- [`Content.Client/_WF/BoardingAction/WFShipModuleInputSystem.cs`](../../../Content.Client/_WF/BoardingAction/WFShipModuleInputSystem.cs)
 
 ### Integration tests
 
@@ -89,7 +78,6 @@ each other, since they leave their own fights by jumping.
 
 ### Prototypes
 
-- [`Resources/Prototypes/_WF/BoardingAction/ftl_disruptor.yml`](../../../Resources/Prototypes/_WF/BoardingAction/ftl_disruptor.yml)
 - [`Resources/Prototypes/_WF/BoardingAction/hack_harpoon.yml`](../../../Resources/Prototypes/_WF/BoardingAction/hack_harpoon.yml)
 
 ### Localization
@@ -98,7 +86,6 @@ each other, since they leave their own fights by jumping.
 
 ### Textures
 
-- [`Resources/Textures/_WF/BoardingAction/ftl_disruptor.rsi/`](../../../Resources/Textures/_WF/BoardingAction/ftl_disruptor.rsi/)
 - [`Resources/Textures/_WF/BoardingAction/hack_arc.rsi/`](../../../Resources/Textures/_WF/BoardingAction/hack_arc.rsi/)
 - [`Resources/Textures/_WF/BoardingAction/hack_cable.png`](../../../Resources/Textures/_WF/BoardingAction/hack_cable.png)
 - [`Resources/Textures/_WF/BoardingAction/hack_cable.png.yml`](../../../Resources/Textures/_WF/BoardingAction/hack_cable.png.yml)
@@ -110,7 +97,6 @@ each other, since they leave their own fights by jumping.
 - [`Tools/_WF/BoardingAction/sprites/boarding_sprites.py`](../../../Tools/_WF/BoardingAction/sprites/boarding_sprites.py)
 - [`Tools/_WF/BoardingAction/sprites/build_layered.lua`](../../../Tools/_WF/BoardingAction/sprites/build_layered.lua)
 - [`Tools/_WF/BoardingAction/sprites/build_sources.sh`](../../../Tools/_WF/BoardingAction/sprites/build_sources.sh)
-- [`Tools/_WF/BoardingAction/sprites/ftl_disruptor.aseprite`](../../../Tools/_WF/BoardingAction/sprites/ftl_disruptor.aseprite)
 - [`Tools/_WF/BoardingAction/sprites/hack_arc.aseprite`](../../../Tools/_WF/BoardingAction/sprites/hack_arc.aseprite)
 - [`Tools/_WF/BoardingAction/sprites/hack_dart.aseprite`](../../../Tools/_WF/BoardingAction/sprites/hack_dart.aseprite)
 - [`Tools/_WF/BoardingAction/sprites/hack_harpoon_gun.aseprite`](../../../Tools/_WF/BoardingAction/sprites/hack_harpoon_gun.aseprite)
@@ -119,22 +105,18 @@ each other, since they leave their own fights by jumping.
 
 ## Non-modular edits
 
-- [`Content.Client/Input/ContentContexts.cs`](../../../Content.Client/Input/ContentContexts.cs): the pilot's ship module key
-- [`Content.Client/Options/UI/Tabs/KeyRebindTab.xaml.cs`](../../../Content.Client/Options/UI/Tabs/KeyRebindTab.xaml.cs): the pilot's ship module key
 - [`Content.Client/Shuttles/BUI/ShuttleConsoleBoundUserInterface.cs`](../../../Content.Client/Shuttles/BUI/ShuttleConsoleBoundUserInterface.cs): the banner's release button
 - [`Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml.cs`](../../../Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml.cs): hacks and disruption
 - [`Content.Server/_Mono/Projectiles/TargetGuided/TargetGuidedSystem.cs`](../../_Mono/Projectiles/TargetGuided/TargetGuidedSystem.cs): a locked-down ship can't steer a missile onto the hacker.
 - [`Content.Server/_Mono/Projectiles/TargetSeeking/TargetSeekingSystem.cs`](../../_Mono/Projectiles/TargetSeeking/TargetSeekingSystem.cs): a locked-down ship's seekers can't take the hacker.
 - [`Content.Server/Salvage/SalvageSystem.ExpeditionConsole.cs`](../../Salvage/SalvageSystem.ExpeditionConsole.cs)
   - a held ship can't leave on an expedition, and must hear so before one is generated.
-  - the radius is off by default; disruptors and hacks hold ships instead.
+  - the radius is off by default; hacks and NPC ships hold ships instead.
 - [`Content.Server/Shuttles/Systems/ShuttleConsoleSystem.cs`](../../Shuttles/Systems/ShuttleConsoleSystem.cs): hacks and disruption, for the helm banner.
 - [`Content.Server/Shuttles/Systems/ShuttleConsoleSystem.FTL.cs`](../../Shuttles/Systems/ShuttleConsoleSystem.FTL.cs)
   - CanFTL's reason never reaches the pilot, so a held ship says why here.
-  - the radius is off by default; disruptors and hacks hold ships instead.
+  - the radius is off by default; hacks and NPC ships hold ships instead.
 - [`Content.Server/Shuttles/Systems/ShuttleSystem.FasterThanLight.cs`](../../Shuttles/Systems/ShuttleSystem.FasterThanLight.cs): a disrupted or hacked ship can't leave, whatever starts the jump.
-- [`Content.Shared/Input/ContentKeyFunctions.cs`](../../../Content.Shared/Input/ContentKeyFunctions.cs): the pilot's ship module key
 - [`Content.Shared/Shuttles/BUIStates/ShuttleBoundUserInterfaceState.cs`](../../../Content.Shared/Shuttles/BUIStates/ShuttleBoundUserInterfaceState.cs): hacks and disruption, for the helm banner.
-- [`Resources/keybinds.yml`](../../../Resources/keybinds.yml): ship module key, on a key free in the stock layout
 
 <!-- WOLFGATE-GENERATED END -->

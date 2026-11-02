@@ -7,7 +7,7 @@ namespace Content.Shared._WF.BoardingAction;
 public sealed class WFBoardingCVars
 {
     /// <summary>
-    /// Whether any powered shuttle console within the old 1536 m radius blocks a jump, as it did before FTL disruptors.
+    /// Whether any powered shuttle console within the old 1536 m radius blocks a jump, as it did before hacks and NPC holds.
     /// Also restores the expedition console's 256 m check.
     /// </summary>
     public static readonly CVarDef<bool> ProximityBlock =

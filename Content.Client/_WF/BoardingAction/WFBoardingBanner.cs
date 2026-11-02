@@ -77,12 +77,6 @@ public sealed class WFBoardingBanner : BoxContainer
 
             if (state.CableTarget is { } cable)
                 notices.Add(Loc.GetString("wf-boarding-helm-cable", ("ship", cable)));
-
-            if (state.DisruptorTarget is { } target)
-            {
-                notices.Add(Loc.GetString(state.DisruptorLocked ? "wf-boarding-helm-holding" : "wf-boarding-helm-locking",
-                    ("ship", target)));
-            }
         }
 
         // SetMessage(string) treats ship names as literal text, including brackets or markup.

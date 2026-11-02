@@ -32,24 +32,9 @@ TOW = {
     "5": (155, 163, 172), "6": (191, 197, 213), "7": (233, 235, 241),
     "o": (116, 52, 34), "p": (176, 84, 42), "q": (226, 136, 62),
 }
-# gravity_generator_mini ramp, plus dead glass and hazard paint.
-MACHINE = {
-    "k": (12, 13, 20), "0": (21, 24, 36), "1": (33, 35, 48), "2": (55, 58, 75), "3": (71, 74, 91),
-    "4": (96, 99, 117), "5": (121, 125, 143), "6": (148, 151, 171), "7": (197, 199, 212),
-    "8": (237, 239, 247),
-    "g": (24, 46, 56), "j": (38, 74, 84), "J": (70, 122, 128),
-    "h": (172, 120, 60), "r": (107, 35, 40),
-}
-LIGHT = {
-    "dim": (42, 110, 118), "dim2": (70, 158, 160),
-    "amber0": (150, 92, 30), "amber1": (226, 150, 48), "amber2": (255, 214, 120),
-    "red0": (140, 32, 44), "red1": (228, 59, 68), "red2": (255, 150, 140),
-    "cyan0": (30, 120, 136), "cyan1": (72, 214, 226), "cyan2": (200, 255, 250),
-}
 ARC = {"w": (240, 255, 255), "c": (120, 236, 244), "b": (44, 148, 214), "d": (28, 84, 150)}
 DARK = {"7": "6", "6": "5", "5": "4", "4": "2", "3": "2", "2": "1", "1": "0", "v": "u", "w": "v", "u": "t",
         "q": "p", "p": "o"}
-MACHINE_DARK = {"8": "7", "7": "6", "6": "5", "5": "4", "4": "3", "3": "2", "2": "1", "1": "0"}
 
 
 def art(x0, y0, text):
@@ -71,9 +56,9 @@ def sym(px, cx):
     return out
 
 
-def relight(px, cx, keys=DARK):
+def relight(px, cx):
     """Steps everything right of cx one shade darker, so a mirrored part keeps its top-left light."""
-    return {(x, y): keys.get(c, c) if x > cx else c for (x, y), c in px.items()}
+    return {(x, y): DARK.get(c, c) if x > cx else c for (x, y), c in px.items()}
 
 
 def over(*layers):
@@ -366,154 +351,6 @@ def tow_turret():
             ("launcher", tow_launcher(), TOW), ("harpoon", tow_loaded(), TOW)]
 
 
-# ftl_disruptor
-
-def ring(cy, w):
-    """One coil of the spindle, half-width w around x 15.5."""
-    left = 15 - w + 1
-    px = {}
-    for x in range(left, 16):
-        d = x - left
-        if d >= 2:
-            px[(x, cy - 2)] = "0"
-        if d == 1:
-            px[(x, cy - 1)] = "0"
-        elif d > 1:
-            px[(x, cy - 1)] = "7" if x < 12 else "6"
-        px[(x, cy)] = "0" if d == 0 else "5" if d == 1 else "6"
-        px[(x, cy + 1)] = "0" if d == 0 else "3" if d == 1 else "g"
-        px[(x, cy + 2)] = "0" if d == 0 else "2"
-        if d >= 1:
-            px[(x, cy + 3)] = "0"
-    return relight(sym(px, 15.5), 15.5, MACHINE_DARK)
-
-
-RINGS = [(18, 10), (14, 9), (10, 8), (6, 6)]
-
-
-def disruptor():
-    """Returns (pixels, ring index per lit pixel). Coil stack, capacitor banks, instrument plinth."""
-    plinth = sym(art(2, 19, """
-        00000000000000
-        05666666666666
-        04555555555555
-        03444444444444
-        01111111111111
-        02333333333333
-        02333333333333
-        02333333333333
-        02333333333333
-        02333333333333
-        01111111111111
-        .0000000000000
-    """), 15.5)
-    banks = sym(art(2, 6, """
-        .00000
-        0877760
-        0777760
-        0666650
-        0322220
-        03g2g20
-        03g2g20
-        03g2g20
-        03g2g20
-        03g2g20
-        03g2g20
-        03g2g20
-        0322220
-        0222220
-    """), 15.5)
-    px = over(plinth, banks)
-    owner = {}
-    for i, (cy, w) in enumerate(RINGS):
-        r = ring(cy, w)
-        px.update(r)
-        for p, c in r.items():
-            owner[p] = i if c == "g" else None
-    px.update(sym(art(13, 0, """
-        ..0
-        .0J
-        0Jj
-        0jg
-        .0g
-    """), 15.5))
-    px.update(art(4, 25, """
-        0000000
-        0r0g0g0
-        0000000
-        0h2h2h0
-        0000000
-    """))
-    px.update(art(12, 26, """
-        k2k2k2k2
-        k2k2k2k2
-        k2k2k2k2
-    """))
-    px.update(art(21, 25, """
-        0000000
-        0hhkkh0
-        0hkkhh0
-        0kkhhk0
-        0000000
-    """))
-    return px, owner
-
-
-LAMPS = [(5, 26), (7, 26), (9, 26)]
-
-
-def disruptor_lit():
-    """The glass the overlays paint: ring bands bottom to top, bank slots, the emitter prism."""
-    px, owner = disruptor()
-    rings = [[p for p, i in owner.items() if i == n and px.get(p) == "g"] for n in range(len(RINGS))]
-    banks = [p for p, c in px.items() if c == "g" and owner.get(p) is None and 5 < p[1] < 19]
-    banks = [p for p in banks if p[0] < 9 or p[0] > 22]
-    prism = [p for p, c in px.items() if c in "Jj" or (c == "g" and p[1] < 5)]
-    return rings, banks, prism
-
-
-def paint(points, key):
-    return {p: key for p in points}
-
-
-def disruptor_idle():
-    rings, banks, prism = disruptor_lit()
-    return over(paint(prism, "dim"), paint([LAMPS[1]], "dim2"),
-                paint([p for p in rings[3] if 14 <= p[0] <= 17], "dim"))
-
-
-def disruptor_locking(f):
-    """Amber sweep climbing the coil stack, banks charging behind it."""
-    rings, banks, prism = disruptor_lit()
-    top, bottom = min(p[1] for p in banks), max(p[1] for p in banks)
-    fill = bottom - (bottom - top + 1) * (f + 1) // 4
-    out = over(paint(banks, "amber0"), paint([p for p in banks if p[1] > fill], "amber1"))
-    out.update(paint(rings[(f - 2) % 4], "amber0"))
-    out.update(paint(rings[(f - 1) % 4], "amber1"))
-    out.update(paint(rings[f], "amber2"))
-    out.update(paint(prism, "amber2" if f == 3 else "amber1" if f == 2 else "amber0"))
-    out.update(paint([LAMPS[0]], "amber2" if f % 2 else "amber0"))
-    out.update(paint([LAMPS[1]], "amber1"))
-    return out
-
-
-def disruptor_locked(f):
-    """Hard lock: the coils swap red and cyan, the prism flares with whichever is hot."""
-    rings, banks, prism = disruptor_lit()
-    hot, dim = ("red", "cyan") if f < 2 else ("cyan", "red")
-    level = "1" if f % 2 == 0 else "0"
-    out = paint(banks, hot + level)
-    for n in range(4):
-        out.update(paint(rings[n], (hot if n % 2 == 0 else dim) + level))
-    out.update(paint(prism, hot + ("2" if f % 2 == 0 else "1")))
-    out.update(paint(LAMPS, "red1" if f % 2 == 0 else "red0"))
-    return out
-
-
-def disruptor_layers():
-    return [("body", disruptor()[0], MACHINE)]
-
-
 # hack_arc
 
 def line(points, key):
@@ -657,14 +494,6 @@ def main():
         "latched": (dart_frames, [0.4, 0.1, 0.12, 0.1]),
     })
 
-    machine = image(disruptor()[0], MACHINE)
-    write_rsi(os.path.join(boarding, "ftl_disruptor.rsi"), {
-        "base": ([machine], None),
-        "idle": ([image(disruptor_idle(), LIGHT)], None),
-        "locking": ([image(disruptor_locking(f), LIGHT) for f in range(4)], [0.2] * 4),
-        "locked": ([image(disruptor_locked(f), LIGHT) for f in range(4)], [0.2] * 4),
-    })
-
     arc = [image(arc_frame(bolts), ARC) for bolts in ARC_FRAMES]
     write_rsi(os.path.join(boarding, "hack_arc.rsi"), {"arc": (arc, [0.09] * len(arc))})
 
@@ -687,12 +516,6 @@ def main():
         write_layers(args.layers, "hack_dart", {
             "body": [image(body, GUN)] * n,
             "lamp": [image(dart_light(level), GUN) for level in blink],
-        })
-        write_layers(args.layers, "ftl_disruptor", {
-            "base": [machine] * 4,
-            "idle": [image(disruptor_idle(), LIGHT)] * 4,
-            "locking": [image(disruptor_locking(f), LIGHT) for f in range(4)],
-            "locked": [image(disruptor_locked(f), LIGHT) for f in range(4)],
         })
         write_layers(args.layers, "hack_arc", {"arc": arc})
         write_layers(args.layers, "harpoon_turret", {name: [image(px, pal)] for name, px, pal in turret})

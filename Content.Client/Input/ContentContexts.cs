@@ -63,7 +63,6 @@ namespace Content.Client.Input
             human.AddFunction(EngineKeyFunctions.Walk);
             human.AddFunction(ContentKeyFunctions.ShuttleAscend); // Mono / PZN
             human.AddFunction(ContentKeyFunctions.ShuttleDescend);
-            human.AddFunction(ContentKeyFunctions.ShuttleModule); // WOLFGATE(BoardingAction): the pilot's ship module key
             human.AddFunction(ContentKeyFunctions.SwapHands);
             human.AddFunction(ContentKeyFunctions.SwapHandsPrevious); // Frontier
             human.AddFunction(ContentKeyFunctions.Drop);

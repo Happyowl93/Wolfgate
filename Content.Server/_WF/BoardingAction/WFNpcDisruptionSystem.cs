@@ -9,8 +9,8 @@ using Robust.Shared.Configuration;
 namespace Content.Server._WF.BoardingAction;
 
 /// <summary>
-/// NPC ships hold what they are shooting at. They carry no machine and need no pilot's key: an encounter ship or a
-/// hostile drone disrupts any non-encounter ship it has guns on, within range.
+/// NPC ships hold what they are shooting at: an encounter ship or a hostile drone disrupts any non-encounter ship it
+/// has guns on, within range.
 /// </summary>
 public sealed partial class WFNpcDisruptionSystem : EntitySystem
 {
