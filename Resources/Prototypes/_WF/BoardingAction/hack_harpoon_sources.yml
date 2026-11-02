@@ -4,7 +4,7 @@
   id: WFUplinkPirateHackHarpoon
   productEntity: WFHackHarpoonGunFlatpack
   cost:
-    Doubloon: 100
+    Doubloon: 5
   categories:
   - UplinkPirateWeapons
   conditions:
@@ -17,7 +17,7 @@
   id: WFUplinkPirateHackDart
   productEntity: WFHackDart
   cost:
-    Doubloon: 10
+    Doubloon: 1
   categories:
   - UplinkPirateAmmo
   conditions:
@@ -30,7 +30,7 @@
   id: WFUplinkHackHarpoon
   productEntity: WFHackHarpoonGunFlatpack
   cost:
-    Telecrystal: 20
+    Telecrystal: 5
   categories:
   - UplinkWeaponry
 
@@ -38,7 +38,7 @@
   id: WFUplinkHackDart
   productEntity: WFHackDart
   cost:
-    Telecrystal: 3
+    Telecrystal: 1
   categories:
   - UplinkAmmo
 

@@ -60,6 +60,7 @@ public sealed class WFBoardingActionTest
 ";
 
     private const string Wall = "WallSolid";
+    private const float ParkDamping = 2.5f;
     private const string ShipGun = "WeaponTurretL85Autocannon";
 
     [Test]
@@ -245,7 +246,10 @@ public sealed class WFBoardingActionTest
             var shuttle = entities.GetComponent<ShuttleComponent>(theirs);
             var body = entities.GetComponent<PhysicsComponent>(theirs);
             var xform = entities.GetComponent<TransformComponent>(theirs);
-            entities.System<ShuttleSystem>().SetInertiaDampening(theirs, body, shuttle, xform, InertiaDampeningMode.Dampen);
+            Assert.That(shuttle.BodyModifier, Is.GreaterThan(ParkDamping), "The lockdown holds it harder than park.");
+            Assert.That(entities.System<ShuttleSystem>().SetInertiaDampening(theirs, body, shuttle, xform, InertiaDampeningMode.Off),
+                Is.False, "Steering turns cruise on every update, and must never get through.");
+            Assert.That(shuttle.BodyModifier, Is.GreaterThan(ParkDamping));
         });
 
         await server.WaitRunTicks(2);
@@ -261,6 +265,12 @@ public sealed class WFBoardingActionTest
         await server.WaitAssertion(() =>
         {
             Assert.That(entities.System<ShuttleSystem>().CanFTL(theirs, out _), Is.True);
+
+            var shuttle = entities.GetComponent<ShuttleComponent>(theirs);
+            Assert.That(shuttle.BodyModifier, Is.EqualTo(ParkDamping), "It is left in park.");
+            Assert.That(entities.System<ShuttleSystem>().SetInertiaDampening(theirs, entities.GetComponent<PhysicsComponent>(theirs),
+                shuttle, entities.GetComponent<TransformComponent>(theirs), InertiaDampeningMode.Dampen), Is.True, "The pilot has the helm back.");
+
             Assert.That(Refused(entities, ourGun, atThem), Is.False, "The hacker's guns are back.");
             Assert.That(Refused(entities, theirGun, atUs), Is.False, "So is everyone else's aim.");
             Assert.That(entities.HasComponent<WFHackedGridComponent>(theirs), Is.False);

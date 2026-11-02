@@ -6,7 +6,6 @@ using Content.Server._WF.Tether;
 using Content.Server.Power.EntitySystems;
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Systems;
-using Content.Shared._NF.Shuttles.Events;
 using Content.Shared._WF.BoardingAction;
 using Content.Shared._WF.Tether;
 using Content.Shared._WF.Tether.Harpoon;
@@ -17,7 +16,6 @@ using Content.Shared.Weapons.Ranged.Events;
 using Robust.Server.Audio;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
-using Robust.Shared.Physics.Components;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
@@ -209,9 +207,6 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
             if (!gun.Lockdown && now >= gun.Latched + gun.LockdownDelay)
                 LandLockdown(ent);
 
-            if (gun.Lockdown)
-                HoldParked(gun.Target!.Value);
-
             ArcEngines(ent, now);
         }
 
@@ -287,6 +282,7 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
 
         gun.Comp.Lockdown = true;
         hacked.LockedOut.Add(source);
+        _shuttle.WfSetLockdownDamping(target, true);
         SoundAlarm(gun, target);
 
         var seekers = EntityQueryEnumerator<TargetSeekingComponent, ProjectileComponent>();
@@ -298,13 +294,6 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
         }
 
         _helm.Refresh(target);
-    }
-
-    private void HoldParked(EntityUid ship)
-    {
-        if (_shuttle.NfGetInertiaDampeningMode(ship) != InertiaDampeningMode.Anchor &&
-            TryComp<PhysicsComponent>(ship, out var body) && TryComp<ShuttleComponent>(ship, out var shuttle))
-            _shuttle.SetInertiaDampening(ship, body, shuttle, Transform(ship), InertiaDampeningMode.Anchor);
     }
 
     private void FindEngines(EntityUid ship, WFHackedGridComponent hacked)
@@ -376,6 +365,7 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
             _disruption.Release(hull, gun);
             if (TryComp<WFHackedGridComponent>(hull, out var hacked))
             {
+                var wasLocked = hacked.LockedOut.Count > 0;
                 hacked.Hackers.Remove(gun);
                 hacked.LockedOut.Clear();
                 foreach (var (other, ship) in hacked.Hackers)
@@ -383,6 +373,9 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
                     if (TryComp<WFHackHarpoonGunComponent>(other, out var comp) && comp.Lockdown)
                         hacked.LockedOut.Add(ship);
                 }
+
+                if (wasLocked && hacked.LockedOut.Count == 0)
+                    _shuttle.WfSetLockdownDamping(hull, false);
 
                 if (hacked.Hackers.Count == 0)
                 {

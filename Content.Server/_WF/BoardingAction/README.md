@@ -30,11 +30,13 @@ a little slack, and parts at 250 m. On the latch:
 
 - The target's FTL drops at once, its helms sound an alarm and show a warning, and blue arcs run across all its
   engines until the last cable is gone, with bursts of sparks.
-- After 8 seconds its ship is held in park. Its guns won't fire along any line that crosses the hacker's hull, its
+- After 8 seconds it is locked down: its dampening is clamped at four times park, and no pilot, autopilot or crew can
+  change that (`ShuttleSystem.WfSetLockdownDamping`). Its guns won't fire along any line that crosses the hacker's hull, its
   seekers won't take the hacker, and its guided missiles won't steer onto it. Only the hacker's own ship is protected.
 - For as long as the cable is out, no ship gun on the hacker can fire, flares included. Its helm shows a Release button.
 
-Park only raises damping, so a hacked ship can still crawl. Its crew can end the hack by cutting the cable or prying the
+The clamp only raises damping, so a locked-down ship can still crawl, and it is left in park when the lockdown ends. Its
+crew can end the hack by cutting the cable or prying the
 dart out of the hull. It also ends if the cable parts, either ship jumps, the gun is destroyed, the dart comes out, or
 the wall or machine holding the dart is destroyed, which takes the dart with it. A hack has no time limit unless
 `maxDuration` is set on the gun.
@@ -96,6 +98,9 @@ signal shot passes through.
 - [`Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml.cs`](../../../Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml.cs): hacks and disruption
 - [`Content.Server/_Mono/Projectiles/TargetGuided/TargetGuidedSystem.cs`](../../_Mono/Projectiles/TargetGuided/TargetGuidedSystem.cs): a locked-down ship can't steer a missile onto the hacker.
 - [`Content.Server/_Mono/Projectiles/TargetSeeking/TargetSeekingSystem.cs`](../../_Mono/Projectiles/TargetSeeking/TargetSeekingSystem.cs): a locked-down ship's seekers can't take the hacker.
+- [`Content.Server/_NF/Shuttles/Systems/ShuttleSystem.cs`](../../_NF/Shuttles/Systems/ShuttleSystem.cs)
+  - a lockdown holds the dampening, which steering otherwise sets every update
+  - the helm has to show the refused mode didn't take
 - [`Content.Server/Salvage/SalvageSystem.ExpeditionConsole.cs`](../../Salvage/SalvageSystem.ExpeditionConsole.cs): a held ship can't leave on an expedition, and must hear so before one is generated.
 - [`Content.Server/Shuttles/Systems/ShuttleConsoleSystem.cs`](../../Shuttles/Systems/ShuttleConsoleSystem.cs): hacks and disruption, for the helm banner.
 - [`Content.Server/Shuttles/Systems/ShuttleConsoleSystem.FTL.cs`](../../Shuttles/Systems/ShuttleConsoleSystem.FTL.cs): CanFTL's reason never reaches the pilot, so a held ship says why here.
