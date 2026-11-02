@@ -5,6 +5,7 @@ using Content.Server.GameTicking;
 using Content.Server.Players.PlayTimeTracking;
 using Content.Server.Preferences.Managers;
 using Content.Shared._WF.Companies;
+using Content.Shared._WF.FactionLock;
 using Content.Shared.GameTicking;
 using Content.Shared.Ghost;
 using Content.Shared.Mobs;
@@ -355,6 +356,29 @@ public sealed partial class WFCompanySystem : EntitySystem
     /// <summary>Ironman characters can't share in company money.</summary>
     private static bool IsIronman(HumanoidCharacterProfile profile) => profile.TraitPreferences.Any(trait => trait.Id == "Ironman");
 
+    /// <summary>Characters who have played a faction stay out of companies.</summary>
+    private static bool IsFactionBound(HumanoidCharacterProfile profile) => WFFactionLockPolicy.Played(profile.Flags).Any();
+
+    /// <summary>The same for the character as it is saved now, after an await that may have left a copy behind.</summary>
+    private bool IsFactionBound(NetUserId user, int slot) =>
+        _preferences.GetPreferencesOrNull(user)?.Characters.GetValueOrDefault(slot) is HumanoidCharacterProfile profile && IsFactionBound(profile);
+
+    /// <summary>Withdraws what a character had pending now that they have played a faction, and shows the player their lock.</summary>
+    public void OnFactionBound(ICommonSession session)
+    {
+        if (CurrentCharacter(session) is { } character)
+        {
+            var applied = _companies.Values.Where(company => company.Applications.ContainsKey(character.ProfileId)).ToArray();
+            ClearInvitations(character.ProfileId);
+            foreach (var company in applied)
+                Touch(company);
+        }
+        SendState(session);
+    }
+
+    /// <summary>Sends a player a fresh snapshot.</summary>
+    public void RefreshState(ICommonSession session) => SendState(session);
+
     private Company? CompanyOf(int profile) =>
         _memberCompany.TryGetValue(profile, out var id) && _companies.TryGetValue(id, out var company) ? company : null;
 
@@ -488,6 +512,14 @@ public sealed partial class WFCompanySystem : EntitySystem
         if (session.Status != SessionStatus.InGame)
             return;
         var state = new WFCompanyState { Loaded = Loaded, Message = message == null ? null : Loc.GetString(message) };
+        if (_preferences.GetPreferencesOrNull(session.UserId) is { } preferences)
+        {
+            foreach (var (slot, profile) in preferences.Characters)
+            {
+                if (profile is HumanoidCharacterProfile humanoid && IsFactionBound(humanoid))
+                    state.PlayedFactions[slot] = WFFactionLockPolicy.Played(humanoid.Flags).ToArray();
+            }
+        }
         if (Loaded && _profileIds.TryGetValue(session.UserId, out var slots))
         {
             state.Characters = slots.Where(pair => CompanyOf(pair.Value) != null).Select(pair =>
@@ -508,7 +540,7 @@ public sealed partial class WFCompanySystem : EntitySystem
             state.CreateFee = _config.GetCVar(WFCompanyCVars.CreateFee);
             state.CreateHours = _config.GetCVar(WFCompanyCVars.CreateHours);
             state.PlayedHours = PlayedHours(session);
-            state.CanJoin = own == null && !IsIronman(character.Profile);
+            state.CanJoin = own == null && !IsIronman(character.Profile) && !IsFactionBound(character.Profile);
             state.Directory = _companies.Values.OrderByDescending(company => company.Members.Count)
                 .ThenByDescending(CompanyValue).Select(Listing).ToArray();
             state.Invitations = _companies.Values.Where(company => company.Invitations.Contains(character.ProfileId)).Select(Listing).ToArray();
@@ -574,7 +606,8 @@ public sealed partial class WFCompanySystem : EntitySystem
             if (session.Status == SessionStatus.InGame && CurrentCharacter(session) == null)
                 RefreshProfileIdsLater(session.UserId);
             if (session.Status != SessionStatus.InGame || CurrentCharacter(session) is not { } character ||
-                CompanyOf(character.ProfileId) != null || IsIronman(character.Profile) || company.Invitations.Contains(character.ProfileId) ||
+                CompanyOf(character.ProfileId) != null || IsIronman(character.Profile) || IsFactionBound(character.Profile) ||
+                company.Invitations.Contains(character.ProfileId) ||
                 HasPlayer(company, session.UserId))
                 continue;
             targets.Add(new WFCompanyPlayer(session.UserId, character.Profile.Name));

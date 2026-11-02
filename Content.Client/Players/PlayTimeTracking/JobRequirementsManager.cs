@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Content.Client._WF.FactionLock; // WOLFGATE(FactionLock)
 using Content.Client.Lobby;
 using Content.Shared.CCVar;
 using Content.Shared.Players;
@@ -107,6 +108,10 @@ public sealed partial class JobRequirementsManager : ISharedPlaytimeManager
         var player = _playerManager.LocalSession;
         if (player == null)
             return true;
+
+        // WOLFGATE(FactionLock): a character's faction history or company bars some faction jobs
+        if (!_entManager.System<WFFactionLockClientSystem>().IsAllowed(job, profile, out reason))
+            return false;
 
         return CheckRoleRequirements(job, profile, out reason);
     }

@@ -42,7 +42,7 @@ public sealed partial class WFCompanySystem
         _nextRequest[session.UserId] = _timing.CurTime + TimeSpan.FromMilliseconds(150);
         if (!Loaded)
         {
-            SendState(session, "wf-company-error-loading");
+            SendState(session, msg.Action == WFCompanyAction.Refresh ? null : "wf-company-error-loading");
             return;
         }
         if (await GetCharacter(session) is not { } character)
@@ -79,7 +79,7 @@ public sealed partial class WFCompanySystem
                 target.Invitations.Remove(character.ProfileId);
                 error = null;
                 break;
-            case WFCompanyAction.Apply when own == null && target != null && !IsIronman(character.Profile):
+            case WFCompanyAction.Apply when own == null && target != null && !IsIronman(character.Profile) && !IsFactionBound(character.Profile):
                 if (target.Applications.Count >= WFCompanyPolicy.MaximumMembers && !target.Applications.ContainsKey(character.ProfileId))
                     break;
                 if (HasPlayer(target, character.User))
@@ -158,7 +158,7 @@ public sealed partial class WFCompanySystem
                 if (company.Members.Count >= WFCompanyPolicy.MaximumMembers)
                     return "wf-company-error-full";
                 if (!_players.TryGetSessionById(user, out var invitee) || CurrentCharacter(invitee) is not { } guest ||
-                    CompanyOf(guest.ProfileId) != null || IsIronman(guest.Profile))
+                    CompanyOf(guest.ProfileId) != null || IsIronman(guest.Profile) || IsFactionBound(guest.Profile))
                     return "wf-company-error-invite";
                 if (HasPlayer(company, user))
                     return "wf-company-error-same-player";
@@ -340,6 +340,8 @@ public sealed partial class WFCompanySystem
     {
         if (IsIronman(character.Profile))
             return ("wf-company-error-ironman", null);
+        if (IsFactionBound(character.Profile))
+            return ("wf-company-error-faction", null);
         if (!WFCompanyPolicy.TryNormalizeName(msg.Name, out var name) || !WFCompanyPolicy.TryNormalizeTag(msg.Tag, out var tag))
             return ("wf-company-error-name", null);
         if (!WFCompanyPolicy.TryNormalizeDescription(msg.Description, out var description))
@@ -387,6 +389,11 @@ public sealed partial class WFCompanySystem
         // The await let other requests run; recheck the name and membership they could have taken.
         if (created == null || CompanyOf(character.ProfileId) != null)
             return ("wf-company-error-name-taken", null);
+        if (IsFactionBound(character.User, character.Slot))
+        {
+            Track(_db.DeleteCompanyAsync(created.Id));
+            return ("wf-company-error-faction", null);
+        }
         var company = new Company
         {
             Id = created.Id, Name = name, Tag = tag, Description = description, Colour = msg.Colour.WithAlpha(1f),
@@ -422,6 +429,8 @@ public sealed partial class WFCompanySystem
             return "wf-company-error-member";
         if (character != null && IsIronman(character))
             return "wf-company-error-ironman";
+        if (character != null && IsFactionBound(character))
+            return "wf-company-error-faction";
         if (company.Members.Count >= WFCompanyPolicy.MaximumMembers)
             return "wf-company-error-full";
         if (HasPlayer(company, user))

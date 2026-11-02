@@ -187,5 +187,7 @@ public sealed class WFCompanyState : EntityEventArgs
     public WFCompanyPlayer[] InviteTargets = Array.Empty<WFCompanyPlayer>();
     /// <summary>Memberships of all the player's characters, by slot.</summary>
     public WFCompanyCharacter[] Characters = Array.Empty<WFCompanyCharacter>();
+    /// <summary>The factions each of the player's characters has played, by slot; the client's own profiles only refresh on lobby join.</summary>
+    public Dictionary<int, string[]> PlayedFactions = new();
     public string? Message;
 }

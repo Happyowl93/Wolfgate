@@ -171,7 +171,7 @@ wf-company-rename = Rename
 wf-company-disband = Disband company
 wf-company-disband-help = Disbanding deletes the company and everything in its account.
 
-wf-company-cannot-join = This character can't join a company: it's already in one or has the Ironman trait.
+wf-company-cannot-join = This character can't join a company: it's already in one, has the Ironman trait or has played a faction.
 wf-company-invitations = Invitations
 wf-company-create = Create a company
 wf-company-create-help = You become its owner. Pick a unique name and a 2 to 5 letter tag.
@@ -301,6 +301,7 @@ wf-company-error-name = Names use letters, digits and simple punctuation, up to 
 wf-company-error-name-taken = Another company already uses that name or tag.
 wf-company-error-description = Descriptions are plain text up to 1024 characters.
 wf-company-error-ironman = Ironman characters can't join companies.
+wf-company-error-faction = Characters who have played a faction can't join companies.
 wf-company-error-member = That character is already in a company.
 wf-company-error-full = The company is full.
 wf-company-error-invite = That player's character can't be invited.

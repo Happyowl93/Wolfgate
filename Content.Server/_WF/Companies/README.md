@@ -108,7 +108,8 @@ server.
 Players open the Company window from the Company button in Crew Setup or from the character creator's Company tab,
 which now shows the character's company instead of the Mono company picker. The window acts as the character being
 played, or the selected one in the lobby. Owners hold every permission; other ranks act only on ranks below their own
-and can't grant permissions they lack. Ironman characters can't join. Deleting a character removes its membership;
+and can't grant permissions they lack. Ironman characters and characters who have played a faction (see
+[FactionLock](../FactionLock/README.md)) can't join. Deleting a character removes its membership;
 a deleted owner's company passes to the highest-ranked member at the next round restart, and an empty one is disbanded.
 
 The Mono company on a character profile no longer applies at spawn; jobs still set gameplay factions. The selectable
