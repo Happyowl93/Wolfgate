@@ -10,3 +10,6 @@ wf-boarding-helm-lockdown = SHIP HACKED: {$ships}
 wf-boarding-helm-cable = HACKING CABLE IN {$ship}
     Ship guns locked.
 wf-boarding-helm-release = Release cable
+
+wf-boarding-gunner-locked = Ship guns locked: hacking cable out.
+wf-boarding-gunner-lockout = Guns locked out: that line crosses the ship hacking you.

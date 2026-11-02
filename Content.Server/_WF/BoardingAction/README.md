@@ -12,7 +12,8 @@ A held ship carries `WFFtlDisruptedComponent`, with one entry for each thing hol
 generating a mission, and a docked group can't leave while any ship in it is held. A spool already running is stopped
 (`ShuttleSystem.WfAbortFtlSpool`).
 
-Stations, protected grids and ships docked to them can't be tackled (`IsTackleable`).
+Stations, protected grids and ships docked to them can't be tackled (`IsTackleable`), and a hacked ship that docks to
+one slips the hack.
 
 ## Hacking harpoon
 
@@ -32,8 +33,11 @@ a little slack, and parts at 250 m. On the latch:
   engines until the last cable is gone, with bursts of sparks.
 - After 8 seconds it is locked down: its dampening is clamped at four times park, and no pilot, autopilot or crew can
   change that (`ShuttleSystem.WfSetLockdownDamping`). Its guns won't fire along any line that crosses the hacker's hull, its
-  seekers won't take the hacker, and its guided missiles won't steer onto it. Only the hacker's own ship is protected.
-- For as long as the cable is out, no ship gun on the hacker can fire, flares included. Its helm shows a Release button.
+  seekers won't take the hacker, and its guided missiles won't steer onto it. Only the ship the gun is on is protected,
+  not what is docked to it.
+- For as long as the cable is out, no ship gun on the hacker or on a ship docked to it can fire, flares included. A
+  station doesn't pass this on to the other ships docked at it. Those ships' helms show a Release button, and a gunner
+  who fires is told why nothing happens.
 
 The clamp only raises damping, so a locked-down ship can still crawl, and it is left in park when the lockdown ends. Its
 crew can end the hack by cutting the cable or prying the
@@ -96,6 +100,8 @@ signal shot passes through.
 
 - [`Content.Client/Shuttles/BUI/ShuttleConsoleBoundUserInterface.cs`](../../../Content.Client/Shuttles/BUI/ShuttleConsoleBoundUserInterface.cs): the banner's release button
 - [`Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml.cs`](../../../Content.Client/Shuttles/UI/ShuttleConsoleWindow.xaml.cs): hacks and disruption
+- [`Content.Server/_Mono/FireControl/FireControlSystem.Console.cs`](../../_Mono/FireControl/FireControlSystem.Console.cs): tell the gunner why locked guns stay silent.
+- [`Content.Server/_Mono/FireControl/FireControlSystem.TargetGuided.cs`](../../_Mono/FireControl/FireControlSystem.TargetGuided.cs): a locked-down ship can't launch a missile at the hacker.
 - [`Content.Server/_Mono/Projectiles/TargetGuided/TargetGuidedSystem.cs`](../../_Mono/Projectiles/TargetGuided/TargetGuidedSystem.cs): a locked-down ship can't steer a missile onto the hacker.
 - [`Content.Server/_Mono/Projectiles/TargetSeeking/TargetSeekingSystem.cs`](../../_Mono/Projectiles/TargetSeeking/TargetSeekingSystem.cs): a locked-down ship's seekers can't take the hacker.
 - [`Content.Server/_NF/Shuttles/Systems/ShuttleSystem.cs`](../../_NF/Shuttles/Systems/ShuttleSystem.cs)

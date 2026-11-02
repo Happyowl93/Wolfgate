@@ -18,6 +18,7 @@ namespace Content.Server._WF.BoardingAction;
 /// </summary>
 public sealed partial class WFFtlDisruptionSystem : EntitySystem
 {
+    [Dependency] private DockingSystem _docking = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private ShuttleSystem _shuttle = default!;
 
@@ -88,6 +89,23 @@ public sealed partial class WFFtlDisruptionSystem : EntitySystem
         }
 
         return true;
+    }
+
+    /// <summary>Collects a ship and the ships docked to it, without passing through a station to the ships beside it.</summary>
+    public void GetDockedShips(EntityUid ship, HashSet<EntityUid> ships)
+    {
+        if (!ships.Add(ship))
+            return;
+
+        foreach (var dock in _docking.GetDocks(ship))
+        {
+            if (dock.Comp.DockedWith is not { } other)
+                continue;
+
+            var grid = _transform.GetParentUid(other);
+            if (IsFreeShip(grid))
+                GetDockedShips(grid, ships);
+        }
     }
 
     private bool IsFreeShip(EntityUid grid)

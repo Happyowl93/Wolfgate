@@ -1,5 +1,6 @@
 using System.Numerics;
 using Content.Server._Mono.FireControl;
+using Content.Server._Mono.Projectiles.TargetGuided;
 using Content.Server._Mono.Projectiles.TargetSeeking;
 using Content.Server._WF.BoardingAction.Components;
 using Content.Server._WF.Tether;
@@ -11,6 +12,7 @@ using Content.Shared._WF.Tether;
 using Content.Shared._WF.Tether.Harpoon;
 using Content.Shared.Administration.Logs;
 using Content.Shared.Database;
+using Content.Shared.Popups;
 using Content.Shared.Projectiles;
 using Content.Shared.Weapons.Ranged.Events;
 using Robust.Server.Audio;
@@ -35,6 +37,7 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private PowerReceiverSystem _power = default!;
     [Dependency] private RopeSystem _rope = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private ShuttleSystem _shuttle = default!;
     [Dependency] private TargetSeekingSystem _seeking = default!;
@@ -50,7 +53,13 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
     /// <summary>How close to a locked-out hull a guided missile may be steered, in metres.</summary>
     private const float GuidanceMargin = 16f;
 
+    /// <summary>How long a gunner waits between being told why their shots are refused.</summary>
+    private static readonly TimeSpan GunnerWarningCooldown = TimeSpan.FromSeconds(2);
+
     private readonly List<EntityUid> _ended = new();
+    private readonly HashSet<EntityUid> _docked = new();
+    private readonly List<WFHackSourceGridComponent> _sources = new();
+    private readonly Dictionary<EntityUid, TimeSpan> _gunnerWarned = new();
 
     public override void Initialize()
     {
@@ -79,30 +88,72 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
         EndHack(gun);
     }
 
-    /// <summary>Stops every ship gun on a hacker, and the guns of a locked-down ship from firing across the hacker's hull.</summary>
+    /// <summary>Stops every ship gun on a hacker or docked to one, and the guns of a locked-down ship from firing across the hacker's hull.</summary>
     private void OnShipGunShot(Entity<FireControllableComponent> gun, ref ShotAttemptedEvent args)
     {
-        if (Transform(gun).GridUid is not { } grid)
-            return;
-
-        if (HasComp<WFHackSourceGridComponent>(grid))
-        {
+        if (RefusedShot(gun, args.Used.Comp.ShootCoordinates) != null)
             args.Cancel();
-            return;
-        }
+    }
 
-        if (!TryComp<WFHackedGridComponent>(grid, out var hacked) || args.Used.Comp.ShootCoordinates is not { } aim)
-            return;
+    /// <summary>The string saying why a ship gun can't take a shot, or null if it can.</summary>
+    private string? RefusedShot(EntityUid gun, EntityCoordinates? aim)
+    {
+        if (Transform(gun).GridUid is not { } grid)
+            return null;
+
+        FindSources(grid);
+        if (_sources.Count > 0)
+            return "wf-boarding-gunner-locked";
+
+        if (!TryComp<WFHackedGridComponent>(grid, out var hacked) || aim is not { } target)
+            return null;
 
         var from = _transform.GetWorldPosition(gun);
-        var to = _transform.ToMapCoordinates(aim).Position;
+        var to = _transform.ToMapCoordinates(target).Position;
         foreach (var ship in hacked.LockedOut)
         {
             if (CrossesHull(from, to, ship))
-            {
-                args.Cancel();
-                return;
-            }
+                return "wf-boarding-gunner-lockout";
+        }
+
+        return null;
+    }
+
+    /// <summary>Tells a gunner why the guns they just fired stay silent, and returns whether it did.</summary>
+    public bool WarnGunner(EntityUid console, EntityUid actor, List<NetEntity> weapons, NetCoordinates aim)
+    {
+        var now = _timing.CurTime;
+        if (_gunnerWarned.TryGetValue(actor, out var next) && now < next)
+            return false;
+
+        var target = GetCoordinates(aim);
+        foreach (var weapon in weapons)
+        {
+            if (!TryGetEntity(weapon, out var gun) || RefusedShot(gun.Value, target) is not { } reason)
+                continue;
+
+            _gunnerWarned[actor] = now + GunnerWarningCooldown;
+            _popup.PopupEntity(Loc.GetString(reason), console, actor, PopupType.Medium);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Collects the ships with a cable out among a ship and everything docked to it.</summary>
+    private void FindSources(EntityUid ship)
+    {
+        _sources.Clear();
+        var any = EntityQueryEnumerator<WFHackSourceGridComponent>();
+        if (!any.MoveNext(out _, out _))
+            return;
+
+        _docked.Clear();
+        _disruption.GetDockedShips(ship, _docked);
+        foreach (var docked in _docked)
+        {
+            if (TryComp<WFHackSourceGridComponent>(docked, out var source))
+                _sources.Add(source);
         }
     }
 
@@ -147,32 +198,34 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
         return false;
     }
 
-    /// <summary>The ship a ship's cable is in, if it has one out.</summary>
+    /// <summary>The ship a cable from this ship, or anything docked to it, is in.</summary>
     public EntityUid? CableTarget(EntityUid ship)
     {
-        if (!TryComp<WFHackSourceGridComponent>(ship, out var source))
-            return null;
-
-        foreach (var gun in source.Guns)
+        FindSources(ship);
+        foreach (var source in _sources)
         {
-            if (TryComp<WFHackHarpoonGunComponent>(gun, out var comp) && comp.Target is { } target)
-                return target;
+            foreach (var gun in source.Guns)
+            {
+                if (TryComp<WFHackHarpoonGunComponent>(gun, out var comp) && comp.Target is { } target)
+                    return target;
+            }
         }
 
         return null;
     }
 
-    /// <summary>Lets go of every cable a ship has out.</summary>
+    /// <summary>Lets go of every cable a ship, or anything docked to it, has out.</summary>
     public void ReleaseCables(EntityUid ship)
     {
-        if (!TryComp<WFHackSourceGridComponent>(ship, out var source))
-            return;
-
+        FindSources(ship);
         _ended.Clear();
-        foreach (var gun in source.Guns)
+        foreach (var source in _sources)
         {
-            if (TryComp<WFHackHarpoonGunComponent>(gun, out var comp) && comp.Cable is { } cable)
-                _ended.Add(cable);
+            foreach (var gun in source.Guns)
+            {
+                if (TryComp<WFHackHarpoonGunComponent>(gun, out var comp) && comp.Cable is { } cable)
+                    _ended.Add(cable);
+            }
         }
 
         foreach (var cable in _ended)
@@ -245,12 +298,16 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
         return true;
     }
 
-    /// <summary>Whether the gun can still work the dart: powered, on the ship it fired from, the dart still in the hull.</summary>
+    /// <summary>
+    /// Whether the gun can still work the dart: powered, on the ship it fired from, the dart still in a hull that can
+    /// be held. A ship that docks to a station or protected grid slips the hack.
+    /// </summary>
     private bool StillLatched(Entity<WFHackHarpoonGunComponent> gun, TransformComponent xform)
     {
         return xform.GridUid == gun.Comp.Source && _power.IsPowered(gun.Owner) && gun.Comp.Dart is { } dart &&
                !TerminatingOrDeleted(dart) && Transform(dart).GridUid == gun.Comp.Target &&
-               TryComp<ShipHarpoonComponent>(dart, out var harpoon) && harpoon.Embedded && !HostGone(dart);
+               TryComp<ShipHarpoonComponent>(dart, out var harpoon) && harpoon.Embedded && !HostGone(dart) &&
+               gun.Comp.Target is { } target && _disruption.IsTackleable(target);
     }
 
     /// <summary>Whether what the dart was sunk into has been destroyed, leaving it loose on the hull.</summary>
@@ -273,7 +330,7 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
             _rope.SetLength(cable, wanted);
     }
 
-    /// <summary>The rest of the hack lands: the ship parks, and whatever its seekers hold on the hacker lets go.</summary>
+    /// <summary>The rest of the hack lands: the ship parks, and whatever its missiles hold on the hacker lets go.</summary>
     private void LandLockdown(Entity<WFHackHarpoonGunComponent> gun)
     {
         if (gun.Comp.Target is not { } target || gun.Comp.Source is not { } source ||
@@ -291,6 +348,13 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
             if (seeker.CurrentTarget == source && TryComp(projectile.Shooter, out TransformComponent? shooter) &&
                 shooter.GridUid == target)
                 _seeking.SetSeekerTarget((uid, seeker), null);
+        }
+
+        var guided = EntityQueryEnumerator<TargetGuidedComponent>();
+        while (guided.MoveNext(out var uid, out var missile))
+        {
+            if (missile.TargetPosition is { } aim && RefusesGuidance(uid, aim))
+                missile.TargetPosition = null;
         }
 
         _helm.Refresh(target);
@@ -359,6 +423,7 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
         gun.Comp.Target = null;
         gun.Comp.Source = null;
         gun.Comp.Lockdown = false;
+        _gunnerWarned.Clear();
 
         if (target is { } hull)
         {

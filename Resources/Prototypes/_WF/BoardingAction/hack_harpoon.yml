@@ -68,7 +68,7 @@
     scale: 1
     shape: triangle
   - type: StaticPrice
-    price: 400
+    price: 50
 
 - type: entity
   id: WFHackHarpoonGun
@@ -80,7 +80,7 @@
   description: Fires a dart on a 250 m data cable. A hit cuts the target's FTL and stops its guns firing on you, but locks your own guns until the cable is gone. Loaded by hand.
   components:
   - type: StaticPrice
-    price: 6000
+    price: 1000
   - type: Sprite
     sprite: _WF/BoardingAction/hack_harpoon_gun.rsi
     layers:
@@ -158,7 +158,7 @@
       color: "#3fa7b5"
     - state: icon-default
   - type: StaticPrice
-    price: 1500
+    price: 500
 
 - type: entity
   id: WFEffectHackArc
@@ -174,3 +174,4 @@
     radius: 3
     energy: 2
     color: "#7fe9ff"
+    castShadows: false

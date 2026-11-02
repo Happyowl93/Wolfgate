@@ -3,7 +3,10 @@ using System.Linq;
 using System.Numerics;
 using Content.Client._WF.BoardingAction;
 using Content.Client._WF.Cockpit;
+using Content.IntegrationTests.Tests._WF.CargoLoad;
 using Content.Server._Mono.FireControl;
+using Content.Server._Mono.Projectiles.TargetGuided;
+using Content.Server._Mono.Projectiles.TargetSeeking;
 using Content.Server._Crescent.ShipShields;
 using Content.Server._Crescent.ShipShields.Components;
 using Content.Shared._Crescent.ShipShields;
@@ -17,6 +20,7 @@ using Content.Shared._NF.Shuttles.Events;
 using Content.Shared._WF.BoardingAction;
 using Content.Shared._WF.Tether;
 using Content.Shared._WF.Tether.Harpoon;
+using Content.Shared.Projectiles;
 using Content.Shared.Shuttles.Components;
 using Content.Shared.Tiles;
 using Content.Shared.Weapons.Ranged.Components;
@@ -569,6 +573,283 @@ public sealed class WFBoardingActionTest
             banner.Measure(new Vector2(1700f, 100f));
             Assert.That(release.DesiredSize.X, Is.GreaterThanOrEqualTo(WFBoardingBanner.ReleaseWidth),
                 "The release button keeps its width when its text is clipped.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task HeldShipHoldsItsDockedGroup()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var elsewhere = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid held = default, partner = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            held = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            partner = MakeShip(entities, maps, map.MapId, new Vector2(0f, 3f));
+            CargoDeck.Dock(entities, CargoDeck.AddPort(entities, held, new Vector2(0.5f, 2.5f), 180f),
+                CargoDeck.AddPort(entities, partner, new Vector2(0.5f, 0.5f), 0f));
+        });
+
+        await server.WaitRunTicks(5);
+        await server.WaitAssertion(() =>
+        {
+            var disruption = entities.System<WFFtlDisruptionSystem>();
+            var shuttles = entities.System<ShuttleSystem>();
+            var shuttle = entities.GetComponent<ShuttleComponent>(partner);
+            shuttles.FTLToCoordinates(partner, shuttle, new EntityCoordinates(elsewhere.MapUid, Vector2.Zero), Angle.Zero,
+                startupTime: 30f, hyperspaceTime: 30f);
+            Assert.That(entities.HasComponent<FTLComponent>(partner), Is.True, "Nothing holds the group yet.");
+
+            disruption.Disrupt(held, held);
+            Assert.That(disruption.IsGroupDisrupted(partner), Is.True);
+        });
+
+        await server.WaitRunTicks(2);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.HasComponent<FTLComponent>(partner), Is.False, "The group's spool stops with one ship held.");
+
+            var shuttle = entities.GetComponent<ShuttleComponent>(partner);
+            entities.System<ShuttleSystem>().FTLToCoordinates(partner, shuttle,
+                new EntityCoordinates(elsewhere.MapUid, Vector2.Zero), Angle.Zero, startupTime: 30f, hyperspaceTime: 30f);
+            Assert.That(entities.HasComponent<FTLComponent>(partner), Is.False, "Nor can a new jump start.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ShipDockedToAProtectedGridCantBeHeld(bool dockedFirst)
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid theirs = default, station = default, harpoon = default;
+        void DockThem() => CargoDeck.Dock(entities, CargoDeck.AddPort(entities, theirs, new Vector2(2.5f, 1.5f), 90f),
+            CargoDeck.AddPort(entities, station, new Vector2(0.5f, 1.5f), -90f));
+
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            var ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            station = MakeShip(entities, maps, map.MapId, new Vector2(33f, 0f));
+            entities.EnsureComponent<ProtectedGridComponent>(station);
+            entities.SpawnEntity(Wall, new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f)));
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(ours, new Vector2(2.5f, 1.5f)));
+            if (dockedFirst)
+                DockThem();
+        });
+
+        await server.WaitRunTicks(5);
+        await server.WaitPost(() => Fire(entities, harpoon, new MapCoordinates(new Vector2(30.5f, 1.5f), map.MapId)));
+        await server.WaitRunTicks(15);
+
+        if (!dockedFirst)
+        {
+            await server.WaitPost(() =>
+            {
+                Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Target, Is.EqualTo(theirs), "A free ship latches.");
+                DockThem();
+            });
+
+            await server.WaitRunTicks(3);
+        }
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Cable, Is.Null, "The cable comes off.");
+            Assert.That(entities.HasComponent<WFHackedGridComponent>(theirs), Is.False);
+            Assert.That(entities.System<WFFtlDisruptionSystem>().IsGroupDisrupted(theirs), Is.False);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task DockedShipsShareTheGunLock()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid pod = default, carrier = default, theirs = default, harpoon = default, carrierGun = default, gunner = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            pod = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            carrier = MakeShip(entities, maps, map.MapId, new Vector2(0f, 3f));
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            CargoDeck.Dock(entities, CargoDeck.AddPort(entities, pod, new Vector2(0.5f, 2.5f), 180f),
+                CargoDeck.AddPort(entities, carrier, new Vector2(0.5f, 0.5f), 0f));
+            entities.SpawnEntity(Wall, new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f)));
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(pod, new Vector2(2.5f, 1.5f)));
+            carrierGun = entities.SpawnEntity("WFTestShipGun", new EntityCoordinates(carrier, new Vector2(1.5f, 1.5f)));
+            gunner = entities.SpawnEntity(null, new EntityCoordinates(carrier, new Vector2(2.5f, 2.5f)));
+        });
+
+        await server.WaitRunTicks(5);
+        var atThem = new MapCoordinates(new Vector2(31f, 1f), map.MapId);
+        await server.WaitAssertion(() =>
+            Assert.That(Refused(entities, carrierGun, atThem), Is.False, "Nothing locks the carrier's guns yet."));
+
+        await server.WaitPost(() => Fire(entities, harpoon, new MapCoordinates(new Vector2(30.5f, 1.5f), map.MapId)));
+        await server.WaitRunTicks(15);
+
+        await server.WaitAssertion(() =>
+        {
+            var hack = entities.System<WFHackHarpoonSystem>();
+            Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Target, Is.EqualTo(theirs));
+            Assert.That(Refused(entities, carrierGun, atThem), Is.True, "A docked ship can't fire past the penalty.");
+            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(carrier)?.CableTarget, Is.Not.Null,
+                "Its helm says why, and carries the release button.");
+
+            var weapons = new List<NetEntity> { entities.GetNetEntity(carrierGun) };
+            var aim = entities.GetNetCoordinates(entities.System<SharedTransformSystem>().ToCoordinates(atThem));
+            Assert.That(hack.WarnGunner(carrierGun, gunner, weapons, aim), Is.True, "The gunner is told.");
+            Assert.That(hack.WarnGunner(carrierGun, gunner, weapons, aim), Is.False, "Once, not on every shot held down.");
+
+            hack.ReleaseCables(carrier);
+        });
+
+        await server.WaitRunTicks(2);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Cable, Is.Null);
+            Assert.That(Refused(entities, carrierGun, atThem), Is.False, "Its guns are back.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task StationDoesntPassTheGunLockOn()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid theirs = default, neighbour = default, harpoon = default, neighbourGun = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            var ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            var station = MakeShip(entities, maps, map.MapId, new Vector2(0f, 3f));
+            neighbour = MakeShip(entities, maps, map.MapId, new Vector2(0f, 6f));
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            entities.EnsureComponent<ProtectedGridComponent>(station);
+            CargoDeck.Dock(entities, CargoDeck.AddPort(entities, ours, new Vector2(0.5f, 2.5f), 180f),
+                CargoDeck.AddPort(entities, station, new Vector2(0.5f, 0.5f), 0f));
+            CargoDeck.Dock(entities, CargoDeck.AddPort(entities, station, new Vector2(0.5f, 2.5f), 180f),
+                CargoDeck.AddPort(entities, neighbour, new Vector2(0.5f, 0.5f), 0f));
+            entities.SpawnEntity(Wall, new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f)));
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(ours, new Vector2(2.5f, 1.5f)));
+            neighbourGun = entities.SpawnEntity("WFTestShipGun", new EntityCoordinates(neighbour, new Vector2(1.5f, 1.5f)));
+        });
+
+        await server.WaitRunTicks(5);
+        await server.WaitPost(() => Fire(entities, harpoon, new MapCoordinates(new Vector2(30.5f, 1.5f), map.MapId)));
+        await server.WaitRunTicks(15);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.GetComponent<WFHackHarpoonGunComponent>(harpoon).Target, Is.EqualTo(theirs));
+            Assert.That(Refused(entities, neighbourGun, new MapCoordinates(new Vector2(31f, 1f), map.MapId)), Is.False,
+                "A ship beside the hacker at a station keeps its guns.");
+            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(neighbour), Is.Null, "And gets no release button.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task LockdownTurnsMissilesOffTheHacker()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var maps = entities.System<SharedMapSystem>();
+
+        EntityUid ours = default, theirs = default, other = default, harpoon = default, seeker = default, missile = default;
+        await server.WaitPost(() =>
+        {
+            entities.DeleteEntity(map.Grid);
+            ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
+            theirs = MakeShip(entities, maps, map.MapId, new Vector2(30f, 0f));
+            other = MakeShip(entities, maps, map.MapId, new Vector2(15f, 40f));
+            entities.EnsureComponent<TargetSeekingTargetComponent>(ours);
+            entities.EnsureComponent<TargetSeekingTargetComponent>(other);
+            entities.SpawnEntity(Wall, new EntityCoordinates(theirs, new Vector2(0.5f, 1.5f)));
+            harpoon = entities.SpawnEntity("WFTestHackGun", new EntityCoordinates(ours, new Vector2(2.5f, 1.5f)));
+            var launcher = entities.SpawnEntity("WFTestShipGun", new EntityCoordinates(theirs, new Vector2(2.5f, 0.5f)));
+
+            var projectiles = entities.System<SharedProjectileSystem>();
+            var at = new MapCoordinates(new Vector2(15f, 1.5f), map.MapId);
+            seeker = entities.SpawnEntity(null, at);
+            projectiles.SetShooter(seeker, entities.EnsureComponent<ProjectileComponent>(seeker), launcher);
+            var seeking = entities.EnsureComponent<TargetSeekingComponent>(seeker);
+            seeking.ScanArc = 360f;
+            seeking.DetectionRange = 1000f;
+            missile = entities.SpawnEntity(null, at);
+            projectiles.SetShooter(missile, entities.EnsureComponent<ProjectileComponent>(missile), launcher);
+            entities.EnsureComponent<PhysicsComponent>(missile);
+            // Nothing here moves a cursor, which otherwise cuts the missile's control after a second.
+            entities.EnsureComponent<TargetGuidedComponent>(missile).FallbackTime = 1000f;
+        });
+
+        await server.WaitRunTicks(5);
+        await server.WaitPost(() => Fire(entities, harpoon, new MapCoordinates(new Vector2(30.5f, 1.5f), map.MapId)));
+        await server.WaitRunTicks(15);
+
+        var transform = entities.System<SharedTransformSystem>();
+        var atUs = new MapCoordinates(new Vector2(1.5f, 1.5f), map.MapId);
+        var awayFromUs = new MapCoordinates(new Vector2(60f, 30f), map.MapId);
+        await server.WaitAssertion(() =>
+        {
+            var seeking = entities.GetComponent<TargetSeekingComponent>(seeker);
+            var seekers = entities.System<TargetSeekingSystem>();
+            seekers.AcquireTarget(seeker, seeking, entities.GetComponent<TransformComponent>(seeker));
+            Assert.That(seeking.CurrentTarget, Is.EqualTo(ours), "Until the lockdown lands its seekers still take the closest ship.");
+
+            var guided = entities.GetComponent<TargetGuidedComponent>(missile);
+            entities.System<TargetGuidedSystem>().SetTargetPosition(missile, transform.ToCoordinates(atUs), guided);
+            Assert.That(guided.TargetPosition, Is.Not.Null, "So can its missiles be steered.");
+        });
+
+        await server.WaitRunTicks(40);
+        await server.WaitAssertion(() =>
+        {
+            var seeking = entities.GetComponent<TargetSeekingComponent>(seeker);
+            Assert.That(seeking.CurrentTarget, Is.Null, "A seeker on the hacker lets go when the lockdown lands.");
+
+            entities.System<TargetSeekingSystem>().AcquireTarget(seeker, seeking, entities.GetComponent<TransformComponent>(seeker));
+            Assert.That(seeking.CurrentTarget, Is.EqualTo(other), "It can't take the hacker again, but anything else is fair.");
+
+            var guided = entities.GetComponent<TargetGuidedComponent>(missile);
+            Assert.That(guided.TargetPosition, Is.Null, "A missile aimed at the hacker loses its aim.");
+
+            var guidance = entities.System<TargetGuidedSystem>();
+            guidance.SetTargetPosition(missile, transform.ToCoordinates(atUs), guided);
+            Assert.That(guided.TargetPosition, Is.Null, "It can't be steered back.");
+            guidance.SetTargetPosition(missile, transform.ToCoordinates(awayFromUs), guided);
+            Assert.That(guided.TargetPosition, Is.Not.Null, "It still steers anywhere else.");
         });
 
         await pair.CleanReturnAsync();

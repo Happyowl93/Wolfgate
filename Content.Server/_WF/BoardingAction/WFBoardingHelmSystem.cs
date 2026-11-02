@@ -11,7 +11,10 @@ namespace Content.Server._WF.BoardingAction;
 public sealed partial class WFBoardingHelmSystem : EntitySystem
 {
     [Dependency] private ShuttleConsoleSystem _console = default!;
+    [Dependency] private WFFtlDisruptionSystem _disruption = default!;
     [Dependency] private WFHackHarpoonSystem _hack = default!;
+
+    private readonly HashSet<EntityUid> _group = new();
 
     public override void Initialize()
     {
@@ -45,11 +48,18 @@ public sealed partial class WFBoardingHelmSystem : EntitySystem
         return state.Empty ? null : state;
     }
 
-    /// <summary>Pushes the current state to a ship's open helms.</summary>
+    /// <summary>Pushes the current state to the open helms of a ship and everything docked to it.</summary>
     public void Refresh(EntityUid? grid)
     {
-        if (grid is { } ship && !TerminatingOrDeleted(ship))
-            _console.RefreshShuttleConsoles(ship);
+        if (grid is not { } ship || TerminatingOrDeleted(ship))
+            return;
+
+        _group.Clear();
+        _disruption.GetDockedShips(ship, _group);
+        foreach (var docked in _group)
+        {
+            _console.RefreshShuttleConsoles(docked);
+        }
     }
 
     private string[] Names(IEnumerable<EntityUid> ships)
