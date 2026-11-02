@@ -204,7 +204,7 @@ public sealed class LoadoutCatalog
         if (text.Length == 0)
             return FormattedMessage.FromUnformatted(Loc.GetString("wf-loadout-locked-generic"));
 
-        if (!text.Contains(' ') && Loc.TryGetString(text, out var localized))
+        if (!text.Contains(' ') && IoCManager.Resolve<ILocalizationManager>().TryGetString(text, out var localized))
             return FormattedMessage.FromUnformatted(localized);
 
         return reason!;

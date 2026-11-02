@@ -7,7 +7,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Client._WF.Roles;
 
 /// <summary>Edits the custom job title of one role, checked live against the shared rules.</summary>
-public sealed class CustomJobTitleWindow : DefaultWindow
+public sealed partial class CustomJobTitleWindow : DefaultWindow
 {
     [Dependency] private IPrototypeManager _prototype = default!;
 

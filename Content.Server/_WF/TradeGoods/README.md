@@ -270,7 +270,6 @@ still well over the roughly 260 in materials it costs to print.
   - no free crates from the eject wire or wrecking the vendor
   - trade goods cost the station's live price
 - [`Resources/Prototypes/_Mono/Outpost/caelestinus.yml`](../../../Resources/Prototypes/_Mono/Outpost/caelestinus.yml): names the station for its role in the sector economy
-- [`Resources/Prototypes/_Mono/PointsOfInterest/tsfmcindustry.yml`](../../../Resources/Prototypes/_Mono/PointsOfInterest/tsfmcindustry.yml): was StandardFrontierOutpost; its market console had no stock to sell
 - [`Resources/Prototypes/_Mono/Recipes/Lathes/equipment.yml`](../../../Resources/Prototypes/_Mono/Recipes/Lathes/equipment.yml): turrets use gun parts from weapon part crates
 - [`Resources/Prototypes/_Mono/Recipes/Lathes/Factions/shipyard.yml`](../../../Resources/Prototypes/_Mono/Recipes/Lathes/Factions/shipyard.yml): ship vouchers use ship parts from ship component crates
 - [`Resources/Prototypes/_Mono/Recipes/Lathes/ShipgunAmmo/base_shipgun_ammo.yml`](../../../Resources/Prototypes/_Mono/Recipes/Lathes/ShipgunAmmo/base_shipgun_ammo.yml): researched ship ammo uses bulk munitions from ammo crates

@@ -20,7 +20,7 @@ public sealed class LoadoutRailRow : ContainerButton
     private readonly Label _pick;
     private readonly Label _chip;
 
-    public readonly LoadoutGroupView Group;
+    public new readonly LoadoutGroupView Group;
 
     public LoadoutRailRow(LoadoutGroupView group, LoadoutIconCache icons)
     {

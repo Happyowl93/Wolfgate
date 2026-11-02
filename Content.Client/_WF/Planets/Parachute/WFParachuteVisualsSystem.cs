@@ -6,8 +6,10 @@ using Robust.Shared.Utility;
 namespace Content.Client._WF.Planets.Parachute;
 
 /// <summary>Draws a parachute on its wearer: the pack strapped to them, and the open canopy over them in a fall.</summary>
-public sealed class WFParachuteVisualsSystem : EntitySystem
+public sealed partial class WFParachuteVisualsSystem : EntitySystem
 {
+    [Dependency] private SpriteSystem _sprite = default!;
+
     private static readonly SpriteSpecifier Canopy =
         new SpriteSpecifier.Rsi(new ResPath("_WF/Planets/Effects/parachute_canopy.rsi"), "canopy");
 
@@ -31,20 +33,20 @@ public sealed class WFParachuteVisualsSystem : EntitySystem
         if (!TryComp<SpriteComponent>(ent, out var sprite))
             return;
 
-        if (!sprite.LayerMapTryGet(CanopyKey.Pack, out _))
+        if (!_sprite.LayerMapTryGet((ent, sprite), CanopyKey.Pack, out _, false))
         {
-            var pack = sprite.AddLayer(Pack);
-            sprite.LayerMapSet(CanopyKey.Pack, pack);
-            sprite.LayerSetScale(pack, PackScale);
-            sprite.LayerSetOffset(pack, PackOffset);
+            var pack = _sprite.AddLayer((ent, sprite), Pack);
+            _sprite.LayerMapSet((ent, sprite), CanopyKey.Pack, pack);
+            _sprite.LayerSetScale((ent, sprite), pack, PackScale);
+            _sprite.LayerSetOffset((ent, sprite), pack, PackOffset);
         }
 
-        var has = sprite.LayerMapTryGet(CanopyKey.Key, out var layer);
+        var has = _sprite.LayerMapTryGet((ent, sprite), CanopyKey.Key, out var layer, false);
 
         if (!ent.Comp.Deployed)
         {
             if (has)
-                sprite.RemoveLayer(layer);
+                _sprite.RemoveLayer((ent, sprite), layer);
 
             return;
         }
@@ -52,11 +54,11 @@ public sealed class WFParachuteVisualsSystem : EntitySystem
         if (has)
             return;
 
-        layer = sprite.AddLayer(Canopy);
-        sprite.LayerMapSet(CanopyKey.Key, layer);
+        layer = _sprite.AddLayer((ent, sprite), Canopy);
+        _sprite.LayerMapSet((ent, sprite), CanopyKey.Key, layer);
 
         // The canopy art has its harness at the bottom edge; sit that on the wearer's top.
-        sprite.LayerSetOffset(layer, new Vector2(0f, sprite.Bounds.Height / 2f + 0.5f));
+        _sprite.LayerSetOffset((ent, sprite), layer, new Vector2(0f, _sprite.GetLocalBounds((ent, sprite)).Height / 2f + 0.5f));
     }
 
     private void OnShutdown(Entity<WFParachutedComponent> ent, ref ComponentShutdown args)
@@ -64,12 +66,12 @@ public sealed class WFParachuteVisualsSystem : EntitySystem
         if (!TryComp<SpriteComponent>(ent, out var sprite))
             return;
 
-        if (sprite.LayerMapTryGet(CanopyKey.Key, out var layer))
-            sprite.RemoveLayer(layer);
+        if (_sprite.LayerMapTryGet((ent, sprite), CanopyKey.Key, out var layer, false))
+            _sprite.RemoveLayer((ent, sprite), layer);
 
         // Looked up afresh: removing the canopy may have shifted the pack's index.
-        if (sprite.LayerMapTryGet(CanopyKey.Pack, out var pack))
-            sprite.RemoveLayer(pack);
+        if (_sprite.LayerMapTryGet((ent, sprite), CanopyKey.Pack, out var pack, false))
+            _sprite.RemoveLayer((ent, sprite), pack);
     }
 
     private enum CanopyKey

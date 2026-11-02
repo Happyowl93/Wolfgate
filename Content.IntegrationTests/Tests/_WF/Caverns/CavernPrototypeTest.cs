@@ -24,6 +24,8 @@ namespace Content.IntegrationTests.Tests._WF.Caverns;
 [TestOf(typeof(WFCavernPrototype))]
 public sealed class CavernPrototypeTest
 {
+    private static readonly EntProtoId AutolatheProto = "Autolathe";
+
     /// <summary>The self-deleting markers a cavern template may place: loot, and fauna through the planet caps.</summary>
     private static readonly HashSet<string> AllowedSpawners = new()
     {
@@ -191,7 +193,7 @@ public sealed class CavernPrototypeTest
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(proto.Index<EntityPrototype>("Autolathe").TryGetComponent<LatheComponent>(out var lathe, factory));
+            Assert.That(proto.Index(AutolatheProto).TryComp<LatheComponent>(out var lathe, factory));
             var shovels = lathe!.StaticPacks
                 .SelectMany(pack => proto.Index(pack).Recipes)
                 .Select(recipe => proto.Index<LatheRecipePrototype>(recipe).Result)
@@ -203,7 +205,7 @@ public sealed class CavernPrototypeTest
 
         bool DigsShafts(EntityPrototype item)
         {
-            if (!item.HasComponent<ShovelComponent>(factory) || !item.TryGetComponent<ToolComponent>(out var tool, factory))
+            if (!item.HasComponent<ShovelComponent>(factory) || !item.TryComp<ToolComponent>(out var tool, factory))
                 return false;
             var qualities = tool.Qualities;
             return qualities.Contains(WFCavernDigSystem.DiggingQuality);

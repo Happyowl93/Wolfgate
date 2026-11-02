@@ -254,7 +254,7 @@ public sealed partial class GridVehicleMoverSystem : EntitySystem
         if (!force && ent.Comp.SyncedGrid == grid)
             return false;
 
-        var coords = xform.Coordinates.WithEntityId(grid, _transform, EntityManager);
+        var coords = _transform.WithEntityId(xform.Coordinates, grid);
         var tile = _map.TileIndicesFor(grid, gridComp, coords);
 
         ent.Comp.SyncedGrid = grid;

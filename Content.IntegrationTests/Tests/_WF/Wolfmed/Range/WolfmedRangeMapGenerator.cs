@@ -102,7 +102,7 @@ public sealed class WolfmedRangeMapGenerator
 
                 var uid = entMan.SpawnEntity(id, new EntityCoordinates(grid, new Vector2(x + 0.5f, y + 0.5f)));
                 if (rotation != Angle.Zero)
-                    transform.SetLocalRotation(entMan.GetComponent<TransformComponent>(uid), rotation);
+                    transform.SetLocalRotation(uid, rotation);
                 return uid;
             }
 

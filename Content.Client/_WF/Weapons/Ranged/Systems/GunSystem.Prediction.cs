@@ -146,7 +146,7 @@ public sealed partial class GunSystem
 
         for (var i = 1; i < spread.Count; i++)
         {
-            if (!pellet.TryGetComponent<HitscanAmmoComponent>(out _, Factory) && pellet.TryGetComponent<ProjectileComponent>(out _, Factory))
+            if (!pellet.TryComp<HitscanAmmoComponent>(out _, Factory) && pellet.TryComp<ProjectileComponent>(out _, Factory))
                 volley.Shot!.Slots.Add(0);
         }
     }

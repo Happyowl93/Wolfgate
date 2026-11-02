@@ -415,7 +415,6 @@ public sealed partial class XenoLeapSystem : EntitySystem
         if (leapProtection.InherentStunDuration != null)
         {
             stunDuration = leapProtection.InherentStunDuration.Value;
-            leapProtection.InherentBlockSound = leapProtection.InherentBlockSound;
         }
 
         // Check if there are any other entities equipped that provide leap protection.
@@ -567,7 +566,7 @@ public sealed partial class XenoLeapSystem : EntitySystem
             _physics.SetBodyStatus(xeno, physics, BodyStatus.OnGround);
 
             if (physics.Awake)
-                _broadphase.RegenerateContacts(xeno, physics);
+                _broadphase.RegenerateContacts((xeno, physics, null, null));
         }
 
         if (!xeno.Comp.KnockdownRequiresInvisibility || HasComp<XenoActiveInvisibleComponent>(xeno))

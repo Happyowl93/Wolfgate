@@ -77,7 +77,7 @@ public sealed partial class WFEncounterSchedulerSystem : EntitySystem
     private List<Entity<MapGridComponent>> _nearby = new();
 
     /// <summary>Stops the scheduler until resumed, whatever the cvar says.</summary>
-    public bool Paused;
+    public new bool Paused;
 
     /// <summary>When the scheduler next tries, while it is running.</summary>
     public TimeSpan? Next => _next;

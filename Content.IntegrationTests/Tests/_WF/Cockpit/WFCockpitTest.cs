@@ -1,5 +1,6 @@
 #nullable enable annotations
 
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using Content.Shared._Mono.FireControl;
 using Content.Shared.Shuttles.BUIStates;
 using System.Linq;
@@ -643,7 +644,7 @@ public sealed class WFCockpitTest : InteractionTest
         await RunTicks(5);
         await Client.WaitAssertion(() =>
         {
-            window.Dispose();
+            window.Teardown();
             settings.SetCVar(WolfgateCVars.UiStyle, originalTheme);
             settings.SetCVar(CCVars.UILayout, originalLayout);
         });
@@ -818,7 +819,7 @@ public sealed class WFCockpitTest : InteractionTest
             Assert.That(Sessions().Select(message => (message.Active, message.Controlling)).TakeLast(2),
                 Is.EqualTo(new[] { (true, true), (false, false) }),
                 "Exiting while armed on FLIGHT ends the session without a trailing release.");
-            window.Dispose();
+            window.Teardown();
             settings.SetCVar(CCVars.UILayout, originalLayout);
         });
     }
@@ -887,7 +888,7 @@ public sealed class WFCockpitTest : InteractionTest
                 if (exit == "helm closed")
                     window.OpenCentered();
             }
-            window.Dispose();
+            window.Teardown();
             settings.SetCVar(CCVars.UILayout, originalLayout);
         });
     }
@@ -959,7 +960,7 @@ public sealed class WFCockpitTest : InteractionTest
                 finally
                 {
                     controller.Exit();
-                    window.Dispose();
+                    window.Teardown();
                     chatController.History.Clear();
                     chat.Repopulate();
                     settings.SetCVar(CCVars.UILayout, originalLayout);
@@ -1024,7 +1025,7 @@ public sealed class WFCockpitTest : InteractionTest
             finally
             {
                 controller.Exit();
-                window.Dispose();
+                window.Teardown();
                 settings.SetCVar(CCVars.UILayout, originalLayout);
             }
         });
@@ -1102,7 +1103,7 @@ public sealed class WFCockpitTest : InteractionTest
                     controller.Exit();
                 if (chat is { WfLogPoppedOut: true })
                     popout.Toggle(chat);
-                window?.Dispose();
+                window?.Teardown();
                 settings.SetCVar(CCVars.UILayout, originalLayout);
             });
         }
@@ -1312,7 +1313,7 @@ public sealed class WFCockpitTest : InteractionTest
                 }
                 finally
                 {
-                    other.Dispose();
+                    other.Teardown();
                 }
 
                 settings.SetCVar(WolfgateCVars.CockpitAutoEnter, false);
@@ -1327,7 +1328,7 @@ public sealed class WFCockpitTest : InteractionTest
             finally
             {
                 controller.Exit();
-                window.Dispose();
+                window.Teardown();
             }
 
             void AssertStaysOut(string how)
@@ -1365,7 +1366,7 @@ public sealed class WFCockpitTest : InteractionTest
                 controller.FrameUpdate(new FrameEventArgs(0.05f));
                 Assert.That(controller.Active, Is.True, "The pilot state arrived within the wait, so the cockpit opens.");
                 controller.Exit();
-                window.Dispose();
+                window.Teardown();
             });
 
             // A second helm never gets its pilot state in time, so it stops waiting.
@@ -1386,7 +1387,7 @@ public sealed class WFCockpitTest : InteractionTest
                 controller.FrameUpdate(new FrameEventArgs(0.05f));
                 Assert.That(controller.CanEnter(window.WfCockpitConsole), Is.True, "The pilot state has arrived by now.");
                 Assert.That(controller.Active, Is.False, "Roughly a second after opening, the helm no longer tries to enter by itself.");
-                window.Dispose();
+                window.Teardown();
             });
 
             // The pilot must be seated when the helm opens; buckling later does not count.
@@ -1408,7 +1409,7 @@ public sealed class WFCockpitTest : InteractionTest
                 controller.FrameUpdate(new FrameEventArgs(0.05f));
                 Assert.That(controller.CanEnter(window.WfCockpitConsole), Is.True, "The pilot is seated now, so entering by hand would work.");
                 Assert.That(controller.Active, Is.False, "Buckling after the helm opened must not enter the cockpit.");
-                window.Dispose();
+                window.Teardown();
             });
         });
     }
@@ -1567,7 +1568,7 @@ public sealed class WFCockpitTest : InteractionTest
 
             controller.Exit();
             Assert.That(AimOverlayPresent(), Is.False);
-            window.Dispose();
+            window.Teardown();
             settings.SetCVar(CCVars.UILayout, originalLayout);
         });
     }
@@ -1751,7 +1752,7 @@ public sealed class WFCockpitTest : InteractionTest
             finally
             {
                 controller.Exit();
-                window.Dispose();
+                window.Teardown();
                 settings.SetCVar(WolfgateCVars.UiStyle, originalTheme);
                 settings.SetCVar(CCVars.UILayout, originalLayout);
             }

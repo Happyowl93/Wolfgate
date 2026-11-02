@@ -8,7 +8,7 @@ namespace Content.Shared._WF.Wolfmed.Wounds;
 /// there, or replaces it when it is a worse rung; a wound past its maximum becomes the next rung; past the top rung a
 /// limb is marked severable. See <see cref="WolfmedWoundLadderSystem"/>.
 /// </summary>
-[Prototype("wolfmedWoundLadder")]
+[Prototype]
 public sealed partial class WolfmedWoundLadderPrototype : IPrototype
 {
     [IdDataField]

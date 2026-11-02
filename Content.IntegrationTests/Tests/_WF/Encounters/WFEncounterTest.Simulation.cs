@@ -22,6 +22,10 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestSimWandererProto => "WFTestSimWanderer";
+    private static ProtoId<WFEncounterPrototype> WFTestSimHaulerProto => "WFTestSimHauler";
+    private static ProtoId<WFEncounterPrototype> WFTestSimPairProto => "WFTestSimPair";
+
     [TestPrototypes]
     private const string SimulationPrototypes = @"
 - type: wfEncounter
@@ -166,7 +170,7 @@ public sealed partial class WFEncounterTest
             var start = new Vector2(30000, 30000);
             await Server.WaitAssertion(() =>
             {
-                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestSimWanderer");
+                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestSimWandererProto);
                 Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(start, MapData.MapId), out encounter), Is.True);
                 var ship = Ship(encounter);
                 proxy = ship.Grid;
@@ -217,7 +221,7 @@ public sealed partial class WFEncounterTest
             var at = new Vector2(-30000, 30000);
             await Server.WaitAssertion(() =>
             {
-                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestSimHauler");
+                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestSimHaulerProto);
                 Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(at, MapData.MapId), out encounter), Is.True);
                 Assert.That(Ship(encounter).Virtual, Is.True);
                 var ev = new FTLStartedEvent(MapData.Grid, new EntityCoordinates(MapData.MapUid, at + new Vector2(500f, 0f)), MapData.MapUid,
@@ -242,9 +246,9 @@ public sealed partial class WFEncounterTest
                 Server.ResolveDependency<IConfigurationManager>().SetCVar(EncountersCVars.DuelMeanSeconds, 1f);
                 var prototypes = Server.ResolveDependency<IPrototypeManager>();
                 var encounters = Server.System<WFEncounterSystem>();
-                Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestSimRaider"),
+                Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestSimRaiderProto),
                     new MapCoordinates(new Vector2(30000, -30000), MapData.MapId), out raider), Is.True);
-                Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestSimHauler"),
+                Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestSimHaulerProto),
                     new MapCoordinates(new Vector2(30800, -30000), MapData.MapId), out hauler), Is.True);
                 var attack = new List<WFCrewObjective>
                 {
@@ -284,9 +288,9 @@ public sealed partial class WFEncounterTest
             {
                 var prototypes = Server.ResolveDependency<IPrototypeManager>();
                 var encounters = Server.System<WFEncounterSystem>();
-                Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestSimHauler"),
+                Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestSimHaulerProto),
                     new MapCoordinates(at, MapData.MapId), out host), Is.True);
-                Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestSimHauler"),
+                Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestSimHaulerProto),
                     new MapCoordinates(at + new Vector2(400f, 0f), MapData.MapId), out visitor), Is.True);
                 var dock = new List<WFCrewObjective>
                 {
@@ -386,7 +390,7 @@ public sealed partial class WFEncounterTest
             await Server.WaitPost(() =>
             {
                 MovePlayer(at + new Vector2(0f, 1500f));
-                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestSimHauler");
+                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestSimHaulerProto);
                 Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(at, MapData.MapId), out encounter), Is.True);
             });
             await Until(() => !Ship(encounter).Virtual && !Ship(encounter).Building, 30, "The hauler near the player is spawned.");
@@ -418,7 +422,7 @@ public sealed partial class WFEncounterTest
             EntityUid encounter = default;
             await Server.WaitAssertion(() =>
             {
-                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestSimPair");
+                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestSimPairProto);
                 Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-30000, 0), MapData.MapId), out encounter), Is.True);
             });
 
@@ -461,7 +465,7 @@ public sealed partial class WFEncounterTest
             await Server.WaitPost(() =>
             {
                 MovePlayer(at + new Vector2(0f, 1500f));
-                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestSimWanderer");
+                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestSimWandererProto);
                 Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(at, MapData.MapId), out encounter), Is.True);
             });
             await Until(() => !Ship(encounter).Virtual && !Ship(encounter).Building, 30, "The wanderer near the player is spawned.");
@@ -497,7 +501,7 @@ public sealed partial class WFEncounterTest
                 maps.SetTile(grid, Vector2i.Zero, new Tile(1));
                 Server.System<SharedTransformSystem>().SetCoordinates(grid.Owner, new EntityCoordinates(MapData.MapUid, centre));
                 station = grid.Owner;
-                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestSimHauler");
+                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestSimHaulerProto);
                 var encounters = Server.System<WFEncounterSystem>();
                 Assert.That(encounters.TrySpawn(prototype, new MapCoordinates(centre + new Vector2(1500f, 0f), MapData.MapId), out encounter), Is.True);
                 Assert.That(encounters.SetOrders(encounter, "ship", new List<WFCrewObjective>
@@ -552,7 +556,7 @@ public sealed partial class WFEncounterTest
             var at = new Vector2(30000, -25000);
             await Server.WaitPost(() =>
             {
-                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestSimHauler");
+                var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestSimHaulerProto);
                 Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(at, MapData.MapId), out encounter), Is.True);
                 proxy = Ship(encounter).Grid;
                 MovePlayer(at + new Vector2(0f, 1500f));

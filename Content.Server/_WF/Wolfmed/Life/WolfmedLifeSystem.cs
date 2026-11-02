@@ -39,7 +39,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 /// </remarks>
 // The heart either beats or it does not, and the brain either has oxygen or is running out of it. Death is the brain
 // organ being destroyed, which is ordinary MobState.Dead with nothing permanent attached.
-public sealed class WolfmedLifeSystem : EntitySystem
+public sealed partial class WolfmedLifeSystem : EntitySystem
 {
     /// <summary>Pressure key for a stopped heart. Full, so an arrested body is always unconscious.</summary>
     public const string ArrestPressure = "arrest";

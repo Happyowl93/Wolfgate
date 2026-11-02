@@ -32,6 +32,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(WolfmedExplosionSystem))]
 public sealed class WolfmedExplosionTest : WolfmedGameTest
 {
+    private static readonly EntProtoId SurgeryCloseIncisionProto = "SurgeryCloseIncision";
+
     // WOLFGATE: a bespoke carrier rather than a shipped vest. Every shipped plate carrier also has an `Armor`
     // component with its own coefficients, which would muddy "the plate is what made the difference"; parenting
     // the abstract ClothingArmorPlate gives exactly the holder, the storage and the container and nothing else.
@@ -250,7 +252,7 @@ public sealed class WolfmedExplosionTest : WolfmedGameTest
                 foreach (var id in surgeryIds)
                 {
                     Assert.That(prototypes.TryIndex(id, out EntityPrototype? proto), Is.True, $"{id} must exist");
-                    Assert.That(proto!.TryGetComponent<SurgeryComponent>(out var surgery, factory), Is.True,
+                    Assert.That(proto!.TryComp<SurgeryComponent>(out var surgery, factory), Is.True,
                         $"{id} must carry a Surgery component");
                     Assert.That(surgery!.Steps, Is.Not.Empty, $"{id} must declare steps");
                     Assert.That(proto.Name, Is.Not.Empty, $"{id} must have a name (CRITIQUE4 M6)");
@@ -318,7 +320,7 @@ public sealed class WolfmedExplosionTest : WolfmedGameTest
                 var current = proto;
                 while (current != null && seen.Add(current.ID))
                 {
-                    if (!current.TryGetComponent<SurgeryComponent>(out var surgery, factory))
+                    if (!current.TryComp<SurgeryComponent>(out var surgery, factory))
                         break;
 
                     steps.AddRange(surgery.Steps.Select(step => step.Id));
@@ -355,7 +357,7 @@ public sealed class WolfmedExplosionTest : WolfmedGameTest
                 // And the wound is removable: SurgeryCloseIncision is the universal finisher, and WP12-5's five
                 // incision-based wound surgeries close their own incision on SurgeryStepSealTendWound (PROTO G's
                 // fourth site), so they need no second operation.
-                Assert.That(Reachable(prototypes.Index<EntityPrototype>("SurgeryCloseIncision")).Any(closing.Contains),
+                Assert.That(Reachable(prototypes.Index(SurgeryCloseIncisionProto)).Any(closing.Contains),
                     Is.True, "SurgeryCloseIncision must carry the Close effect - it is the universal finisher.");
 
                 foreach (var id in new[]
@@ -390,7 +392,7 @@ public sealed class WolfmedExplosionTest : WolfmedGameTest
     {
         return prototypes.EnumeratePrototypes<EntityPrototype>()
             .Where(proto => proto.Components.ContainsKey("SurgeryStep") &&
-                            proto.TryGetComponent<WolfmedSurgeryIncisionTreatmentEffectComponent>(
+                            proto.TryComp<WolfmedSurgeryIncisionTreatmentEffectComponent>(
                                 out var effect, factory) &&
                             effect.Treatment == treatment)
             .Select(proto => proto.ID)

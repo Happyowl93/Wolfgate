@@ -7,7 +7,7 @@ using Robust.Shared.Player;
 namespace Content.Server._WF.Xenonids.MassScanner;
 
 /// <summary>Every xeno carries a radar console; this hands out the action that toggles its window.</summary>
-public sealed class XenoMassScannerSystem : EntitySystem
+public sealed partial class XenoMassScannerSystem : EntitySystem
 {
     [Dependency] private SharedActionsSystem _actions = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;

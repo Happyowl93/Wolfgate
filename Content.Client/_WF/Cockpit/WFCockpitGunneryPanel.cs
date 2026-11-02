@@ -81,6 +81,7 @@ public sealed class WFCockpitGunneryPanel : Control
     private void Forward(BoundUserInterfaceMessage message) => Command?.Invoke(message);
     private void Refresh() => Forward(new FireControlConsoleRefreshServerMessage());
 
+#pragma warning disable CS0672, CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
     protected override void Dispose(bool disposing)
     {
         if (disposing && !_released)
@@ -93,4 +94,5 @@ public sealed class WFCockpitGunneryPanel : Control
         }
         base.Dispose(disposing);
     }
+#pragma warning restore CS0672, CS0618
 }

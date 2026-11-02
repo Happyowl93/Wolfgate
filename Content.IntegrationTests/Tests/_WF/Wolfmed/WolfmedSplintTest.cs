@@ -33,6 +33,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(WolfmedSplintSystem))]
 public sealed class WolfmedSplintTest : WolfmedGameTest
 {
+    private static readonly ProtoId<FractureProfilePrototype> WFWolfmedFractureProfileProto = "WFWolfmedFractureProfile";
+
     /// <summary>A splint on a broken leg sets the bone, cuts the penalty to a quarter and is used up.</summary>
     [Test]
     public async Task SplintSetsTheFractureAndCutsThePenaltyTest()
@@ -123,7 +125,7 @@ public sealed class WolfmedSplintTest : WolfmedGameTest
                 Assert.That(splints.CanApply(splint, head), Is.EqualTo(WolfmedSplintRefusal.NoFracture));
 
                 // The floor is the profile's own: the same grade a bonesetter refuses below.
-                var profile = prototypes.Index<FractureProfilePrototype>("WFWolfmedFractureProfile");
+                var profile = prototypes.Index<FractureProfilePrototype>(WFWolfmedFractureProfileProto);
                 Assert.That(profile.ReductionMinimumGrade, Is.EqualTo(FractureGrade.Simple));
 
                 foreach (var key in new[]

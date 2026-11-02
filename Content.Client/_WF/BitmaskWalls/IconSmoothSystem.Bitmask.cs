@@ -32,7 +32,7 @@ public sealed partial class IconSmoothSystem
             tile = _mapSystem.TileIndicesFor(grid, grid.Comp, xform.Coordinates);
             foreach (var (offset, bit, needs) in BitmaskNeighbours)
             {
-                var candidates = _mapSystem.GetAnchoredEntitiesEnumerator(grid, grid.Comp, tile + offset);
+                var candidates = _mapSystem.GetAnchoredEntities(grid, grid.Comp, tile + offset);
                 if ((junction & needs) == needs && MatchingEntity(smooth, candidates, smoothQuery, offset))
                     junction |= bit;
             }

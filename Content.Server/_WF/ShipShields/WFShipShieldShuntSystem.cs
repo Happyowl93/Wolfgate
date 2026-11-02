@@ -18,7 +18,7 @@ using Content.Server._Crescent.ShipShields.Components;
 namespace Content.Server._WF.ShipShields;
 
 /// <summary>Applies authorized helm allocations to the ship selected by the console.</summary>
-public sealed class WFShipShieldShuntSystem : EntitySystem
+public sealed partial class WFShipShieldShuntSystem : EntitySystem
 {
     [Dependency] private ShipShieldsSystem _shields = default!;
     [Dependency] private ShuttleConsoleLockSystem _locks = default!;

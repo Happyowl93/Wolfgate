@@ -10,7 +10,7 @@ namespace Content.Server._WF.Drydock;
 /// Landing thruster refits (<see cref="WFLandingThrusterRefit"/>): every linear thruster on a ship converted for
 /// atmospheric flight, keeping its parts and ratings. Each thruster is a unit.
 /// </summary>
-public sealed class WFLandingThrusterRefitSystem : EntitySystem
+public sealed partial class WFLandingThrusterRefitSystem : EntitySystem
 {
     [Dependency] private ThrusterSystem _thrusters = default!;
     [Dependency] private IPrototypeManager _prototype = default!;
@@ -53,9 +53,9 @@ public sealed class WFLandingThrusterRefitSystem : EntitySystem
     {
         var prospect = args.Prospect;
         if (_prototype.TryIndex(prospect.Prototype, out var proto) &&
-            proto.TryGetComponent<ThrusterComponent>(out var thruster, Factory) &&
+            proto.TryComp<ThrusterComponent>(out var thruster, Factory) &&
             thruster.Type == ThrusterType.Linear &&
-            !proto.TryGetComponent<WFLandingThrusterComponent>(out _, Factory))
+            !proto.TryComp<WFLandingThrusterComponent>(out _, Factory))
         {
             prospect.Lacking[0]++;
         }

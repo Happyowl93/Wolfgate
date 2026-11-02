@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using System.Numerics;
 using Content.Server._NF.Bank;
@@ -22,6 +23,10 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static readonly ProtoId<WFStandingPrototype> WFAshfallReaversProto = "WFAshfallReavers";
+    private static ProtoId<WFEncounterPrototype> WFTestSimRaiderProto => "WFTestSimRaider";
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     /// <summary>
     /// Killing a Reaver crewman pays the killer the company's kill bounty at once, the assist half of it, and it still
     /// pays once the encounter is over, as for boarders left aboard a player's ship.
@@ -39,8 +44,8 @@ public sealed partial class WFEncounterTest
             // Other tests on this pair may have used the hour's allowance.
             config.SetCVar(EncountersCVars.PayoutHourlyCap, int.MaxValue);
             var prototypes = Server.ResolveDependency<IPrototypeManager>();
-            bounty = prototypes.Index<WFStandingPrototype>("WFAshfallReavers").KillBounty;
-            Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestSimRaider"),
+            bounty = prototypes.Index<WFStandingPrototype>(WFAshfallReaversProto).KillBounty;
+            Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestSimRaiderProto),
                 new MapCoordinates(new Vector2(-52000, 52000), MapData.MapId), out encounter), Is.True);
         });
         Assert.That(bounty, Is.GreaterThan(0), "The Reavers carry a kill bounty.");
@@ -49,7 +54,7 @@ public sealed partial class WFEncounterTest
         await Server.WaitAssertion(() =>
         {
             var group = Ship(encounter).Group;
-            var crew = SEntMan.EntityQuery<WFCrewComponent>(true).Where(member => member.Group == group).Select(member => member.Owner).ToList();
+            var crew = SEntMan.EntityQuery<WFCrewComponent>(true).Where(member => member.Group == group).Select(member => member.Uid()).ToList();
             Assert.That(crew, Has.Count.GreaterThanOrEqualTo(4));
 
             var player = SEntMan.GetEntity(Player);
@@ -104,7 +109,7 @@ public sealed partial class WFEncounterTest
             cap = config.GetCVar(EncountersCVars.PayoutHourlyCap);
             config.SetCVar(EncountersCVars.PayoutHourlyCap, int.MaxValue);
             var prototypes = Server.ResolveDependency<IPrototypeManager>();
-            Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestSimRaider"),
+            Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestSimRaiderProto),
                 new MapCoordinates(new Vector2(-56000, 52000), MapData.MapId), out encounter), Is.True);
         });
         await Until(() => !Ship(encounter).Virtual && !Ship(encounter).Building, 30, "The raider's hull is built.");
@@ -114,11 +119,11 @@ public sealed partial class WFEncounterTest
         await Server.WaitAssertion(() =>
         {
             var group = Ship(encounter).Group;
-            victim = SEntMan.EntityQuery<WFCrewComponent>(true).First(member => member.Group == group).Owner;
+            victim = SEntMan.EntityQuery<WFCrewComponent>(true).First(member => member.Group == group).Uid();
             var player = SEntMan.GetEntity(Player);
             SEntMan.EnsureComponent<BankAccountComponent>(player);
             Server.System<BankSystem>().TryGetBalance(player, out before);
-            var blunt = Server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>("Blunt");
+            var blunt = Server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>(BluntProto);
             for (var i = 0; i < 20 && !Server.System<MobStateSystem>().IsIncapacitated(victim); i++)
                 Server.System<DamageableSystem>().TryChangeDamage(victim, new DamageSpecifier(blunt, 20), true, origin: player);
             Assert.That(Server.System<MobStateSystem>().IsIncapacitated(victim), "The crewman goes down.");
@@ -128,7 +133,7 @@ public sealed partial class WFEncounterTest
         {
             Server.System<BankSystem>().TryGetBalance(SEntMan.GetEntity(Player), out var after);
             Assert.That(after - before, Is.EqualTo(1500), "The player who beat the crewman down is paid.");
-            var drop = Server.ResolveDependency<IPrototypeManager>().Index<WFStandingPrototype>("WFAshfallReavers").CashDrop;
+            var drop = Server.ResolveDependency<IPrototypeManager>().Index<WFStandingPrototype>(WFAshfallReaversProto).CashDrop;
             var cash = Server.System<EntityLookupSystem>().GetEntitiesInRange<StackComponent>(SEntMan.GetComponent<TransformComponent>(victim).Coordinates, 1f)
                 .Where(stack => SEntMan.GetComponent<MetaDataComponent>(stack).EntityPrototype?.ID == "SpaceCash")
                 .Sum(stack => stack.Comp.Count);

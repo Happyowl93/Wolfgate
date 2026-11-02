@@ -12,7 +12,7 @@ using Robust.Shared.Configuration;
 namespace Content.Client._WF.SoundtrackMute;
 
 /// <summary>Fades background music out while a jukebox or MIDI instrument is in range.</summary>
-public sealed class SoundtrackMuteSystem : EntitySystem
+public sealed partial class SoundtrackMuteSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private AudioSystem _audio = default!;

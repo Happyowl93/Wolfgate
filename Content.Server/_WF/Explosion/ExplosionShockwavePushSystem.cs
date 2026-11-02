@@ -28,7 +28,7 @@ namespace Content.Server._WF.Explosion;
 ///
 /// A buckled mob rides it out: its shove is held back and only lands if the blast destroys what it was strapped to.
 /// </remarks>
-public sealed class ExplosionShockwavePushSystem : EntitySystem
+public sealed partial class ExplosionShockwavePushSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IRobustRandom _random = default!;

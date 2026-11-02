@@ -14,6 +14,9 @@ namespace Content.IntegrationTests.Tests._WF.BlackHole;
 [TestFixture]
 public sealed class BlackHoleStarTest
 {
+    private static readonly ProtoId<StarSystemPrototype> SystemKyphrusProto = "SystemKyphrus";
+    private static readonly ProtoId<StarTypePrototype> TypeKStarProto = "TypeKStar";
+
     private const BindingFlags PrivateInstance = BindingFlags.Instance | BindingFlags.NonPublic;
 
     /// <summary>The visual replacement preserves Kyphrus's name, illumination model and planetary layout.</summary>
@@ -24,11 +27,11 @@ public sealed class BlackHoleStarTest
         await pair.Server.WaitAssertion(() =>
         {
             var prototypes = pair.Server.ResolveDependency<IPrototypeManager>();
-            var definition = prototypes.Index<StarSystemPrototype>("SystemKyphrus");
+            var definition = prototypes.Index<StarSystemPrototype>(SystemKyphrusProto);
             var system = pair.Server.System<Content.Server._FarHorizons.StarSystem.StarSystemMapSystem>()
                 .BuildPlanetarySystem("SystemKyphrus");
             Assert.That(system, Is.Not.Null);
-            var ordinary = new Star(prototypes.Index<StarTypePrototype>("TypeKStar"), prototypes);
+            var ordinary = new Star(prototypes.Index<StarTypePrototype>(TypeKStarProto), prototypes);
 
             using (Assert.EnterMultipleScope())
             {

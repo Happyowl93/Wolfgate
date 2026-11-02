@@ -30,7 +30,7 @@ public sealed class EventGridHardpointTest
         var paths = new HashSet<ResPath>();
         foreach (var proto in prototypes.EnumeratePrototypes<EntityPrototype>())
         {
-            if (proto.Abstract || !proto.TryGetComponent<BluespaceErrorRuleComponent>(out var rule, factory))
+            if (proto.Abstract || !proto.TryComp<BluespaceErrorRuleComponent>(out var rule, factory))
                 continue;
 
             foreach (var group in rule.Groups.Values.OfType<BluespaceGridSpawnGroup>())

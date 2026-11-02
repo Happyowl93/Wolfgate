@@ -10,7 +10,7 @@ namespace Content.Client._WF.Performance;
 /// Reads the asteroid field lists for rocks whose grids this client hasn't been sent, and the radar shapes to draw
 /// them with.
 /// </summary>
-public sealed class WFAsteroidFieldSystem : EntitySystem
+public sealed partial class WFAsteroidFieldSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
 

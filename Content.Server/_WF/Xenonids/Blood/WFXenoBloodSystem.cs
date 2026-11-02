@@ -14,7 +14,7 @@ namespace Content.Server._WF.Xenonids.Blood;
 /// RMC xenos have no bloodstream, so nothing marks a fight. This drops acid-blood decals when a xeno is hurt, when it
 /// dies and when it is gibbed, and gibs a corpse that keeps taking damage so explosions leave gibs instead of a body.
 /// </summary>
-public sealed class WFXenoBloodSystem : EntitySystem
+public sealed partial class WFXenoBloodSystem : EntitySystem
 {
     [Dependency] private BodySystem _body = default!;
     [Dependency] private MobStateSystem _mobState = default!;

@@ -37,7 +37,7 @@ public sealed class AsfFleetTest
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(prototypes.Index(ShipyardConsole).TryGetComponent<ShipyardListingComponent>(out var listing, factory));
+            Assert.That(prototypes.Index(ShipyardConsole).TryComp<ShipyardListingComponent>(out var listing, factory));
             foreach (var id in listing!.Shuttles)
             {
                 var vessel = prototypes.Index<VesselPrototype>(id);

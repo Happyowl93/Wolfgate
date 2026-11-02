@@ -17,7 +17,7 @@ namespace Content.Client._WF.Shuttles.Systems;
 /// Always takes over the engine's per-sound pass, which turns a sound up before checking its range or placing it: an
 /// unplaced source sits at the map origin, so anyone standing there heard blips of far-off sounds (CC is at the origin).
 /// </summary>
-public sealed class ShuttleCameraListenerSystem : EntitySystem
+public sealed partial class ShuttleCameraListenerSystem : EntitySystem
 {
     [Dependency] private IEyeManager _eye = default!;
     [Dependency] private IPlayerManager _player = default!;

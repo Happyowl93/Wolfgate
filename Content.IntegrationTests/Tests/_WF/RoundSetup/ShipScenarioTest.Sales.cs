@@ -1,3 +1,4 @@
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -61,7 +62,7 @@ public sealed partial class ShipScenarioTest
                 Assert.That(occupied.Error, Is.EqualTo(ShipyardSystem.ShipyardSaleError.OrganicsAboard));
                 server.System<SharedTransformSystem>().SetCoordinates(body, new EntityCoordinates(central, Vector2.Zero));
                 foreach (var (_, xform) in em.EntityQuery<MobStateComponent, TransformComponent>().ToArray())
-                    if (xform.GridUid == spawn.EntityId) em.DeleteEntity(xform.Owner);
+                    if (xform.GridUid == spawn.EntityId) em.DeleteEntity(xform.Uid());
                 var sale = shipyard.TrySellShuttle(station, spawn.EntityId, console, out var value);
                 Assert.That(sale.Error, Is.EqualTo(ShipyardSystem.ShipyardSaleError.Success));
                 Assert.That(value, Is.Positive);

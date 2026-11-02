@@ -249,7 +249,8 @@ public sealed partial class WFCompanySystem : EntitySystem
 
     private void OnRestart(RoundRestartCleanupEvent args)
     {
-        SavePlayedTime();
+        // Saved on the next update: a write started here would still be running when the restart adds the new round.
+        _nextSave = TimeSpan.Zero;
         _spawnedSlots.Clear();
         _rankJoins.Clear();
         _newRecords.Clear();

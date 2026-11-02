@@ -187,11 +187,11 @@ public sealed partial class WFHullSectionSystem : EntitySystem
     /// Only wrenchable entities are checked. What the snapshot holds on this tile was built to share it, such as a
     /// window and its grille, so only something else blocks.
     /// </summary>
-    private bool IsSpotTaken(Entity<MapGridComponent> hull, EntProtoId proto, Vector2i index, ShipRepairDataComponent data, ShipRepairChunk chunk)
+    public bool IsSpotTaken(Entity<MapGridComponent> hull, EntProtoId proto, Vector2i index, ShipRepairDataComponent data, ShipRepairChunk chunk)
     {
         if (!_proto.TryIndex(proto, out var entProto) ||
-            !entProto.TryGetComponent<AnchorableComponent>(out _, _factory) ||
-            !entProto.TryGetComponent<FixturesComponent>(out var fixtures, _factory))
+            !entProto.TryComp<AnchorableComponent>(out _, _factory) ||
+            !entProto.TryComp<FixturesComponent>(out var fixtures, _factory))
             return false;
 
         var layer = 0;
@@ -207,7 +207,7 @@ public sealed partial class WFHullSectionSystem : EntitySystem
         if ((layer | mask) == 0)
             return false;
 
-        var anchored = _map.GetAnchoredEntitiesEnumerator(hull, hull.Comp, index);
+        var anchored = _map.GetAnchoredEntities(hull, hull.Comp, index);
         while (anchored.MoveNext(out var uid))
         {
             if (!TryComp<PhysicsComponent>(uid, out var body) || !body.CanCollide || !body.Hard)
@@ -346,7 +346,7 @@ public sealed partial class WFHullSectionSystem : EntitySystem
         _map.FindGridsIntersecting(xform.MapID, home, ref grids, true, false);
         var crowded = grids.Any(grid => grid.Owner != hull.Owner && grid.Owner != section.Owner && !IsGround(grid));
 
-        var tiles = _map.GetAllTilesEnumerator(section, section.Comp);
+        var tiles = _map.GetAllTiles(section, section.Comp);
         while (tiles.MoveNext(out var tile))
         {
             var index = tile.Value.GridIndices + offset;
@@ -364,7 +364,7 @@ public sealed partial class WFHullSectionSystem : EntitySystem
     public bool TouchesHull(Entity<MapGridComponent> hull, Entity<MapGridComponent> section)
     {
         var home = OffsetOf(section);
-        var tiles = _map.GetAllTilesEnumerator(section, section.Comp);
+        var tiles = _map.GetAllTiles(section, section.Comp);
         while (tiles.MoveNext(out var tile))
         {
             foreach (var offset in EdgeNeighbours)
@@ -387,7 +387,7 @@ public sealed partial class WFHullSectionSystem : EntitySystem
     public int CountTiles(Entity<MapGridComponent> grid)
     {
         var count = 0;
-        var tiles = _map.GetAllTilesEnumerator(grid, grid.Comp);
+        var tiles = _map.GetAllTiles(grid, grid.Comp);
         while (tiles.MoveNext(out _))
         {
             count++;

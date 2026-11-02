@@ -518,6 +518,10 @@ public sealed partial class StationJobsSystem : EntitySystem
             if (!EntityManager.System<Content.Server._WF.RoundSetup.WFRoundSetupSystem>().IsStandardStation(station))
                 continue;
             // WOLFGATE END
+            // WOLFGATE(StationRoles): player ships take crew through Crew Setup only
+            if (HasComp<ExtraShuttleInformationComponent>(station))
+                continue;
+
             var stationNetEntity = GetNetEntity(station);
             var list = comp.JobList.ToDictionary(x => x.Key, x => x.Value);
 

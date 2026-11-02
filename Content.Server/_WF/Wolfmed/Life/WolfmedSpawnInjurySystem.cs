@@ -24,7 +24,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 /// Bloodloss as missing blood, the bleeding stopped (a body found like this stopped bleeding a while ago), and a total
 /// at the body's Dead threshold is a Wolfmed death, as the threshold would have made it.
 /// </summary>
-public sealed class WolfmedSpawnInjurySystem : EntitySystem
+public sealed partial class WolfmedSpawnInjurySystem : EntitySystem
 {
     [Dependency] private IComponentFactory _factory = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
@@ -82,7 +82,7 @@ public sealed class WolfmedSpawnInjurySystem : EntitySystem
     {
         var damage = new DamageSpecifier();
         if (MetaData(body).EntityPrototype is { } prototype &&
-            prototype.TryGetComponent(out DamageableComponent? preset, _factory))
+            prototype.TryComp(out DamageableComponent? preset, _factory))
             damage += preset.Damage;
 
         if (TryComp(body, out WolfmedSpawnInjuryComponent? pending))

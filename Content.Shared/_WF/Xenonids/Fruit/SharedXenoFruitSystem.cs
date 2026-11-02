@@ -362,7 +362,7 @@ public sealed partial class SharedXenoFruitSystem : EntitySystem
 
         // Target has fruit, resin hole, egg, xeno construct or other obstruction on it
         var tile = _mapSystem.CoordinatesToTile(gridId, grid, target);
-        var anchored = _mapSystem.GetAnchoredEntitiesEnumerator(gridId, grid, tile);
+        var anchored = _mapSystem.GetAnchoredEntities(gridId, grid, tile);
         while (anchored.MoveNext(out var uid))
         {
             // Target on another fruit
@@ -1077,7 +1077,7 @@ public sealed partial class SharedXenoFruitSystem : EntitySystem
 
     public string GetFruitSprite(EntityPrototype ent)
     {
-        if (!ent.TryGetComponent<XenoFruitComponent>(out var fruit, _componentFactory))
+        if (!ent.TryComp<XenoFruitComponent>(out var fruit, _componentFactory))
             return "fruit_lesser_spent";
 
         return fruit.GrownState;

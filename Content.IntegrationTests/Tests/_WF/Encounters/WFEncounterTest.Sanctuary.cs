@@ -21,6 +21,8 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 /// <summary>A player ship docked at a station is in sanctuary: no hunt, extorter or zone goes for it, and one that berths mid-run is let go.</summary>
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestEncounterHunterProto => "WFTestEncounterHunter";
+
     /// <summary>A ship and a station beside it, ready to dock, with the test player aboard the ship.</summary>
     private (EntityUid Ship, EntityUid ShipDock, EntityUid Station, EntityUid StationDock) BerthPair(Vector2 at)
     {
@@ -97,7 +99,7 @@ public sealed partial class WFEncounterTest
         await Server.WaitAssertion(() =>
         {
             Berth(pair);
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestEncounterHunter");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestEncounterHunterProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype,
                 new MapCoordinates(new Vector2(-62000, 62000) + new Vector2(-1500f, 0f), MapData.MapId), out encounter), Is.True);
         });
@@ -128,7 +130,7 @@ public sealed partial class WFEncounterTest
         await Server.WaitAssertion(() =>
         {
             pair = BerthPair(new Vector2(-63000, 63000));
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestEncounterHunter");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestEncounterHunterProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype,
                 new MapCoordinates(new Vector2(-63000, 63000) + new Vector2(-1500f, 0f), MapData.MapId), out encounter), Is.True);
         });
@@ -206,7 +208,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestAuditZoneGuarded");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestAuditZoneGuardedProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-64000, 64000), MapData.MapId), out encounter), Is.True);
             pair = BerthPair(new Vector2(-63900, 64000));
         });

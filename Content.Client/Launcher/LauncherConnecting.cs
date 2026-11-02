@@ -65,6 +65,7 @@ namespace Content.Client.Launcher
 
             _clientNetManager.ConnectFailed += OnConnectFailed;
             _clientNetManager.ClientConnectStateChanged += OnConnectStateChanged;
+            StartJoinProgress(); // WOLFGATE(JoinProgress): follow the join stages
 
             CurrentPage = Page.Connecting;
         }
@@ -75,6 +76,7 @@ namespace Content.Client.Launcher
 
             _clientNetManager.ConnectFailed -= OnConnectFailed;
             _clientNetManager.ClientConnectStateChanged -= OnConnectStateChanged;
+            StopJoinProgress(); // WOLFGATE(JoinProgress): this screen closing is the end of the join
         }
 
         private void OnConnectFailed(object? _, NetConnectFailArgs args)

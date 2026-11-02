@@ -18,7 +18,7 @@ namespace Content.Server._WF.Wolfmed.Consciousness;
 /// HUDs for <c>wolfmed.call_for_help_seconds</c>, then waits <c>wolfmed.call_for_help_cooldown</c> before the
 /// next call. Downed only: the action exists while Downed and nowhere else.
 /// </summary>
-public sealed class WolfmedCallForHelpSystem : EntitySystem
+public sealed partial class WolfmedCallForHelpSystem : EntitySystem
 {
     public static readonly EntProtoId CallAction = "WFActionWolfmedCallForHelp";
 

@@ -20,7 +20,7 @@ namespace Content.Server._WF.Wolfmed.Gore;
 /// art on the deck around the body as decals: the blood layer in the body's blood colour, the skin-coloured bits in
 /// its skin colour, the innards in their own colours. Cleanable like the floor splats. Organic bodies only.
 /// </summary>
-public sealed class WolfmedGibDecalSystem : EntitySystem
+public sealed partial class WolfmedGibDecalSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private DecalSystem _decals = default!;

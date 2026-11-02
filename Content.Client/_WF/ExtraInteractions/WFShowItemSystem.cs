@@ -8,7 +8,7 @@ namespace Content.Client._WF.ExtraInteractions;
 /// <summary>
 /// Keeps the item bubbles the server announced until they expire; <see cref="WFShowItemOverlay"/> draws them.
 /// </summary>
-public sealed class WFShowItemSystem : SharedWFShowItemSystem
+public sealed partial class WFShowItemSystem : SharedWFShowItemSystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IOverlayManager _overlays = default!;

@@ -506,7 +506,7 @@ public sealed partial class ShuttleHullRoofOverlay : Overlay
     {
         _roofed.Clear();
 
-        var tiles = _map.GetAllTilesEnumerator(grid.Owner, grid.Comp);
+        var tiles = _map.GetAllTiles(grid.Owner, grid.Comp);
 
         while (tiles.MoveNext(out var tileRef))
         {

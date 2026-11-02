@@ -41,7 +41,9 @@ public sealed class VehicleAmmoLoaderBoundUserInterface : BoundUserInterface, IR
         if (_menu != null)
             _menu.OnClose -= Close;
 
-        _menu?.Dispose();
+        if (_menu is { Disposed: false })
+            _menu.Orphan();
+
         _menu = null;
     }
 

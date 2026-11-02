@@ -8,7 +8,7 @@ namespace Content.Server._WF.Xenonids.Hive;
 /// <summary>
 /// Sends the hive entity, which lives in nullspace, to the clients of its xenos so client-side hive checks work.
 /// </summary>
-public sealed class XenoHivePvsSystem : EntitySystem
+public sealed partial class XenoHivePvsSystem : EntitySystem
 {
     [Dependency] private SharedXenoHiveSystem _hive = default!;
     [Dependency] private PvsOverrideSystem _pvsOverride = default!;

@@ -27,7 +27,7 @@ public sealed partial class ShipShieldsSystem
             return null;
         if (HasComp<MapGridComponent>(uid))
             return uid;
-        if (TryComp<TransformComponent>(uid, out var transform) && transform.GridUid is { } grid
+        if (TryComp(uid, out TransformComponent? transform) && transform.GridUid is { } grid
             && !TerminatingOrDeleted(grid) && HasComp<MapGridComponent>(grid))
             return grid;
         return EntityManager.System<Content.Server._WF.NpcCrew.Systems.WFCrewAlertSystem>().FreeMechOf(uid);

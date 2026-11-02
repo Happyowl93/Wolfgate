@@ -22,6 +22,9 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestFixture]
 public sealed class WolfmedBobMeleeSoundsTest : WolfmedGameTest
 {
+    private static readonly ProtoId<SoundCollectionPrototype> WFWolfmedChopProto = "WFWolfmedChop";
+    private static readonly ProtoId<SoundCollectionPrototype> WFWolfmedPunchProto = "WFWolfmedPunch";
+
     private static DamageSpecifier Damage(string type, float amount) =>
         new() { DamageDict = { [new ProtoId<DamageTypePrototype>(type)] = FixedPoint2.New(amount) } };
 
@@ -68,8 +71,8 @@ public sealed class WolfmedBobMeleeSoundsTest : WolfmedGameTest
             Assert.That(sounds.IsChop(Damage("Blunt", 40)), Is.True, "a 40 Blunt hit does not chop.");
             Assert.That(sounds.IsChop(Damage("Slash", 32)), Is.False, "a machete chops.");
             Assert.That(sounds.IsChop(Damage("Piercing", 60)), Is.False, "a stab chops.");
-            Assert.That(SProtoMan.Index<SoundCollectionPrototype>("WFWolfmedChop").PickFiles, Has.Count.EqualTo(3));
-            Assert.That(SProtoMan.Index<SoundCollectionPrototype>("WFWolfmedPunch").PickFiles, Has.Count.EqualTo(3));
+            Assert.That(SProtoMan.Index<SoundCollectionPrototype>(WFWolfmedChopProto).PickFiles, Has.Count.EqualTo(3));
+            Assert.That(SProtoMan.Index<SoundCollectionPrototype>(WFWolfmedPunchProto).PickFiles, Has.Count.EqualTo(3));
         });
     }
 }

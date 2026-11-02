@@ -48,6 +48,9 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(WolfmedGoreSystem))]
 public sealed class WolfmedGoreTest : WolfmedGameTest
 {
+    private static readonly ProtoId<ReagentPrototype> WaterProto = "Water";
+    private static readonly ProtoId<ReagentPrototype> SpaceCleanerProto = "SpaceCleaner";
+
     // --- G1 ---------------------------------------------------------------------------------------
 
     /// <summary>
@@ -77,7 +80,7 @@ public sealed class WolfmedGoreTest : WolfmedGameTest
             var wall = entities.SpawnEntity("WFWolfmedBloodSplatWall", new EntityCoordinates(map.Grid, 0.5f, 0.5f));
             Assert.That(entities.HasComponent<WolfmedCleanableComponent>(wall), Is.True);
 
-            var water = protoMan.Index<ReagentPrototype>("Water");
+            var water = protoMan.Index<ReagentPrototype>(WaterProto);
             Assert.That(water.TileReactions.Any(r => r is WolfmedCleanSplats), Is.True, "water does not clean Wolfmed's blood.");
             var grid = entities.GetComponent<MapGridComponent>(map.Grid);
             var tile = entities.System<SharedMapSystem>().GetTileRef(map.Grid, grid, coords);
@@ -440,7 +443,7 @@ public sealed class WolfmedGoreTest : WolfmedGameTest
         {
             // The reagent that purges cleanable decals also runs the Wolfmed reaction, so one mop stroke
             // takes both halves of a splat.
-            var cleaner = prototypes.Index<ReagentPrototype>("SpaceCleaner");
+            var cleaner = prototypes.Index<ReagentPrototype>(SpaceCleanerProto);
             Assert.That(cleaner.TileReactions.Any(reaction => reaction is WolfmedCleanSplats), Is.True,
                 "space cleaner does not know about the wall splats.");
 

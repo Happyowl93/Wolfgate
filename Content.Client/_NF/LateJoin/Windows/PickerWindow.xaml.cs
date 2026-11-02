@@ -23,8 +23,10 @@ public sealed partial class PickerWindow : FancyWindow
     // Designed so you can implement your own tab controls, simply make your control and add the enum here.
     public enum PickerType
     {
-        StationOrCrewLarge,
-        Crew,
+        // WOLFGATE(StationRoles) START: the crew controls are gone
+        // StationOrCrewLarge,
+        // Crew,
+        // WOLFGATE END
         Station,
     }
 
@@ -39,17 +41,19 @@ public sealed partial class PickerWindow : FancyWindow
         _gameTicker = _entitySystem.GetEntitySystem<ClientGameTicker>();
         _sawmill = Logger.GetSawmill("latejoin");
 
-        CrewTabButton.OnPressed += _ =>
-        {
-            SetCurrentTab(PickerType.Crew);
-            UpdateUi(_gameTicker.StationJobInformationList);
-        };
+        // WOLFGATE(StationRoles) START: no tab bar, the window is only the station list
+        // CrewTabButton.OnPressed += _ =>
+        // {
+        //     SetCurrentTab(PickerType.Crew);
+        //     UpdateUi(_gameTicker.StationJobInformationList);
+        // };
 
-        StationTabButton.OnPressed += _ =>
-        {
-            SetCurrentTab(PickerType.Station);
-            UpdateUi(_gameTicker.StationJobInformationList);
-        };
+        // StationTabButton.OnPressed += _ =>
+        // {
+        //     SetCurrentTab(PickerType.Station);
+        //     UpdateUi(_gameTicker.StationJobInformationList);
+        // };
+        // WOLFGATE END
 
         UpdateUi(_gameTicker.StationJobInformationList);
     }
@@ -61,7 +65,9 @@ public sealed partial class PickerWindow : FancyWindow
         // This is the place to change the default tab.
         if (_currentTab == null)
         {
-            SetCurrentTab(PickerType.StationOrCrewLarge);
+            // WOLFGATE(StationRoles): opens straight on the station list
+            // SetCurrentTab(PickerType.StationOrCrewLarge);
+            SetCurrentTab(PickerType.Station);
         }
     }
 
@@ -83,18 +89,20 @@ public sealed partial class PickerWindow : FancyWindow
         var availableJobs = obj.Where(kvp => kvp.Value.JobsAvailable.Values.Count != 0)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-        var stationJobs = availableJobs.Where(kvp => kvp.Value.IsLateJoinStation)
-            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-        var crewJobs = availableJobs.Where(kvp => !kvp.Value.IsLateJoinStation)
-            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        // WOLFGATE(StationRoles) START: no tab bar to label
+        // var stationJobs = availableJobs.Where(kvp => kvp.Value.IsLateJoinStation)
+        //     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        // var crewJobs = availableJobs.Where(kvp => !kvp.Value.IsLateJoinStation)
+        //     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-        StationTabLabel.Text = _loc.GetString("frontier-lobby-station-title") + stationJobs.GetJobSumCountString();
-        StationTabButton.Disabled = !StationJobInformationExtensions.IsAnyStationAvailable(availableJobs) ||
-                                    _currentTab?.Type == PickerType.Station;
+        // StationTabLabel.Text = _loc.GetString("frontier-lobby-station-title") + stationJobs.GetJobSumCountString();
+        // StationTabButton.Disabled = !StationJobInformationExtensions.IsAnyStationAvailable(availableJobs) ||
+        //                             _currentTab?.Type == PickerType.Station;
 
-        CrewTabLabel.Text = _loc.GetString("frontier-lobby-crew-title") + crewJobs.GetJobSumCountString();
-        CrewTabButton.Disabled = !StationJobInformationExtensions.IsAnyCrewJobAvailable(availableJobs) ||
-                                 _currentTab?.Type == PickerType.Crew;
+        // CrewTabLabel.Text = _loc.GetString("frontier-lobby-crew-title") + crewJobs.GetJobSumCountString();
+        // CrewTabButton.Disabled = !StationJobInformationExtensions.IsAnyCrewJobAvailable(availableJobs) ||
+        //                          _currentTab?.Type == PickerType.Crew;
+        // WOLFGATE END
 
         _currentTab?.Control.UpdateUi(availableJobs);
     }
@@ -111,17 +119,19 @@ public sealed partial class PickerWindow : FancyWindow
 
         switch (pickerType)
         {
-            case PickerType.StationOrCrewLarge:
-                var stationOrCrewLargeControl = new StationOrCrewLargeControl();
-                _currentTab = new PickerTab(pickerType, stationOrCrewLargeControl);
-                // Child panel can change tab from within, set the tab change callback.
-                stationOrCrewLargeControl.OnTabChange ??= SetCurrentTab;
-                break;
-            case PickerType.Crew:
-                var crewPickerControl = new CrewPickerControl();
-                _currentTab = new PickerTab(pickerType, crewPickerControl);
-                crewPickerControl.OnJobJoined ??= JoinGame;
-                break;
+            // WOLFGATE(StationRoles) START: ship crews join through Crew Setup now
+            // case PickerType.StationOrCrewLarge:
+            //     var stationOrCrewLargeControl = new StationOrCrewLargeControl();
+            //     _currentTab = new PickerTab(pickerType, stationOrCrewLargeControl);
+            //     // Child panel can change tab from within, set the tab change callback.
+            //     stationOrCrewLargeControl.OnTabChange ??= SetCurrentTab;
+            //     break;
+            // case PickerType.Crew:
+            //     var crewPickerControl = new CrewPickerControl();
+            //     _currentTab = new PickerTab(pickerType, crewPickerControl);
+            //     crewPickerControl.OnJobJoined ??= JoinGame;
+            //     break;
+            // WOLFGATE END
             case PickerType.Station:
                 var stationPickerControl = new StationPickerControl();
                 _currentTab = new PickerTab(pickerType, stationPickerControl);

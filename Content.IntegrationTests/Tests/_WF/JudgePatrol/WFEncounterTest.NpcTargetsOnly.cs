@@ -15,6 +15,8 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 /// <summary>A ship minding only NPCs leaves a player ship of an enemy company alone, where a plain patrol fights it.</summary>
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestEncounterNpcTargetsOnlyGuardProto => "WFTestEncounterNpcTargetsOnlyGuard";
+
     [TestPrototypes]
     private const string NpcTargetsOnlyPrototypes = @"
 - type: wfEncounter
@@ -43,9 +45,9 @@ public sealed partial class WFEncounterTest
         EntityUid player = default;
         await Server.WaitAssertion(() =>
         {
-            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestEncounterNpcTargetsOnlyGuard"),
+            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestEncounterNpcTargetsOnlyGuardProto),
                 new MapCoordinates(at, MapData.MapId), out var judging), Is.True);
-            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestEncounterPlainGuard"),
+            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestEncounterPlainGuardProto),
                 new MapCoordinates(at + new Vector2(0, 400), MapData.MapId), out var guarding), Is.True);
             judge = SEntMan.GetComponent<WFEncounterComponent>(judging).Ships["guard"];
             plain = SEntMan.GetComponent<WFEncounterComponent>(guarding).Ships["guard"];

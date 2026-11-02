@@ -29,7 +29,7 @@ public sealed partial class WFDrydockSystem
 
         var materials = new Dictionary<string, int>();
         _constructionMaterials[proto.ID] = materials;
-        if (!proto.TryGetComponent<ConstructionComponent>(out var construction, Factory) ||
+        if (!proto.TryComp<ConstructionComponent>(out var construction, Factory) ||
             !_prototype.TryIndex<ConstructionGraphPrototype>(construction.Graph, out var graph) ||
             graph.Start is not { } start ||
             !graph.TryPath(start, construction.Node, out var path))
@@ -52,14 +52,14 @@ public sealed partial class WFDrydockSystem
             }
         }
 
-        if (proto.TryGetComponent<MachineComponent>(out var machine, Factory) && machine.Board is { } board &&
-            _prototype.Index(board).TryGetComponent<MachineBoardComponent>(out var boardComp, Factory))
+        if (proto.TryComp<MachineComponent>(out var machine, Factory) && machine.Board is { } board &&
+            _prototype.Index(board).TryComp<MachineBoardComponent>(out var boardComp, Factory))
         {
             // Cable comes off whole with the parts, so only sheets count.
             foreach (var (stack, amount) in boardComp.StackRequirements)
             {
                 if (_prototype.TryIndex(stack, out var stackProto) &&
-                    _prototype.Index(stackProto.Spawn).TryGetComponent<MaterialComponent>(out _, Factory))
+                    _prototype.Index(stackProto.Spawn).TryComp<MaterialComponent>(out _, Factory))
                     AddSheets(materials, stack.Id, amount);
             }
         }
@@ -72,7 +72,7 @@ public sealed partial class WFDrydockSystem
     {
         if (!_prototype.TryIndex<StackPrototype>(stackId, out var stack) ||
             !_prototype.TryIndex(stack.Spawn, out var sheet) ||
-            !sheet.TryGetComponent<PhysicalCompositionComponent>(out var composition, Factory))
+            !sheet.TryComp<PhysicalCompositionComponent>(out var composition, Factory))
         {
             return;
         }
@@ -86,7 +86,7 @@ public sealed partial class WFDrydockSystem
     /// <summary>Whether a prototype is a wall.</summary>
     private bool IsWall(EntityPrototype proto)
     {
-        return proto.TryGetComponent<TagComponent>(out var tags, Factory) && _tag.HasTag(tags, WallTag);
+        return proto.TryComp<TagComponent>(out var tags, Factory) && _tag.HasTag(tags, WallTag);
     }
 
     /// <summary>Market value of a set of materials, from each material's price per unit.</summary>

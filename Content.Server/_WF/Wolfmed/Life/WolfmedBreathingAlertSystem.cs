@@ -12,7 +12,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 // "No air" replaces the stock low-gas alert (one marked line in RespiratorSystem asks SuffocationAlert). "No lungs"
 // covers a body with no working lungs, which the respirator never alerts because it raises its alert per lung.
 // Everything else keeps the stock alert.
-public sealed class WolfmedBreathingAlertSystem : EntitySystem
+public sealed partial class WolfmedBreathingAlertSystem : EntitySystem
 {
     public static readonly ProtoId<AlertPrototype> NoAir = "WFWolfmedCantBreatheAir";
     public static readonly ProtoId<AlertPrototype> NoLungs = "WFWolfmedCantBreatheLungs";

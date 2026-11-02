@@ -4,7 +4,7 @@ using Robust.Shared.Configuration;
 namespace Content.Client._WF.Performance;
 
 /// <summary>Buffers more game states by default, so server tick hitches show less on the client.</summary>
-public sealed class WFNetBufferSystem : EntitySystem
+public sealed partial class WFNetBufferSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
 

@@ -18,7 +18,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.NpcCrew.Systems;
 
 /// <summary>Connects real suit internals before crew work and when their current tile loses safe air.</summary>
-public sealed class WFCrewEvaSystem : EntitySystem
+public sealed partial class WFCrewEvaSystem : EntitySystem
 {
     [Dependency] private InventorySystem _inventory = default!;
     [Dependency] private SharedGasTankSystem _tanks = default!;
@@ -225,7 +225,7 @@ public sealed class WFCrewEvaSystem : EntitySystem
         var here = _transform.GetWorldPosition(mob);
         if (!safe)
         {
-            var tiles = _maps.GetAllTilesEnumerator(home, map);
+            var tiles = _maps.GetAllTiles(home, map);
             while (tiles.MoveNext(out var tile))
             {
                 if (!_planner.IsSafePost(home, tile.Value.GridIndices, map))

@@ -35,12 +35,12 @@ public sealed class XenoSensorTest
         {
             foreach (var caste in new[] { "CMXenoQueen", "CMXenoDrone" })
             {
-                Assert.That(prototypes.Index<EntityPrototype>(caste).TryGetComponent(out XenoConstructionComponent? order, factory), Is.True);
+                Assert.That(prototypes.Index<EntityPrototype>(caste).TryComp(out XenoConstructionComponent? order, factory), Is.True);
                 Assert.That(order!.CanOrderConstruction, Does.Contain(new EntProtoId(Node)),
                     $"{caste} should be able to order the resin sensor.");
             }
 
-            Assert.That(prototypes.Index<EntityPrototype>(Node).TryGetComponent(out HiveConstructionNodeComponent? node, factory), Is.True);
+            Assert.That(prototypes.Index<EntityPrototype>(Node).TryComp(out HiveConstructionNodeComponent? node, factory), Is.True);
             Assert.That(node!.Spawn.Id, Is.EqualTo(Sensor));
 
             var hive = entities.SpawnEntity("CMXenoHive", MapCoordinates.Nullspace);

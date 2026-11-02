@@ -20,6 +20,9 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 /// <summary>Zones answer only to ships, a zone threat is no attack, and a decided encounter pays the side with living crew.</summary>
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestAuditZoneGuardedProto => "WFTestAuditZoneGuarded";
+    private static ProtoId<WFEncounterPrototype> WFTestAuditZoneSkirmishProto => "WFTestAuditZoneSkirmish";
+
     [TestPrototypes]
     private const string AuditZonePrototypes = @"
 - type: wfEncounter
@@ -56,7 +59,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, intruder = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestAuditZoneGuarded");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestAuditZoneGuardedProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(21000, 21000), MapData.MapId), out encounter), Is.True);
 
             var grid = Server.System<SharedMapSystem>().CreateGridEntity(MapData.MapId);
@@ -95,7 +98,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, intruder = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestAuditZoneGuarded");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestAuditZoneGuardedProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(22000, 22000), MapData.MapId), out encounter), Is.True);
 
             var grid = Server.System<SharedMapSystem>().CreateGridEntity(MapData.MapId);
@@ -142,7 +145,7 @@ public sealed partial class WFEncounterTest
     {
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestAuditZoneSkirmish");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestAuditZoneSkirmishProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(23000, 23000), MapData.MapId), out var encounter), Is.True);
             var comp = SEntMan.GetComponent<WFEncounterComponent>(encounter);
             var rewards = Server.System<WFEncounterRewardSystem>();

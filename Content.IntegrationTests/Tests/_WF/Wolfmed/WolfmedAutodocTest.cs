@@ -52,6 +52,9 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(AutodocSystem))]
 public sealed class WolfmedAutodocTest : WolfmedGameTest
 {
+    private static readonly ProtoId<AutodocVoicePrototype> WFWolfmedAutodocVoiceSamProto = "WFWolfmedAutodocVoiceSam";
+    private static readonly ProtoId<AutodocTriagePrototype> WFWolfmedAutodocTriageProto = "WFWolfmedAutodocTriage";
+
     [TestPrototypes]
     private const string Prototypes = @"
 - type: entity
@@ -574,7 +577,7 @@ public sealed class WolfmedAutodocTest : WolfmedGameTest
 
         await server.WaitAssertion(() =>
         {
-            var voice = protos.Index<AutodocVoicePrototype>("WFWolfmedAutodocVoiceSam");
+            var voice = protos.Index<AutodocVoicePrototype>(WFWolfmedAutodocVoiceSamProto);
 
             Assert.Multiple(() =>
             {
@@ -656,7 +659,7 @@ public sealed class WolfmedAutodocTest : WolfmedGameTest
         await server.WaitAssertion(() =>
         {
             var autodoc = entities.System<AutodocSystem>();
-            var voice = protos.Index<AutodocVoicePrototype>("WFWolfmedAutodocVoiceSam");
+            var voice = protos.Index<AutodocVoicePrototype>(WFWolfmedAutodocVoiceSamProto);
 
             Assert.Multiple(() =>
             {
@@ -1129,7 +1132,7 @@ public sealed class WolfmedAutodocTest : WolfmedGameTest
     private static Dictionary<string, int> TriageOrder(IPrototypeManager protos)
     {
         var order = new Dictionary<string, int>();
-        var triage = protos.Index<AutodocTriagePrototype>("WFWolfmedAutodocTriage");
+        var triage = protos.Index<AutodocTriagePrototype>(WFWolfmedAutodocTriageProto);
 
         foreach (var step in triage.Steps)
         {

@@ -16,7 +16,7 @@ namespace Content.Client._WF.MappingMode.Test;
 /// <see cref="WFMappingTesterComponent"/>), keeps the test banner over whatever gameplay screen is up, binds the
 /// return key while testing, and sends the start and stop requests.
 /// </summary>
-public sealed class WFMappingTestClientSystem : EntitySystem
+public sealed partial class WFMappingTestClientSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IInputManager _input = default!;

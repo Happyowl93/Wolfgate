@@ -23,6 +23,9 @@ namespace Content.IntegrationTests.Tests._WF.Drydock;
 [TestFixture]
 public sealed class MobileDrydockBreakTest
 {
+    private static readonly EntProtoId MachineFTLDrive25SProto = "MachineFTLDrive25S";
+    private static readonly ProtoId<ContentTileDefinition> PlatingProto = "Plating";
+
     private const int HullSize = 4;
 
     /// <summary>A hardpoint gun, salvaged whole.</summary>
@@ -168,7 +171,7 @@ public sealed class MobileDrydockBreakTest
                 WFDrydockConsoleUiKey.Key, out var state), Is.True, "The console should have a state.");
             Assert.That(state!.BreakYield.GetValueOrDefault("UraniumFissile"), Is.EqualTo(100),
                 "The salvage preview should list half of the drive's fissile.");
-            Assert.That(drydock.RebuildPrice(new WFDrydockConsoleComponent(), server.ProtoMan.Index<EntityPrototype>("MachineFTLDrive25S")),
+            Assert.That(drydock.RebuildPrice(new WFDrydockConsoleComponent(), server.ProtoMan.Index(MachineFTLDrive25SProto)),
                 Is.AtLeast(7000), "Rebuilding the drive should be priced on its fissile.");
 
             var comp = em.GetComponent<WFDrydockConsoleComponent>(console);
@@ -284,7 +287,7 @@ public sealed class MobileDrydockBreakTest
 
             // A 5x5 ring with a cross bar through its middle and a filled 2x2 corner.
             ship = DrydockTest.CreateShip(pair, map.MapId);
-            var plating = new Tile(server.ProtoMan.Index<ContentTileDefinition>("Plating").TileId);
+            var plating = new Tile(server.ProtoMan.Index<ContentTileDefinition>(PlatingProto).TileId);
             var tiles = new List<(Vector2i, Tile)>();
             for (var x = 0; x < size; x++)
             for (var y = 0; y < size; y++)

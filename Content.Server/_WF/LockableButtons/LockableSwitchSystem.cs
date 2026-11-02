@@ -8,7 +8,7 @@ namespace Content.Server._WF.LockableButtons;
 /// Gates a locked button or switch: someone its access reader admits presses it and it stays locked, anyone else
 /// is denied. Unlocking it, from its verb, opens it to everyone.
 /// </summary>
-public sealed class LockableSwitchSystem : EntitySystem
+public sealed partial class LockableSwitchSystem : EntitySystem
 {
     [Dependency] private AccessReaderSystem _accessReader = default!;
     [Dependency] private SharedPopupSystem _popup = default!;

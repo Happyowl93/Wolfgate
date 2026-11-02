@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -326,7 +327,7 @@ public sealed class LoadoutCatalogTest
                     Assert.That(entMan.EntityCount, Is.EqualTo(before), $"{role.ID} left preview entities behind on close");
                 }
 
-                window.Dispose();
+                window.Teardown();
                 Assert.That(entMan.EntityCount, Is.EqualTo(before), $"{role.ID} left preview entities behind");
             });
         }

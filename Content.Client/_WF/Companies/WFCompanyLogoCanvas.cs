@@ -22,7 +22,7 @@ public sealed class WFCompanyLogoCanvas : Control
 
     private bool? _painting;
 
-    private readonly int Size;
+    private new readonly int Size;
 
     public WFCompanyLogoCanvas(int size)
     {

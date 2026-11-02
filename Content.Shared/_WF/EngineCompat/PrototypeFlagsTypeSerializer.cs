@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Serializes the engine's obsolete type, which still has fields to load.
 using System.Linq;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;

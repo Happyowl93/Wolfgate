@@ -22,7 +22,7 @@ public sealed record WFTradeShortage(EntityUid? Grid, string Group, float Factor
 /// Every so often the worst real gap in the sector's ledgers is reported as a shortage, with its cause, or the whole
 /// sector booms for a group of goods and pays more for it for a while, as outside demand.
 /// </summary>
-public sealed class WFTradeShortageSystem : EntitySystem
+public sealed partial class WFTradeShortageSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _proto = default!;

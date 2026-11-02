@@ -32,7 +32,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// human differ only in YAML. The belly being open is expressed as Shitmed's own incision state, which is
 /// what lets the existing organ surgeries run on a patient nobody has cut.
 /// </remarks>
-public sealed class WolfmedEviscerationSystem : EntitySystem
+public sealed partial class WolfmedEviscerationSystem : EntitySystem
 {
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private INetManager _net = default!;

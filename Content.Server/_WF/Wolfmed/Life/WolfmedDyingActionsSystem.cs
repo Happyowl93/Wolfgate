@@ -49,7 +49,7 @@ public sealed partial class WolfmedDyingActionsComponent : Component
 // Succumb and Last Words exist only while Dying: the brain organ goes to 0 in place, the body dies, and the ghost can
 // return after brain repair and a defibrillator. The ghost command reaches the same dialog in arrest, and a "left
 // alive but empty" one with no way back in any other living state.
-public sealed class WolfmedDyingActionsSystem : EntitySystem
+public sealed partial class WolfmedDyingActionsSystem : EntitySystem
 {
     public static readonly EntProtoId SuccumbAction = "WFActionWolfmedSuccumb";
     public static readonly EntProtoId LastWordsAction = "WFActionWolfmedLastWords";

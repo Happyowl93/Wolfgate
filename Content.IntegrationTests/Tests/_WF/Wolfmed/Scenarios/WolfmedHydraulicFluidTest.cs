@@ -55,6 +55,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 [TestOf(typeof(WolfmedFluidPackSystem))]
 public sealed class WolfmedHydraulicFluidTest : WolfmedGameTest
 {
+    private static readonly ProtoId<AutodocReagentsPrototype> WFWolfmedAutodocReagentsProto = "WFWolfmedAutodocReagents";
+
     [TestPrototypes]
     private const string Prototypes = @"
 - type: entity
@@ -123,7 +125,7 @@ public sealed class WolfmedHydraulicFluidTest : WolfmedGameTest
                         .ContainsKey("WFWolfmedHydraulicFluidPack"), Is.True, $"{inventory} does not stock the pack.");
                 }
 
-                var list = protos.Index<AutodocReagentsPrototype>("WFWolfmedAutodocReagents").Reagents;
+                var list = protos.Index<AutodocReagentsPrototype>(WFWolfmedAutodocReagentsProto).Reagents;
                 Assert.That(list.Any(e => e.Reagent == Fluid && e.Role == AutodocReagentRole.Fluid && e.Machine), Is.True,
                     "the pod does not list hydraulic fluid as a machine fluid.");
                 Assert.That(list.Any(e => e.Reagent == "Oil"), Is.False, "the pod lists oil.");

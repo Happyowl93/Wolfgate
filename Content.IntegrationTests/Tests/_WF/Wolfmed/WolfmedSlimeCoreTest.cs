@@ -16,6 +16,7 @@ using Content.Shared.FixedPoint;
 using Content.Shared.Mobs.Systems;
 using NUnit.Framework;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 
@@ -27,6 +28,9 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestFixture]
 public sealed class WolfmedSlimeCoreTest : WolfmedGameTest
 {
+    private static readonly ProtoId<AutodocProgramPrototype> WFWolfmedAutodocProgramNeuroProto = "WFWolfmedAutodocProgramNeuro";
+    private static readonly ProtoId<AutodocCategoryPrototype> WFWolfmedAutodocCategoryNeuroProto = "WFWolfmedAutodocCategoryNeuro";
+
     private const string Heal = "WFSurgeryHealSlimeCore";
     private const string Repair = "WFSurgeryRepairSlimeCore";
 
@@ -109,8 +113,8 @@ public sealed class WolfmedSlimeCoreTest : WolfmedGameTest
     {
         await Server.WaitAssertion(() =>
         {
-            var program = SProtoMan.Index<AutodocProgramPrototype>("WFWolfmedAutodocProgramNeuro");
-            var category = SProtoMan.Index<AutodocCategoryPrototype>("WFWolfmedAutodocCategoryNeuro");
+            var program = SProtoMan.Index<AutodocProgramPrototype>(WFWolfmedAutodocProgramNeuroProto);
+            var category = SProtoMan.Index<AutodocCategoryPrototype>(WFWolfmedAutodocCategoryNeuroProto);
             var planned = SProtoMan.EnumeratePrototypes<AutodocTriagePrototype>()
                 .SelectMany(triage => triage.Steps)
                 .SelectMany(step => step.Surgeries)

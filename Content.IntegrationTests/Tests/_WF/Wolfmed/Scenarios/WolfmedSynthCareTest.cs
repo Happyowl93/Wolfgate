@@ -37,6 +37,9 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 [TestOf(typeof(WolfmedFluidPackSystem))]
 public sealed class WolfmedSynthCareTest : WolfmedGameTest
 {
+    private static readonly EntProtoId ExosuitFabricatorProto = "ExosuitFabricator";
+    private static readonly ProtoId<LatheRecipePackPrototype> WFSynthOrgansStaticProto = "WFSynthOrgansStatic";
+
     public override PoolSettings PoolSettings => PsDisconnected;
 
     private const string Fluid = "WFWolfmedHydraulicFluid";
@@ -155,11 +158,11 @@ public sealed class WolfmedSynthCareTest : WolfmedGameTest
         await Server.WaitAssertion(() =>
         {
             var protos = Server.ResolveDependency<IPrototypeManager>();
-            var fabricator = protos.Index<EntityPrototype>("ExosuitFabricator");
-            Assert.That(fabricator.TryGetComponent<LatheComponent>(out var lathe, SEntMan.ComponentFactory), Is.True);
+            var fabricator = protos.Index(ExosuitFabricatorProto);
+            Assert.That(fabricator.TryComp<LatheComponent>(out var lathe, SEntMan.ComponentFactory), Is.True);
             Assert.That(lathe!.StaticPacks.Select(p => p.Id), Does.Contain("WFSynthOrgansStatic"),
                 "the exosuit fabricator does not print synth organs.");
-            var results = protos.Index<LatheRecipePackPrototype>("WFSynthOrgansStatic").Recipes
+            var results = protos.Index<LatheRecipePackPrototype>(WFSynthOrgansStaticProto).Recipes
                 .Select(r => protos.Index(r).Result?.Id).ToList();
             Assert.That(results, Does.Contain("OrganSynthHeart"), "no replacement synth heart.");
 

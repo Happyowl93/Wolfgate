@@ -117,20 +117,20 @@ public sealed class WolfmedBodyDoll : PanelContainer
             var rsi = new SpriteSpecifier.Rsi(
                 new ResPath($"/Textures/_Shitmed/Interface/Targeting/Status/{name}.rsi"), $"{name}_{(int) integrity}");
 
-            if (!sprite.TryGetLayer(layer, out _))
-                sprite.AddLayer(_sprites.Frame0(rsi));
+            if (!_sprites.TryGetLayer((_dollEntity, sprite), layer, out _, false))
+                _sprites.AddTextureLayer((_dollEntity, sprite), _sprites.Frame0(rsi));
             else
-                sprite.LayerSetTexture(layer, _sprites.Frame0(rsi));
+                _sprites.LayerSetTexture((_dollEntity, sprite), layer, _sprites.Frame0(rsi));
 
-            sprite.LayerSetScale(layer, new Vector2(3f, 3f));
-            sprite.LayerSetVisible(layer, true);
+            _sprites.LayerSetScale((_dollEntity, sprite), layer, new Vector2(3f, 3f));
+            _sprites.LayerSetVisible((_dollEntity, sprite), layer, true);
             layer++;
         }
 
         // A shorter scan than the last one leaves layers behind; hide them rather than redraw stale limbs.
-        while (sprite.TryGetLayer(layer, out _))
+        while (_sprites.TryGetLayer((_dollEntity, sprite), layer, out _, false))
         {
-            sprite.LayerSetVisible(layer, false);
+            _sprites.LayerSetVisible((_dollEntity, sprite), layer, false);
             layer++;
         }
     }
@@ -142,11 +142,13 @@ public sealed class WolfmedBodyDoll : PanelContainer
             overlay.Visible = key == part;
     }
 
-    protected override void Dispose(bool disposing)
+    protected override void ExitedTree()
     {
-        if (disposing && !_entities.Deleted(_dollEntity))
+        base.ExitedTree();
+
+        if (!_entities.Deleted(_dollEntity))
             _entities.QueueDeleteEntity(_dollEntity);
 
-        base.Dispose(disposing);
+        _dollEntity = EntityUid.Invalid;
     }
 }

@@ -7,7 +7,7 @@ using Content.Shared.FixedPoint;
 namespace Content.Server._WF.Wolfmed.Medical;
 
 /// <summary>Mannitol's effect: a damaged brain that still works gets its health back.</summary>
-public sealed class WolfmedBrainMendSystem : EntitySystem
+public sealed partial class WolfmedBrainMendSystem : EntitySystem
 {
     [Dependency] private OrganHealthSystem _organs = default!;
     [Dependency] private WolfmedLifeSystem _life = default!;

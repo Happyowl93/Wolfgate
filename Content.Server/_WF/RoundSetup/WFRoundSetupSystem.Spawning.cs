@@ -44,13 +44,13 @@ public sealed partial class WFRoundSetupSystem
     {
         if (_pendingSpawns.TryGetValue(session.UserId, out var pending))
             return pending.Station == station;
-        return IsStandardStation(station) && FindLobby(session.UserId) == null;
+        return IsStandardStation(station) && !IsPlayerShip(station) && FindLobby(session.UserId) == null;
     }
 
-    /// <summary>Ordinary joining covers every station and player ship except private scenario stations.</summary>
+    /// <summary>Whether a station isn't a private scenario station.</summary>
     public bool IsStandardStation(EntityUid station) => !IsScenarioStation(station);
 
-    /// <summary>Player-owned ships recruit through ordinary late join, never through scenario allocation.</summary>
+    /// <summary>Player-owned ships take crew only through Crew Setup, never through ordinary joining.</summary>
     private bool IsPlayerShip(EntityUid station) => HasComp<ExtraShuttleInformationComponent>(station);
 
     /// <summary>Private scenario stations never enter the ordinary station picker.</summary>

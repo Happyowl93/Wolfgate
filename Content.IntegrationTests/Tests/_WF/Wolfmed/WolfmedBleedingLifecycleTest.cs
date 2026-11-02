@@ -6,6 +6,7 @@ using Content.Shared._Onyx.Wounds;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 
@@ -13,6 +14,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(WoundBleedingSystem))]
 public sealed class WolfmedBleedingLifecycleTest : WolfmedGameTest
 {
+    private static readonly ProtoId<Content.Shared._WF.Wolfmed.Damage.WolfmedTreatmentOverlayProfilePrototype> WFWolfmedTreatmentOverlayDefaultProto = "WFWolfmedTreatmentOverlayDefault";
+
     [TestCase(false)]
     [TestCase(true)]
     public async Task HealingBelowBleedingThresholdUpdatesBloodstreamTest(bool otherBleedingWound)
@@ -159,7 +162,7 @@ public sealed class WolfmedBleedingLifecycleTest : WolfmedGameTest
             var visuals = entities.System<Content.Server._WF.Wolfmed.Damage.WolfmedTreatmentVisualsSystem>();
             var necrosis = entities.System<Content.Server._WF.Wolfmed.Wounds.WolfmedNecrosisSystem>();
             var profile = server.ProtoMan.Index<Content.Shared._WF.Wolfmed.Damage.WolfmedTreatmentOverlayProfilePrototype>(
-                "WFWolfmedTreatmentOverlayDefault");
+                WFWolfmedTreatmentOverlayDefaultProto);
             var body = entities.SpawnEntity("MobHuman", map.GridCoords);
             var arm = entities.System<SharedBodySystem>().GetBodyChildren(body)
                 .First(part => part.Component.PartType == BodyPartType.Arm).Id;

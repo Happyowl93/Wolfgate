@@ -8,7 +8,7 @@ using Robust.Shared.Console;
 namespace Content.Server._WF.Companies;
 
 /// <summary>Shared lookup and logging for the company admin commands.</summary>
-public abstract class WFCompanyCommand : LocalizedEntityCommands
+public abstract partial class WFCompanyCommand : LocalizedEntityCommands
 {
     [Dependency] protected WFCompanySystem Companies = default!;
     [Dependency] private IAdminLogManager _adminLog = default!;

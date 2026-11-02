@@ -35,6 +35,11 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(WolfmedWoundSfxSystem))]
 public sealed class WolfmedWoundSfxTest : WolfmedGameTest
 {
+    private static readonly ProtoId<WoundPrototype> BoneFractureWoundProto = "BoneFractureWound";
+    private static readonly ProtoId<WoundPrototype> BluntWoundProto = "BluntWound";
+    private static readonly ProtoId<WoundPrototype> WFWolfmedDislocationWoundProto = "WFWolfmedDislocationWound";
+    private static readonly EntProtoId TourniquetProto = "Tourniquet";
+
     /// <summary>
     /// The profile answers each wound with the collection its cause and its tissue call for, and every
     /// collection and effect it names exists.
@@ -55,7 +60,7 @@ public sealed class WolfmedWoundSfxTest : WolfmedGameTest
                 // Bone first: a fracture is a Blunt wound and must not answer with the bruise sound. Playtest 4: its
                 // entry is silent, because the crack comes from WolfmedBodySoundSystem.
                 Assert.That(profile.GetWoundSound("BoneFractureWound",
-                    prototypes.Index<WoundPrototype>("BoneFractureWound"), true, FixedPoint2.New(40)), Is.Null,
+                    prototypes.Index<WoundPrototype>(BoneFractureWoundProto), true, FixedPoint2.New(40)), Is.Null,
                     "the fracture entry claims the wound silently.");
                 Assert.That(Collection(profile, prototypes, "WFWolfmedDislocationWound", organic: true, 40),
                     Is.EqualTo("WFWolfmedWoundBone"));
@@ -82,7 +87,7 @@ public sealed class WolfmedWoundSfxTest : WolfmedGameTest
                     Is.EqualTo("WFWolfmedWoundChassis"));
 
                 // A bruise below the entry's own floor says nothing at all.
-                Assert.That(profile.GetWoundSound("BluntWound", prototypes.Index<WoundPrototype>("BluntWound"),
+                Assert.That(profile.GetWoundSound("BluntWound", prototypes.Index<WoundPrototype>(BluntWoundProto),
                     true, FixedPoint2.New(6)), Is.Null, "a light bruise is not worth a sound.");
             });
 
@@ -389,7 +394,7 @@ public sealed class WolfmedWoundSfxTest : WolfmedGameTest
         await server.WaitAssertion(() =>
         {
             var cautery = prototypes.Index<WolfmedCauteryProfilePrototype>(WolfmedCauterySystem.DefaultProfile);
-            var dislocation = prototypes.Index<WoundPrototype>("WFWolfmedDislocationWound");
+            var dislocation = prototypes.Index<WoundPrototype>(WFWolfmedDislocationWoundProto);
             Assert.That(dislocation.TryGetBehavior(FixedPoint2.New(40), out WolfmedDislocationBehavior relocate),
                 Is.True);
 
@@ -421,7 +426,7 @@ public sealed class WolfmedWoundSfxTest : WolfmedGameTest
 
                 // The tourniquet item's own two sounds are Onyx's and were already set; this is the pair
                 // taking it off, which had nothing.
-                Assert.That(prototypes.Index<EntityPrototype>("Tourniquet")
+                Assert.That(prototypes.Index(TourniquetProto)
                     .Components.ContainsKey("Tourniquet"), Is.True);
             });
         });

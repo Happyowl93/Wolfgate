@@ -19,7 +19,7 @@ namespace Content.Server._WF.Traders;
 /// A killable trader has no weapon and never fights. Hurt, he stops trading with whoever did it and runs to the
 /// far end of his own ship, then keeps away from them for as long as they stay near.
 /// </summary>
-public sealed class TraderFleeSystem : EntitySystem
+public sealed partial class TraderFleeSystem : EntitySystem
 {
     /// <summary>
     /// Blackboard key the trader's HTN reads its destination from.
@@ -217,7 +217,7 @@ public sealed class TraderFleeSystem : EntitySystem
         TimeSpan now)
     {
         var scored = new List<(Vector2i Tile, float Score)>();
-        var tiles = _map.GetAllTilesEnumerator(grid, gridComp);
+        var tiles = _map.GetAllTiles(grid, gridComp);
         while (tiles.MoveNext(out var tile))
         {
             var indices = tile.Value.GridIndices;

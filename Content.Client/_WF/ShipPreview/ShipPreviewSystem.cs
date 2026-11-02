@@ -187,7 +187,7 @@ public sealed partial class ShipPreviewSystem : EntitySystem
 
         // Counted once here rather than per frame; the grid never changes while it is previewed.
         var tiles = 0;
-        var enumerator = _map.GetAllTilesEnumerator(grid.Value.Owner, grid.Value.Comp);
+        var enumerator = _map.GetAllTiles(grid.Value.Owner, grid.Value.Comp);
         while (enumerator.MoveNext(out _))
         {
             tiles++;

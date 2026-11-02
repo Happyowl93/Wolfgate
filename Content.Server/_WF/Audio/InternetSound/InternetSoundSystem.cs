@@ -431,7 +431,7 @@ public sealed partial class InternetSoundSystem : EntitySystem
         // before any of it goes out to clients.
         try
         {
-            _audio.GetAudioLength(InternetSoundResources.PathFor(id));
+            _audio.GetAudioLength(new ResolvedPathSpecifier(InternetSoundResources.PathFor(id)));
         }
         catch (Exception e)
         {
@@ -543,7 +543,7 @@ public sealed partial class InternetSoundSystem : EntitySystem
         }
         else
         {
-            var stream = _audio.PlayGlobal(path, Filter.Broadcast(), true, AudioParams.Default);
+            var stream = _audio.PlayGlobal(new ResolvedPathSpecifier(path), Filter.Broadcast(), true, AudioParams.Default);
 
             if (stream == null)
             {

@@ -4,7 +4,7 @@ using Content.Shared._WF.ShipShields;
 namespace Content.Server._WF.NpcCrew.Systems;
 
 /// <summary>Extends autonomous crew friendly-fire protection to shield interception.</summary>
-public sealed class WFCrewShieldProtectionSystem : EntitySystem
+public sealed partial class WFCrewShieldProtectionSystem : EntitySystem
 {
     [Dependency] private WFCrewFriendlyFireSystem _friendlyFire = default!;
 

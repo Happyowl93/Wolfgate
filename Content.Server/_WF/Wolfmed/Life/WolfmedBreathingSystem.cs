@@ -26,7 +26,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 /// blood loss and hypoxia have routes of their own and never stop the respirator. Everything else keeps the
 /// upstream rule that an incapacitated body does not inhale.
 /// </summary>
-public sealed class WolfmedBreathingSystem : EntitySystem
+public sealed partial class WolfmedBreathingSystem : EntitySystem
 {
     private static readonly ProtoId<DamageTypePrototype> Asphyxiation = "Asphyxiation";
 

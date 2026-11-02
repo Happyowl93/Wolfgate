@@ -7,7 +7,7 @@ namespace Content.Server._WF.Construction;
 /// Crafts an item recipe back to back. Stops at the first failed craft (out of materials, do-after interrupted);
 /// a request made mid-run replaces what is left of the current one.
 /// </summary>
-public sealed class CraftRepeatSystem : EntitySystem
+public sealed partial class CraftRepeatSystem : EntitySystem
 {
     [Dependency] private ConstructionSystem _construction = default!;
 

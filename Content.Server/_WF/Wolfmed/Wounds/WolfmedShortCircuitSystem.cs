@@ -14,7 +14,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// </remarks>
 // The mechanical counterpart of WolfmedElectricalBurnSystem; a chassis has no organ to reach or hands to open, so a
 // short costs the moment and the noise that tells everyone nearby what happened.
-public sealed class WolfmedShortCircuitSystem : EntitySystem
+public sealed partial class WolfmedShortCircuitSystem : EntitySystem
 {
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;

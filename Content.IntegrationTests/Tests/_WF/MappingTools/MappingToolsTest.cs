@@ -52,7 +52,7 @@ public sealed class MappingToolsTest
 
         EntityUid FixtureAt(Vector2i cell)
         {
-            var anchored = mapSys.GetAnchoredEntitiesEnumerator(grid, grid, cell);
+            var anchored = mapSys.GetAnchoredEntities(grid, grid, cell);
             while (anchored.MoveNext(out var uid))
             {
                 if (entMan.GetComponent<MetaDataComponent>(uid.Value).EntityPrototype?.ID == "WFMappingToolsTestFixture")
@@ -208,7 +208,7 @@ public sealed class MappingToolsTest
             Assert.Multiple(() =>
             {
                 Assert.That(mapSys.TryGetTileRef(grid, grid, cell, out var tile) && !tile.Tile.IsEmpty, Is.False);
-                var anchored = mapSys.GetAnchoredEntitiesEnumerator(grid, grid, Vector2i.Zero);
+                var anchored = mapSys.GetAnchoredEntities(grid, grid, Vector2i.Zero);
                 Assert.That(anchored.MoveNext(out var restored), Is.True, "The erased fixture comes back.");
                 Assert.That(entMan.GetComponent<MetaDataComponent>(restored!.Value).EntityPrototype?.ID, Is.EqualTo("WFMappingToolsTestFixture"));
             });

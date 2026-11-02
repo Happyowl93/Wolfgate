@@ -10,7 +10,7 @@ namespace Content.Server._WF.Wolfmed.Targeting;
 /// NPCs pick a new body part to aim at every second, by their targeting odds. Only players ever changed the aim, so
 /// every mob hit the torso, and limbs, heads and the wounds they take were never reached.
 /// </summary>
-public sealed class WolfmedNpcAimSystem : EntitySystem
+public sealed partial class WolfmedNpcAimSystem : EntitySystem
 {
     /// <summary>How often an NPC's aim moves to another part.</summary>
     private static readonly TimeSpan Interval = TimeSpan.FromSeconds(1);

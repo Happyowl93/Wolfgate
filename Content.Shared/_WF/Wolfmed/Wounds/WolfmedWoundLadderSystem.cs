@@ -15,7 +15,7 @@ namespace Content.Shared._WF.Wolfmed.Wounds;
 // (max 120) carries 90. A worse rung arriving takes over at the larger of its own and the carried severity; a lesser one
 // adds wolfmed.wound_ladder_lower_share of its rescaled severity. A full wound that is pushed further opens the next
 // rung at wolfmed.wound_ladder_entry of its maximum plus the excess.
-public sealed class WolfmedWoundLadderSystem : EntitySystem
+public sealed partial class WolfmedWoundLadderSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _config = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;

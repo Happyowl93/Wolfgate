@@ -179,7 +179,7 @@ public sealed partial class ShootAtFixedPointSystem : EntitySystem
         }
 
         if (physics.Awake)
-            _broadphase.RegenerateContacts(projectile, physics);
+            _broadphase.RegenerateContacts((projectile, physics, null, null));
     }
 
     /// <summary>Ends a round's flight where it is: it comes to rest and tells whatever waits for that.</summary>

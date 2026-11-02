@@ -27,7 +27,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 /// </summary>
 // No blood and no breathing means no oxygenation clock, so a shut-down machine stays unconscious indefinitely with
 // nothing running out. Death is still the brain, the positronic one for a chassis, through the ordinary organ path.
-public sealed class WolfmedShutdownSystem : EntitySystem
+public sealed partial class WolfmedShutdownSystem : EntitySystem
 {
     /// <summary>Pressure key for a machine with nothing running.</summary>
     public const string ShutdownPressure = "shutdown";

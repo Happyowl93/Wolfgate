@@ -36,6 +36,7 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.NpcCrew;
 
@@ -49,6 +50,8 @@ namespace Content.IntegrationTests.Tests._WF.NpcCrew;
 [TestOf(typeof(WFCrewSystem))]
 public sealed partial class WFCrewTest : InteractionTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     private const string Hostile = "WFTestHostileMob";
     private const string TestHelm = "WFTestHelm";
     private const string Helm = "ComputerShuttle";
@@ -257,7 +260,7 @@ public sealed partial class WFCrewTest : InteractionTest
         var crewSystem = Server.System<WFCrewSystem>();
         var hands = Server.System<SharedHandsSystem>();
         var damageable = Server.System<DamageableSystem>();
-        var blunt = new DamageSpecifier(ProtoMan.Index<DamageTypePrototype>("Blunt"), 10);
+        var blunt = new DamageSpecifier(ProtoMan.Index<DamageTypePrototype>(BluntProto), 10);
         var deck = await CreateDeck(new Vector2(6f, 0f), 9, gravity: true);
         EntityUid pilot = default;
         EntityUid hostile = default;
@@ -454,7 +457,7 @@ public sealed partial class WFCrewTest : InteractionTest
         var mobState = Server.System<MobStateSystem>();
         var meta = Server.System<MetaDataSystem>();
         var xforms = Server.System<SharedTransformSystem>();
-        var blunt = new DamageSpecifier(ProtoMan.Index<DamageTypePrototype>("Blunt"), 10);
+        var blunt = new DamageSpecifier(ProtoMan.Index<DamageTypePrototype>(BluntProto), 10);
 
         var deck = await CreateDeck(new Vector2(6f, 0f), 9, gravity: true);
         var raider = await CreateDeck(new Vector2(6f, 12f), 3, gravity: true);

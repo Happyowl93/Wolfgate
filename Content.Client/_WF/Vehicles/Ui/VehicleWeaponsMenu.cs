@@ -114,7 +114,7 @@ public sealed partial class VehicleWeaponsMenu : FancyWindow
 
     private void RebuildHardpointButtons()
     {
-        HardpointStrip.DisposeAllChildren();
+        HardpointStrip.RemoveAllChildren();
         HardpointScroll.HScrollEnabled = _hardpoints.Count > 6;
 
         var ordered = _hardpoints

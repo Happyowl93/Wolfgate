@@ -64,7 +64,6 @@ public sealed partial class WFCockpitView
         _lease.Remember(() =>
         {
             _aimLines.Orphan();
-            _aimLines.Dispose();
         });
         var overlays = IoCManager.Resolve<IOverlayManager>();
         var aimOverlay = new WFCockpitAimOverlay(_aimPreview, viewport.Viewport);
@@ -93,7 +92,9 @@ public sealed partial class WFCockpitView
         if (_gunneryConsole != console)
         {
             _gunneryInput.Cancel();
+#pragma warning disable CS0618 // Gunnery rows are torn down, not parked.
             _gunneryContents.DisposeAllChildren();
+#pragma warning restore CS0618
             _gunneryPanel = null;
             _gunneryConsole = console;
         }

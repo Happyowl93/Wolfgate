@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -152,7 +153,7 @@ public sealed partial class WFCrewTest
                 UiMan.SetHovered(null);
                 entities.OnGroupingChanged(grouping);
                 crewWindow?.Close();
-                crewWindow?.Dispose();
+                crewWindow?.Teardown();
                 warpWindow.Close();
             });
             await Server.WaitPost(() =>

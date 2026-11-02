@@ -325,7 +325,7 @@ public sealed class MappingToolsPipesTest
                 {
                     Assert.That(prototypes.TryIndex<EntityPrototype>(id, out var prototype), Is.True, id);
                     Assert.That(prototype!.Abstract || prototype.HideSpawnMenu, Is.False, id);
-                    Assert.That(prototype.TryGetComponent<NodeContainerComponent>(out var nodes, factory), Is.True, id);
+                    Assert.That(prototype.TryComp<NodeContainerComponent>(out var nodes, factory), Is.True, id);
                     Assert.That(nodes!.Nodes.Values.OfType<PipeNode>().Any(), Is.True, $"{id} has pipe ports.");
                 }
             });

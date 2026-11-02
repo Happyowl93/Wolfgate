@@ -67,7 +67,9 @@ public sealed partial class XenoScissorCutSystem : EntitySystem
         if (_net.IsClient)
             return;
 
+#pragma warning disable CS0618 // The lookup replacement filters fixtures differently; this hit test was not re-tuned for it.
         foreach (var ent in _physics.GetCollidingEntities(Transform(xeno).MapID, rot))
+#pragma warning restore CS0618
         {
             if (HasComp<DamageOnXenoScissorsComponent>(ent) || HasComp<DestroyOnXenoPierceScissorComponent>(ent))
             {

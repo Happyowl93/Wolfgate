@@ -268,9 +268,18 @@ public sealed partial class WFMappingExportWizard : FancyWindow
     public bool ShipErrors => _issues is { Scope: WFMappingIssueScope.Ship } issues &&
                               issues.Issues.Exists(issue => issue.Severity == WFMappingIssueSeverity.Error);
 
+    /// <summary>Whether the last check holds a map lint failure, which the server refuses for every kind.</summary>
+    private bool LintErrors => _issues is { } issues &&
+                               issues.Issues.Exists(issue => issue.RuleId == WFMappingIssueCatalog.MapLint);
+
     private static WFMappingIssueScope ScopeOf(WFMappingExportKind kind)
     {
-        return kind == WFMappingExportKind.Ship ? WFMappingIssueScope.Ship : WFMappingIssueScope.Map;
+        return kind switch
+        {
+            WFMappingExportKind.Ship => WFMappingIssueScope.Ship,
+            WFMappingExportKind.Grid => WFMappingIssueScope.Grid,
+            _ => WFMappingIssueScope.Map,
+        };
     }
 
     private void SetKind(WFMappingExportKind kind)
@@ -280,19 +289,11 @@ public sealed partial class WFMappingExportWizard : FancyWindow
 
         if (kind != _kind)
         {
-            // Ship and Grid share nothing in the check, but Map and Grid both run the Map scope: keep that result.
-            var rescan = ScopeOf(kind) != ScopeOf(_kind);
+            // Each kind has its own scope: a ship's parts, and the lint treats a grid as a point of interest.
             _kind = kind;
             UpdatePackageTarget();
-            if (rescan)
-            {
-                _issues = null;
-                Check();
-            }
-            else
-            {
-                RenderIssues();
-            }
+            _issues = null;
+            Check();
         }
 
         Refresh();
@@ -368,7 +369,7 @@ public sealed partial class WFMappingExportWizard : FancyWindow
         PackageButton.Disabled = _busy || _testing;
         BackButton.Disabled = _step == 1;
         NextButton.Visible = _step < 3;
-        NextButton.Disabled = _step == 1 && _kind == WFMappingExportKind.Ship && (ShipErrors || _checking);
+        NextButton.Disabled = _step == 1 && (LintErrors || _kind == WFMappingExportKind.Ship && (ShipErrors || _checking));
         DetailsForm.Visible = _kind == WFMappingExportKind.Ship;
         DetailsMapNote.Visible = _kind != WFMappingExportKind.Ship;
         SaveFirstLabel.Visible = InSession && _dirty;
@@ -420,6 +421,7 @@ public sealed partial class WFMappingExportWizard : FancyWindow
         CheckHint.SetMessage(Loc.GetString(_kind switch
         {
             WFMappingExportKind.Ship => ShipErrors ? "wf-mapping-export-check-errors" : "wf-mapping-export-check-ok-ship",
+            _ when LintErrors => "wf-mapping-export-check-lint",
             WFMappingExportKind.Grid => "wf-mapping-export-check-ok-grid",
             _ => "wf-mapping-export-check-ok-map",
         }));

@@ -101,7 +101,7 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
             return cached;
 
         int? value = null;
-        if (_proto.TryIndex<EntityPrototype>(cash, out var proto) && proto.TryGetComponent<StackComponent>(out var stack, _factory))
+        if (_proto.TryIndex<EntityPrototype>(cash, out var proto) && proto.TryComp<StackComponent>(out var stack, _factory))
             value = stack.Count;
 
         _cashValues[cash] = value;

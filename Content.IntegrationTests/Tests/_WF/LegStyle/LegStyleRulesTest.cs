@@ -60,7 +60,7 @@ public sealed class LegStyleRulesTest
                                 $"{style.ID} gives {species} the legs it already has.");
 
                         // Reshaped slots have to exist on the species' inventory.
-                        var template = proto.Index(speciesProto.Prototype).TryGetComponent<InventoryComponent>(out var inventory, server.EntMan.ComponentFactory)
+                        var template = proto.Index(speciesProto.Prototype).TryComp<InventoryComponent>(out var inventory, server.EntMan.ComponentFactory)
                             ? proto.Index<InventoryTemplatePrototype>(inventory.TemplateId)
                             : null;
                         Assert.That(template, Is.Not.Null, $"{species} has no inventory.");

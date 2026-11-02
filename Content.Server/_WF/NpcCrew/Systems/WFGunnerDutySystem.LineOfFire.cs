@@ -34,6 +34,10 @@ public sealed partial class WFGunnerDutySystem
         var clear = new List<EntityUid>();
         foreach (var gun in guns)
         {
+            // Batteries are shared out once a second, so a gun can be destroyed while still on the list.
+            if (TerminatingOrDeleted(gun))
+                continue;
+
             var key = (gun, target);
             if (!_lines.TryGetValue(key, out var line) || now >= line.Next)
             {

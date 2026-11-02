@@ -37,13 +37,15 @@ public sealed class LegStyleMarkingTest : InteractionTest
 
         await Client.WaitAssertion(() =>
         {
-            var sprite = CEntMan.GetComponent<SpriteComponent>(CPlayer);
-            Assert.That(sprite.LayerMapTryGet(Leg, out _), Is.True, "The leg marking isn't drawn.");
-            Assert.That(sprite.LayerMapTryGet($"{Leg}-displacement", out _), Is.True, "The leg marking wasn't reshaped.");
-            Assert.That(sprite.LayerMapTryGet($"{Foot}-displacement", out _), Is.True, "The foot marking wasn't reshaped.");
-            Assert.That(sprite.LayerMapTryGet($"{Leg}-legmask", out _) && sprite.LayerMapTryGet($"{Leg}-footmask", out _), Is.True,
+            var spriteUid = CPlayer;
+            var sprites = CEntMan.System<SpriteSystem>();
+            var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), Leg, out _, false), Is.True, "The leg marking isn't drawn.");
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), $"{Leg}-displacement", out _, false), Is.True, "The leg marking wasn't reshaped.");
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), $"{Foot}-displacement", out _, false), Is.True, "The foot marking wasn't reshaped.");
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), $"{Leg}-legmask", out _, false) && sprites.LayerMapTryGet((spriteUid, sprite), $"{Leg}-footmask", out _, false), Is.True,
                 "The leg marking isn't cut to its own leg, so a side view shows it on both.");
-            Assert.That(sprite.LayerMapTryGet(Leg, out var leg) && sprite[leg] is SpriteComponent.Layer { ShaderPrototype: var shader }
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), Leg, out var leg, false) && sprite[leg] is SpriteComponent.Layer { ShaderPrototype: var shader }
                 && shader == "WFLegMarkingDisplaced", Is.True, "The leg marking isn't drawn with the cutting shader.");
         });
 
@@ -52,11 +54,13 @@ public sealed class LegStyleMarkingTest : InteractionTest
 
         await Client.WaitAssertion(() =>
         {
-            var sprite = CEntMan.GetComponent<SpriteComponent>(CPlayer);
-            Assert.That(sprite.LayerMapTryGet(Leg, out _), Is.True, "The leg marking went with the digitigrade legs.");
-            Assert.That(sprite.LayerMapTryGet($"{Leg}-displacement", out _), Is.False, "Plantigrade legs kept the reshaping.");
-            Assert.That(sprite.LayerMapTryGet($"{Foot}-displacement", out _), Is.False, "Plantigrade feet kept the reshaping.");
-            Assert.That(sprite.LayerMapTryGet($"{Leg}-legmask", out _), Is.False, "Plantigrade legs kept the outline.");
+            var spriteUid = CPlayer;
+            var sprites = CEntMan.System<SpriteSystem>();
+            var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), Leg, out _, false), Is.True, "The leg marking went with the digitigrade legs.");
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), $"{Leg}-displacement", out _, false), Is.False, "Plantigrade legs kept the reshaping.");
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), $"{Foot}-displacement", out _, false), Is.False, "Plantigrade feet kept the reshaping.");
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), $"{Leg}-legmask", out _, false), Is.False, "Plantigrade legs kept the outline.");
         });
     }
 }

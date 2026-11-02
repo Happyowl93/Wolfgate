@@ -22,11 +22,15 @@ using Content.Shared.Radio.Components;
 using Content.Shared.StatusIcon;
 using Content.Shared.StatusIcon.Components;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Companies;
 
 public sealed partial class WFCompanyTest
 {
+    private static readonly ProtoId<Content.Shared.Preferences.Loadouts.RoleLoadoutPrototype> JobContractorProto = "JobContractor";
+    private static readonly ProtoId<JobIconPrototype> JobIconContractorProto = "JobIconContractor";
+
     /// <summary>Joining as a rank spawns the base job with the rank title, marks the ID and grants the company channel.</summary>
     [Test]
     public async Task MembersJoinAsTheirRank()
@@ -57,7 +61,7 @@ public sealed partial class WFCompanyTest
                     vote.Cancel();
                 // A bought loadout replaces the stored profile mid-spawn, which must not lose the character's company.
                 var prototypes = server.ResolveDependency<Robust.Shared.Prototypes.IPrototypeManager>();
-                var role = prototypes.Index<Content.Shared.Preferences.Loadouts.RoleLoadoutPrototype>("JobContractor");
+                var role = prototypes.Index<Content.Shared.Preferences.Loadouts.RoleLoadoutPrototype>(JobContractorProto);
                 var loadout = new Content.Shared.Preferences.Loadouts.RoleLoadout(role.ID);
                 var named = original.WithName("Ada Owner").WithBankBalance(100000);
                 loadout.SetDefault(named, owner, prototypes);
@@ -136,7 +140,7 @@ public sealed partial class WFCompanyTest
             {
                 var clientEm = pair.Client.EntMan;
                 var clientBody = clientEm.GetEntity(em.GetNetEntity(owner.AttachedEntity!.Value));
-                var job = pair.Client.ResolveDependency<Robust.Shared.Prototypes.IPrototypeManager>().Index<JobIconPrototype>("JobIconContractor");
+                var job = pair.Client.ResolveDependency<Robust.Shared.Prototypes.IPrototypeManager>().Index<JobIconPrototype>(JobIconContractorProto);
                 var icons = new GetStatusIconsEvent(new System.Collections.Generic.List<StatusIconData> { job });
                 clientEm.EventBus.RaiseLocalEvent(clientBody, ref icons);
                 Assert.That(client.GetRankIconPath(topRank), Is.Not.Null);

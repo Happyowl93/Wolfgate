@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -279,7 +280,7 @@ public sealed class WolfmedPlaytestOneTest : WolfmedGameTest
         {
             var charge = SEntMan.System<SiliconChargeSystem>();
             Assert.That(charge.TryGetSiliconBattery(ipc, out var battery), Is.True);
-            SEntMan.System<BatterySystem>().SetCharge(battery!.Owner, battery.MaxCharge * 0.12f);
+            SEntMan.System<BatterySystem>().SetCharge(battery!.Uid(), battery!.MaxCharge * 0.12f);
             SetPain(ipc, BodyPartType.Torso, 129);
         });
 

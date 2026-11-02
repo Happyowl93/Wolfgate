@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using System.Numerics;
 using Content.Server._WF.Encounters.Components;
@@ -30,7 +31,7 @@ public sealed partial class WFEncounterTest
         await Server.WaitPost(() =>
         {
             var prototypes = Server.ResolveDependency<IPrototypeManager>();
-            Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestSimRaider"),
+            Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestSimRaiderProto),
                 new MapCoordinates(new Vector2(stealthed ? -60000 : -64000, 52000), MapData.MapId), out encounter), Is.True);
         });
         await Until(() => !Ship(encounter).Virtual && !Ship(encounter).Building, 30, "The raider's hull is built.");
@@ -40,8 +41,8 @@ public sealed partial class WFEncounterTest
         {
             var group = Ship(encounter).Group;
             var crewman = SEntMan.EntityQuery<WFCrewComponent>(true).First(member => member.Group == group
-                && SEntMan.GetComponent<TransformComponent>(member.Owner).GridUid == Ship(encounter).Grid
-                && !Server.System<Robust.Shared.Containers.SharedContainerSystem>().IsEntityInContainer(member.Owner)).Owner;
+                && SEntMan.GetComponent<TransformComponent>(member.Uid()).GridUid == Ship(encounter).Grid
+                && !Server.System<Robust.Shared.Containers.SharedContainerSystem>().IsEntityInContainer(member.Uid())).Uid();
             boarder = SEntMan.SpawnEntity("MobHuman", SEntMan.GetComponent<TransformComponent>(crewman).Coordinates);
             if (stealthed)
                 SEntMan.EnsureComponent<StealthComponent>(boarder);
@@ -56,11 +57,11 @@ public sealed partial class WFEncounterTest
                 var group = Ship(encounter).Group;
                 foreach (var member in SEntMan.EntityQuery<WFCrewComponent>(true).Where(member => member.Group == group))
                 {
-                    var htn = SEntMan.GetComponent<HTNComponent>(member.Owner);
+                    var htn = SEntMan.GetComponent<HTNComponent>(member.Uid());
                     if (htn.Blackboard.TryGetValue<EntityUid>("Target", out var target, SEntMan) && target == boarder)
                     {
                         targeted = true;
-                        TestContext.Out.WriteLine($"Second {second}: {SEntMan.ToPrettyString(member.Owner)} targets the boarder; unseen {Server.System<WFCrewStealthSystem>().Unseen(boarder)}.");
+                        TestContext.Out.WriteLine($"Second {second}: {SEntMan.ToPrettyString(member.Uid())} targets the boarder; unseen {Server.System<WFCrewStealthSystem>().Unseen(boarder)}.");
                     }
                 }
             });
@@ -82,7 +83,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, intruder = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestAuditZoneGuarded");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestAuditZoneGuardedProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(23000, 23000), MapData.MapId), out encounter), Is.True);
 
             var grid = Server.System<SharedMapSystem>().CreateGridEntity(MapData.MapId);
@@ -114,7 +115,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, prey = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestAuditZoneGuarded");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestAuditZoneGuardedProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(24000, 24000), MapData.MapId), out encounter), Is.True);
 
             var grid = Server.System<SharedMapSystem>().CreateGridEntity(MapData.MapId);

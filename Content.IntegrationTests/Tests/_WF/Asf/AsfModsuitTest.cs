@@ -34,10 +34,10 @@ public sealed class AsfModsuitTest
             {
                 var proto = prototypes.Index<EntityPrototype>(id);
                 // Monolith#4845 took plate holders off every hardsuit and modsuit, ASF included.
-                Assert.That(proto.TryGetComponent<ArmorPlateHolderComponent>(out _, factory), Is.False, $"{id} follows upstream and takes no armour plates.");
-                Assert.That(proto.TryGetComponent<HarpyHideWingsComponent>(out _, factory), Is.True, $"{id} should cover wings like a hardsuit.");
+                Assert.That(proto.TryComp<ArmorPlateHolderComponent>(out _, factory), Is.False, $"{id} follows upstream and takes no armour plates.");
+                Assert.That(proto.TryComp<HarpyHideWingsComponent>(out _, factory), Is.True, $"{id} should cover wings like a hardsuit.");
                 // The seal's ComponentToggler listens to ItemToggle; a toggle here would strip pressure protection.
-                Assert.That(proto.TryGetComponent<ItemToggleComponent>(out _, factory), Is.False, $"{id} must not carry an item toggle.");
+                Assert.That(proto.TryComp<ItemToggleComponent>(out _, factory), Is.False, $"{id} must not carry an item toggle.");
             }
         });
 

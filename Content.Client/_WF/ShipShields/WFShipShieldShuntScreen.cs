@@ -200,6 +200,7 @@ public sealed partial class WFShipShieldShuntScreen : BoxContainer
         Text = Loc.GetString(label), HorizontalExpand = true, MinHeight = 30,
     };
 
+#pragma warning disable CS0672, CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
     protected override void Dispose(bool disposing)
     {
         if (disposing)
@@ -209,6 +210,7 @@ public sealed partial class WFShipShieldShuntScreen : BoxContainer
         }
         base.Dispose(disposing);
     }
+#pragma warning restore CS0672, CS0618
 
     /// <summary>Accepts current and target allocation without overwriting unacknowledged local edits.</summary>
     public void UpdateState(WFShipShieldShuntState? state, float helmRotation)

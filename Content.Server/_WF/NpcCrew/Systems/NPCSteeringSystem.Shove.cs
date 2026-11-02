@@ -165,7 +165,7 @@ public sealed partial class NPCSteeringSystem
 
     private bool HasDoor(EntityUid grid, MapGridComponent gridComp, Vector2i tile)
     {
-        var anchored = _mapSystem.GetAnchoredEntitiesEnumerator(grid, gridComp, tile);
+        var anchored = _mapSystem.GetAnchoredEntities(grid, gridComp, tile);
         while (anchored.MoveNext(out var ent))
         {
             if (HasComp<DoorComponent>(ent))

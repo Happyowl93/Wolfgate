@@ -117,8 +117,10 @@ public sealed partial class WFDockingClampSystem : EntitySystem
 
     private void OnDock(DockEvent args)
     {
+#pragma warning disable CS0618 // DockEvent carries the dock components without their uids.
         Bite(args.GridAUid, args.GridBUid, args.DockA.Owner);
         Bite(args.GridBUid, args.GridAUid, args.DockB.Owner);
+#pragma warning restore CS0618
     }
 
     private void OnUndock(UndockEvent args)

@@ -28,7 +28,7 @@ namespace Content.Server._WF.Wolfmed.Consciousness;
 /// </remarks>
 // Transitions are down, out, waking, standing and the heart. Every line that names the cause also names whatever
 // else is holding the body, and none promises waking or standing while something else is.
-public sealed class WolfmedConditionAlertSystem : EntitySystem
+public sealed partial class WolfmedConditionAlertSystem : EntitySystem
 {
     [Dependency] private AlertsSystem _alerts = default!;
     [Dependency] private WolfmedCardSystem _card = default!; // playtest 3

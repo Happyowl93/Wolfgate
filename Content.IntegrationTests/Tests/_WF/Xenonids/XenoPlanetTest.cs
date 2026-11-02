@@ -152,7 +152,7 @@ public sealed partial class XenoPlanetTest
                 var index = new Vector2i(x + dx, y + dy);
                 open = maps.TryGetTileRef(grid, grid, index, out var tile)
                        && !tile.Tile.IsEmpty
-                       && !maps.GetAnchoredEntitiesEnumerator(grid, grid, index).MoveNext(out _);
+                       && !maps.GetAnchoredEntities(grid, grid, index).MoveNext(out _);
             }
 
             if (open)

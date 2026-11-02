@@ -112,14 +112,14 @@ public sealed class WolfgateMarkingIcon : Control
     {
         foreach (var sprite in sprites)
         {
-            if (Visible(sprite, direction))
+            if (ShowsInDirection(sprite, direction))
                 return true;
         }
 
         return false;
     }
 
-    private static bool Visible(SpriteSpecifier sprite, Direction direction)
+    private static bool ShowsInDirection(SpriteSpecifier sprite, Direction direction)
     {
         // Only RSI states carry per-direction frames; a flat texture always draws.
         if (Sprites.RsiStateLike(sprite) is not RSI.State state)

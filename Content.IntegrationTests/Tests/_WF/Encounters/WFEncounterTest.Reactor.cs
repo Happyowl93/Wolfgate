@@ -33,7 +33,7 @@ public sealed partial class WFEncounterTest
         var rods = 0f;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryRival");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryRivalProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-37000, -37000), MapData.MapId), out encounter), Is.True);
             ship = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["rival"].Grid;
 

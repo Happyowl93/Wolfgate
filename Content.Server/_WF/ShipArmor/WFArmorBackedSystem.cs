@@ -178,7 +178,7 @@ public sealed partial class WFArmorBackedSystem : EntitySystem
         var source = uid;
         var sourceXform = xform;
         if (TryComp<HardpointComponent>(uid, out var hardpoint) && hardpoint.anchoring is { } gun &&
-            TryComp<TransformComponent>(gun, out var gunXform) && gunXform.ParentUid == gridUid)
+            TryComp(gun, out TransformComponent? gunXform) && gunXform.ParentUid == gridUid)
         {
             source = gun;
             sourceXform = gunXform;

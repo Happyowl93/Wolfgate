@@ -59,7 +59,7 @@ public sealed partial class HumanoidProfileEditor
     /// <summary>The bubble's name in the picker, its id where no name is written.</summary>
     private static string TypingBubbleName(string id)
     {
-        return Loc.TryGetString($"wf-typing-bubble-{id.ToLowerInvariant()}", out var name) ? name : id;
+        return IoCManager.Resolve<ILocalizationManager>().TryGetString($"wf-typing-bubble-{id.ToLowerInvariant()}", out var name) ? name : id;
     }
 
     /// <summary>Lights the profile's bubble, and shows the species' own on the first box.</summary>
@@ -86,7 +86,7 @@ public sealed partial class HumanoidProfileEditor
     {
         if (_prototypeManager.TryIndex<SpeciesPrototype>(species, out var speciesProto)
             && _prototypeManager.TryIndex(speciesProto.Prototype, out var mob)
-            && mob.TryGetComponent<TypingIndicatorComponent>(out var indicator, _entManager.ComponentFactory))
+            && mob.TryComp<TypingIndicatorComponent>(out var indicator, _entManager.ComponentFactory))
         {
             return indicator.TypingIndicatorPrototype;
         }

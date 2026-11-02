@@ -17,7 +17,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 // A badly burned body dies of fluid loss through the blood route medics already know. The volume is discarded, never
 // spilled: burns weep, they do not bleed. A dressing cuts it to wolfmed.burn_dressed_fluid_factor, a graft stops it.
 // Dead bodies lose nothing, and arrest does not slow it.
-public sealed class WolfmedFluidLossSystem : EntitySystem
+public sealed partial class WolfmedFluidLossSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _config = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;

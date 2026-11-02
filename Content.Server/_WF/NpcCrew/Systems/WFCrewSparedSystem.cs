@@ -14,7 +14,7 @@ namespace Content.Server._WF.NpcCrew.Systems;
 /// player of that faction aboard. The crew never warns, hunts or zones them, and answers their fire only once it runs
 /// past <see cref="WFCrewAlertSystem.OwnFactionStrayHits"/>.
 /// </summary>
-public sealed class WFCrewSparedSystem : EntitySystem
+public sealed partial class WFCrewSparedSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private MobStateSystem _mobs = default!;

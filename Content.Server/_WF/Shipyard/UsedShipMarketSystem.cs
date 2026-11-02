@@ -93,7 +93,7 @@ public record struct UsedShipListedEvent(UsedShipListing Listing);
 /// Keeps the round's used ship lot: copies every ship sold on a marked station, and hands the
 /// copies back out when someone buys one. In memory only, cleared on round restart.
 /// </summary>
-public sealed class UsedShipMarketSystem : EntitySystem
+public sealed partial class UsedShipMarketSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private DockingSystem _docking = default!;
@@ -273,15 +273,16 @@ public sealed class UsedShipMarketSystem : EntitySystem
             var children = Transform(parent).ChildEnumerator;
             while (children.MoveNext(out var child))
             {
-                // A prototype that is not saved takes everything inside it with it, so do not recurse.
                 if (MetaData(child).EntityPrototype is { MapSavable: false } && !IsTransient(child))
                 {
-                    if (!HasComp<ActorComponent>(child))
-                        found.Add(child);
+                    // A player isn't copied, and takes everything inside them with them.
+                    if (HasComp<ActorComponent>(child))
+                        continue;
 
-                    continue;
+                    found.Add(child);
                 }
 
+                // A carried entity is saved with its containers, so whatever they hold must be carried too.
                 pending.Enqueue(child);
             }
         }

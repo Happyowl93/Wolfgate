@@ -21,6 +21,7 @@ namespace Content.Client._WF.Clown;
 public sealed class BalloonStringOverlay : Overlay
 {
     private readonly IEntityManager _entities;
+    private SharedTransformSystem _transform => _entities.System<SharedTransformSystem>();
     private readonly IGameTiming _timing;
     private readonly SpriteSystem _sprites;
     private readonly BalloonStringSystem _system;
@@ -101,8 +102,8 @@ public sealed class BalloonStringOverlay : Overlay
                 && (carrierMeta.Flags & MetaDataFlags.InContainer) != 0)
                 continue;
 
-            var carrierPos = xform.WorldPosition;
-            var facing = (xform.WorldRotation + eyeRot).GetCardinalDir();
+            var carrierPos = _transform.GetWorldPosition(xform);
+            var facing = (_transform.GetWorldRotation(xform) + eyeRot).GetCardinalDir();
             var isLeftHand = info.Location == HandLocation.Left;
             var handPos = carrierPos + screenUp.RotateVec(GetHandOffset(facing, isLeftHand));
 

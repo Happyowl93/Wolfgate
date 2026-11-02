@@ -15,7 +15,7 @@ namespace Content.Server._WF.Encounters.Systems;
 /// The lines come from the ship's zone lines: <c>{ZoneLines}-hail-question</c>, <c>-hail-yes</c>, <c>-hail-no</c>,
 /// <c>-hail-declared</c> and <c>-hail-cleared</c>.
 /// </summary>
-public sealed class WFEncounterInterrogationSystem : EntitySystem
+public sealed partial class WFEncounterInterrogationSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private HailingSystem _hailing = default!;

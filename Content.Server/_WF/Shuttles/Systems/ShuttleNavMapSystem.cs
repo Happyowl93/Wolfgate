@@ -7,7 +7,7 @@ namespace Content.Server._WF.Shuttles.Systems;
 /// Keeps nav map data on any grid carrying a shuttle console, so the console's whole-ship view has
 /// something to draw on ships that were never registered as a station.
 /// </summary>
-public sealed class ShuttleNavMapSystem : EntitySystem
+public sealed partial class ShuttleNavMapSystem : EntitySystem
 {
     [Dependency] private NavMapSystem _navMap = default!;
 

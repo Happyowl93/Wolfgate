@@ -20,6 +20,7 @@ using Content.Shared.Damage.Prototypes;
 using Content.Shared.FixedPoint;
 using NUnit.Framework;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 
@@ -32,6 +33,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(AutodocSystem))]
 public sealed class PodAntibioticsTest : WolfmedGameTest
 {
+    private static readonly ProtoId<DamageTypePrototype> SlashProto = "Slash";
+
     public override PoolSettings PoolSettings => PsDisconnected;
 
     [TestPrototypes]
@@ -83,7 +86,7 @@ public sealed class PodAntibioticsTest : WolfmedGameTest
                 LoadBeaker(pod);
 
             body = SEntMan.SpawnEntity("MobHuman", map.GridCoords);
-            var slash = SProtoMan.Index<DamageTypePrototype>("Slash");
+            var slash = SProtoMan.Index<DamageTypePrototype>(SlashProto);
             SEntMan.System<DamageableSystem>().TryChangeDamage(body, new DamageSpecifier(slash, FixedPoint2.New(20)),
                 origin: null, targetPart: TargetBodyPart.Torso);
             var torso = SEntMan.System<SharedBodySystem>().GetBodyChildrenOfType(body, BodyPartType.Torso).Single().Id;

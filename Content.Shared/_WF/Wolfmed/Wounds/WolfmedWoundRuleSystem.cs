@@ -20,7 +20,7 @@ namespace Content.Shared._WF.Wolfmed.Wounds;
 /// To add a wound: write the wound prototype with <c>ruleOnly: true</c>, list it in the part profile's
 /// <c>supportedWounds</c>, and add a <c>wolfmedWoundRule</c> naming it. No C# is needed.
 /// </remarks>
-public sealed class WolfmedWoundRuleSystem : EntitySystem
+public sealed partial class WolfmedWoundRuleSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IRobustRandom _random = default!;
@@ -201,19 +201,20 @@ public sealed class WolfmedWoundRuleSystem : EntitySystem
             !_bleedGate.PartCanStartBleeding(part))
             return false;
 
-        if (ArmorRefuses(part, rule.Wound, amount, rule.MinDamage))
+        if (ArmorRefuses(part, rule.Wound, amount, rule.MinDamage, rule.ID, cause))
             return false;
 
         return _wounds.CanCreateWound(part.AsNullable(), rule.Wound);
     }
 
     /// <summary>Whether worn armour refuses this wound, or needs a bigger hit than <paramref name="amount"/> for it.</summary>
-    private bool ArmorRefuses(EntityUid part, ProtoId<WoundPrototype> wound, FixedPoint2 amount, FixedPoint2 minDamage)
+    private bool ArmorRefuses(EntityUid part, ProtoId<WoundPrototype> wound, FixedPoint2 amount, FixedPoint2 minDamage,
+        string? rule = null, WolfmedWoundCause cause = WolfmedWoundCause.None)
     {
         if (!TryComp(part, out BodyPartComponent? attached) || attached.Body is not { } body)
             return false;
 
-        var attempt = new WolfmedWoundRuleAttemptEvent(part, wound, amount);
+        var attempt = new WolfmedWoundRuleAttemptEvent(part, wound, amount) { Rule = rule, Cause = cause };
         RaiseLocalEvent(body, ref attempt);
         return attempt.Cancelled || amount < minDamage * attempt.MinDamageMultiplier;
     }

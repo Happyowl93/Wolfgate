@@ -22,7 +22,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, intruder = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestAuditZoneGuarded");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestAuditZoneGuardedProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(23000, 23000), MapData.MapId), out encounter), Is.True);
             SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["guarded"].NeutralCompanies.Add("WFUnderground");
 

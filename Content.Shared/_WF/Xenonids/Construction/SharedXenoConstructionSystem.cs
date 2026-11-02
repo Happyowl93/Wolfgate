@@ -767,7 +767,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
 
         var hasBoost = _queenBoostQuery.HasComp(xeno.Owner);
 
-        if (prototype.TryGetComponent(out HiveConstructionNodeComponent? node, _compFactory) &&
+        if (prototype.TryComp(out HiveConstructionNodeComponent? node, _compFactory) &&
             !hasBoost &&
             !_xenoPlasma.TryRemovePlasmaPopup((xeno, plasma), node.InitialPlasmaCost))
         {
@@ -1101,7 +1101,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
 
     private bool HasSupportAt(EntityUid gridId, MapGridComponent grid, Vector2i tile)
     {
-        var anchored = _mapSystem.GetAnchoredEntitiesEnumerator(gridId, grid, tile);
+        var anchored = _mapSystem.GetAnchoredEntities(gridId, grid, tile);
         while (anchored.MoveNext(out var uid))
         {
             if (_constructionSupportQuery.HasComp(uid) && !HasComp<DoorComponent>(uid))
@@ -1129,7 +1129,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
         {
             var dir = (AtmosDirection)(1 << i);
             var pos = indices.Offset(dir);
-            var anchored = _mapSystem.GetAnchoredEntitiesEnumerator(gridId, grid, pos);
+            var anchored = _mapSystem.GetAnchoredEntities(gridId, grid, pos);
             while (anchored.MoveNext(out var uid))
             {
                 if (TerminatingOrDeleted(uid.Value) || EntityManager.IsQueuedForDeletion(uid.Value))
@@ -1206,7 +1206,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
     public FixedPoint2? GetStructurePlasmaCost(EntProtoId prototype)
     {
         if (_prototype.TryIndex(prototype, out var buildChoice) &&
-            buildChoice.TryGetComponent(out XenoConstructionPlasmaCostComponent? cost, _compFactory))
+            buildChoice.TryComp(out XenoConstructionPlasmaCostComponent? cost, _compFactory))
         {
             return cost.Plasma;
         }
@@ -1218,7 +1218,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
     {
         XenoConstructionMinRangeComponent? minRangeComp = null;
         if (_prototype.TryIndex(prototype, out var buildChoice))
-            buildChoice.TryGetComponent(out minRangeComp, _compFactory);
+            buildChoice.TryComp(out minRangeComp, _compFactory);
         if (minRangeComp != null)
             return minRangeComp.MinRange.Float();
         return 0;
@@ -1227,7 +1227,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
     private float? GetBuildSpeed(EntProtoId prototype)
     {
         if (_prototype.TryIndex(prototype, out var buildChoice) &&
-            buildChoice.TryGetComponent(out XenoConstructionBuildSpeedComponent? speed, _compFactory))
+            buildChoice.TryComp(out XenoConstructionBuildSpeedComponent? speed, _compFactory))
         {
             return speed.BuildTimeMult;
         }
@@ -1384,7 +1384,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
         }
 
         var tile = _mapSystem.CoordinatesToTile(gridId, grid, target);
-        var anchored = _mapSystem.GetAnchoredEntitiesEnumerator(gridId, grid, tile);
+        var anchored = _mapSystem.GetAnchoredEntities(gridId, grid, tile);
         while (anchored.MoveNext(out var uid))
         {
             if (_hiveConstructionNodeQuery.TryGetComponent(uid, out var node) &&
@@ -1486,7 +1486,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
         foreach (var direction in Directions)
         {
             var pos = SharedMapSystem.GetDirection(tile, direction);
-            var directionEnumerator = _mapSystem.GetAnchoredEntitiesEnumerator(gridId, grid, pos);
+            var directionEnumerator = _mapSystem.GetAnchoredEntities(gridId, grid, pos);
 
             while (directionEnumerator.MoveNext(out var ent))
             {
@@ -1556,7 +1556,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
                 }
             }
 
-            if (choiceProto.TryGetComponent(out HiveConstructionLimitedComponent? limited, _compFactory) &&
+            if (choiceProto.TryComp(out HiveConstructionLimitedComponent? limited, _compFactory) &&
                 !CanPlaceLimitedHiveStructure(xeno.Owner, limited, out var limit, out _))
             {
                 // server-only as the structure may not be in the client's PVS bubble
@@ -1610,7 +1610,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
     public bool CanPlaceLimitedXenoStructure(Entity<XenoSecretionLimitedComponent?> xeno, EntProtoId construction)
     {
         if (!_prototype.TryIndex(construction, out var prototype) ||
-            !prototype.TryGetComponent(out XenoSecretionLimitedComponent? comp, _compFactory))
+            !prototype.TryComp(out XenoSecretionLimitedComponent? comp, _compFactory))
         {
             return true;
         }
@@ -1645,7 +1645,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
         {
             var dir = (AtmosDirection)(1 << i);
             var pos = tile.Offset(dir);
-            var anchored = _mapSystem.GetAnchoredEntitiesEnumerator(grid, grid, pos);
+            var anchored = _mapSystem.GetAnchoredEntities(grid, grid, pos);
             while (anchored.MoveNext(out var uid))
             {
                 if (TerminatingOrDeleted(uid.Value) || EntityManager.IsQueuedForDeletion(uid.Value))
@@ -1732,7 +1732,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
         }
 
         var tile = _mapSystem.TileIndicesFor(gridId, grid, coords);
-        var anchored = _mapSystem.GetAnchoredEntitiesEnumerator(gridId, grid, tile);
+        var anchored = _mapSystem.GetAnchoredEntities(gridId, grid, tile);
         var hasWeeds = false;
         while (anchored.MoveNext(out var uid))
         {
@@ -1964,7 +1964,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
         var wantDoor = designer.BuildDoorNodes;
 
         if (!_prototype.TryIndex(choice, out var proto) ||
-            !proto.TryGetComponent(out DesignerDesignNodeVariantComponent? variants, _compFactory))
+            !proto.TryComp(out DesignerDesignNodeVariantComponent? variants, _compFactory))
         {
             return choice;
         }
@@ -2057,7 +2057,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
     private bool TryHandleDesignerRemoteDeleteNodeChoice(Entity<XenoConstructionComponent> xeno, EntProtoId choice, EntityCoordinates target)
     {
         if (!_prototype.TryIndex(choice, out var proto) ||
-            !proto.TryGetComponent(out DesignerDeleteDesignNodeComponent? deleteChoice, _compFactory))
+            !proto.TryComp(out DesignerDeleteDesignNodeComponent? deleteChoice, _compFactory))
         {
             return false;
         }
@@ -2112,7 +2112,7 @@ public sealed partial class SharedXenoConstructionSystem : EntitySystem
     private bool TryHandleDesignerRemoteThickenResin(Entity<XenoConstructionComponent> xeno, EntProtoId choice, EntityCoordinates target)
     {
         if (!_prototype.TryIndex(choice, out var proto) ||
-            !proto.TryGetComponent(out DesignerRemoteThickenResinComponent? thickenChoice, _compFactory))
+            !proto.TryComp(out DesignerRemoteThickenResinComponent? thickenChoice, _compFactory))
         {
             return false;
         }

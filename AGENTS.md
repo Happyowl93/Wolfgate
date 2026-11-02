@@ -18,6 +18,7 @@ PascalCase name is its folder name in every area:
 | Ship grids (a vessel's `shuttlePath`) | `Resources/SharedMaps/_WF/<Module>` |
 | Other maps (stations, POIs) | `Resources/Maps/_WF/<Module>` |
 | Guidebook pages | `Resources/ServerInfo/_WF/<Module>` |
+| Data clients download on demand, not shipped | `Resources/GameData/_WF/<Module>` |
 | Scripts and generators | `Tools/_WF/<Module>` |
 | Design docs | `Docs/_WF/<Module>` |
 

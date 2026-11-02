@@ -157,7 +157,7 @@ public sealed partial class WFCockpitGunnerySystem : EntitySystem
     private bool CanAccessConsole(EntityUid actor, EntityUid helm, EntityUid console)
     {
         if (TerminatingOrDeleted(console) || !HasComp<FireControlConsoleComponent>(console) ||
-            !TryComp<TransformComponent>(helm, out var helmTransform) || helmTransform.GridUid is not { } grid ||
+            !TryComp(helm, out TransformComponent? helmTransform) || helmTransform.GridUid is not { } grid ||
             Transform(actor).GridUid != grid || Transform(console).GridUid != grid ||
             !Transform(console).Anchored || !_power.IsPowered(console) ||
             !_ui.HasUi(console, FireControlConsoleUiKey.Key) || !_blocker.CanInteract(actor, console) ||

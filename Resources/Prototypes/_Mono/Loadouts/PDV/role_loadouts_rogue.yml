@@ -12,6 +12,7 @@
   - PirateFace
   - ContractorBoxSurvival
   - RakhshanPDA
+  - ContractorCartridge # WOLFGATE: PDV roles had no PDA cartridges
   - ContractorWallet
   - NFSpeciesSpecific
   - PirateTrinkets
@@ -38,6 +39,7 @@
   - PDVFace
   - ContractorBoxSurvival
   - AsvaranPDA
+  - ContractorCartridge # WOLFGATE: PDV roles had no PDA cartridges
   - NFSpeciesSpecific
   - ContractorWallet
   - PirateTrinkets
@@ -64,6 +66,7 @@
   - PDVCommanderNeck
   - ContractorBoxSurvival
   - GrandVizierPDA
+  - ContractorCartridge # WOLFGATE: PDV roles had no PDA cartridges
   - NFSpeciesSpecific
   - ContractorWallet
   - PirateCaptainTrinkets
@@ -89,6 +92,7 @@
   - PDVNeck
   - ContractorBoxSurvival
   - PDVInfiltratorPDA
+  - ContractorCartridge # WOLFGATE: PDV roles had no PDA cartridges
   - NFSpeciesSpecific
   - ContractorWallet
   - PirateTrinkets
@@ -113,6 +117,7 @@
   - PirateFace
   - ContractorBoxSurvival
   - PDVDenasvarPDA
+  - ContractorCartridge # WOLFGATE: PDV roles had no PDA cartridges
   - ContractorWallet
   - NFSpeciesSpecific
   - PirateTrinkets
@@ -181,6 +186,7 @@
   - PDVShoes
   - TsfmcBalaclava
   - RakhshanPDA
+  - ContractorCartridge # WOLFGATE: PDV roles had no PDA cartridges
   - NFSpeciesSpecific
   - PDVInfantryBelt
   canCustomizeName: true

@@ -316,7 +316,7 @@ public sealed partial class XenoEggSystem : EntitySystem
 
         // Hand code is god-awful and its reach distance is inconsistent with args.CanReach
         // so we need to set the position ourselves.
-        _transform.SetCoordinates(egg, EntityManager.GetCoordinates(args.Coordinates));
+        _transform.SetCoordinates(egg, GetCoordinates(args.Coordinates));
         _transform.SetLocalRotation(egg, 0);
 
         SetEggState(egg, XenoEggState.Growing);
@@ -692,7 +692,7 @@ public sealed partial class XenoEggSystem : EntitySystem
         }
 
         var tile = _map.TileIndicesFor(gridId, grid, coordinates);
-        var anchored = _map.GetAnchoredEntitiesEnumerator(gridId, grid, tile);
+        var anchored = _map.GetAnchoredEntities(gridId, grid, tile);
         hasHiveWeeds = _weeds.IsOnHiveWeeds((gridId, grid), coordinates);
         while (anchored.MoveNext(out var uid))
         {

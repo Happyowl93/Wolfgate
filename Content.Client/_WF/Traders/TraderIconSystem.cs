@@ -10,7 +10,7 @@ namespace Content.Client._WF.Traders;
 /// Puts a question mark over every living trader, where the SSD indicator would be, so players can tell them
 /// from anyone else standing about.
 /// </summary>
-public sealed class TraderIconSystem : EntitySystem
+public sealed partial class TraderIconSystem : EntitySystem
 {
     private static readonly ProtoId<SsdIconPrototype> Icon = "WFTraderIcon";
 

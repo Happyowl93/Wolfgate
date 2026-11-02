@@ -32,6 +32,8 @@ namespace Content.IntegrationTests.Tests._WF.MappingMode;
 [TestFixture]
 public sealed class WFMappingShipTest
 {
+    private static readonly ProtoId<ContentTileDefinition> FloorSteelProto = "FloorSteel";
+
     private const string MapName = "Ship Test";
     private const string Wall = "WallSolid";
     private const string Ame = "AmeController";
@@ -193,7 +195,7 @@ public sealed class WFMappingShipTest
             }
 
             Assert.That(prototypes.HasIndex<VesselPrototype>(id), Is.False, "The throwaway vessel is gone again.");
-            Assert.That(prototypes.Index<ContentTileDefinition>("FloorSteel").TileId,
+            Assert.That(prototypes.Index<ContentTileDefinition>(FloorSteelProto).TileId,
                 Is.EqualTo(server.ResolveDependency<ITileDefinitionManager>()["FloorSteel"].TileId),
                 "Loading the vessel rebuilt the tile definitions without their tile ids.");
         });

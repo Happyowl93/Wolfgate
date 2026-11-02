@@ -1,8 +1,10 @@
 using Content.Server.Body.Components;
+using Content.Server._WF.Wolfmed.Medical; // WOLFGATE(Wolfmed)
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Body.Organ;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.Components.SolutionManager;
+using Content.Shared.Chemistry.Reaction; // WOLFGATE(Wolfmed)
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
 
@@ -21,7 +23,16 @@ namespace Content.Server.Body.Systems
             SubscribeLocalEvent<StomachComponent, MapInitEvent>(OnMapInit);
             SubscribeLocalEvent<StomachComponent, EntityUnpausedEvent>(OnUnpaused);
             SubscribeLocalEvent<StomachComponent, ApplyMetabolicMultiplierEvent>(OnApplyMetabolicMultiplier);
+            SubscribeLocalEvent<StomachComponent, SolutionRelayEvent<ReactionAttemptEvent>>(OnReactionAttempt); // WOLFGATE(Wolfmed): salted food and water must not form saline
         }
+
+        // WOLFGATE(Wolfmed) START: salted food and water must not form saline
+        private void OnReactionAttempt(Entity<StomachComponent> ent, ref SolutionRelayEvent<ReactionAttemptEvent> args)
+        {
+            if (args.Name == DefaultSolutionName && WolfmedOralAbsorptionSystem.BlockedInBody(args.Event.Reaction))
+                args.Event.Cancelled = true;
+        }
+        // WOLFGATE END
 
         private void OnMapInit(Entity<StomachComponent> ent, ref MapInitEvent args)
         {
@@ -51,6 +62,8 @@ namespace Content.Server.Body.Systems
                     continue;
 
                 var transferSolution = new Solution();
+
+                _wolfmedAbsorption.TrackUntracked(stomach, stomachSolution); // WOLFGATE(Wolfmed): reaction products were stuck in the stomach for good
 
                 var queue = new RemQueue<StomachComponent.ReagentDelta>();
                 foreach (var delta in stomach.ReagentDeltas)

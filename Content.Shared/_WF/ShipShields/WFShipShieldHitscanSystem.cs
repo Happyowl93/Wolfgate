@@ -6,7 +6,7 @@ using Robust.Shared.Physics.Components;
 namespace Content.Shared._WF.ShipShields;
 
 /// <summary>Clips authoritative and predicted beams against the visible shield perimeter.</summary>
-public sealed class WFShipShieldHitscanSystem : EntitySystem
+public sealed partial class WFShipShieldHitscanSystem : EntitySystem
 {
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private INetManager _net = default!;

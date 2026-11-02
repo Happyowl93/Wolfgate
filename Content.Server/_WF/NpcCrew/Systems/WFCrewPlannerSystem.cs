@@ -40,7 +40,7 @@ public enum WFCrewPostKind : byte
 /// Posts keep to breathable deck; a console with none beside it, or a hull with none at all, is manned from open
 /// deck, and whoever is posted there is spawned in a void kit.
 /// </summary>
-public sealed class WFCrewPlannerSystem : EntitySystem
+public sealed partial class WFCrewPlannerSystem : EntitySystem
 {
     [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private TurfSystem _turf = default!;
@@ -357,7 +357,7 @@ public sealed class WFCrewPlannerSystem : EntitySystem
     /// <summary>Whether a tile holds something anchored and solid that is not a wall or window: a console, a machine, a locker.</summary>
     private bool HasMachine(EntityUid grid, MapGridComponent gridComp, Vector2i tile)
     {
-        var anchored = _map.GetAnchoredEntitiesEnumerator(grid, gridComp, tile);
+        var anchored = _map.GetAnchoredEntities(grid, gridComp, tile);
         while (anchored.MoveNext(out var uid))
         {
             if (_tags.HasAnyTag(uid.Value, WallTag, WindowTag) || !TryComp<FixturesComponent>(uid, out var fixtures))
@@ -377,7 +377,7 @@ public sealed class WFCrewPlannerSystem : EntitySystem
     private HashSet<Vector2i> FreeTiles(EntityUid grid, MapGridComponent gridComp)
     {
         var free = new HashSet<Vector2i>();
-        var tiles = _map.GetAllTilesEnumerator(grid, gridComp);
+        var tiles = _map.GetAllTiles(grid, gridComp);
         while (tiles.MoveNext(out var tile))
         {
             if (IsStandable(grid, tile.Value.GridIndices, gridComp))

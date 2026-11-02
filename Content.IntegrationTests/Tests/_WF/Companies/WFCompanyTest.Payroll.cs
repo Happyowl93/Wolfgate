@@ -38,8 +38,11 @@ public sealed partial class WFCompanyTest
         var slot = preferences.GetPreferences(owner.UserId).SelectedCharacterIndex;
         var spawnedSlots = (Dictionary<NetUserId, int>) typeof(WFCompanySystem)
             .GetField("_spawnedSlots", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(companies)!;
+        var nextSample = typeof(WFCompanySystem).GetField("_nextSample", BindingFlags.Instance | BindingFlags.NonPublic)!;
         await server.WaitPost(() =>
         {
+            // The test samples by hand; the system's own timer would add a minute at a random point.
+            nextSample.SetValue(companies, TimeSpan.MaxValue);
             server.CfgMan.SetCVar(CCVars.AutoVoteEnabled, false);
             foreach (var vote in server.ResolveDependency<IVoteManager>().ActiveVotes.ToArray())
                 vote.Cancel();
@@ -157,7 +160,11 @@ public sealed partial class WFCompanyTest
                 preferences.SetProfile(owner.UserId, slot, original).Wait();
             });
             await server.RemoveAllDummySessions();
-            await server.WaitPost(() => server.CfgMan.SetCVar(CCVars.AutoVoteEnabled, autoVote));
+            await server.WaitPost(() =>
+            {
+                server.CfgMan.SetCVar(CCVars.AutoVoteEnabled, autoVote);
+                nextSample.SetValue(companies, TimeSpan.Zero);
+            });
         }
         await pair.RunTicksSync(2);
         await pair.CleanReturnAsync();

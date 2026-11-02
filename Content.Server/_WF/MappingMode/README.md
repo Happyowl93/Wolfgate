@@ -65,7 +65,7 @@ packages a library version as one zip laid out like the repository, so it is unz
 steps, with Back and Next:
 
 - Check runs the issues checker (`WFMappingIssuesSystem`, `WFMappingIssuesRequest`) on the session for the chosen kind,
-  Ship, Map or Grid (a grid runs the map check, which stops nothing), and lists what it found with the severity, the title, the fix hint and Go to, which moves the observer
+  Ship, Map or Grid (a grid runs the map rules, with the map lint taking it for a point of interest), and lists what it found with the severity, the title, the fix hint and Go to, which moves the observer
   to the entity or tile (`WFMappingGoToIssueRequest`). Export as ship is off while an error stands, and the hint says
   to fix them or export as a map; Check again re-runs it. The server answers one check per three seconds and says
   so (`WFMappingIssuesRefusedEvent`) rather than staying silent; the client holds a check asked inside that gap
@@ -91,10 +91,15 @@ the README. A grid export (for POIs and other grids that aren't ships) is the ve
 bare as `<file>.yml` under the ship grid's name, with no prototype, README or zip, and refused for several grids or none
 the way a ship is. The README says what the package is, where to unzip it, what each file is, what to check (guessed fields,
 the price against the appraisal, an id already in the game) and the issues report at export time by severity, or that
-no check ran. A ship export in the map's session is refused while an error stands, the price in the details counted
+the session wasn't checked. A ship export in the map's session is refused while an error stands, the price in the details counted
 against the appraisal floor. The check only runs when the version is the map's newest and the session has no changes
 since, so the live grids are the version's; outside the session, from an older version or with unsaved changes nothing
 is checked and the README says so.
+
+Every export also runs the map lint on the version's saved files, in or out of the session, and is refused when it
+fails. `WFMappingMapLint` holds the prototype rules of the CI map checker (`.github/mapchecker/config.py`, to be kept in
+step by hand): the always-illegal matches and the DoNotMap category for every kind, plus the point-of-interest-only ones
+for a ship or map but not a grid. The live check reports the same rule as `map-lint`.
 
 The details are kept as `ship.yml` in the version folder, sanitized (name alphabet, description length, price range,
 known enum values, lists deduplicated and capped at 8), sent with the library listing so the wizard pre-fills, copied
@@ -435,6 +440,7 @@ requests are handled in MappingTools (`MappingToolsSystem.Links.cs`). Cvars are 
 - [`Content.Server/_WF/MappingMode/Issues/WFMappingIssuesSystem.cs`](Issues/WFMappingIssuesSystem.cs)
 - [`Content.Server/_WF/MappingMode/Issues/WFMappingIssuesSystem.Map.cs`](Issues/WFMappingIssuesSystem.Map.cs)
 - [`Content.Server/_WF/MappingMode/Issues/WFMappingIssuesSystem.Ship.cs`](Issues/WFMappingIssuesSystem.Ship.cs)
+- [`Content.Server/_WF/MappingMode/Issues/WFMappingMapLint.cs`](Issues/WFMappingMapLint.cs)
 - [`Content.Server/_WF/MappingMode/Test/WFMappingTest.cs`](Test/WFMappingTest.cs)
 - [`Content.Server/_WF/MappingMode/Test/WFMappingTestSystem.cs`](Test/WFMappingTestSystem.cs)
 - [`Content.Server/_WF/MappingMode/WFMappingDownloadSystem.cs`](WFMappingDownloadSystem.cs)

@@ -1,5 +1,6 @@
 #nullable enable annotations
 
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -99,7 +100,7 @@ public sealed class WFRadarOverlayTest
                         {
                             lease.Restore();
                             cockpit.Parent?.RemoveChild(cockpit);
-                            cockpit.Dispose();
+                            cockpit.Teardown();
                         }
                         Layout(helm, new Vector2(1180, 780));
                         Assert.That(helmRadar.Parent, Is.SameAs(home));

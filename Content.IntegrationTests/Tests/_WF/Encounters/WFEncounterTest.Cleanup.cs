@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -18,6 +19,8 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestEncounterSkirmishProto => "WFTestEncounterSkirmish";
+
     /// <summary>A resolved ship due to jump out stays for the grace period after the last player steps off it.</summary>
     [Test]
     public async Task ResolvedShipWaitsOutTheGraceAfterPlayersLeave()
@@ -122,12 +125,12 @@ public sealed partial class WFEncounterTest
     {
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestEncounterSkirmish");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestEncounterSkirmishProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-49000, 49000), MapData.MapId), out var encounter), Is.True);
             var comp = SEntMan.GetComponent<WFEncounterComponent>(encounter);
             var foe = comp.Ships["foe"];
             var friend = comp.Ships["friend"];
-            var crewman = SEntMan.EntityQuery<WFCrewComponent>(true).First(member => member.Group == foe.Group).Owner;
+            var crewman = SEntMan.EntityQuery<WFCrewComponent>(true).First(member => member.Group == foe.Group).Uid();
             Assert.That(SEntMan.HasComponent<KillTrackerComponent>(crewman), Is.True, "Crews report who downs them.");
 
             var rewards = Server.System<WFEncounterRewardSystem>();
@@ -139,7 +142,7 @@ public sealed partial class WFEncounterTest
             Assert.That(rewards.GetHelpers(comp, new HashSet<string> { foe.Side }).Select(helper => helper.Session),
                 Does.Contain(ServerSession), "Downing one of theirs is help against them.");
 
-            var other = SEntMan.EntityQuery<WFCrewComponent>(true).First(member => member.Group == friend.Group).Owner;
+            var other = SEntMan.EntityQuery<WFCrewComponent>(true).First(member => member.Group == friend.Group).Uid();
             var turn = new KillReportedEvent(other, new KillPlayerSource(ServerSession.UserId), null, false);
             SEntMan.EventBus.RaiseEvent(EventSource.Local, ref turn);
             Assert.That(rewards.GetHelpers(comp, new HashSet<string> { foe.Side }), Is.Empty, "Downing the other side's crew too forfeits the share.");

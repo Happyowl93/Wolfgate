@@ -39,6 +39,7 @@ namespace Content.Client._WF.Xenonids.Construction;
 public sealed partial class XenoConstructionGhostSystem : EntitySystem
 {
     [Dependency] private IComponentFactory _compFactory = default!;
+    [Dependency] private SpriteSystem _sprite = default!;
     [Dependency] private IEyeManager _eyeManager = default!;
     [Dependency] private IInputManager _inputManager = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
@@ -250,7 +251,7 @@ public sealed partial class XenoConstructionGhostSystem : EntitySystem
 
         var tile = _mapSystem.CoordinatesToTile(gridId, grid, snapped);
 
-        var anchored = _mapSystem.GetAnchoredEntitiesEnumerator(gridId, grid, tile);
+        var anchored = _mapSystem.GetAnchoredEntities(gridId, grid, tile);
         while (anchored.MoveNext(out var uid))
         {
             if (TryComp(uid, out XenoStructureUpgradeableComponent? comp) && comp.To != null)
@@ -339,34 +340,39 @@ public sealed partial class XenoConstructionGhostSystem : EntitySystem
         if (!TryComp(ghost, out SpriteComponent? sprite))
             return;
 
-        sprite.Color = new Color(48, 255, 48, 128);
-        sprite.DrawDepth = 9;
-        sprite.Visible = true;
+        _sprite.SetColor((ghost, sprite), new Color(48, 255, 48, 128));
+        _sprite.SetDrawDepth((ghost, sprite), 9);
+        _sprite.SetVisible((ghost, sprite), true);
 
         if (!_prototypeManager.TryIndex<EntityPrototype>(structurePrototype, out var prototype))
             return;
 
-        if (TryConfigureIconSmoothSprite(sprite, prototype))
+        if (TryConfigureIconSmoothSprite(ghost, sprite, prototype))
             return;
 
-        if (prototype.TryGetComponent<SpriteComponent>(out var prototypeSprite, _compFactory))
+        if (prototype.TryComp<SpriteComponent>(out var prototypeSprite, _compFactory))
         {
-            sprite.CopyFrom(prototypeSprite);
-            sprite.Color = new Color(48, 255, 48, 128);
-            sprite.DrawDepth = 9;
+            _sprite.CopySprite((EntityUid.Invalid, prototypeSprite), (ghost, sprite));
+            _sprite.SetColor((ghost, sprite), new Color(48, 255, 48, 128));
+            _sprite.SetDrawDepth((ghost, sprite), 9);
 
             for (var i = 0; i < sprite.AllLayers.Count(); i++)
             {
                 sprite.LayerSetShader(i, "unshaded");
-                sprite.LayerSetVisible(i, true);
+                _sprite.LayerSetVisible((ghost, sprite), i, true);
             }
         }
     }
 
-    private bool TryConfigureIconSmoothSprite(SpriteComponent sprite, EntityPrototype prototype)
+    private enum GhostLayer : byte
     {
-        if (!prototype.TryGetComponent(out IconSmoothComponent? iconSmooth, _compFactory) ||
-            !prototype.TryGetComponent(out SpriteComponent? prototypeSprite, _compFactory) ||
+        Base,
+    }
+
+    private bool TryConfigureIconSmoothSprite(EntityUid ghost, SpriteComponent sprite, EntityPrototype prototype)
+    {
+        if (!prototype.TryComp(out IconSmoothComponent? iconSmooth, _compFactory) ||
+            !prototype.TryComp(out SpriteComponent? prototypeSprite, _compFactory) ||
             string.IsNullOrEmpty(iconSmooth.StateBase))
         {
             return false;
@@ -374,15 +380,15 @@ public sealed partial class XenoConstructionGhostSystem : EntitySystem
 
         try
         {
-            sprite.LayerMapReserveBlank(0);
-            sprite.LayerSetRSI(0, prototypeSprite.BaseRSI);
+            _sprite.LayerMapReserve((ghost, sprite), GhostLayer.Base);
+            _sprite.LayerSetRsi((ghost, sprite), 0, prototypeSprite.BaseRSI);
 
             if (prototypeSprite.BaseRSI?.TryGetState(iconSmooth.StateBase, out _) == true)
             {
-                sprite.LayerSetState(0, iconSmooth.StateBase);
+                _sprite.LayerSetRsiState((ghost, sprite), 0, iconSmooth.StateBase);
                 sprite.LayerSetShader(0, "unshaded");
-                sprite.LayerSetVisible(0, true);
-                sprite.Color = new Color(48, 255, 48, 128);
+                _sprite.LayerSetVisible((ghost, sprite), 0, true);
+                _sprite.SetColor((ghost, sprite), new Color(48, 255, 48, 128));
                 return true;
             }
             else
@@ -418,9 +424,9 @@ public sealed partial class XenoConstructionGhostSystem : EntitySystem
 
         if (TryComp(_currentGhost.Value, out SpriteComponent? sprite))
         {
-            sprite.Color = IsValidConstructionLocation(player.Value, coords)
+            _sprite.SetColor((_currentGhost.Value, sprite), IsValidConstructionLocation(player.Value, coords)
                 ? new Color(48, 255, 48, 128)
-                : new Color(255, 48, 48, 128);
+                : new Color(255, 48, 48, 128));
         }
     }
 

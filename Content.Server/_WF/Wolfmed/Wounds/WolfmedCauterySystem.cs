@@ -28,7 +28,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// <see cref="UtilityVerb"/> because the interaction events on <c>WoundHostComponent</c> are all taken
 /// (welder repair, embedded removal) and a verb also reads as intent.
 /// </remarks>
-public sealed class WolfmedCauterySystem : EntitySystem
+public sealed partial class WolfmedCauterySystem : EntitySystem
 {
     /// <summary>The shipped profile. Retuning searing is an edit to that prototype, not to this file.</summary>
     public const string DefaultProfile = "WFWolfmedCauteryDefault";

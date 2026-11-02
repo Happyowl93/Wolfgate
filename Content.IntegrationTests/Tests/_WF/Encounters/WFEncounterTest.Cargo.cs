@@ -24,7 +24,7 @@ public sealed partial class WFEncounterTest
         var planner = Server.System<WFCrewPlannerSystem>();
         var gridComp = SEntMan.GetComponent<MapGridComponent>(grid);
         var walkable = new HashSet<Vector2i>();
-        var tiles = maps.GetAllTilesEnumerator(grid, gridComp);
+        var tiles = maps.GetAllTiles(grid, gridComp);
         while (tiles.MoveNext(out var tile))
         {
             if (planner.IsStandable(grid, tile.Value.GridIndices, gridComp))

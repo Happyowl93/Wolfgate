@@ -77,7 +77,7 @@ public static class EmoteVoiceRules
         sounds = null;
         if (!protoManager.TryIndex(species, out var speciesProto)
             || !protoManager.TryIndex(speciesProto.Prototype, out var body)
-            || !body.TryGetComponent<VocalComponent>(out var vocal, factory)
+            || !body.TryComp<VocalComponent>(out var vocal, factory)
             || vocal.Sounds == null)
             return false;
 

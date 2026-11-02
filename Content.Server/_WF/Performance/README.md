@@ -50,6 +50,13 @@ Small fixes for hot spots found in live server profiles, kept as narrow hooks in
   zones, ship status, crew ship status, cargo load and thermal signatures each start on their own part of the second.
 - AI ship steering works every other tick and holds its input between (`ShipSteeringSystem`), and `FlammableSystem`
   looks for what's due every third tick.
+- NPC ship crews cost less in a fleet fight. A gunner's costlier post checks and target re-checks run four times a second
+  (`WFGunnerDutySystem.HoldsPost`), guns are aimed every other tick (`ShipTargetingSystem.WFAimPeriod`; a shot attempt
+  lasts 0.2 s, so firing doesn't stop between), and steering runs its area searches every third turn and skips the
+  sector maths when nothing is near.
+- `WFDeletedRefStateSystem` hand-writes the state of components whose references can outlive what they point at
+  (projectiles, deeds, guest access, station grids). A generated state logged an error with a stack trace per deleted
+  reference, per send, on the PVS threads. A deleted reference goes out as invalid, and set entries are left out.
 - `WFGridDeleteWatchSystem` logs any grid that takes at least 50 ms to delete, by name and entity count.
 - The marked upstream edits skip idle-shuttle thruster work, avoid `Enum.GetValues` and nullable boxing on per-tick
   paths, stop `FlammableSystem` from crashing when igniting queues new fire events, and stop networking a thrown
@@ -88,6 +95,7 @@ Small fixes for hot spots found in live server profiles, kept as narrow hooks in
 - [`Content.Shared/_WF/Performance/SharedRoofSystem.WFDelta.cs`](../../../Content.Shared/_WF/Performance/SharedRoofSystem.WFDelta.cs)
 - [`Content.Shared/_WF/Performance/WFAsteroidFieldComponent.cs`](../../../Content.Shared/_WF/Performance/WFAsteroidFieldComponent.cs)
 - [`Content.Shared/_WF/Performance/WFCollectionExtensions.cs`](../../../Content.Shared/_WF/Performance/WFCollectionExtensions.cs)
+- [`Content.Shared/_WF/Performance/WFDeletedRefStateSystem.cs`](../../../Content.Shared/_WF/Performance/WFDeletedRefStateSystem.cs)
 - [`Content.Shared/_WF/Performance/WFPerformanceCVars.cs`](../../../Content.Shared/_WF/Performance/WFPerformanceCVars.cs)
 - [`Content.Shared/_WF/Performance/WFTickSpread.cs`](../../../Content.Shared/_WF/Performance/WFTickSpread.cs)
 
@@ -103,6 +111,7 @@ Small fixes for hot spots found in live server profiles, kept as narrow hooks in
 - [`Content.IntegrationTests/Tests/_WF/Performance/WFAsteroidCullTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Performance/WFAsteroidCullTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Performance/WFBottomlessRegenTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Performance/WFBottomlessRegenTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Performance/WFBreachLoopTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Performance/WFBreachLoopTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Performance/WFDeletedRefStateTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Performance/WFDeletedRefStateTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Performance/WFFlammableDebrisTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Performance/WFFlammableDebrisTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Performance/WFGravityRefreshTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Performance/WFGravityRefreshTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Performance/WFGridDeleteWatchTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Performance/WFGridDeleteWatchTest.cs)
@@ -149,9 +158,19 @@ Small fixes for hot spots found in live server profiles, kept as narrow hooks in
 - [`Content.Server/_Mono/Detection/ThermalSignatureSystem.cs`](../../_Mono/Detection/ThermalSignatureSystem.cs): off the tick other one-second systems run on
 - [`Content.Server/_Mono/NPC/HTN/ShipSteeringSystem.cs`](../../_Mono/NPC/HTN/ShipSteeringSystem.cs)
   - how often steering works out a new input
+  - how many steering turns one area search for obstacles lasts
   - steering works every other tick and holds its input between, saving its scans
+  - holds this pilot's last obstacle search
   - this input holds for the whole turn
   - held until the next turn
+  - the area searches run every few turns; what they found is looked at again every turn
+  - fills the kept set, was a new one per search
+  - end of the area searches
+  - with nothing to avoid the wish is clear, so skip working out every sector's thrust
+- [`Content.Server/_Mono/NPC/HTN/ShipTargetingSystem.cs`](../../_Mono/NPC/HTN/ShipTargetingSystem.cs)
+  - how often a ship's guns are aimed; a shot attempt lasts 0.2 s, so they keep firing between
+  - each turn covers the whole period
+  - each ship aims on its own tick of the period
 - [`Content.Server/_Mono/Radar/RadarBlipSystem.cs`](../../_Mono/Radar/RadarBlipSystem.cs): every radar on a map shares one walk of the blips per tick
 - [`Content.Server/_Mono/Temperature/Systems/EntityRadiusHeaterSystem.cs`](../../_Mono/Temperature/Systems/EntityRadiusHeaterSystem.cs)
   - each heater takes its own tick of the second, not all on one
@@ -185,6 +204,7 @@ Small fixes for hot spots found in live server profiles, kept as narrow hooks in
   - burning can destroy things and spawn flammable debris, which broke the live query
 - [`Content.Server/Atmos/EntitySystems/HeatExchangerSystem.cs`](../../Atmos/EntitySystems/HeatExchangerSystem.cs): wizden#41390, was IsTileAirBlocked
 - [`Content.Server/Chunking/ChunkingSystem.cs`](../../Chunking/ChunkingSystem.cs): mining rocks never hold decals or gas, and are only sent to players near them
+- [`Content.Server/Explosion/EntitySystems/ExplosionSystem.Processing.cs`](../../Explosion/EntitySystems/ExplosionSystem.Processing.cs): Debug, was Info; it logged every step of every explosion
 - [`Content.Server/Explosion/EntitySystems/ProjectileGrenadeSystem.cs`](../../Explosion/EntitySystems/ProjectileGrenadeSystem.cs): wizden#36641, the grenade is deleted so it can't be the gun; was uid, null
 - [`Content.Server/Fluids/EntitySystems/DrainSystem.cs`](../../Fluids/EntitySystems/DrainSystem.cs)
   - each drain takes its own tick
@@ -239,6 +259,11 @@ Small fixes for hot spots found in live server profiles, kept as narrow hooks in
   - release a battle's oversized set afterwards
 - [`Content.Shared/_CE/ZLevels/Core/EntitySystems/CESharedZLevelsSystem.Update.cs`](../../../Content.Shared/_CE/ZLevels/Core/EntitySystems/CESharedZLevelsSystem.Update.cs): predicted height joins the sprite passes
 - [`Content.Shared/_Mono/Fixtures/FixtureDamageDealerSystem.cs`](../../../Content.Shared/_Mono/Fixtures/FixtureDamageDealerSystem.cs): off the tick other one-second systems start on
+- [`Content.Shared/_Mono/Shipyard/ShipGuestAccessComponent.cs`](../../../Content.Shared/_Mono/Shipyard/ShipGuestAccessComponent.cs)
+  - was AutoGenerateComponentState; WFDeletedRefStateSystem sends the sets, whose entries can be deleted first
+  - networked by WFDeletedRefStateSystem
+- [`Content.Shared/_Mono/VendingMachine/VendingMachinePurchaseComponent.cs`](../../../Content.Shared/_Mono/VendingMachine/VendingMachinePurchaseComponent.cs): not networked, the client never reads it and the grid can be deleted first
+- [`Content.Shared/_NF/Shipyard/Components/ShuttleDeedComponent.cs`](../../../Content.Shared/_NF/Shipyard/Components/ShuttleDeedComponent.cs): WFDeletedRefStateSystem sends the state, since the ship can be deleted first
 - [`Content.Shared/_Onyx/Targeting/TargetingSnapshotComponent.cs`](../../../Content.Shared/_Onyx/Targeting/TargetingSnapshotComponent.cs): not networked; a thrown item outlives its thrower and sent a deleted entity every state
 - [`Content.Shared/Atmos/Consoles/Components/AtmosMonitoringConsoleComponent.cs`](../../../Content.Shared/Atmos/Consoles/Components/AtmosMonitoringConsoleComponent.cs)
   - wizden#38974, subnets carry a Color
@@ -264,8 +289,19 @@ Small fixes for hot spots found in live server profiles, kept as narrow hooks in
   - replaces AllChunks
   - removals are named directly
   - removals are named directly; copies now fill the new data and new chunks count
+- [`Content.Shared/Projectiles/ProjectileComponent.cs`](../../../Content.Shared/Projectiles/ProjectileComponent.cs)
+  - was AutoGenerateComponentState; WFDeletedRefStateSystem sends the state, since Shooter and Weapon can be deleted first
+  - networked by WFDeletedRefStateSystem
+- [`Content.Shared/Station/Components/StationDataComponent.cs`](../../../Content.Shared/Station/Components/StationDataComponent.cs)
+  - was AutoGenerateComponentState; WFDeletedRefStateSystem sends Grids, whose entries can be deleted first
+  - networked by WFDeletedRefStateSystem
+- [`Content.Shared/StationRecords/SharedStationRecordsSystem.cs`](../../../Content.Shared/StationRecords/SharedStationRecordsSystem.cs): a deleted station goes out as invalid, without logging an error on a PVS thread
 - [`Content.Shared/Storage/EntitySystems/MagnetPickupSystem.cs`](../../../Content.Shared/Storage/EntitySystems/MagnetPickupSystem.cs): finding what's due walks every magnet; NextScan keeps the rate
 - [`Content.Shared/Storage/EntitySystems/MaterialStorageMagnetPickupSystem.cs`](../../../Content.Shared/Storage/EntitySystems/MaterialStorageMagnetPickupSystem.cs): finding what's due walks every magnet; NextScan keeps the rate
+- [`Content.Shared/Weapons/Melee/SharedMeleeWeaponSystem.cs`](../../../Content.Shared/Weapons/Melee/SharedMeleeWeaponSystem.cs): a target can be deleted before the swing arrives
+- [`Content.Shared/Weapons/Ranged/Components/TargetedProjectileComponent.cs`](../../../Content.Shared/Weapons/Ranged/Components/TargetedProjectileComponent.cs)
+  - was AutoGenerateComponentState; WFDeletedRefStateSystem sends Target, which can be deleted first
+  - networked by WFDeletedRefStateSystem
 - [`Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.cs`](../../../Content.Shared/Weapons/Ranged/Systems/SharedGunSystem.cs)
   - wizden#36641, gunUid was not nullable
   - wizden#36641, a projectile may have no shooter

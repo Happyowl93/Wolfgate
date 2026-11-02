@@ -23,7 +23,7 @@ public sealed class HardpointPrototypeTest
 
             bool Has<T>(EntProtoId id) where T : IComponent, new()
             {
-                return protos.TryIndex(id, out var target) && target.TryGetComponent<T>(out _, factory);
+                return protos.TryIndex(id, out var target) && target.TryComp<T>(out _, factory);
             }
 
             foreach (var proto in protos.EnumeratePrototypes<EntityPrototype>())
@@ -31,7 +31,7 @@ public sealed class HardpointPrototypeTest
                 if (proto.Abstract)
                     continue;
 
-                if (proto.TryGetComponent<HardpointItemComponent>(out var item, factory))
+                if (proto.TryComp<HardpointItemComponent>(out var item, factory))
                 {
                     items++;
 
@@ -48,11 +48,11 @@ public sealed class HardpointPrototypeTest
                         if (item.CompatibilityId is { } compatibility)
                             Assert.That(Has<HardpointCompatibilityComponent>(compatibility), $"{proto.ID}: compatibilityId {compatibility} is not a compatibility id.");
 
-                        Assert.That(proto.TryGetComponent<HardpointIntegrityComponent>(out _, factory), $"{proto.ID}: a hardpoint with no integrity can never wear or break.");
+                        Assert.That(proto.TryComp<HardpointIntegrityComponent>(out _, factory), $"{proto.ID}: a hardpoint with no integrity can never wear or break.");
                     }
                 }
 
-                if (proto.TryGetComponent<HardpointSlotsComponent>(out var slots, factory))
+                if (proto.TryComp<HardpointSlotsComponent>(out var slots, factory))
                 {
                     using (Assert.EnterMultipleScope())
                     {

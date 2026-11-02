@@ -21,7 +21,7 @@ namespace Content.Server._WF.Hailing;
 /// sends back whatever is said to them, or offers answers to pick from. The pilot runs the console as an
 /// automated end, with no UI open. It removes itself after a few idle minutes.
 /// </summary>
-public sealed class HailTestSystem : EntitySystem
+public sealed partial class HailTestSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IRobustRandom _random = default!;

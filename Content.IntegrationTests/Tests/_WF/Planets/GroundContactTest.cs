@@ -44,7 +44,7 @@ public sealed class GroundContactTest
             var lattice = server.ResolveDependency<ITileDefinitionManager>()["Lattice"].TileId;
             var solid = 0;
             var frame = 0;
-            var tiles = server.System<SharedMapSystem>().GetAllTilesEnumerator(hull, em.GetComponent<MapGridComponent>(hull));
+            var tiles = server.System<SharedMapSystem>().GetAllTiles(hull, em.GetComponent<MapGridComponent>(hull));
             while (tiles.MoveNext(out var tile))
                 if (tile.Value.Tile.TypeId == lattice) frame++;
                 else solid++;

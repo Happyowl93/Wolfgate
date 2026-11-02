@@ -13,7 +13,7 @@ namespace Content.Server._WF.Synthetics;
 /// Every synthetic spawns with "Synths and You" in its backpack: into the pack if it has one with room, else a hand,
 /// else at its feet. Nothing prints or sells the book; this is the only way it gets into the round.
 /// </summary>
-public sealed class WFSynthManualSystem : SharedWFSyntheticsSystem
+public sealed partial class WFSynthManualSystem : SharedWFSyntheticsSystem
 {
     public static readonly EntProtoId Book = "WFBookSynthsAndYou";
 

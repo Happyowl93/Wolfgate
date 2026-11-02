@@ -46,8 +46,9 @@ wf-mapping-export-check-summary = {$errors ->
 wf-mapping-export-check-no-session = You aren't in this map's session, so nothing is checked. Open the map to check it before exporting.
 wf-mapping-export-check-errors = A ship can't be exported while an error stands. Fix them and check again, or export as a map instead.
 wf-mapping-export-check-ok-ship = No errors stand: the ship can be exported.
-wf-mapping-export-check-ok-map = Warnings don't stop a map export.
-wf-mapping-export-check-ok-grid = Nothing stops a grid export; the issues are for your information.
+wf-mapping-export-check-ok-map = Only a map check failure stops a map export.
+wf-mapping-export-check-ok-grid = Only a map check failure stops a grid export. A grid is checked as a point of interest.
+wf-mapping-export-check-lint = The repository's map check refuses what's marked below. Fix it and check again.
 wf-mapping-export-issue-goto = Go to
 wf-mapping-export-severity-error = Error
 wf-mapping-export-severity-warning = Warning
@@ -100,6 +101,10 @@ wf-mapping-export-errors = {$count ->
     [one] 1 error stands
    *[other] {$count} errors stand
 } in the check; fix them or export as a map.
+wf-mapping-export-lint = The map check refuses {$count ->
+    [one] 1 prototype
+   *[other] {$count} prototypes
+}: {$names}.
 wf-mapping-export-goto-gone = That entity is gone.
 
 ## README.txt and the prototype header
@@ -123,11 +128,12 @@ wf-mapping-export-readme-check-taken = The id {$id} already exists in the game. 
 wf-mapping-export-readme-check-test = Run the shipyard tests (Content.IntegrationTests, VesselShipyardTest) before opening a pull request.
 wf-mapping-export-readme-check-station = The gameMap gives the map a plain station; change the station prototype and jobs to what it needs.
 wf-mapping-export-readme-check-zmap = The zMap lists the levels bottom-up; the ground level (depth 0) is index {$ground}. Give the zMap its atmosphere and light components if it needs them.
+wf-mapping-export-readme-check-lint = The saved files passed the repository's map check for this kind of export.
 wf-mapping-export-readme-issues = Issues report ({$scope} check, {$count ->
     [one] 1 issue
    *[other] {$count} issues
 }) at export time:
-wf-mapping-export-readme-unchecked = No check ran: the export was made outside the map's session, or from a version older than what the session holds now.
+wf-mapping-export-readme-unchecked = The session wasn't checked: the export was made outside the map's session, or from a version older than what the session holds now.
 wf-mapping-export-readme-no-issues = No issues.
 wf-mapping-export-readme-severity-error = Errors:
 wf-mapping-export-readme-severity-warning = Warnings:

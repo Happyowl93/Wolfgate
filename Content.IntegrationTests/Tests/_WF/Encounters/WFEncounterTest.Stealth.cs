@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using System.Numerics;
 using Content.Server._WF.Encounters.Components;
@@ -32,8 +33,8 @@ public sealed partial class WFEncounterTest
             var lead = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["lead"];
             var containers = Server.System<Robust.Shared.Containers.SharedContainerSystem>();
             var crewman = SEntMan.EntityQuery<WFCrewComponent>(true).First(member => member.Group == lead.Group
-                && SEntMan.GetComponent<TransformComponent>(member.Owner).GridUid == lead.Grid
-                && !containers.IsEntityInContainer(member.Owner)).Owner;
+                && SEntMan.GetComponent<TransformComponent>(member.Uid()).GridUid == lead.Grid
+                && !containers.IsEntityInContainer(member.Uid())).Uid();
 
             var transform = Server.System<SharedTransformSystem>();
             var player = SEntMan.GetEntity(Player);

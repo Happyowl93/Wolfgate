@@ -16,7 +16,7 @@ namespace Content.Server._WF.Synthetics;
 /// and cannot be switched back on by repairs, reads Disabled, and puts no pain on the body
 /// (<see cref="PainSystem.CanFeelPain"/> and <see cref="BodyPartFunctionalitySystem.GetState"/> check for it).
 /// </summary>
-public sealed class WFChassisIsolationSystem : EntitySystem
+public sealed partial class WFChassisIsolationSystem : EntitySystem
 {
     private static readonly TimeSpan SweepInterval = TimeSpan.FromSeconds(1);
 

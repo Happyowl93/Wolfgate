@@ -15,7 +15,7 @@ namespace Content.Client._WF.Explosion;
 /// expands on its own clock until it passes the edge of the blast. It does not move the cursor, so clicks during a
 /// wave still land where the world actually is.
 /// </remarks>
-public sealed class ExplosionShockwaveSystem : EntitySystem
+public sealed partial class ExplosionShockwaveSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private SharedMapSystem _mapMan = default!;

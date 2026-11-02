@@ -4466,3 +4466,329 @@ Entries:
   id: 100296
   time: '2026-11-01T02:32:55.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/406
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Mapping mode exports now run the map check for the kind of export and
+        refuse maps that would fail it.
+  id: 100297
+  time: '2026-11-01T03:35:40.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/434
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Join Round now offers Crew and Station Roles.
+    - type: Add
+      message: >-
+        Station roles now pay an hourly salary automatically while you work
+        them, with no leader needed.
+    - type: Remove
+      message: Removed the Crew tab from the join window.
+    - type: Remove
+      message: >-
+        Ships can no longer open crew slots or post adverts on the records
+        computer. Recruit through Crew Setup.
+  id: 100298
+  time: '2026-11-01T03:49:04.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/435
+- author: DriftingSkies
+  changes:
+    - type: Add
+      message: >-
+        Added an Augments tab to the character creator: give your character
+        cybernetic arms and legs in 29 styles, previewed live and fitted to your
+        species, digitigrade legs included.
+    - type: Fix
+      message: >-
+        Hands no longer vanish under jumpsuits in side view on Vulpkanin,
+        Canine, Skrell, Moth and other species that draw their hands before
+        their feet.
+  id: 100299
+  time: '2026-11-01T03:51:50.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/412
+- author: DriftingSkies
+  changes:
+    - type: Add
+      message: >-
+        Civilian, medical, ERT and novelty suits now have specializations too.
+        Examine a suit to see what it does.
+    - type: Add
+      message: >-
+        Plasma Reserve (every medic suit): carries 90u of synthetic plasma you
+        can transfuse into a patient with "Transfuse from suit". It can't be
+        used on yourself, and it refills from blood packs.
+    - type: Add
+      message: >-
+        Steady Hands (CMO, paramedic, brigmedic and faction medic suits): light
+        hits no longer interrupt your bandaging, splinting or suturing.
+    - type: Add
+      message: >-
+        Sterile Weave (medic EVA, TSF M82b): wounds under the suit don't get
+        infected, and wounds you treat start clean.
+    - type: Add
+      message: >-
+        Emergency Stasis Weave (CMO hardsuit, Sanitäter, Armed Trauma T-53):
+        going critical holds all your bleeding for 20 seconds. It recharges over
+        5 minutes.
+    - type: Add
+      message: 'Servo Assist (engineering suits): tool work is about 25% faster.'
+    - type: Add
+      message: >-
+        Rad Sink (engineering hardsuit): takes half of incoming radiation and
+        sheds what you've absorbed over time.
+    - type: Add
+      message: >-
+        EMP-Hardened (CE, research, Minerva and Magnate suits): EMPs don't
+        affect you or anything you carry.
+    - type: Add
+      message: >-
+        Decon Coating (scientist, janitor and CBURN suits): splashed, sprayed
+        and spilled chemicals don't soak in. Showers, extinguishers and
+        antiseptic still work.
+    - type: Add
+      message: >-
+        Blast Liner (Maxim, Bulwark, Centurion, mercenary modsuit, ERT
+        security): explosions can't take your limbs, bruise your organs or cause
+        internal bleeding.
+    - type: Add
+      message: >-
+        Wildlife Padding (Goliath hardsuit): carp, spiders and other creatures
+        deal half damage.
+    - type: Add
+      message: >-
+        Haul Frame (Goliath hardsuit): dragging bodies and crates doesn't slow
+        you down.
+    - type: Add
+      message: >-
+        Emergency Thrusters (pilot and spationaut hardsuits): a thruster burst
+        in zero-G in the direction you face, every 90 seconds.
+    - type: Add
+      message: 'Living Tissue (organic space suit): small bleeds close on their own.'
+    - type: Add
+      message: >-
+        The clown hardsuit honks when you hit it, and the mime hardsuit keeps
+        its wearer silent.
+    - type: Add
+      message: >-
+        IV drips and suit transfusions now show a line to the patient, and the
+        patient gets an "IV connected" alert.
+    - type: Tweak
+      message: >-
+        The mime hardsuit no longer shares the clown hardsuit's honk and
+        anti-slip treads, and its footsteps are muffled.
+    - type: Fix
+      message: >-
+        The Salvage, RD, VG MEDUSA and Ullman ENFORCER MKII suit descriptions
+        now match what the suits do.
+  id: 100300
+  time: '2026-11-01T03:56:08.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/408
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Selling a ship no longer fails because of a filtered records console, a
+        reactor fuel rod or an uplink crate.
+    - type: Fix
+      message: >-
+        Sold ships keep everything stored inside mechs and other carried
+        machines.
+    - type: Fix
+      message: Character saves that collide with another save no longer get lost.
+    - type: Fix
+      message: Random cargo no longer lands on the wrong grid.
+    - type: Fix
+      message: Salvage outposts now generate their junction airlocks.
+    - type: Tweak
+      message: Safety deposit boxes now refuse PDAs and implants.
+  id: 100301
+  time: '2026-11-01T05:38:29.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/433
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: >-
+        The connecting screen now shows each join step, how long it takes and a
+        download bar.
+    - type: Add
+      message: >-
+        If the connection gets stuck, the connecting screen tells you to check
+        your firewall or antivirus and gives you a Reconnect button.
+    - type: Add
+      message: >-
+        Copy Details on the connecting screen copies your join timings for bug
+        reports.
+    - type: Tweak
+      message: The Link Discord button is now green.
+  id: 100302
+  time: '2026-11-01T06:31:00.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/439
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Synthetic Feroxi now start with the synthetic survival box.
+    - type: Fix
+      message: MMC arrivals are now announced on the MMC radio.
+    - type: Fix
+      message: Drydocks no longer build a ship's old guns over guns you swapped in.
+  id: 100303
+  time: '2026-11-01T06:31:11.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/438
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Colour picker popups now close when their list is rebuilt.
+  id: 100304
+  time: '2026-11-01T09:23:22.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/440
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Buying a ship no longer replaces your company rank or custom job title
+        with Captain.
+  id: 100305
+  time: '2026-11-01T10:47:34.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/442
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: Big ship battles put less load on the server.
+  id: 100306
+  time: '2026-11-01T10:47:46.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/441
+- author: antanananat
+  changes:
+    - type: Fix
+      message: >-
+        The docking airlock on the UBM Excelsior is actually and genuinely
+        facing the right way now for real this time.
+  id: 100307
+  time: '2026-11-01T21:55:25.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/444
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Added the Freedoom arcade cabinet, sold as a flatpack by John Wolfgate
+        and the Wolfgate vendor.
+    - type: Add
+      message: Added the Gamehub program to PDAs, for downloading and playing games.
+    - type: Add
+      message: Added game leaderboards, viewable from cabinets and PDAs.
+    - type: Add
+      message: Freedoom cabinets now pay prize tickets for finished levels.
+    - type: Add
+      message: Players nearby can hear games being played on cabinets and PDAs.
+  id: 100308
+  time: '2026-11-01T23:11:52.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/445
+- author: Gandalf2k15
+  changes:
+    - type: Remove
+      message: Removed two jukebox tracks that had no valid license.
+  id: 100309
+  time: '2026-11-01T23:48:29.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/447
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Salted food and water no longer turn into saline in your body.
+    - type: Fix
+      message: Chemicals formed in your stomach no longer stay stuck there.
+    - type: Fix
+      message: Systemic bleeding now goes away once the bleeding stops.
+    - type: Fix
+      message: Crafting no longer uses the jumpsuit you are wearing.
+    - type: Fix
+      message: You can walk normally after anchoring a chameleon disguise.
+    - type: Fix
+      message: Research machines lose their server link when moved to another grid.
+    - type: Fix
+      message: Crew monitors now show one crew list that other maps cannot overwrite.
+    - type: Fix
+      message: Ship owners can unlock their ship's gas turbine.
+    - type: Fix
+      message: The cargo request computer on the Stellar Blessing now works.
+    - type: Add
+      message: PDV roles can pick PDA cartridges in the loadout menu.
+    - type: Add
+      message: The PDV uplink now sells 5.56 ammo.
+  id: 100310
+  time: '2026-11-01T23:53:12.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/446
+- author: Balls2zawall
+  changes:
+    - type: Add
+      message: Added a new T4 ship to the PDV roster, the Foxtrot-II stealth destroyer
+  id: 100311
+  time: '2026-11-02T00:54:43.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/436
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Radars now show the coordinates of your cursor and the scanner.
+    - type: Add
+      message: Helms and mass scanners can save, name and delete ship waypoints.
+    - type: Add
+      message: Helms can send the autopilot to typed coordinates or a saved waypoint.
+  id: 100312
+  time: '2026-11-02T01:43:40.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/448
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        Added Freedoom Phase 2, on PDAs and as an arcade cabinet flatpack from
+        John Wolfgate and the Wolfgate vendor.
+  id: 100313
+  time: '2026-11-02T01:49:21.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/449
+- author: Gandalf2k15
+  changes:
+    - type: Remove
+      message: Removes OwO accent.........
+  id: 100314
+  time: '2026-11-02T02:02:18.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/450
+- author: TheSlapper
+  changes:
+    - type: Add
+      message: Added voices for characters.
+  id: 100315
+  time: '2026-11-02T02:32:52.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/431
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: NPC crew no longer fire semi-automatic guns at machine gun speed.
+    - type: Fix
+      message: Microwaves no longer swallow an emag used on them.
+    - type: Fix
+      message: >-
+        Drifting in zero gravity no longer interrupts actions on yourself or
+        things you carry.
+    - type: Tweak
+      message: You are now told when the hourly payout cap cuts your bounty.
+  id: 100316
+  time: '2026-11-02T02:55:24.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/451
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Fixed the game freezing and reloading everything when a ship flew over a
+        deleted object.
+  id: 100317
+  time: '2026-11-02T07:31:15.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/453
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: >-
+        You can preview ships in the company hangar before you buy or launch
+        them.
+  id: 100318
+  time: '2026-11-02T09:48:52.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/455

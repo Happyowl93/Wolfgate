@@ -563,7 +563,7 @@ public sealed partial class XenoAcidHoleSystem : EntitySystem
         if (HasActiveHole(wall))
             return false;
 
-        var holeRotation = direction.ToAngle() - Transform(wall).WorldRotation;
+        var holeRotation = direction.ToAngle() - _transform.GetWorldRotation(wall);
         var hole = SpawnAttachedTo(wall.Comp.HolePrototype, wall.Owner.ToCoordinates(), rotation: holeRotation);
         var holeComp = EnsureComp<XenoAcidHoleComponent>(hole);
         holeComp.Wall = wall.Owner;

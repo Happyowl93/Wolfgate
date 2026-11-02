@@ -7,7 +7,7 @@ using Robust.Client.GameObjects;
 namespace Content.Client._WF.Avali.Feathers;
 
 /// <summary>Applies owner and blood colors to feather sprites.</summary>
-public sealed class FeatherVisualizer : VisualizerSystem<FeatherComponent>
+public sealed partial class FeatherVisualizer : VisualizerSystem<FeatherComponent>
 {
     [Dependency] private ClothingSystem _clothing = default!;
     [Dependency] private SharedItemSystem _item = default!;

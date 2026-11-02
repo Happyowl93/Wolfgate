@@ -6,7 +6,7 @@ using static Content.Shared._WF.Barricades.EntrenchingToolComponentVisualLayers;
 namespace Content.Client._WF.Barricades;
 
 /// <summary>Shows the entrenching tool folded or open, with dirt on the blade while it holds some.</summary>
-public sealed class EntrenchingToolVisualsSystem : EntitySystem
+public sealed partial class EntrenchingToolVisualsSystem : EntitySystem
 {
     [Dependency] private AppearanceSystem _appearance = default!;
     [Dependency] private SpriteSystem _sprite = default!;

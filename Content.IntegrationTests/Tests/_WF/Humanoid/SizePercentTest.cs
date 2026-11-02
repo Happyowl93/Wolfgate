@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Reflection;
 using Content.Client._Mono.Company;
 using Content.Client.Lobby;
@@ -66,7 +67,7 @@ public sealed class SizePercentTest
             Enter(percent, "tall");
             Assert.That(percent.Text, Is.EqualTo(MathF.Round(slider.MaxValue * 100).ToString()), "junk is put back");
 
-            editor.Dispose();
+            editor.Teardown();
         });
 
         await pair.CleanReturnAsync();

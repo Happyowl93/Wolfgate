@@ -228,7 +228,9 @@ public sealed partial class WFCockpitView : Control
         {
             _lease.Restore();
             _console.WfSetCockpitActive(false);
+#pragma warning disable CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
             Dispose();
+#pragma warning restore CS0618
         }
     }
 

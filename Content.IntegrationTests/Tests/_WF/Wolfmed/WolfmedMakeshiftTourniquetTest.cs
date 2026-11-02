@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using System.Threading.Tasks;
 using Content.IntegrationTests.Fixtures;
@@ -254,7 +255,7 @@ public sealed class WolfmedMakeshiftTourniquetTest : WolfmedGameTest
     }
 
     private EntityUid[] Straps() =>
-        SEntMan.EntityQuery<WolfmedMakeshiftTourniquetComponent>().Select(strap => strap.Owner).ToArray();
+        SEntMan.EntityQuery<WolfmedMakeshiftTourniquetComponent>().Select(strap => strap.Uid()).ToArray();
 
     private EntityUid SpawnInHand(EntityUid user, string id, TestMapData map)
     {

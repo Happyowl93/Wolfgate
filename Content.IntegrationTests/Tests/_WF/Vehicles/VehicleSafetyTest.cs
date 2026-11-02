@@ -53,6 +53,8 @@ namespace Content.IntegrationTests.Tests._WF.Vehicles;
 [TestFixture]
 public sealed class VehicleSafetyTest
 {
+    private static readonly EntProtoId WFVehicleDemolitionChargeProto = "WFVehicleDemolitionCharge";
+
     private const string Chassis = "WFSafetyTestVehicle";
     private const string ShipVessel = "Guppy";
     private const string HeavyBlast = "WFSafetyTestHeavyBlast";
@@ -1102,13 +1104,13 @@ public sealed class VehicleSafetyTest
             var defaults = new VehicleDemolitionComponent();
 
             var blast = protoMan.Index<EntityPrototype>(defaults.Explosion);
-            var charge = protoMan.Index<EntityPrototype>("WFVehicleDemolitionCharge");
+            var charge = protoMan.Index(WFVehicleDemolitionChargeProto);
 
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(defaults.Explosion.Id, Is.EqualTo("WFVehicleWreckExplosion"));
-                Assert.That(blast.TryGetComponent<Content.Shared.Explosion.Components.ExplosiveComponent>(out _, factory), Is.True);
-                Assert.That(charge.TryGetComponent<RMCVehicleDemolitionChargeComponent>(out _, factory), Is.True);
+                Assert.That(blast.TryComp<Content.Shared.Explosion.Components.ExplosiveComponent>(out _, factory), Is.True);
+                Assert.That(charge.TryComp<RMCVehicleDemolitionChargeComponent>(out _, factory), Is.True);
             }
         });
 

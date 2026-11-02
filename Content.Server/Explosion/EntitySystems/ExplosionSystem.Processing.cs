@@ -164,7 +164,8 @@ public sealed partial class ExplosionSystem
 #endif
         }
 
-        Log.Info($"Processed {TilesPerTick - tilesRemaining} tiles in {Stopwatch.Elapsed.TotalMilliseconds}ms");
+        // WOLFGATE(Performance): Debug, was Info; it logged every step of every explosion
+        Log.Debug($"Processed {TilesPerTick - tilesRemaining} tiles in {Stopwatch.Elapsed.TotalMilliseconds}ms");
 
         // we have finished processing our tiles. Is there still an ongoing explosion?
         if (_activeExplosion != null)

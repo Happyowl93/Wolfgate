@@ -33,7 +33,7 @@ public sealed class TraderStockTest
                 {
                     if (!prototypes.TryIndex<EntityPrototype>(id, out var item))
                         failures.Add($"{inventory.ID}: {id} does not exist");
-                    else if (item.Abstract || !item.TryGetComponent<ItemComponent>(out _, factory))
+                    else if (item.Abstract || !item.TryComp<ItemComponent>(out _, factory))
                         failures.Add($"{inventory.ID}: {id} is not an item");
                     else if (count == 0)
                         failures.Add($"{inventory.ID}: {id} has no stock");

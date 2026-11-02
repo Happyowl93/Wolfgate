@@ -11,7 +11,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.ShipCombat;
 
 /// <summary>Turns rotating ship guns toward their aim point at their turn rate.</summary>
-public sealed class WFTurretTraverseSystem : EntitySystem
+public sealed partial class WFTurretTraverseSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedTransformSystem _xform = default!;

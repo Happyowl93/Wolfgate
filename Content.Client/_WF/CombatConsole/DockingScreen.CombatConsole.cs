@@ -13,7 +13,7 @@ public sealed partial class DockingScreen
         var side = Column(locks, ports);
         side.MinWidth = side.MaxWidth = 260;
         side.VerticalExpand = true;
-        DisposeAllChildren();
+        RemoveAllChildren();
         SeparationOverride = 8;
         AddChild(approach);
         AddChild(side);

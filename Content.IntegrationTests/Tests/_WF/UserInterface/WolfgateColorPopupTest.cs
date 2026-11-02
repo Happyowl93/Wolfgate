@@ -1,3 +1,4 @@
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Reflection;
 using Content.Client._WF.UserInterface.Controls;
 using Robust.Client.UserInterface.Controls;
@@ -62,7 +63,7 @@ public sealed class WolfgateColorPopupTest
                 Assert.That(Field("_r").Text, Is.EqualTo(picked.RByte.ToString()));
             }
 
-            popup.Dispose();
+            popup.Teardown();
         });
 
         await pair.CleanReturnAsync();

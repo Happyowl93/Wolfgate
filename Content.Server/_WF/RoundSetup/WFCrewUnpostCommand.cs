@@ -8,7 +8,7 @@ namespace Content.Server._WF.RoundSetup;
 
 /// <summary>Withdraws a crew's posting and stops it recruiting.</summary>
 [AdminCommand(AdminFlags.Moderator)]
-public sealed class WFCrewUnpostCommand : LocalizedEntityCommands
+public sealed partial class WFCrewUnpostCommand : LocalizedEntityCommands
 {
     [Dependency] private WFRoundSetupSystem _setup = default!;
     [Dependency] private IAdminLogManager _adminLog = default!;

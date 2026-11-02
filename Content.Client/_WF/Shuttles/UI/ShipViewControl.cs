@@ -13,6 +13,7 @@ namespace Content.Client._WF.Shuttles.UI;
 /// Nav map of a single ship, framed so the whole hull fits in the control, with hull telemetry drawn
 /// over it as line work so it reads against the wireframe underneath.
 /// </summary>
+[Virtual]
 public class ShipViewControl : NavMapControl
 {
     /// <summary>

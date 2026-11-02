@@ -16,7 +16,7 @@ namespace Content.Server._WF.TradeGoods.Systems;
 /// and ship parts, and pays the enemy's people more for war goods. A navy that posts warrants puts one on any of its
 /// own people who sell to the enemy.
 /// </summary>
-public sealed class WFTradeWarSystem : EntitySystem
+public sealed partial class WFTradeWarSystem : EntitySystem
 {
     [Dependency] private WFTradeMarketSystem _market = default!;
     [Dependency] private WarLevelSystem _war = default!;

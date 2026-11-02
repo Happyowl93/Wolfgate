@@ -23,6 +23,8 @@ namespace Content.IntegrationTests.Tests._WF.TradeGoods;
 [TestOf(typeof(WFTradeWarSystem))]
 public sealed class TradeWarTest
 {
+    private static readonly ProtoId<WFEncounterPrototype> WFEncounterFreightSmallProto = "WFEncounterFreightSmall";
+
     private const string TsfChute = "CargoChuteTSFMC";
     private const string Ammo = "TradeGoodAmmo";
 
@@ -99,7 +101,7 @@ public sealed class TradeWarTest
 
         await server.WaitAssertion(() =>
         {
-            var freight = protos.Index<WFEncounterPrototype>("WFEncounterFreightSmall");
+            var freight = protos.Index<WFEncounterPrototype>(WFEncounterFreightSmallProto);
             var station = map.Grid.Owner;
 
             var before = new WFEncounterStationWeightEvent(freight, station, 1f);

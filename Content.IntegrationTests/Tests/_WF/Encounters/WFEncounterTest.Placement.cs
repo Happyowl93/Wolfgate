@@ -11,6 +11,8 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestPlacementPatrolProto => "WFTestPlacementPatrol";
+
     [TestPrototypes]
     private const string PlacementPrototypes = @"
 - type: wfEncounter
@@ -37,7 +39,7 @@ public sealed partial class WFEncounterTest
             var central = Port(map, Vector2.Zero, "Caelestinus Central");
             Port(map, new Vector2(2000, 0), "Halcyon");
 
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestPlacementPatrol");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestPlacementPatrolProto);
             var scheduler = Server.System<WFEncounterSchedulerSystem>();
             // The standoff is kept from the avoided station's hull, not its centre.
             var hull = SEntMan.GetComponent<Robust.Shared.Map.Components.MapGridComponent>(central).LocalAABB;

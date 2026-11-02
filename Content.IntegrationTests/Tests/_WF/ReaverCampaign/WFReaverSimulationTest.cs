@@ -11,6 +11,7 @@ using Content.Shared._WF.NpcCrew;
 using Robust.Shared.Configuration;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.ReaverCampaign;
 
@@ -18,6 +19,8 @@ namespace Content.IntegrationTests.Tests._WF.ReaverCampaign;
 [TestOf(typeof(WFEncounterSystem))]
 public sealed class WFReaverSimulationTest : WFReaverTestBase
 {
+    private static ProtoId<WFEncounterPrototype> WFTestSimHaulerProto => "WFTestSimHauler";
+
     /// <summary>Each round of a simulated fight on a simulated hub counts as a hit by the attacker on the stronghold.</summary>
     [Test]
     public async Task ASimulatedAttackOnASimulatedHubCountsAsHits()
@@ -37,7 +40,7 @@ public sealed class WFReaverSimulationTest : WFReaverTestBase
 
             var encounters = Server.System<WFEncounterSystem>();
             var hubAt = Server.System<SharedTransformSystem>().GetWorldPosition(hub.Grid);
-            Assert.That(encounters.TrySpawn(ProtoMan.Index<WFEncounterPrototype>("WFTestSimHauler"),
+            Assert.That(encounters.TrySpawn(ProtoMan.Index<WFEncounterPrototype>(WFTestSimHaulerProto),
                 new MapCoordinates(hubAt + new Vector2(800f, 0f), MapData.MapId), out attacker, offBudget: true), Is.True);
             Assert.That(encounters.SetOrders(attacker, "ship", new List<WFCrewObjective>
             {

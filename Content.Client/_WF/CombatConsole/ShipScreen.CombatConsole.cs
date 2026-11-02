@@ -86,7 +86,7 @@ public sealed partial class ShipScreen
         var workspace = Row(plot, status, side);
         workspace.VerticalExpand = true;
         workspace.SeparationOverride = 8;
-        DisposeAllChildren();
+        RemoveAllChildren();
         Orientation = LayoutOrientation.Vertical;
         VerticalExpand = true;
         SeparationOverride = 8;

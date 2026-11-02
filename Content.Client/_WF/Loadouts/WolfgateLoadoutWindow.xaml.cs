@@ -712,6 +712,7 @@ public sealed partial class WolfgateLoadoutWindow : FancyWindow
         _icons.Clear();
     }
 
+#pragma warning disable CS0672, CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
@@ -719,4 +720,5 @@ public sealed partial class WolfgateLoadoutWindow : FancyWindow
         if (disposing)
             Cleanup();
     }
+#pragma warning restore CS0672, CS0618
 }

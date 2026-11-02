@@ -37,6 +37,9 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(WolfmedWoundTraitSystem))]
 public sealed class WolfmedSlashBiteWoundTest : WolfmedGameTest
 {
+    private static readonly EntProtoId WFSurgeryRepairArteryProto = "WFSurgeryRepairArtery";
+    private static readonly EntProtoId WFSurgeryRepairTendonProto = "WFSurgeryRepairTendon";
+
     /// <summary>
     /// A deep cut to a limb opens an artery and severs a tendon on top of the cut itself; a shallow one
     /// does neither, and a torso cut has no tendon to sever.
@@ -368,8 +371,8 @@ public sealed class WolfmedSlashBiteWoundTest : WolfmedGameTest
                 Assert.That(locale.HasString("wolfmed-wound-name-tendon-cut"));
                 Assert.That(locale.HasString("wolfmed-wound-name-avulsion"));
                 Assert.That(locale.HasString("wolfmed-tourniquet-nowhere-to-tie"));
-                Assert.That(prototypes.HasIndex<EntityPrototype>("WFSurgeryRepairArtery"));
-                Assert.That(prototypes.HasIndex<EntityPrototype>("WFSurgeryRepairTendon"));
+                Assert.That(prototypes.HasIndex(WFSurgeryRepairArteryProto));
+                Assert.That(prototypes.HasIndex(WFSurgeryRepairTendonProto));
             });
         });
     }

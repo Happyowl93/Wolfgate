@@ -1,5 +1,6 @@
 #nullable enable annotations
 
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System;
 using Content.Client._WF.Cockpit;
 using Content.Client._WF.Shuttles.UI;
@@ -103,7 +104,7 @@ public sealed class WFCockpitTcasTest : InteractionTest
         }
         finally
         {
-            await Client.WaitPost(() => banner?.Dispose());
+            await Client.WaitPost(() => banner?.Teardown());
             await Server.WaitPost(() =>
             {
                 SEntMan.RemoveComponent<CollisionWarningDisabledComponent>(MapData.Grid.Owner);

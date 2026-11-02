@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -54,7 +55,7 @@ public sealed partial class WFCrewTest
             finally
             {
                 window.Close();
-                window.Dispose();
+                window.Teardown();
             }
         });
         await RunTicks(5);

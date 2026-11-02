@@ -16,7 +16,7 @@ namespace Content.Client._WF.Humanoid;
 /// Species browser: a grid of cards, each with a full-body preview of a default character of that species,
 /// its name, a short summary and a link to its guidebook page.
 /// </summary>
-public sealed class WolfgateSpeciesPicker : BoxContainer
+public sealed partial class WolfgateSpeciesPicker : BoxContainer
 {
     [Dependency] private IEntityManager _entManager = default!;
     [Dependency] private IPrototypeManager _prototypeManager = default!;
@@ -64,7 +64,7 @@ public sealed class WolfgateSpeciesPicker : BoxContainer
         _dummies.Clear();
         _cards.Clear();
         _grids.Clear();
-        DisposeAllChildren();
+        RemoveAllChildren();
     }
 
     /// <summary>Marks a card as chosen without raising <see cref="OnSpeciesSelected"/>.</summary>
@@ -169,7 +169,7 @@ public sealed class WolfgateSpeciesPicker : BoxContainer
     private static string Summary(SpeciesPrototype species)
     {
         var key = $"species-summary-{species.ID.ToLowerInvariant()}";
-        return Loc.TryGetString(key, out var summary) ? summary : string.Empty;
+        return IoCManager.Resolve<ILocalizationManager>().TryGetString(key, out var summary) ? summary : string.Empty;
     }
 
     /// <summary>Cards per row, shared by every panel so they line up across groups.</summary>

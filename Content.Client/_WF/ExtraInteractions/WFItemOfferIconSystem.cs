@@ -12,7 +12,7 @@ namespace Content.Client._WF.ExtraInteractions;
 /// <summary>
 /// Draws each offered item in front of its offerer and turns a click on it into a take request.
 /// </summary>
-public sealed class WFItemOfferIconSystem : EntitySystem
+public sealed partial class WFItemOfferIconSystem : EntitySystem
 {
     [Dependency] private IOverlayManager _overlays = default!;
     [Dependency] private SharedCombatModeSystem _combat = default!;

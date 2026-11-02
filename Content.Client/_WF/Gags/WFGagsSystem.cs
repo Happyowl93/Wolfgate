@@ -9,7 +9,7 @@ using Robust.Client.GameObjects;
 namespace Content.Client._WF.Gags;
 
 /// <summary>Tints a recolourable item's layers with its colours: on the item, on the wearer and in hand.</summary>
-public sealed class WFGagsSystem : SharedWFGagsSystem
+public sealed partial class WFGagsSystem : SharedWFGagsSystem
 {
     [Dependency] private SharedItemSystem _item = default!;
     [Dependency] private SpriteSystem _sprite = default!;

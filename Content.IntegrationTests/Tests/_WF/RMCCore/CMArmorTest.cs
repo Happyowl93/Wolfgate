@@ -13,6 +13,8 @@ namespace Content.IntegrationTests.Tests._WF.RMCCore;
 [TestOf(typeof(CMArmorSystem))]
 public sealed class CMArmorTest
 {
+    private static readonly ProtoId<DamageTypePrototype> HeatProto = "Heat";
+
     private const string Plain = "WFRMCCoreTestMob";
     private const string Armored = "WFRMCCoreTestArmoredMob";
 
@@ -53,7 +55,7 @@ public sealed class CMArmorTest
             var armored = entities.SpawnEntity(Armored, map.GridCoords);
             Assert.That(entities.GetComponent<RMCSizeComponent>(armored).Size, Is.EqualTo(RMCSizes.Humanoid));
 
-            var heat = new DamageSpecifier(prototypes.Index<DamageTypePrototype>("Heat"), FixedPoint2.New(20));
+            var heat = new DamageSpecifier(prototypes.Index<DamageTypePrototype>(HeatProto), FixedPoint2.New(20));
             damageable.TryChangeDamage(plain, heat);
             damageable.TryChangeDamage(armored, heat);
 

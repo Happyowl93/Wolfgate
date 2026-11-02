@@ -50,7 +50,7 @@ public enum WolfmedSpeciesCheck : byte
 /// its reason. The id is the species id. The ladder it runs is its biotype; any conformance check it is built to fail in
 /// its own biotype is listed, and the test fails on any failure not excused and on any excuse no longer needed.
 /// </summary>
-[Prototype("wolfmedSpeciesException")]
+[Prototype]
 public sealed partial class WolfmedSpeciesExceptionPrototype : IPrototype
 {
     [IdDataField]

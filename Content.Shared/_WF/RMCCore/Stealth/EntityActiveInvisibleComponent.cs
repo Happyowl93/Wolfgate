@@ -3,7 +3,7 @@ using Robust.Shared.GameStates;
 
 namespace Content.Shared._WF.RMCCore.Stealth;
 
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState, AutoGenerateComponentPause]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class EntityActiveInvisibleComponent : Component
 {
     [DataField, AutoNetworkedField]

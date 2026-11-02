@@ -14,7 +14,7 @@ namespace Content.Client._WF.ExtraInteractions;
 /// Turns a point at a carried item's hand, inventory or storage slot into a show request. The point key doesn't
 /// focus the HUD, so otherwise it falls through to whatever lies in the world under the slot.
 /// </summary>
-public sealed class WFShowItemUIController : UIController
+public sealed partial class WFShowItemUIController : UIController
 {
     [Dependency] private IInputManager _input = default!;
     [Dependency] private IPlayerManager _player = default!;

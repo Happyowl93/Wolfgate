@@ -28,7 +28,7 @@ namespace Content.Server._WF.Tether.Harpoon;
 /// The server half of the harpoon turret: the cable that pays out behind a shot harpoon, whether the harpoon bit
 /// or glanced off, the tow cable it leaves behind, and the winch the operator works it with.
 /// </summary>
-public sealed class ShipHarpoonTurretSystem : SharedShipHarpoonTurretSystem
+public sealed partial class ShipHarpoonTurretSystem : SharedShipHarpoonTurretSystem
 {
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private IPrototypeManager _protos = default!;

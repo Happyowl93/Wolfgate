@@ -140,7 +140,9 @@ public sealed partial class CMUCargoVehicleSystem
             BreakOnMove = true,
             NeedHand = false,
             DuplicateCondition = DuplicateConditions.SameEvent | DuplicateConditions.SameTarget,
+#pragma warning disable CS0618 // The do-after attempt event would need a handler per crate check; this one-off closure is still honoured.
             ExtraCheck = () => CanFinishLoad(vehicle, user, crate),
+#pragma warning restore CS0618
         };
 
         if (_doAfter.TryStartDoAfter(doAfter))
@@ -164,7 +166,9 @@ public sealed partial class CMUCargoVehicleSystem
             BreakOnMove = true,
             NeedHand = false,
             DuplicateCondition = DuplicateConditions.SameEvent | DuplicateConditions.SameTarget,
+#pragma warning disable CS0618 // The do-after attempt event would need a handler per crate check; this one-off closure is still honoured.
             ExtraCheck = () => CanFinishUnload(vehicle, user, out _),
+#pragma warning restore CS0618
         };
 
         if (_doAfter.TryStartDoAfter(doAfter))

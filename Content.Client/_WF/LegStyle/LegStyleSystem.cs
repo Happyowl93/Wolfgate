@@ -62,7 +62,7 @@ public sealed partial class LegStyleSystem : EntitySystem
             || style.Stance != LegStance.Digitigrade
             || style.FittedMarkings.Any(folder => path.TryRelativeTo(SpriteSpecifierSerializer.TextureRoot / folder, out _))
             || GetDisplacement(ent, fitSlot, null) is not { } data
-            || !ent.Comp2.LayerMapTryGet(layerId, out var index))
+            || !_sprite.LayerMapTryGet((ent.Owner, ent.Comp2), layerId, out var index, false))
         {
             return;
         }
@@ -72,8 +72,8 @@ public sealed partial class LegStyleSystem : EntitySystem
         var (leg, foot) = part is HumanoidVisualLayers.LLeg or HumanoidVisualLayers.LFoot
             ? (HumanoidVisualLayers.LLeg, HumanoidVisualLayers.LFoot)
             : (HumanoidVisualLayers.RLeg, HumanoidVisualLayers.RFoot);
-        var legMask = Outline(ent.Comp2, leg, layerId, "legMask");
-        var footMask = Outline(ent.Comp2, foot, layerId, "footMask");
+        var legMask = Outline((ent.Owner, ent.Comp2), leg, layerId, "legMask");
+        var footMask = Outline((ent.Owner, ent.Comp2), foot, layerId, "footMask");
         if (legMask != null && footMask != null)
             data = new DisplacementData { SizeMaps = data.SizeMaps, ShaderOverride = MarkingShader };
 
@@ -87,7 +87,7 @@ public sealed partial class LegStyleSystem : EntitySystem
         // Shader-parameter layers sit below the layer they feed.
         foreach (var (mask, key) in new[] { (legMask, $"{layerId}-legmask"), (footMask, $"{layerId}-footmask") })
         {
-            if (!ent.Comp2.LayerMapTryGet(layerId, out var target))
+            if (!_sprite.LayerMapTryGet((ent.Owner, ent.Comp2), layerId, out var target, false))
                 return;
 
             _sprite.AddLayer((ent.Owner, ent.Comp2), mask, target);
@@ -100,11 +100,11 @@ public sealed partial class LegStyleSystem : EntitySystem
     /// A layer that hands a body part's current sprite to a marking's shader as an outline, or null if the part
     /// draws no sprite.
     /// </summary>
-    private PrototypeLayerData? Outline(SpriteComponent sprite, HumanoidVisualLayers part, string layerId, string parameter)
+    private PrototypeLayerData? Outline(Entity<SpriteComponent> sprite, HumanoidVisualLayers part, string layerId, string parameter)
     {
-        if (!sprite.LayerMapTryGet(part, out var index)
-            || sprite.LayerGetActualRSI(index) is not { } rsi
-            || sprite[index] is not SpriteComponent.Layer { State.Name: { } state })
+        if (!_sprite.LayerMapTryGet((sprite.Owner, sprite.Comp), part, out var index, false)
+            || _sprite.LayerGetEffectiveRsi((sprite.Owner, sprite.Comp), index) is not { } rsi
+            || sprite.Comp[index] is not SpriteComponent.Layer { State.Name: { } state })
         {
             return null;
         }

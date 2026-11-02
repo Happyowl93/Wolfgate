@@ -22,6 +22,9 @@ namespace Content.Client._WF.HeatHaze;
 /// </remarks>
 public sealed partial class HeatHazeOverlay : Overlay
 {
+    private static readonly ProtoId<ShaderPrototype> WFHeatHazeMaskProto = "WFHeatHazeMask";
+    private static readonly ProtoId<ShaderPrototype> WFHeatHazeProto = "WFHeatHaze";
+
     [Dependency] private IClyde _clyde = default!;
     [Dependency] private IEntityManager _entMan = default!;
     private SharedMapSystem _mapMan => _entMan.System<SharedMapSystem>();
@@ -75,8 +78,8 @@ public sealed partial class HeatHazeOverlay : Overlay
 
         _xform = _entMan.System<SharedTransformSystem>();
         _overlayQuery = _entMan.GetEntityQuery<GasTileOverlayComponent>();
-        _maskShader = _proto.Index<ShaderPrototype>("WFHeatHazeMask").Instance();
-        _hazeShader = _proto.Index<ShaderPrototype>("WFHeatHaze").Instance().Duplicate();
+        _maskShader = _proto.Index<ShaderPrototype>(WFHeatHazeMaskProto).Instance();
+        _hazeShader = _proto.Index<ShaderPrototype>(WFHeatHazeProto).Instance().Duplicate();
 
         // Right after the fire sprites, so flames shimmer and ghosts don't.
         ZIndex = GasTileOverlay.GasOverlayZIndex + 1;

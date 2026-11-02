@@ -20,6 +20,7 @@ namespace Content.Client._WF.Clown;
 public sealed class JugglingOverlay : Overlay
 {
     private readonly IEntityManager _entities;
+    private SharedTransformSystem _transform => _entities.System<SharedTransformSystem>();
     private readonly IGameTiming _timing;
     private readonly SpriteSystem _sprites;
 
@@ -59,7 +60,7 @@ public sealed class JugglingOverlay : Overlay
             if ((clownMeta.Flags & MetaDataFlags.InContainer) != 0)
                 continue;
 
-            var worldPos = xform.WorldPosition;
+            var worldPos = _transform.GetWorldPosition(xform);
             var startTime = (float)active.StartTime.TotalSeconds;
             var elapsed = curTime - startTime;
             var n = active.JuggledItems.Count;

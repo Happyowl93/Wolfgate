@@ -52,8 +52,10 @@ public sealed class LegStylePreviewTest
             humanoids.LoadProfile(doll, digitigrade);
             AssertNoStrays(entities, doll, "digitigrade again");
 
-            var sprite = entities.GetComponent<SpriteComponent>(doll);
-            Assert.That(sprite.LayerMapTryGet("GauzeLowerLegLeft-gauze_lowerleg_l-displacement", out _), Is.True,
+            var spriteUid = doll;
+            var sprites = entities.System<SpriteSystem>();
+            var sprite = entities.GetComponent<SpriteComponent>(spriteUid);
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), "GauzeLowerLegLeft-gauze_lowerleg_l-displacement", out _, false), Is.True,
                 "The foot marking lost its reshaping.");
             entities.DeleteEntity(doll);
         });
@@ -63,11 +65,18 @@ public sealed class LegStylePreviewTest
 
     private static void AssertNoStrays(IEntityManager entities, EntityUid doll, string when)
     {
-        var sprite = entities.GetComponent<SpriteComponent>(doll);
+        var spriteUid = doll;
+        var sprites = entities.System<SpriteSystem>();
+        var sprite = entities.GetComponent<SpriteComponent>(spriteUid);
         var strays = sprite.AllLayers
             .OfType<SpriteComponent.Layer>()
             .Select(layer => layer.CopyToShaderParameters?.LayerKey)
-            .Where(key => key != null && !sprite.LayerMapTryGet(key, out _))
+            .Where(key => key switch
+            {
+                string name => !sprites.LayerMapTryGet((spriteUid, sprite), name, out _, false),
+                Enum value => !sprites.LayerMapTryGet((spriteUid, sprite), value, out _, false),
+                _ => false,
+            })
             .ToList();
         Assert.That(strays, Is.Empty, $"Reshaping layers for missing layers once {when}: {string.Join(", ", strays)}");
     }

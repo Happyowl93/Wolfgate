@@ -51,7 +51,7 @@ public sealed partial class WFMappingDeletePreviewOverlay : Overlay
         var handle = args.WorldHandle;
         handle.SetTransform(_transform.GetWorldMatrix(uid.Value));
 
-        var tiles = _map.GetAllTilesEnumerator(uid.Value, grid);
+        var tiles = _map.GetAllTiles(uid.Value, grid);
         while (tiles.MoveNext(out var tile))
         {
             var cell = tile.Value.GridIndices;

@@ -408,7 +408,7 @@ public sealed class VehicleAmmoTest : InteractionTest
         guns.AttemptShoot(user, gun, SEntMan.GetComponent<GunComponent>(gun), new EntityCoordinates(gun, new Vector2(6f, 0f)));
     }
 
-    private int ActiveDoAfters(EntityUid user)
+    private new int ActiveDoAfters(EntityUid user)
     {
         return SEntMan.TryGetComponent(user, out DoAfterComponent? doAfters) ? doAfters.DoAfters.Count : 0;
     }

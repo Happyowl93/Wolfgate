@@ -41,6 +41,7 @@ namespace Content.Client.Launcher
 
             RobustXamlLoader.Load(this);
             InitSymphony(); // WOLFGATE(Symphony): Symphony, the Link Discord buttons, built in LauncherConnectingGui.Symphony.cs
+            InitJoinProgress(); // WOLFGATE(JoinProgress): stage, download and stuck warning controls
 
             LayoutContainer.SetAnchorPreset(this, LayoutContainer.LayoutPreset.Wide);
 
@@ -86,12 +87,12 @@ namespace Content.Client.Launcher
 
         private void CopyButtonPressed(BaseButton.ButtonEventArgs args)
         {
-            CopyText(ConnectFailReason.Text);
+            CopyText(WithJoinDetails(ConnectFailReason.Text)); // WOLFGATE(JoinProgress): add the stage timings to the copied reason
         }
 
         private void CopyButtonDisconnectedPressed(BaseButton.ButtonEventArgs args)
         {
-            CopyText(DisconnectReason.Text);
+            CopyText(WithJoinDetails(DisconnectReason.Text)); // WOLFGATE(JoinProgress): add the stage timings to the copied reason
         }
 
         private void CopyText(string? text)
@@ -187,6 +188,8 @@ namespace Content.Client.Launcher
                 button.Disabled = true;
                 button.Text = Loc.GetString("connecting-redial-wait", ("time", _waitTime.ToString("00.000")));
             }
+
+            UpdateJoinProgress(args); // WOLFGATE(JoinProgress): refresh the console after the button text is set
         }
 
         private void OnPageChanged(LauncherConnecting.Page page)

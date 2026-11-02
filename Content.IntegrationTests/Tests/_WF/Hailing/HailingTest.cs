@@ -774,7 +774,7 @@ public sealed partial class HailingTest : InteractionTest
         });
     }
 
-    private void Floor(EntityUid grid)
+    private new void Floor(EntityUid grid)
     {
         var tiles = new List<(Vector2i GridIndices, Tile Tile)>();
 

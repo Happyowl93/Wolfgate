@@ -12,7 +12,7 @@ namespace Content.Shared._WF.SuitTank;
 /// <summary>
 /// Finds the gas tanks in a worn suit's storage and which mob a stored tank belongs to.
 /// </summary>
-public sealed class WFSuitTankStorageSystem : EntitySystem
+public sealed partial class WFSuitTankStorageSystem : EntitySystem
 {
     [Dependency] private InventorySystem _inventory = default!;
     [Dependency] private SharedContainerSystem _container = default!;

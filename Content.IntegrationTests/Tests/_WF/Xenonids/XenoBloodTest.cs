@@ -16,6 +16,8 @@ namespace Content.IntegrationTests.Tests._WF.Xenonids;
 [TestFixture]
 public sealed class XenoBloodTest
 {
+    private static readonly ProtoId<DamageGroupPrototype> BruteProto = "Brute";
+
     [Test]
     public async Task HitsDeathAndGibsLeaveBlood()
     {
@@ -52,7 +54,7 @@ public sealed class XenoBloodTest
         });
         await pair.RunTicksSync(5);
 
-        var brute = new DamageSpecifier(protoMan.Index<DamageGroupPrototype>("Brute"), 30);
+        var brute = new DamageSpecifier(protoMan.Index<DamageGroupPrototype>(BruteProto), 30);
         var start = 0;
         await server.WaitAssertion(() =>
         {
@@ -65,7 +67,7 @@ public sealed class XenoBloodTest
         {
             afterHit = Count();
             Assert.That(afterHit, Is.GreaterThan(start), "A hard hit leaves a blood splatter.");
-            damageable.TryChangeDamage(drone, new DamageSpecifier(protoMan.Index<DamageGroupPrototype>("Brute"), 700), true);
+            damageable.TryChangeDamage(drone, new DamageSpecifier(protoMan.Index<DamageGroupPrototype>(BruteProto), 700), true);
             Assert.That(mobState.IsDead(drone), "The drone dies.");
         });
         await pair.RunTicksSync(3);
@@ -73,7 +75,7 @@ public sealed class XenoBloodTest
         {
             Assert.That(Count(), Is.GreaterThan(afterHit + 1), "Death leaves several splatters.");
             Assert.That(entities.EntityExists(drone), "A dead drone is a corpse, not gibs.");
-            damageable.TryChangeDamage(drone, new DamageSpecifier(protoMan.Index<DamageGroupPrototype>("Brute"), 600), true);
+            damageable.TryChangeDamage(drone, new DamageSpecifier(protoMan.Index<DamageGroupPrototype>(BruteProto), 600), true);
         });
         await pair.RunTicksSync(3);
         await server.WaitAssertion(() =>

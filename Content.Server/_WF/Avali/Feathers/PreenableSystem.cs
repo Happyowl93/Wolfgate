@@ -20,7 +20,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.Avali.Feathers;
 
 /// <summary>Runs Avali feather preening, shedding and regrowth.</summary>
-public sealed class PreenableSystem : EntitySystem
+public sealed partial class PreenableSystem : EntitySystem
 {
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedAppearanceSystem _appearance = default!;

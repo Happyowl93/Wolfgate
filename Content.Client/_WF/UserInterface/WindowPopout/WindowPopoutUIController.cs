@@ -12,7 +12,7 @@ namespace Content.Client._WF.UserInterface.WindowPopout;
 /// Adds a pop-out button next to the close button of every in-game window, letting players drag windows onto
 /// another monitor. Works from outside the window classes, so no window needs to opt in.
 /// </summary>
-public sealed class WindowPopoutUIController : UIController
+public sealed partial class WindowPopoutUIController : UIController
 {
     [Dependency] private IConfigurationManager _cfg = default!;
 

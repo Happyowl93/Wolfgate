@@ -30,7 +30,7 @@ public sealed class WFTradeBlockadeAttempt
 /// relief rates, the navies pay war demand while the war is hot, and a raided station pays more for repairs. When
 /// traffic breaks a blockade attempt, the ships that ran it are named and paid.
 /// </summary>
-public sealed class WFTradeSectorSystem : EntitySystem
+public sealed partial class WFTradeSectorSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _proto = default!;

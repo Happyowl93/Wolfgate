@@ -9,7 +9,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 /// <summary>Heats a burning body that dies of overheating, as fire did before Monolith#4831.</summary>
 // A silicon takes no fire damage: a fire hurts it only by heating the chassis until it overheats. The tile fire
 // port made a burning body heat the air and not itself, which left a burning chassis unharmed.
-public sealed class WolfmedBurningChassisSystem : EntitySystem
+public sealed partial class WolfmedBurningChassisSystem : EntitySystem
 {
     private static readonly TimeSpan Interval = TimeSpan.FromSeconds(1);
 

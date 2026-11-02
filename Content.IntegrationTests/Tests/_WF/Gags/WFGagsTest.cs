@@ -38,14 +38,14 @@ public sealed class WFGagsTest
         {
             foreach (var proto in server.ProtoMan.EnumeratePrototypes<EntityPrototype>())
             {
-                if (proto.Abstract || !proto.TryGetComponent<WFGagsComponent>(out var gags, factory))
+                if (proto.Abstract || !proto.TryComp<WFGagsComponent>(out var gags, factory))
                     continue;
 
                 count++;
                 var states = new List<string?>();
-                if (proto.TryGetComponent<ClothingComponent>(out var clothing, factory))
+                if (proto.TryComp<ClothingComponent>(out var clothing, factory))
                     states.AddRange(clothing.ClothingVisuals.Values.SelectMany(l => l).Select(l => l.State));
-                if (proto.TryGetComponent<ItemComponent>(out var item, factory))
+                if (proto.TryComp<ItemComponent>(out var item, factory))
                     states.AddRange(item.InhandVisuals.Values.SelectMany(l => l).Select(l => l.State));
 
                 if (gags.Colors.Count is 0 or > WFGagsColors.MaxColors)
@@ -141,7 +141,7 @@ public sealed class WFGagsTest
             var gagsSystem = entMan.System<WFGagsSystem>();
             var spriteSystem = entMan.System<SpriteSystem>();
             var protos = client.ProtoMan.EnumeratePrototypes<EntityPrototype>()
-                .Where(p => !p.Abstract && p.ID.StartsWith("WFMeridian") && p.TryGetComponent<ClothingComponent>(out _, factory))
+                .Where(p => !p.Abstract && p.ID.StartsWith("WFMeridian") && p.TryComp<ClothingComponent>(out _, factory))
                 .ToList();
 
             foreach (var proto in protos)

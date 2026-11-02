@@ -100,7 +100,7 @@ public sealed class WFGagsColorRow : BoxContainer
         if (rebuild)
         {
             _popup?.Close();
-            _swatches.DisposeAllChildren();
+            _swatches.RemoveAllChildren();
             _chips.Clear();
             for (var i = 0; i < _colors.Count; i++)
             {
@@ -171,16 +171,15 @@ public sealed class WFGagsColorRow : BoxContainer
         OnColorsChanged?.Invoke(_colors.ToList());
     }
 
-    protected override void Dispose(bool disposing)
+    protected override void ExitedTree()
     {
-        base.Dispose(disposing);
+        base.ExitedTree();
 
-        if (!disposing || _popup == null)
+        if (_popup == null)
             return;
 
         _popup.Close();
         _popup.Orphan();
-        _popup.Dispose();
         _popup = null;
     }
 }

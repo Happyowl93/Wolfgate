@@ -28,6 +28,10 @@ namespace Content.IntegrationTests.Tests._WF.Traders;
 [TestFixture]
 public sealed class UsedShipSaveTest
 {
+    private static readonly ProtoId<VesselPrototype> ArribaneProto = "Arribane";
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+    private static readonly ProtoId<DamageTypePrototype> HeatProto = "Heat";
+
     [Test]
     public async Task DamagedShipWithVendorRoundTrips()
     {
@@ -46,7 +50,7 @@ public sealed class UsedShipSaveTest
 
         await server.WaitAssertion(() =>
         {
-            var vessel = protoMan.Index<VesselPrototype>("Arribane");
+            var vessel = protoMan.Index<VesselPrototype>(ArribaneProto);
             Assert.That(mapLoader.TryLoadGrid(map.MapId, vessel.ShuttlePath, out var grid), Is.True);
             shuttle = grid!.Value.Owner;
         });
@@ -55,8 +59,8 @@ public sealed class UsedShipSaveTest
 
         await server.WaitAssertion(() =>
         {
-            var blunt = protoMan.Index<DamageTypePrototype>("Blunt");
-            var heat = protoMan.Index<DamageTypePrototype>("Heat");
+            var blunt = protoMan.Index<DamageTypePrototype>(BluntProto);
+            var heat = protoMan.Index<DamageTypePrototype>(HeatProto);
             var children = new System.Collections.Generic.List<EntityUid>();
             var xforms = entMan.GetComponent<TransformComponent>(shuttle).ChildEnumerator;
             while (xforms.MoveNext(out var c)) children.Add(c);
@@ -122,7 +126,7 @@ public sealed class UsedShipSaveTest
         var shuttle = EntityUid.Invalid;
         await server.WaitAssertion(() =>
         {
-            var vessel = protoMan.Index<VesselPrototype>("Arribane");
+            var vessel = protoMan.Index<VesselPrototype>(ArribaneProto);
             Assert.That(mapLoader.TryLoadGrid(map.MapId, vessel.ShuttlePath, out var grid), Is.True);
             shuttle = grid!.Value.Owner;
         });
@@ -169,7 +173,7 @@ public sealed class UsedShipSaveTest
 
         await server.WaitAssertion(() =>
         {
-            var vessel = protoMan.Index<VesselPrototype>("Arribane");
+            var vessel = protoMan.Index<VesselPrototype>(ArribaneProto);
             Assert.That(entMan.System<MapLoaderSystem>().TryLoadGrid(map.MapId, vessel.ShuttlePath, out var grid), Is.True);
             var shuttle = grid!.Value.Owner;
 

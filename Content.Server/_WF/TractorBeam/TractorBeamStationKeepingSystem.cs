@@ -14,7 +14,7 @@ namespace Content.Server._WF.TractorBeam;
 /// Braking is evaluated after beam recoil, using the shuttle movement controller's
 /// powered engine limits and retaining independent manual steering priority.
 /// </summary>
-public sealed class TractorBeamStationKeepingSystem : VirtualController
+public sealed partial class TractorBeamStationKeepingSystem : VirtualController
 {
     private readonly HashSet<EntityUid> _brakingShuttles = new();
     [Dependency] private MoverController _mover = default!;

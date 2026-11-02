@@ -20,7 +20,7 @@ namespace Content.Server._WF.Wolfmed.Body;
 // A hit whose damage after armour exceeds its part's reach line for a type reaches the organs inside. The excess is
 // split across the working organs: (hit - line) x the organ's multiplier for the type x its weight share x
 // wolfmed.organ_damage_scale, capped per organ per hit. A destroyed organ leaves the split, so the rest take more.
-public sealed class WolfmedOrganThresholdSystem : EntitySystem
+public sealed partial class WolfmedOrganThresholdSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _config = default!;
     [Dependency] private OrganHealthSystem _organHealth = default!;

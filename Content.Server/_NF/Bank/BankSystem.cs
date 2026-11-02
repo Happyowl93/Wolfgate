@@ -1,3 +1,14 @@
+// WOLFGATE: restore the licence header removed by Kill Spdx
+// SPDX-FileCopyrightText: 2024 Checkraze
+// SPDX-FileCopyrightText: 2024 Whatstone
+// SPDX-FileCopyrightText: 2024 checkraze
+// SPDX-FileCopyrightText: 2025 Ark
+// SPDX-FileCopyrightText: 2025 Dvir
+// SPDX-FileCopyrightText: 2025 Redrover1760
+// SPDX-FileCopyrightText: 2025 ark1368
+//
+// SPDX-License-Identifier: MPL-2.0
+
 using System.Threading;
 using Content.Server._Mono.MonoCoins;
 using Content.Server.Database;

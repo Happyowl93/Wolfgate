@@ -18,6 +18,7 @@ using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
 using NUnit.Framework;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 
@@ -30,6 +31,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(WolfmedAntisepticSpraySystem))]
 public sealed class WolfmedAntisepticSprayTest : WolfmedGameTest
 {
+    private static readonly ProtoId<DamageTypePrototype> SlashProto = "Slash";
+
     [Test]
     public async Task SprayOnYourselfCleansTheWoundInsteadOfDrinkingTest()
     {
@@ -43,7 +46,7 @@ public sealed class WolfmedAntisepticSprayTest : WolfmedGameTest
             var solutions = SEntMan.System<SharedSolutionContainerSystem>();
             body = SEntMan.SpawnEntity("MobHuman", map.GridCoords);
             other = SEntMan.SpawnEntity("MobHuman", map.GridCoords);
-            var slash = SProtoMan.Index<DamageTypePrototype>("Slash");
+            var slash = SProtoMan.Index<DamageTypePrototype>(SlashProto);
             foreach (var patient in new[] { body, other })
                 SEntMan.System<DamageableSystem>().TryChangeDamage(patient, new DamageSpecifier(slash, FixedPoint2.New(15)),
                     origin: null, targetPart: TargetBodyPart.LeftArm);

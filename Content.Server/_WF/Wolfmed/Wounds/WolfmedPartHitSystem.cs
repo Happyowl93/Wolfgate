@@ -15,7 +15,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 // Called from Onyx's one-event-per-hit dispatcher. A burn already at its maximum escalates into charring, and a
 // charred hand, foot, arm or leg that keeps cooking crumbles to ash; the head and torso never crumble. A big enough
 // hit interrupts what the body is doing (WolfmedDoAfterInterruptSystem).
-public sealed class WolfmedPartHitSystem : EntitySystem
+public sealed partial class WolfmedPartHitSystem : EntitySystem
 {
     [Dependency] private BodySystem _body = default!;
     [Dependency] private IConfigurationManager _config = default!;

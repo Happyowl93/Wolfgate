@@ -16,7 +16,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// a part that is grafted and burned to the top again chars again, one that keeps burning does not char
 /// twice for the same fire.
 /// </remarks>
-public sealed class WolfmedCharringSystem : EntitySystem
+public sealed partial class WolfmedCharringSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private WoundSystem _wounds = default!;

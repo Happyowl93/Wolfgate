@@ -83,6 +83,10 @@ public sealed partial class CEZLevelsSpeakingSystem : EntitySystem
         Timer.Spawn(MessageDelayMilliseconds,
             () =>
             {
+                // WOLFGATE(LiveFixes): the speaker can be deleted with its map before this fires
+                if (TerminatingOrDeleted(transmit))
+                    return;
+
                 _chat.TrySendInGameICMessage(
                     transmit,
                     message,

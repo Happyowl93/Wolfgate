@@ -113,6 +113,7 @@ namespace Content.Server.Entry
                 IoCManager.Resolve<IServerConsentManager>().Initialize(); // WOLFGATE(Genitals): consent system
                 IoCManager.Resolve<INodeGroupFactory>().Initialize();
                 IoCManager.Resolve<ContentNetworkResourceManager>().Initialize();
+                IoCManager.Resolve<_WF.JoinProgress.JoinProgressManager>().Initialize(); // WOLFGATE(JoinProgress): tells joining clients their download size
                 IoCManager.Resolve<GhostKickManager>().Initialize();
                 IoCManager.Resolve<ServerInfoManager>().Initialize();
                 IoCManager.Resolve<ServerApi>().Initialize();

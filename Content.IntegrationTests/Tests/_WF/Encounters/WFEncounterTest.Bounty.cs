@@ -26,6 +26,8 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestBountyCrewProto => "WFTestBountyCrew";
+
     [TestPrototypes]
     private const string BountyPrototypes = @"
 - type: entity
@@ -424,7 +426,7 @@ public sealed partial class WFEncounterTest
         {
             board = EnsureBoard();
             // Pinned, so the encounter is still there to look at after the poll that finds its only ship gone.
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestBountyCrew");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestBountyCrewProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-30000, 66000), MapData.MapId),
                 out encounter, pinned: true), Is.True);
             id = SEntMan.GetComponent<WFEncounterBountyComponent>(encounter).Contract!.Value;

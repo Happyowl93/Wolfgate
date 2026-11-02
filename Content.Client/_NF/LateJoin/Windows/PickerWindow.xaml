@@ -1,12 +1,15 @@
 ﻿<!-- WOLFGATE(Companies): xmlns:companies for the join as rank bar -->
+<!-- WOLFGATE(StationRoles): window title is Station Roles -->
 <controls:FancyWindow xmlns="https://spacestation14.io"
                       xmlns:companies="clr-namespace:Content.Client._WF.Companies"
                       xmlns:graphics="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
                       xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
-                      Title="Join Game"
+                      Title="{Loc 'wf-station-roles-title'}"
                       SetSize="800 600">
 
     <BoxContainer Orientation="Vertical">
+        <!-- WOLFGATE(StationRoles) START: crew tab and tab bar removed -->
+        <!--
         <PanelContainer VerticalExpand="False" HorizontalExpand="True" Margin="6 6 6 6">
             <PanelContainer.PanelOverride>
                 <graphics:StyleBoxFlat BorderThickness="3" BorderColor="#35434d" BackgroundColor="#141414"/>
@@ -35,6 +38,8 @@
         </BoxContainer>
             </PanelContainer>
         </PanelContainer>
+        -->
+        <!-- WOLFGATE END -->
         <!-- WOLFGATE(Companies): company members can join the round as their rank -->
         <companies:WFCompanyQuickJoin Margin="6 0 6 6" />
         <PanelContainer VerticalExpand="True" HorizontalExpand="True">

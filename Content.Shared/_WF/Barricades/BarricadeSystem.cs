@@ -16,7 +16,7 @@ using static Content.Shared.Physics.CollisionGroup;
 namespace Content.Shared._WF.Barricades;
 
 /// <summary>Barricade placement rules, sandbag filling and building, and the entrenching tool.</summary>
-public sealed class BarricadeSystem : EntitySystem
+public sealed partial class BarricadeSystem : EntitySystem
 {
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
@@ -431,7 +431,7 @@ public sealed class BarricadeSystem : EntitySystem
         }
 
         var indices = _mapSystem.TileIndicesFor(gridId, grid, coordinates);
-        var anchored = _mapSystem.GetAnchoredEntitiesEnumerator(gridId, grid, indices);
+        var anchored = _mapSystem.GetAnchoredEntities(gridId, grid, indices);
         while (anchored.MoveNext(out var uid))
         {
             if (_barricadeQuery.HasComp(uid) &&

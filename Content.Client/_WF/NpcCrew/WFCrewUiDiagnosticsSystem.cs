@@ -12,7 +12,7 @@ using Robust.Shared.Configuration;
 namespace Content.Client._WF.NpcCrew;
 
 /// <summary>Opt-in request, delivery and attachment traces for missing admin menu contents.</summary>
-public sealed class WFCrewUiDiagnosticsSystem : EntitySystem
+public sealed partial class WFCrewUiDiagnosticsSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IClientGameTiming _timing = default!;

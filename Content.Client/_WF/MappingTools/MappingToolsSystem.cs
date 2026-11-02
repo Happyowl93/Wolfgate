@@ -38,7 +38,7 @@ public readonly record struct MappingPick(MappingPickKind Kind, string Id, Angle
 /// action-bar button, <c>mappingtools</c> or <c>mapping</c> turns it on. The panel sits in its own window, or in a
 /// host given to <see cref="SetDock"/>.
 /// </summary>
-public sealed class MappingToolsSystem : EntitySystem
+public sealed partial class MappingToolsSystem : EntitySystem
 {
     [Dependency] private IClientAdminManager _admin = default!;
     [Dependency] private IGameTiming _timing = default!;
@@ -348,7 +348,7 @@ public sealed class MappingToolsSystem : EntitySystem
         {
             for (var y = -1; y <= 1; y++)
             {
-                var neighbours = _map.GetAnchoredEntitiesEnumerator(gridUid, grid, oldCell + new Vector2i(x, y));
+                var neighbours = _map.GetAnchoredEntities(gridUid, grid, oldCell + new Vector2i(x, y));
                 while (neighbours.MoveNext(out var neighbour))
                 {
                     if (neighbour != ent.Owner)

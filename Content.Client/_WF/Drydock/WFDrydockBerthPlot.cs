@@ -16,7 +16,7 @@ namespace Content.Client._WF.Drydock;
 /// Live top-down plot of a drydock berth: the bay, its cranes, the ship in it and the work still to do.
 /// The berth mouth faces the bottom of the plot, so ships sail up into it.
 /// </summary>
-public sealed class WFDrydockBerthPlot : Control
+public sealed partial class WFDrydockBerthPlot : Control
 {
     /// <summary>Tiles of approach lane drawn past the berth mouth.</summary>
     private const float LaneLength = 9f;
@@ -308,7 +308,7 @@ public sealed class WFDrydockBerthPlot : Control
             return;
 
         _tiles.Clear();
-        var tiles = _map.GetAllTilesEnumerator(ship.Value, grid);
+        var tiles = _map.GetAllTiles(ship.Value, grid);
         while (tiles.MoveNext(out var tile))
         {
             _tiles.Add(tile!.Value.GridIndices);

@@ -364,7 +364,7 @@ public sealed partial class WFMappingLinkSystem : EntitySystem
             foreach (var id in fills)
             {
                 if (!_prototypes.TryIndex<EntityPrototype>(id, out var prototype) ||
-                    !prototype.TryGetComponent(out AccessReaderComponent? board, _factory))
+                    !prototype.TryComp(out AccessReaderComponent? board, _factory))
                 {
                     continue;
                 }

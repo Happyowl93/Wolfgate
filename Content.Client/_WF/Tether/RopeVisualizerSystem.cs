@@ -13,7 +13,7 @@ namespace Content.Client._WF.Tether;
 /// The chains live here, not on the networked component, so nothing about the simulation can
 /// desynchronise or be mispredicted.
 /// </summary>
-public sealed class RopeVisualizerSystem : EntitySystem
+public sealed partial class RopeVisualizerSystem : EntitySystem
 {
     [Dependency] private IOverlayManager _overlays = default!;
     [Dependency] private IPrototypeManager _protos = default!;
@@ -77,7 +77,7 @@ public sealed class RopeVisualizerSystem : EntitySystem
             return;
 
         view = view.Enlarged(ViewMargin);
-        var currentMap = _eye.CurrentMap;
+        var currentMap = _eye.CurrentEye.Position.MapId;
         var time = (float) (_timing.CurTime.TotalSeconds % 1000);
 
         var query = EntityQueryEnumerator<RopeComponent>();
@@ -209,8 +209,8 @@ public sealed class RopeVisualizerSystem : EntitySystem
     {
         position = default;
         mapId = MapId.Nullspace;
-        if (Deleted(uid) || !TryComp<TransformComponent>(uid, out var xform) ||
-            !TryComp<MetaDataComponent>(uid, out var meta) || (meta.Flags & MetaDataFlags.Detached) != 0)
+        if (Deleted(uid) || !TryComp(uid, out TransformComponent? xform) ||
+            !TryComp(uid, out MetaDataComponent? meta) || (meta.Flags & MetaDataFlags.Detached) != 0)
             return false;
 
         position = _transform.GetWorldPosition(xform);

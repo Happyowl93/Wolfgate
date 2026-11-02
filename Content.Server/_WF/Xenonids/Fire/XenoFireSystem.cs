@@ -10,7 +10,7 @@ namespace Content.Server._WF.Xenonids.Fire;
 /// <summary>
 /// RMC's caste fire immunities and burning weeds on top of upstream <see cref="FlammableComponent"/>.
 /// </summary>
-public sealed class XenoFireSystem : EntitySystem
+public sealed partial class XenoFireSystem : EntitySystem
 {
     [Dependency] private FlammableSystem _flammable = default!;
     [Dependency] private RMCMapSystem _rmcMap = default!;

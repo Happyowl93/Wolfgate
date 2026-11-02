@@ -14,7 +14,7 @@ namespace Content.Server._WF.MappingMode;
 /// Looks over a grid for <see cref="WFMappingVesselYaml"/>: tiles, appraisal, cargo pallets, mining gear, mounted guns
 /// and generators, and writes its vessel prototype with the player-facing text localized.
 /// </summary>
-public sealed class WFMappingVesselSystem : EntitySystem
+public sealed partial class WFMappingVesselSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private PricingSystem _pricing = default!;

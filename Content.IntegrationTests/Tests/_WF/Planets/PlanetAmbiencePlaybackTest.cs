@@ -14,12 +14,15 @@ using Robust.Shared.Configuration;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using static Content.IntegrationTests.Tests._WF.Planets.PlanetFixture;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Planets;
 
 [TestFixture]
 public sealed class PlanetAmbiencePlaybackTest
 {
+    private static readonly ProtoId<WFPlanetSurfacePrototype> WFSurfaceCarcinomaProto = "WFSurfaceCarcinoma";
+
     [Test]
     public async Task CarcinomaAccentsFollowNightAndDay()
     {
@@ -30,7 +33,7 @@ public sealed class PlanetAmbiencePlaybackTest
         var layers = new List<EntityUid>();
         await server.WaitPost(() =>
         {
-            var profile = server.ResolveDependency<Robust.Shared.Prototypes.IPrototypeManager>().Index<WFPlanetSurfacePrototype>("WFSurfaceCarcinoma");
+            var profile = server.ResolveDependency<Robust.Shared.Prototypes.IPrototypeManager>().Index<WFPlanetSurfacePrototype>(WFSurfaceCarcinomaProto);
             var network = server.System<WFPlanetNetworkSystem>().BuildNetwork(profile, Vector2.Zero, "Carcinoma", null)!.Value;
             layers.AddRange(server.EntMan.GetComponent<WFPlanetNetworkComponent>(network).Layers);
             server.System<BiomeSystem>().SetEnabled((layers[0], server.EntMan.GetComponent<BiomeComponent>(layers[0])), false);

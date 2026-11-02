@@ -78,7 +78,8 @@ public sealed partial class WFShipShieldShuntScreen
         lease.Remember(() =>
         {
             _wfCockpitShowStats = null;
-            stats.Dispose();
+            if (!stats.Disposed)
+                stats.Orphan();
         });
         return WFCockpitMfdLayout.Details(InstrumentTheme.Column(telemetry, InstrumentTheme.Label("wf-console-shield-vector"),
             InstrumentTheme.Label("wf-shield-helm-bearing"), lease.Take(_direction),

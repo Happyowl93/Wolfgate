@@ -20,7 +20,7 @@ public readonly record struct WFTradeSectorGood(string Good, int Stock, int Owed
 /// pool and the pool is owed out to whoever is short. It runs on rates, and only freighters turn what's owed into stock, so
 /// losing one loses real supply. A blockaded station can't export or be reached and its imports go to hoarders.
 /// </summary>
-public sealed class WFTradeEconomySystem : EntitySystem
+public sealed partial class WFTradeEconomySystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _proto = default!;

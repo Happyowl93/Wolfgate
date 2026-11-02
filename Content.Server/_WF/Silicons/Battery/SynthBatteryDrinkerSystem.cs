@@ -8,7 +8,7 @@ namespace Content.Server._WF.Silicons.Battery;
 /// Points the battery drinker at a synth's internal cell, which lives in an organ
 /// slot rather than the power cell slot the stock drinker looks in.
 /// </summary>
-public sealed class SynthBatteryDrinkerSystem : EntitySystem
+public sealed partial class SynthBatteryDrinkerSystem : EntitySystem
 {
     [Dependency] private SynthBatterySystem _synthBattery = default!;
 

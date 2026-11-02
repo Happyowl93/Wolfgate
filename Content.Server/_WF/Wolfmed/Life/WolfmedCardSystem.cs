@@ -12,7 +12,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 // It holds a coarse bar of the brain's remaining rescue window (tenths, never seconds), whether somebody is doing
 // CPR, whether an analyzer just read the body, and when a timed faint ends. The client draws the card from this and
 // the cause prototype.
-public sealed class WolfmedCardSystem : EntitySystem
+public sealed partial class WolfmedCardSystem : EntitySystem
 {
     private static readonly TimeSpan TickInterval = TimeSpan.FromSeconds(1);
 

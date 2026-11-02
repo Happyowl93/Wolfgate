@@ -79,10 +79,12 @@ public sealed partial class ShuttleConsoleWindow
             _wfCockpitButton.Disabled = !UserInterfaceManager.GetUIController<WFCockpitUIController>().CanEnter(WfCockpitConsole);
     }
 
+#pragma warning disable CS0672, CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
     protected override void Dispose(bool disposing)
     {
         if (disposing)
             UserInterfaceManager.GetUIController<WFCockpitUIController>().Exit(this);
         base.Dispose(disposing);
     }
+#pragma warning restore CS0672, CS0618
 }

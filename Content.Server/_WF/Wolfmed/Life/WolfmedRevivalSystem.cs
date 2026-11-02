@@ -35,7 +35,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 /// other content's <see cref="UnrevivableComponent"/> are the only hard stops, and neither is this system's.
 /// A shock succeeds on a roll, so no line here ever promises one will work.
 /// </remarks>
-public sealed class WolfmedRevivalSystem : EntitySystem
+public sealed partial class WolfmedRevivalSystem : EntitySystem
 {
     [Dependency] private IComponentFactory _factory = default!;
     [Dependency] private IConfigurationManager _cfg = default!;

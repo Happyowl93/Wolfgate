@@ -5,7 +5,7 @@ using Content.Shared.Mind.Components;
 namespace Content.Server._WF.Xenonids.Parasite;
 
 /// <summary>When the player who burst takes their larva, their old body becomes unrepairable.</summary>
-public sealed class WFBurstHostSystem : EntitySystem
+public sealed partial class WFBurstHostSystem : EntitySystem
 {
     [Dependency] private SharedMindSystem _mind = default!;
     [Dependency] private SharedXenoParasiteSystem _parasite = default!;

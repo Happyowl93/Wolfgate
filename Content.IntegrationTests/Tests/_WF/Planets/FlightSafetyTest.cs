@@ -168,7 +168,7 @@ public sealed class FlightSafetyTest
     private static int TileCount(TestPair pair, EntityUid hull)
     {
         var grid = pair.Server.EntMan.GetComponent<MapGridComponent>(hull);
-        var tiles = pair.Server.System<SharedMapSystem>().GetAllTilesEnumerator(hull, grid);
+        var tiles = pair.Server.System<SharedMapSystem>().GetAllTiles(hull, grid);
         var count = 0;
         while (tiles.MoveNext(out _))
             count++;

@@ -21,7 +21,7 @@ using Robust.Shared.Timing;
 namespace Content.Shared._WF.Barricades;
 
 /// <summary>Deploying, collapsing, merging and welding MB-6 folding barricades.</summary>
-public sealed class RMCFoldingBarricadeSystem : EntitySystem
+public sealed partial class RMCFoldingBarricadeSystem : EntitySystem
 {
     [Dependency] private ActionBlockerSystem _actionBlocker = default!;
     [Dependency] private SharedAudioSystem _audio = default!;

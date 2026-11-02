@@ -63,9 +63,18 @@ public sealed partial class HealingSystem
                 healing.TreatmentCapabilities, healing.AllowedWoundStages, healing.BloodlossModifier, healing.HealWounds)
             : null;
 
+        // A medic in a sterile weave leaves the wounds they treat clean.
+        EntityUid? sterilePart = _wfInfection.IsSterile(args.User)
+            ? requestedPart ?? _woundHealing.ResolveHealingPart(entity, null, treatable, GetHealingContainers(healing),
+                healing.TreatmentCapabilities, healing.AllowedWoundStages, healing.BloodlossModifier, healing.HealWounds)
+            : null;
+
         if (!_woundHealing.TryApplyHealing(entity, requestedPart, (used, healing), args.User,
                 out var healed, out var stoppedBleeding))
             return;
+
+        if (sterilePart is { } cleanPart)
+            _wfInfection.CleanPart(cleanPart);
 
         if (burnPart is { } dressedPart)
             _wfFluidLoss.Dress(dressedPart);
@@ -101,12 +110,12 @@ public sealed partial class HealingSystem
         if (entity.Owner != args.User)
         {
             _adminLogger.Add(LogType.Healed,
-                $"{EntityManager.ToPrettyString(args.User):user} healed {EntityManager.ToPrettyString(entity.Owner):target} for {total:damage} damage");
+                $"{ToPrettyString(args.User):user} healed {ToPrettyString(entity.Owner):target} for {total:damage} damage");
         }
         else
         {
             _adminLogger.Add(LogType.Healed,
-                $"{EntityManager.ToPrettyString(args.User):user} healed themselves for {total:damage} damage");
+                $"{ToPrettyString(args.User):user} healed themselves for {total:damage} damage");
         }
 
         _audio.PlayPvs(healing.HealingEndSound, entity.Owner);

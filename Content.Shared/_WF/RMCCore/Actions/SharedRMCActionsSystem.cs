@@ -358,7 +358,9 @@ public abstract partial class SharedRMCActionsSystem : EntitySystem
         to.Priority = from.Priority;
         to.AttachedEntity = from.AttachedEntity;
         to.RaiseOnUser = from.RaiseOnUser;
+#pragma warning disable CS0618 // A copied action keeps every field the original has.
         to.RaiseOnAction = from.RaiseOnAction;
+#pragma warning restore CS0618
         to.AutoPopulate = from.AutoPopulate;
         to.Temporary = from.Temporary;
         to.ItemIconStyle = from.ItemIconStyle;

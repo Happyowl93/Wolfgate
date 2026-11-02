@@ -16,6 +16,27 @@ external:
 # Edits outside _WF that can't hold a WOLFGATE marker: JSON, images, audio, rich-text .txt and map files.
 # Each entry has a path (a file, a folder or a glob), the module it serves (null for a standalone edit) and a reason.
 unmarked:
+  - path: Resources/Maps/Shuttles/dart.yml
+    module: Cloning
+    reason: Mapped a genetic database and a body scanner console, linked to the scanner and pod.
+  - path: Resources/Maps/Shuttles/emergency_raven.yml
+    module: Cloning
+    reason: Mapped a genetic database and a body scanner console, linked to the scanner and pod.
+  - path: Resources/Maps/_Mono/Outpost/caelestinus_central.yml
+    module: Cloning
+    reason: Mapped a genetic database and a body scanner console, linked to the scanner and pod.
+  - path: Resources/Maps/_Mono/ShuttleEvent/asakim_medium.yml
+    module: Cloning
+    reason: Mapped a genetic database and a body scanner console, linked to the scanner and pod.
+  - path: Resources/Maps/_Mono/ShuttleEvent/asakim_small.yml
+    module: Cloning
+    reason: Mapped a genetic database and a body scanner console, linked to the scanner and pod.
+  - path: Resources/Maps/centcomm.yml
+    module: Cloning
+    reason: Mapped a genetic database and a body scanner console, linked to the scanner and pod.
+  - path: Resources/Maps/_Mono/POI/pdvhelios.yml
+    module: LiveFixes
+    reason: Removed saved configurator lists that held invalid entity references.
   - path: Resources/Fonts/ComicNeue
     module: Clown
     reason: Comic Neue font and its OFL licence for the Clown trait speech.
@@ -2767,6 +2788,24 @@ unmarked:
   - path: Resources/Maps/elkridge.yml
     module: Xenoarch
     reason: Removed the mapped artifact's BiasedArtifact component, which no longer exists.
+  - path: Resources/Textures/_NF/Clothing/Head/Hardsuits/nfsd.rsi/
+    module: null
+    reason: Licence and credit set as in HardLight 0fc067be74.
+  - path: Resources/Textures/_NF/Clothing/Head/Hardsuits/nfsd_combat.rsi/
+    module: null
+    reason: Licence and credit set as in HardLight 0fc067be74.
+  - path: Resources/Textures/_NF/Clothing/Head/Hardsuits/nfsd_command.rsi/
+    module: null
+    reason: Licence and credit set as in HardLight 0fc067be74.
+  - path: Resources/Textures/_NF/Clothing/Head/Hardsuits/nfsd_experimental.rsi/
+    module: null
+    reason: Licence and credit set as in HardLight 0fc067be74.
+  - path: Resources/Textures/_NF/Clothing/Head/Hardsuits/nfsd_sheriff.rsi/
+    module: null
+    reason: Licence and credit set as in HardLight 0fc067be74.
+  - path: LICENSES/MIT.txt
+    module: null
+    reason: Copyright lines for both holders of the MIT code, Space Wizards and New Frontiers.
   - path: LICENSES/LicenseRef-Starlight.txt
     module: null
     reason: Starlight licence text, required by the Starlight-licensed code under _Starlight and _FarHorizons.

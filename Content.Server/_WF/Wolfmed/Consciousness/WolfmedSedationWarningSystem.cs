@@ -10,7 +10,7 @@ namespace Content.Server._WF.Wolfmed.Consciousness;
 /// M2 (plan §3.4): the patient is told as sedation climbs, once per line: drowsy at <c>wolfmed.sedation_warn</c>,
 /// breathing slowing at the depression line, barely awake at <c>wolfmed.sedation_warn_heavy</c>. Nothing ships in M1a.
 /// </summary>
-public sealed class WolfmedSedationWarningSystem : EntitySystem
+public sealed partial class WolfmedSedationWarningSystem : EntitySystem
 {
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private WolfmedConditionAlertSystem _conditionAlerts = default!;

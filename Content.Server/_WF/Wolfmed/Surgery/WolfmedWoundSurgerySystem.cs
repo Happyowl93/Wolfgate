@@ -15,7 +15,7 @@ namespace Content.Server._WF.Wolfmed.Surgery;
 /// server-assembly classes (D13); the listing conditions and completion checks stay shared
 /// (WolfmedSurgeryConditionSystem). One component in both systems is legal because the events differ.
 /// </remarks>
-public sealed class WolfmedWoundSurgerySystem : EntitySystem
+public sealed partial class WolfmedWoundSurgerySystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IRobustRandom _random = default!;

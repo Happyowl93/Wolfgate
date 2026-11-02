@@ -10,7 +10,7 @@ namespace Content.Server._WF.SuitTank;
 /// <summary>
 /// Moves internals to a fresh tank in the worn suit when the connected suit tank runs low.
 /// </summary>
-public sealed class WFSuitTankSwitchSystem : EntitySystem
+public sealed partial class WFSuitTankSwitchSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private GasTankSystem _gasTank = default!;

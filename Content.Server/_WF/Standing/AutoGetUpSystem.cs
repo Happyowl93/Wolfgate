@@ -9,7 +9,7 @@ namespace Content.Server._WF.Standing;
 /// <summary>
 /// Decides whether a knocked-down body gets up by itself: its own player's setting, or always when it has no player.
 /// </summary>
-public sealed class AutoGetUpSystem : EntitySystem
+public sealed partial class AutoGetUpSystem : EntitySystem
 {
     [Dependency] private INetConfigurationManager _cfg = default!;
     [Dependency] private ISharedPlayerManager _player = default!;

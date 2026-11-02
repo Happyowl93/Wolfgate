@@ -232,9 +232,9 @@ public sealed class FabricationSiloTest
         await server.WaitAssertion(() =>
         {
             var factory = server.ResolveDependency<IComponentFactory>();
-            Assert.That(server.ProtoMan.Index(MaterialSiloBoard).TryGetComponent<MachineBoardComponent>(out var expected, factory),
+            Assert.That(server.ProtoMan.Index(MaterialSiloBoard).TryComp<MachineBoardComponent>(out var expected, factory),
                 Is.True);
-            Assert.That(server.ProtoMan.Index<EntityPrototype>(board).TryGetComponent<MachineBoardComponent>(out var actual, factory),
+            Assert.That(server.ProtoMan.Index<EntityPrototype>(board).TryComp<MachineBoardComponent>(out var actual, factory),
                 Is.True);
             Assert.That(actual!.Requirements, Is.EquivalentTo(expected!.Requirements));
             Assert.That(actual.StackRequirements, Is.EquivalentTo(expected.StackRequirements));

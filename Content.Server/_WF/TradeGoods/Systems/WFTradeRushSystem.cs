@@ -31,7 +31,7 @@ public sealed class WFTradeRush
 /// the order is filled or expires. The first ships to deliver split it. Bulk orders work the same way, for a hold's
 /// worth of crates over a longer window at a flat price. Orders go to the stations furthest under target for their goods.
 /// </summary>
-public sealed class WFTradeRushSystem : EntitySystem
+public sealed partial class WFTradeRushSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _proto = default!;

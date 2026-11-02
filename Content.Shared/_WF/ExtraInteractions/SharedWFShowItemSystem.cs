@@ -7,7 +7,7 @@ namespace Content.Shared._WF.ExtraInteractions;
 /// <summary>
 /// Pointing at an item you carry shows it in a thought bubble over you, as in SS13, instead of pointing at the floor under the HUD.
 /// </summary>
-public abstract class SharedWFShowItemSystem : EntitySystem
+public abstract partial class SharedWFShowItemSystem : EntitySystem
 {
     [Dependency] private SharedTransformSystem _transform = default!;
 

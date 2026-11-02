@@ -105,7 +105,7 @@ public sealed partial class WFDrydockSystem
             return 0;
 
         var count = 0;
-        var tiles = _map.GetAllTilesEnumerator(ship, grid);
+        var tiles = _map.GetAllTiles(ship, grid);
         while (tiles.MoveNext(out _))
         {
             count++;

@@ -42,7 +42,7 @@ namespace Content.Server._WF.Ghost;
 /// <summary>
 /// Builds the categorised target list for the ghost orbit menu and handles orbit requests.
 /// </summary>
-public sealed class GhostOrbitSystem : EntitySystem
+public sealed partial class GhostOrbitSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private IAdminManager _admin = default!;

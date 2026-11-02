@@ -22,6 +22,8 @@ namespace Content.IntegrationTests.Tests._WF.Species;
 [TestFixture]
 public sealed class AvaliChemistryTest
 {
+    private static readonly ProtoId<DamageTypePrototype> AsphyxiationProto = "Asphyxiation";
+
     /// <summary>Five seconds: enough heart metabolism passes for every reagent to take effect.</summary>
     private const int MetabolismTicks = 150;
 
@@ -40,7 +42,7 @@ public sealed class AvaliChemistryTest
         var map = await pair.CreateTestMap();
         var bloodstream = entMan.System<BloodstreamSystem>();
         var damageable = entMan.System<DamageableSystem>();
-        var asphyxiation = server.ProtoMan.Index<DamageTypePrototype>("Asphyxiation");
+        var asphyxiation = server.ProtoMan.Index<DamageTypePrototype>(AsphyxiationProto);
 
         // Keyed by species (or the healing check) and the reagent injected; "" is an untreated control.
         var subjects = new Dictionary<(string Group, string Reagent), EntityUid>();

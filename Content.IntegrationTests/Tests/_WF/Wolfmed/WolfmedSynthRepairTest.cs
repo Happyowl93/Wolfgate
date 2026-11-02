@@ -40,6 +40,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestFixture]
 public sealed class WolfmedSynthRepairTest : WolfmedGameTest
 {
+    private static readonly ProtoId<DamageTypePrototype> ShockProto = "Shock";
+
     public override PoolSettings PoolSettings => PsDisconnected;
 
     /// <summary>Reported: a synthetic human flopped to the floor on spawn, with the downed HUD up.</summary>
@@ -237,7 +239,7 @@ public sealed class WolfmedSynthRepairTest : WolfmedGameTest
         {
             var body = SEntMan.SpawnEntity("MobSynth", map.GridCoords);
             var torso = Part(body, BodyPartType.Torso);
-            var shock = new DamageSpecifier(SProtoMan.Index<DamageTypePrototype>("Shock"), 30);
+            var shock = new DamageSpecifier(SProtoMan.Index<DamageTypePrototype>(ShockProto), 30);
             Assert.That(SEntMan.System<WoundDamageRoutingSystem>()
                 .TryApplyPartDamage(body, torso, shock, ignoreResistances: true), Is.True);
             Assert.That(SEntMan.GetComponent<DamageableComponent>(body).Damage.DamageDict.GetValueOrDefault("Cellular"),

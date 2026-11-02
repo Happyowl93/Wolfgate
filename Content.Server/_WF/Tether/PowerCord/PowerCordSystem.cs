@@ -19,7 +19,7 @@ namespace Content.Server._WF.Tether.PowerCord;
 /// tile and runs the ordinary rope flow from it; two clamped ends merge the hulls' power nets
 /// until the cord is untied, snapped or one hull leaves.
 /// </summary>
-public sealed class PowerCordSystem : EntitySystem
+public sealed partial class PowerCordSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _protos = default!;
     [Dependency] private NodeContainerSystem _nodeContainer = default!;
@@ -305,7 +305,7 @@ public sealed class PowerCordSystem : EntitySystem
         _clamps = new Dictionary<string, (EntProtoId, NodeGroupID)>();
         foreach (var proto in _protos.EnumeratePrototypes<EntityPrototype>())
         {
-            if (proto.Abstract || !proto.TryGetComponent<PowerCordClampComponent>(out var clamp, EntityManager.ComponentFactory))
+            if (proto.Abstract || !proto.TryComp<PowerCordClampComponent>(out var clamp, EntityManager.ComponentFactory))
                 continue;
 
             // The first clamp prototype for a cord type wins, so a mapper's variant cannot shadow it.

@@ -7,7 +7,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.BattleLoad;
 
 /// <summary>Tracks where explosions are thick, so spawners can hold off near a big fight. Also holds the module's settings.</summary>
-public sealed class WFBattleHeatSystem : EntitySystem
+public sealed partial class WFBattleHeatSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IGameTiming _timing = default!;

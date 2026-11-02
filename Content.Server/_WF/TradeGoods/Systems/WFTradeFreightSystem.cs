@@ -19,7 +19,7 @@ namespace Content.Server._WF.TradeGoods.Systems;
 /// and a run lost to attack writes off what its remaining stops were owed. Sealed crates pay less at lawful chutes, full
 /// price at a fence, and a bonus at their own destination.
 /// </summary>
-public sealed class WFTradeFreightSystem : EntitySystem
+public sealed partial class WFTradeFreightSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _proto = default!;
     [Dependency] private IRobustRandom _random = default!;

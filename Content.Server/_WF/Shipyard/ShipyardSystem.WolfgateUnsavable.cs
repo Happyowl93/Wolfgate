@@ -41,14 +41,14 @@ public sealed partial class ShipyardSystem
                     var name = serializer.CurrentComponent;
                     serializer = new EntitySerializer(_wfDependencies, probeOptions);
                     if (name == null || !_wfComponentFactory.TryGetRegistration(name, out var registration) ||
-                        !EntityManager.TryGetComponent(uid, registration.Type, out var bad))
+                        !TryComp(uid, registration.Type, out var bad))
                     {
                         Log.Warning($"Could not tell what stops {ToPrettyString(uid)} saving: {e.Message}");
                         break;
                     }
 
                     Log.Warning($"Copying a sold ship without {name} on {ToPrettyString(uid)}, which won't save: {e.Message}");
-                    EntityManager.RemoveComponent(uid, bad);
+                    RemComp(uid, bad);
                 }
             }
         }

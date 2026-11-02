@@ -30,7 +30,7 @@ public sealed class CMUEmergencyLightsTest : InteractionTest
         {
             foreach (var proto in ProtoMan.EnumeratePrototypes<EntityPrototype>())
             {
-                if (!proto.Abstract && proto.TryGetComponent<CMUEmergencyLightsComponent>(out _, Factory))
+                if (!proto.Abstract && proto.TryComp<CMUEmergencyLightsComponent>(out _, Factory))
                     vehicles.Add(proto.ID);
             }
 

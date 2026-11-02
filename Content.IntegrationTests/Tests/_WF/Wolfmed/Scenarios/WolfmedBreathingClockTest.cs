@@ -42,6 +42,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 [TestOf(typeof(WolfmedBreathingSystem))]
 public sealed class WolfmedBreathingClockTest : WolfmedGameTest
 {
+    private static readonly EntProtoId BloodpackProto = "Bloodpack";
+
     private const float Band = 0.2f;
 
     /// <summary>The plan's starting values for everything the clock arithmetic reads.</summary>
@@ -367,8 +369,8 @@ public sealed class WolfmedBreathingClockTest : WolfmedGameTest
             Assert.That(s.State(e), Is.EqualTo(WolfmedConsciousness.Up));
 
             // OD6 (c) input: how fast a hand medic can put blood in.
-            if (SProtoMan.Index<EntityPrototype>("Bloodpack")
-                .TryGetComponent<HealingComponent>(out var pack, SEntMan.ComponentFactory))
+            if (SProtoMan.Index(BloodpackProto)
+                .TryComp<HealingComponent>(out var pack, SEntMan.ComponentFactory))
             {
                 var perSecond = pack.ModifyBloodLevel / pack.Delay;
                 var self = pack.ModifyBloodLevel / (pack.Delay * pack.SelfHealPenaltyMultiplier);

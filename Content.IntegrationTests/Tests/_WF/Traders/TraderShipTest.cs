@@ -51,6 +51,8 @@ namespace Content.IntegrationTests.Tests._WF.Traders;
 [TestOf(typeof(UsedShipMarketSystem))]
 public sealed class TraderShipTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     private const string DealerProto = "WFTraderShipyard";
     private const string SalesmanProto = "WFTraderUsedShips";
     private const string DealerDialogue = "WFTraderShipyardDialogue";
@@ -90,7 +92,7 @@ public sealed class TraderShipTest
             var compFactory = server.ResolveDependency<IComponentFactory>();
 
             var dealer = protoMan.Index<EntityPrototype>(DealerProto);
-            Assert.That(dealer.TryGetComponent<TraderShipyardComponent>(out var shipyard, compFactory), Is.True,
+            Assert.That(dealer.TryComp<TraderShipyardComponent>(out var shipyard, compFactory), Is.True,
                 $"{DealerProto} should front shipyard listings.");
 
             var allowed = shipyard!.Consoles.Select(listing => listing.Console.Id).ToList();
@@ -114,12 +116,12 @@ public sealed class TraderShipTest
             foreach (var id in allowed)
             {
                 var console = protoMan.Index<EntityPrototype>(id);
-                Assert.That(console.TryGetComponent<ShipyardConsoleComponent>(out _, compFactory), Is.True,
+                Assert.That(console.TryComp<ShipyardConsoleComponent>(out _, compFactory), Is.True,
                     $"{id} is not a shipyard console.");
             }
 
             var salesman = protoMan.Index<EntityPrototype>(SalesmanProto);
-            Assert.That(salesman.TryGetComponent<TraderUsedShipsComponent>(out var used, compFactory), Is.True,
+            Assert.That(salesman.TryComp<TraderUsedShipsComponent>(out var used, compFactory), Is.True,
                 $"{SalesmanProto} should deal in used ships.");
             Assert.That(used!.UsedShipMarkup, Is.EqualTo(0.05f).Within(0.0001f));
             Assert.That(used.RelistDelay, Is.EqualTo(TimeSpan.FromMinutes(1)));
@@ -657,7 +659,7 @@ public sealed class TraderShipTest
             // Dent the marker so the copy has damage to keep.
             var damageSys = entMan.System<DamageableSystem>();
             entMan.EnsureComponent<DamageableComponent>(marker);
-            damageSys.TryChangeDamage(marker, new DamageSpecifier(protoMan.Index<DamageTypePrototype>("Blunt"), 7), true);
+            damageSys.TryChangeDamage(marker, new DamageSpecifier(protoMan.Index<DamageTypePrototype>(BluntProto), 7), true);
             Assert.That(entMan.GetComponent<DamageableComponent>(marker).TotalDamage, Is.EqualTo(FixedPoint2.New(7)));
 
             // A ship that was running when it was sold: force the gravity generator's receiver powered

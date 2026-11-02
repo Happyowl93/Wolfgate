@@ -384,6 +384,7 @@
       CornerClutter: NFBaseClutter
       Entrance: NFMiningAirlock
       EntranceFlank: NFMiningWindow
+      Junction: NFMiningAirlock # WOLFGATE(LiveFixes): NFPlanetBase needs this key, and its junction step was skipped with an error
       WallMounts: NFBaseWallMounts
       Window: NFMiningWindow
     tiles:

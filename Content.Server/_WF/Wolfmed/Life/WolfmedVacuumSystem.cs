@@ -16,7 +16,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 /// </summary>
 // Barotrauma's own rule, read the same way: the containing mixture's pressure through the suit's protection against
 // the low pressure hazard line. Its TakingDamage flag is not used, as it stays set once the damage cap is reached.
-public sealed class WolfmedVacuumSystem : EntitySystem
+public sealed partial class WolfmedVacuumSystem : EntitySystem
 {
     [Dependency] private AtmosphereSystem _atmosphere = default!;
     [Dependency] private BarotraumaSystem _barotrauma = default!;

@@ -9,7 +9,7 @@ using Robust.Shared.Player;
 namespace Content.Server._WF.Xenonids.Parasite.AI;
 
 /// <summary>Adds and removes the hunting HTN of an AI facehugger: off while it sits in a container (a host's face, a xeno's grip) or a player drives it, on again when it is free.</summary>
-public sealed class WFParasiteAISystem : EntitySystem
+public sealed partial class WFParasiteAISystem : EntitySystem
 {
     [Dependency] private NPCSystem _npc = default!;
     [Dependency] private MobStateSystem _mobState = default!;

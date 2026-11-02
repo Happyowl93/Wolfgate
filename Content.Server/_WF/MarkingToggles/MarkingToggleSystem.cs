@@ -13,7 +13,7 @@ namespace Content.Server._WF.MarkingToggles;
 /// Lets a player show or hide their own body's markings mid-round. Species markings use their own visible flag;
 /// custom markings are listed as hidden on the humanoid component. Neither is saved to the character.
 /// </summary>
-public sealed class MarkingToggleSystem : EntitySystem
+public sealed partial class MarkingToggleSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPlayerManager _player = default!;

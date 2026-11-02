@@ -8,5 +8,5 @@ public sealed partial class StatusEffectsSystem
     [Dependency] private IPrototypeManager _protoMan = default!;
 
     /// <summary>Upstream's EntitySystem.ProtoMan, under the name the vendored files call.</summary>
-    private IPrototypeManager ProtoMan => _protoMan;
+    private new IPrototypeManager ProtoMan => _protoMan;
 }

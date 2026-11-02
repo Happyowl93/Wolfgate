@@ -1,6 +1,7 @@
 using Content.Shared._WF.RMCCore.Aura;
 using Content.Shared._WF.RMCCore.Stealth;
 using Robust.Client.GameObjects;
+using Content.Client._WF.RMCCore.Stealth;
 using Robust.Client.Graphics;
 using Robust.Shared.Prototypes;
 
@@ -8,6 +9,9 @@ namespace Content.Client._WF.RMCCore.Aura;
 
 public sealed partial class AuraSystem : SharedAuraSystem
 {
+    private static readonly ProtoId<ShaderPrototype> RMCAuraOutlineProto = "RMCAuraOutline";
+
+    [Dependency] private SpriteSystem _sprite = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     public override void Initialize()
     {
@@ -22,7 +26,11 @@ public sealed partial class AuraSystem : SharedAuraSystem
         if (!TryComp(ent, out SpriteComponent? sprite))
             return;
 
-        sprite.PostShader = _prototypes.Index<ShaderPrototype>("RMCAuraOutline").InstanceUnique();
+        _sprite.SetPostShader((ent, sprite), new SpriteComponent.PostShaderArgs
+        {
+            Id = EntityInvisibilityVisualsSystem.PostShaderId,
+            Shader = _prototypes.Index<ShaderPrototype>(RMCAuraOutlineProto).InstanceUnique(),
+        });
     }
 
     private void OnShutdown(Entity<AuraComponent> ent, ref ComponentShutdown args)
@@ -36,7 +44,7 @@ public sealed partial class AuraSystem : SharedAuraSystem
         if (!TryComp(ent, out SpriteComponent? sprite))
             return;
 
-        sprite.PostShader = null;
+        _sprite.RemovePostShader((ent, sprite), EntityInvisibilityVisualsSystem.PostShaderId);
     }
 
     public override void Update(float frameTime)
@@ -47,8 +55,11 @@ public sealed partial class AuraSystem : SharedAuraSystem
 
         while (auraQuery.MoveNext(out var uid, out var aura, out var sprite))
         {
-            sprite.PostShader?.SetParameter("outline_color", aura.Color);
-            sprite.PostShader?.SetParameter("outline_width", aura.OutlineWidth);
+            if (!_sprite.TryGetPostShader(sprite, EntityInvisibilityVisualsSystem.PostShaderId, out var shader))
+                continue;
+
+            shader.Shader.SetParameter("outline_color", aura.Color);
+            shader.Shader.SetParameter("outline_width", aura.OutlineWidth);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Content.Server._WF.Wolfmed.Medical;
 /// body's own fluid and repeats until the body is full or the pack is empty. A pack holding anything the body does not
 /// run on is refused whole: oil in an IPC is a foreign reagent, not hydraulic fluid.
 /// </summary>
-public sealed class WolfmedFluidPackSystem : EntitySystem
+public sealed partial class WolfmedFluidPackSystem : EntitySystem
 {
     [Dependency] private BloodstreamSystem _bloodstream = default!;
     [Dependency] private SharedAudioSystem _audio = default!;

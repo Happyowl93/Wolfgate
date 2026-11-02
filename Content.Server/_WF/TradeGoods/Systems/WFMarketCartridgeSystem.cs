@@ -30,7 +30,7 @@ public sealed partial class WFMarketCartridgeComponent : Component;
 /// Pushes the Market app's state to every open copy every few seconds and when one opens. UI state reaches every client
 /// near the PDA, so a holder who sees the hidden markets gets a public copy there and the full one sent to the viewers.
 /// </summary>
-public sealed class WFMarketCartridgeSystem : EntitySystem
+public sealed partial class WFMarketCartridgeSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _proto = default!;

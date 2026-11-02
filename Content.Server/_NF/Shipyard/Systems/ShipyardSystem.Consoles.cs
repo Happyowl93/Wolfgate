@@ -375,7 +375,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
         if (!voucherUsed)
         {
-            if (!string.IsNullOrEmpty(component.NewJobTitle))
+            if (!string.IsNullOrEmpty(component.NewJobTitle) && !EntityManager.System<Content.Server._WF.Roles.CustomJobTitleSystem>().HasCustomTitle(player)) // WOLFGATE(Roles): a company rank or custom title stays on the ID
                 _idSystem.TryChangeJobTitle(targetId, component.NewJobTitle, idCard, player);
         }
 

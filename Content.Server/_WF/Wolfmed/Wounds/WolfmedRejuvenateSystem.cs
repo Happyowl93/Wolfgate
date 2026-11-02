@@ -19,7 +19,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// Answers <see cref="WolfmedRejuvenateEvent"/>, the broadcast the two Onyx rejuvenate handlers raise,
 /// because both <c>RejuvenateEvent</c> pairs on a body and a part are already owned.
 /// </remarks>
-public sealed class WolfmedRejuvenateSystem : EntitySystem
+public sealed partial class WolfmedRejuvenateSystem : EntitySystem
 {
     [Dependency] private SharedBodySystem _body = default!;
     [Dependency] private OrganHealthSystem _organs = default!;

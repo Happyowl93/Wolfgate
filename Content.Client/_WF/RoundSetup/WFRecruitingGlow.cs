@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Numerics;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
@@ -7,7 +6,7 @@ using Robust.Shared.Timing;
 namespace Content.Client._WF.RoundSetup;
 
 /// <summary>A slow pulsing border drawn over a crew entry that is recruiting.</summary>
-public sealed class WFRecruitingGlow : Control
+public sealed partial class WFRecruitingGlow : Control
 {
     /// <summary>The recruiting accent, shared with the posting card and chat line.</summary>
     public static readonly Color Accent = Color.FromHex("#7FD3C4");
@@ -23,10 +22,6 @@ public sealed class WFRecruitingGlow : Control
         HorizontalExpand = true;
         VerticalExpand = true;
     }
-
-    /// <summary>Whether the latest crew snapshot lists this station's crew as recruiting.</summary>
-    public static bool IsRecruitingStation(NetEntity station) =>
-        IoCManager.Resolve<IEntityManager>().System<WFRoundSetupClientSystem>().State?.RecruitingStations.Contains(station) == true;
 
     protected override void Draw(DrawingHandleScreen handle)
     {

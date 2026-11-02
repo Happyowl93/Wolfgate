@@ -10,7 +10,7 @@ namespace Content.Server._WF.NpcCrew.Systems;
 /// What NPC crews can't see: a mob with its stealth field up (a stealth suit) and a ship with its IFF hidden (a
 /// cloak). Either is seen again for a while after a hostile act: hurting, robbing or shooting, or firing on a ship.
 /// </summary>
-public sealed class WFCrewStealthSystem : EntitySystem
+public sealed partial class WFCrewStealthSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
 

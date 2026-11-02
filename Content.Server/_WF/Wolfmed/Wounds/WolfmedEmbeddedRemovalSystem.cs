@@ -24,7 +24,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// Runs last in the interaction chain (AfterInteractUsingEvent) so it never steals a surgery, a butcher or
 /// a topical; the target part comes from the user's own Shitmed part selection, like the tourniquet.
 /// </remarks>
-public sealed class WolfmedEmbeddedRemovalSystem : EntitySystem
+public sealed partial class WolfmedEmbeddedRemovalSystem : EntitySystem
 {
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;

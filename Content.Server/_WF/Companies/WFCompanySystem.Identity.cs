@@ -72,7 +72,7 @@ public sealed partial class WFCompanySystem
 
     /// <summary>The slot of a character being spawned. Buying a paid loadout replaces the stored profile mid-spawn, so the
     /// spawned copy may no longer be in the preferences; spawns always use the selected character.</summary>
-    private static int? SpawnedSlot(PlayerPreferences prefs, HumanoidCharacterProfile profile)
+    public static int? SpawnedSlot(PlayerPreferences prefs, HumanoidCharacterProfile profile)
     {
         if (prefs.IndexOfCharacter(profile) is >= 0 and var slot)
             return slot;

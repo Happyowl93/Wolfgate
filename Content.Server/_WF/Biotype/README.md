@@ -103,6 +103,7 @@ markings) stays keyed on the species.
 - [`Content.Shared/Preferences/HumanoidCharacterProfile.cs`](../../../Content.Shared/Preferences/HumanoidCharacterProfile.cs)
   - Default and unknown values become the species' own
   - a trait the effective biotype can't take is dropped
+- [`Resources/Prototypes/_DV/Loadouts/Miscellaneous/survival.yml`](../../../Resources/Prototypes/_DV/Loadouts/Miscellaneous/survival.yml): the box is for flesh bodies, whatever the species
 - [`Resources/Prototypes/_EinsteinEngines/Species/ipc.yml`](../../../Resources/Prototypes/_EinsteinEngines/Species/ipc.yml): a machine by default
 - [`Resources/Prototypes/_HL/Entities/Mobs/Species/synth.yml`](../../../Resources/Prototypes/_HL/Entities/Mobs/Species/synth.yml)
   - a synthetic needs neither food nor drink, as every Synthetic biotype body

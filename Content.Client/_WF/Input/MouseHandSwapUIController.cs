@@ -9,7 +9,7 @@ namespace Content.Client._WF.Input;
 /// <summary>
 /// Lets a mouse button bound to swap hands work with the cursor over the HUD, as a key does.
 /// </summary>
-public sealed class MouseHandSwapUIController : UIController
+public sealed partial class MouseHandSwapUIController : UIController
 {
     [Dependency] private IInputManager _input = default!;
 

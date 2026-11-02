@@ -64,11 +64,13 @@ public sealed class WFRolledSleevesTest : InteractionTest
         await RunTicks(5);
         await Client.WaitAssertion(() =>
         {
-            var sprite = CEntMan.GetComponent<SpriteComponent>(ToClient(target));
+            var spriteUid = ToClient(target);
+            var sprites = CEntMan.System<SpriteSystem>();
+            var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
             var slots = CEntMan.GetComponent<InventorySlotsComponent>(ToClient(target));
             var drawn = slots.VisualLayerKeys["jumpsuit"]
-                .Where(k => sprite.LayerMapTryGet(k, out _))
-                .Select(k => ((SpriteComponent.Layer) sprite[sprite.LayerMapGet(k)]).ActualRsi?.Path.ToString())
+                .Where(k => sprites.LayerMapTryGet((spriteUid, sprite), k, out _, false))
+                .Select(k => ((SpriteComponent.Layer) sprite[sprites.LayerMapGet((spriteUid, sprite), k)]).ActualRsi?.Path.ToString())
                 .Any(p => p != null && p.StartsWith("/Textures/_WF/RolledSleeves/Meridian/"));
             Assert.That(drawn, Is.True, "The rolled-down suit didn't use its drawn Meridian sprite.");
         });
@@ -140,13 +142,15 @@ public sealed class WFRolledSleevesTest : InteractionTest
             await RunTicks(5);
             await Client.WaitAssertion(() =>
             {
-                var sprite = CEntMan.GetComponent<SpriteComponent>(ToClient(target));
+                var spriteUid = ToClient(target);
+                var sprites = CEntMan.System<SpriteSystem>();
+                var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
                 var keys = CEntMan.GetComponent<InventorySlotsComponent>(ToClient(target)).VisualLayerKeys["jumpsuit"];
                 if (keys.Any(k => k.EndsWith(MaskSuffix)))
                     return;
 
-                var states = keys.Where(k => sprite.LayerMapTryGet(k, out _))
-                    .Select(k => (SpriteComponent.Layer) sprite[sprite.LayerMapGet(k)])
+                var states = keys.Where(k => sprites.LayerMapTryGet((spriteUid, sprite), k, out _, false))
+                    .Select(k => (SpriteComponent.Layer) sprite[sprites.LayerMapGet((spriteUid, sprite), k)])
                     .Select(l => $"{l.ActualRsi?.Path}:{l.State.Name}");
                 failures.Add($"{proto.ID}: no mask ({string.Join(", ", states)})");
             });
@@ -159,7 +163,9 @@ public sealed class WFRolledSleevesTest : InteractionTest
     {
         await Client.WaitAssertion(() =>
         {
-            var sprite = CEntMan.GetComponent<SpriteComponent>(ToClient(target));
+            var spriteUid = ToClient(target);
+            var sprites = CEntMan.System<SpriteSystem>();
+            var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
             var slots = CEntMan.GetComponent<InventorySlotsComponent>(ToClient(target));
             var maskKeys = slots.VisualLayerKeys["jumpsuit"].Where(k => k.EndsWith(MaskSuffix)).ToList();
             if (maskState == null)
@@ -172,8 +178,8 @@ public sealed class WFRolledSleevesTest : InteractionTest
             foreach (var maskKey in maskKeys)
             {
                 var suitKey = maskKey[..^MaskSuffix.Length];
-                Assert.That(sprite.LayerMapTryGet(suitKey, out var suitIndex), Is.True);
-                Assert.That(sprite.LayerMapTryGet(maskKey, out var maskIndex), Is.True);
+                Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), suitKey, out var suitIndex, false), Is.True);
+                Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), maskKey, out var maskIndex, false), Is.True);
                 Assert.That(maskIndex, Is.LessThan(suitIndex), "The mask layer must come before the suit layer.");
                 Assert.That(((SpriteComponent.Layer) sprite[maskIndex]).State.Name, Is.EqualTo(maskState));
 

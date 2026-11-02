@@ -50,7 +50,10 @@ public abstract partial class SharedMouseRotatorSystem : EntitySystem
         if (args.SenderSession.AttachedEntity is not { } ent
             || !TryComp<MouseRotatorComponent>(ent, out var rotator))
         {
-            Log.Error($"User {args.SenderSession.Name} ({args.SenderSession.UserId}) tried setting local rotation directly without a valid mouse rotator component attached!");
+            // WOLFGATE(LiveFixes) START: a request sent just before the player changed bodies arrives late, which isn't an error
+            // Log.Error($"User {args.SenderSession.Name} ({args.SenderSession.UserId}) tried setting local rotation directly without a valid mouse rotator component attached!");
+            Log.Debug($"User {args.SenderSession.Name} ({args.SenderSession.UserId}) tried setting local rotation directly without a valid mouse rotator component attached!");
+            // WOLFGATE END
             return;
         }
 

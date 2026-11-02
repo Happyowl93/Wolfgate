@@ -44,7 +44,7 @@ public sealed class GenitalOrganSlotTest
 
             foreach (var entity in proto.EnumeratePrototypes<EntityPrototype>())
             {
-                if (entity.TryGetComponent<BodyPartComponent>(out var part, factory))
+                if (entity.TryComp<BodyPartComponent>(out var part, factory))
                 {
                     foreach (var organSlot in part.Organs.Keys)
                     {
@@ -53,8 +53,8 @@ public sealed class GenitalOrganSlotTest
                 }
 
                 // The genital organs fill the genital slots by design.
-                if (entity.TryGetComponent<OrganComponent>(out var organ, factory)
-                    && !entity.TryGetComponent<GenitalOrganComponent>(out _, factory))
+                if (entity.TryComp<OrganComponent>(out var organ, factory)
+                    && !entity.TryComp<GenitalOrganComponent>(out _, factory))
                     others.Add((organ.SlotId, $"organ {entity.ID}"));
             }
 
@@ -108,9 +108,9 @@ public sealed class GenitalOrganSlotTest
                         continue;
 
                     Assert.That(entity.Name, Is.EqualTo("organ tissue"), $"{id} name");
-                    Assert.That(entity.TryGetComponent<OrganComponent>(out var organ, factory), $"{id} has no Organ.");
+                    Assert.That(entity.TryComp<OrganComponent>(out var organ, factory), $"{id} has no Organ.");
                     Assert.That(organ?.SlotId, Is.EqualTo(GenitalOrganSystem.SlotId(slot)), $"{id} slotId");
-                    Assert.That(entity.TryGetComponent<GenitalOrganComponent>(out var genital, factory), $"{id} has no GenitalOrgan.");
+                    Assert.That(entity.TryComp<GenitalOrganComponent>(out var genital, factory), $"{id} has no GenitalOrgan.");
                     Assert.That(genital?.Slot, Is.EqualTo(slot), $"{id} slot");
                     Assert.That(HasMarker(entity, slot, factory), $"{id} lacks its slot marker.");
                 }
@@ -125,11 +125,11 @@ public sealed class GenitalOrganSlotTest
     {
         return slot switch
         {
-            GenitalSlot.Penis => entity.TryGetComponent<PenisOrganComponent>(out _, factory),
-            GenitalSlot.Testicles => entity.TryGetComponent<TesticlesOrganComponent>(out _, factory),
-            GenitalSlot.Vagina => entity.TryGetComponent<VaginaOrganComponent>(out _, factory),
-            GenitalSlot.Womb => entity.TryGetComponent<WombOrganComponent>(out _, factory),
-            GenitalSlot.Breasts => entity.TryGetComponent<BreastsOrganComponent>(out _, factory),
+            GenitalSlot.Penis => entity.TryComp<PenisOrganComponent>(out _, factory),
+            GenitalSlot.Testicles => entity.TryComp<TesticlesOrganComponent>(out _, factory),
+            GenitalSlot.Vagina => entity.TryComp<VaginaOrganComponent>(out _, factory),
+            GenitalSlot.Womb => entity.TryComp<WombOrganComponent>(out _, factory),
+            GenitalSlot.Breasts => entity.TryComp<BreastsOrganComponent>(out _, factory),
             _ => false,
         };
     }

@@ -83,7 +83,8 @@ public sealed partial class StoreComponent : Component
     /// <summary>
     ///     The map the store was originally from, used to block refunds if the map is changed
     /// </summary>
-    [DataField]
+    // [DataField] // WOLFGATE(LiveFixes): not saved; a ship copy can't reference the map it left, and a loaded copy has no refund map
+    [ViewVariables]
     public EntityUid? StartingMap;
 
     #region audio

@@ -1,3 +1,4 @@
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using System.Numerics;
 using Content.Server._WF.Xenobiology;
@@ -27,14 +28,17 @@ namespace Content.IntegrationTests.Tests._WF.Xenobiology;
 [TestFixture]
 public sealed class XenobiologyTest
 {
+    private static readonly ProtoId<Content.Shared.VendingMachines.VendingMachineInventoryPrototype> WFWolfgateVendInventoryProto = "WFWolfgateVendInventory";
+    private static readonly ProtoId<XenobiologyBountyPrototype> BountyExtractAnyThreeProto = "BountyExtractAnyThree";
+
     private const string GreyPending = "MobSlimeXenobioBabyGrey";
 
     private static EntityUid SpawnGrey(IEntityManager entities, Robust.Shared.Map.EntityCoordinates coords)
     {
-        var before = entities.EntityQuery<SlimeComponent>().Select(s => s.Owner).ToHashSet();
+        var before = entities.EntityQuery<SlimeComponent>().Select(s => s.Uid()).ToHashSet();
         var marker = entities.SpawnEntity(GreyPending, coords);
         entities.System<XenobiologySystem>().SpawnPending((marker, entities.GetComponent<PendingSlimeSpawnComponent>(marker)));
-        return entities.EntityQuery<SlimeComponent>().Select(s => s.Owner).Single(uid => !before.Contains(uid));
+        return entities.EntityQuery<SlimeComponent>().Select(s => s.Uid()).Single(uid => !before.Contains(uid));
     }
 
     /// <summary>A latched slime sucked into a xenovac tank stays in the tank, not stuck unreachable on the tile.</summary>
@@ -107,15 +111,15 @@ public sealed class XenobiologyTest
             var mutations = comp.PotentialMutations.ToHashSet();
             entities.System<XenobiologySystem>().DoMitosis((slime, comp));
 
-            var children = entities.EntityQuery<SlimeComponent>().Where(s => s.Owner != slime).ToList();
+            var children = entities.EntityQuery<SlimeComponent>().Where(s => s.Uid() != slime).ToList();
             Assert.That(children, Is.Not.Empty);
             Assert.That(children.Select(c => c.Breed), Is.All.Matches<ProtoId<Content.Shared._WF.Xenobiology.BreedPrototype>>(b => mutations.Contains(b)),
                 "At full mutation chance every child is one of the parent's mutations.");
 
             foreach (var child in children)
             {
-                Assert.That(protos.Index(child.Breed).BreedName, Is.EqualTo(entities.GetComponent<MobGrowthComponent>(child.Owner).BaseEntityName));
-                entities.DeleteEntity(child.Owner);
+                Assert.That(protos.Index(child.Breed).BreedName, Is.EqualTo(entities.GetComponent<MobGrowthComponent>(child.Uid()).BaseEntityName));
+                entities.DeleteEntity(child.Uid());
             }
         });
 
@@ -201,7 +205,7 @@ public sealed class XenobiologyTest
         await server.WaitAssertion(() =>
         {
             var extracts = entities.EntityQuery<SlimeExtractComponent>()
-                .Count(e => entities.GetComponent<MetaDataComponent>(e.Owner).EntityPrototype?.ID == "GreySlimeExtract");
+                .Count(e => entities.GetComponent<MetaDataComponent>(e.Uid()).EntityPrototype?.ID == "GreySlimeExtract");
             Assert.That(extracts, Is.EqualTo(produced), "The grinder makes the slime's extract count of its breed's extract.");
         });
 
@@ -284,7 +288,7 @@ public sealed class XenobiologyTest
 
         await server.WaitAssertion(() =>
         {
-            var stock = protos.Index<Content.Shared.VendingMachines.VendingMachineInventoryPrototype>("WFWolfgateVendInventory");
+            var stock = protos.Index<Content.Shared.VendingMachines.VendingMachineInventoryPrototype>(WFWolfgateVendInventoryProto);
             Assert.That(stock.StartingInventory.ContainsKey("MobSlimeXenobioBabyGrey"), Is.True);
 
             // A vendor spawns the stocked prototype next to itself; that has to leave a live grey slime.
@@ -309,7 +313,7 @@ public sealed class XenobiologyTest
         await server.WaitAssertion(() =>
         {
             var containers = entities.System<Robust.Shared.Containers.SharedContainerSystem>();
-            var slimes = entities.EntityQuery<SlimeComponent>().Select(s => s.Owner).ToList();
+            var slimes = entities.EntityQuery<SlimeComponent>().Select(s => s.Uid()).ToList();
             Assert.That(slimes, Has.Count.EqualTo(2));
             Assert.That(slimes.All(s => containers.TryGetContainingContainer((s, null), out var c) && c.Owner == crate), Is.True,
                 "The starter slimes stay in the crate until it is opened.");
@@ -340,7 +344,7 @@ public sealed class XenobiologyTest
                 storage.Insert(bag, entities.SpawnEntity("GreySlimeExtract", map.GridCoords), out _, playSound: false);
             }
 
-            var any = protos.Index<XenobiologyBountyPrototype>("BountyExtractAnyThree");
+            var any = protos.Index<XenobiologyBountyPrototype>(BountyExtractAnyThreeProto);
             var system = entities.System<XenobiologyBountyConsoleSystem>();
             Assert.That(system.IsBountyComplete(bag, any.Entries, out var handedIn), Is.True);
             Assert.That(handedIn, Has.Count.EqualTo(3));

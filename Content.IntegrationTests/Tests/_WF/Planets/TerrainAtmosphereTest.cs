@@ -26,6 +26,8 @@ namespace Content.IntegrationTests.Tests._WF.Planets;
 [TestOf(typeof(WFTerrainAtmosphereSystem))]
 public sealed class TerrainAtmosphereTest
 {
+    private static readonly ProtoId<WFPlanetSurfacePrototype> WFSurfaceThrasciasProto = "WFSurfaceThrascias";
+
     /// <summary>Ground the Asclepiu biome lays.</summary>
     private const string Grass = "FloorPlanetGrass";
 
@@ -216,7 +218,7 @@ public sealed class TerrainAtmosphereTest
 
         await server.WaitPost(() =>
         {
-            var surface = server.ResolveDependency<IPrototypeManager>().Index<WFPlanetSurfacePrototype>("WFSurfaceThrascias");
+            var surface = server.ResolveDependency<IPrototypeManager>().Index<WFPlanetSurfacePrototype>(WFSurfaceThrasciasProto);
             var network = server.System<WFPlanetNetworkSystem>().BuildNetwork(surface, Vector2.Zero, "Thrascias", null);
             ground = entMan.GetComponent<WFPlanetNetworkComponent>(network!.Value).GroundMap;
         });

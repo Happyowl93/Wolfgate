@@ -10,7 +10,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 public record struct WolfmedVomitAttemptEvent(bool Cancelled = false);
 
 /// <summary>Nothing dead vomits, and neither does a wound host in cardiac arrest.</summary>
-public sealed class WolfmedVomitGateSystem : EntitySystem
+public sealed partial class WolfmedVomitGateSystem : EntitySystem
 {
     [Dependency] private MobStateSystem _mobState = default!;
 

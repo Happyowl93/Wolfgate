@@ -18,7 +18,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.NpcCrew.Systems;
 
 /// <summary>Checks boarding and docking authorization independently of nearby players or radio operators.</summary>
-public sealed class WFCrewSecuritySystem : EntitySystem
+public sealed partial class WFCrewSecuritySystem : EntitySystem
 {
     [Dependency] private NpcFactionSystem _factions = default!;
     [Dependency] private MobStateSystem _mobs = default!;

@@ -67,6 +67,8 @@ namespace Content.Server.Database
         public DbSet<WolfgateCompanyApplication> WolfgateCompanyApplication { get; set; } = null!;
         // WOLFGATE END
 
+        public DbSet<WolfgateGameScore> WolfgateGameScore { get; set; } = null!; // WOLFGATE(GameHub): best level scores
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Preference>()
@@ -487,6 +489,15 @@ namespace Content.Server.Database
                 .HasIndex(r => r.Status);
             // WOLFGATE END
 
+            // WOLFGATE(GameHub) START: one best score per player, game and level
+            modelBuilder.Entity<WolfgateGameScore>()
+                .HasIndex(s => new { s.PlayerUserId, s.Game, s.Level })
+                .IsUnique();
+
+            modelBuilder.Entity<WolfgateGameScore>()
+                .HasIndex(s => s.Game);
+            // WOLFGATE END
+
             // WOLFGATE(Companies) START: names and tags are unique; a character's membership goes with the character
             modelBuilder.Entity<WolfgateCompany>()
                 .HasIndex(c => c.Name)
@@ -633,6 +644,11 @@ namespace Content.Server.Database
         // WOLFGATE(Biotype): organic or synthetic body, 0 for the species' own.
         [Column("biotype")] public int Biotype { get; set; }
 
+        // WOLFGATE(Augments) START: augments picked per slot (slot:augment[:style] entries) and priced ones paid for.
+        [Column("augments")] public string Augments { get; set; } = "";
+        [Column("augment_unlocks")] public string AugmentUnlocks { get; set; } = "";
+        // WOLFGATE END
+
         // WOLFGATE(BloodColour): blood and flesh colour as hex, null for the species' own.
         [Column("blood_color")] public string? BloodColor { get; set; }
 
@@ -644,6 +660,9 @@ namespace Content.Server.Database
 
         // WOLFGATE(EmoteVoices): the wfMessageSound prototype id, empty for the species' own.
         [Column("message_sound")] public string MessageSound { get; set; } = "";
+
+        // WOLFGATE(Voice): the voice settings as JSON, null in rows saved before voices existed.
+        [Column("speech_voice")] public string? SpeechVoice { get; set; }
 
         public int PreferenceId { get; set; }
         public Preference Preference { get; set; } = null!;
@@ -2054,6 +2073,31 @@ namespace Content.Server.Database
         public string Note { get; set; } = "";
     }
 
+    // WOLFGATE END
+
+    // WOLFGATE(GameHub) START: a player's best score on one level of a hub game
+    public class WolfgateGameScore
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public Guid PlayerUserId { get; set; }
+
+        [Required, MaxLength(64)]
+        public string PlayerName { get; set; } = "";
+
+        [Required, MaxLength(64)]
+        public string Game { get; set; } = "";
+
+        public int Level { get; set; }
+
+        public int Score { get; set; }
+
+        public DateTime Time { get; set; }
+    }
+    // WOLFGATE END
+
+    // WOLFGATE(Companies) START: a company's ship licences
     /// <summary>A company's permanent right to launch one copy of a ship design each round.</summary>
     public class WolfgateCompanyLicence
     {

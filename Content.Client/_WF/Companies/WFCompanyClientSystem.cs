@@ -12,7 +12,7 @@ using SixLabors.ImageSharp.PixelFormats;
 namespace Content.Client._WF.Companies;
 
 /// <summary>Receives company snapshots and logos and sends Company window requests.</summary>
-public sealed class WFCompanyClientSystem : EntitySystem
+public sealed partial class WFCompanyClientSystem : EntitySystem
 {
     [Dependency] private IClyde _clyde = default!;
     [Dependency] private IResourceManager _resources = default!;

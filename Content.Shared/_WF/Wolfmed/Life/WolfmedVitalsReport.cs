@@ -403,7 +403,7 @@ public static class WolfmedVitalsText
         foreach (var (slot, band) in report.Organs)
         {
             var key = slot.ToLowerInvariant();
-            var name = Loc.TryGetString($"wolfmed-vitals-organ-{key}", out var named) ? named : slot;
+            var name = IoCManager.Resolve<ILocalizationManager>().TryGetString($"wolfmed-vitals-organ-{key}", out var named) ? named : slot;
             items.Add(Loc.GetString($"wolfmed-vitals-organ-band-{band.ToString().ToLowerInvariant()}", ("organ", name)));
         }
     }
@@ -483,10 +483,10 @@ public static class WolfmedVitalsText
     public static string Aid(WolfmedRoutes route, bool mechanical, bool shock = false)
     {
         var key = $"wolfmed-vitals-aid-{route.ToString().ToLowerInvariant()}";
-        if (shock && Loc.TryGetString(key + "-shock", out var shocked))
+        if (shock && IoCManager.Resolve<ILocalizationManager>().TryGetString(key + "-shock", out var shocked))
             return shocked;
 
-        return mechanical && Loc.TryGetString(key + "-mechanical", out var machine) ? machine : Loc.GetString(key);
+        return mechanical && IoCManager.Resolve<ILocalizationManager>().TryGetString(key + "-mechanical", out var machine) ? machine : Loc.GetString(key);
     }
 
     /// <summary>
@@ -581,7 +581,7 @@ public static class WolfmedVitalsText
             return SourceName(source);
 
         var key = $"wolfmed-vitals-cause-{cause.ToString().ToLowerInvariant()}";
-        var name = mechanical && Loc.TryGetString(key + "-mechanical", out var machine)
+        var name = mechanical && IoCManager.Resolve<ILocalizationManager>().TryGetString(key + "-mechanical", out var machine)
             ? machine
             : Loc.GetString(key);
         return cause == WolfmedCause.Hypoxia && source != WolfmedCauseSource.None
@@ -607,7 +607,7 @@ public static class WolfmedVitalsText
                 ("kelvin", Whole(report.VerdictCore)),
                 ("line", Units(report.VerdictRewarm))),
             WolfmedDefibVerdict.Unrevivable => Loc.GetString("wolfmed-vitals-verdict-unrevivable",
-                ("reason", report.VerdictReason is { } reason && Loc.TryGetString(reason, out var text)
+                ("reason", report.VerdictReason is { } reason && IoCManager.Resolve<ILocalizationManager>().TryGetString(reason, out var text)
                     ? text
                     : report.VerdictReason ?? string.Empty)),
             _ => Loc.GetString($"wolfmed-vitals-verdict-{report.Verdict.ToString().ToLowerInvariant()}"),

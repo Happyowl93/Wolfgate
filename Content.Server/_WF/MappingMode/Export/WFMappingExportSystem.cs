@@ -24,9 +24,10 @@ namespace Content.Server._WF.MappingMode.Export;
 /// <summary>
 /// Packages a library version as one zip laid out like the repository (a ship's grid and vessel prototype, or a map's
 /// levels and its <c>gameMap</c> or <c>zMap</c>, plus a README with the issues report), or sends a version's one grid
-/// file bare, and streams it through <see cref="WFMappingDownloadSystem"/>. Also moves a mapper to an issue's place.
+/// file bare, and streams it through <see cref="WFMappingDownloadSystem"/>. Every kind runs the map lint for that kind
+/// on the saved files and is refused when it fails. Also moves a mapper to an issue's place.
 /// </summary>
-public sealed class WFMappingExportSystem : EntitySystem
+public sealed partial class WFMappingExportSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private IGameTiming _timing = default!;
@@ -45,6 +46,9 @@ public sealed class WFMappingExportSystem : EntitySystem
     private readonly WFMappingThrottle<NetUserId> _exportThrottle = new(1 / 5.0, 1);
 
     private readonly WFMappingThrottle<NetUserId> _goToThrottle = new(2, 4);
+
+    /// <summary>Most prototypes one lint refusal names.</summary>
+    private const int MaxLintNames = 5;
 
     public override void Initialize()
     {
@@ -147,7 +151,32 @@ public sealed class WFMappingExportSystem : EntitySystem
         }
     }
 
-    /// <summary>The version's one grid file as saved, under the same one-grid rule as a ship; no check runs.</summary>
+    /// <summary>Whether the saved files pass the map lint for a kind; tells the player what fails when not.</summary>
+    private bool PassesLint(ICommonSession player, WFMappingExportKind kind, IEnumerable<byte[]> files)
+    {
+        var failed = new SortedSet<string>(StringComparer.Ordinal);
+        foreach (var file in files)
+        {
+            foreach (var id in WFMappingMapLint.ProtoIds(file))
+            {
+                // An unknown id may be a migrated one; the map loader says what it makes of those.
+                if (_prototypes.TryIndex<EntityPrototype>(id, out var proto) &&
+                    WFMappingMapLint.IsIllegal(proto, kind == WFMappingExportKind.Grid))
+                {
+                    failed.Add(id);
+                }
+            }
+        }
+
+        if (failed.Count == 0)
+            return true;
+
+        _mapping.Notify(player, false, "wf-mapping-export-lint", ("count", failed.Count),
+            ("names", string.Join(", ", failed.Take(MaxLintNames))));
+        return false;
+    }
+
+    /// <summary>The version's one grid file as saved, under the same one-grid rule as a ship; only the map lint runs.</summary>
     private byte[]? TryReadGrid(ICommonSession player, WFMappingLibrarySystem.LibraryMap map,
         WFMappingLibrarySystem.LibraryVersion version)
     {
@@ -162,9 +191,10 @@ public sealed class WFMappingExportSystem : EntitySystem
         {
             _mapping.Notify(player, false, "wf-mapping-mode-download-too-large",
                 ("max", WFMappingDownloadAssembler.MaxFileBytes / (1024 * 1024)));
+            return null;
         }
 
-        return data;
+        return PassesLint(player, WFMappingExportKind.Grid, new[] { data }) ? data : null;
     }
 
     private byte[]? TryBuildShip(ICommonSession player, WFMappingLibrarySystem.LibraryMap map,
@@ -204,6 +234,9 @@ public sealed class WFMappingExportSystem : EntitySystem
             return null;
         }
 
+        if (!PassesLint(player, WFMappingExportKind.Ship, new[] { gridData }))
+            return null;
+
         var gridEntry = WFMappingExportPackage.ShipGridEntry(fields.FileName);
         var protoEntry = WFMappingExportPackage.PrototypeEntry(fields.FileName);
         var files = new List<string>
@@ -213,7 +246,7 @@ public sealed class WFMappingExportSystem : EntitySystem
             Loc.GetString("wf-mapping-export-readme-file-readme"),
         };
 
-        var checks = new List<string>();
+        var checks = new List<string> { Loc.GetString("wf-mapping-export-readme-check-lint") };
         if (fields.Guessed.Count > 0)
             checks.Add(Loc.GetString("wf-mapping-export-readme-check-guessed", ("fields", string.Join(", ", fields.Guessed))));
 
@@ -260,6 +293,9 @@ public sealed class WFMappingExportSystem : EntitySystem
             files.Add(Loc.GetString("wf-mapping-export-readme-file-level", ("path", entry), ("depth", depth)));
         }
 
+        if (!PassesLint(player, WFMappingExportKind.Map, entries.Select(entry => entry.Data)))
+            return null;
+
         var protoEntry = WFMappingExportPackage.PrototypeEntry(fileName);
         var id = WFMappingVesselYaml.VesselId(map.Name);
         files.Add(Loc.GetString(single ? "wf-mapping-export-readme-file-gamemap" : "wf-mapping-export-readme-file-zmap",
@@ -275,6 +311,7 @@ public sealed class WFMappingExportSystem : EntitySystem
 
         var checks = new List<string>
         {
+            Loc.GetString("wf-mapping-export-readme-check-lint"),
             Loc.GetString(single ? "wf-mapping-export-readme-check-station" : "wf-mapping-export-readme-check-zmap",
                 ("ground", depths.IndexOf(0))),
         };

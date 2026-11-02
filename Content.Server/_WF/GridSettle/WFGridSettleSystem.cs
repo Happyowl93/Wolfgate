@@ -16,7 +16,7 @@ namespace Content.Server._WF.GridSettle;
 /// Brings idle grids to rest. The engine sends every grid to every client, so a drifting wreck costs every player
 /// bandwidth each tick until it sleeps.
 /// </summary>
-public sealed class WFGridSettleSystem : EntitySystem
+public sealed partial class WFGridSettleSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedPhysicsSystem _physics = default!;

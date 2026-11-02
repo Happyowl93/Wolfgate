@@ -19,7 +19,7 @@ namespace Content.IntegrationTests.Tests._WF.Vehicles;
 /// on the physics component, which every vehicle has, so it can never clash with a real system's subscription.
 /// </summary>
 [Reflect(false)]
-public sealed class VehicleEventProbeSystem : EntitySystem
+public sealed partial class VehicleEventProbeSystem : EntitySystem
 {
     public readonly List<(EntityUid Vehicle, VehicleCollisionEvent Event)> Collisions = new();
     public readonly List<(EntityUid Vehicle, VehicleOpenTileAttemptEvent Event)> OpenTileAttempts = new();

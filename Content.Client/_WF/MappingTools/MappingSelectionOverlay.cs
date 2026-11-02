@@ -13,7 +13,7 @@ namespace Content.Client._WF.MappingTools;
 /// <summary>
 /// Draws the Select tool's selection, box, drag preview and paste preview.
 /// </summary>
-public sealed class MappingSelectionOverlay : Overlay
+public sealed partial class MappingSelectionOverlay : Overlay
 {
     [Dependency] private IEntityManager _entities = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;

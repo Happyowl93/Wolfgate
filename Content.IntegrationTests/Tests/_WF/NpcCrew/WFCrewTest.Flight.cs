@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Numerics;
 using System.Reflection;
 using Robust.Client.UserInterface.Controls;
@@ -168,7 +169,7 @@ public sealed partial class WFCrewTest
                 { Action = WFCrewSetupAction.List, Grids = new() { destination, source }, Crews = new() { crew } } });
             Assert.That(target.SelectedId, Is.EqualTo(0), "Selection survives a reordered grid refresh.");
             window.Close();
-            window.Dispose();
+            window.Teardown();
         });
         await RunTicks(5);
     }

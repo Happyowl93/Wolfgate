@@ -157,7 +157,6 @@ public sealed partial class ResinWhispererSystem : EntitySystem
             if (_examineSystem.InRangeUnOccluded(ent, pointCoordinates, ent.Comp.MaxRemoteConstructDistance))
             {
                 return true;
-                break;
             }
         }
 

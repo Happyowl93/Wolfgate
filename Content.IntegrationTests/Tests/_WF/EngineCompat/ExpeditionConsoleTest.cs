@@ -20,6 +20,8 @@ namespace Content.IntegrationTests.Tests._WF.EngineCompat;
 /// <summary>An expedition shuttle's console shows the station's offers to the player who opens it.</summary>
 public sealed class ExpeditionConsoleTest : InteractionTest
 {
+    private static ProtoId<GameMapPrototype> JudiciaryProto => "Judiciary";
+
     [Test]
     public async Task ConsoleListsOffers()
     {
@@ -28,7 +30,7 @@ public sealed class ExpeditionConsoleTest : InteractionTest
 
         await Server.WaitPost(() =>
         {
-            var gameMap = Server.ResolveDependency<IPrototypeManager>().Index<GameMapPrototype>("Judiciary");
+            var gameMap = Server.ResolveDependency<IPrototypeManager>().Index<GameMapPrototype>(JudiciaryProto);
             Assert.That(SEntMan.System<MapLoaderSystem>().TryLoadGrid(MapId, gameMap.MapPath, out var grid, offset: new Vector2(500f, 500f)));
             station = SEntMan.System<StationSystem>().InitializeNewStation(gameMap.Stations["Judiciary"], [grid!.Value.Owner]);
 

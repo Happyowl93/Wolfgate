@@ -1,6 +1,7 @@
 #nullable enable
 using System.Linq;
 using Content.Server._WF.Clown;
+using Content.Server.Atmos.Components;
 using Content.Server.Station.Systems;
 using Content.Shared._WF.ChatFont;
 using Content.Shared._WF.Clown;
@@ -24,6 +25,9 @@ namespace Content.IntegrationTests.Tests._WF.Traits;
 [TestOf(typeof(JugglingSystem))]
 public sealed class ClownMimeTraitTest
 {
+    private static readonly ProtoId<TraitPrototype> ClownProto = "Clown";
+    private static readonly ProtoId<TraitPrototype> MimeProto = "Mime";
+
     private const string Item = "WFTestJuggleItem";
     private const string TwoHanded = "WFTestJuggleTwoHanded";
     private const string Iceberg = "WFChatFontIceberg";
@@ -45,7 +49,9 @@ public sealed class ClownMimeTraitTest
     private static EntityUid SpawnClown(IEntityManager entMan, IPrototypeManager proto, EntityCoordinates coords)
     {
         var mob = entMan.SpawnEntity("MobHuman", coords);
-        entMan.AddComponents(mob, proto.Index<TraitPrototype>("Clown").Components, false);
+        // The test map is a vacuum, and any damage ends juggling.
+        entMan.RemoveComponent<BarotraumaComponent>(mob);
+        entMan.AddComponents(mob, proto.Index<TraitPrototype>(ClownProto).Components, false);
         return mob;
     }
 
@@ -135,7 +141,7 @@ public sealed class ClownMimeTraitTest
             var clown = entMan.System<StationSpawningSystem>()
                 .SpawnPlayerMob(map.GridCoords, job: null, profile.WithChatFont(Iceberg), station: null);
 
-            entMan.AddComponents(clown, server.ProtoMan.Index<TraitPrototype>("Clown").Components, false);
+            entMan.AddComponents(clown, server.ProtoMan.Index<TraitPrototype>(ClownProto).Components, false);
             Assert.That(entMan.GetComponent<WFChatFontComponent>(clown).Font, Is.EqualTo(ClownFont));
 
             entMan.System<SharedHumanoidAppearanceSystem>().LoadProfile(clown, profile);
@@ -159,7 +165,7 @@ public sealed class ClownMimeTraitTest
         await server.WaitAssertion(() =>
         {
             var mime = entMan.SpawnEntity("MobHuman", map.GridCoords);
-            entMan.AddComponents(mime, server.ProtoMan.Index<TraitPrototype>("Mime").Components, false);
+            entMan.AddComponents(mime, server.ProtoMan.Index<TraitPrototype>(MimeProto).Components, false);
 
             Assert.That(entMan.GetComponent<MimeAbilitiesComponent>(mime).Granted, Has.Count.EqualTo(2));
             entMan.DeleteEntity(mime);

@@ -9,7 +9,7 @@ namespace Content.Server._WF.CorpseRadar;
 /// <summary>
 /// Shows a player's body on ship radar once it has been dead for <see cref="Delay"/>, until it is revived or destroyed.
 /// </summary>
-public sealed class WFCorpseRadarSystem : EntitySystem
+public sealed partial class WFCorpseRadarSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedMindSystem _minds = default!;

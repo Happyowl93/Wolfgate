@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using System.Threading.Tasks;
 using Content.Server.Atmos.EntitySystems;
@@ -55,20 +56,20 @@ public sealed class WolfmedRangeMapTest
         {
             var xforms = entMan.GetEntityQuery<TransformComponent>();
             var species = entMan.EntityQuery<HumanoidAppearanceComponent>(true)
-                .Count(h => xforms.GetComponent(h.Owner).MapUid == map);
+                .Count(h => xforms.GetComponent(h.Uid()).MapUid == map);
             Assert.That(species, Is.EqualTo(expected),
                 "the range does not carry one mob per playable species; rerun WolfmedRangeMapGenerator and commit the map.");
 
             var pods = entMan.EntityQuery<AutodocComponent>(true)
-                .Where(a => xforms.GetComponent(a.Owner).MapUid == map)
+                .Where(a => xforms.GetComponent(a.Uid()).MapUid == map)
                 .ToList();
             Assert.That(pods, Has.Count.EqualTo(2), "the range does not carry two pods.");
             var atmos = entMan.System<AtmosphereSystem>();
             foreach (var pod in pods)
             {
-                var air = atmos.GetTileMixture(pod.Owner);
+                var air = atmos.GetTileMixture(pod.Uid());
                 Assert.That(air?.GetMoles(Gas.Oxygen) ?? 0f, Is.GreaterThan(1f), "the range has no oxygen at a pod.");
-                Assert.That(entMan.GetComponent<ApcPowerReceiverComponent>(pod.Owner).Powered, Is.True, "a range pod has no power.");
+                Assert.That(entMan.GetComponent<ApcPowerReceiverComponent>(pod.Uid()).Powered, Is.True, "a range pod has no power.");
             }
         });
 

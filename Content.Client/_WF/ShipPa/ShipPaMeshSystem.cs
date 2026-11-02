@@ -72,7 +72,9 @@ public sealed partial class ShipPaMeshSystem : EntitySystem
     {
         _shuttingDown = true;
         StopVoices();
-        _subtitlePanel?.Dispose();
+        if (_subtitlePanel is { Disposed: false })
+            _subtitlePanel.Orphan();
+
         _subtitlePanel = null;
         _subtitle = null;
         base.Shutdown();
@@ -465,7 +467,7 @@ public sealed partial class ShipPaMeshSystem : EntitySystem
         if (TryComp(voice.Entity, out AudioComponent? audio))
             audio.StopPlaying();
         // Dispose the source before an internet sound buffer becomes eligible for release.
-        EntityManager.DeleteEntity(voice.Entity);
+        Del(voice.Entity);
     }
 
     private void StopVoices()

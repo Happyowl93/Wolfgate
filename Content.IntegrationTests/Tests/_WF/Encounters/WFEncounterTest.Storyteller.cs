@@ -20,6 +20,16 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestStoryRoundStartProto => "WFTestStoryRoundStart";
+    private static ProtoId<WFEncounterPrototype> WFTestStoryDockProto => "WFTestStoryDock";
+    private static ProtoId<WFEncounterPrototype> WFTestStoryIffProto => "WFTestStoryIff";
+    private static ProtoId<WFEncounterPrototype> WFTestStoryEveryoneProto => "WFTestStoryEveryone";
+    private static ProtoId<WFEncounterPrototype> WFTestStoryFighterProto => "WFTestStoryFighter";
+    private static ProtoId<WFEncounterPrototype> WFTestStoryUnionProto => "WFTestStoryUnion";
+    private static readonly ProtoId<Content.Shared.Dataset.DatasetPrototype> WFNamesUsspLastProto = "WFNamesUsspLast";
+    private static ProtoId<WFEncounterPrototype> WFTestStoryHulkProto => "WFTestStoryHulk";
+    private static ProtoId<WFEncounterPrototype> WFTestStoryLeashProto => "WFTestStoryLeash";
+
     [TestPrototypes]
     private const string StorytellerPrototypes = @"
 - type: wfEncounter
@@ -155,7 +165,7 @@ public sealed partial class WFEncounterTest
             var system = Server.System<WFEncounterSystem>();
             var count = system.ActiveCount();
             var cost = system.ActiveCost();
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryRoundStart");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryRoundStartProto);
             Assert.That(system.TrySpawn(prototype, new MapCoordinates(new Vector2(33000, 33000), MapData.MapId), out var encounter), Is.True);
             Assert.That(SEntMan.GetComponent<WFEncounterComponent>(encounter).OffBudget, Is.True);
             Assert.That(system.ActiveCount(), Is.EqualTo(count));
@@ -172,7 +182,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryDock");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryDockProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(31000, 31000), MapData.MapId), out encounter), Is.True);
             var comp = SEntMan.GetComponent<WFEncounterComponent>(encounter);
             var lead = comp.Ships["lead"];
@@ -218,7 +228,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, patrol = default, intruder = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryIff");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryIffProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(35000, 35000), MapData.MapId), out encounter), Is.True);
             patrol = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["patrol"].Grid;
 
@@ -281,7 +291,7 @@ public sealed partial class WFEncounterTest
         var group = string.Empty;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryIff");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryIffProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(33000, 33000), MapData.MapId), out encounter), Is.True);
             var state = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["patrol"];
             patrol = state.Grid;
@@ -332,7 +342,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, warship = default, visitor = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryEveryone");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryEveryoneProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(31000, 31000), MapData.MapId), out encounter), Is.True);
             warship = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["warship"].Grid;
 
@@ -389,7 +399,7 @@ public sealed partial class WFEncounterTest
         {
             // No grace after the player leaves; ResolvedShipWaitsOutTheGraceAfterPlayersLeave covers it.
             config.SetCVar(EncountersCVars.CleanupGrace, 0f);
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryRival");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryRivalProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-31000, -31000), MapData.MapId), out encounter), Is.True);
             ship = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["rival"].Grid;
 
@@ -427,7 +437,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, ship = default, generator = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryRival");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryRivalProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-33000, -33000), MapData.MapId), out encounter), Is.True);
             ship = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["rival"].Grid;
 
@@ -493,7 +503,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, ship = default, generator = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryFighter");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryFighterProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-35000, -35000), MapData.MapId), out encounter), Is.True);
             var state = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["fighter"];
             ship = state.Grid;
@@ -532,10 +542,10 @@ public sealed partial class WFEncounterTest
         await Server.WaitAssertion(() =>
         {
             var prototypes = Server.ResolveDependency<IPrototypeManager>();
-            var prototype = prototypes.Index<WFEncounterPrototype>("WFTestStoryUnion");
+            var prototype = prototypes.Index<WFEncounterPrototype>(WFTestStoryUnionProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-37000, -37000), MapData.MapId), out encounter), Is.True);
             ship = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["ship"].Grid;
-            var surnames = prototypes.Index<Content.Shared.Dataset.DatasetPrototype>("WFNamesUsspLast").Values;
+            var surnames = prototypes.Index<Content.Shared.Dataset.DatasetPrototype>(WFNamesUsspLastProto).Values;
 
             var crew = 0;
             var members = SEntMan.EntityQueryEnumerator<WFCrewComponent, TransformComponent>();
@@ -580,8 +590,8 @@ public sealed partial class WFEncounterTest
 
             var system = Server.System<WFEncounterSystem>();
             var prototypes = Server.ResolveDependency<IPrototypeManager>();
-            Assert.That(system.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestStoryIff"), new MapCoordinates(new Vector2(37000, 37000), MapData.MapId), out first), Is.True);
-            Assert.That(system.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestStoryRival"), new MapCoordinates(new Vector2(37500, 37000), MapData.MapId), out second), Is.True);
+            Assert.That(system.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestStoryIffProto), new MapCoordinates(new Vector2(37000, 37000), MapData.MapId), out first), Is.True);
+            Assert.That(system.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestStoryRivalProto), new MapCoordinates(new Vector2(37500, 37000), MapData.MapId), out second), Is.True);
         });
         await RunTicks(150);
         await Server.WaitAssertion(() =>
@@ -618,7 +628,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, hulk = default, king = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryHulk");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryHulkProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(39000, 39000), MapData.MapId), out encounter), Is.True);
             hulk = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["hulk"].Grid;
         });
@@ -743,7 +753,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, stray = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryLeash");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryLeashProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(45000, 45000), MapData.MapId), out encounter), Is.True);
             stray = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["one"].Grid;
         });

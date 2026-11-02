@@ -31,6 +31,9 @@
       rank: mmc-employee
     - type: RadioOnCryosleep
       radioChannel: Mieyo
+# WOLFGATE(Roles): reports arrivals on the MMC radio, since the job spawner skips the station announcement
+    - type: WFRadioOnJoin
+      radioChannel: Mieyo
   - !type:AddLanguageSpecial
     languagesSpoken:
     - Nekomimetic

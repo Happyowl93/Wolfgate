@@ -88,17 +88,4 @@ public sealed partial class WFRoundSetupSystem
         CaptureCrewCard(member, session);
         SyncCrewShips();
     }
-
-    /// <summary>Stations whose recruiting crew owns a ship there, for the ordinary late-join picker.</summary>
-    private NetEntity[] RecruitingStations()
-    {
-        var stations = new HashSet<NetEntity>();
-        foreach (var lobby in _lobbies.Values.Where(lobby => lobby.Started && ShowsRecruiting(lobby)))
-        foreach (var grid in CrewGrids(lobby))
-        {
-            if (!TerminatingOrDeleted(grid) && _crewStations.GetOwningStation(grid) is { } station)
-                stations.Add(GetNetEntity(station));
-        }
-        return stations.ToArray();
-    }
 }

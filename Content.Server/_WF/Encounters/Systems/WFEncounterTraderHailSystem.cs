@@ -10,7 +10,7 @@ namespace Content.Server._WF.Encounters.Systems;
 /// Traders answer hails: a ship carrying passengers picks up a hail ringing at its helm and offers to hold position,
 /// so the caller can come alongside and dock while it is under way. A trader whose crew are alerted takes no calls.
 /// </summary>
-public sealed class WFEncounterTraderHailSystem : EntitySystem
+public sealed partial class WFEncounterTraderHailSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private HailingSystem _hailing = default!;

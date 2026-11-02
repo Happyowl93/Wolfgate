@@ -17,7 +17,7 @@ namespace Content.Server._WF.MappingMode;
 /// Streams a library version's level files, its ship grid and vessel prototype, or an export package built in memory,
 /// to their owner: one transfer per file and one download per player, in chunks paced by the client's acknowledgements.
 /// </summary>
-public sealed class WFMappingDownloadSystem : EntitySystem
+public sealed partial class WFMappingDownloadSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private IGameTiming _timing = default!;

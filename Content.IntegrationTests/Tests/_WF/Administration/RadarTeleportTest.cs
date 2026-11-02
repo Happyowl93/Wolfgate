@@ -284,7 +284,7 @@ public sealed class RadarTeleportTest : InteractionTest
         await RunTicks(5);
     }
 
-    private async Task<MapCoordinates> Position(EntityUid uid)
+    private new async Task<MapCoordinates> Position(EntityUid uid)
     {
         MapCoordinates position = default;
         await Server.WaitPost(() => position = SEntMan.System<SharedTransformSystem>().GetMapCoordinates(uid));

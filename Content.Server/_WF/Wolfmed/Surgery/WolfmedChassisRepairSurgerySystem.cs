@@ -13,7 +13,7 @@ namespace Content.Server._WF.Wolfmed.Surgery;
 /// repair through the routing with the Mechanical capability (WeldingHealableSystem), the cable coil's heal through
 /// WoundHealingSystem. The completion checks are shared (WolfmedSurgeryConditionSystem).
 /// </summary>
-public sealed class WolfmedChassisRepairSurgerySystem : EntitySystem
+public sealed partial class WolfmedChassisRepairSurgerySystem : EntitySystem
 {
     private static readonly HashSet<TreatmentCapability> WeldCapabilities = new() { TreatmentCapability.Mechanical };
 

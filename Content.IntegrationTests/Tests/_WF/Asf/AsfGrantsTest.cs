@@ -26,6 +26,9 @@ namespace Content.IntegrationTests.Tests._WF.Asf;
 [TestFixture]
 public sealed class AsfGrantsTest
 {
+    private static ProtoId<GameMapPrototype> WFAsfLanternProto => "WFAsfLantern";
+    private static readonly EntProtoId WFAsfGrantKioskProto = "WFAsfGrantKiosk";
+
     private static readonly ResPath Lantern = new("/Maps/_WF/Asf/lantern.yml");
     private const string Grant = "WFAsfRewardGrant";
 
@@ -90,7 +93,7 @@ public sealed class AsfGrantsTest
 
             Assert.That(kiosks, Is.Positive, "Lantern Post has no kiosk that takes ARG.");
 
-            var station = prototypes.Index<GameMapPrototype>("WFAsfLantern").Stations["WFAsfLantern"];
+            var station = prototypes.Index<GameMapPrototype>(WFAsfLanternProto).Stations["WFAsfLantern"];
             Assert.That(station.StationComponentOverrides.TryGetComponent<StationCargoBountyDatabaseComponent>(factory, out var bounties));
             Assert.That(bounties!.AvailableBounties, Is.Not.Empty);
             foreach (var id in bounties.AvailableBounties)
@@ -171,12 +174,12 @@ public sealed class AsfGrantsTest
         {
             foreach (var proto in prototypes.EnumeratePrototypes<EntityPrototype>())
             {
-                if (proto.Abstract || !proto.TryGetComponent<XenoArtifactComponent>(out var artifact, factory))
+                if (proto.Abstract || !proto.TryComp<XenoArtifactComponent>(out var artifact, factory))
                     continue;
 
                 foreach (var (effect, _) in tables.ListSpawns(artifact.EffectsTable))
                 {
-                    if (prototypes.Index(effect).TryGetComponent<XAEApplyComponentsComponent>(out var apply, factory))
+                    if (prototypes.Index(effect).TryComp<XAEApplyComponentsComponent>(out var apply, factory))
                         lasting.UnionWith(apply.Components.Keys);
                 }
             }
@@ -219,8 +222,8 @@ public sealed class AsfGrantsTest
             Assert.That(spawned.All(e => entities.GetComponent<MetaDataComponent>(e).EntityPrototype!.ID.StartsWith(Grant)));
             maps.DeleteMap(entities.GetComponent<TransformComponent>(mapUid).MapID);
 
-            var kiosk = prototypes.Index<EntityPrototype>("WFAsfGrantKiosk");
-            Assert.That(kiosk.TryGetComponent<StoreComponent>(out var store, entities.ComponentFactory));
+            var kiosk = prototypes.Index(WFAsfGrantKioskProto);
+            Assert.That(kiosk.TryComp<StoreComponent>(out var store, entities.ComponentFactory));
             var listings = prototypes.EnumeratePrototypes<ListingPrototype>()
                 .Where(l => l.Categories.Overlaps(store!.Categories))
                 .ToList();

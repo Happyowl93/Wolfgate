@@ -13,17 +13,18 @@ using Robust.Shared.Timing;
 namespace Content.Client.Launcher;
 
 /// <summary>
-/// A button that glows Discord blue and breathes, so the way in is the first thing a refused player sees.
+/// A button that glows green and breathes, so the way in is the first thing a refused player sees.
 /// </summary>
 public sealed class SymphonyPulseButton : Button
 {
-    private static readonly Color Blue = Color.FromHex("#5865F2");
-    private readonly StyleBoxFlat _box = new() { BackgroundColor = Blue, ContentMarginLeftOverride = 14, ContentMarginRightOverride = 14, ContentMarginTopOverride = 6, ContentMarginBottomOverride = 6 };
+    private static readonly Color Green = Color.FromHex("#2E9E4F");
+    private readonly StyleBoxFlat _box = new() { BackgroundColor = Green, ContentMarginLeftOverride = 14, ContentMarginRightOverride = 14, ContentMarginTopOverride = 6, ContentMarginBottomOverride = 6 };
     private float _time;
 
     public SymphonyPulseButton()
     {
         StyleBoxOverride = _box;
+        ModulateSelfOverride = Color.White;
     }
 
     protected override void FrameUpdate(FrameEventArgs args)
@@ -32,11 +33,11 @@ public sealed class SymphonyPulseButton : Button
         if (!VisibleInTree)
             return;
         _time += args.DeltaSeconds;
-        // One breath every 1.6 seconds, between the blue and a lighter one; brighter still while hovered.
+        // One breath every 1.6 seconds, between the green and a lighter one; brighter still while hovered.
         var t = (MathF.Sin(_time * MathF.Tau / 1.6f) + 1f) / 2f;
         var lift = IsHovered ? 0.35f : 0.12f + 0.2f * t;
-        _box.BackgroundColor = Color.InterpolateBetween(Blue, Color.White, lift);
-        _box.BorderColor = Color.InterpolateBetween(Blue, Color.White, 0.5f * t);
+        _box.BackgroundColor = Color.InterpolateBetween(Green, Color.White, lift);
+        _box.BorderColor = Color.InterpolateBetween(Green, Color.White, 0.5f * t);
         _box.BorderThickness = new Thickness(2);
     }
 }

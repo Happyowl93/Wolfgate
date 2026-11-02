@@ -21,7 +21,7 @@ namespace Content.Server._WF.Wolfmed.Consciousness;
 /// symptoms in words through the self path of the visual inspection. Play dead (Downed only, OD20) makes you read as
 /// lifeless from a distance until you move, speak or act. Granted by a direct call from consciousness's Apply.
 /// </summary>
-public sealed class WolfmedCrawlActionsSystem : EntitySystem
+public sealed partial class WolfmedCrawlActionsSystem : EntitySystem
 {
     public static readonly EntProtoId PlayDeadAction = "WFActionWolfmedPlayDead";
     public static readonly EntProtoId CheckYourselfAction = "WFActionWolfmedCheckYourself";

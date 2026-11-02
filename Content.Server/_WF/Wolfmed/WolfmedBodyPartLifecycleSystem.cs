@@ -11,8 +11,10 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._WF.Wolfmed;
 
 /// <summary>Drives Onyx's part-lifecycle entry points from Wolfgate's body-scoped part events.</summary>
-public sealed class WolfmedBodyPartLifecycleSystem : EntitySystem
+public sealed partial class WolfmedBodyPartLifecycleSystem : EntitySystem
 {
+    private static readonly ProtoId<DamageTypePrototype> BloodlossProto = "Bloodloss";
+
     [Dependency] private WoundDamageProjectionSystem _projection = default!;
     [Dependency] private WoundBleedingSystem _bleeding = default!;
     [Dependency] private SharedBodySystem _body = default!;
@@ -118,6 +120,6 @@ public sealed class WolfmedBodyPartLifecycleSystem : EntitySystem
         // WoundHostComponent.LocalizedDamageTypes, so routing keeps it systemic instead of dealing it to
         // another limb - and CheckVitalDamage counts systemic damage.
         _damageable.ChangeDamage(body.Owner,
-            new DamageSpecifier(_prototypes.Index<DamageTypePrototype>("Bloodloss"), lost));
+            new DamageSpecifier(_prototypes.Index<DamageTypePrototype>(BloodlossProto), lost));
     }
 }

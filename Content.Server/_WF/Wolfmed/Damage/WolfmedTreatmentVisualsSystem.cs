@@ -19,7 +19,7 @@ namespace Content.Server._WF.Wolfmed.Damage;
 /// a treatment without changing a damage number - the wound lifecycle broadcast, a bleed refresh and a
 /// fracture treatment change - and coalesced to one walk per body per tick.
 /// </remarks>
-public sealed class WolfmedTreatmentVisualsSystem : EntitySystem
+public sealed partial class WolfmedTreatmentVisualsSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;

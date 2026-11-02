@@ -129,7 +129,7 @@ public sealed partial class HardpointMenu : FancyWindow
         ErrorLabel.Visible = hasError;
         ErrorLabel.Text = hasError ? error! : string.Empty;
 
-        HardpointList.DisposeAllChildren();
+        HardpointList.RemoveAllChildren();
 
         if (hasFrameIntegrity && frameMaxIntegrity > 0f)
         {

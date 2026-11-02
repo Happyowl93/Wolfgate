@@ -4,7 +4,7 @@ using Content.Server.Ghost;
 namespace Content.Server._WF.Xenonids.Construction.Nest;
 
 /// <summary>Remembers who ghosted out of a nested body; RMC raises the ghost attempt in shared code, Wolfgate on the server.</summary>
-public sealed class XenoNestGhostSystem : EntitySystem
+public sealed partial class XenoNestGhostSystem : EntitySystem
 {
     [Dependency] private XenoNestSystem _xenoNest = default!;
 

@@ -1,5 +1,6 @@
 using Content.Server._Mono.FireControl;
 using Content.Server._Mono.Projectiles.TargetSeeking;
+using Content.Shared._WF.Performance; // WOLFGATE(Performance)
 using Content.Shared.Weapons.Hitscan.Components;
 using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Systems;
@@ -8,12 +9,17 @@ using Robust.Shared.Map.Components;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Spawners;
+using Robust.Shared.Timing; // WOLFGATE(Performance)
 using System.Numerics;
 
 namespace Content.Server._Mono.NPC.HTN;
 
 public sealed partial class ShipTargetingSystem : EntitySystem
 {
+    // WOLFGATE(Performance): how often a ship's guns are aimed; a shot attempt lasts 0.2 s, so they keep firing between
+    public const int WFAimPeriod = 2;
+    [Dependency] private IGameTiming _wfTiming = default!;
+
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private FireControlSystem _cannon = default!;
     [Dependency] private SharedGunSystem _gun = default!;
@@ -41,10 +47,15 @@ public sealed partial class ShipTargetingSystem : EntitySystem
 
     public override void Update(float frameTime)
     {
+        frameTime *= WFAimPeriod; // WOLFGATE(Performance): each turn covers the whole period
         var query = EntityQueryEnumerator<ShipTargetingComponent>();
 
         while (query.MoveNext(out var uid, out var comp))
         {
+            // WOLFGATE(Performance): each ship aims on its own tick of the period
+            if (!WFTickSpread.Due(uid, _wfTiming.CurTick, WFAimPeriod))
+                continue;
+
             var pilotXform = Transform(uid);
 
             var shipUid = pilotXform.GridUid;

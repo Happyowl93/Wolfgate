@@ -1,5 +1,6 @@
 #nullable enable annotations
 
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -184,7 +185,7 @@ public sealed class WFCockpitFtlDriveTest
             }
             finally
             {
-                bank.Dispose();
+                bank.Teardown();
                 entities.DeleteEntity(ship);
             }
         });

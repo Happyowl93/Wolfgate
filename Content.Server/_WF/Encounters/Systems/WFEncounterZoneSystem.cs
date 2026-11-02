@@ -647,8 +647,10 @@ public sealed partial class WFEncounterZoneSystem : EntitySystem
     /// <summary>Whether a grid is another ship of the same encounter on the same side.</summary>
     private bool SameSide(WFEncounterComponent encounter, WFEncounterShipState ship, EntityUid grid)
     {
+#pragma warning disable CS0618 // The caller only has the component here.
         return TryComp<WFEncounterGridComponent>(grid, out var marker) && marker.Encounter == encounter.Owner
             && encounter.Ships.TryGetValue(marker.Key, out var other) && other.Side == ship.Side;
+#pragma warning restore CS0618
     }
 
     /// <summary>Whether a ship flies only civilian flags: a faction's civilian arm, or no company at all.</summary>

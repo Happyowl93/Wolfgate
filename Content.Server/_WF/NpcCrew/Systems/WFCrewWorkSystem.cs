@@ -625,7 +625,7 @@ public sealed partial class WFCrewWorkSystem : EntitySystem
             return true;
         EntityManager.System<WFCrewSpeechSystem>().Say(mob,
             job.SrdCoordinates != null || job.Tool != null ? "repair" : job.Returning ? "return-cargo" : "collect");
-        if (!Transform(mob).Coordinates.InRange(EntityManager, destination, 1.5f))
+        if (!_transform.InRange(Transform(mob).Coordinates, destination, 1.5f))
             return true;
         if (job.SrdCoordinates != null || job.Returning)
         {
@@ -830,7 +830,7 @@ public sealed partial class WFCrewWorkSystem : EntitySystem
         Vector2i? best = null;
         var bestDistance = -1;
         var bestSafe = false;
-        var tiles = _maps.GetAllTilesEnumerator(grid, map);
+        var tiles = _maps.GetAllTiles(grid, map);
         while (tiles.MoveNext(out var tile))
         {
             var at = tile.Value.GridIndices;

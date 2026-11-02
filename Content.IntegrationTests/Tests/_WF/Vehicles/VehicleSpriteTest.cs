@@ -25,6 +25,8 @@ namespace Content.IntegrationTests.Tests._WF.Vehicles;
 [TestFixture]
 public sealed class VehicleSpriteTest
 {
+    private static readonly System.Text.RegularExpressions.Regex PrototypeIdRegex = new(@"(?m)^  id: (\S+)\s*$");
+
     private static readonly ResPath TextureRoot = new("/Textures");
 
     /// <summary>The layer the frame damage visualizer fades in (VehicleFrameDamageLayers.DamagedFrame).</summary>
@@ -54,15 +56,15 @@ public sealed class VehicleSpriteTest
             foreach (var proto in protos.EnumeratePrototypes<EntityPrototype>())
             {
                 if (proto.Abstract || !ids.Contains(proto.ID) ||
-                    !proto.TryGetComponent<HardpointItemComponent>(out var item, factory) ||
-                    !proto.TryGetComponent<HardpointVisualComponent>(out var visual, factory) ||
+                    !proto.TryComp<HardpointItemComponent>(out var item, factory) ||
+                    !proto.TryComp<HardpointVisualComponent>(out var visual, factory) ||
                     string.IsNullOrWhiteSpace(visual.VehicleState))
                 {
                     continue;
                 }
 
                 // A turret that draws itself as an overlay shows no state on the vehicle (VehicleHardpointVisualsSystem).
-                if (proto.TryGetComponent<VehicleTurretComponent>(out var turret, factory) && turret.ShowOverlay)
+                if (proto.TryComp<VehicleTurretComponent>(out var turret, factory) && turret.ShowOverlay)
                     continue;
 
                 parts.Add((proto, item, visual));
@@ -71,8 +73,8 @@ public sealed class VehicleSpriteTest
             foreach (var vehicle in protos.EnumeratePrototypes<EntityPrototype>())
             {
                 if (vehicle.Abstract || !ids.Contains(vehicle.ID) ||
-                    !vehicle.TryGetComponent<RMCVehicleComponent>(out _, factory) ||
-                    !vehicle.TryGetComponent<HardpointSlotsComponent>(out var slots, factory))
+                    !vehicle.TryComp<RMCVehicleComponent>(out _, factory) ||
+                    !vehicle.TryComp<HardpointSlotsComponent>(out var slots, factory))
                 {
                     continue;
                 }
@@ -138,7 +140,7 @@ public sealed class VehicleSpriteTest
 
             foreach (var vehicle in protos.EnumeratePrototypes<EntityPrototype>())
             {
-                if (vehicle.Abstract || !ids.Contains(vehicle.ID) || !vehicle.TryGetComponent<RMCVehicleComponent>(out _, factory))
+                if (vehicle.Abstract || !ids.Contains(vehicle.ID) || !vehicle.TryComp<RMCVehicleComponent>(out _, factory))
                     continue;
 
                 // The test chassis and the exit marker areas are vehicles in name only and have no sprite.
@@ -209,8 +211,7 @@ public sealed class VehicleSpriteTest
 
         foreach (var file in resources.ContentFindFiles(new ResPath("/Prototypes/_WF/Vehicles")).Where(f => f.Extension == "yml"))
         {
-            foreach (System.Text.RegularExpressions.Match match in System.Text.RegularExpressions.Regex.Matches(
-                         resources.ContentFileReadAllText(file), @"(?m)^  id: (\S+)\s*$"))
+            foreach (System.Text.RegularExpressions.Match match in PrototypeIdRegex.Matches(resources.ContentFileReadAllText(file)))
             {
                 ids.Add(match.Groups[1].Value);
             }

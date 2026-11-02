@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System;
 using System.Linq;
 using System.Numerics;
@@ -89,7 +90,7 @@ public sealed class WFReaverGunPlatformTest : WFReaverTestBase
         await Server.WaitPost(() =>
         {
             _pilot = SEntMan.EntityQuery<WFPilotDutyComponent, WFCrewComponent>()
-                .First(pair => pair.Item2.Group == _group && pair.Item2.Role == WFCrewRoles.Pilot.Id).Item1.Owner;
+                .First(pair => pair.Item2.Group == _group && pair.Item2.Role == WFCrewRoles.Pilot.Id).Item1.Uid();
         });
         await WaitUntilServer(() => SEntMan.GetComponent<WFPilotDutyComponent>(_pilot).AtHelm, 3000);
     }
@@ -162,7 +163,7 @@ public sealed class WFReaverGunPlatformTest : WFReaverTestBase
             var gunners = Server.System<WFGunnerDutySystem>();
             var laid = SEntMan.EntityQuery<WFGunnerDutyComponent, WFCrewComponent>()
                 .Where(pair => pair.Item2.Group == _group)
-                .SelectMany(pair => gunners.Batteries(pair.Item1.Owner))
+                .SelectMany(pair => gunners.Batteries(pair.Item1.Uid()))
                 .Any(battery => battery.Target == attacker && battery.Guns.Count > 0);
             Assert.That(laid, Is.True, "A gunner should have the hub's guns laid on the attacker.");
         });

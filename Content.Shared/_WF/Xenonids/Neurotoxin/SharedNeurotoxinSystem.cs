@@ -378,7 +378,7 @@ public abstract partial class SharedNeurotoxinSystem : EntitySystem
 
     private void DoNeuroHallucination(EntityUid victim, NeurotoxinComponent neurotoxin)
     {
-        var hallucination = SharedRandomExtensions.Pick(neurotoxin.Hallucinations, _random.GetRandom());
+        var hallucination = _random.Pick(neurotoxin.Hallucinations);
         //Note event times are hardcoded for now since thers alot of them
         switch (hallucination)
         {

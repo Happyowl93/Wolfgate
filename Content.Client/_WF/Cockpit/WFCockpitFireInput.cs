@@ -17,7 +17,7 @@ using SixLabors.ImageSharp.Processing;
 namespace Content.Client._WF.Cockpit;
 
 /// <summary>Routes cockpit aiming and held fire from the world view and navigation plot.</summary>
-public sealed class WFCockpitFireInput : Control
+public sealed partial class WFCockpitFireInput : Control
 {
     [Dependency] private IInputManager _input = default!;
     [Dependency] private IClyde _clyde = default!;
@@ -72,7 +72,9 @@ public sealed class WFCockpitFireInput : Control
         _navigation.OnVisibilityChanged += SurfaceVisibilityChanged;
         _input.Contexts.ContextChanged += ContextChanged;
         _input.FirstChanceOnKeyEvent += PhysicalKey;
+#pragma warning disable CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
         lease.Remember(Dispose);
+#pragma warning restore CS0618
     }
 
     /// <summary>Builds the aiming cursor; a missing image falls back to the system crosshair instead of blocking the cockpit.</summary>
@@ -241,6 +243,7 @@ public sealed class WFCockpitFireInput : Control
         base.ExitedTree();
     }
 
+#pragma warning disable CS0672, CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
     protected override void Dispose(bool disposing)
     {
         if (disposing && !_disposed)
@@ -264,4 +267,5 @@ public sealed class WFCockpitFireInput : Control
         }
         base.Dispose(disposing);
     }
+#pragma warning restore CS0672, CS0618
 }

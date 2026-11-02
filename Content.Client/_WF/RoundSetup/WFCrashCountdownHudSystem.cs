@@ -134,7 +134,7 @@ public sealed partial class WFCrashCountdownHudSystem : EntitySystem
         LayoutContainer.SetPosition(_hud, new Vector2(MathF.Max(0, (_ui.PopupRoot.Width - width) / 2), 120));
         _hud.Visible = true;
         if (!AlarmPlaying)
-            _alarm = _audio.PlayGlobal("/Audio/Machines/alarm.ogg", Filter.Local(), false,
+            _alarm = _audio.PlayGlobal(new ResolvedPathSpecifier("/Audio/Machines/alarm.ogg"), Filter.Local(), false,
                 AudioParams.Default.WithLoop(true).WithVolume(-8f))?.Entity;
     }
 

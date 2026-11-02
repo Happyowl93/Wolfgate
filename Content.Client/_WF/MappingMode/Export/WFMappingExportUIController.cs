@@ -14,7 +14,7 @@ namespace Content.Client._WF.MappingMode.Export;
 /// Opens the export wizard from the Save tab, the library rows and the lobby, feeds it the issues, library and download
 /// state, and runs its Package step: a save of the session when it is dirty, then the export of the newest version.
 /// </summary>
-public sealed class WFMappingExportUIController : UIController, IOnStateExited<GameplayState>, IOnStateExited<LobbyState>,
+public sealed partial class WFMappingExportUIController : UIController, IOnStateExited<GameplayState>, IOnStateExited<LobbyState>,
     IOnSystemChanged<WFMappingClientSystem>
 {
     [Dependency] private IGameTiming _timing = default!;

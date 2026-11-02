@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -222,7 +223,7 @@ public sealed class WFChassisPanelWindowTest : GameTest
             Assert.That(((Button) panel.BayButton).Text, Is.EqualTo("CLOSE BAY"));
         });
 
-        await Client.WaitPost(() => window!.Dispose());
+        await Client.WaitPost(() => window!.Teardown());
     }
 
     /// <summary>
@@ -435,7 +436,7 @@ public sealed class WFChassisPanelWindowTest : GameTest
             Assert.That(disconnects, Has.Count.EqualTo(2), "a late second click only re-arms.");
         });
 
-        await Client.WaitPost(() => window!.Dispose());
+        await Client.WaitPost(() => window!.Teardown());
     }
 
     /// <summary>A left click on a table cell; the cells take the mouse themselves.</summary>
@@ -496,7 +497,7 @@ public sealed class WFChassisPanelWindowTest : GameTest
         await RunTicksSync(3);
         await Client.WaitAssertion(() => AssertAligned(grids[1]));
 
-        await Client.WaitPost(() => window!.Dispose());
+        await Client.WaitPost(() => window!.Teardown());
     }
 
     private static void AssertAligned(GridContainer grid)
@@ -585,7 +586,7 @@ public sealed class WFChassisPanelWindowTest : GameTest
             Assert.That(bay, Is.EqualTo(1));
         });
 
-        await Client.WaitPost(() => window!.Dispose());
+        await Client.WaitPost(() => window!.Teardown());
     }
 
     /// <summary>Each part's colouring on the doll: off, disabled or an integrity band.</summary>
@@ -676,7 +677,7 @@ public sealed class WFChassisPanelWindowTest : GameTest
             Assert.That(panel.Selected, Is.Null);
         });
 
-        await Client.WaitPost(() => window!.Dispose());
+        await Client.WaitPost(() => window!.Teardown());
     }
 
     /// <summary>The bay strip sits in the gap above the hotbar and clear of every box the readout draws.</summary>

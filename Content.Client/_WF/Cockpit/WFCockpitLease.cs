@@ -30,7 +30,9 @@ public sealed class WFCockpitLease
             root.RemoveChild(child);
         Remember(() =>
         {
+#pragma warning disable CS0618 // Controls left on a leased root are torn down; the hail strip checks Disposed.
             root.DisposeAllChildren();
+#pragma warning restore CS0618
             foreach (var child in children)
             {
                 // One child failing to come back must not cost the screen the children after it.

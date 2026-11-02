@@ -22,7 +22,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 /// wolfmed.core_cooling_seconds, and a hotter one over wolfmed.core_heating_seconds; it hurries back toward normal.
 /// A container that protects its occupant from cold damage (a cryo pod) holds the core where it is.
 /// </remarks>
-public sealed class WolfmedBodyTemperatureSystem : EntitySystem
+public sealed partial class WolfmedBodyTemperatureSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IGameTiming _timing = default!;

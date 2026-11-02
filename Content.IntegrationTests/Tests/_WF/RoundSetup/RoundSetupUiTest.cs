@@ -1,3 +1,4 @@
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using Content.Client.Changelog;
 using System.Collections.Generic;
 using System.Linq;
@@ -334,7 +335,7 @@ public sealed partial class RoundSetupUiTest
     /// <summary>Pregame READY offers crew setup by default; legacy leaves a crew before readying with saved preferences.</summary>
     [TestCase(false)]
     [TestCase(true)]
-    public async Task PregameReadyOffersCrewOrLegacy(bool alreadyInCrew)
+    public async Task PregameReadyOffersCrewOrStationRoles(bool alreadyInCrew)
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { InLobby = true });
         var ui = pair.Client.ResolveDependency<IUserInterfaceManager>();
@@ -369,12 +370,12 @@ public sealed partial class RoundSetupUiTest
             Assert.That(pair.Client.System<ClientGameTicker>().AreWeReady, Is.False, "Dismissing the choice must not ready the player.");
             chooser = Descendants(ui.WindowRoot).OfType<WFRoundJoinChoiceWindow>().Single();
             choice = Named<Button>(chooser, "RoundJoinCrew");
-            var legacy = Named<Button>(chooser, "RoundJoinStandard");
-            Assert.That(choice.Text, Is.EqualTo(Loc.GetString("wf-round-setup-ready-crew-default")));
+            var stationRoles = Named<Button>(chooser, "RoundJoinStation");
+            Assert.That(choice.Text, Is.EqualTo(Loc.GetString("wf-round-setup-ready-crew")));
             Assert.That(choice.HasStyleClass("ButtonAccept"), Is.True);
-            Assert.That(choice.GlobalPosition.Y, Is.LessThan(legacy.GlobalPosition.Y));
-            Assert.That(legacy.Text, Is.EqualTo(Loc.GetString("wf-round-setup-ready-standard-legacy")));
-            Assert.That(legacy.Label.ClipText, Is.False);
+            Assert.That(choice.GlobalPosition.Y, Is.LessThan(stationRoles.GlobalPosition.Y));
+            Assert.That(stationRoles.Text, Is.EqualTo(Loc.GetString("wf-round-setup-ready-station-roles")));
+            Assert.That(stationRoles.Label.ClipText, Is.False);
         });
         await Click(pair, choice);
         await pair.Client.WaitAssertion(() =>
@@ -388,7 +389,7 @@ public sealed partial class RoundSetupUiTest
         // Allow the crew browser refresh to clear the server request throttle.
         await pair.RunTicksSync(pair.SecondsToTicks(0.25f));
         await Click(pair, ready);
-        await pair.Client.WaitPost(() => choice = Named<Button>(ui.WindowRoot, "RoundJoinStandard"));
+        await pair.Client.WaitPost(() => choice = Named<Button>(ui.WindowRoot, "RoundJoinStation"));
         await Click(pair, choice);
         await pair.RunTicksSync(pair.SecondsToTicks(0.5f));
         await pair.Client.WaitAssertion(() =>
@@ -412,9 +413,9 @@ public sealed partial class RoundSetupUiTest
         await pair.CleanReturnAsync();
     }
 
-    /// <summary>Late join offers crews first and opens legacy joining directly to stations.</summary>
+    /// <summary>Late join offers crews first and opens station roles directly on the station list.</summary>
     [Test]
-    public async Task MidroundHomeOffersCrewAndStandard()
+    public async Task MidroundHomeOffersCrewAndStationRoles()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { InLobby = true });
         var ui = pair.Client.ResolveDependency<IUserInterfaceManager>();
@@ -453,14 +454,15 @@ public sealed partial class RoundSetupUiTest
             crews.Close();
         });
         await Click(pair, join);
-        await pair.Client.WaitPost(() => choice = Named<Button>(ui.WindowRoot, "RoundJoinStandard"));
+        await pair.Client.WaitPost(() => choice = Named<Button>(ui.WindowRoot, "RoundJoinStation"));
         await Click(pair, choice);
         await pair.Client.WaitAssertion(() =>
         {
             var picker = Descendants(ui.WindowRoot).OfType<PickerWindow>().Single();
-            // The original picker stays intact, including its route onto player ship crews.
-            Assert.That(Descendants(picker).OfType<StationOrCrewLargeControl>().Count(), Is.EqualTo(1));
-            Assert.That(Named<Button>(picker, "CrewTabButton").Visible, Is.True);
+            // Station list only: no crew tab, no tab bar.
+            Assert.That(picker.Title, Is.EqualTo(Loc.GetString("wf-station-roles-title")));
+            Assert.That(Descendants(picker).OfType<StationPickerControl>().Count(), Is.EqualTo(1));
+            Assert.That(Descendants(picker).Any(control => control.Name == "CrewTabButton"), Is.False);
             Assert.That(Descendants(ui.WindowRoot).OfType<WFRoundSetupWindow>(), Is.Empty);
             picker.Close();
         });
@@ -539,7 +541,7 @@ public sealed partial class RoundSetupUiTest
             Assert.That(vote.VisibleInTree, Is.True, "Votes remain visible alongside chat.");
             Assert.That(vote.GlobalPosition.X + vote.Width, Is.LessThanOrEqualTo(width + 1), "Votes fit the communication dock.");
             screen.VoteContainer.RemoveChild(vote);
-            vote.Dispose();
+            vote.Teardown();
             if (screen.VoteContainer.ChildCount == 0)
                 Assert.That(screen.Chat.VisibleInTree, Is.True, "Chat returns when the last vote ends.");
 

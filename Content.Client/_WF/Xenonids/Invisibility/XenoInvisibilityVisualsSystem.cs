@@ -3,8 +3,10 @@ using Robust.Client.GameObjects;
 
 namespace Content.Client._WF.Xenonids.Invisibility;
 
-public sealed class XenoInvisibilityVisualsSystem : EntitySystem
+public sealed partial class XenoInvisibilityVisualsSystem : EntitySystem
 {
+    [Dependency] private SpriteSystem _sprite = default!;
+
     private EntityQuery<XenoActiveInvisibleComponent> _activeInvisibleQuery;
 
     public override void Initialize()
@@ -18,7 +20,7 @@ public sealed class XenoInvisibilityVisualsSystem : EntitySystem
         while (invisible.MoveNext(out var uid, out var comp, out var sprite))
         {
             var opacity = _activeInvisibleQuery.HasComp(uid) ? comp.Opacity : 1;
-            sprite.Color = Color.White.WithAlpha(opacity);
+            _sprite.SetColor((uid, sprite), Color.White.WithAlpha(opacity));
         }
     }
 }

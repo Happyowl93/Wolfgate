@@ -35,6 +35,8 @@ namespace Content.IntegrationTests.Tests._WF.Feedback;
 [TestFixture]
 public sealed class PlayerReportFixesTest
 {
+    private static readonly ProtoId<SpeciesPrototype> ReptilianProto = "Reptilian";
+
     /// <summary>The bounty pays for an executed heretic; any other corpse stays off the books.</summary>
     [Test]
     public async Task DeadHereticSellsAndOtherCorpsesDoNot()
@@ -114,6 +116,10 @@ public sealed class PlayerReportFixesTest
         await pair.RunTicksSync(10);
 
         var verbs = protos.Index<SpeechVerbPrototype>(Style).SpeechVerbStrings.Select(id => loc.GetString(id)).ToList();
+        // The wearer's own verbs share "chirps" with the mask's style, so that word can't show the mask was left out.
+        if (nameOverride)
+            verbs = verbs.Except(protos.Index<SpeechVerbPrototype>("Parrot").SpeechVerbStrings.Select(id => loc.GetString(id))).ToList();
+
         var wrapped = history.Skip(seen).Select(entry => entry.Msg.WrappedMessage).LastOrDefault(line => line.Contains("ello"));
         Assert.That(wrapped, Is.Not.Null, "The player never heard the line.");
         Assert.That(verbs.Any(wrapped!.Contains), Is.EqualTo(!nameOverride), $"Wrong speech style use: {wrapped}");
@@ -164,7 +170,7 @@ public sealed class PlayerReportFixesTest
         {
             lizard = entMan.SpawnEntity("MobReptilian", map.GridCoords);
             var biotypes = entMan.System<WFBiotypeSystem>();
-            biotypes.Apply(lizard, biotype, protos.Index<SpeciesPrototype>("Reptilian"));
+            biotypes.Apply(lizard, biotype, protos.Index<SpeciesPrototype>(ReptilianProto));
             Assert.That(biotypes.GetBiotype(lizard), Is.EqualTo(biotype), "The lizard didn't become this biotype.");
         });
         await pair.RunTicksSync(5);

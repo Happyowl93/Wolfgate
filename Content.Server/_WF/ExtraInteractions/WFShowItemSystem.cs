@@ -13,7 +13,7 @@ namespace Content.Server._WF.ExtraInteractions;
 /// <summary>
 /// Checks a show request, then sends the bubble to everyone nearby and an emote line to chat.
 /// </summary>
-public sealed class WFShowItemSystem : SharedWFShowItemSystem
+public sealed partial class WFShowItemSystem : SharedWFShowItemSystem
 {
     [Dependency] private IConfigurationManager _config = default!;
     [Dependency] private IGameTiming _timing = default!;
