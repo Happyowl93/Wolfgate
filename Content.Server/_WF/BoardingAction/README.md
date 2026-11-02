@@ -83,14 +83,6 @@ signal shot passes through.
 - [`Resources/Textures/_WF/BoardingAction/hack_dart.rsi/`](../../../Resources/Textures/_WF/BoardingAction/hack_dart.rsi/)
 - [`Resources/Textures/_WF/BoardingAction/hack_harpoon_gun.rsi/`](../../../Resources/Textures/_WF/BoardingAction/hack_harpoon_gun.rsi/)
 
-### Tools
-
-- [`Tools/_WF/BoardingAction/sprites/hack_arc.aseprite`](../../../Tools/_WF/BoardingAction/sprites/hack_arc.aseprite)
-- [`Tools/_WF/BoardingAction/sprites/hack_dart.aseprite`](../../../Tools/_WF/BoardingAction/sprites/hack_dart.aseprite)
-- [`Tools/_WF/BoardingAction/sprites/hack_harpoon_gun.aseprite`](../../../Tools/_WF/BoardingAction/sprites/hack_harpoon_gun.aseprite)
-- [`Tools/_WF/BoardingAction/sprites/harpoon.aseprite`](../../../Tools/_WF/BoardingAction/sprites/harpoon.aseprite)
-- [`Tools/_WF/BoardingAction/sprites/harpoon_turret.aseprite`](../../../Tools/_WF/BoardingAction/sprites/harpoon_turret.aseprite)
-
 ## Non-modular edits
 
 - [`Content.Client/Shuttles/BUI/ShuttleConsoleBoundUserInterface.cs`](../../../Content.Client/Shuttles/BUI/ShuttleConsoleBoundUserInterface.cs): the banner's release button

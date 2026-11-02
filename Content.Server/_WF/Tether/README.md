@@ -227,7 +227,6 @@ Rerun any Skipped test on its own: pair tests can be skipped by unrelated
 - [`Tools/_WF/Tether/brown_rope.png`](../../../Tools/_WF/Tether/brown_rope.png)
 - [`Tools/_WF/Tether/bungee_rope.png`](../../../Tools/_WF/Tether/bungee_rope.png)
 - [`Tools/_WF/Tether/cable_rope.png`](../../../Tools/_WF/Tether/cable_rope.png)
-- [`Tools/_WF/Tether/harpoon_sprites.py`](../../../Tools/_WF/Tether/harpoon_sprites.py)
 - [`Tools/_WF/Tether/metal_rope.png`](../../../Tools/_WF/Tether/metal_rope.png)
 - [`Tools/_WF/Tether/nylon_rope.png`](../../../Tools/_WF/Tether/nylon_rope.png)
 - [`Tools/_WF/Tether/power_cord_sprites.py`](../../../Tools/_WF/Tether/power_cord_sprites.py)
