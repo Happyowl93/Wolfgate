@@ -16,12 +16,9 @@ public sealed class WFBoardingHelmState
     /// <summary>Whether a hack has finished and this ship is locked down.</summary>
     public bool Lockdown;
 
-    /// <summary>Ships holding this one's FTL from range.</summary>
-    public string[] Disruptors = Array.Empty<string>();
-
     /// <summary>The ship this one's hacking cable is latched to.</summary>
     public string? CableTarget;
 
     /// <summary>Whether there is nothing to show.</summary>
-    public bool Empty => Hackers.Length == 0 && Disruptors.Length == 0 && CableTarget == null;
+    public bool Empty => Hackers.Length == 0 && CableTarget == null;
 }

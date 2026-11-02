@@ -72,9 +72,6 @@ public sealed class WFBoardingBanner : BoxContainer
                     ("ships", string.Join(", ", state.Hackers))));
             }
 
-            if (state.Disruptors.Length > 0)
-                warnings.Add(Loc.GetString("wf-boarding-helm-disrupted", ("ships", string.Join(", ", state.Disruptors))));
-
             if (state.CableTarget is { } cable)
                 notices.Add(Loc.GetString("wf-boarding-helm-cable", ("ship", cable)));
         }

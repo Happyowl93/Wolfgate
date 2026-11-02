@@ -2,18 +2,13 @@ using Content.Server._WF.BoardingAction;
 using Content.Shared._WF.BoardingAction;
 using Content.Shared.Popups;
 using Robust.Shared.Audio;
-using Robust.Shared.Configuration;
 
 namespace Content.Server.Shuttles.Systems;
 
 public sealed partial class ShuttleConsoleSystem
 {
-    [Dependency] private IConfigurationManager _wfBoardingConfig = default!;
     [Dependency] private WFBoardingHelmSystem _wfBoardingHelm = default!;
     [Dependency] private WFFtlDisruptionSystem _wfDisruption = default!;
-
-    /// <summary>Whether nearby powered consoles still block jumps.</summary>
-    private bool WfFtlProximityBlock => _wfBoardingConfig.GetCVar(WFBoardingCVars.ProximityBlock);
 
     private WFBoardingHelmState? GetWfBoardingState(EntityUid? grid) => _wfBoardingHelm.GetState(grid);
 

@@ -7,10 +7,8 @@ using Content.Server._Mono.FireControl;
 using Content.Server._Crescent.ShipShields;
 using Content.Server._Crescent.ShipShields.Components;
 using Content.Shared._Crescent.ShipShields;
-using Content.Server._Mono.NPC.HTN;
 using Content.Server._WF.BoardingAction;
 using Content.Server._WF.BoardingAction.Components;
-using Content.Server._WF.Encounters.Components;
 using Content.Server._WF.Tether;
 using Content.Server.Power.Components;
 using Content.Server.Shuttles.Components;
@@ -62,7 +60,6 @@ public sealed class WFBoardingActionTest
 ";
 
     private const string Wall = "WallSolid";
-    private const string Pilot = "MobHuman";
 
     [Test]
     public async Task HeldShipCantJumpUntilEverythingLetsGo()
@@ -82,8 +79,8 @@ public sealed class WFBoardingActionTest
             var first = entities.SpawnEntity(null, MapCoordinates.Nullspace);
             var second = entities.SpawnEntity(null, MapCoordinates.Nullspace);
 
-            disruption.Disrupt(ship, first, first);
-            disruption.Disrupt(ship, second, second);
+            disruption.Disrupt(ship, first);
+            disruption.Disrupt(ship, second);
             Assert.That(shuttles.CanFTL(ship, out _), Is.False);
 
             shuttles.FTLToCoordinates(ship, shuttle, new EntityCoordinates(elsewhere.MapUid, Vector2.Zero), Angle.Zero);
@@ -117,7 +114,7 @@ public sealed class WFBoardingActionTest
             entities.System<ShuttleSystem>().FTLToCoordinates(ship, shuttle,
                 new EntityCoordinates(elsewhere.MapUid, Vector2.Zero), Angle.Zero, startupTime: 30f, hyperspaceTime: 30f);
             Assert.That(entities.HasComponent<FTLComponent>(ship), Is.True);
-            entities.System<WFFtlDisruptionSystem>().Disrupt(ship, ship, ship);
+            entities.System<WFFtlDisruptionSystem>().Disrupt(ship, ship);
         });
 
         await server.WaitRunTicks(2);
@@ -181,7 +178,6 @@ public sealed class WFBoardingActionTest
             var helm = entities.System<WFBoardingHelmSystem>();
             Assert.That(helm.GetState(theirs)?.Hackers, Has.Length.EqualTo(1));
             Assert.That(helm.GetState(theirs)?.Lockdown, Is.False);
-            Assert.That(helm.GetState(theirs)?.Disruptors, Is.Empty, "A hack isn't reported as a disruptor as well.");
             Assert.That(helm.GetState(ours)?.CableTarget, Is.Not.Null);
         });
 
@@ -469,49 +465,6 @@ public sealed class WFBoardingActionTest
     }
 
     [Test]
-    public async Task NpcShipHoldsWhatItShootsAt()
-    {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entities = server.EntMan;
-        var maps = entities.System<SharedMapSystem>();
-
-        EntityUid theirs = default, npc = default;
-        await server.WaitPost(() =>
-        {
-            entities.DeleteEntity(map.Grid);
-            var ours = MakeShip(entities, maps, map.MapId, Vector2.Zero);
-            theirs = MakeShip(entities, maps, map.MapId, new Vector2(100f, 0f));
-            npc = entities.SpawnEntity(Pilot, new EntityCoordinates(ours, new Vector2(0.5f, 0.5f)));
-            entities.EnsureComponent<ShipTargetingComponent>(npc).Target = new EntityCoordinates(theirs, Vector2.One);
-        });
-
-        await server.WaitRunTicks(90);
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.True);
-            Assert.That(entities.System<WFBoardingHelmSystem>().GetState(theirs)?.Disruptors, Has.Length.EqualTo(1));
-            entities.RemoveComponent<ShipTargetingComponent>(npc);
-        });
-
-        await server.WaitRunTicks(90);
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.False);
-
-            entities.EnsureComponent<WFEncounterGridComponent>(theirs);
-            entities.EnsureComponent<ShipTargetingComponent>(npc).Target = new EntityCoordinates(theirs, Vector2.One);
-        });
-
-        await server.WaitRunTicks(90);
-        await server.WaitAssertion(() => Assert.That(entities.HasComponent<WFFtlDisruptedComponent>(theirs), Is.False,
-            "Encounter ships leave their own fights by jumping, so NPC ships never pin them."));
-
-        await pair.CleanReturnAsync();
-    }
-
-    [Test]
     public async Task HelmSurvivesTheHolderBeingDeleted()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
@@ -523,7 +476,7 @@ public sealed class WFBoardingActionTest
         await server.WaitAssertion(() =>
         {
             var holder = MakeShip(entities, maps, map.MapId, new Vector2(100f, 0f));
-            entities.System<WFFtlDisruptionSystem>().Disrupt(map.Grid.Owner, holder, holder);
+            entities.EnsureComponent<WFHackedGridComponent>(map.Grid.Owner).Hackers[holder] = holder;
             entities.DeleteEntity(holder);
 
             Assert.That(entities.System<WFBoardingHelmSystem>().GetState(map.Grid.Owner), Is.Null,

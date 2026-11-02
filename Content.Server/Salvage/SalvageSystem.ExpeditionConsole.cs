@@ -16,7 +16,6 @@ using Content.Shared.NPC; // Frontier
 using Content.Server._NF.Salvage; // Frontier
 using Content.Server.Shuttles.Components;
 using Content.Server._WF.BoardingAction.Components; // WOLFGATE(BoardingAction)
-using Content.Shared._WF.BoardingAction; // WOLFGATE(BoardingAction)
 
 namespace Content.Server.Salvage;
 
@@ -129,7 +128,6 @@ public sealed partial class SalvageSystem
 
             var intersecting = new List<Entity<MapGridComponent>>();
             _mapSystem.FindGridsIntersecting(xform.MapID, bounds, ref intersecting);
-            if (_cfgManager.GetCVar(WFBoardingCVars.ProximityBlock)) // WOLFGATE(BoardingAction): the radius is off by default; hacks and NPC ships hold ships instead.
             foreach (var other in intersecting.Select(g => g.Comp))
             {
                 if (other.Owner == grid ||

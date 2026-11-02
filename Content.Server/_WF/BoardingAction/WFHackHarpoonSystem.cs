@@ -237,7 +237,7 @@ public sealed partial class WFHackHarpoonSystem : EntitySystem
             FindEngines(target, hacked);
 
         EnsureComp<WFHackSourceGridComponent>(source).Guns.Add(gun);
-        _disruption.Disrupt(target, gun, source);
+        _disruption.Disrupt(target, gun);
         SoundAlarm(gun, target);
         _adminLog.Add(LogType.Action, LogImpact.Medium,
             $"{ToPrettyString(source):source} latched a hacking cable into {ToPrettyString(target):target}");

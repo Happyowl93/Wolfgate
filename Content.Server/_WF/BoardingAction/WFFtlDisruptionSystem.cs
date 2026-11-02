@@ -37,9 +37,9 @@ public sealed partial class WFFtlDisruptionSystem : EntitySystem
     }
 
     /// <summary>Starts holding a ship. <paramref name="source"/> is what holds it, and must be the one to let go.</summary>
-    public void Disrupt(EntityUid grid, EntityUid source, EntityUid sourceGrid)
+    public void Disrupt(EntityUid grid, EntityUid source)
     {
-        EnsureComp<WFFtlDisruptedComponent>(grid).Sources[source] = sourceGrid;
+        EnsureComp<WFFtlDisruptedComponent>(grid).Sources.Add(source);
     }
 
     /// <summary>Lets go of a ship. It can jump again once nothing else holds it.</summary>

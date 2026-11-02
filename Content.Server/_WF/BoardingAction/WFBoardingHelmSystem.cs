@@ -39,13 +39,6 @@ public sealed partial class WFBoardingHelmSystem : EntitySystem
             state.Lockdown = hacked.LockedOut.Count > 0;
         }
 
-        if (TryComp<WFFtlDisruptedComponent>(ship, out var disrupted))
-        {
-            state.Disruptors = Names(disrupted.Sources
-                .Where(source => !HasComp<WFHackHarpoonGunComponent>(source.Key))
-                .Select(source => source.Value));
-        }
-
         if (_hack.CableTarget(ship) is { } cable)
             state.CableTarget = ShipName(cable);
 
