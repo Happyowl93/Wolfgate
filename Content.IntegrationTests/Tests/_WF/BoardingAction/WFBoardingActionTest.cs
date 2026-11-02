@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Content.Client._WF.BoardingAction;
+using Content.Client._WF.Cockpit;
 using Content.Server._Mono.FireControl;
 using Content.Server._Crescent.ShipShields;
 using Content.Server._Crescent.ShipShields.Components;
@@ -23,6 +25,7 @@ using Content.Shared.Tiles;
 using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Events;
 using Content.Shared.Weapons.Ranged.Systems;
+using Robust.Client.UserInterface.Controls;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Maths;
@@ -639,6 +642,14 @@ public sealed class WFBoardingActionTest
 
             banner.SetState(new WFBoardingHelmState());
             Assert.That(banner.Visible, Is.False);
+
+            // The console theme clips every button's text, as it does in the cockpit.
+            banner.SetState(new WFBoardingHelmState { CableTarget = "Raider" });
+            var release = WFCockpitLease.Descendants(banner).OfType<Button>().Single();
+            release.ClipText = true;
+            banner.Measure(new Vector2(1700f, 100f));
+            Assert.That(release.DesiredSize.X, Is.GreaterThanOrEqualTo(WFBoardingBanner.ReleaseWidth),
+                "The release button keeps its width when its text is clipped.");
         });
 
         await pair.CleanReturnAsync();

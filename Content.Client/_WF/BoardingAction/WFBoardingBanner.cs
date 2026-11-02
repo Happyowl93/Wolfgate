@@ -10,6 +10,9 @@ public sealed class WFBoardingBanner : BoxContainer
     private static readonly Color WarningText = Color.FromHex("#ff9a8a");
     private static readonly Color NoticeText = Color.FromHex("#9ff2ff");
 
+    /// <summary>Room for the release button's label under any console skin.</summary>
+    public const float ReleaseWidth = 140f;
+
     private readonly PanelContainer _warning;
     private readonly RichTextLabel _warningLabel;
     private readonly PanelContainer _notice;
@@ -34,6 +37,8 @@ public sealed class WFBoardingBanner : BoxContainer
         row.AddChild(_release = new Button
         {
             Text = Loc.GetString("wf-boarding-helm-release"),
+            // The console theme clips button text, which stops the label holding the button open.
+            MinWidth = ReleaseWidth,
             Margin = new Thickness(0, 4, 6, 4),
             VerticalAlignment = VAlignment.Center,
         });
