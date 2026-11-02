@@ -16,8 +16,9 @@ Stations, protected grids and ships docked to them can't be tackled (`IsTackleab
 
 ## Hacking harpoon
 
-`WFHackHarpoonGun` is a light hardpoint gun fired from gunnery or the cockpit, built on the Tether module's harpoon
-(`ShipHarpoonTurret` with `manned: false`). It is loaded by hand with one `WFHackDart`. A dart that glances, misses or
+`WFHackHarpoonGun` is a universal gun for any hardpoint of Light size or larger, fired from gunnery or the cockpit and
+built on the Tether module's harpoon (`ShipHarpoonTurret` with `manned: false`). It is loaded by hand with one
+`WFHackDart`. A dart that glances, misses or
 meets a shield is destroyed, and a hit has to be square on, as with any harpoon.
 
 The cable (`WFRopeHackCable`) pulls on nothing and has sparks running along it. It pays out as the ships move, keeping

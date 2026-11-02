@@ -140,7 +140,7 @@
     repairTime: 10
     repairCost: 20
   - type: HardpointAnchorableOnly
-    class: Ballistic
+    class: Universal
     size: Light
 
 - type: entity
