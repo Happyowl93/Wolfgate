@@ -16,6 +16,10 @@ Stations, protected grids and ships docked to them can't be tackled (`IsTackleab
 
 ## Hacking harpoon
 
+The gun and its darts aren't sold to the public. PDV buys them at its requisition station with Doubloons, the
+Underground at `UndergroundVend` with Telecrystals, and Viper Group researches `WFViperGroupHackHarpoon` and prints them
+at the Viper lathe. The listings, tech and recipes are in `hack_harpoon_sources.yml`.
+
 `WFHackHarpoonGun` is a universal gun for any hardpoint of Light size or larger, fired from gunnery or the cockpit and
 built on the Tether module's harpoon (`ShipHarpoonTurret` with `manned: false`). It is loaded by hand with one
 `WFHackDart`. A dart that glances, misses or
@@ -72,6 +76,7 @@ signal shot passes through.
 ### Prototypes
 
 - [`Resources/Prototypes/_WF/BoardingAction/hack_harpoon.yml`](../../../Resources/Prototypes/_WF/BoardingAction/hack_harpoon.yml)
+- [`Resources/Prototypes/_WF/BoardingAction/hack_harpoon_sources.yml`](../../../Resources/Prototypes/_WF/BoardingAction/hack_harpoon_sources.yml)
 
 ### Localization
 
@@ -96,5 +101,6 @@ signal shot passes through.
 - [`Content.Server/Shuttles/Systems/ShuttleConsoleSystem.FTL.cs`](../../Shuttles/Systems/ShuttleConsoleSystem.FTL.cs): CanFTL's reason never reaches the pilot, so a held ship says why here.
 - [`Content.Server/Shuttles/Systems/ShuttleSystem.FasterThanLight.cs`](../../Shuttles/Systems/ShuttleSystem.FasterThanLight.cs): a disrupted or hacked ship can't leave, whatever starts the jump.
 - [`Content.Shared/Shuttles/BUIStates/ShuttleBoundUserInterfaceState.cs`](../../../Content.Shared/Shuttles/BUIStates/ShuttleBoundUserInterfaceState.cs): hacks and disruption, for the helm banner.
+- [`Resources/Prototypes/_Mono/Recipes/Lathes/Packs/Factions/viper_group.yml`](../../../Resources/Prototypes/_Mono/Recipes/Lathes/Packs/Factions/viper_group.yml): Viper Group researches the hacking harpoon
 
 <!-- WOLFGATE-GENERATED END -->

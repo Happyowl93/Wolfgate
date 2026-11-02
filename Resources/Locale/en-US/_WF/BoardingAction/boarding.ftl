@@ -1,6 +1,7 @@
 wf-boarding-ftl-disrupted = FTL disrupted.
 wf-boarding-unknown-ship = Unidentified vessel
 wf-boarding-rope-hack-cable = hacking cable
+wf-boarding-tech-hack-harpoon = ARACHNE Hacking Harpoon
 
 wf-boarding-helm-hack = HACK IN PROGRESS: {$ships}
     FTL offline. Cut the cable or pry out the dart.
