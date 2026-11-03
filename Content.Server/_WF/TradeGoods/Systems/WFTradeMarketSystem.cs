@@ -52,6 +52,9 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
 
     private readonly Dictionary<string, int?> _cashValues = new();
 
+    /// <summary>Each station id's economy role, built on first use.</summary>
+    private Dictionary<string, WFTradeStationPrototype>? _roles;
+
     public override void Initialize()
     {
         base.Initialize();
@@ -73,6 +76,9 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
     {
         if (args.WasModified<EntityPrototype>())
             _cashValues.Clear();
+
+        if (args.WasModified<WFTradeStationPrototype>())
+            _roles = null;
     }
 
     /// <summary>The market profile a grid uses.</summary>

@@ -122,13 +122,13 @@ public sealed partial class WFTradeShortageSystem : EntitySystem
     {
         var profile = _proto.Index(WFTradeMarketSystem.DefaultProfile);
         _active.RemoveAll(shortage => shortage is { Report: true, Grid: { } grid }
-                                      && !_market.Group(profile, shortage.Group).Any(good => _market.Row(grid, good).ScarceSince != null));
+                                      && !_market.Group(profile, shortage.Group).Any(good => _market.TryGetRow(grid, good, out var row) && row.ScarceSince != null));
     }
 
     /// <summary>Whether a good has been scarce at a station long enough to report.</summary>
     private bool Due(EntityUid grid, string good, WFTradeMarketPrototype profile)
     {
-        return _market.Row(grid, good).ScarceSince is { } since && _timing.CurTime - since >= profile.ShortageDelay;
+        return _market.TryGetRow(grid, good, out var row) && row.ScarceSince is { } since && _timing.CurTime - since >= profile.ShortageDelay;
     }
 
     /// <summary>Why a station is short of a good, as players are told it.</summary>
@@ -225,13 +225,17 @@ public sealed partial class WFTradeShortageSystem : EntitySystem
         if (picked.SectorWide)
             return StartBoom(picked, goodsName, minutes);
 
-        // The worst-off station first, and among equals any of them.
+        // The worst-off station first, and among equals any of them, judged only by goods scarce long enough to report.
         _random.Shuffle(candidates);
         var groupGoods = _market.Group(profile, picked.Group);
-        var target = candidates.MinBy(grid => groupGoods.Min(good => _market.Level(grid, good)));
-        var worst = groupGoods.MinBy(good => _market.Level(target, good));
-        if (Due(target, worst, profile))
+        var due = candidates
+            .Select(grid => (Grid: grid, Goods: groupGoods.Where(good => Due(grid, good, profile)).ToList()))
+            .Where(entry => entry.Goods.Count > 0)
+            .ToList();
+        if (due.Count > 0)
         {
+            var (target, goods) = due.MinBy(entry => entry.Goods.Min(good => _market.KnownLevel(entry.Grid, good)));
+            var worst = goods.MinBy(good => _market.KnownLevel(target, good))!;
             var level = WFTradeMarketSystem.LevelFactor(profile, _market.PricedLevel(target, worst));
             var cause = Cause(target, worst, profile);
             var report = new WFTradeShortage(target, picked.Group, level, _timing.CurTime + TimeSpan.FromHours(12), goodsName, null, cause);
@@ -240,10 +244,12 @@ public sealed partial class WFTradeShortageSystem : EntitySystem
             return report;
         }
 
+        // Only a forced shortage gets here: no gap behind it, so it runs at its prototype's price.
+        var forcedTarget = candidates.MinBy(grid => groupGoods.Min(good => _market.KnownLevel(grid, good)));
         var factor = MathF.Round(_random.NextFloat(picked.MinFactor, picked.MaxFactor), 1);
-        var shortage = new WFTradeShortage(target, picked.Group, factor, _timing.CurTime + picked.Duration, goodsName);
+        var shortage = new WFTradeShortage(forcedTarget, picked.Group, factor, _timing.CurTime + picked.Duration, goodsName);
         _active.Add(shortage);
-        _market.Announce(Loc.GetString("wf-trade-shortage-start", ("station", Name(target)), ("goods", goodsName), ("factor", WFTradeMarketSystem.Shown(factor)), ("minutes", minutes)), target);
+        _market.Announce(Loc.GetString("wf-trade-shortage-start", ("station", Name(forcedTarget)), ("goods", goodsName), ("factor", WFTradeMarketSystem.Shown(factor)), ("minutes", minutes)), forcedTarget);
         return shortage;
     }
 

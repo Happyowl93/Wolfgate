@@ -201,7 +201,7 @@ public sealed partial class WFTradeRushSystem : EntitySystem
         var minutes = _random.Next(picked.Minutes.X, Math.Max(picked.Minutes.X, picked.Minutes.Y) + 1);
         var rush = new WFTradeRush
         {
-            Grid = candidates.MinBy(grid => pickedGoods.Min(good => _market.Level(grid, good))),
+            Grid = candidates.MinBy(grid => pickedGoods.Min(good => _market.KnownLevel(grid, good))),
             Group = picked.Group,
             Goods = picked.Goods,
             Total = count,

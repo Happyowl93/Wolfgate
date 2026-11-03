@@ -50,6 +50,9 @@ public sealed partial class WFTradeFreightSystem : EntitySystem
     /// <summary>What each simulated run has left to unload.</summary>
     private readonly Dictionary<EntityUid, Dictionary<string, int>> _holds = new();
 
+    /// <summary>Crates each run has unloaded so far, so a lost run writes off only what it still carried.</summary>
+    private readonly Dictionary<EntityUid, Dictionary<string, int>> _unloaded = new();
+
     /// <summary>The hulls each run loaded cargo onto.</summary>
     private readonly Dictionary<EntityUid, HashSet<EntityUid>> _freighters = new();
 
@@ -77,6 +80,7 @@ public sealed partial class WFTradeFreightSystem : EntitySystem
         _reached.Clear();
         _freighters.Clear();
         _holds.Clear();
+        _unloaded.Clear();
     }
 
     private void OnCargoLoaded(ref WFEncounterCargoLoadedEvent args)
@@ -158,6 +162,8 @@ public sealed partial class WFTradeFreightSystem : EntitySystem
             goods.Add(good);
             supplied.Add(_market.GoodName(good));
             var unloaded = Math.Min(count, (int) MathF.Ceiling(delivered / profile.FreightCrateStock));
+            var unloadedSoFar = _unloaded.GetOrNew(args.Encounter);
+            unloadedSoFar[good] = unloadedSoFar.GetValueOrDefault(good) + unloaded;
             if (simulated)
             {
                 hold[good] = count - unloaded;
@@ -204,6 +210,7 @@ public sealed partial class WFTradeFreightSystem : EntitySystem
         _reached.Remove(args.Encounter, out var reached);
         _freighters.Remove(args.Encounter, out var hulls);
         _holds.Remove(args.Encounter);
+        _unloaded.Remove(args.Encounter, out var unloaded);
 
         // A fight decided with a freighter still flying for the run didn't lose it.
         if (args.Resolution == WFEncounterResolution.Decided
@@ -225,10 +232,11 @@ public sealed partial class WFTradeFreightSystem : EntitySystem
             if (reached?.Contains(stop) == true || TerminatingOrDeleted(stop))
                 continue;
 
-            // What it was bringing is gone, and the sector has to make it again.
+            // What it was still bringing is gone, and the sector has to make it again.
             foreach (var good in goods)
             {
-                _market.LoseInbound(stop, good, manifest.Crates.Count(crate => crate.Id == good) * crateStock / (float) unreached);
+                var left = Math.Max(0, manifest.Crates.Count(crate => crate.Id == good) - (unloaded?.GetValueOrDefault(good) ?? 0));
+                _market.LoseInbound(stop, good, left * crateStock / (float) unreached);
             }
 
             _shortages.NoteLost(stop);

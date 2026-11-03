@@ -8,6 +8,7 @@ using Content.Shared._WF.TradeGoods;
 using Content.Shared.VendingMachines;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
+using Robust.Shared.Timing;
 
 namespace Content.Server._WF.TradeGoods.Systems;
 
@@ -27,6 +28,11 @@ public sealed partial class WFTradeMarketSystem
     private static readonly TimeSpan VendorInterval = TimeSpan.FromSeconds(5);
 
     private TimeSpan _nextVendorRefresh;
+
+    /// <summary>The best price any open chute table lists per good, worked out once per tick.</summary>
+    private readonly Dictionary<string, int> _openBest = new();
+
+    private GameTick _openBestTick;
 
     private void InitializeBuy()
     {
@@ -220,7 +226,18 @@ public sealed partial class WFTradeMarketSystem
         if (!Restocking(grid, good))
             return null;
 
-        var best = Chutes().Where(chute => !IsHiddenChute(chute.Chute)).Select(chute => BasePrice(chute.Dispenser, good) ?? 0).DefaultIfEmpty(0).Max();
+        if (_openBestTick != _timing.CurTick)
+        {
+            _openBestTick = _timing.CurTick;
+            _openBest.Clear();
+        }
+
+        if (!_openBest.TryGetValue(good, out var best))
+        {
+            best = Chutes().Where(chute => !IsHiddenChute(chute.Chute)).Select(chute => BasePrice(chute.Dispenser, good) ?? 0).DefaultIfEmpty(0).Max();
+            _openBest[good] = best;
+        }
+
         return best > 0 ? best : null;
     }
 

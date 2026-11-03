@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Server._WF.TradeGoods.Components;
 using Content.Shared._WF.TradeGoods;
@@ -29,13 +30,32 @@ public sealed partial class WFTradeMarketSystem
         if (!TryComp<WFTradeStationComponent>(grid, out var station))
             return null;
 
-        foreach (var role in _proto.EnumeratePrototypes<WFTradeStationPrototype>())
+        if (_roles == null)
         {
-            if (role.Stations.Contains(station.Id))
-                return role;
+            _roles = new Dictionary<string, WFTradeStationPrototype>();
+            foreach (var role in _proto.EnumeratePrototypes<WFTradeStationPrototype>())
+            {
+                foreach (var id in role.Stations)
+                {
+                    _roles.TryAdd(id, role);
+                }
+            }
         }
 
-        return null;
+        return _roles.GetValueOrDefault(station.Id);
+    }
+
+    /// <summary>A good's row at a station if it keeps one. Unlike <see cref="Row"/>, never opens one.</summary>
+    public bool TryGetRow(EntityUid grid, string good, [NotNullWhen(true)] out WFTradeRow? row)
+    {
+        row = null;
+        return TryComp<WFTradeMarketComponent>(grid, out var market) && market.Ledger.TryGetValue(good, out row);
+    }
+
+    /// <summary>A good's level where the station keeps a row for it, or normal where it doesn't.</summary>
+    public float KnownLevel(EntityUid grid, string good)
+    {
+        return TryGetRow(grid, good, out var row) ? row.Stock / Profile(grid).StockTarget : 1f;
     }
 
     /// <summary>A good's row at a station, opening it the first time it's asked for: full outside the economy, a rolled share of target in it.</summary>
@@ -143,7 +163,7 @@ public sealed partial class WFTradeMarketSystem
 
         var profile = Profile(grid);
         var service = _proto.Index(id);
-        return MathF.Max(1f, service.Goods.Max(good => LevelFactor(profile, PricedLevel(grid, good))));
+        return MathF.Max(1f, service.Goods.Max(good => TryGetRow(grid, good, out var row) ? LevelFactor(profile, row.Priced) : 1f));
     }
 
     /// <summary>The goods a station's chutes would take only because it is scarce of them.</summary>

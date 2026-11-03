@@ -210,7 +210,9 @@ public sealed partial class WFEncounterSchedulerSystem : EntitySystem
             return;
 
         _nextFreight = _timing.CurTime + FreightInterval();
-        TryScheduleFreight(out _);
+        // A run that couldn't be placed tries again soon; a full cap waits the whole interval.
+        if (!TryScheduleFreight(out _) && _encounters.ActiveFreight() < _freightMaxActive)
+            _nextFreight = _timing.CurTime + RetryDelay;
     }
 
     private TimeSpan FreightInterval()

@@ -400,7 +400,9 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
     /// <summary>A good's shelf at a station for its row's bar, or null where the station stands outside the sector economy.</summary>
     private float? Shelf(EntityUid grid, string good, WFTradeMarketPrototype profile)
     {
-        return profile.ContrabandGoods.Contains(good) || _market.Role(grid) == null ? null : _market.Level(grid, good);
+        return profile.ContrabandGoods.Contains(good) || _market.Role(grid) == null || !_market.TryGetRow(grid, good, out _)
+            ? null
+            : _market.KnownLevel(grid, good);
     }
 
     /// <summary>The Sector tab: every good's stock, flow and who is short of it, scarcest first.</summary>

@@ -26,6 +26,7 @@ public sealed class EconomyLedgerTest
     private const string Supplies = "TradeGoodSupplies";
     private const string Medical = "TradeGoodMedicalSupplies";
     private const string Chemicals = "TradeGoodChemicalSupplies";
+    private const string Volatile = "TradeGoodChemicalsVolatile";
     private const string Metals = "TradeGoodMetals";
     private const string Ammo = "TradeGoodAmmo";
     private const string Fission = "TradeGoodFissionFuel";
@@ -313,6 +314,39 @@ public sealed class EconomyLedgerTest
             market.Row(grid, Medical).Stock = profile.StockTarget;
             economy.Tick(0.001f);
             Assert.That(shortages.Active, Does.Not.Contain(report), "A report should end with the gap.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ShortagesReportTheGapThatIsDueNotAFreshDip()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var market = entMan.System<WFTradeMarketSystem>();
+        var shortages = entMan.System<WFTradeShortageSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            shortages.Clear();
+            TradeTestWorld.MarketChute(entMan, map);
+            var grid = map.Grid.Owner;
+            entMan.EnsureComponent<WFTradeStationComponent>(grid).Id = "Zvezda";
+            var profile = market.Profile(grid);
+            var now = server.Timing.CurTime;
+
+            // Chemical supplies have been short long enough; volatiles sit lower but only just dipped.
+            market.SetVendorStock(grid, Chemicals, 20);
+            market.Row(grid, Chemicals).ScarceSince = now - profile.ShortageDelay;
+            market.SetVendorStock(grid, Volatile, 0);
+            market.Row(grid, Volatile).ScarceSince = now;
+
+            var shortage = shortages.Start(new ProtoId<WFTradeShortagePrototype>("WFTradeShortageChemicals"))!;
+            Assert.That(shortage.Report, Is.True, "A due gap should be reported even when a fresher dip sits lower.");
+            Assert.That(shortage.Grid, Is.EqualTo(grid));
         });
 
         await pair.CleanReturnAsync();

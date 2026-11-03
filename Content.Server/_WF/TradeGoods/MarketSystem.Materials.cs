@@ -40,6 +40,9 @@ public sealed partial class MarketSystem
     /// <summary>Units priced this tick per station and material: a sale walks down the curve instead of paying one rate.</summary>
     private readonly Dictionary<(EntityUid Station, string Good), int> _wfAhead = new();
 
+    /// <summary>Each station's console carts this tick, so a pallet's items don't search the consoles one by one.</summary>
+    private readonly Dictionary<EntityUid, List<List<MarketData>>> _wfCarts = new();
+
     private GameTick _wfTick;
 
     public override void Update(float frameTime)
@@ -123,12 +126,16 @@ public sealed partial class MarketSystem
             _wfTick = _timing.CurTick;
             _wfAdjusted.Clear();
             _wfAhead.Clear();
+            _wfCarts.Clear();
         }
 
         if (_wfAdjusted.TryGetValue(sold, out var known))
             return known;
 
-        var adjustment = WfAdjustment(sold, (station, market), WfCarts(station), _tradeMarket.Profile(null));
+        if (!_wfCarts.TryGetValue(station, out var carts))
+            _wfCarts[station] = carts = WfCarts(station);
+
+        var adjustment = WfAdjustment(sold, (station, market), carts, _tradeMarket.Profile(null));
         _wfAdjusted[sold] = adjustment;
         return adjustment;
     }
