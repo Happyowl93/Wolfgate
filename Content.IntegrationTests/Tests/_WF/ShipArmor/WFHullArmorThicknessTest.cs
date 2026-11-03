@@ -46,7 +46,7 @@ public sealed class WFHullArmorThicknessTest
                 foreach (var (id, expected) in Expected)
                 {
                     var proto = protoMan.Index<EntityPrototype>(id);
-                    var actual = proto.TryGetComponent<ArmorThicknessComponent>(out var comp, compFactory)
+                    var actual = proto.TryComp<ArmorThicknessComponent>(out var comp, compFactory)
                         ? comp!.Thickness
                         : -1;
                     Assert.That(actual, Is.EqualTo(expected), $"{id}: {actual}");

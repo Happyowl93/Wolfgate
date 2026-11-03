@@ -65,11 +65,11 @@ public sealed partial class WFCrewTest
                 var position = SEntMan.GetComponent<TransformComponent>(member).Coordinates;
                 if (pilotRole)
                     return SEntMan.GetComponent<WFPilotDutyComponent>(member).AtHelm
-                        && position.InRange(SEntMan, SEntMan.GetComponent<TransformComponent>(console).Coordinates, 2f);
+                        && SEntMan.System<SharedTransformSystem>().InRange(position, SEntMan.GetComponent<TransformComponent>(console).Coordinates, 2f);
                 if (gunnerRole)
                     return SEntMan.GetComponent<WFGunnerDutyComponent>(member).AtConsole
-                        && position.InRange(SEntMan, SEntMan.GetComponent<TransformComponent>(console).Coordinates, 2f);
-                return position.InRange(SEntMan, post, 1.6f);
+                        && SEntMan.System<SharedTransformSystem>().InRange(position, SEntMan.GetComponent<TransformComponent>(console).Coordinates, 2f);
+                return SEntMan.System<SharedTransformSystem>().InRange(position, post, 1.6f);
             }
 
             await WaitUntil(AtStation, 600, () => Describe(member));

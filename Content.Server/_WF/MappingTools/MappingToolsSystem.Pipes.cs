@@ -382,7 +382,7 @@ public sealed partial class MappingToolsSystem
 
             if (layer != AtmosPipeLayer.Primary)
             {
-                if (!prototype.TryGetComponent<AtmosPipeLayersComponent>(out var layers, _factory) ||
+                if (!prototype.TryComp<AtmosPipeLayersComponent>(out var layers, _factory) ||
                     !_pipeLayers.TryGetAlternativePrototype(layers, layer, out var alternative) ||
                     !_prototypes.HasIndex<EntityPrototype>(alternative))
                 {

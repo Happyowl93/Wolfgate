@@ -1,5 +1,6 @@
 #nullable enable annotations
 
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -429,7 +430,7 @@ public sealed class WFGunnerySupplyTest
             var launched = em.EntityQuery<WFFlareDecoyComponent>(true).ToArray();
             Assert.That(launched, Is.Not.Empty, "The real Sunny ammunition path must mark its emitted countermeasures.");
             foreach (var flare in launched)
-                em.DeleteEntity(flare.Owner);
+                em.DeleteEntity(flare.Uid());
             em.RemoveComponent<GunComponent>(launcher);
 
             // Only the fixture's emitted flare participates in these range/arc comparisons.

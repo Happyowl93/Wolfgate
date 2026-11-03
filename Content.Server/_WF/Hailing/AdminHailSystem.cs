@@ -15,7 +15,7 @@ namespace Content.Server._WF.Hailing;
 /// The admin verb on shuttle consoles that hails a ship as God. The admin needs no ship of their own: a
 /// stand-in entity takes their end of the hail, and they talk through the ordinary hail window.
 /// </summary>
-public sealed class AdminHailSystem : EntitySystem
+public sealed partial class AdminHailSystem : EntitySystem
 {
     [Dependency] private IAdminManager _admins = default!;
     [Dependency] private EuiManager _eui = default!;

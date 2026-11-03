@@ -1,5 +1,6 @@
 #nullable enable annotations
 
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Reflection;
 using Content.Client._Mono.FireControl.UI;
 using Content.Client.Shuttles.UI;
@@ -90,7 +91,7 @@ public sealed class RadarDisplaySettingsTest
         {
             await client.WaitPost(() =>
             {
-                scanner?.Dispose();
+                scanner?.Teardown();
                 cfg.SetCVar(WolfgateCVars.RadarShowIff, original.Item1);
                 cfg.SetCVar(WolfgateCVars.RadarShowIffDetailed, original.Item2);
                 cfg.SetCVar(WolfgateCVars.RadarShowDocks, original.Item3);

@@ -30,7 +30,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 // wolfmed.ipc_core_heat_k the core loses health, faster the hotter it is, and the chassis is in thermal shutdown
 // (Dying, cause CoreHeat, with Succumb and Last Words); under wolfmed.ipc_core_heat_wake_k it comes back online.
 // A core at 0 is core failure, the ordinary organ death path.
-public sealed class WolfmedOverheatSystem : EntitySystem
+public sealed partial class WolfmedOverheatSystem : EntitySystem
 {
     /// <summary>Pressure key for thermal shutdown. Full, so the chassis is out while the core cooks.</summary>
     public const string CoreHeatPressure = "coreheat";

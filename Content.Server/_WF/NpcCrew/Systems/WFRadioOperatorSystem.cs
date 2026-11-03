@@ -50,7 +50,7 @@ public readonly record struct WFRadioTransmission(
 /// alert channel. Driven by ship and crew events plus a once-a-second look for boarders, so it works while the
 /// officer's HTN sleeps. He transmits as himself and only while he is up, so downing him ends the broadcasts.
 /// </summary>
-public sealed class WFRadioOperatorSystem : EntitySystem
+public sealed partial class WFRadioOperatorSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private ILocalizationManager _loc = default!;
@@ -405,7 +405,7 @@ public sealed class WFRadioOperatorSystem : EntitySystem
             return;
 
         var vessel = string.Empty;
-        if (TryComp<TransformComponent>(hostile, out var hostileXform)
+        if (TryComp(hostile, out TransformComponent? hostileXform)
             && (HasComp<MapGridComponent>(hostile) ? hostile : hostileXform.GridUid) is { } hostileGrid
             && hostileGrid != grid
             && Name(hostileGrid) is { Length: > 0 } hostileName)

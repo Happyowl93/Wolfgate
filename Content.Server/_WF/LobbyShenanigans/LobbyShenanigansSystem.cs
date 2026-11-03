@@ -10,7 +10,7 @@ namespace Content.Server._WF.LobbyShenanigans;
 /// Sets a lobby shenanigan off for every client, or clears them all. Called only by the SSymphony panel's endpoint, behind the admin API
 /// token; clients have no way to ask for one.
 /// </summary>
-public sealed class LobbyShenanigansSystem : EntitySystem
+public sealed partial class LobbyShenanigansSystem : EntitySystem
 {
     [Dependency] private IPlayerManager _players = default!;
     [Dependency] private GameTicker _ticker = default!;

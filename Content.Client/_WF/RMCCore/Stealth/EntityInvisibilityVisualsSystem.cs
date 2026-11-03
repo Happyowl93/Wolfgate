@@ -7,6 +7,12 @@ namespace Content.Client._WF.RMCCore.Stealth;
 
 public sealed partial class EntityInvisibilityVisualsSystem : EntitySystem
 {
+    /// <summary>The one post-shader slot that auras and invisibility take turns on.</summary>
+    public const string PostShaderId = "rmc-visibility";
+
+    private static readonly ProtoId<ShaderPrototype> RMCInvisibleProto = "RMCInvisible";
+
+    [Dependency] private SpriteSystem _sprite = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
 
     public override void Initialize()
@@ -22,7 +28,11 @@ public sealed partial class EntityInvisibilityVisualsSystem : EntitySystem
         if (!TryComp(ent, out SpriteComponent? sprite))
             return;
 
-        sprite.PostShader = _prototypes.Index<ShaderPrototype>("RMCInvisible").InstanceUnique();
+        _sprite.SetPostShader((ent, sprite), new SpriteComponent.PostShaderArgs
+        {
+            Id = PostShaderId,
+            Shader = _prototypes.Index<ShaderPrototype>(RMCInvisibleProto).InstanceUnique(),
+        });
     }
 
     private void OnShutdown(Entity<EntityTurnInvisibleComponent> ent, ref ComponentShutdown args)
@@ -33,7 +43,7 @@ public sealed partial class EntityInvisibilityVisualsSystem : EntitySystem
         if (!TryComp(ent, out SpriteComponent? sprite))
             return;
 
-        sprite.PostShader = null;
+        _sprite.RemovePostShader((ent, sprite), PostShaderId);
     }
 
     public override void Update(float frameTime)
@@ -42,7 +52,8 @@ public sealed partial class EntityInvisibilityVisualsSystem : EntitySystem
         while (invisible.MoveNext(out var uid, out var comp, out var sprite))
         {
             var opacity =  TryComp<EntityActiveInvisibleComponent>(uid, out var activeInvisible) ? activeInvisible.Opacity : 1;
-            sprite.PostShader?.SetParameter("visibility", opacity);
+            if (_sprite.TryGetPostShader(sprite, PostShaderId, out var shader))
+                shader.Shader.SetParameter("visibility", opacity);
         }
     }
 }

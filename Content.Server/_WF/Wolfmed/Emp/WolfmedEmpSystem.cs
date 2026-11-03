@@ -19,7 +19,7 @@ namespace Content.Server._WF.Wolfmed.Emp;
 /// per body and resolved together at the end of the tick. That is what lets one pulse share a per-body budget: a
 /// whole chassis takes a hard hit rather than ten separate ones, and a single cybernetic arm takes it all.
 /// </remarks>
-public sealed class WolfmedEmpSystem : EntitySystem
+public sealed partial class WolfmedEmpSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _config = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;

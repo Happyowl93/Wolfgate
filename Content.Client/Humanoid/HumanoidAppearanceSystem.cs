@@ -226,6 +226,7 @@ public sealed partial class HumanoidAppearanceSystem : SharedHumanoidAppearanceS
         humanoid.SkinColor = profile.Appearance.SkinColor;
         humanoid.EyeColor = profile.Appearance.EyeColor;
         ApplyLegStyle(profile, humanoid); // WOLFGATE(LegStyle): the picked legs replace the species' leg layers
+        ApplyAugmentVisuals(uid, profile, humanoid); // WOLFGATE(Augments): the doll shows the picked augments, client-side only
         humanoid.Height = profile.Appearance.Height;
         humanoid.Width = profile.Appearance.Width;
 
@@ -336,7 +337,7 @@ public sealed partial class HumanoidAppearanceSystem : SharedHumanoidAppearanceS
         //    && setting.AllowsMarkings;
         visible &= humanoid.BaseLayers.TryGetValue(markingPrototype.BodyPart, out var setting)
            && setting.AllowsMarkings
-           || DrawsMismatched(humanoid);
+           || DrawsMismatched(humanoid) && setting?.AllowsMarkings != false; // WOLFGATE(Augments): an augment's layer takes no markings
         // WOLFGATE END
 
         // WOLFGATE(Genitals): a removed undergarment is not drawn for viewers who pass the anatomy gate
@@ -377,6 +378,7 @@ public sealed partial class HumanoidAppearanceSystem : SharedHumanoidAppearanceS
                 continue;
             }
 
+            targetLayer = _legStyle.MarkingAnchor((uid, sprite), layerSlot, targetLayer); // WOLFGATE(LegStyle): side views overlap the limb pair, so its markings draw above both
             var slotOffset = slotOffsets.TryGetValue(layerSlot, out var o) ? o : 0;
             slotOffsets[layerSlot] = slotOffset + 1;
             // WOLFGATE END

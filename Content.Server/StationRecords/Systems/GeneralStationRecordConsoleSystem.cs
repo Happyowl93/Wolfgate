@@ -37,7 +37,8 @@ public sealed partial class GeneralStationRecordConsoleSystem : EntitySystem
             subs.Event<SetStationRecordFilter>(OnFiltersChanged);
             subs.Event<DeleteStationRecord>(OnRecordDelete);
             subs.Event<AdjustStationJobMsg>(OnAdjustJob); // Frontier
-            subs.Event<SetStationAdvertisementMsg>(OnAdvertisementChanged); // Frontier
+            // WOLFGATE(StationRoles): ship adverts were only shown on the removed crew tab
+            // subs.Event<SetStationAdvertisementMsg>(OnAdvertisementChanged); // Frontier
         });
     }
 
@@ -73,6 +74,10 @@ public sealed partial class GeneralStationRecordConsoleSystem : EntitySystem
         var stationUid = _station.GetOwningStation(ent);
         if (stationUid is EntityUid station)
         {
+            // WOLFGATE(StationRoles): ships recruit through Crew Setup, so they have no slots to open
+            if (HasComp<ExtraShuttleInformationComponent>(station))
+                return;
+
             // Frontier: check access - hack because we don't have an AccessReaderComponent, it's the station
             if (TryComp(stationUid, out StationJobsComponent? stationJobs) &&
                 (stationJobs.Groups.Count > 0 || stationJobs.Tags.Count > 0))
@@ -116,18 +121,20 @@ public sealed partial class GeneralStationRecordConsoleSystem : EntitySystem
         }
     }
 
-    private void OnAdvertisementChanged(Entity<GeneralStationRecordConsoleComponent> ent, ref SetStationAdvertisementMsg msg)
-    {
-        var stationUid = _station.GetOwningStation(ent);
-        if (stationUid is EntityUid station
-            && TryComp<ExtraShuttleInformationComponent>(station, out var vesselInfo))
-        {
-            vesselInfo.Advertisement = msg.Advertisement;
-            _adminLog.Add(LogType.ShuttleInfoChanged, $"{ToPrettyString(msg.Actor):actor} set their shuttle {ToPrettyString(station)}'s ad text to {vesselInfo.Advertisement}");
-            UpdateUserInterface(ent);
-            _stationJobsSystem.UpdateJobsAvailable(); // Nasty - ideally this sends out partial information - one ship changed its advertisement.
-        }
-    }
+    // WOLFGATE(StationRoles) START: ship adverts were only shown on the removed crew tab
+    // private void OnAdvertisementChanged(Entity<GeneralStationRecordConsoleComponent> ent, ref SetStationAdvertisementMsg msg)
+    // {
+    //     var stationUid = _station.GetOwningStation(ent);
+    //     if (stationUid is EntityUid station
+    //         && TryComp<ExtraShuttleInformationComponent>(station, out var vesselInfo))
+    //     {
+    //         vesselInfo.Advertisement = msg.Advertisement;
+    //         _adminLog.Add(LogType.ShuttleInfoChanged, $"{ToPrettyString(msg.Actor):actor} set their shuttle {ToPrettyString(station)}'s ad text to {vesselInfo.Advertisement}");
+    //         UpdateUserInterface(ent);
+    //         _stationJobsSystem.UpdateJobsAvailable(); // Nasty - ideally this sends out partial information - one ship changed its advertisement.
+    //     }
+    // }
+    // WOLFGATE END
     // End Frontier: job counts, advertisements
 
     private void UpdateUserInterface(Entity<GeneralStationRecordConsoleComponent> ent)
@@ -138,12 +145,16 @@ public sealed partial class GeneralStationRecordConsoleSystem : EntitySystem
         // Frontier: jobs, advertisements
         IReadOnlyDictionary<ProtoId<JobPrototype>, int?>? jobList = null;
         string? advertisement = null;
-        if (owningStation != null)
-        {
+        // WOLFGATE(StationRoles) START: ship consoles offer no job slots or adverts
+        // if (owningStation != null)
+        // {
+        //     jobList = _stationJobsSystem.GetJobs(owningStation.Value);
+        //     if (TryComp<ExtraShuttleInformationComponent>(owningStation, out var extraVessel))
+        //         advertisement = extraVessel.Advertisement;
+        // }
+        if (owningStation != null && !HasComp<ExtraShuttleInformationComponent>(owningStation))
             jobList = _stationJobsSystem.GetJobs(owningStation.Value);
-            if (TryComp<ExtraShuttleInformationComponent>(owningStation, out var extraVessel))
-                advertisement = extraVessel.Advertisement;
-        }
+        // WOLFGATE END
 
         if (!TryComp<StationRecordsComponent>(owningStation, out var stationRecords))
         {

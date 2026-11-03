@@ -15,7 +15,7 @@ namespace Content.Client._WF.LobbyShenanigans;
 /// Covers the lobby and runs every <see cref="LobbyShenanigan"/> over it when the server sets one off. Takes a click
 /// only on something a shenanigan shows, so players can pick it up; everywhere else the lobby below gets it.
 /// </summary>
-public sealed class LobbyShenanigansLayer : Control
+public sealed partial class LobbyShenanigansLayer : Control
 {
     [Dependency] private IReflectionManager _reflection = default!;
     [Dependency] private IDynamicTypeFactory _factory = default!;

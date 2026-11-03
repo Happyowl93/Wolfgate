@@ -521,7 +521,7 @@ public sealed class WolfmedRevivalStopwatchTest : WolfmedGameTest
     }
 
     private HealingComponent? Healing(string id) =>
-        SProtoMan.Index<EntityPrototype>(id).TryGetComponent(out HealingComponent? healing, SEntMan.ComponentFactory)
+        SProtoMan.Index<EntityPrototype>(id).TryComp(out HealingComponent? healing, SEntMan.ComponentFactory)
             ? healing
             : null;
 

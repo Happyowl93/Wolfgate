@@ -15,7 +15,7 @@ namespace Content.Server._WF.Wolfmed.Medical;
 /// closes wolfmed.reagent_wound_mend severity off the worst open wounds of the healed types. Wounds no damage
 /// removal closes (bleeds, incisions, stumps, fractures) and wounds that refuse treatment (a lodged round) are left.
 /// </summary>
-public sealed class WolfmedReagentWoundMendSystem : EntitySystem
+public sealed partial class WolfmedReagentWoundMendSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;

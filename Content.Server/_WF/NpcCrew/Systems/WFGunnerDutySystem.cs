@@ -10,6 +10,7 @@ using Content.Server.NPC.Systems;
 using Content.Server.Power.EntitySystems;
 using Content.Shared._Mono.FireControl;
 using Content.Shared._WF.NpcCrew;
+using Content.Shared._WF.Performance;
 using Content.Shared.Interaction;
 using Content.Shared.NPC.Systems;
 using Content.Shared.Weapons.Hitscan.Components;
@@ -157,6 +158,19 @@ public sealed partial class WFGunnerDutySystem : EntitySystem
             _occupants.Remove(console);
     }
 
+    /// <summary>
+    /// Drops the kept target choice of a crew's gunners, so a changed security policy is acted on next tick rather
+    /// than when their quarter-second selection comes round.
+    /// </summary>
+    public void Reselect(EntityUid grid, string group)
+    {
+        foreach (var uid in _selections.Keys.ToArray())
+        {
+            if (TryComp<WFCrewComponent>(uid, out var crew) && crew.Group == group && Transform(uid).GridUid == grid)
+                _selections.Remove(uid);
+        }
+    }
+
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
@@ -172,10 +186,10 @@ public sealed partial class WFGunnerDutySystem : EntitySystem
                 _batteries.Remove(uid);
                 continue;
             }
-            if (crew.Duty != WFCrewDuties.Gunnery || !htn.Enabled || !_npcCombat.CanNpcShoot(uid) || HasComp<ActorComponent>(uid)
+            if (crew.Duty != WFCrewDuties.Gunnery || !htn.Enabled || HasComp<ActorComponent>(uid)
                 || duty.Console is not { } console || Transform(uid).GridUid is not { } grid
-                || !Usable(console, grid, uid) || !_interaction.InRangeUnobstructed(uid, console)
-                || htn.Plan is { } plan && !plan.Tasks.Any(task => task.Operator is WFTakeGunneryOperator))
+                || TerminatingOrDeleted(console)
+                || now >= duty.NextPostCheck && !HoldsPost(uid, duty, htn, console, grid, now))
             {
                 Release(uid);
                 continue;
@@ -185,11 +199,10 @@ public sealed partial class WFGunnerDutySystem : EntitySystem
                 duty.NextReach = now + ReachInterval;
                 duty.Reach = GunReach(grid);
             }
-            // Target selection runs four times a second; the chosen ship is kept in between while still engageable.
+            // Target selection runs four times a second; the chosen ship is kept in between while it exists.
             var here = _transform.GetMapCoordinates(grid);
             if (!_selections.TryGetValue(uid, out var selection) || now >= selection.Next
-                || selection.Target is { } kept
-                    && Engageable(uid, grid, crew, duty, here, kept, _alerts.IsHostileShip(grid, crew.Group, kept)) == null)
+                || selection.Target is { } kept && TerminatingOrDeleted(kept))
             {
                 selection = (now + SelectionInterval, SelectTarget(uid, grid, crew, duty, here));
                 _selections[uid] = selection;
@@ -214,6 +227,8 @@ public sealed partial class WFGunnerDutySystem : EntitySystem
                     _batteries[uid] = battery;
                 }
 
+                // The guns are aimed on the targeting system's turns, so their lines are only needed then.
+                var aimTurn = WFTickSpread.Due(uid, _timing.CurTick, ShipTargetingSystem.WFAimPeriod);
                 var laid = new EntityCoordinates(hostile, Lay(grid, hostile, duty));
                 if (_targeting.Target(uid, laid) is { } aim)
                 {
@@ -222,13 +237,16 @@ public sealed partial class WFGunnerDutySystem : EntitySystem
                     // The guns are this gunner's to share out: the targeting system is kept from taking them all back.
                     // A gun with a bystander in its line holds its fire.
                     var cannons = aim.Cannons;
-                    cannons.Clear();
-                    if (battery.Groups.Count > 0)
-                        cannons.AddRange(ClearGuns(grid, crew.Group, battery.Groups[0].Guns, hostile, _transform.ToMapCoordinates(laid)));
+                    if (aimTurn)
+                    {
+                        cannons.Clear();
+                        if (battery.Groups.Count > 0)
+                            cannons.AddRange(ClearGuns(grid, crew.Group, battery.Groups[0].Guns, hostile, _transform.ToMapCoordinates(laid)));
+                    }
                     aim.WeaponCheckAccum = 3600f;
                 }
 
-                if (battery.Groups.Count > 1 && TryComp<PhysicsComponent>(grid, out var body))
+                if (aimTurn && battery.Groups.Count > 1 && TryComp<PhysicsComponent>(grid, out var body))
                 {
                     for (var i = 1; i < battery.Groups.Count; i++)
                     {
@@ -249,6 +267,14 @@ public sealed partial class WFGunnerDutySystem : EntitySystem
                 _batteries.Remove(uid);
             }
         }
+    }
+
+    /// <summary>The costlier checks that a gunner still holds his post, run at the selection pace.</summary>
+    private bool HoldsPost(EntityUid uid, WFGunnerDutyComponent duty, HTNComponent htn, EntityUid console, EntityUid grid, TimeSpan now)
+    {
+        duty.NextPostCheck = now + SelectionInterval;
+        return _npcCombat.CanNpcShoot(uid) && Usable(console, grid, uid) && _interaction.InRangeUnobstructed(uid, console)
+               && (htn.Plan is not { } plan || plan.Tasks.Any(task => task.Operator is WFTakeGunneryOperator));
     }
 
     /// <summary>Where the guns are laid on a ship, in its own frame: off it by the gunner's error, and well clear for a warning shot.</summary>
@@ -383,6 +409,8 @@ public sealed partial class WFGunnerDutySystem : EntitySystem
         // A cloaked ship is not seen, even one the crew was sent after.
         if (EntityManager.System<WFCrewStealthSystem>().ShipUnseen(ship))
             return null;
+        if (_spared.HoldsFireOn(grid, ship))
+            return null;
         // A player vessel of the crew's faction is fired on only once its own fire has made it an attacker.
         if (_spared.Spared(grid, ship) && !_alerts.FiredShipGuns(grid, crew.Group, ship))
             return null;
@@ -420,15 +448,15 @@ public sealed partial class WFGunnerDutySystem : EntitySystem
                 continue;
 
             float distance;
-            if (proto.TryGetComponent<HitscanAmmoComponent>(out _, _factory))
+            if (proto.TryComp<HitscanAmmoComponent>(out _, _factory))
             {
-                distance = proto.TryGetComponent<HitscanBasicRaycastComponent>(out var raycast, _factory)
+                distance = proto.TryComp<HitscanBasicRaycastComponent>(out var raycast, _factory)
                     ? raycast.MaxDistance
                     : float.MaxValue;
             }
             else
             {
-                distance = _guns.GetBulletPrototype(proto).TryGetComponent<TimedDespawnComponent>(out var despawn, _factory)
+                distance = _guns.GetBulletPrototype(proto).TryComp<TimedDespawnComponent>(out var despawn, _factory)
                     ? gun.ProjectileSpeedModified * despawn.Lifetime
                     : float.MaxValue;
             }

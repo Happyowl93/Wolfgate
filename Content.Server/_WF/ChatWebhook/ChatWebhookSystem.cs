@@ -22,7 +22,7 @@ public readonly record struct ChatWebhookEvent(ChatWebhookChannel Channel, strin
 /// <summary>
 ///     Copies dead chat and LOOC to Discord webhooks. One way: nothing comes back from Discord.
 /// </summary>
-public sealed class ChatWebhookSystem : EntitySystem
+public sealed partial class ChatWebhookSystem : EntitySystem
 {
     private const int MaxContentLength = 2000;
     private const int MaxUsernameLength = 80;

@@ -14,7 +14,7 @@ namespace Content.Shared._WF.Tether.Harpoon;
 /// Manning a harpoon turret: who is buckled in, where the turret is pointing, and whether a shot is allowed.
 /// Everything here runs on both sides so the operator's shot is predicted like any other gun.
 /// </summary>
-public abstract class SharedShipHarpoonTurretSystem : EntitySystem
+public abstract partial class SharedShipHarpoonTurretSystem : EntitySystem
 {
     [Dependency] protected IGameTiming Timing = default!;
     [Dependency] private SharedBuckleSystem _buckle = default!;
@@ -140,7 +140,7 @@ public abstract class SharedShipHarpoonTurretSystem : EntitySystem
 
     private void OnShotAttempted(Entity<ShipHarpoonTurretComponent> turret, ref ShotAttemptedEvent args)
     {
-        if (turret.Comp.Operator != GetNetEntity(args.User))
+        if (turret.Comp.Manned && turret.Comp.Operator != GetNetEntity(args.User))
         {
             args.Cancel();
             return;
@@ -160,7 +160,7 @@ public abstract class SharedShipHarpoonTurretSystem : EntitySystem
             return;
         }
 
-        if (args.Used.Comp.ShootCoordinates is { } target && !InArc(turret, target))
+        if (turret.Comp.Manned && args.Used.Comp.ShootCoordinates is { } target && !InArc(turret, target))
         {
             Refuse(turret, args.User, "wf-harpoon-turret-out-of-arc");
             args.Cancel();

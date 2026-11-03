@@ -22,7 +22,7 @@ public abstract partial class SharedFabricationSiloSystem
 
         // A single screw and a full stack are different prototypes of one stack type.
         if (_stackQuery.TryComp(item, out var stack) &&
-            partProto.TryGetComponent<StackComponent>(out var partStack, _factory))
+            partProto.TryComp<StackComponent>(out var partStack, _factory))
             return stack.StackTypeId == partStack.StackTypeId;
 
         // A recolour, such as the lathe's green crowbar, shares the part's parents and name.

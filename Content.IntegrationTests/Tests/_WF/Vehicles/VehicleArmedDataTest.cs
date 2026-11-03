@@ -40,10 +40,10 @@ public sealed class VehicleArmedDataTest
                 if (proto.Abstract || proto.ID.Contains("Test"))
                     continue;
 
-                if (proto.TryGetComponent<HardpointItemComponent>(out _, factory) && proto.TryGetComponent<GunComponent>(out _, factory))
+                if (proto.TryComp<HardpointItemComponent>(out _, factory) && proto.TryComp<GunComponent>(out _, factory))
                     guns.Add(proto);
 
-                if (proto.TryGetComponent<BulletBoxComponent>(out _, factory) && proto.ID.StartsWith("VehicleAmmoBox"))
+                if (proto.TryComp<BulletBoxComponent>(out _, factory) && proto.ID.StartsWith("VehicleAmmoBox"))
                     boxes.Add(proto);
             }
 
@@ -56,11 +56,11 @@ public sealed class VehicleArmedDataTest
             {
                 using (Assert.EnterMultipleScope())
                 {
-                    var ballistic = gun.TryGetComponent<BallisticAmmoProviderComponent>(out var ammo, factory);
+                    var ballistic = gun.TryComp<BallisticAmmoProviderComponent>(out var ammo, factory);
                     Assert.That(ballistic, Is.True, $"{gun.ID}: a hardpoint gun feeds from a ballistic provider.");
-                    Assert.That(gun.TryGetComponent<VehicleHardpointAmmoComponent>(out var hardpointAmmo, factory), Is.True, $"{gun.ID}: no reserve magazines are kept for it.");
-                    Assert.That(gun.TryGetComponent<RefillableByBulletBoxComponent>(out var refill, factory), Is.True, $"{gun.ID}: no ammo box refills it.");
-                    Assert.That(gun.TryGetComponent<GunComponent>(out var gunComp, factory), Is.True);
+                    Assert.That(gun.TryComp<VehicleHardpointAmmoComponent>(out var hardpointAmmo, factory), Is.True, $"{gun.ID}: no reserve magazines are kept for it.");
+                    Assert.That(gun.TryComp<RefillableByBulletBoxComponent>(out var refill, factory), Is.True, $"{gun.ID}: no ammo box refills it.");
+                    Assert.That(gun.TryComp<GunComponent>(out var gunComp, factory), Is.True);
 
                     if (!ballistic || hardpointAmmo == null || refill == null || gunComp == null)
                         continue;
@@ -76,12 +76,12 @@ public sealed class VehicleArmedDataTest
 
                     // The gun system raises its ammo event on the server only, so a round that is sent to a point is the server's
                     // alone: the shooter's client does not fire a copy of it.
-                    if (gun.TryGetComponent<ShootAtFixedPointComponent>(out _, factory) && ammo.Proto is { } fixedCartridgeId)
+                    if (gun.TryComp<ShootAtFixedPointComponent>(out _, factory) && ammo.Proto is { } fixedCartridgeId)
                     {
                         var fixedCartridge = protos.Index<EntityPrototype>(fixedCartridgeId);
-                        var roundId = fixedCartridge.TryGetComponent<CartridgeAmmoComponent>(out var fixedAmmo, factory) ? fixedAmmo.Prototype : default;
+                        var roundId = fixedCartridge.TryComp<CartridgeAmmoComponent>(out var fixedAmmo, factory) ? fixedAmmo.Prototype : default;
                         var round = protos.Index<EntityPrototype>(roundId);
-                        Assert.That(round.TryGetComponent<IgnorePredictionHideComponent>(out _, factory), Is.True,
+                        Assert.That(round.TryComp<IgnorePredictionHideComponent>(out _, factory), Is.True,
                             $"{gun.ID}: its rounds are sent to a point on the server, so the client must not predict them (IgnorePredictionHide).");
                     }
 
@@ -91,7 +91,7 @@ public sealed class VehicleArmedDataTest
                     if (box == null)
                         continue;
 
-                    Assert.That(box.TryGetComponent<BulletBoxComponent>(out var boxComp, factory), Is.True, $"{gun.ID}: {boxId} is not a bullet box.");
+                    Assert.That(box.TryComp<BulletBoxComponent>(out var boxComp, factory), Is.True, $"{gun.ID}: {boxId} is not a bullet box.");
                     if (boxComp == null)
                         continue;
 
@@ -118,14 +118,14 @@ public sealed class VehicleArmedDataTest
         if (cartridge == null)
             return;
 
-        Assert.That(cartridge.TryGetComponent<CartridgeAmmoComponent>(out var cartridgeAmmo, factory), Is.True, $"{gunId}: {cartridgeId} is not a cartridge.");
+        Assert.That(cartridge.TryComp<CartridgeAmmoComponent>(out var cartridgeAmmo, factory), Is.True, $"{gunId}: {cartridgeId} is not a cartridge.");
         if (cartridgeAmmo == null)
             return;
 
         Assert.That(cartridgeAmmo.DeleteOnSpawn, Is.True, $"{cartridgeId}: a casing arriving on a client trips a test-client assert.");
         Assert.That(protos.TryIndex<EntityPrototype>(cartridgeAmmo.Prototype, out var round), Is.True, $"{cartridgeId}: the round {cartridgeAmmo.Prototype} does not exist.");
         if (round != null)
-            Assert.That(round.TryGetComponent<ProjectileComponent>(out _, factory), Is.True, $"{cartridgeId}: {cartridgeAmmo.Prototype} is not a projectile.");
+            Assert.That(round.TryComp<ProjectileComponent>(out _, factory), Is.True, $"{cartridgeId}: {cartridgeAmmo.Prototype} is not a projectile.");
     }
 
     /// <summary>
@@ -150,15 +150,15 @@ public sealed class VehicleArmedDataTest
                 if (proto.Abstract || proto.ID.Contains("Test"))
                     continue;
 
-                if (proto.TryGetComponent<RMCVehicleComponent>(out _, factory) &&
-                    proto.TryGetComponent<HardpointSlotsComponent>(out _, factory) &&
-                    !proto.TryGetComponent<VehicleWeaponsComponent>(out _, factory))
+                if (proto.TryComp<RMCVehicleComponent>(out _, factory) &&
+                    proto.TryComp<HardpointSlotsComponent>(out _, factory) &&
+                    !proto.TryComp<VehicleWeaponsComponent>(out _, factory))
                 {
                     vehicles.Add(proto);
                 }
 
-                if (proto.TryGetComponent<HardpointItemComponent>(out _, factory) &&
-                    (proto.TryGetComponent<GunComponent>(out _, factory) || proto.TryGetComponent<HardpointSlotsComponent>(out _, factory)))
+                if (proto.TryComp<HardpointItemComponent>(out _, factory) &&
+                    (proto.TryComp<GunComponent>(out _, factory) || proto.TryComp<HardpointSlotsComponent>(out _, factory)))
                 {
                     gunParts.Add(proto);
                 }
@@ -170,7 +170,7 @@ public sealed class VehicleArmedDataTest
             var failures = new List<string>();
             foreach (var vehicle in vehicles)
             {
-                var slots = vehicle.TryGetComponent<HardpointSlotsComponent>(out var vehicleSlots, factory) ? vehicleSlots : null;
+                var slots = vehicle.TryComp<HardpointSlotsComponent>(out var vehicleSlots, factory) ? vehicleSlots : null;
                 if (slots == null)
                     continue;
 
@@ -193,7 +193,7 @@ public sealed class VehicleArmedDataTest
     /// <summary>The slot rule of the hardpoint system (family, slot type, compatibility id, type, whitelist) on prototype data.</summary>
     private static bool SlotTakes(IComponentFactory factory, HardpointSlotsComponent slots, HardpointSlot slot, EntityPrototype part)
     {
-        if (!part.TryGetComponent<HardpointItemComponent>(out var item, factory))
+        if (!part.TryComp<HardpointItemComponent>(out var item, factory))
             return false;
 
         if (slots.VehicleFamily != null && item.VehicleFamily != slots.VehicleFamily)
@@ -222,7 +222,7 @@ public sealed class VehicleArmedDataTest
         if (components.Length == 0 && tags.Count == 0)
             return true;
 
-        var partTags = part.TryGetComponent<TagComponent>(out var tagComponent, factory) ? tagComponent.Tags : null;
+        var partTags = part.TryComp<TagComponent>(out var tagComponent, factory) ? tagComponent.Tags : null;
         var matches = components.Select(name => part.Components.ContainsKey(name))
             .Concat(tags.Select(tag => partTags != null && partTags.Contains(tag)))
             .ToList();
@@ -242,19 +242,19 @@ public sealed class VehicleArmedDataTest
         await server.WaitAssertion(() =>
         {
             var portGuns = protos.EnumeratePrototypes<EntityPrototype>()
-                .Where(p => !p.Abstract && !p.ID.Contains("Test") && p.TryGetComponent<VehiclePortGunComponent>(out _, factory))
+                .Where(p => !p.Abstract && !p.ID.Contains("Test") && p.TryComp<VehiclePortGunComponent>(out _, factory))
                 .ToList();
             Assert.That(portGuns.Select(p => p.ID), Is.EquivalentTo(new[] { "VehicleAPCM56FPWPortGunLeft", "VehicleAPCM56FPWPortGunRight" }));
 
             foreach (var gun in portGuns)
             {
-                Assert.That(gun.TryGetComponent<ItemSlotsComponent>(out var slots, factory), Is.True, $"{gun.ID}: no item slots.");
+                Assert.That(gun.TryComp<ItemSlotsComponent>(out var slots, factory), Is.True, $"{gun.ID}: no item slots.");
                 var slotMap = slots!.Slots;
                 Assert.That(slotMap.TryGetValue("gun_magazine", out var slot), Is.True, $"{gun.ID}: no magazine slot.");
                 Assert.That(slot!.StartingItem, Is.Not.Null, $"{gun.ID}: no starting magazine.");
 
                 var magazine = protos.Index<EntityPrototype>(slot.StartingItem!);
-                Assert.That(magazine.TryGetComponent<BallisticAmmoProviderComponent>(out var ammo, factory), Is.True, $"{gun.ID}: the magazine has no rounds.");
+                Assert.That(magazine.TryComp<BallisticAmmoProviderComponent>(out var ammo, factory), Is.True, $"{gun.ID}: the magazine has no rounds.");
                 CheckCartridge(protos, factory, gun.ID, ammo!.Proto!.Value);
             }
         });
@@ -268,8 +268,8 @@ public sealed class VehicleArmedDataTest
         if (startingItem == null || !protos.TryIndex<EntityPrototype>(startingItem, out var item))
             return 0;
 
-        var count = item.TryGetComponent<HardpointItemComponent>(out _, factory) && item.TryGetComponent<GunComponent>(out _, factory) ? 1 : 0;
-        if (item.TryGetComponent<ItemSlotsComponent>(out var slots, factory))
+        var count = item.TryComp<HardpointItemComponent>(out _, factory) && item.TryComp<GunComponent>(out _, factory) ? 1 : 0;
+        if (item.TryComp<ItemSlotsComponent>(out var slots, factory))
         {
             foreach (var slot in slots.Slots.Values)
             {
@@ -295,7 +295,7 @@ public sealed class VehicleArmedDataTest
         await server.WaitAssertion(() =>
         {
             var variants = protos.EnumeratePrototypes<EntityPrototype>()
-                .Where(p => !p.Abstract && p.ID.Contains("Armed") && p.TryGetComponent<RMCVehicleComponent>(out _, factory))
+                .Where(p => !p.Abstract && p.ID.Contains("Armed") && p.TryComp<RMCVehicleComponent>(out _, factory))
                 .OrderBy(p => p.ID)
                 .ToList();
 
@@ -304,7 +304,7 @@ public sealed class VehicleArmedDataTest
             var failures = new List<string>();
             foreach (var variant in variants)
             {
-                if (!variant.TryGetComponent<ItemSlotsComponent>(out var variantSlots, factory))
+                if (!variant.TryComp<ItemSlotsComponent>(out var variantSlots, factory))
                 {
                     failures.Add($"{variant.ID}: no item slots.");
                     continue;
@@ -318,7 +318,7 @@ public sealed class VehicleArmedDataTest
                 // The vehicle it is made from: its nearest parent that is not abstract (a loadout is).
                 var baseId = protos.EnumerateParents<EntityPrototype>(variant.ID).FirstOrDefault()?.ID;
                 if (baseId == null ||
-                    !protos.Index<EntityPrototype>(baseId).TryGetComponent<ItemSlotsComponent>(out var baseSlots, factory))
+                    !protos.Index<EntityPrototype>(baseId).TryComp<ItemSlotsComponent>(out var baseSlots, factory))
                 {
                     failures.Add($"{variant.ID}: no vehicle to compare it with.");
                     continue;
@@ -392,8 +392,8 @@ public sealed class VehicleArmedDataTest
             foreach (var gun in protos.EnumeratePrototypes<EntityPrototype>())
             {
                 if (gun.Abstract || gun.ID.Contains("Test") ||
-                    !gun.TryGetComponent<HardpointItemComponent>(out _, factory) ||
-                    !gun.TryGetComponent<GunComponent>(out var gunComp, factory))
+                    !gun.TryComp<HardpointItemComponent>(out _, factory) ||
+                    !gun.TryComp<GunComponent>(out var gunComp, factory))
                 {
                     continue;
                 }
@@ -449,12 +449,12 @@ public sealed class VehicleArmedDataTest
             foreach (var gun in protos.EnumeratePrototypes<EntityPrototype>())
             {
                 if (gun.Abstract || gun.ID.Contains("Test") ||
-                    !gun.TryGetComponent<HardpointItemComponent>(out _, factory) ||
-                    !gun.TryGetComponent<GunComponent>(out var gunComp, factory) ||
-                    gun.TryGetComponent<ShootAtFixedPointComponent>(out _, factory) ||
-                    !gun.TryGetComponent<BallisticAmmoProviderComponent>(out var ammo, factory) ||
+                    !gun.TryComp<HardpointItemComponent>(out _, factory) ||
+                    !gun.TryComp<GunComponent>(out var gunComp, factory) ||
+                    gun.TryComp<ShootAtFixedPointComponent>(out _, factory) ||
+                    !gun.TryComp<BallisticAmmoProviderComponent>(out var ammo, factory) ||
                     ammo.Proto is not { } cartridgeId ||
-                    !protos.Index<EntityPrototype>(cartridgeId).TryGetComponent<CartridgeAmmoComponent>(out var cartridge, factory))
+                    !protos.Index<EntityPrototype>(cartridgeId).TryComp<CartridgeAmmoComponent>(out var cartridge, factory))
                 {
                     continue;
                 }
@@ -473,7 +473,7 @@ public sealed class VehicleArmedDataTest
                 }
 
                 // BaseBullet lives ten seconds, which is no range limit; a shorter lifetime is one.
-                var limited = round.TryGetComponent<TimedDespawnComponent>(out var despawn, factory) && despawn.Lifetime < 5f;
+                var limited = round.TryComp<TimedDespawnComponent>(out var despawn, factory) && despawn.Lifetime < 5f;
                 if (expected == null)
                 {
                     if (limited)
@@ -521,7 +521,7 @@ public sealed class VehicleArmedDataTest
             EntityPrototype Round(string id) => protos.Index<EntityPrototype>(id);
             T Get<T>(EntityPrototype proto) where T : IComponent, new()
             {
-                Assert.That(proto.TryGetComponent<T>(out var found, factory), Is.True, $"{proto.ID} has no {typeof(T).Name}.");
+                Assert.That(proto.TryComp<T>(out var found, factory), Is.True, $"{proto.ID} has no {typeof(T).Name}.");
                 return found!;
             }
 
@@ -573,7 +573,7 @@ public sealed class VehicleArmedDataTest
                 var ammo = Get<BallisticAmmoProviderComponent>(gun);
                 var cartridge = Get<CartridgeAmmoComponent>(protos.Index<EntityPrototype>(ammo.Proto!.Value));
                 var round = Round(cartridge.Prototype);
-                return round.TryGetComponent<TimedDespawnComponent>(out var despawn, factory) && despawn.Lifetime < 5f;
+                return round.TryComp<TimedDespawnComponent>(out var despawn, factory) && despawn.Lifetime < 5f;
             }
 
             Assert.That(Damage("VehicleTankM56Cupola"), Is.EqualTo(30f));

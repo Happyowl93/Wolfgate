@@ -24,7 +24,7 @@ namespace Content.Client._WF.Wolfmed.Overlays;
 /// decides how loud the readout is, keeps the fault list animating and makes the noise.
 /// </summary>
 [UsedImplicitly]
-public sealed class WolfmedSyntheticHudOverlaySystem : EntitySystem
+public sealed partial class WolfmedSyntheticHudOverlaySystem : EntitySystem
 {
     /// <summary>The blip a new fault line announces itself with. Quiet, local, and rate limited.</summary>
     private const string FaultSound = "/Audio/Machines/beep.ogg";
@@ -137,7 +137,7 @@ public sealed class WolfmedSyntheticHudOverlaySystem : EntitySystem
         {
             _wasStandby = standby;
             if (standby)
-                _audio.PlayGlobal(StandbySound, Filter.Local(), false, AudioParams.Default.WithVolume(-12f));
+                _audio.PlayGlobal(new ResolvedPathSpecifier(StandbySound), Filter.Local(), false, AudioParams.Default.WithVolume(-12f));
         }
 
         UpdateAlarm(strain, dead || standby);
@@ -179,7 +179,7 @@ public sealed class WolfmedSyntheticHudOverlaySystem : EntitySystem
         if (fresh && _time >= _nextBlip)
         {
             _nextBlip = _time + 0.2f;
-            _audio.PlayGlobal(FaultSound, Filter.Local(), false, AudioParams.Default.WithVolume(-14f));
+            _audio.PlayGlobal(new ResolvedPathSpecifier(FaultSound), Filter.Local(), false, AudioParams.Default.WithVolume(-14f));
         }
     }
 
@@ -200,7 +200,7 @@ public sealed class WolfmedSyntheticHudOverlaySystem : EntitySystem
 
         var urgency = Math.Clamp((strain - WolfmedSyntheticHudLineSystem.HeavyAt) / (1f - WolfmedSyntheticHudLineSystem.HeavyAt), 0f, 1f);
         _nextAlarm = _time + MathHelper.Lerp(2.5f, 0.8f, urgency);
-        _audio.PlayGlobal(AlarmSound, Filter.Local(), false, AudioParams.Default.WithVolume(-16f));
+        _audio.PlayGlobal(new ResolvedPathSpecifier(AlarmSound), Filter.Local(), false, AudioParams.Default.WithVolume(-16f));
     }
 
     private void BuildSystem(WolfmedSyntheticHudComponent hud, WolfmedSyntheticTier tier)

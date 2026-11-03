@@ -20,7 +20,7 @@ using Color = Robust.Shared.Maths.Color;
 namespace Content.Client._WF.Companies;
 
 /// <summary>Draws or imports company art: the 32x32 logo or an 8x8 rank icon.</summary>
-public sealed class WFCompanyLogoWindow : DefaultWindow
+public sealed partial class WFCompanyLogoWindow : DefaultWindow
 {
     [Dependency] private IFileDialogManager _dialog = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;

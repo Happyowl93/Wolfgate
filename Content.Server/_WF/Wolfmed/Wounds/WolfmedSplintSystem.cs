@@ -21,7 +21,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// <see cref="WoundFractureSystem.TrySetTreatment"/> is a no-op off the server, so a client copy would only
 /// ever popup and delete the item on a prediction it cannot make.
 /// </remarks>
-public sealed class WolfmedSplintSystem : EntitySystem
+public sealed partial class WolfmedSplintSystem : EntitySystem
 {
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private SharedBodySystem _body = default!;

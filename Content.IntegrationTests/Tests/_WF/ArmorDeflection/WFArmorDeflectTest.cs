@@ -27,15 +27,15 @@ public sealed class WFArmorDeflectTest
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(prototypes.Index<EntityPrototype>(Suit).TryGetComponent<WFArmorDeflectComponent>(out var armor, factory), Is.True);
+            Assert.That(prototypes.Index<EntityPrototype>(Suit).TryComp<WFArmorDeflectComponent>(out var armor, factory), Is.True);
             foreach (var id in Bounces)
             {
-                Assert.That(prototypes.Index<EntityPrototype>(id).TryGetComponent<ProjectileComponent>(out var round, factory), Is.True, id);
+                Assert.That(prototypes.Index<EntityPrototype>(id).TryComp<ProjectileComponent>(out var round, factory), Is.True, id);
                 Assert.That(WFArmorDeflectSystem.IsLightRound(armor!, round!), Is.True, $"{id} should ricochet.");
             }
             foreach (var id in Penetrates)
             {
-                Assert.That(prototypes.Index<EntityPrototype>(id).TryGetComponent<ProjectileComponent>(out var round, factory), Is.True, id);
+                Assert.That(prototypes.Index<EntityPrototype>(id).TryComp<ProjectileComponent>(out var round, factory), Is.True, id);
                 Assert.That(WFArmorDeflectSystem.IsLightRound(armor!, round!), Is.False, $"{id} should get through.");
             }
         });

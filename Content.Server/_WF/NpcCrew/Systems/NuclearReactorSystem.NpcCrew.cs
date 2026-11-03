@@ -47,7 +47,7 @@ public sealed partial class NuclearReactorSystem
 
         var item = Spawn(part.ProtoId, Transform(ent).Coordinates);
         RemComp<ReactorPartComponent>(item);
-        EntityManager.AddComponent(item, new ReactorPartComponent(part));
+        AddComp(item, new ReactorPartComponent(part));
         reactor.ComponentGrid![slot.X, slot.Y] = null;
 
         UpdateGridVisual(ent);

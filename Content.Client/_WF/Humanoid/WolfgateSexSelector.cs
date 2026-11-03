@@ -35,7 +35,7 @@ public sealed class WolfgateSexSelector : BoxContainer
     {
         // Disposing rather than removing matters: a ButtonGroup only drops a button when it is disposed,
         // so plain removal would leave every superseded segment in the group forever.
-        DisposeAllChildren();
+        RemoveAllChildren();
         _icons.Clear();
         _segments.Clear();
 

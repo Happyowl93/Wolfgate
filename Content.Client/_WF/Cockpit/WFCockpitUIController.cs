@@ -98,7 +98,9 @@ public sealed partial class WFCockpitUIController : UIController
                 screen.RemoveChild(view);
             lease.Restore();
             foreach (var view in failed)
+#pragma warning disable CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
                 view.Dispose();
+#pragma warning restore CS0618
             if (console.WfCockpitActive)
                 console.WfSetCockpitActive(false);
             _console = null;

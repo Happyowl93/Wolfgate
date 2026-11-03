@@ -185,6 +185,7 @@
   parent: [MobGuardianBase, InventoryBase]
   description: A mesmerising whirl of hard-light patterns weaves a blue colored clown of dubious origin.
   components:
+    - type: DoAfter # WOLFGATE(LiveFixes): the holoclown has hands and tried actions it couldn't start
     - type: GhostRole
       allowMovement: true
       allowSpeech: true

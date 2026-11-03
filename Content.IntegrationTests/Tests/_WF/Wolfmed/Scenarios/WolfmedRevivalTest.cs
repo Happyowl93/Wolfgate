@@ -51,6 +51,9 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 [TestOf(typeof(WolfmedRevivalSystem))]
 public sealed class WolfmedRevivalTest : WolfmedGameTest
 {
+    private static readonly EntProtoId MultitoolProto = "Multitool";
+    private static readonly EntProtoId MedicatedSutureProto = "MedicatedSuture";
+
     private async Task Pin()
     {
         await OverrideCVar(Side.Server, WolfmedCVars.Consciousness, true);
@@ -215,7 +218,7 @@ public sealed class WolfmedRevivalTest : WolfmedGameTest
                     "core repair is not offered on a chassis with a destroyed core.");
                 Assert.That(surgery.WolfmedSurgeryValid(human, Part(human, BodyPartType.Torso), "WFSurgeryRepairCore"), Is.False,
                     "core repair is offered on flesh.");
-                Assert.That(SProtoMan.Index<EntityPrototype>("Multitool").HasComponent<WolfmedCoreProbeComponent>(), Is.True,
+                Assert.That(SProtoMan.Index(MultitoolProto).HasComponent<WolfmedCoreProbeComponent>(), Is.True,
                     "the multitool is not the core repair tool.");
             });
 
@@ -496,7 +499,7 @@ public sealed class WolfmedRevivalTest : WolfmedGameTest
 
             var torso = Part(sutured, BodyPartType.Torso);
             Assert.That(infection.MarkSutured(torso, new[] { "Slash", "Piercing" }), Is.GreaterThan(0), "no wound took the suture.");
-            Assert.That(SProtoMan.Index<EntityPrototype>("MedicatedSuture").HasComponent<WolfmedSutureComponent>(), Is.True);
+            Assert.That(SProtoMan.Index(MedicatedSutureProto).HasComponent<WolfmedSutureComponent>(), Is.True);
 
             var suturedWound = Wound(torso, "SlashWound");
             var openWound = Wound(Part(open, BodyPartType.Torso), "SlashWound");

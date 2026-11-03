@@ -9,7 +9,7 @@ namespace Content.Server._WF.Tributes;
 /// <summary>
 /// Now and then, the pilot who starts an FTL jump says "Engage." In memory of Sir Patrick Stewart.
 /// </summary>
-public sealed class WFEngageSystem : EntitySystem
+public sealed partial class WFEngageSystem : EntitySystem
 {
     [Dependency] private ChatSystem _chat = default!;
     [Dependency] private IRobustRandom _random = default!;

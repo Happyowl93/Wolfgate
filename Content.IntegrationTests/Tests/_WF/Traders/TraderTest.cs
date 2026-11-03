@@ -125,9 +125,9 @@ public sealed class TraderTest
         int ExpectedPrice(EntityPrototype item)
         {
             var vendorProto = protoMan.Index<EntityPrototype>(VendorProto);
-            Assert.That(vendorProto.TryGetComponent<VendingMachineComponent>(out var vend, compFactory), Is.True,
+            Assert.That(vendorProto.TryComp<VendingMachineComponent>(out var vend, compFactory), Is.True,
                 "The mirrored vendor prototype has no VendingMachine component.");
-            vendorProto.TryGetComponent<MarketModifierComponent>(out var modifier, compFactory);
+            vendorProto.TryComp<MarketModifierComponent>(out var modifier, compFactory);
 
             var price = pricing.GetEstimatedPrice(item);
             if (price == 0)
@@ -449,7 +449,7 @@ public sealed class TraderTest
                 entMan.GetComponent<AmeControllerComponent>(jarAme).FuelSlot, jar, null), Is.True, "The jar should go in.");
 
             var jarProto = protoMan.Index<EntityPrototype>(AmeJarProto);
-            Assert.That(jarProto.TryGetComponent<AmeFuelContainerComponent>(out var fullJar, compFactory), Is.True);
+            Assert.That(jarProto.TryComp<AmeFuelContainerComponent>(out var fullJar, compFactory), Is.True);
             var jarUnitPrice = ExpectedPrice(jarProto) / (double) fullJar!.FuelCapacity;
 
             var lines = refuelSys.GetQuote((trader, refuel), gridUid, out var total);
@@ -495,13 +495,13 @@ public sealed class TraderTest
     /// </summary>
     private static int UnitsPerItem(EntityPrototype proto, IComponentFactory factory, string material)
     {
-        Assert.That(proto.TryGetComponent<PhysicalCompositionComponent>(out var composition, factory), Is.True,
+        Assert.That(proto.TryComp<PhysicalCompositionComponent>(out var composition, factory), Is.True,
             $"{proto.ID} has no material composition.");
         Assert.That(composition!.MaterialComposition.TryGetValue(material, out var per), Is.True,
             $"{proto.ID} is not made of {material}.");
 
         var count = 1;
-        if (proto.TryGetComponent<StackComponent>(out var stack, factory))
+        if (proto.TryComp<StackComponent>(out var stack, factory))
             count = stack!.Count;
 
         return per * count;
@@ -512,7 +512,7 @@ public sealed class TraderTest
     /// </summary>
     private static int ReagentsPerItem(EntityPrototype proto, IComponentFactory factory, string reagent)
     {
-        Assert.That(proto.TryGetComponent<SolutionContainerManagerComponent>(out var manager, factory), Is.True,
+        Assert.That(proto.TryComp<SolutionContainerManagerComponent>(out var manager, factory), Is.True,
             $"{proto.ID} has no solutions.");
         Assert.That(manager!.Solutions, Is.Not.Null, $"{proto.ID} has no solutions to fill from.");
 

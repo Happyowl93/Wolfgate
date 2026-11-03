@@ -15,7 +15,7 @@ namespace Content.Client._WF.SafetyDepositBox;
 /// is listed under its raw name, so a new blacklist entry shows up without touching the guide.
 /// </remarks>
 [UsedImplicitly]
-public sealed class SafetyDepositRefusedEmbed : BoxContainer, IDocumentTag
+public sealed partial class SafetyDepositRefusedEmbed : BoxContainer, IDocumentTag
 {
     private const string BoxProto = "SafetyDepositBoxSmall";
 
@@ -33,22 +33,22 @@ public sealed class SafetyDepositRefusedEmbed : BoxContainer, IDocumentTag
         control = null;
 
         if (!_prototype.TryIndex<EntityPrototype>(BoxProto, out var proto) ||
-            !proto.TryGetComponent<StorageComponent>(out var storage, _factory) ||
+            !proto.TryComp<StorageComponent>(out var storage, _factory) ||
             storage.Blacklist is not { } blacklist)
         {
-            Logger.Error($"Safety deposit refused list: {BoxProto} has no storage blacklist");
+            IoCManager.Resolve<ILogManager>().GetSawmill("wf.safetydeposit").Error($"Safety deposit refused list: {BoxProto} has no storage blacklist");
             return false;
         }
 
         var lines = new List<string>();
         foreach (var name in blacklist.Components ?? Array.Empty<string>())
         {
-            lines.Add(Name("safety-deposit-refused-component-", name));
+            lines.Add(LocName("safety-deposit-refused-component-", name));
         }
 
         foreach (var tag in blacklist.Tags ?? new List<ProtoId<Shared.Tag.TagPrototype>>())
         {
-            lines.Add(Name("safety-deposit-refused-tag-", tag.Id));
+            lines.Add(LocName("safety-deposit-refused-tag-", tag.Id));
         }
 
         foreach (var line in lines.Where(l => !string.IsNullOrEmpty(l)).Distinct().Order())
@@ -60,8 +60,8 @@ public sealed class SafetyDepositRefusedEmbed : BoxContainer, IDocumentTag
         return true;
     }
 
-    private static string Name(string prefix, string id)
+    private static string LocName(string prefix, string id)
     {
-        return Loc.TryGetString(prefix + id.ToLowerInvariant(), out var text) ? text : id;
+        return IoCManager.Resolve<ILocalizationManager>().TryGetString(prefix + id.ToLowerInvariant(), out var text) ? text : id;
     }
 }

@@ -15,7 +15,7 @@ namespace Content.Server._WF.TradeGoods.Systems;
 /// Priority consignments. A consignment appears at one station bound for another, pays well if delivered on time, less
 /// if late, and is announced when a ship takes it. One that is never delivered is recalled a window after its deadline.
 /// </summary>
-public sealed class WFTradeSpecialCrateSystem : EntitySystem
+public sealed partial class WFTradeSpecialCrateSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _proto = default!;

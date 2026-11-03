@@ -40,10 +40,12 @@ public sealed class AvaliFeatherClothingTest : InteractionTest
         {
             await Client.WaitAssertion(() =>
             {
-                var sprite = CEntMan.GetComponent<SpriteComponent>(ToClient(target));
-                Assert.That(sprite.LayerMapTryGet("head-feather", out var headLayer), Is.True,
+                var spriteUid = ToClient(target);
+                var sprites = CEntMan.System<SpriteSystem>();
+                var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
+                Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), "head-feather", out var headLayer, false), Is.True,
                     "The head feather visual layer was missing.");
-                Assert.That(sprite.LayerMapTryGet("ears-feather", out var earsLayer), Is.True,
+                Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), "ears-feather", out var earsLayer, false), Is.True,
                     "The ear feather visual layer was missing.");
                 Assert.That(sprite[headLayer].Color, Is.EqualTo(expectedHead), "The head feather tint changed.");
                 Assert.That(sprite[earsLayer].Color, Is.EqualTo(expectedEars), "The ear feather tint changed.");

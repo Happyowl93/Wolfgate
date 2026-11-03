@@ -7,6 +7,7 @@ namespace Content.Shared._WF.Xenonids.ManageHive.Boons;
 [DataDefinition]
 [ImplicitDataDefinitionForInheritors]
 [Serializable, NetSerializable]
+[Virtual]
 public partial class HiveBoonEvent
 {
     [NonSerialized]

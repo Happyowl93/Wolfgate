@@ -16,6 +16,8 @@ namespace Content.IntegrationTests.Tests._WF.AdsIncursion;
 [TestFixture]
 public sealed class WFAdsContentTest
 {
+    private static ProtoId<GamePresetPrototype> WFContestedSectorProto => "WFContestedSector";
+
     private static bool IsTest(string id)
     {
         return id.StartsWith("WFTest");
@@ -42,7 +44,7 @@ public sealed class WFAdsContentTest
                 Assert.That(prototypes.HasIndex(campaign.Preset), Is.True, $"{campaign.ID} names a real preset");
             }
 
-            var ashfall = prototypes.Index<GamePresetPrototype>("WFContestedSector");
+            var ashfall = prototypes.Index<GamePresetPrototype>(WFContestedSectorProto);
             Assert.That(ashfall.Rules, Does.Contain("WFAdsCampaignRule"), "The Contested Sector preset runs the ADS beside the Reavers.");
         });
 

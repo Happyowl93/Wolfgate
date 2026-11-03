@@ -16,6 +16,8 @@ namespace Content.IntegrationTests.Tests._WF.Xenonids;
 [TestFixture]
 public sealed class XenoParasiteVariantTest
 {
+    private static readonly ProtoId<DamageGroupPrototype> BruteProto = "Brute";
+
     [Test]
     public async Task HardyHuggerBitesAndStillDies()
     {
@@ -37,7 +39,7 @@ public sealed class XenoParasiteVariantTest
                 var bite = entities.GetComponent<MeleeWeaponComponent>(hugger).Damage;
                 Assert.That(bite.GetTotal(), Is.GreaterThan(FixedPoint2.Zero), $"{id} bites.");
 
-                var brute = new DamageSpecifier(protoMan.Index<DamageGroupPrototype>("Brute"), 100);
+                var brute = new DamageSpecifier(protoMan.Index<DamageGroupPrototype>(BruteProto), 100);
                 damageable.TryChangeDamage(hugger, brute, true);
                 Assert.That(mobState.IsDead(hugger), $"{id} still dies to damage.");
             }
@@ -92,7 +94,7 @@ public sealed class XenoParasiteVariantTest
             var comp = entities.GetComponent<XenoParasiteComponent>(infector);
             Assert.That(parasites.Infect((infector, comp), human, popup: false, force: true), "The infecting hunter hugs a host.");
 
-            var brute = new DamageSpecifier(protoMan.Index<DamageGroupPrototype>("Brute"), 100);
+            var brute = new DamageSpecifier(protoMan.Index<DamageGroupPrototype>(BruteProto), 100);
             damageable.TryChangeDamage(biter, brute, true);
         });
 

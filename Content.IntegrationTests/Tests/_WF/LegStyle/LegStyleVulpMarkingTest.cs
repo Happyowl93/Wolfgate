@@ -37,12 +37,14 @@ public sealed class LegStyleVulpMarkingTest : InteractionTest
 
         await Client.WaitAssertion(() =>
         {
-            var sprite = CEntMan.GetComponent<SpriteComponent>(CPlayer);
-            Assert.That(sprite.LayerMapTryGet(DeltaV, out _) && sprite.LayerMapTryGet(Starlight, out _), Is.True,
+            var spriteUid = CPlayer;
+            var sprites = CEntMan.System<SpriteSystem>();
+            var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), DeltaV, out _, false) && sprites.LayerMapTryGet((spriteUid, sprite), Starlight, out _, false), Is.True,
                 "The markings aren't drawn.");
-            Assert.That(sprite.LayerMapTryGet($"{DeltaV}-displacement", out _), Is.True,
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), $"{DeltaV}-displacement", out _, false), Is.True,
                 "A plantigrade marking wasn't reshaped on the vulpkanin's own legs.");
-            Assert.That(sprite.LayerMapTryGet($"{Starlight}-displacement", out _), Is.False,
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), $"{Starlight}-displacement", out _, false), Is.False,
                 "A marking drawn for these legs was reshaped.");
         });
 
@@ -51,8 +53,10 @@ public sealed class LegStyleVulpMarkingTest : InteractionTest
 
         await Client.WaitAssertion(() =>
         {
-            var sprite = CEntMan.GetComponent<SpriteComponent>(CPlayer);
-            Assert.That(sprite.LayerMapTryGet($"{DeltaV}-displacement", out _), Is.False,
+            var spriteUid = CPlayer;
+            var sprites = CEntMan.System<SpriteSystem>();
+            var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), $"{DeltaV}-displacement", out _, false), Is.False,
                 "Plantigrade legs kept the reshaping.");
         });
     }

@@ -18,8 +18,8 @@ public sealed class SharedWFCockpitSystem : EntitySystem
             TryComp<BuckleComponent>(pilot, out var buckle) && buckle.BuckledTo is { } seat &&
             !TerminatingOrDeleted(seat) && HasComp<WFCockpitSeatComponent>(seat) &&
             TryComp<StrapComponent>(seat, out var strap) && strap.Enabled &&
-            TryComp<TransformComponent>(seat, out var seatTransform) &&
-            TryComp<TransformComponent>(helm, out var consoleTransform) &&
+            TryComp(seat, out TransformComponent? seatTransform) &&
+            TryComp(helm, out TransformComponent? consoleTransform) &&
             seatTransform.GridUid is { } grid && grid == consoleTransform.GridUid;
     }
 }

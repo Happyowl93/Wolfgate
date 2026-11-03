@@ -191,7 +191,7 @@ public sealed partial class FabricationSiloMenu : FancyWindow
         SlotButton.Text = Loc.GetString(_slot != null ? "fabrication-silo-eject" : "fabrication-silo-insert");
         SlotButton.ToolTip = Loc.GetString(_slot != null ? "fabrication-silo-eject-container-hint" : "fabrication-silo-insert-hint");
 
-        StockList.DisposeAllChildren();
+        StockList.RemoveAllChildren();
         var search = SearchBar.Text.Trim();
         var canWithdraw = _slot is { } target && target.Volume < target.MaxVolume;
         foreach (var (entry, label) in _stock

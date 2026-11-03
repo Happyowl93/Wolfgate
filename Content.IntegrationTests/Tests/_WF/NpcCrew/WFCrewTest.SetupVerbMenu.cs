@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Concurrent;
 using System.Linq;
 using Content.Client._WF.NpcCrew;
@@ -106,7 +107,7 @@ public sealed partial class WFCrewTest
                 system.OnVerbsResponse -= responses.Enqueue;
                 context.Close();
                 window?.Close();
-                window?.Dispose();
+                window?.Teardown();
             });
             if (!wasAdmin)
                 await Server.WaitPost(() => admins.DeAdmin(ServerSession));

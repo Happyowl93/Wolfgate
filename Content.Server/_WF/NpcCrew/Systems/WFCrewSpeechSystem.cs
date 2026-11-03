@@ -8,7 +8,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.NpcCrew.Systems;
 
 /// <summary>Short local action reports with per-speaker and per-line cooldowns.</summary>
-public sealed class WFCrewSpeechSystem : EntitySystem
+public sealed partial class WFCrewSpeechSystem : EntitySystem
 {
     [Dependency] private ChatSystem _chat = default!;
     [Dependency] private MobStateSystem _mobs = default!;

@@ -1,3 +1,51 @@
+// WOLFGATE: restore the licence header removed by Kill Spdx
+// SPDX-FileCopyrightText: 2020 20kdc
+// SPDX-FileCopyrightText: 2020 DamianX
+// SPDX-FileCopyrightText: 2020 Víctor Aguilera Puerto
+// SPDX-FileCopyrightText: 2021 Acruid
+// SPDX-FileCopyrightText: 2021 Metal Gear Sloth
+// SPDX-FileCopyrightText: 2021 Remie Richards
+// SPDX-FileCopyrightText: 2021 ShadowCommander
+// SPDX-FileCopyrightText: 2021 Swept
+// SPDX-FileCopyrightText: 2021 ike709
+// SPDX-FileCopyrightText: 2022 AJCM-git
+// SPDX-FileCopyrightText: 2022 Moony
+// SPDX-FileCopyrightText: 2022 Rane
+// SPDX-FileCopyrightText: 2022 T-Stalker
+// SPDX-FileCopyrightText: 2022 Veritius
+// SPDX-FileCopyrightText: 2022 Visne
+// SPDX-FileCopyrightText: 2022 metalgearsloth
+// SPDX-FileCopyrightText: 2022 mirrorcult
+// SPDX-FileCopyrightText: 2022 wrexbe
+// SPDX-FileCopyrightText: 2023 Cheackraze
+// SPDX-FileCopyrightText: 2023 Checkraze
+// SPDX-FileCopyrightText: 2023 DrSmugleaf
+// SPDX-FileCopyrightText: 2023 Flipp Syder
+// SPDX-FileCopyrightText: 2023 Morb
+// SPDX-FileCopyrightText: 2023 OCO_Omega
+// SPDX-FileCopyrightText: 2024 Ciac32
+// SPDX-FileCopyrightText: 2024 Debug
+// SPDX-FileCopyrightText: 2024 Dvir
+// SPDX-FileCopyrightText: 2024 Ed
+// SPDX-FileCopyrightText: 2024 ErhardSteinhauer
+// SPDX-FileCopyrightText: 2024 GreaseMonk
+// SPDX-FileCopyrightText: 2024 Krunklehorn
+// SPDX-FileCopyrightText: 2024 Leon Friedrich
+// SPDX-FileCopyrightText: 2024 Mr. 27
+// SPDX-FileCopyrightText: 2024 Pieter-Jan Briers
+// SPDX-FileCopyrightText: 2024 Whatstone
+// SPDX-FileCopyrightText: 2024 Whisper
+// SPDX-FileCopyrightText: 2024 Winkarst
+// SPDX-FileCopyrightText: 2024 dffdff2423
+// SPDX-FileCopyrightText: 2024 lizelive
+// SPDX-FileCopyrightText: 2025 Ark
+// SPDX-FileCopyrightText: 2025 Hyper B
+// SPDX-FileCopyrightText: 2025 LukeZurg22
+// SPDX-FileCopyrightText: 2025 ark1368
+// SPDX-FileCopyrightText: 2025 starch
+//
+// SPDX-License-Identifier: MPL-2.0
+
 using System.Linq;
 using System.Text.RegularExpressions;
 using Content.Shared._Mono.Company;
@@ -7,10 +55,13 @@ using Content.Shared._WF.ChatFont; // WOLFGATE(ChatFont)
 using Content.Shared._WF.TypingBubble; // WOLFGATE(TypingBubble)
 using Content.Shared._WF.BloodColour; // WOLFGATE(BloodColour)
 using Content.Shared._WF.EmoteVoices; // WOLFGATE(EmoteVoices)
+using Content.Shared._WF.Voice; // WOLFGATE(Voice)
 using Content.Shared._WF.Genitals; // WOLFGATE(Genitals)
 using Content.Shared._WF.Genitals.Migration; // WOLFGATE(Genitals)
 using Content.Shared._WF.Genitals.Profile; // WOLFGATE(Genitals)
 using Content.Shared._WF.LegStyle; // WOLFGATE(LegStyle)
+using Content.Shared._WF.Traits; // WOLFGATE(Traits)
+using Content.Shared._WF.Traits.Conditions; // WOLFGATE(Traits)
 using Content.Shared.CCVar;
 using Content.Shared.GameTicking;
 using Content.Shared.Humanoid;
@@ -256,10 +307,13 @@ namespace Content.Shared.Preferences
             CustomMarkings = new(other.CustomMarkings); // WOLFGATE(CustomMarkings)
             LegStance = other.LegStance; // WOLFGATE(LegStyle)
             Biotype = other.Biotype; // WOLFGATE(Biotype)
+            Augments = new(other.Augments); // WOLFGATE(Augments)
+            AugmentUnlocks = new(other.AugmentUnlocks); // WOLFGATE(Augments)
             ChatFont = other.ChatFont; // WOLFGATE(ChatFont)
             TypingIndicator = other.TypingIndicator; // WOLFGATE(TypingBubble)
             BloodColor = other.BloodColor; // WOLFGATE(BloodColour)
             MessageSound = other.MessageSound; // WOLFGATE(EmoteVoices)
+            SpeechVoice = other.SpeechVoice; // WOLFGATE(Voice)
         }
 
         /// <summary>Copy constructor</summary>
@@ -295,10 +349,13 @@ namespace Content.Shared.Preferences
             CustomMarkings = new(other.CustomMarkings); // WOLFGATE(CustomMarkings)
             LegStance = other.LegStance; // WOLFGATE(LegStyle)
             Biotype = other.Biotype; // WOLFGATE(Biotype)
+            Augments = new(other.Augments); // WOLFGATE(Augments)
+            AugmentUnlocks = new(other.AugmentUnlocks); // WOLFGATE(Augments)
             ChatFont = other.ChatFont; // WOLFGATE(ChatFont)
             TypingIndicator = other.TypingIndicator; // WOLFGATE(TypingBubble)
             BloodColor = other.BloodColor; // WOLFGATE(BloodColour)
             MessageSound = other.MessageSound; // WOLFGATE(EmoteVoices)
+            SpeechVoice = other.SpeechVoice; // WOLFGATE(Voice)
         }
 
         /// <summary>
@@ -641,11 +698,13 @@ namespace Content.Shared.Preferences
             if (!CustomMarkingsEqual(other)) return false; // WOLFGATE(CustomMarkings)
             if (LegStance != other.LegStance) return false; // WOLFGATE(LegStyle)
             if (Biotype != other.Biotype) return false; // WOLFGATE(Biotype)
+            if (!AugmentsEqual(other)) return false; // WOLFGATE(Augments)
             if (ChatFont != other.ChatFont) return false; // WOLFGATE(ChatFont)
             if (TypingIndicator != other.TypingIndicator) return false; // WOLFGATE(TypingBubble)
             if (BloodColor != other.BloodColor) return false; // WOLFGATE(BloodColour)
             if (ScreamVoice != other.ScreamVoice || LaughVoice != other.LaughVoice) return false; // WOLFGATE(EmoteVoices)
             if (MessageSound != other.MessageSound) return false; // WOLFGATE(EmoteVoices)
+            if (!Equals(SpeechVoice, other.SpeechVoice)) return false; // WOLFGATE(Voice)
             if (!Flags.SequenceEqual(other.Flags)) return false; // Mono
             if (!Components.SequenceEqual(other.Components)) return false; // Mono
             if (!Items.SequenceEqual(other.Items)) return false; // Mono
@@ -853,8 +912,10 @@ namespace Content.Shared.Preferences
             EnsureCustomMarkingsValid(configManager); // WOLFGATE(CustomMarkings)
             EnsureValidEmoteVoices(prototypeManager); // WOLFGATE(EmoteVoices)
             MessageSound = MessageSoundRules.Sanitize(MessageSound, prototypeManager); // WOLFGATE(EmoteVoices): an unknown message sound becomes the species' own
+            SpeechVoice = (SpeechVoice ?? new SpeechVoice()).Clamped(); // WOLFGATE(Voice): out-of-range sliders come back inside their range; crafted network data can deliver null
             LegStance = LegStyleRules.Validate(Species, LegStance, prototypeManager); // WOLFGATE(LegStyle): legs the species doesn't have fall back to its own
             Biotype = WFBiotypeRules.Resolve(Biotype, speciesPrototype); // WOLFGATE(Biotype): Default and unknown values become the species' own
+            EnsureAugmentsValid(prototypeManager, collection.Resolve<IComponentFactory>()); // WOLFGATE(Augments): augments the species can't take are dropped
             ChatFont = WFChatFontRules.Validate(ChatFont, prototypeManager); // WOLFGATE(ChatFont): an unknown font becomes the default
             TypingIndicator = WFTypingBubbleRules.Validate(TypingIndicator, prototypeManager); // WOLFGATE(TypingBubble): an unknown or hidden bubble becomes the species' own
             BloodColor = WFBloodColourRules.Validate(BloodColor); // WOLFGATE(BloodColour)
@@ -910,6 +971,7 @@ namespace Content.Shared.Preferences
             // Track points count for each group.
             var groups = new Dictionary<string, int>();
             var result = new List<ProtoId<TraitPrototype>>();
+            var conditionCtx = new TraitConditionContext { SpeciesId = Species.Id, Proto = protoManager }; // WOLFGATE(Traits)
 
             // WOLFGATE START: count downsides first so a positive trait isn't dropped by set order
             var ordered = traits
@@ -924,6 +986,11 @@ namespace Content.Shared.Preferences
 
                 if (WFBiotypeGates.TraitBlocked(traitProto, this, protoManager)) // WOLFGATE(Biotype): a trait the effective biotype can't take is dropped
                     continue;
+
+                // WOLFGATE(Traits) START: drop a trait whose known conditions the character does not meet
+                if (!TraitConditionEvaluator.AllMet(traitProto.Conditions, conditionCtx))
+                    continue;
+                // WOLFGATE END
 
                 // WOLFGATE(MeridianTraits) START: drop a trait that excludes one already taken, in either direction
                 if (result.Any(taken => traitProto.MutuallyExclusiveTraits.Contains(taken)
@@ -1014,12 +1081,14 @@ namespace Content.Shared.Preferences
             hashCode.Add(CustomMarkings.Count); // WOLFGATE(CustomMarkings)
             hashCode.Add((int) LegStance); // WOLFGATE(LegStyle)
             hashCode.Add((int) Biotype); // WOLFGATE(Biotype)
+            hashCode.Add(Augments.Count); // WOLFGATE(Augments)
             hashCode.Add(ChatFont); // WOLFGATE(ChatFont)
             hashCode.Add(TypingIndicator); // WOLFGATE(TypingBubble)
             hashCode.Add(BloodColor); // WOLFGATE(BloodColour)
             hashCode.Add(ScreamVoice); // WOLFGATE(EmoteVoices)
             hashCode.Add(LaughVoice); // WOLFGATE(EmoteVoices)
             hashCode.Add(MessageSound); // WOLFGATE(EmoteVoices)
+            hashCode.Add(SpeechVoice); // WOLFGATE(Voice)
             return hashCode.ToHashCode();
         }
 

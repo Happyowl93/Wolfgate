@@ -11,7 +11,7 @@ namespace Content.Server._WF.Encounters.Systems;
 /// Encounter ship deeds: the highest in command of an encounter ship drops its deed when he dies, and whoever uses it
 /// makes the ship permanent, cut loose from its encounter.
 /// </summary>
-public sealed class WFEncounterDeedSystem : EntitySystem
+public sealed partial class WFEncounterDeedSystem : EntitySystem
 {
     [Dependency] private WFEncounterSystem _encounters = default!;
     [Dependency] private MetaDataSystem _meta = default!;

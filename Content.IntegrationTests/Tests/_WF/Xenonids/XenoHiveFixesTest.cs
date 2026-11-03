@@ -349,7 +349,6 @@ public sealed class XenoHiveFixesTest
         EntityUid drone = default;
         EntityUid shuttle = default;
         EntityUid gunnery = default;
-        EntityUid vendor = default;
         await server.WaitPost(() =>
         {
             var hive = entities.SpawnEntity("CMXenoHive", MapCoordinates.Nullspace);

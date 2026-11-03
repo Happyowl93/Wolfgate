@@ -10,7 +10,7 @@ using Robust.Shared.Timing;
 namespace Content.Client._WF.CombatConsole;
 
 /// <summary>Plays local mechanical control cues through the player's normal audio mixer.</summary>
-public sealed class WFConsoleAudio : EntitySystem
+public sealed partial class WFConsoleAudio : EntitySystem
 {
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private IGameTiming _timing = default!;
@@ -51,7 +51,7 @@ public sealed class WFConsoleAudio : EntitySystem
         var gain = _configuration.GetCVar(CCVars.InterfaceVolume);
         if (gain <= 0)
             return;
-        _audio.PlayGlobal($"/Audio/_WF/CombatConsole/Retro/{cue}.ogg", Filter.Local(), false,
+        _audio.PlayGlobal(new ResolvedPathSpecifier($"/Audio/_WF/CombatConsole/Retro/{cue}.ogg"), Filter.Local(), false,
             AudioParams.Default.WithVolume(-12f + SharedAudioSystem.GainToVolume(gain)));
     }
 }

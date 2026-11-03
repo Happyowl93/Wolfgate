@@ -27,6 +27,8 @@ namespace Content.IntegrationTests.Tests._WF.Planets;
 [TestFixture]
 public sealed class CarcinomaInfestationTest
 {
+    private static readonly ProtoId<WFPlanetSurfacePrototype> WFSurfaceCarcinomaProto = "WFSurfaceCarcinoma";
+
     [Test]
     public async Task TendrilsHoldHullUntilCutAndGrowthStaysBounded()
     {
@@ -37,7 +39,7 @@ public sealed class CarcinomaInfestationTest
         var em = server.EntMan;
         await server.WaitPost(() =>
         {
-            var surface = server.ResolveDependency<IPrototypeManager>().Index<WFPlanetSurfacePrototype>("WFSurfaceCarcinoma");
+            var surface = server.ResolveDependency<IPrototypeManager>().Index<WFPlanetSurfacePrototype>(WFSurfaceCarcinomaProto);
             var network = server.System<WFPlanetNetworkSystem>().BuildNetwork(surface, Vector2.Zero, "Carcinoma", null)!.Value;
             layers.AddRange(em.GetComponent<WFPlanetNetworkComponent>(network).Layers);
         });

@@ -1,3 +1,4 @@
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -30,11 +31,15 @@ using Robust.Shared.Enums;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
 using Robust.Shared.Player;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.RoundSetup;
 
 public sealed partial class WFRoundSetupLobbyTest
 {
+    private static ProtoId<GameMapPrototype> WFFactionBurstMapProto => "WFFactionBurstMap";
+    private static readonly ProtoId<VesselPrototype> GuppyProto = "Guppy";
+
     [TestPrototypes]
     private const string BurstMap = @"
 - type: gameMap
@@ -132,13 +137,13 @@ public sealed partial class WFRoundSetupLobbyTest
                     var jobs = server.System<StationJobsSystem>();
                     var em = server.EntMan;
                     var stationSystem = server.System<StationSystem>();
-                    stationSystem.InitializeNewStation(server.ProtoMan.Index<GameMapPrototype>("WFFactionBurstMap").Stations["PDV"], null);
+                    stationSystem.InitializeNewStation(server.ProtoMan.Index<GameMapPrototype>(WFFactionBurstMapProto).Stations["PDV"], null);
                     for (var faction = 0; faction < 2; faction++)
                     {
                         var job = faction == 0 ? "Deputy" : "Pirate";
-                        stations[faction] = em.EntityQuery<StationJobsComponent>().Select(comp => comp.Owner)
+                        stations[faction] = em.EntityQuery<StationJobsComponent>().Select(comp => comp.Uid())
                             .Single(uid => setup.IsStandardStation(uid) && jobs.TryGetJobSlot(uid, job, out _));
-                        var vessel = server.ProtoMan.Index<VesselPrototype>("Guppy");
+                        var vessel = server.ProtoMan.Index<VesselPrototype>(GuppyProto);
                         Assert.That(server.System<MapLoaderSystem>().TryLoadGrid(ticker.DefaultMap, vessel.ShuttlePath,
                             out var loaded, offset: new Vector2(faction == 0 ? -8000 : 8000, 0)), Is.True);
                         bases[faction] = loaded!.Value.Owner;

@@ -73,7 +73,7 @@ public sealed class WolfmedBobSoundsTest : WolfmedGameTest
                 // The upstream Pill and a variant that inherits from it.
                 foreach (var pill in new[] { "Pill", "PillDexalin" })
                 {
-                    Assert.That(prototypes.Index<EntityPrototype>(pill).TryGetComponent(out FoodComponent? food, factory),
+                    Assert.That(prototypes.Index<EntityPrototype>(pill).TryComp(out FoodComponent? food, factory),
                         Is.True);
                     Assert.That(food!.UseSound, Is.InstanceOf<SoundCollectionSpecifier>());
                     var id = ((SoundCollectionSpecifier) food.UseSound).Collection!;

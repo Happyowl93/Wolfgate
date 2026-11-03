@@ -23,7 +23,7 @@ namespace Content.IntegrationTests.Tests._WF.AdsIncursion;
 public sealed class WFAdsChallengeTest : WFAdsTestBase
 {
     /// <summary>A Reaver cell two out from the ADS node: adjacent to ADS space, away from the core.</summary>
-    private static readonly WFSectorCell Rival = FarCell(AdsHome, 2);
+    private static new readonly WFSectorCell Rival = FarCell(AdsHome, 2);
 
     /// <summary>Founds a node, gives the Reavers a cell beside ADS space and has the campaign challenge it by its own rules.</summary>
     private EntityUid Launch(out EntityUid node)

@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using System.Threading.Tasks;
 using Content.Client._WF.Synthetics;
@@ -69,6 +70,6 @@ public sealed class WFChassisPanelDollTest : GameTest
             panel.Update(WFChassisPanelWindowTest.State(bayOpen: true));
         });
 
-        await Client.WaitPost(() => window!.Dispose());
+        await Client.WaitPost(() => window!.Teardown());
     }
 }

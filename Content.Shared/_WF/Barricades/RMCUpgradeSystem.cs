@@ -71,7 +71,7 @@ public sealed class RMCConstructionUpgradedEvent(EntityUid newUid, EntityUid old
 }
 
 /// <summary>Swaps barricades for their upgraded or downgraded versions, keeping damage and rotation.</summary>
-public sealed class RMCUpgradeSystem : EntitySystem
+public sealed partial class RMCUpgradeSystem : EntitySystem
 {
     [Dependency] private IComponentFactory _compFactory = default!;
     [Dependency] private DamageableSystem _damageable = default!;
@@ -96,7 +96,7 @@ public sealed class RMCUpgradeSystem : EntitySystem
     {
         upgrade = default!;
         return _prototypes.TryIndex(id, out var proto) &&
-               proto.TryGetComponent(out upgrade!, _compFactory);
+               proto.TryComp(out upgrade!, _compFactory);
     }
 
     /// <summary>Whether the item is a stack one of the target's upgrades consumes.</summary>

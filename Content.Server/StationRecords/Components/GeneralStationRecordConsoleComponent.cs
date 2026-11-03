@@ -16,7 +16,8 @@ public sealed partial class GeneralStationRecordConsoleComponent : Component
     /// <summary>
     /// Qualities to filter a search by.
     /// </summary>
-    [DataField]
+    // [DataField] // WOLFGATE(LiveFixes): not saved; a set filter has no serializer and failed the ship copy
+    [ViewVariables]
     public StationRecordsFilter? Filter;
 
     /// <summary>

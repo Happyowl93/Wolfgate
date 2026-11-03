@@ -48,7 +48,7 @@ public sealed class CargoHullTest
 
             float CrateWeight(EntProtoId crate)
             {
-                return protoMan.Index(crate).TryGetComponent<WFCargoMassComponent>(out _, factory) ? cargo.GoodWeight(crate) : 0f;
+                return protoMan.Index(crate).TryComp<WFCargoMassComponent>(out _, factory) ? cargo.GoodWeight(crate) : 0f;
             }
 
             Assert.Multiple(() =>

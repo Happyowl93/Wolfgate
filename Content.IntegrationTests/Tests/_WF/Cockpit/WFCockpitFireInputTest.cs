@@ -1,5 +1,6 @@
 #nullable enable annotations
 
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -330,7 +331,7 @@ public sealed class WFCockpitFireInputTest
             Assert.That(drawn, Has.Length.EqualTo(1), "Only selected weapons draw a preview line.");
             Assert.That((drawn[0].From - Vector2.Transform(new Vector2(6, 3), worldToView)).Length(), Is.LessThan(0.5f), "The line starts at the weapon.");
             Assert.That((drawn[0].To - aimPixel).Length(), Is.LessThan(0.5f), "The line ends at the aim point.");
-            lines.Dispose();
+            lines.Teardown();
             var reticle = nav.CustomCursorShape;
             Assert.That(reticle, Is.Not.Null, "Armed plots use the visible gun-sight asset rather than a platform crosshair.");
             Assert.That(world.Viewport.CustomCursorShape, Is.SameAs(originalWorld), "Only the hovered aiming surface changes cursor.");

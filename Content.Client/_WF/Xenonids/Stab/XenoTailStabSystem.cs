@@ -15,6 +15,7 @@ namespace Content.Client._WF.Xenonids.Stab;
 public sealed partial class XenoTailStabSystem : SharedXenoTailStabSystem
 {
     [Dependency] private AnimationPlayerSystem _animation = default!;
+    [Dependency] private SpriteSystem _sprite = default!;
     [Dependency] private IConsoleHost _console = default!;
     [Dependency] private InteractionSystem _interaction = default!;
     [Dependency] private IGameTiming _timing = default!;
@@ -71,7 +72,7 @@ public sealed partial class XenoTailStabSystem : SharedXenoTailStabSystem
 
         var sprite = EnsureComp<SpriteComponent>(animationEnt);
         sprite.NoRotation = true;
-        sprite.Rotation = localPos.ToWorldAngle();
+        _sprite.SetRotation((animationEnt, sprite), localPos.ToWorldAngle());
 
         // lie by 20% so the player feels less bad about missing
         var distance = localPos.Length() * 0.80f;

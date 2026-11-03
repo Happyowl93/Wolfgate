@@ -52,13 +52,15 @@ public sealed class AvaliClothingTest : InteractionTest
         var cTarget = ToClient(target);
         await Client.WaitAssertion(() =>
         {
-            var sprite = CEntMan.GetComponent<SpriteComponent>(cTarget);
+            var spriteUid = cTarget;
+            var sprites = CEntMan.System<SpriteSystem>();
+            var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
             var slots = CEntMan.GetComponent<InventorySlotsComponent>(cTarget);
             Assert.That(slots.VisualLayerKeys.TryGetValue("head", out var headKeys), Is.True, "No head layers were rendered.");
             foreach (var key in headKeys!)
             {
                 revealed.Add(key);
-                if (sprite.LayerMapTryGet(key, out var index))
+                if (sprites.LayerMapTryGet((spriteUid, sprite), key, out var index, false))
                     states.Add(sprite[index].RsiState.Name ?? "");
             }
         });

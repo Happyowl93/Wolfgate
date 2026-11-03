@@ -45,7 +45,7 @@ public sealed partial class ExaminableDamageSystem : EntitySystem
     private int GetDamageLevel(EntityUid uid, ExaminableDamageComponent? component = null,
         DamageableComponent? damageable = null, DestructibleComponent? destructible = null)
     {
-        if (!Resolve(uid, ref component, ref damageable, ref destructible))
+        if (!Resolve(uid, ref component, ref damageable, ref destructible, false)) // WOLFGATE(LiveFixes): indestructible scenery has no damage level
             return 0;
 
         if (component.MessagesProto == null)

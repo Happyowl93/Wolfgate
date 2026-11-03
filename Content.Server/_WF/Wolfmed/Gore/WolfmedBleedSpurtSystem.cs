@@ -26,7 +26,7 @@ namespace Content.Server._WF.Wolfmed.Gore;
 /// which every treatment, tourniquet, clot and heal already goes through, and again on each spurt, so a
 /// bleed that stops without one still switches the clock off.
 /// </remarks>
-public sealed class WolfmedBleedSpurtSystem : EntitySystem
+public sealed partial class WolfmedBleedSpurtSystem : EntitySystem
 {
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private BloodstreamSystem _bloodstream = default!;

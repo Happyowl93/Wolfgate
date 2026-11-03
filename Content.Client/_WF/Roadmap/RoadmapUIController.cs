@@ -10,7 +10,7 @@ namespace Content.Client._WF.Roadmap;
 /// Opens the roadmap from the lobby links and the game menu, and once per launch in the lobby,
 /// after the server's rules decision and any rules popup.
 /// </summary>
-public sealed class RoadmapUIController : UIController, IOnStateEntered<LobbyState>
+public sealed partial class RoadmapUIController : UIController, IOnStateEntered<LobbyState>
 {
     [Dependency] private INetManager _net = default!;
     [Dependency] private IStateManager _state = default!;

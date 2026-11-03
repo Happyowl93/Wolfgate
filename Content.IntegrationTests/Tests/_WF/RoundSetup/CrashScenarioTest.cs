@@ -46,7 +46,7 @@ public sealed class CrashScenarioTest
             em.AddComponents(hull, vessel.AddComponents);
             Assert.That(em.HasComponent<ShuttleComponent>(hull), Is.True);
             var turf = server.System<TurfSystem>();
-            var tiles = server.System<SharedMapSystem>().GetAllTilesEnumerator(hull, loaded.Value.Comp);
+            var tiles = server.System<SharedMapSystem>().GetAllTiles(hull, loaded.Value.Comp);
             var usable = 0;
             while (tiles.MoveNext(out var tile))
             {

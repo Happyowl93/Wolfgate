@@ -24,7 +24,7 @@ namespace Content.Server._WF.Wolfmed.Sounds;
 /// has nothing for them. A species that maps one of these emotes itself keeps its own sound. Every emote in those
 /// sets, and the dying gasp, is flesh only: a mechanical body plays nothing for them.
 /// </remarks>
-public sealed class WolfmedBodySoundSystem : EntitySystem
+public sealed partial class WolfmedBodySoundSystem : EntitySystem
 {
     /// <summary>The Wolfmed emotes' voices for a male or unsexed body, as VocalSystem falls back to male.</summary>
     public static readonly ProtoId<EmoteSoundsPrototype> MaleEmotes = "WFWolfmedMaleEmotes";

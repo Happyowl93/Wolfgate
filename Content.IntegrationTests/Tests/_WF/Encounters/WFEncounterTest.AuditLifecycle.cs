@@ -16,6 +16,10 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestAuditEscortedProto => "WFTestAuditEscorted";
+    private static ProtoId<WFEncounterPrototype> WFTestAuditPersistentProto => "WFTestAuditPersistent";
+    private static ProtoId<WFEncounterPrototype> WFTestAuditTraderProto => "WFTestAuditTrader";
+
     [TestPrototypes]
     private const string AuditLifecyclePrototypes = @"
 - type: wfEncounter
@@ -73,7 +77,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestAuditEscorted");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestAuditEscortedProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(27000, 27000), MapData.MapId), out encounter), Is.True);
         });
         await WaitUntilServer(() => !SEntMan.TryGetComponent(encounter, out WFEncounterComponent? comp) || comp.Resolution != null, 1800);
@@ -96,7 +100,7 @@ public sealed partial class WFEncounterTest
             var system = Server.System<WFEncounterSystem>();
             var count = system.ActiveCount();
             var cost = system.ActiveCost();
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestAuditPersistent");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestAuditPersistentProto);
             Assert.That(system.TrySpawn(prototype, new MapCoordinates(new Vector2(25000, 25000), MapData.MapId), out var encounter), Is.True);
             Assert.That(system.IsRunning("WFTestAuditPersistent"), Is.True);
             Assert.That(system.ActiveCount(), Is.EqualTo(count));
@@ -118,7 +122,7 @@ public sealed partial class WFEncounterTest
         await Server.WaitAssertion(() =>
         {
             var system = Server.System<WFEncounterSystem>();
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestAuditTrader");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestAuditTraderProto);
             Assert.That(system.TrySpawn(prototype, new MapCoordinates(new Vector2(23000, 23000), MapData.MapId), out var encounter), Is.True);
             var comp = SEntMan.GetComponent<WFEncounterComponent>(encounter);
             var ship = comp.Ships["trader"];

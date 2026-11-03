@@ -15,7 +15,7 @@ namespace Content.Server._WF.Wolfmed.Body;
 /// surgery lists. Eye damage blurs and blinds by itself, so it never takes the organ below one health. Oculine
 /// clears the eye damage and mends the organ's other losses.
 /// </summary>
-public sealed class WolfmedOpticsSystem : EntitySystem
+public sealed partial class WolfmedOpticsSystem : EntitySystem
 {
     [Dependency] private BlindableSystem _blindable = default!;
     [Dependency] private OrganHealthSystem _organs = default!;

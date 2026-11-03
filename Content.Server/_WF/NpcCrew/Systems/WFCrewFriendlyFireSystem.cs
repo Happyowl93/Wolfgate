@@ -17,7 +17,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.NpcCrew.Systems;
 
 /// <summary>Stops autonomous crew damage to allies before armor, wounds and retaliation process the hit.</summary>
-public sealed class WFCrewFriendlyFireSystem : EntitySystem
+public sealed partial class WFCrewFriendlyFireSystem : EntitySystem
 {
     [Dependency] private NpcFactionSystem _factions = default!;
     [Dependency] private WFCrewSecuritySystem _security = default!;
@@ -172,7 +172,7 @@ public sealed class WFCrewFriendlyFireSystem : EntitySystem
     /// <summary>Reports ship hitscan damage to a hull the way ship-weapon projectile impacts are reported.</summary>
     private void ReportBeamHit(EntityUid target, EntityUid gun)
     {
-        if (!TryComp<TransformComponent>(target, out var xform) || !xform.Anchored || xform.GridUid is not { } grid
+        if (!TryComp(target, out TransformComponent? xform) || !xform.Anchored || xform.GridUid is not { } grid
             || !_alerts.IsShipWeapon(gun) || Transform(gun).GridUid is not { } attacker || attacker == grid)
             return;
         var ev = new WFCrewHullHitEvent(grid, attacker);

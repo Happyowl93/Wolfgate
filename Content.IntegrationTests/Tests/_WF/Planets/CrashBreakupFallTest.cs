@@ -155,7 +155,7 @@ public sealed class CrashBreakupFallTest
         var count = 0;
         foreach (var grid in grids)
         {
-            var tiles = maps.GetAllTilesEnumerator(grid, entMan.GetComponent<MapGridComponent>(grid));
+            var tiles = maps.GetAllTiles(grid, entMan.GetComponent<MapGridComponent>(grid));
             while (tiles.MoveNext(out var tile))
             {
                 if (tile.Value.Tile.TypeId == typeId)

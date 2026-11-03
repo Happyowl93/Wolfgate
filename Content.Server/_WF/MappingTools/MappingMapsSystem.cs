@@ -21,7 +21,7 @@ namespace Content.Server._WF.MappingTools;
 /// The Maps window's server side: lists map files, sends one's text for the preview, and saves and opens them like
 /// the savegrid, savemap, mapping and loadgrid commands.
 /// </summary>
-public sealed class MappingMapsSystem : EntitySystem
+public sealed partial class MappingMapsSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private IAdminManager _admin = default!;

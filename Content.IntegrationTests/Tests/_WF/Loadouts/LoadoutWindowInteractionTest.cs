@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -130,7 +131,7 @@ public sealed class LoadoutWindowInteractionTest : InteractionTest
 
             var row = Descendants(_window).OfType<LoadoutRailRow>().Single(r => r.Group == group);
             Assert.That(Descendants(row).OfType<Label>().Select(l => l.Text), Does.Contain(picked.Name), "the rail names the new pick");
-            _window.Dispose();
+            _window.Teardown();
         });
     }
 
@@ -167,7 +168,7 @@ public sealed class LoadoutWindowInteractionTest : InteractionTest
 
             Assert.That(_window.TrySelect(open[0]), Is.True, "a pick above the minimum can be dropped");
             Assert.That(Held(multi), Has.Count.EqualTo(multi.Max - 1));
-            _window.Dispose();
+            _window.Teardown();
         });
     }
 
@@ -227,7 +228,7 @@ public sealed class LoadoutWindowInteractionTest : InteractionTest
                 Assert.That(card.GlobalPosition.X + card.Size.X, Is.LessThanOrEqualTo(panel.GlobalPosition.X + panel.Size.X + 0.5f), "no card runs out of the panel");
             }
 
-            _window.Dispose();
+            _window.Teardown();
         });
     }
 
@@ -262,7 +263,7 @@ public sealed class LoadoutWindowInteractionTest : InteractionTest
         {
             Assert.That(Held(group), Is.Empty, "the Nothing tile cleared the group");
             Assert.That(nothing.Pressed, Is.True, "and is lit now");
-            _window.Dispose();
+            _window.Teardown();
         });
     }
 
@@ -325,7 +326,7 @@ public sealed class LoadoutWindowInteractionTest : InteractionTest
         {
             Assert.That(Tiles().Where(t => t.Entry != null).All(t => t.Entry!.Group == group), Is.True, "the grid is back on the open group");
             Assert.That(Descendants(_window).OfType<LoadoutRailRow>().Single(r => r.Pressed).Group, Is.SameAs(group));
-            _window.Dispose();
+            _window.Teardown();
         });
     }
 
@@ -377,7 +378,7 @@ public sealed class LoadoutWindowInteractionTest : InteractionTest
 
         await Client.WaitPost(() =>
         {
-            _window.Dispose();
+            _window.Teardown();
             config.SetCVar(CVars.DisplayUIScale, original);
         });
         await RunTicks(2);
@@ -425,7 +426,7 @@ public sealed class LoadoutWindowInteractionTest : InteractionTest
             var row = Descendants(_window).OfType<WFGagsColorRow>().Single();
             var first = Swatches(row)[0];
             Assert.That((first.PanelOverride as StyleBoxFlat)?.BackgroundColor, Is.EqualTo(picked), "the swatch shows the colour");
-            _window.Dispose();
+            _window.Teardown();
         });
 
         List<PanelContainer> Swatches(WFGagsColorRow row)

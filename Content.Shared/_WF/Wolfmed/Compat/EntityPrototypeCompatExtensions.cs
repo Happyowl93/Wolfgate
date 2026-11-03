@@ -9,5 +9,5 @@ public static class EntityPrototypeCompatExtensions
     /// <summary>Gets a component from an entity prototype's component registry.</summary>
     public static bool TryComp<T>(this EntityPrototype proto, [NotNullWhen(true)] out T? component, IComponentFactory factory)
         where T : IComponent, new()
-        => proto.TryGetComponent(out component, factory);
+        => proto.TryComp(out component, factory);
 }

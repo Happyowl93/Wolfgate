@@ -7,7 +7,7 @@ namespace Content.Server._WF.Drydock;
 /// Ship refits: the tiers a ship owns, what falls short of them, and what it costs to bring it up. The work on the
 /// ship itself is each refit kind's, through its <see cref="WFShipRefitEffect"/>.
 /// </summary>
-public sealed class WFShipRefitSystem : EntitySystem
+public sealed partial class WFShipRefitSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototype = default!;
 

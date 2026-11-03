@@ -10,7 +10,7 @@ using Content.Shared.Chemistry.Reagent;
 namespace Content.Server._WF.BloodColour;
 
 /// <summary>Gives a character the blood colour picked in their profile and repaints the blood already in them.</summary>
-public sealed class WFBloodColourSystem : EntitySystem
+public sealed partial class WFBloodColourSystem : EntitySystem
 {
     [Dependency] private BloodstreamSystem _bloodstream = default!;
     [Dependency] private SharedBodySystem _body = default!;

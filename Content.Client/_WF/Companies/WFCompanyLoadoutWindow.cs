@@ -10,7 +10,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Client._WF.Companies;
 
 /// <summary>Picks the loadouts a rank is issued at each spawn, from any crew job's loadouts.</summary>
-public sealed class WFCompanyLoadoutWindow : DefaultWindow
+public sealed partial class WFCompanyLoadoutWindow : DefaultWindow
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IEntityManager _entities = default!;

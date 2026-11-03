@@ -27,7 +27,7 @@ namespace Content.Server._WF.JudgePatrol;
 /// round runs with encounters on, replaces one lost after the respawn delay, and paces the circling ships so they keep
 /// their spacing.
 /// </summary>
-public sealed class WFStationPatrolSystem : EntitySystem
+public sealed partial class WFStationPatrolSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _config = default!;
     [Dependency] private IGameTiming _timing = default!;

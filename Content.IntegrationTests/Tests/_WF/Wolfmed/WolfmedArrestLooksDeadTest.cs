@@ -26,6 +26,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(WolfmedLifeSystem))]
 public sealed class WolfmedArrestLooksDeadTest : WolfmedGameTest
 {
+    private static readonly ProtoId<HealthIconPrototype> WFHealthIconWolfmedArrestProto = "WFHealthIconWolfmedArrest";
+
     [TestPrototypes]
     private const string Prototypes = @"
 # Starts under its own suffocation threshold, so the first respirator update either gasps or does not.
@@ -165,7 +167,7 @@ public sealed class WolfmedArrestLooksDeadTest : WolfmedGameTest
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(protos.TryIndex<HealthIconPrototype>("WFHealthIconWolfmedArrest", out var icon), Is.True,
+            Assert.That(protos.TryIndex<HealthIconPrototype>(WFHealthIconWolfmedArrestProto, out var icon), Is.True,
                 "the arrest HUD icon prototype is missing.");
 
             Assert.That(icon!.Icon, Is.InstanceOf<SpriteSpecifier.Rsi>());

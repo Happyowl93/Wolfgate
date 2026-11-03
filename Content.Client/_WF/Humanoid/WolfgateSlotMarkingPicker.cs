@@ -12,7 +12,7 @@ namespace Content.Client._WF.Humanoid;
 /// Grid picker for one marking category with slots (hair, facial hair). Same surface as SingleMarkingPicker,
 /// so the profile editor drives it unchanged: tiles select, the "none" tile clears the slot.
 /// </summary>
-public sealed class WolfgateSlotMarkingPicker : BoxContainer
+public sealed partial class WolfgateSlotMarkingPicker : BoxContainer
 {
     [Dependency] private MarkingManager _markingManager = default!;
 
@@ -163,7 +163,7 @@ public sealed class WolfgateSlotMarkingPicker : BoxContainer
             return;
 
         _prototypes ??= _markingManager.MarkingsByCategoryAndSpecies(Category, _species);
-        _grid.DisposeAllChildren();
+        _grid.RemoveAllChildren();
         _tiles.Clear();
 
         var current = Slot >= 0 ? _markings![Slot] : null;
@@ -173,12 +173,12 @@ public sealed class WolfgateSlotMarkingPicker : BoxContainer
 
         var sorted = _prototypes.Where(m =>
                 m.Key.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
-                Name(m.Value).Contains(filter, StringComparison.OrdinalIgnoreCase))
-            .OrderBy(p => Name(p.Value));
+                LocName(m.Value).Contains(filter, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(p => LocName(p.Value));
 
         foreach (var (id, proto) in sorted)
         {
-            var tile = new WolfgateMarkingTile(id, Name(proto), proto.Sprites, _direction)
+            var tile = new WolfgateMarkingTile(id, LocName(proto), proto.Sprites, _direction)
             {
                 Pressed = current?.MarkingId == id,
                 Tint = tint,
@@ -233,7 +233,7 @@ public sealed class WolfgateSlotMarkingPicker : BoxContainer
 
     private void PopulateColors()
     {
-        _colors.DisposeAllChildren();
+        _colors.RemoveAllChildren();
         if (_markings == null || _markings.Count == 0 || !_markingManager.TryGetMarking(_markings[Slot], out var proto))
             return;
 
@@ -278,5 +278,5 @@ public sealed class WolfgateSlotMarkingPicker : BoxContainer
         }
     }
 
-    private static string Name(MarkingPrototype proto) => Loc.GetString($"marking-{proto.ID}");
+    private static string LocName(MarkingPrototype proto) => Loc.GetString($"marking-{proto.ID}");
 }

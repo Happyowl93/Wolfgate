@@ -13,7 +13,7 @@ namespace Content.Client._WF.Barricades;
 
 /// <summary>Opens the upgrade radial menu at the barricade.</summary>
 [UsedImplicitly]
-public sealed class RMCConstructionUpgradeBui : BoundUserInterface
+public sealed partial class RMCConstructionUpgradeBui : BoundUserInterface
 {
     [Dependency] private IClyde _displayManager = default!;
     [Dependency] private IEyeManager _eye = default!;

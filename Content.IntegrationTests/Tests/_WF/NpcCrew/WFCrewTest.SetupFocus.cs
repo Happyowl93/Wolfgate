@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using System.Numerics;
 using Content.Shared._WF.NpcCrew;
@@ -133,7 +134,7 @@ public sealed partial class WFCrewTest
             finally
             {
                 external.Close();
-                external.Dispose();
+                external.Teardown();
             }
         });
     }

@@ -22,7 +22,7 @@ public enum ShipPaSkipResult
 /// A ship's PA playlist: links wait on the grid and play one after another through the internet sound system,
 /// which still plays a single track per ship.
 /// </summary>
-public sealed class ShipPaPlaylistSystem : EntitySystem
+public sealed partial class ShipPaPlaylistSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IConfigurationManager _cfg = default!;

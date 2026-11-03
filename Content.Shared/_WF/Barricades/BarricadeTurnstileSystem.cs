@@ -6,7 +6,7 @@ using Robust.Shared.Physics.Events;
 namespace Content.Shared._WF.Barricades;
 
 /// <summary>Lets whitelisted mobs through a turnstile only from behind it, along with whatever they pull.</summary>
-public sealed class BarricadeTurnstileSystem : EntitySystem
+public sealed partial class BarricadeTurnstileSystem : EntitySystem
 {
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private EntityWhitelistSystem _whitelist = default!;

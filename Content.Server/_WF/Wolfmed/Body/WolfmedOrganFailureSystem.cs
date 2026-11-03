@@ -17,7 +17,7 @@ public sealed partial class WolfmedOrganFailedComponent : Component;
 /// needing a spare. Its destruction wound still lands once. A chassis's parts are swapped, not mended, so a
 /// mechanical body keeps Onyx's removal, as does every body with wolfmed.organ_destruction_removes on.
 /// </summary>
-public sealed class WolfmedOrganFailureSystem : EntitySystem
+public sealed partial class WolfmedOrganFailureSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _config = default!;
     [Dependency] private WoundSystem _wounds = default!;

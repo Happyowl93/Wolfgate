@@ -120,7 +120,9 @@ public sealed partial class XenoTailLashSystem : EntitySystem
 
         args.Handled = true;
 
+#pragma warning disable CS0618 // The lookup replacement filters fixtures differently; this hit test was not re-tuned for it.
         foreach (var ent in _physics.GetCollidingEntities(Transform(xeno).MapID, xeno.Comp.Area.Value))
+#pragma warning restore CS0618
         {
             if (!_xeno.CanAbilityAttackTarget(xeno, ent))
                 continue;

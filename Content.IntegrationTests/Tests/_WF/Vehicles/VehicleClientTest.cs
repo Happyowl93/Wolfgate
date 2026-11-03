@@ -38,9 +38,9 @@ public sealed class VehicleClientTest
                 // A vehicle with a doorway has its driver in a body of their own, which has a context.
                 if (proto.Abstract ||
                     VehicleSpawnDefaultsTest.IsTestVehicle(proto.ID) ||
-                    !proto.TryGetComponent<RMCVehicleComponent>(out _, factory) ||
-                    proto.TryGetComponent<VehicleEnterComponent>(out _, factory) ||
-                    !proto.TryGetComponent<VehicleSoundComponent>(out var sound, factory) ||
+                    !proto.TryComp<RMCVehicleComponent>(out _, factory) ||
+                    proto.TryComp<VehicleEnterComponent>(out _, factory) ||
+                    !proto.TryComp<VehicleSoundComponent>(out var sound, factory) ||
                     sound.HornSound == null)
                 {
                     continue;
@@ -48,7 +48,7 @@ public sealed class VehicleClientTest
 
                 checkedVehicles.Add(proto.ID);
 
-                if (!proto.TryGetComponent<InputComponent>(out var input, factory))
+                if (!proto.TryComp<InputComponent>(out var input, factory))
                 {
                     Assert.Fail($"{proto.ID} has a horn but no input context, so its pilot's use-item key never reaches it.");
                     continue;

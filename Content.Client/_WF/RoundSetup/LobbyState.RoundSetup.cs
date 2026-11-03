@@ -8,7 +8,7 @@ namespace Content.Client.Lobby;
 public sealed partial class LobbyState
 {
     private WFRoundSetupClientSystem? _roundSetup;
-    private PickerWindow? _normalJobs;
+    private PickerWindow? _stationRoles;
     private WFRoundJoinChoiceWindow? _joinChoice;
 
     private void InitializeRoundSetupHome()
@@ -23,25 +23,25 @@ public sealed partial class LobbyState
         if (_roundSetup != null)
             _roundSetup.Received -= RoundSetupChanged;
         _roundSetup = null;
-        _joinStandardAfterLeaving = false;
+        _joinStationAfterLeaving = false;
         _joinChoice?.Close();
         _joinChoice = null;
-        _normalJobs?.Close();
-        _normalJobs = null;
+        _stationRoles?.Close();
+        _stationRoles = null;
     }
 
     private void RoundSetupChanged(WFRoundSetupState state)
     {
         UpdateRoundSetupHome();
         if (state.Message != null)
-            _joinStandardAfterLeaving = false;
-        if (!_joinStandardAfterLeaving || state.OwnLobby != null)
+            _joinStationAfterLeaving = false;
+        if (!_joinStationAfterLeaving || state.OwnLobby != null)
             return;
-        _joinStandardAfterLeaving = false;
-        CompleteStandardJoin();
+        _joinStationAfterLeaving = false;
+        CompleteStationJoin();
     }
 
-    /// <summary>Shows the standard join action or a return to the player's current crew.</summary>
+    /// <summary>Shows the join action or a return to the player's current crew.</summary>
     private void UpdateRoundSetupHome()
     {
         if (Lobby == null)
@@ -89,44 +89,44 @@ public sealed partial class LobbyState
             return;
         }
         _joinChoice = new WFRoundJoinChoiceWindow(
-            () => _userInterfaceManager.GetUIController<WFRoundSetupUIController>().OpenCrews(), JoinStandard, pregame: !_gameTicker.IsGameStarted);
+            () => _userInterfaceManager.GetUIController<WFRoundSetupUIController>().OpenCrews(), JoinStationRoles, pregame: !_gameTicker.IsGameStarted);
         _joinChoice.OpenCentered();
     }
 
-    private void JoinStandard()
+    private void JoinStationRoles()
     {
         if (_gameTicker.IsGameStarted && _gameTicker.DisallowedLateJoin)
             return;
-        // Wait for the server to release crew membership before choosing the normal flow.
+        // Wait for the server to release crew membership before choosing station roles.
         if (_roundSetup?.State?.OwnLobby is { } crew)
         {
-            _joinStandardAfterLeaving = true;
+            _joinStationAfterLeaving = true;
             _roundSetup.Send(new WFRoundSetupRequest(WFRoundSetupAction.Leave) { LobbyId = crew });
             return;
         }
-        CompleteStandardJoin();
+        CompleteStationJoin();
     }
 
-    private bool _joinStandardAfterLeaving;
+    private bool _joinStationAfterLeaving;
 
-    private void CompleteStandardJoin()
+    private void CompleteStationJoin()
     {
         if (_gameTicker.IsGameStarted)
-            OpenNormalJobs();
+            OpenStationRoles();
         else
             SetReady(true);
     }
 
-    private void OpenNormalJobs()
+    private void OpenStationRoles()
     {
         if (_gameTicker.DisallowedLateJoin)
             return;
-        if (_normalJobs is { IsOpen: true })
+        if (_stationRoles is { IsOpen: true })
         {
-            _normalJobs.MoveToFront();
+            _stationRoles.MoveToFront();
             return;
         }
-        _normalJobs = new PickerWindow();
-        _normalJobs.OpenNormalJobs();
+        _stationRoles = new PickerWindow();
+        _stationRoles.OpenStationRoles();
     }
 }

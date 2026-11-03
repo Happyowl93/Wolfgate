@@ -11,7 +11,7 @@ namespace Content.Server._WF.Traders;
 /// <summary>
 /// Stamps a spawning player's ID card with who it belongs to, and an unstamped card with the buyer of the ship it holds.
 /// </summary>
-public sealed class IdCardOwnerSystem : EntitySystem
+public sealed partial class IdCardOwnerSystem : EntitySystem
 {
     [Dependency] private SharedIdCardSystem _idCard = default!;
 

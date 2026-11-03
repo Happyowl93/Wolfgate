@@ -285,7 +285,10 @@ namespace Content.Shared.Chemistry.Reaction
                     return;
             }
 
-            Log.Error($"{nameof(Solution)} {soln.Owner} could not finish reacting in under {MaxReactionIterations} loops.");
+            // WOLFGATE(LiveFixes) START: name the entity and reagents, since the old message can't identify the reaction loop
+            // Log.Error($"{nameof(Solution)} {soln.Owner} could not finish reacting in under {MaxReactionIterations} loops.");
+            Log.Error($"{nameof(Solution)} {ToPrettyString(soln.Owner)} could not finish reacting in under {MaxReactionIterations} loops. Contents: {soln.Comp.Solution}");
+            // WOLFGATE END
         }
     }
 

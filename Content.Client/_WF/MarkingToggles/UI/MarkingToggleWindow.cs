@@ -12,7 +12,7 @@ using Robust.Shared.Timing;
 namespace Content.Client._WF.MarkingToggles.UI;
 
 /// <summary>A checkbox for each marking on the player's body: ticked shows it, unticked hides it.</summary>
-public sealed class MarkingToggleWindow : FancyWindow
+public sealed partial class MarkingToggleWindow : FancyWindow
 {
     [Dependency] private IEntityManager _entMan = default!;
 
@@ -63,12 +63,14 @@ public sealed class MarkingToggleWindow : FancyWindow
             _custom.RequestLibrary();
     }
 
+#pragma warning disable CS0672, CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
         if (disposing)
             _custom.LibraryUpdated -= OnLibraryUpdated;
     }
+#pragma warning restore CS0672, CS0618
 
     private void OnLibraryUpdated()
     {
@@ -136,7 +138,7 @@ public sealed class MarkingToggleWindow : FancyWindow
             foreach (var marking in markings)
             {
                 var id = marking.MarkingId;
-                var name = Loc.TryGetString($"marking-{id}", out var named) ? named : id;
+                var name = IoCManager.Resolve<ILocalizationManager>().TryGetString($"marking-{id}", out var named) ? named : id;
                 AddBox(name,
                     shown => _toggles.SetVisible(category, id, shown),
                     body => body.MarkingSet.Markings.TryGetValue(category, out var list)

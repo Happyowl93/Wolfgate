@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -371,6 +372,6 @@ public abstract class WFReaverTestBase : WFSectorTestBase
     protected List<EntityUid> Raids()
     {
         return SEntMan.EntityQuery<WFReaverRaidComponent, WFEncounterComponent>()
-            .Where(pair => pair.Item2.Resolution == null).Select(pair => pair.Item1.Owner).ToList();
+            .Where(pair => pair.Item2.Resolution == null).Select(pair => pair.Item1.Uid()).ToList();
     }
 }

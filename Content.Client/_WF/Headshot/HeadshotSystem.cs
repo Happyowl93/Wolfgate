@@ -11,7 +11,7 @@ using Robust.Shared.Timing;
 namespace Content.Client._WF.Headshot;
 
 /// <summary>Adds the examined character's headshot to the examine tooltip, downloading each image once.</summary>
-public sealed class HeadshotSystem : EntitySystem
+public sealed partial class HeadshotSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
 

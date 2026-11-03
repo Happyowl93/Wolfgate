@@ -55,7 +55,7 @@ public sealed partial class WFChassisPanelWindow
         var bandTip = entry.Band.StartsWith(BandPrefix, StringComparison.Ordinal)
             ? "wf-chassis-ui-tip-band-" + entry.Band[BandPrefix.Length..]
             : string.Empty;
-        row.Band.ToolTip = entry.Organ != null && Loc.TryGetString(bandTip, out var band)
+        row.Band.ToolTip = entry.Organ != null && IoCManager.Resolve<ILocalizationManager>().TryGetString(bandTip, out var band)
             ? Wrap(band)
             : null;
 
@@ -73,14 +73,14 @@ public sealed partial class WFChassisPanelWindow
         if (!LinesByText.TryGetValue(fault, out var proto))
             return Wrap(line);
 
-        var head = !string.IsNullOrEmpty(proto.Advice) && Loc.TryGetString(proto.Advice, out var advice)
+        var head = !string.IsNullOrEmpty(proto.Advice) && IoCManager.Resolve<ILocalizationManager>().TryGetString(proto.Advice, out var advice)
             ? Loc.GetString("wf-chassis-ui-tip-fault", ("fault", line), ("advice", advice))
             : line;
 
         var tip = Wrap(head);
         if (proto.Wound is { } wound &&
             _prototypes.TryIndex<WolfmedTreatmentProcedurePrototype>(wound.Id, out var procedure) &&
-            Loc.TryGetString(procedure.Summary, out var summary))
+            IoCManager.Resolve<ILocalizationManager>().TryGetString(procedure.Summary, out var summary))
         {
             tip += "\n" + Wrap(summary);
         }

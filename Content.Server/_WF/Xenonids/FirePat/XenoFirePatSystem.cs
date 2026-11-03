@@ -14,7 +14,7 @@ namespace Content.Server._WF.Xenonids.FirePat;
 /// RMC's fire patting on upstream fire: a <see cref="XenoFirePatterComponent"/> holder clicking anything burning (a mob,
 /// weeds, a resin structure, an item) with an empty hand takes fire stacks off it.
 /// </summary>
-public sealed class XenoFirePatSystem : EntitySystem
+public sealed partial class XenoFirePatSystem : EntitySystem
 {
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private FlammableSystem _flammable = default!;

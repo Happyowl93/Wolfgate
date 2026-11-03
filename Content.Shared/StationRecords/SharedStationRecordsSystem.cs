@@ -18,7 +18,8 @@ public abstract class SharedStationRecordsSystem : EntitySystem
     }
     public (NetEntity, uint) Convert(StationRecordKey input)
     {
-        return (GetNetEntity(input.OriginStation), input.Id);
+        // WOLFGATE(Performance): a deleted station goes out as invalid, without logging an error on a PVS thread
+        return (TryGetNetEntity(input.OriginStation, out var station) ? station.Value : NetEntity.Invalid, input.Id);
     }
 
     public List<(NetEntity, uint)> Convert(ICollection<StationRecordKey> input)

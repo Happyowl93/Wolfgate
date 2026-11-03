@@ -8,7 +8,7 @@ namespace Content.Client._WF.Ghost;
 /// <summary>
 /// Network side of the ghost orbit menu, plus the orbit links in chat.
 /// </summary>
-public sealed class GhostOrbitSystem : EntitySystem
+public sealed partial class GhostOrbitSystem : EntitySystem
 {
     [Dependency] private IPlayerManager _player = default!;
 

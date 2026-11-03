@@ -169,6 +169,7 @@ public sealed partial class ShipAccessScreen : BoxContainer
         WfRefitInstruments();
     }
 
+#pragma warning disable CS0672, CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
@@ -178,6 +179,7 @@ public sealed partial class ShipAccessScreen : BoxContainer
         _client.CodesReceived -= OnCodes;
         _client.AlertReceived -= OnAlert;
     }
+#pragma warning restore CS0672, CS0618
 
     /// <summary>Codes are only held while the tab is open.</summary>
     protected override void VisibilityChanged(bool newVisible)
@@ -443,7 +445,7 @@ public sealed partial class ShipAccessScreen : BoxContainer
         LockedLabel.Text = comp == null ? "-" : Loc.GetString(comp.Locked ? "ship-access-locked-yes" : "ship-access-locked-no");
 
         _builderChecks.Clear();
-        AllowListContainer.DisposeAllChildren();
+        AllowListContainer.RemoveAllChildren();
         if (comp != null)
         {
             foreach (var entry in comp.AllowList)
@@ -456,7 +458,7 @@ public sealed partial class ShipAccessScreen : BoxContainer
     private void RebuildNearby(bool isOwner, List<NearbyPerson> nearby)
     {
         NearbyBox.Visible = isOwner;
-        NearbyContainer.DisposeAllChildren();
+        NearbyContainer.RemoveAllChildren();
         foreach (var person in nearby)
             NearbyContainer.AddChild(NearbyRow(person));
 
@@ -469,7 +471,7 @@ public sealed partial class ShipAccessScreen : BoxContainer
         DoorNoneLabel.Visible = selected == null;
         DoorBox.Visible = selected != null;
         _doorPlayerChecks.Clear();
-        DoorPlayersContainer.DisposeAllChildren();
+        DoorPlayersContainer.RemoveAllChildren();
         if (selected == null)
             return;
 

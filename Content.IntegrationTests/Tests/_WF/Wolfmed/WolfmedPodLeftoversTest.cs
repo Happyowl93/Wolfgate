@@ -27,6 +27,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(AutodocSystem))]
 public sealed class WolfmedPodLeftoversTest : WolfmedGameTest
 {
+    private static readonly ProtoId<DamageTypePrototype> SlashProto = "Slash";
+
     public override PoolSettings PoolSettings => PsDisconnected;
 
     [TestPrototypes]
@@ -59,7 +61,7 @@ public sealed class WolfmedPodLeftoversTest : WolfmedGameTest
             var uid = SEntMan.SpawnEntity("WolfmedLeftoversTestPod", map.GridCoords);
             pod = (uid, SEntMan.GetComponent<AutodocComponent>(uid));
             body = SEntMan.SpawnEntity("MobHuman", map.GridCoords);
-            var slash = SProtoMan.Index<DamageTypePrototype>("Slash");
+            var slash = SProtoMan.Index<DamageTypePrototype>(SlashProto);
             SEntMan.System<DamageableSystem>().TryChangeDamage(body, new DamageSpecifier(slash, FixedPoint2.New(40)),
                 origin: null, targetPart: TargetBodyPart.Torso);
             var torso = SEntMan.System<SharedBodySystem>().GetBodyChildrenOfType(body, BodyPartType.Torso).Single().Id;

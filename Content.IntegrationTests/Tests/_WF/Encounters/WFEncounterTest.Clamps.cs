@@ -20,6 +20,8 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestStealthBoarderProto => "WFTestStealthBoarder";
+
     [TestPrototypes]
     private const string ClampPrototypes = @"
 - type: wfEncounter
@@ -189,7 +191,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStealthBoarder");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStealthBoarderProto);
             var system = Server.System<WFEncounterSystem>();
             Assert.That(system.TrySpawn(prototype, new MapCoordinates(new Vector2(-52000, 52000), MapData.MapId), out encounter), Is.True);
             var comp = SEntMan.GetComponent<WFEncounterComponent>(encounter);

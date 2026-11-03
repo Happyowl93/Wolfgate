@@ -9,7 +9,7 @@ namespace Content.Server._WF.EventStaff;
 /// Sends a message to the event staff chat.
 /// </summary>
 [AdminCommand(AdminFlags.Event)]
-public sealed class EventChatCommand : LocalizedCommands
+public sealed partial class EventChatCommand : LocalizedCommands
 {
     [Dependency] private IChatManager _chat = default!;
 

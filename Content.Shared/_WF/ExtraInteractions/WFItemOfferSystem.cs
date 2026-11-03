@@ -23,7 +23,7 @@ namespace Content.Shared._WF.ExtraInteractions;
 /// <summary>
 /// Lets a mob hold out its active item so anyone in reach can take it, without dropping it first.
 /// </summary>
-public sealed class WFItemOfferSystem : EntitySystem
+public sealed partial class WFItemOfferSystem : EntitySystem
 {
     [Dependency] private ActionBlockerSystem _actionBlocker = default!;
     [Dependency] private ISharedAdminLogManager _adminLog = default!;

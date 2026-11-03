@@ -13,6 +13,7 @@ using Content.Shared.Forensics.Components;
 using Content.Shared.Humanoid;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Maths;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Avali;
 
@@ -21,6 +22,8 @@ namespace Content.IntegrationTests.Tests._WF.Avali;
 [TestOf(typeof(PreenableSystem))]
 public sealed class AvaliPreeningTest : InteractionTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     [Test]
     public async Task SelfAndOtherPreeningConsumeFeathersAndCopyDonorData()
     {
@@ -152,7 +155,7 @@ public sealed class AvaliPreeningTest : InteractionTest
         await Server.WaitAssertion(() =>
         {
             SEntMan.GetComponent<PreenableComponent>(target).ShedScalingChance = 1f;
-            var blunt = ProtoMan.Index<DamageTypePrototype>("Blunt");
+            var blunt = ProtoMan.Index<DamageTypePrototype>(BluntProto);
             SEntMan.System<DamageableSystem>().TryChangeDamage(target,
                 new DamageSpecifier(blunt, FixedPoint2.New(10)), ignoreResistances: true);
         });

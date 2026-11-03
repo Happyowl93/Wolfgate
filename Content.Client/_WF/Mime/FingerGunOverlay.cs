@@ -61,7 +61,7 @@ public sealed partial class FingerGunOverlaySystem : EntitySystem
 }
 
 /// <summary>Red vignette on the target's screen after a finger gun hit, drawn like the brute damage overlay.</summary>
-public sealed class FingerGunOverlay : Overlay
+public sealed partial class FingerGunOverlay : Overlay
 {
     private static readonly ProtoId<ShaderPrototype> CircleMaskShader = "GradientCircleMask";
 

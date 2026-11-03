@@ -9,7 +9,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.Xenonids.Parasite.AI;
 
 /// <summary>Performs the leap action for NPC xenos that carry <see cref="WFNPCLeapComponent"/>, aiming it at the target and cancelling it when the target moves off the line. Ported from RMC-14's NPCLeapSystem.</summary>
-public sealed class WFNPCLeapSystem : EntitySystem
+public sealed partial class WFNPCLeapSystem : EntitySystem
 {
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private InteractionSystem _interaction = default!;

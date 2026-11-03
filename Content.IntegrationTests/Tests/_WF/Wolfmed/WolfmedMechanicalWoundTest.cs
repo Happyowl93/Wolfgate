@@ -39,6 +39,11 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(WolfmedOverheatingSystem))]
 public sealed class WolfmedMechanicalWoundTest : WolfmedGameTest
 {
+    private static readonly ProtoId<WoundPrototype> WFWolfmedServoDamageWoundProto = "WFWolfmedServoDamageWound";
+    private static readonly EntProtoId WFSurgeryReplaceServoProto = "WFSurgeryReplaceServo";
+    private static readonly EntProtoId WFSurgeryStepReplaceServoProto = "WFSurgeryStepReplaceServo";
+    private static readonly ProtoId<WoundPrototype> WFWolfmedOverheatingWoundProto = "WFWolfmedOverheatingWound";
+
     /// <summary>Wounds that belong to flesh and must never appear on a chassis.</summary>
     private static readonly string[] OrganicOnly =
     [
@@ -279,9 +284,9 @@ public sealed class WolfmedMechanicalWoundTest : WolfmedGameTest
             // The exit is the procedure: open the limb, replace the run with a cable coil, seal it.
             Assert.Multiple(() =>
             {
-                Assert.That(prototypes.Index<WoundPrototype>("WFWolfmedServoDamageWound").DamageTypes, Is.Empty);
-                Assert.That(prototypes.HasIndex<EntityPrototype>("WFSurgeryReplaceServo"));
-                Assert.That(prototypes.HasIndex<EntityPrototype>("WFSurgeryStepReplaceServo"));
+                Assert.That(prototypes.Index<WoundPrototype>(WFWolfmedServoDamageWoundProto).DamageTypes, Is.Empty);
+                Assert.That(prototypes.HasIndex(WFSurgeryReplaceServoProto));
+                Assert.That(prototypes.HasIndex(WFSurgeryStepReplaceServoProto));
                 Assert.That(entities.HasComponent<WolfmedServoKitComponent>(
                     entities.SpawnEntity("CableApcStack", map.GridCoords)), Is.True,
                     "and the coil a mechanic already carries is the step's tool.");
@@ -326,7 +331,7 @@ public sealed class WolfmedMechanicalWoundTest : WolfmedGameTest
             {
                 Assert.That(entities.GetComponent<WoundComponent>(wound).Severity, Is.EqualTo(FixedPoint2.New(48.4)));
                 Assert.That(overheating.IsOverheating(arm), Is.True);
-                Assert.That(prototypes.Index<WoundPrototype>("WFWolfmedOverheatingWound").DamageTypes, Is.Empty,
+                Assert.That(prototypes.Index<WoundPrototype>(WFWolfmedOverheatingWoundProto).DamageTypes, Is.Empty,
                     "no damage type means no tool and no damage removal reaches it.");
                 Assert.That(traits.TryGetLimbPenalty(arm, mobility: false, out var slow), Is.True);
                 Assert.That(slow, Is.GreaterThan(1f), "a hot part works slowly.");

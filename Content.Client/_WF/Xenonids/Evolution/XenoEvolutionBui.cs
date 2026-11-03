@@ -128,7 +128,7 @@ public sealed partial class XenoEvolutionBui : BoundUserInterface
             var name = strain.Name;
             string? description = null;
 
-            if (strain.TryGetComponent(out XenoStrainComponent? strainComp))
+            if (strain.TryComp(out XenoStrainComponent? strainComp, EntMan.ComponentFactory))
             {
                 name = $"{Loc.GetString(strainComp.Name)} {name}";
                 description = strainComp.Description;
@@ -183,7 +183,7 @@ public sealed partial class XenoEvolutionBui : BoundUserInterface
         {
             if (hasQueenAlive &&
                 _prototype.TryIndex(evolutionId, out var proto) &&
-                proto.TryGetComponent(out XenoEvolutionGranterComponent? _, _compFactory))
+                proto.TryComp(out XenoEvolutionGranterComponent? _, _compFactory))
             {
                 continue;
             }

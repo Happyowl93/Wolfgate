@@ -29646,8 +29646,6 @@ entities:
       deviceLists:
       - 4376
       - 34
-      configurators:
-      - invalid
   - uid: 4402
     components:
     - type: Transform
@@ -29658,8 +29656,6 @@ entities:
       deviceLists:
       - 4376
       - 34
-      configurators:
-      - invalid
   - uid: 4403
     components:
     - type: Transform
@@ -29670,8 +29666,6 @@ entities:
       deviceLists:
       - 4376
       - 34
-      configurators:
-      - invalid
   - uid: 4404
     components:
     - type: Transform
@@ -30251,8 +30245,6 @@ entities:
       - 34
       - 4364
       - 23
-      configurators:
-      - invalid
   - uid: 4463
     components:
     - type: Transform
@@ -30265,8 +30257,6 @@ entities:
       - 34
       - 4364
       - 23
-      configurators:
-      - invalid
   - uid: 4464
     components:
     - type: Transform
@@ -39942,8 +39932,6 @@ entities:
     - type: DeviceNetwork
       deviceLists:
       - 34
-      configurators:
-      - invalid
     - type: AtmosPipeLayers
       pipeLayer: Secondary
     - type: AtmosPipeColor
@@ -39957,8 +39945,6 @@ entities:
     - type: DeviceNetwork
       deviceLists:
       - 34
-      configurators:
-      - invalid
     - type: AtmosPipeLayers
       pipeLayer: Secondary
     - type: AtmosPipeColor
@@ -40030,8 +40016,6 @@ entities:
     - type: DeviceNetwork
       deviceLists:
       - 34
-      configurators:
-      - invalid
     - type: AtmosPipeLayers
       pipeLayer: Secondary
     - type: AtmosPipeColor
@@ -40060,8 +40044,6 @@ entities:
     - type: DeviceNetwork
       deviceLists:
       - 34
-      configurators:
-      - invalid
     - type: AtmosPipeLayers
       pipeLayer: Tertiary
     - type: AtmosPipeColor
@@ -40644,8 +40626,6 @@ entities:
     - type: DeviceNetwork
       deviceLists:
       - 34
-      configurators:
-      - invalid
     - type: AtmosPipeLayers
       pipeLayer: Tertiary
     - type: AtmosPipeColor
@@ -40659,8 +40639,6 @@ entities:
     - type: DeviceNetwork
       deviceLists:
       - 34
-      configurators:
-      - invalid
     - type: AtmosPipeLayers
       pipeLayer: Tertiary
     - type: AtmosPipeColor

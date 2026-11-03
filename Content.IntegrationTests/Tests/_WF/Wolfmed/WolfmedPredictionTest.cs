@@ -25,6 +25,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(WolfmedPredictedDamageSystem))]
 public sealed class WolfmedPredictionTest : WolfmedGameTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     /// <summary>A damageable with no body and no WoundHostComponent: the client must still predict on it.</summary>
     [TestPrototypes]
     private const string Prototypes = @"
@@ -66,7 +68,7 @@ public sealed class WolfmedPredictionTest : WolfmedGameTest
             var entMan = Client.EntMan;
             var damageable = entMan.System<DamageableSystem>();
             var protos = Client.ResolveDependency<IPrototypeManager>();
-            var blunt = protos.Index<DamageTypePrototype>("Blunt");
+            var blunt = protos.Index<DamageTypePrototype>(BluntProto);
 
             isWoundHost = entMan.HasComponent<WoundHostComponent>(clientHost);
 

@@ -10,7 +10,7 @@ namespace Content.Server._WF.Species;
 /// Tops thirst back up to Okay on mobs that never need to drink. Checked every tick, so a drain such as a Kelotane
 /// overdose never holds long enough to set off thirst effects or a Feroxi's dehydrated lungs.
 /// </summary>
-public sealed class WFNeverThirstySystem : EntitySystem
+public sealed partial class WFNeverThirstySystem : EntitySystem
 {
     [Dependency] private ThirstSystem _thirst = default!;
 

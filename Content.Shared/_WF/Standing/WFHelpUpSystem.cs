@@ -15,7 +15,7 @@ namespace Content.Shared._WF.Standing;
 /// <summary>
 /// Hugging or hand-clicking a knocked-down body cuts its stun and knockdown so it gets up sooner.
 /// </summary>
-public sealed class WFHelpUpSystem : EntitySystem
+public sealed partial class WFHelpUpSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedAudioSystem _audio = default!;

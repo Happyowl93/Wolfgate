@@ -37,7 +37,7 @@ public sealed class WolfmedMultiToolSurgeryTest : WolfmedGameTest
                 foreach (var proto in prototypes.EnumeratePrototypes<EntityPrototype>().OrderBy(p => p.ID))
                 {
                     if (proto.Abstract || Excluded.Contains(proto.ID) ||
-                        !proto.TryGetComponent(out MultipleToolComponent? tool, factory))
+                        !proto.TryComp(out MultipleToolComponent? tool, factory))
                         continue;
 
                     var modes = tool.Entries.SelectMany(entry => entry.Behavior).Select(q => q.ToString()).ToHashSet();

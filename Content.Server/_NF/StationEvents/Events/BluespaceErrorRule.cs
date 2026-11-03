@@ -223,11 +223,15 @@ public sealed partial class BluespaceErrorRule : StationEventSystem<BluespaceErr
 
         foreach (var componentGridUid in component.GridsUid)
         {
+            // WOLFGATE(LiveFixes) START: a grid destroyed in play is normal and must not stop the rest of the cleanup
+            // if (!EntityManager.TryGetComponent<TransformComponent>(componentGridUid, out var gridTransform))
+            // {
+            //     Log.Error("bluespace error objective was missing transform component");
+            //     return;
+            // }
             if (!EntityManager.TryGetComponent<TransformComponent>(componentGridUid, out var gridTransform))
-            {
-                Log.Error("bluespace error objective was missing transform component");
-                return;
-            }
+                continue;
+            // WOLFGATE END
 
             if (gridTransform.GridUid is not EntityUid gridUid)
             {

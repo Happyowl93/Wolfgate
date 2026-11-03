@@ -172,8 +172,6 @@ public sealed class WFRoundSetupState : EntityEventArgs
     public bool CanJoin;
     /// <summary>The recipient is playing a living character and belongs to no crew.</summary>
     public bool CanJoinLive;
-    /// <summary>Stations whose crew is recruiting, for the ordinary late-join picker.</summary>
-    public NetEntity[] RecruitingStations = Array.Empty<NetEntity>();
     /// <summary>The recipient's own player company, so its crews sort first.</summary>
     public int? OwnCompany;
     /// <summary>The recipient's company rank title, for joining their company's crews as it.</summary>

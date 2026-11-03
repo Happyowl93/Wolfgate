@@ -7,7 +7,7 @@ namespace Content.Client._WF.UserInterface.WindowPopout;
 /// <summary>
 /// Title bar button that pops a window out into its own OS window, or docks it back.
 /// </summary>
-public sealed class WolfgatePopoutButton : TextureButton
+public sealed partial class WolfgatePopoutButton : TextureButton
 {
     public const string StyleClassWindowPopoutButton = "windowPopoutButton";
 

@@ -22,7 +22,7 @@ namespace Content.Server._WF.Wolfmed.Stasis;
 /// wolfmed.stasis_damage_factor of itself before it becomes a wound. It never touches a fracture: a broken bone is
 /// surgery's (owner's rule). It ends by itself after wolfmed.stasis_max_seconds.
 /// </summary>
-public sealed class WolfmedStasisSystem : EntitySystem
+public sealed partial class WolfmedStasisSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
@@ -70,6 +70,10 @@ public sealed class WolfmedStasisSystem : EntitySystem
             {
                 if (!stasis.IsInStasis)
                 {
+                    // A stasis weave's hold is the weave's to lift.
+                    if (hold.HeldUntil != null)
+                        continue;
+
                     RemComp<WolfmedStasisHoldComponent>(uid);
                     RefreshBleeding(uid);
                     continue;
@@ -110,7 +114,7 @@ public sealed class WolfmedStasisSystem : EntitySystem
     }
 
     /// <summary>Every bleeding wound on the body recomputed against the hold, and the body's total with it.</summary>
-    private void RefreshBleeding(EntityUid body)
+    public void RefreshBleeding(EntityUid body)
     {
         foreach (var (part, _) in _body.GetBodyChildren(body))
         {

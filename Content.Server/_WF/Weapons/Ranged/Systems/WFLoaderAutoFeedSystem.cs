@@ -9,7 +9,7 @@ namespace Content.Server._WF.Weapons.Ranged.Systems;
 /// <summary>
 /// Reloads auto-fed guns from their linked ammo loaders once a shot has resolved.
 /// </summary>
-public sealed class WFLoaderAutoFeedSystem : EntitySystem
+public sealed partial class WFLoaderAutoFeedSystem : EntitySystem
 {
     [Dependency] private AmmoLoaderSystem _ammoLoader = default!;
 

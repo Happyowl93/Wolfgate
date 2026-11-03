@@ -148,7 +148,7 @@ public sealed partial class HardpointSlotSystem : EntitySystem
             return true;
         }
 
-        if (EntityManager.IsClientSide(ent.Owner))
+        if (IsClientSide(ent.Owner))
             return true;
 
         DropOrphanedInserts(targetLocation.State);

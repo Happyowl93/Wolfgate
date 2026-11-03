@@ -6,8 +6,8 @@
     <GuideEntityEmbed Entity="IntercomCommon"/>
   </Box>
   As the Captain of a Independent Colossus Vessel, you have the authority to hire and fire crew members, and to delegate work.
-There are two ways to hire crew:
-- Use the [color=#a4885c]station records computer[/color] on your ship to open crew slots. Players that join later can spawn in on your ship.
+<!-- WOLFGATE(StationRoles): ship crews recruit through Crew Setup -->There are two ways to hire crew:
+<!-- WOLFGATE(StationRoles): ship crews recruit through Crew Setup -->- Use [color=#a4885c]Crew Setup[/color] to form a crew and post for recruits. Players that join later can spawn in on your ship.
 - Invite other players to join your crew through in-game communications.
 
 Crew membership is informal - you don't need to sign any forms, but feel free to roleplay!

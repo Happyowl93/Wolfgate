@@ -6,6 +6,7 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Maths;
 using Robust.Shared.Physics.Systems;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Weapons;
 
@@ -13,6 +14,8 @@ namespace Content.IntegrationTests.Tests._WF.Weapons;
 [TestFixture]
 public sealed class WFHullImpactTest
 {
+    private static readonly ProtoId<DamageTypePrototype> StructuralProto = "Structural";
+
     // The diagonal blocks south and east, so a shell from the west strikes its open side with the room to the east.
     [TestCase("WallPlastitanium", 0f)]
     [TestCase("WallPlastitanium", 15f)]
@@ -103,7 +106,7 @@ public sealed class WFHullImpactTest
             second = entities.SpawnEntity("WallSolid", new EntityCoordinates(map.Grid.Owner, 6.5f, 0.5f));
 
             // Wear the first wall down so one AP hit breaks it.
-            var structural = server.ProtoMan.Index<DamageTypePrototype>("Structural");
+            var structural = server.ProtoMan.Index<DamageTypePrototype>(StructuralProto);
             var destroyedAt = entities.System<DestructibleSystem>().DestroyedAt(first);
             entities.System<DamageableSystem>().TryChangeDamage(first,
                 new DamageSpecifier(structural, destroyedAt - 10), ignoreResistances: true);

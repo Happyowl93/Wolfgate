@@ -11,7 +11,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.NpcCrew.Systems;
 
 /// <summary>Opt-in authoritative traces for menu requests and player attachment changes.</summary>
-public sealed class WFCrewUiDiagnosticsSystem : EntitySystem
+public sealed partial class WFCrewUiDiagnosticsSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IGameTiming _timing = default!;

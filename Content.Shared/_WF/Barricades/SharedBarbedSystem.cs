@@ -16,7 +16,7 @@ using Robust.Shared.Network;
 namespace Content.Shared._WF.Barricades;
 
 /// <summary>Stringing and cutting barbed wire on barricades, and what the wire does.</summary>
-public abstract class SharedBarbedSystem : EntitySystem
+public abstract partial class SharedBarbedSystem : EntitySystem
 {
     [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private SharedAudioSystem _audio = default!;

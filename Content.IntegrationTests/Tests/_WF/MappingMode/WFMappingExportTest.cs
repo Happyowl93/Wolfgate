@@ -8,11 +8,13 @@ using Content.Client._WF.MappingMode;
 using Content.IntegrationTests.Pair;
 using Content.Server._WF.MappingMode;
 using Content.Server._WF.MappingMode.Export;
+using Content.Server._WF.MappingMode.Issues;
 using Content.Server._WF.MappingTools;
 using Content.Shared._NF.Shipyard;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared._WF.MappingMode;
 using Content.Shared._WF.MappingMode.Export;
+using Content.Shared._WF.MappingMode.Issues;
 using Robust.Server.GameObjects;
 using Robust.Shared.ContentPack;
 using Robust.Shared.GameObjects;
@@ -29,7 +31,7 @@ namespace Content.IntegrationTests.Tests._WF.MappingMode;
 /// the vessel prototype with the mapper's details and a README; the details persist in the version, ride into the next
 /// save and reach the library listing; an error in the check refuses the ship export; a map of two levels exports its
 /// level files and a zMap, one level a gameMap; Go to moves the observer; a grid export is the bare grid file, refused
-/// for a version of two grids.
+/// for a version of two grids; the map lint refuses by kind, from the saved files.
 /// </summary>
 [TestFixture]
 public sealed class WFMappingExportTest
@@ -37,6 +39,7 @@ public sealed class WFMappingExportTest
     private const string ShipName = "Export Ship";
     private const string LevelsName = "Export Levels";
     private const string GridName = "Export Grid";
+    private const string LintName = "Export Lint";
 
     /// <summary>The parts that clear every ship error, placed along the grid's middle row.</summary>
     private static readonly string[] Parts =
@@ -273,7 +276,7 @@ public sealed class WFMappingExportTest
             Assert.That(library.TryFindVersion(player.UserId, ShipName, null, out map, out _), Is.True);
             var old = export.TryBuild(player, map!, version, WFMappingExportKind.Ship, new WFMappingShipDetails { Price = 1 });
             Assert.That(old, Is.Not.Null, "An older version exports unchecked.");
-            Assert.That(Text(WFMappingExportPackage.Unzip(old!), "README.txt"), Does.Contain("No check ran"));
+            Assert.That(Text(WFMappingExportPackage.Unzip(old!), "README.txt"), Does.Contain("The session wasn't checked"));
         });
 
         await pair.RunTicksSync(5);
@@ -477,6 +480,71 @@ public sealed class WFMappingExportTest
         }
 
         Assert.That(results, Does.Contain("wf-mapping-ship-several-grids"));
+
+        await Disable(pair);
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task MapLintRefusesByKind()
+    {
+        await using var pair = await PoolManager.GetServerClient(Settings);
+        var server = pair.Server;
+        var client = pair.Client;
+        var entMan = server.EntMan;
+        var mapping = entMan.System<WFMappingModeSystem>();
+        var library = entMan.System<WFMappingLibrarySystem>();
+        var export = entMan.System<WFMappingExportSystem>();
+        var issues = entMan.System<WFMappingIssuesSystem>();
+        var mapSys = entMan.System<MapSystem>();
+        var tileDefs = server.ResolveDependency<ITileDefinitionManager>();
+        var clientSys = client.EntMan.System<WFMappingClientSystem>();
+        await Enable(pair);
+        var player = pair.Player!;
+
+        var results = new List<string>();
+        await client.WaitPost(() => clientSys.ResultReceived += result => results.Add(result.LocKey));
+
+        static bool Linted(List<WFMappingIssue> found)
+        {
+            return found.Exists(issue => issue.RuleId == WFMappingIssueCatalog.MapLint);
+        }
+
+        // A wall the checker only allows on a point of interest: a grid passes, a map doesn't.
+        WFMappingSession session = default!;
+        Entity<MapGridComponent> grid = default;
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(mapping.TryCreateSession(player, LintName, out var created), Is.True);
+            session = created!;
+            grid = MakeGrid(entMan, mapSys, tileDefs, session.RootMap, 4, 3);
+            entMan.SpawnEntity("WallPlastitaniumIndestructible", new EntityCoordinates(grid, 0.5f, 0.5f));
+            Assert.That(Linted(issues.Check(session, WFMappingIssueScope.Grid)), Is.False);
+            Assert.That(Linted(issues.Check(session, WFMappingIssueScope.Map)), Is.True);
+            Assert.That(Linted(issues.Check(session, WFMappingIssueScope.Ship)), Is.True);
+            Assert.That(library.Autosave(session), Is.True);
+            Assert.That(library.TryFindVersion(player.UserId, LintName, null, out var map, out var version), Is.True);
+            Assert.That(export.TryBuild(player, map!, version!, WFMappingExportKind.Grid, null), Is.Not.Null);
+            Assert.That(export.TryBuild(player, map!, version!, WFMappingExportKind.Map, null), Is.Null);
+        });
+        for (var i = 0; i < 50 && !results.Contains("wf-mapping-export-lint"); i++)
+        {
+            await pair.RunTicksSync(1);
+        }
+
+        Assert.That(results, Does.Contain("wf-mapping-export-lint"));
+
+        // Something no kind may hold, and the older version still refused with no session to check it against.
+        await server.WaitAssertion(() =>
+        {
+            entMan.SpawnEntity("SpawnPointPassenger", new EntityCoordinates(grid, 1.5f, 0.5f));
+            Assert.That(Linted(issues.Check(session, WFMappingIssueScope.Grid)), Is.True);
+            Assert.That(library.Autosave(session), Is.True);
+            Assert.That(library.TryFindVersion(player.UserId, LintName, null, out var map, out var newest), Is.True);
+            Assert.That(newest!.Name.Number, Is.EqualTo(2));
+            Assert.That(export.TryBuild(player, map!, newest, WFMappingExportKind.Grid, null), Is.Null);
+            Assert.That(export.TryBuild(player, map!, map!.Versions[0], WFMappingExportKind.Map, null), Is.Null);
+        });
 
         await Disable(pair);
         await pair.CleanReturnAsync();

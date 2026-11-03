@@ -3,15 +3,19 @@ using Robust.Shared.Serialization;
 
 namespace Content.Shared._WF.MappingMode.Issues;
 
-/// <summary>What a check is for: a shipyard vessel (one level, one grid) or any map (every level).</summary>
+/// <summary>
+/// What a check is for: a shipyard vessel (one level, one grid), any map (every level) or a bare grid file, which the
+/// map lint takes for a point of interest.
+/// </summary>
 [Serializable, NetSerializable]
 public enum WFMappingIssueScope : byte
 {
     Ship,
     Map,
+    Grid,
 }
 
-/// <summary>How bad an issue is; a ship export is refused while an <see cref="Error"/> stands.</summary>
+/// <summary>How bad an issue is; a ship export is refused while an <see cref="Error"/> stands, any export over a map lint one.</summary>
 [Serializable, NetSerializable]
 public enum WFMappingIssueSeverity : byte
 {

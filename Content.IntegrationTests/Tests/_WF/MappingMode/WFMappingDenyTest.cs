@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -143,7 +144,7 @@ public sealed class WFMappingDenyTest
         }
 
         int Count(string prototype) => entMan.EntityQuery<MetaDataComponent>(true)
-            .Count(m => m.EntityPrototype?.ID == prototype && !entMan.IsQueuedForDeletion(m.Owner));
+            .Count(m => m.EntityPrototype?.ID == prototype && !entMan.IsQueuedForDeletion(m.Uid()));
 
         // A map of one grid holding every saved denied prototype, a plain warp marker and an item.
         EntityUid DeniedMap()

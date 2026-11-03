@@ -10,7 +10,7 @@ namespace Content.Server._WF.Synthetics;
 /// A chassis on a vacuum tile loses heat as it would in open space. An empty tile has almost no heat capacity, so the
 /// temperature exchange alone left a synthetic on a holed deck at room temperature forever.
 /// </summary>
-public sealed class WFChassisVacuumSystem : EntitySystem
+public sealed partial class WFChassisVacuumSystem : EntitySystem
 {
     [Dependency] private AtmosphereSystem _atmosphere = default!;
     [Dependency] private TemperatureSystem _temperature = default!;

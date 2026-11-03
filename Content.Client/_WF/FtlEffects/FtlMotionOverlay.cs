@@ -120,7 +120,7 @@ public sealed partial class FtlMotionOverlay : Overlay
     private void BuildHull(EntityUid uid, MapGridComponent grid, Hull hull)
     {
         var vertices = new List<DrawVertexUV2D>();
-        var tiles = _maps.GetAllTilesEnumerator(uid, grid);
+        var tiles = _maps.GetAllTiles(uid, grid);
         while (tiles.MoveNext(out var tile))
         {
             var origin = (Vector2) tile.Value.GridIndices * grid.TileSize;

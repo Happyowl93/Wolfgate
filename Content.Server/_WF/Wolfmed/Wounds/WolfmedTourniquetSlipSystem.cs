@@ -8,7 +8,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// <summary>A makeshift tourniquet slips off its limb when that limb takes a hard hit.</summary>
 // A real strap holds through anything (playtest 4); a strip of cloth does not. Only a hit on the strapped part itself
 // counts, and only one that can interrupt a do-after: fire, bleeding and other ticks never knock it loose.
-public sealed class WolfmedTourniquetSlipSystem : EntitySystem
+public sealed partial class WolfmedTourniquetSlipSystem : EntitySystem
 {
     [Dependency] private WolfmedNecrosisSystem _necrosis = default!;
 

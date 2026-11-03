@@ -16,7 +16,7 @@ namespace Content.Server._WF.Wolfmed.Gore;
 /// <summary>Makes a badly damaged or EMP-struck machine part throw sparks every few seconds until repaired.</summary>
 // Built like WolfmedBleedSpurtSystem: WolfmedMachineSparkComponent sits on a body only while it has a sparking part,
 // so the tick walks a handful of entities, and the condition is re-asked on every wound change and every spark.
-public sealed class WolfmedMachineSparkSystem : EntitySystem
+public sealed partial class WolfmedMachineSparkSystem : EntitySystem
 {
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private IGameTiming _timing = default!;

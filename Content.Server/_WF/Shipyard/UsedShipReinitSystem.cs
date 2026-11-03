@@ -24,7 +24,7 @@ namespace Content.Server._WF.Shipyard;
 /// the setup that is safe to repeat is redone here - a blanket map init would refill every locker,
 /// vending machine and light on the hull.
 /// </summary>
-public sealed class UsedShipReinitSystem : EntitySystem
+public sealed partial class UsedShipReinitSystem : EntitySystem
 {
     [Dependency] private IComponentFactory _compFactory = default!;
     [Dependency] private IGameTiming _timing = default!;
@@ -103,7 +103,7 @@ public sealed class UsedShipReinitSystem : EntitySystem
         emitter.Shielded = null;
 
         if (MetaData(uid).EntityPrototype is { } proto
-            && proto.TryGetComponent<ShipShieldEmitterComponent>(out var original, _compFactory))
+            && proto.TryComp<ShipShieldEmitterComponent>(out var original, _compFactory))
         {
             emitter.BaseDraw = original.BaseDraw;
             emitter.MaxDraw = original.MaxDraw;

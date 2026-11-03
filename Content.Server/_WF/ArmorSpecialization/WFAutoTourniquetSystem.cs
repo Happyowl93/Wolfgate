@@ -16,7 +16,7 @@ namespace Content.Server._WF.ArmorSpecialization;
 /// Ties a Wolfmed tourniquet onto a covered limb with an untreated arterial bleed, for a worn
 /// <see cref="WFAutoTourniquetComponent"/> suit, spending a charge per strap and earning charges back over time.
 /// </summary>
-public sealed class WFAutoTourniquetSystem : EntitySystem
+public sealed partial class WFAutoTourniquetSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedBodySystem _body = default!;

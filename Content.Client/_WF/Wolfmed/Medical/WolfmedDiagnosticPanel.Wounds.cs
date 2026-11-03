@@ -1061,10 +1061,10 @@ public sealed partial class WolfmedDiagnosticPanel
     private static string Advice(string key, bool mechanical)
     {
         if (mechanical &&
-            Loc.TryGetString(key + WolfmedTreatmentAdvice.MechanicalSuffix, out var chassis))
+            IoCManager.Resolve<ILocalizationManager>().TryGetString(key + WolfmedTreatmentAdvice.MechanicalSuffix, out var chassis))
             return chassis;
 
-        return Loc.TryGetString(key, out var advice) ? advice : string.Empty;
+        return IoCManager.Resolve<ILocalizationManager>().TryGetString(key, out var advice) ? advice : string.Empty;
     }
 
     private static string Tooltip(string headline, string advice) =>

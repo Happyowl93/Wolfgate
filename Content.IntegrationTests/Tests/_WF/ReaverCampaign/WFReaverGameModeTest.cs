@@ -17,6 +17,9 @@ namespace Content.IntegrationTests.Tests._WF.ReaverCampaign;
 [TestOf(typeof(WFReaverCampaignRuleSystem))]
 public sealed class WFReaverGameModeTest : WFReaverTestBase
 {
+    private static ProtoId<GamePresetPrototype> WFContestedSectorProto => "WFContestedSector";
+    private static ProtoId<GamePresetPrototype> MonoStandardProto => "MonoStandard";
+
     /// <summary>The preset is votable and is Standard's rules plus the Contested Sector rule and the ADS rule.</summary>
     [Test]
     public async Task ContestedSectorPresetIsStandardPlusTheRules()
@@ -25,8 +28,8 @@ public sealed class WFReaverGameModeTest : WFReaverTestBase
         await Server.WaitAssertion(() =>
         {
             var protos = Server.ResolveDependency<IPrototypeManager>();
-            var ashfall = protos.Index<GamePresetPrototype>("WFContestedSector");
-            var standard = protos.Index<GamePresetPrototype>("MonoStandard");
+            var ashfall = protos.Index<GamePresetPrototype>(WFContestedSectorProto);
+            var standard = protos.Index<GamePresetPrototype>(MonoStandardProto);
             Assert.That(ashfall.ShowInVote, Is.True);
             Assert.That(ashfall.Rules, Is.SupersetOf(standard.Rules));
             Assert.That(ashfall.Rules, Does.Contain("WFReaverCampaignRule"));

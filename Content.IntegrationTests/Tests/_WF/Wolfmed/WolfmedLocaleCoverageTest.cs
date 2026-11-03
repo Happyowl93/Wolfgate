@@ -150,7 +150,7 @@ public sealed class WolfmedLocaleCoverageTest : WolfmedGameTest
                 {
                     // Test fixtures carry an unprefixed Wolfmed id; everything shipped is WF-prefixed or upstream.
                     if (surgery.Abstract || surgery.ID.StartsWith("Wolfmed", StringComparison.Ordinal) ||
-                        !surgery.TryGetComponent(out Content.Shared._Shitmed.Medical.Surgery.SurgeryComponent? comp, factory))
+                        !surgery.TryComp(out Content.Shared._Shitmed.Medical.Surgery.SurgeryComponent? comp, factory))
                         continue;
 
                     foreach (var step in comp.Steps)

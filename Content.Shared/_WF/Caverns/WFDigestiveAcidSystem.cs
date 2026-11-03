@@ -70,7 +70,7 @@ public sealed partial class WFDigestiveAcidSystem : EntitySystem
         if (pool.Comp.CoveredBy == null || xform.GridUid is not { } gridUid || !TryComp<MapGridComponent>(gridUid, out var grid))
             return true;
 
-        var anchored = _map.GetAnchoredEntitiesEnumerator(gridUid, grid, _map.LocalToTile(gridUid, grid, xform.Coordinates));
+        var anchored = _map.GetAnchoredEntities(gridUid, grid, _map.LocalToTile(gridUid, grid, xform.Coordinates));
         while (anchored.MoveNext(out var cover))
         {
             if (cover != pool.Owner && _whitelist.IsWhitelistPass(pool.Comp.CoveredBy, cover.Value))

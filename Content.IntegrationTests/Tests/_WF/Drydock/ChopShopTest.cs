@@ -19,6 +19,7 @@ using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
 using Robust.Shared.Utility;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Drydock;
 
@@ -26,6 +27,8 @@ namespace Content.IntegrationTests.Tests._WF.Drydock;
 [TestFixture]
 public sealed class ChopShopTest
 {
+    private static readonly ProtoId<VesselPrototype> GuppyProto = "Guppy";
+
     private const int HullSize = 4;
 
     /// <summary>Builds a mobile crane yard worked by a chop-shop console, with a 4x4 steel-walled hull in its berth.</summary>
@@ -88,7 +91,7 @@ public sealed class ChopShopTest
             (console, crane, ship) = SetUpChopShop(pair, map.MapId);
             yard = em.GetComponent<TransformComponent>(console).GridUid!.Value;
             em.AddComponent<VesselComponent>(ship).VesselId = "Guppy";
-            expected = (int) (server.ProtoMan.Index<VesselPrototype>("Guppy").Price * 0.8);
+            expected = (int) (server.ProtoMan.Index<VesselPrototype>(GuppyProto).Price * 0.8);
             actor = em.SpawnEntity("MobHuman", new MapCoordinates(0, 0, map.MapId));
         });
 
@@ -163,7 +166,7 @@ public sealed class ChopShopTest
             (console, crane, ship) = SetUpChopShop(pair, map.MapId);
             yard = em.GetComponent<TransformComponent>(console).GridUid!.Value;
             em.AddComponent<VesselComponent>(ship).VesselId = "Guppy";
-            expected = (int) (server.ProtoMan.Index<VesselPrototype>("Guppy").Price * 0.8);
+            expected = (int) (server.ProtoMan.Index<VesselPrototype>(GuppyProto).Price * 0.8);
             actor = em.SpawnEntity("MobHuman", new MapCoordinates(0, 0, map.MapId));
             berthed = xforms.GetWorldPosition(ship);
         });
@@ -291,7 +294,7 @@ public sealed class ChopShopTest
 
         await server.WaitAssertion(() =>
         {
-            var vessel = server.ProtoMan.Index<VesselPrototype>("Guppy");
+            var vessel = server.ProtoMan.Index<VesselPrototype>(GuppyProto);
             Assert.That(server.System<AdminVesselSpawnSystem>().TrySpawnVessel(vessel, map.MapId, new Vector2(800f, 0f), null,
                 out var spawned, createStation: true), Is.True, "The Guppy should spawn.");
             var ship = spawned!.Value;

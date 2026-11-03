@@ -28,7 +28,7 @@ public sealed class AsfCoilgunTest
         await server.WaitAssertion(() =>
         {
             var slug = prototypes.Index(Slug);
-            Assert.That(slug.TryGetComponent<CartridgeAmmoComponent>(out var cartridge, factory), Is.True);
+            Assert.That(slug.TryComp<CartridgeAmmoComponent>(out var cartridge, factory), Is.True);
             Assert.That(cartridge!.DeleteOnSpawn, Is.True, "Coil slugs are caseless and must leave nothing behind.");
 
             maps.CreateMap(out var mapId);

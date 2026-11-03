@@ -249,8 +249,6 @@ public sealed partial class XenoLungeSystem : EntitySystem
         _pulling.TryStartPull(xeno, targetId);
         RemCompDeferred<XenoActiveLungeComponent>(xeno);
         return true;
-
-        var player = IoCManager.Resolve<ISharedPlayerManager>().Sessions.Select(e => e.Ping).Order();
     }
 
     private void OnXenoLungeStunnedPullStopped(Entity<XenoLungeStunnedComponent> ent, ref PullStoppedMessage args)

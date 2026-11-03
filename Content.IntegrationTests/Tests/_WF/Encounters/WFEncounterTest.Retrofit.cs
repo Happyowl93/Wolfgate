@@ -23,6 +23,11 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static readonly ProtoId<WFEncounterPrototype> WFReaverPatrolProto = "WFReaverPatrol";
+    private static readonly ProtoId<WFEncounterPrototype> WFReaverStrongholdProto = "WFReaverStronghold";
+    private static readonly ProtoId<VesselPrototype> VictoriaProto = "Victoria";
+    private static readonly ProtoId<WFPirateRetrofitPrototype> WFPirateRetrofitLightProto = "WFPirateRetrofitLight";
+
     private static readonly string[] WornTiles = { "FloorSteelDirty", "FloorSteelDamaged", "PlatingDamaged", "FloorBrokenWood" };
 
     /// <summary>
@@ -35,7 +40,7 @@ public sealed partial class WFEncounterTest
         EntityUid low = default, high = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFReaverPatrol");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFReaverPatrolProto);
             var encounters = Server.System<WFEncounterSystem>();
             Assert.That(encounters.TrySpawn(prototype, new MapCoordinates(new Vector2(-45000, -45000), MapData.MapId), out low, pinned: true, tier: 0), Is.True);
             Assert.That(encounters.TrySpawn(prototype, new MapCoordinates(new Vector2(-48000, -48000), MapData.MapId), out high, pinned: true, tier: 4), Is.True);
@@ -44,7 +49,7 @@ public sealed partial class WFEncounterTest
         await RunTicks(60);
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFReaverPatrol");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFReaverPatrolProto);
             var lowComp = SEntMan.GetComponent<WFEncounterComponent>(low);
             Assert.That(lowComp.Tier, Is.EqualTo(0));
             Assert.That(lowComp.Threat, Is.EqualTo(0), "Its rank on the map is its tier.");
@@ -92,7 +97,7 @@ public sealed partial class WFEncounterTest
         EntityUid hub = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFReaverStronghold");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFReaverStrongholdProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-51000, -51000), MapData.MapId), out hub, pinned: true, tier: 0), Is.True);
             var lead = SEntMan.GetComponent<WFEncounterComponent>(hub).Ships["lead"];
             var band = WFEncounterSystem.BandFor(prototype.Ships[0], 0)!;
@@ -214,10 +219,10 @@ public sealed partial class WFEncounterTest
         EntityUid grid = default;
         await Server.WaitAssertion(() =>
         {
-            var patrol = prototypes.Index<WFEncounterPrototype>("WFReaverPatrol");
+            var patrol = prototypes.Index<WFEncounterPrototype>(WFReaverPatrolProto);
             var band = WFEncounterSystem.BandFor(patrol.Ships.First(ship => ship.Key == "lead"), 0)!;
             Assert.That(band.Retrofit, Is.Not.Null);
-            var path = prototypes.Index<VesselPrototype>("Victoria").ShuttlePath;
+            var path = prototypes.Index<VesselPrototype>(VictoriaProto).ShuttlePath;
             Assert.That(SEntMan.System<MapLoaderSystem>().TryLoadGrid(MapData.MapId, path, out var loaded,
                 offset: new Vector2(-60000, -60000)), Is.True);
             grid = loaded!.Value.Owner;
@@ -245,8 +250,8 @@ public sealed partial class WFEncounterTest
     public async Task SteppedRetrofitMatchesOneGo()
     {
         var prototypes = Server.ResolveDependency<IPrototypeManager>();
-        var retrofit = prototypes.Index<WFPirateRetrofitPrototype>("WFPirateRetrofitLight");
-        var path = prototypes.Index<VesselPrototype>("Victoria").ShuttlePath;
+        var retrofit = prototypes.Index<WFPirateRetrofitPrototype>(WFPirateRetrofitLightProto);
+        var path = prototypes.Index<VesselPrototype>(VictoriaProto).ShuttlePath;
         var system = Server.System<WFPirateRetrofitSystem>();
         EntityUid whole = default, stepped = default;
         WFPirateRetrofitRun run = default!;
@@ -288,7 +293,7 @@ public sealed partial class WFEncounterTest
     {
         var parts = new List<string>();
         var gridComp = SEntMan.GetComponent<MapGridComponent>(grid);
-        var tiles = SEntMan.System<SharedMapSystem>().GetAllTilesEnumerator(grid, gridComp);
+        var tiles = SEntMan.System<SharedMapSystem>().GetAllTiles(grid, gridComp);
         while (tiles.MoveNext(out var tile))
         {
             parts.Add($"tile {tile.Value.GridIndices} {tile.Value.Tile.TypeId}");

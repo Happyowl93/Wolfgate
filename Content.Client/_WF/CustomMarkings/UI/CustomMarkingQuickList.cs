@@ -111,7 +111,7 @@ public sealed partial class CustomMarkingQuickList : BoxContainer
 
     private void Rebuild()
     {
-        _grid.DisposeAllChildren();
+        _grid.RemoveAllChildren();
 
         var library = _system.Library;
         if (library != null)

@@ -101,7 +101,7 @@ public sealed partial class ShuttleDockControl
             return false;
 
         action.Parent!.RemoveChild(action);
-        original.Dispose();
+        original.Orphan();
         var number = _wfCockpitDockNumbers.Count + 1;
         _wfCockpitDockNumbers.Add(dock, number);
         var name = dock.LabelName ?? dock.Name;

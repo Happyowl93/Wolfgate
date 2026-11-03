@@ -6,7 +6,7 @@ using Robust.Shared.Network;
 namespace Content.Shared._WF.Xenonids.Parasite.Surgery;
 
 /// <summary>Wires the burst chest repair surgery to the parasite system; it is offered only while the host can still be mended.</summary>
-public sealed class XenoBurstSurgerySystem : EntitySystem
+public sealed partial class XenoBurstSurgerySystem : EntitySystem
 {
     [Dependency] private INetManager _net = default!;
     [Dependency] private SharedXenoParasiteSystem _parasite = default!;

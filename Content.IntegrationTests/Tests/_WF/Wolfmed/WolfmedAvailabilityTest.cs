@@ -162,14 +162,14 @@ public sealed class WolfmedAvailabilityTest : WolfmedGameTest
                     continue;
 
                 var inner = new List<string>();
-                if (proto.TryGetComponent<StorageFillComponent>(out var fill, factory))
+                if (proto.TryComp<StorageFillComponent>(out var fill, factory))
                 {
                     inner.AddRange(fill.Contents
                         .Where(entry => entry.PrototypeId != null)
                         .Select(entry => entry.PrototypeId!.Value.Id));
                 }
 
-                if (proto.TryGetComponent<FlatpackComponent>(out var flatpack, factory) && flatpack.Entity is { } unpacked)
+                if (proto.TryComp<FlatpackComponent>(out var flatpack, factory) && flatpack.Entity is { } unpacked)
                     inner.Add(unpacked.Id);
 
                 foreach (var next in inner)
@@ -262,7 +262,7 @@ public sealed class WolfmedAvailabilityTest : WolfmedGameTest
                         $"{id} does not contain {content}: the fill overflowed or the entry was dropped.");
 
                     // ITEMS: every certain entry, not just the one named, so the last item in a full kit counts.
-                    if (prototypes.Index<EntityPrototype>(id).TryGetComponent<StorageFillComponent>(out var fill, factory))
+                    if (prototypes.Index<EntityPrototype>(id).TryComp<StorageFillComponent>(out var fill, factory))
                     {
                         foreach (var entry in fill.Contents)
                         {

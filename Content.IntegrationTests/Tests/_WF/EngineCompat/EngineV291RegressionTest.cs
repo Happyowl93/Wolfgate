@@ -1,3 +1,4 @@
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -85,7 +86,7 @@ public sealed class EngineV291RegressionTest
             var window = new SalvageExpeditionWindow();
             window.UpdateState(new SalvageExpeditionConsoleState(TimeSpan.Zero, false, false, false, 0, missions));
             Assert.That(window.FindControl<BoxContainer>("Container").ChildCount, Is.EqualTo(missions.Count));
-            window.Dispose();
+            window.Teardown();
         });
 
         await pair.CleanReturnAsync();

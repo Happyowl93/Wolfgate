@@ -18,6 +18,8 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestStoryStrandedFrigateProto => "WFTestStoryStrandedFrigate";
+
     [TestPrototypes]
     private const string StrandedPrototypes = @"
 - type: wfEncounter
@@ -45,7 +47,7 @@ public sealed partial class WFEncounterTest
         (Vector2 Position, Angle Rotation)? sideSpot = null, mainSpot = null;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryStrandedFrigate");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryStrandedFrigateProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-45000, -45000), MapData.MapId), out encounter), Is.True);
             ship = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["frigate"].Grid;
         });

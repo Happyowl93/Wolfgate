@@ -4,7 +4,7 @@ using Robust.Shared.GameStates;
 namespace Content.Shared._WF.Xenonids.Fruit.Components;
 
 // Overshield (unstable resin fruit)
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(true), AutoGenerateComponentPause]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(true)]
 [Access(typeof(SharedXenoFruitSystem))]
 public sealed partial class XenoFruitShieldComponent : Component
 {

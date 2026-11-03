@@ -15,7 +15,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 // wolfmed.rad_marrow_rate a second, so it kills through the blood route medics already know. Past
 // wolfmed.consc_rad_down the patient is Downed, cause Radiation. Machines have no marrow: radiation stays their
 // slowdown and pain.
-public sealed class WolfmedRadiationSystem : EntitySystem
+public sealed partial class WolfmedRadiationSystem : EntitySystem
 {
     public static readonly ProtoId<DamageTypePrototype> Radiation = "Radiation";
 

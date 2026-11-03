@@ -34,7 +34,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 // last check is passed over while another condition holds, so a septic patient alternates rather than coughing
 // forever. Nothing for the dead, a stopped heart (it looks dead), a pod mid-procedure, strong sedation or a chassis.
 // Unconscious bodies still choke and cough, so the emotes skip the action blocker.
-public sealed class WolfmedConditionEmoteSystem : EntitySystem
+public sealed partial class WolfmedConditionEmoteSystem : EntitySystem
 {
     public static readonly ProtoId<EmotePrototype> Choke = "WFWolfmedChoke";
     public static readonly ProtoId<EmotePrototype> Cough = "WFWolfmedCough";

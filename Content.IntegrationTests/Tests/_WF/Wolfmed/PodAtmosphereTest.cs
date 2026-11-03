@@ -42,6 +42,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(AutodocSystem))]
 public sealed class PodAtmosphereTest : WolfmedGameTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     public override PoolSettings PoolSettings => PsDisconnected;
 
     [TestPrototypes]
@@ -305,7 +307,7 @@ public sealed class PodAtmosphereTest : WolfmedGameTest
         await Server.WaitAssertion(() =>
         {
             Assert.That(Autodoc.GetSeal(pod), Is.EqualTo(WolfmedAutodocSeal.Sealed));
-            var blunt = new DamageSpecifier(SProtoMan.Index<DamageTypePrototype>("Blunt"), FixedPoint2.New(110));
+            var blunt = new DamageSpecifier(SProtoMan.Index<DamageTypePrototype>(BluntProto), FixedPoint2.New(110));
             SEntMan.System<DamageableSystem>().TryChangeDamage(pod, blunt, ignoreResistances: true);
 
             Assert.That(SEntMan.EntityExists(pod), Is.True, "110 damage destroyed the pod; the breach is below that.");
@@ -417,7 +419,7 @@ public sealed class PodAtmosphereTest : WolfmedGameTest
         {
             SEntMan.System<AtmosphereSystem>().SetMapAtmosphere(map.MapUid, true, GasMixture.SpaceGas);
             body = SEntMan.SpawnEntity("MobHuman", map.GridCoords);
-            var blunt = new DamageSpecifier(SProtoMan.Index<DamageTypePrototype>("Blunt"), FixedPoint2.New(60));
+            var blunt = new DamageSpecifier(SProtoMan.Index<DamageTypePrototype>(BluntProto), FixedPoint2.New(60));
             SEntMan.System<DamageableSystem>().TryChangeDamage(body, blunt, origin: null, targetPart: TargetBodyPart.LeftLeg);
 
             var uid = SEntMan.SpawnEntity("WolfmedTestAirPod", map.GridCoords);

@@ -27,7 +27,7 @@ namespace Content.Server._WF.Performance;
 /// A player keeps a rock grid once sent, until it is deleted: the client can't detach a grid that leaves its view
 /// (the engine asserts against it), so sending stops only when the rock goes.
 /// </remarks>
-public sealed class WFAsteroidCullSystem : EntitySystem
+public sealed partial class WFAsteroidCullSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IGameTiming _timing = default!;

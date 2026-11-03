@@ -25,7 +25,7 @@ namespace Content.Server._WF.Wolfmed.Sounds;
 /// re-evaluated off the bleeding system's <c>PartBleedingChangedEvent</c>, and again at every drip, so a bleed that
 /// stops without an event still switches the clock off.
 /// </remarks>
-public sealed class WolfmedBleedDripSystem : EntitySystem
+public sealed partial class WolfmedBleedDripSystem : EntitySystem
 {
     public static readonly ProtoId<SoundCollectionPrototype> DripCollection = "WFWolfmedBloodDrip";
 

@@ -90,8 +90,13 @@ public sealed class TraderBoundUserInterface : BoundUserInterface
         if (!disposing)
             return;
 
-        _dialogue?.Dispose();
-        _shop?.Dispose();
-        _usedShips?.Dispose();
+        if (_dialogue is { Disposed: false })
+            _dialogue.Orphan();
+
+        if (_shop is { Disposed: false })
+            _shop.Orphan();
+
+        if (_usedShips is { Disposed: false })
+            _usedShips.Orphan();
     }
 }

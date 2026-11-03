@@ -20,6 +20,10 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 /// </summary>
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestEncounterKnownThreatGuardProto => "WFTestEncounterKnownThreatGuard";
+    private static ProtoId<WFEncounterPrototype> WFTestEncounterPlainGuardProto => "WFTestEncounterPlainGuard";
+    private static ProtoId<WFEncounterPrototype> WFTestEncounterKnownThreatRaiderProto => "WFTestEncounterKnownThreatRaider";
+
     [TestPrototypes]
     private const string KnownThreatPrototypes = @"
 - type: wfEncounter
@@ -74,9 +78,9 @@ public sealed partial class WFEncounterTest
         EntityUid player = default, dark = default;
         await Server.WaitAssertion(() =>
         {
-            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestEncounterKnownThreatGuard"),
+            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestEncounterKnownThreatGuardProto),
                 new MapCoordinates(at, MapData.MapId), out var judging), Is.True);
-            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestEncounterPlainGuard"),
+            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestEncounterPlainGuardProto),
                 new MapCoordinates(at + new Vector2(0, 400), MapData.MapId), out var guarding), Is.True);
             judge = SEntMan.GetComponent<WFEncounterComponent>(judging).Ships["guard"];
             plain = SEntMan.GetComponent<WFEncounterComponent>(guarding).Ships["guard"];
@@ -100,7 +104,7 @@ public sealed partial class WFEncounterTest
             Assert.That(alerts.IsWarningShot(judge.Grid, player), Is.False, "And fire no warning shots at him.");
             Assert.That(alerts.IsHostileShip(judge.Grid, judge.Group, player), Is.False);
 
-            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestEncounterKnownThreatRaider"),
+            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestEncounterKnownThreatRaiderProto),
                 new MapCoordinates(at + new Vector2(-300, 0), MapData.MapId), out var raid), Is.True);
             var raider = SEntMan.GetComponent<WFEncounterComponent>(raid).Ships["raider"];
             Server.System<ShuttleSystem>().AddIFFFlag(raider.Grid, IFFFlags.HideLabel);
@@ -129,7 +133,7 @@ public sealed partial class WFEncounterTest
         EntityUid player = default;
         await Server.WaitAssertion(() =>
         {
-            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestEncounterPlainGuard"),
+            Assert.That(encounters.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestEncounterPlainGuardProto),
                 new MapCoordinates(at, MapData.MapId), out var guarding), Is.True);
             patrol = SEntMan.GetComponent<WFEncounterComponent>(guarding).Ships["guard"];
             player = ClampDeck(at + new Vector2(250, 200)).Grid;

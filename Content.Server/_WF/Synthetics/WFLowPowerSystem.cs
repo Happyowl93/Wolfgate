@@ -15,7 +15,7 @@ namespace Content.Server._WF.Synthetics;
 /// Low power: a synthetic chassis with an empty cell, or none, stays up and conscious but crawls and runs one arm.
 /// The shutdown system reports the power state here; this keeps the one powered arm and lets the owner switch it.
 /// </summary>
-public sealed class WFLowPowerSystem : SharedWFSyntheticsSystem
+public sealed partial class WFLowPowerSystem : SharedWFSyntheticsSystem
 {
     /// <summary>How long after a switch the powered arm can be switched again.</summary>
     public static readonly TimeSpan SwitchCooldown = TimeSpan.FromSeconds(3);

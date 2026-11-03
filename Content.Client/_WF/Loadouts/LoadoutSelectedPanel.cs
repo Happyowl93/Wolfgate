@@ -214,6 +214,6 @@ public sealed class LoadoutSelectedPanel : PanelContainer
 
         _cardIcons.Clear();
         _rows.Clear();
-        _cards.DisposeAllChildren();
+        _cards.RemoveAllChildren();
     }
 }

@@ -34,6 +34,10 @@ public sealed partial class WFGunnerDutySystem
         var clear = new List<EntityUid>();
         foreach (var gun in guns)
         {
+            // Batteries are shared out once a second, so a gun can be destroyed while still on the list.
+            if (TerminatingOrDeleted(gun))
+                continue;
+
             var key = (gun, target);
             if (!_lines.TryGetValue(key, out var line) || now >= line.Next)
             {
@@ -84,7 +88,8 @@ public sealed partial class WFGunnerDutySystem
     /// <summary>Whether a crew may put rounds into a ship: one it is fighting, set on or warning off as hostile.</summary>
     private bool Hostile(EntityUid grid, string group, EntityUid other)
     {
-        return _objectives.IsAttackTarget(grid, group, other) || _alerts.IsHostileShip(grid, group, other)
-               || _security.IsHostileDockingTarget(grid, group, other);
+        return !_spared.HoldsFireOn(grid, other)
+               && (_objectives.IsAttackTarget(grid, group, other) || _alerts.IsHostileShip(grid, group, other)
+                   || _security.IsHostileDockingTarget(grid, group, other));
     }
 }

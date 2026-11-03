@@ -15,7 +15,7 @@ namespace Content.Server._WF.Encounters.Systems;
 /// The lines come from the ship's zone lines: <c>{ZoneLines}-hail-question</c>, <c>-hail-yes</c>, <c>-hail-no</c>,
 /// <c>-hail-declared</c> and <c>-hail-cleared</c>.
 /// </summary>
-public sealed class WFEncounterInterrogationSystem : EntitySystem
+public sealed partial class WFEncounterInterrogationSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private HailingSystem _hailing = default!;
@@ -106,7 +106,7 @@ public sealed class WFEncounterInterrogationSystem : EntitySystem
     /// <summary>Hails the nearest stranger in a ship's warning zone that is not being asked and is not on cooldown.</summary>
     private void Ask(EntityUid uid, WFEncounterComponent encounter, WFEncounterShipState ship, TimeSpan now)
     {
-        if (ship.Lurking || ship.Extort != null || TerminatingOrDeleted(ship.Grid) || _status.IsDisabled(ship.Grid)
+        if (ship.Lurking || ship.Extort != null || ship.Abduct != null || TerminatingOrDeleted(ship.Grid) || _status.IsDisabled(ship.Grid)
             || _calls.Values.Any(call => call.Ship == ship))
             return;
 

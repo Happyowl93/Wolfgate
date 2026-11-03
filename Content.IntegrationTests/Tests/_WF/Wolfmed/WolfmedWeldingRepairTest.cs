@@ -27,6 +27,9 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestFixture]
 public sealed class WolfmedWeldingRepairTest : WolfmedGameTest
 {
+    private static readonly ProtoId<DamageTypePrototype> SlashProto = "Slash";
+    private static readonly ProtoId<DamageTypePrototype> PiercingProto = "Piercing";
+
     public override PoolSettings PoolSettings => PsDisconnected;
 
     [TestCase("MobHuman", "SpeedLeftLeg", TargetBodyPart.LeftLeg)]
@@ -64,7 +67,7 @@ public sealed class WolfmedWeldingRepairTest : WolfmedGameTest
                 Assert.That(graph.AttachPart(torso, slot, part), Is.True);
             }
 
-            var slash = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>("Slash");
+            var slash = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>(SlashProto);
             Assert.That(entities.System<WoundDamageRoutingSystem>()
                 .TryApplyPartDamage(body, part, new DamageSpecifier(slash, 15), ignoreResistances: true), Is.True);
             Assert.That(entities.System<WoundSystem>().GetWounds(part).Any(), Is.True);
@@ -148,7 +151,7 @@ public sealed class WolfmedWeldingRepairTest : WolfmedGameTest
             entities.RemoveComponent<TemperatureComponent>(user);
             var graph = entities.System<SharedBodySystem>();
             leg = graph.GetBodyChildrenOfType(body, BodyPartType.Leg, symmetry: BodyPartSymmetry.Right).Single().Id;
-            var slash = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>("Slash");
+            var slash = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>(SlashProto);
             Assert.That(entities.System<WoundDamageRoutingSystem>()
                 .TryApplyPartDamage(body, leg, new DamageSpecifier(slash, 15), ignoreResistances: true), Is.True);
             Assert.That(entities.System<WoundSystem>().GetWounds(leg).Any(), Is.True, "no breach to weld.");
@@ -202,7 +205,7 @@ public sealed class WolfmedWeldingRepairTest : WolfmedGameTest
             var wounds = entities.System<WoundSystem>();
             var embedded = entities.System<WolfmedEmbeddedObjectSystem>();
             leg = graph.GetBodyChildrenOfType(body, BodyPartType.Leg, symmetry: BodyPartSymmetry.Right).Single().Id;
-            var slash = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>("Slash");
+            var slash = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>(SlashProto);
             Assert.That(entities.System<WoundDamageRoutingSystem>()
                 .TryApplyPartDamage(body, leg, new DamageSpecifier(slash, 15), ignoreResistances: true), Is.True);
             var breaches = wounds.GetWounds(leg).Select(wound => wound.Owner).ToList();
@@ -281,7 +284,7 @@ public sealed class WolfmedWeldingRepairTest : WolfmedGameTest
             var wounds = entities.System<WoundSystem>();
             var embedded = entities.System<WolfmedEmbeddedObjectSystem>();
             leg = graph.GetBodyChildrenOfType(body, BodyPartType.Leg, symmetry: BodyPartSymmetry.Right).Single().Id;
-            var slash = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>("Slash");
+            var slash = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>(SlashProto);
             Assert.That(entities.System<WoundDamageRoutingSystem>()
                 .TryApplyPartDamage(body, leg, new DamageSpecifier(slash, 15), ignoreResistances: true), Is.True);
             var breach = wounds.GetWounds(leg).First().Owner;
@@ -352,7 +355,7 @@ public sealed class WolfmedWeldingRepairTest : WolfmedGameTest
             torso = entities.System<SharedBodySystem>().GetBodyChildrenOfType(body, type, symmetry: symmetry).Single().Id;
 
             rules.ForcedRoll = 0f;
-            var piercing = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>("Piercing");
+            var piercing = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>(PiercingProto);
             for (var i = 0; i < hits; i++)
             {
                 var bullet = entities.SpawnEntity("BulletMinigun", map.GridCoords);
@@ -441,7 +444,7 @@ public sealed class WolfmedWeldingRepairTest : WolfmedGameTest
             entities.System<TagSystem>().AddTag(user, "InstantDoAfters");
             var graph = entities.System<SharedBodySystem>();
             var leg = graph.GetBodyChildrenOfType(body, BodyPartType.Leg, symmetry: BodyPartSymmetry.Right).Single().Id;
-            var slash = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>("Slash");
+            var slash = server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>(SlashProto);
             // Revival pass: the user deals it; damage with no origin is ambient harm and stops at 0.8 of the leg's cap.
             Assert.That(entities.System<WoundDamageRoutingSystem>()
                 .TryApplyPartDamage(body, leg, new DamageSpecifier(slash, 100), user, ignoreResistances: true), Is.True);

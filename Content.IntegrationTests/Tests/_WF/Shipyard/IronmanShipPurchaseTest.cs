@@ -178,7 +178,7 @@ public sealed class IronmanShipPurchaseTest
     /// <summary>
     /// A console on a station's grid with a card in its slot, and the player's body standing next to it.
     /// </summary>
-    private static (EntityUid Console, EntityUid Customer, EntityUid IdCard) SpawnShipyard(
+    internal static (EntityUid Console, EntityUid Customer, EntityUid IdCard) SpawnShipyard(
         IEntityManager entMan,
         TestMapData map,
         ICommonSession session)
@@ -214,7 +214,7 @@ public sealed class IronmanShipPurchaseTest
     /// <summary>
     /// Opens the console on the customer; the listing it sells from is the one its open window is keyed to.
     /// </summary>
-    private static void OpenListing(IEntityManager entMan, EntityUid console, EntityUid customer)
+    internal static void OpenListing(IEntityManager entMan, EntityUid console, EntityUid customer)
     {
         Assert.That(entMan.System<UserInterfaceSystem>().TryOpenUi(console, ShipyardConsoleUiKey.Shipyard, customer), Is.True,
             "The customer should be able to open the console.");
@@ -223,7 +223,7 @@ public sealed class IronmanShipPurchaseTest
     /// <summary>
     /// Sends the purchase message the console's window would send, without a client behind it.
     /// </summary>
-    private static void Purchase(IEntityManager entMan, EntityUid console, EntityUid customer)
+    internal static void Purchase(IEntityManager entMan, EntityUid console, EntityUid customer)
     {
         var msg = new ShipyardConsolePurchaseMessage(VesselProto)
         {

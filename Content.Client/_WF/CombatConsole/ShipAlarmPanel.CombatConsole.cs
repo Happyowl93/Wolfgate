@@ -37,7 +37,7 @@ public sealed partial class ShipAlarmPanel
             Detach(button);
             WfCompactAlarmButton(button);
         }
-        CodeContainer.DisposeAllChildren();
+        CodeContainer.RemoveAllChildren();
         CodeContainer.Margin = new Thickness(0);
         CodeContainer.SeparationOverride = 4;
         for (var i = 0; i < codes.Length; i += 2)
@@ -72,7 +72,7 @@ public sealed partial class ShipAlarmPanel
         WfRefitPlaylist();
         var body = Column(readouts, CodeContainer, GeneralQuartersButton, alerts, announce, sound, PlaylistBox);
         body.SeparationOverride = 6;
-        DisposeAllChildren();
+        RemoveAllChildren();
         Margin = new Thickness(0);
         HorizontalExpand = true;
         VerticalExpand = false;

@@ -191,9 +191,13 @@ public abstract partial class SharedDoAfterSystem : EntitySystem
             || args.Event.GetType().Namespace is {} ns && ns.StartsWith("Content.IntegrationTests"), // classes defined in tests cannot be marked as serializable.
             $"Do after event is not serializable. Event: {args.Event.GetType()}");
 
-        if (!Resolve(args.User, ref comp))
+        // WOLFGATE(LiveFixes) START: a user that can't do this just fails, which isn't an error
+        // if (!Resolve(args.User, ref comp))
+        if (!Resolve(args.User, ref comp, false))
         {
-            Log.Error($"Attempting to start a doAfter with invalid user: {ToPrettyString(args.User)}.");
+            // Log.Error($"Attempting to start a doAfter with invalid user: {ToPrettyString(args.User)}.");
+            Log.Debug($"Attempting to start a doAfter with invalid user: {ToPrettyString(args.User)}.");
+            // WOLFGATE END
             id = null;
             return false;
         }

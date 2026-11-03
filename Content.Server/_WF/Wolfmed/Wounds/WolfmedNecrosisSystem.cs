@@ -25,7 +25,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// the clock starts. <see cref="Update"/> advances by whatever time has accumulated so a test can hand it
 /// the whole ten minutes at once.
 /// </remarks>
-public sealed class WolfmedNecrosisSystem : EntitySystem
+public sealed partial class WolfmedNecrosisSystem : EntitySystem
 {
     private const float TickSeconds = 5f;
 

@@ -30,7 +30,7 @@ public sealed partial class ShuttleConsoleSystem
             open.Add(uid);
             var selected = new ConsoleShuttleEvent { Console = uid };
             RaiseLocalEvent(uid, ref selected);
-            var grid = selected.Console is { } console && TryComp<TransformComponent>(console, out var transform)
+            var grid = selected.Console is { } console && TryComp(console, out TransformComponent? transform)
                 ? transform.GridUid : null;
             var current = GetWolfgateShieldShuntState(grid);
             if (_wfShieldHelmStates.TryGetValue(uid, out var previous) &&

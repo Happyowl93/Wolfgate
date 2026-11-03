@@ -32,12 +32,12 @@ public sealed class SafetyDepositBoxDamoclesTest
         await server.WaitAssertion(() =>
         {
             var boxes = server.ProtoMan.EnumeratePrototypes<EntityPrototype>()
-                .Where(proto => !proto.Abstract && proto.TryGetComponent<SafetyDepositBoxComponent>(out _, factory))
+                .Where(proto => !proto.Abstract && proto.TryComp<SafetyDepositBoxComponent>(out _, factory))
                 .ToList();
             Assert.That(boxes, Is.Not.Empty, "No safety deposit box prototypes were found.");
 
             var gun = server.ProtoMan.Index<EntityPrototype>(DamoclesProto);
-            Assert.That(gun.TryGetComponent<TagComponent>(out var gunTags, factory), Is.True, "The Damocles has no tags.");
+            Assert.That(gun.TryComp<TagComponent>(out var gunTags, factory), Is.True, "The Damocles has no tags.");
 
             Assert.Multiple(() =>
             {
@@ -46,7 +46,7 @@ public sealed class SafetyDepositBoxDamoclesTest
 
                 foreach (var proto in boxes)
                 {
-                    Assert.That(proto.TryGetComponent<StorageComponent>(out var storage, factory), Is.True,
+                    Assert.That(proto.TryComp<StorageComponent>(out var storage, factory), Is.True,
                         $"{proto.ID} has no storage.");
 
                     var refused = storage!.Blacklist?.Tags;

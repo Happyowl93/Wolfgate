@@ -12,7 +12,7 @@ namespace Content.Server._WF.Cleaning;
 /// <summary>
 /// Decides which decals cleaning takes and washes them off a tile, for space cleaner, mops and cleanbots.
 /// </summary>
-public sealed class WFDecalCleaningSystem : EntitySystem
+public sealed partial class WFDecalCleaningSystem : EntitySystem
 {
     [Dependency] private DecalSystem _decals = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;

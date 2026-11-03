@@ -6,7 +6,7 @@ namespace Content.Client._WF.MappingTools;
 /// Opens or closes the mapping tools window. Mapping admins only, via <c>clientCommandPerms.yml</c>; the server also
 /// checks the Mapping flag on every request.
 /// </summary>
-public sealed class MappingToolsCommand : LocalizedEntityCommands
+public sealed partial class MappingToolsCommand : LocalizedEntityCommands
 {
     [Dependency] private MappingToolsSystem _tools = default!;
 

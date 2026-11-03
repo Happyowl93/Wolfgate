@@ -9,7 +9,7 @@ namespace Content.Client._WF.SuitTank;
 /// <summary>
 /// Draws a tank in a worn suit's storage on the wearer, using the tank's suit storage sprite.
 /// </summary>
-public sealed class WFSuitTankVisualsSystem : EntitySystem
+public sealed partial class WFSuitTankVisualsSystem : EntitySystem
 {
     [Dependency] private ISerializationManager _serialization = default!;
     [Dependency] private SpriteSystem _sprite = default!;

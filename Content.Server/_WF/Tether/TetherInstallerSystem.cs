@@ -16,16 +16,14 @@ namespace Content.Server._WF.Tether;
 /// Spends stored steel to bolt a <see cref="RopeAttachPointComponent"/> eye to a tile at range,
 /// refusing space and tiles that already hold one.
 /// </summary>
-public sealed class TetherInstallerSystem : EntitySystem
+public sealed partial class TetherInstallerSystem : EntitySystem
 {
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedMaterialStorageSystem _materials = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
-    [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private TurfSystem _turf = default!;
-    [Dependency] private IPrototypeManager _protos = default!;
 
     public override void Initialize()
     {

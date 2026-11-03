@@ -24,24 +24,24 @@ public sealed partial class WFMappingIssuesSystem
             if (TryComp<MapGridComponent>(child, out var grid))
             {
                 grids.Add((child, depth));
-                CheckGrid(report, (child, grid), depth);
+                CheckGrid(report, (child, grid), depth, scope);
                 continue;
             }
 
             // Anything else under the map is loose in space; the ship file never holds it and a map file keeps
             // it floating.
-            Walk(child, uid => CheckEntity(report, uid, depth));
+            Walk(child, uid => CheckEntity(report, uid, depth, scope));
             Add(report, WFMappingIssueCatalog.MapLooseEntity, child, Transform(child).Coordinates, depth,
                 ("name", NameOf(child)));
         }
 
         // A ship check reports the grid count itself.
-        if (grids.Count == before && scope == WFMappingIssueScope.Map)
+        if (grids.Count == before && scope != WFMappingIssueScope.Ship)
             Add(report, WFMappingIssueCatalog.MapLevelEmpty, null, null, depth, ("depth", depth));
     }
 
     /// <summary>Scans a grid and checks its anchored entities tile by tile and every entity it holds.</summary>
-    private void CheckGrid(Report report, Entity<MapGridComponent> grid, int depth)
+    private void CheckGrid(Report report, Entity<MapGridComponent> grid, int depth, WFMappingIssueScope scope)
     {
         var scan = _vessel.Scan(grid);
         report.Grids++;
@@ -53,7 +53,7 @@ public sealed partial class WFMappingIssuesSystem
         var children = Transform(grid).ChildEnumerator;
         while (children.MoveNext(out var child))
         {
-            Walk(child, uid => CheckEntity(report, uid, depth));
+            Walk(child, uid => CheckEntity(report, uid, depth, scope));
 
             var xform = Transform(child);
             if (!xform.Anchored)
@@ -93,8 +93,8 @@ public sealed partial class WFMappingIssuesSystem
         return MetaData(uid).EntityPrototype?.ID;
     }
 
-    /// <summary>The per-entity rules: a prototype the map file drops, and a denied component.</summary>
-    private void CheckEntity(Report report, EntityUid uid, int depth)
+    /// <summary>The per-entity rules: a prototype the map file drops, one the map lint refuses, and a denied component.</summary>
+    private void CheckEntity(Report report, EntityUid uid, int depth, WFMappingIssueScope scope)
     {
         report.Entities++;
         var coords = Transform(uid).Coordinates;
@@ -107,6 +107,9 @@ public sealed partial class WFMappingIssuesSystem
             Add(report, WFMappingIssueCatalog.MapUnsaved, uid, coords, depth,
                 ("name", NameOf(uid)), ("spawner", spawner));
         }
+
+        if (MetaData(uid).EntityPrototype is { } linted && WFMappingMapLint.IsIllegal(linted, scope == WFMappingIssueScope.Grid))
+            Add(report, WFMappingIssueCatalog.MapLint, uid, coords, depth, ("name", NameOf(uid)), ("id", linted.ID));
 
         if (_mapping.HasDeniedComponent(uid))
             Add(report, WFMappingIssueCatalog.MapDenied, uid, coords, depth, ("name", NameOf(uid)));

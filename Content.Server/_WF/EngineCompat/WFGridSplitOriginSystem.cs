@@ -4,7 +4,7 @@ using Robust.Shared.Map.Components;
 namespace Content.Server._WF.EngineCompat;
 
 /// <summary>Records how a split-off grid's tile indices map back to the grid it came from.</summary>
-public sealed class WFGridSplitOriginSystem : EntitySystem
+public sealed partial class WFGridSplitOriginSystem : EntitySystem
 {
     [Dependency] private SharedTransformSystem _transform = default!;
 

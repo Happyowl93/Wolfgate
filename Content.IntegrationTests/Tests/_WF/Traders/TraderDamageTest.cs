@@ -22,6 +22,8 @@ namespace Content.IntegrationTests.Tests._WF.Traders;
 [TestOf(typeof(TraderFleeSystem))]
 public sealed class TraderDamageTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     private const string WandererProto = "WFTraderWanderer";
     private const string StationProto = "WFTraderFuelTechnician";
     private const string AttackerProto = "MobHuman";
@@ -93,7 +95,7 @@ public sealed class TraderDamageTest
             attacker = entMan.SpawnEntity(AttackerProto, new EntityCoordinates(gridUid, 1.5f, 0.5f));
 
             var damageable = entMan.System<DamageableSystem>();
-            var blunt = protoMan.Index<DamageTypePrototype>("Blunt");
+            var blunt = protoMan.Index<DamageTypePrototype>(BluntProto);
             damageable.TryChangeDamage(wanderer, new DamageSpecifier(blunt, 5), origin: attacker);
             damageable.TryChangeDamage(station, new DamageSpecifier(blunt, 5), origin: attacker);
         });

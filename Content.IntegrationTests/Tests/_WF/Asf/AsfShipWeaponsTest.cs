@@ -19,6 +19,8 @@ namespace Content.IntegrationTests.Tests._WF.Asf;
 [TestFixture]
 public sealed class AsfShipWeaponsTest
 {
+    private static readonly EntProtoId WFAsfComputerShipyardProto = "WFAsfComputerShipyard";
+
     [TestPrototypes]
     private const string Prototypes = @"
 - type: entity
@@ -89,8 +91,8 @@ public sealed class AsfShipWeaponsTest
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(prototypes.Index<EntityPrototype>("WFAsfComputerShipyard")
-                .TryGetComponent<ShipyardListingComponent>(out var listing, factory));
+            Assert.That(prototypes.Index(WFAsfComputerShipyardProto)
+                .TryComp<ShipyardListingComponent>(out var listing, factory));
             foreach (var id in listing!.Shuttles)
             {
                 maps.CreateMap(out var mapId);

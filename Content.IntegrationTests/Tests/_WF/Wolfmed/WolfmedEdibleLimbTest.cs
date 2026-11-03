@@ -156,8 +156,8 @@ public sealed class WolfmedEdibleLimbTest : WolfmedGameTest
     private string Profile(string id, IComponentFactory factory)
     {
         var proto = SProtoMan.Index<EntityPrototype>(id);
-        Assert.That(proto.TryGetComponent(out SolutionContainerManagerComponent? manager, factory), Is.True, $"{id} has no solutions.");
-        Assert.That(proto.TryGetComponent(out FlavorProfileComponent? flavor, factory), Is.True, $"{id} has no flavour.");
+        Assert.That(proto.TryComp(out SolutionContainerManagerComponent? manager, factory), Is.True, $"{id} has no solutions.");
+        Assert.That(proto.TryComp(out FlavorProfileComponent? flavor, factory), Is.True, $"{id} has no flavour.");
 
         var solutions = manager!.Solutions;
         Assert.That(solutions, Is.Not.Null, $"{id} declares no solutions.");

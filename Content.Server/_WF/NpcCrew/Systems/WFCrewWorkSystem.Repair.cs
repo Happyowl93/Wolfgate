@@ -45,8 +45,8 @@ public sealed partial class WFCrewWorkSystem
                 if (only is { } at && spec.LocalPosition != at.Position)
                     continue;
                 if (!tool.EnableEntityRepair || !_prototypes.TryIndex(data.EntityPalette[spec.ProtoIndex], out var prototype)
-                    || !prototype.TryGetComponent<ShipRepairableComponent>(out _, Factory)
-                    || prototype.TryGetComponent<ShipRepairableRestrictComponent>(out var restricted, Factory)
+                    || !prototype.TryComp<ShipRepairableComponent>(out _, Factory)
+                    || prototype.TryComp<ShipRepairableRestrictComponent>(out var restricted, Factory)
                         && _whitelist.IsWhitelistFail(restricted.ToolWhitelist, worker))
                     continue;
                 if (spec.OriginalEntity is not { } original || !TryGetEntity(original, out var entity)

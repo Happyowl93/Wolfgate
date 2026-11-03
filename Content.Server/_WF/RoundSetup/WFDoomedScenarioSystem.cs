@@ -28,7 +28,7 @@ using Robust.Shared.Random;
 namespace Content.Server._WF.RoundSetup;
 
 /// <summary>Down With Ye' Ship!: the SY Reach in drone space, ringed by three Reaver warships.</summary>
-public sealed class WFDoomedScenarioSystem : EntitySystem
+public sealed partial class WFDoomedScenarioSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IRobustRandom _random = default!;

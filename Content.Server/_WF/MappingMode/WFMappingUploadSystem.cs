@@ -22,7 +22,7 @@ namespace Content.Server._WF.MappingMode;
 /// reference, and a library version holding the engine's save of that map, never the uploaded bytes. A file with
 /// prototypes this server lacks is held, unloaded, until the player agrees to lose those entities.
 /// </summary>
-public sealed class WFMappingUploadSystem : EntitySystem
+public sealed partial class WFMappingUploadSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private IConfigurationManager _cfg = default!;

@@ -13,7 +13,7 @@ namespace Content.Server._WF.Wolfmed.Body;
 /// RemoveOrgan raises the same event again, which is idempotent. Everything Onyx's OrganEffectSystem does on organ *removal* Wolfgate already
 /// does through Shitmed (P3-D8), so this is the only consequence glue phase 3 needs.
 /// </remarks>
-public sealed class WolfmedOrganConsequenceSystem : EntitySystem
+public sealed partial class WolfmedOrganConsequenceSystem : EntitySystem
 {
     [Dependency] private WolfmedShutdownSystem _shutdown = default!; // BRAIN
     [Dependency] private WolfmedOrganFailureSystem _failure = default!;

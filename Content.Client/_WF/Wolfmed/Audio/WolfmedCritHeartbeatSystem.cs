@@ -20,7 +20,7 @@ namespace Content.Client._WF.Wolfmed.Audio;
 /// anyone else's mob and works for any entity with MobStateComponent, not only wound hosts.
 /// </summary>
 [UsedImplicitly]
-public sealed class WolfmedCritHeartbeatSystem : EntitySystem
+public sealed partial class WolfmedCritHeartbeatSystem : EntitySystem
 {
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
@@ -108,7 +108,7 @@ public sealed class WolfmedCritHeartbeatSystem : EntitySystem
         var arrest = _player.LocalEntity is { } arrested && HasComp<WolfmedCardiacArrestComponent>(arrested);
         Flatlined = arrest;
         if (arrest && !_flatlined)
-            _audio.PlayGlobal(FlatlineSound, Filter.Local(), false, AudioParams.Default.WithVolume(-6f));
+            _audio.PlayGlobal(new ResolvedPathSpecifier(FlatlineSound), Filter.Local(), false, AudioParams.Default.WithVolume(-6f));
 
         _flatlined = arrest;
 
@@ -151,7 +151,7 @@ public sealed class WolfmedCritHeartbeatSystem : EntitySystem
         if (_stream is { } existing && !Deleted(existing))
             return;
 
-        var played = _audio.PlayGlobal(HeartbeatSound, Filter.Local(), false,
+        var played = _audio.PlayGlobal(new ResolvedPathSpecifier(HeartbeatSound), Filter.Local(), false,
             AudioParams.Default.WithLoop(true).WithVolume(-4f));
         _stream = played?.Entity;
     }

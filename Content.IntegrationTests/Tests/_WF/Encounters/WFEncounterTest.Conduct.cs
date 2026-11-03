@@ -26,6 +26,8 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 /// </summary>
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestTraderUnderWayProto => "WFTestTraderUnderWay";
+
     /// <summary>Starts the test trader far from everything and returns its encounter and ship.</summary>
     private async Task<(EntityUid Encounter, WFEncounterShipState Ship)> StartTestTrader(Vector2 at)
     {
@@ -33,7 +35,7 @@ public sealed partial class WFEncounterTest
         WFEncounterShipState ship = default!;
         await Server.WaitAssertion(() =>
         {
-            var proto = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestTraderUnderWay");
+            var proto = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestTraderUnderWayProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(proto, new MapCoordinates(at, MapData.MapId), out encounter), Is.True);
             ship = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["trader"];
         });

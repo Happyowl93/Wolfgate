@@ -82,6 +82,14 @@ public sealed partial class BloodstreamSystem : EntitySystem
         if (args.Cancelled)
             return;
 
+        // WOLFGATE(Wolfmed) START: salted food and water must not form saline
+        if (Content.Server._WF.Wolfmed.Medical.WolfmedOralAbsorptionSystem.BlockedInBody(args.Reaction))
+        {
+            args.Cancelled = true;
+            return;
+        }
+        // WOLFGATE END
+
         foreach (var effect in args.Reaction.Effects)
         {
             switch (effect)

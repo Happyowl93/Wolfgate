@@ -25,7 +25,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// so a blunt hit that opens a bleed sprays and a cut that clots on contact does not. A chassis has no
 /// bleeding to read, so its sparks still come straight off the wound.
 /// </remarks>
-public sealed class WolfmedWoundSfxSystem : EntitySystem
+public sealed partial class WolfmedWoundSfxSystem : EntitySystem
 {
     /// <summary>The shipped profile. Retuning the feedback layer is an edit to that prototype.</summary>
     public const string DefaultProfile = "WFWolfmedSfxDefault";

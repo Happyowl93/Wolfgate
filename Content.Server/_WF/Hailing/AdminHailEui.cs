@@ -10,7 +10,7 @@ namespace Content.Server._WF.Hailing;
 /// An admin's side of a hail made as God: the ordinary hail window, fed from a stand-in entity instead of a
 /// console. Closing the window ends the hail.
 /// </summary>
-public sealed class AdminHailEui : BaseEui
+public sealed partial class AdminHailEui : BaseEui
 {
     [Dependency] private IAdminManager _admins = default!;
     [Dependency] private IEntityManager _entManager = default!;

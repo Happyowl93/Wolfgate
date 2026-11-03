@@ -22,7 +22,7 @@ namespace Content.Server._WF.Wolfmed.Damage;
 /// Septic, a wound closing, a drug stopping a bleed) is caught by a sweep every wolfmed.overlay_refresh_seconds.
 /// Machines keep their chassis visuals: a mechanical part never shows either overlay.
 /// </remarks>
-public sealed class WolfmedWoundOverlaySystem : EntitySystem
+public sealed partial class WolfmedWoundOverlaySystem : EntitySystem
 {
     /// <summary>What a wound is tinted when its body has no blood reagent to read.</summary>
     private static readonly Color FallbackBlood = Color.FromHex("#800000");

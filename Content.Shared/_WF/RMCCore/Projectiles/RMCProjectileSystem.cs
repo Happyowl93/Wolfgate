@@ -184,7 +184,7 @@ public sealed partial class RMCProjectileSystem : EntitySystem
 
             accuracy = accuracy > projectile.Comp.MinAccuracy ? accuracy : projectile.Comp.MinAccuracy;
 
-            var random = new Xoshiro128P(projectile.Comp.GunSeed, (long)projectile.Comp.Tick << 32 | GetNetEntity(args.OtherEntity).Id).NextFloat(0f, 100f);
+            var random = new Xoshiro128P(projectile.Comp.GunSeed, (long)projectile.Comp.Tick << 32 | (uint) GetNetEntity(args.OtherEntity).Id).NextFloat(0f, 100f);
 
             if (accuracy >= random)
                 return;

@@ -28,7 +28,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 // wolfmed.dormant_offer_seconds of that it is flagged in distress on medical HUDs and the ghost offer opens. The
 // moment anything gets worse both are withdrawn, an open dialog included, and a waiting ghost is told; when the body
 // wakes the ghost is offered the way back.
-public sealed class WolfmedDormantSystem : EntitySystem
+public sealed partial class WolfmedDormantSystem : EntitySystem
 {
     public static readonly EntProtoId WaitAction = "WFActionWolfmedWaitAsGhost";
 

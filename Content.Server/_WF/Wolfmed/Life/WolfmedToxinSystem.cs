@@ -19,7 +19,7 @@ namespace Content.Server._WF.Wolfmed.Life;
 // breathing and drains the brain on its own clock; the heart stops through the oxygen trigger, named "toxin". A
 // working liver clears wolfmed.toxin_clearance a second, the one passive healing a wound host gets. Machines take
 // no Poison.
-public sealed class WolfmedToxinSystem : EntitySystem
+public sealed partial class WolfmedToxinSystem : EntitySystem
 {
     public static readonly ProtoId<DamageTypePrototype> Poison = "Poison";
 

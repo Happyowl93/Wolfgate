@@ -26,7 +26,7 @@ namespace Content.Server._WF.MappingTools;
 /// file per level. Only stacks whose maps are all still uninitialized can be changed, so live stations and planets
 /// are left alone.
 /// </summary>
-public sealed class MappingZLevelsSystem : EntitySystem
+public sealed partial class MappingZLevelsSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private IAdminManager _admin = default!;

@@ -51,6 +51,8 @@ namespace Content.IntegrationTests.Tests._WF.Traders;
 [TestOf(typeof(UsedShipMarketSystem))]
 public sealed class TraderShipTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     private const string DealerProto = "WFTraderShipyard";
     private const string SalesmanProto = "WFTraderUsedShips";
     private const string DealerDialogue = "WFTraderShipyardDialogue";
@@ -90,7 +92,7 @@ public sealed class TraderShipTest
             var compFactory = server.ResolveDependency<IComponentFactory>();
 
             var dealer = protoMan.Index<EntityPrototype>(DealerProto);
-            Assert.That(dealer.TryGetComponent<TraderShipyardComponent>(out var shipyard, compFactory), Is.True,
+            Assert.That(dealer.TryComp<TraderShipyardComponent>(out var shipyard, compFactory), Is.True,
                 $"{DealerProto} should front shipyard listings.");
 
             var allowed = shipyard!.Consoles.Select(listing => listing.Console.Id).ToList();
@@ -114,12 +116,12 @@ public sealed class TraderShipTest
             foreach (var id in allowed)
             {
                 var console = protoMan.Index<EntityPrototype>(id);
-                Assert.That(console.TryGetComponent<ShipyardConsoleComponent>(out _, compFactory), Is.True,
+                Assert.That(console.TryComp<ShipyardConsoleComponent>(out _, compFactory), Is.True,
                     $"{id} is not a shipyard console.");
             }
 
             var salesman = protoMan.Index<EntityPrototype>(SalesmanProto);
-            Assert.That(salesman.TryGetComponent<TraderUsedShipsComponent>(out var used, compFactory), Is.True,
+            Assert.That(salesman.TryComp<TraderUsedShipsComponent>(out var used, compFactory), Is.True,
                 $"{SalesmanProto} should deal in used ships.");
             Assert.That(used!.UsedShipMarkup, Is.EqualTo(0.05f).Within(0.0001f));
             Assert.That(used.RelistDelay, Is.EqualTo(TimeSpan.FromMinutes(1)));
@@ -542,7 +544,6 @@ public sealed class TraderShipTest
             Assert.That(listing!.ShipName, Is.EqualTo(ShipName), "The listing should keep the ship's name.");
             Assert.That(listing.DesignId?.Id, Is.EqualTo(VesselProto), "The listing should remember the design.");
             Assert.That(listing.DesignName, Is.EqualTo(protoMan.Index<VesselPrototype>(VesselProto).Name));
-            Assert.That(listing.Data, Is.Not.Empty, "The grid should have been serialised.");
 
             Assert.That(listing.SaleValue, Is.EqualTo(shipyardSys.GetPostSaleRateBill(console, appraisal)),
                 "The listing should record the post-rate, pre-tax bill.");
@@ -554,6 +555,16 @@ public sealed class TraderShipTest
                 "A bought ship should sit out back for the relist delay.");
             Assert.That(marketSys.GetAvailable(), Does.Not.Contain(listing),
                 "It should not be on the lot yet.");
+        });
+
+        // The copy takes many ticks, and blocking on it here would stop them running.
+        for (var i = 0; i < 1800 && !(listing!.Ready && entMan.Deleted(shuttle)); i++)
+            await pair.RunTicksSync(1);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(listing!.Ready, Is.True, "The copy should have finished.");
+            Assert.That(listing.Data, Is.Not.Empty, "The grid should have been serialised.");
 
             // The old owner's bindings must not survive the copy.
             Assert.That(entMan.HasComponent<ShuttleDeedComponent>(shuttle), Is.False,
@@ -562,8 +573,7 @@ public sealed class TraderShipTest
             // Stand in for five minutes passing.
             listing.AvailableAt = listing.SoldAt;
             Assert.That(marketSys.GetAvailable(), Does.Contain(listing), "It should be on the lot now.");
-
-            entMan.DeleteEntity(shuttle);
+            Assert.That(entMan.Deleted(shuttle), Is.True, "The sold hull should be gone.");
         });
 
         await pair.RunTicksSync(2);
@@ -657,7 +667,7 @@ public sealed class TraderShipTest
             // Dent the marker so the copy has damage to keep.
             var damageSys = entMan.System<DamageableSystem>();
             entMan.EnsureComponent<DamageableComponent>(marker);
-            damageSys.TryChangeDamage(marker, new DamageSpecifier(protoMan.Index<DamageTypePrototype>("Blunt"), 7), true);
+            damageSys.TryChangeDamage(marker, new DamageSpecifier(protoMan.Index<DamageTypePrototype>(BluntProto), 7), true);
             Assert.That(entMan.GetComponent<DamageableComponent>(marker).TotalDamage, Is.EqualTo(FixedPoint2.New(7)));
 
             // A ship that was running when it was sold: force the gravity generator's receiver powered
@@ -719,7 +729,7 @@ public sealed class TraderShipTest
             Assert.That(listing.ShipName, Is.EqualTo(ShipName));
         });
 
-        for (var i = 0; i < 40 && !entMan.Deleted(shuttle); i++)
+        for (var i = 0; i < 360 && !(listing!.Ready && entMan.Deleted(shuttle)); i++)
             await pair.RunTicksSync(5);
 
         var bought = EntityUid.Invalid;

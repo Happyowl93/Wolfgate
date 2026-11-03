@@ -7,7 +7,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._WF.Vehicles.Crushing;
 
 /// <summary>Gives the entity prototypes it matches the behaviour of a <see cref="VehicleSmashableComponent"/>.</summary>
-[Prototype("vehicleSmashRule")]
+[Prototype]
 public sealed partial class VehicleSmashRulePrototype : IPrototype
 {
     [IdDataField]

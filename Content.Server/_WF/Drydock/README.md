@@ -47,7 +47,8 @@ full power a repair takes at most 6 minutes (`maxDuration`) and a refit 2 (`maxR
 travel included; longer work is sped up to fit, and lost power adds the time it costs. When a job ends, the console
 announces it at the console and to a payer elsewhere; it can also use a radio channel (`noticeChannel`), which no
 console sets. A rebuilt gun mounts on its hardpoint and rejoins the ship's fire control at the next hardpoint
-refresh, within a minute.
+refresh, within a minute. A part whose spot now holds something else, such as a gun swapped onto its hardpoint, isn't
+rebuilt or charged, the same check the ship repair tool makes.
 
 ## Pricing
 

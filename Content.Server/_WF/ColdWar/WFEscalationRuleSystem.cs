@@ -10,7 +10,7 @@ namespace Content.Server._WF.ColdWar;
 /// <summary>
 /// Counts down to the end of TSF/PDV talks, warns the sector on the way and then sets the war level HOT for good.
 /// </summary>
-public sealed class WFEscalationRuleSystem : GameRuleSystem<WFEscalationRuleComponent>
+public sealed partial class WFEscalationRuleSystem : GameRuleSystem<WFEscalationRuleComponent>
 {
     [Dependency] private ChatSystem _chat = default!;
     [Dependency] private IGameTiming _timing = default!;

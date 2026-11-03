@@ -61,7 +61,7 @@ namespace Content.Server._WF.Traders;
 /// <summary>
 /// Runs a trader's conversation: the dialogue menu, the barter zone, payment and receipts.
 /// </summary>
-public sealed class TraderSystem : EntitySystem
+public sealed partial class TraderSystem : EntitySystem
 {
     [Dependency] private BankSystem _bank = default!;
     [Dependency] private ChatSystem _chat = default!;

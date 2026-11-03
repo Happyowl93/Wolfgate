@@ -23,7 +23,7 @@ namespace Content.Server._WF.MappingMode;
 /// The per-player map library in the server's data folder: versioned manual saves and autosaves of sessions,
 /// opening a version as a new session, and deleting maps and versions. The listing comes from folder names.
 /// </summary>
-public sealed class WFMappingLibrarySystem : EntitySystem
+public sealed partial class WFMappingLibrarySystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private AtmosphereSystem _atmos = default!;

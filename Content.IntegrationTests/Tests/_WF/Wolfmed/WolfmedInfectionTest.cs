@@ -45,6 +45,10 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(WolfmedInfectionSystem))]
 public sealed class WolfmedInfectionTest : WolfmedGameTest
 {
+    private static readonly ProtoId<ReagentPrototype> SpaceacillinProto = "Spaceacillin";
+    private static readonly ProtoId<ReactionPrototype> SpaceacillinReactionProto = "Spaceacillin";
+    private static readonly ProtoId<WoundPrototype> WFWolfmedNecrosisWoundProto = "WFWolfmedNecrosisWound";
+
     /// <summary>
     /// These walk the infection's own course on a 20-point cut, a minor wound. Playtest 5 spares minor wounds the air;
     /// InfectionNeedsAReasonTest pins that rule, so here it is off.
@@ -729,9 +733,9 @@ public sealed class WolfmedInfectionTest : WolfmedGameTest
                 Assert.That(diagnostics.Sepsis, Is.GreaterThanOrEqualTo(0f));
 
                 Assert.That(prototypes.HasIndex<AlertPrototype>(WolfmedInfectionSystem.SepsisAlert));
-                Assert.That(prototypes.HasIndex<ReagentPrototype>("Spaceacillin"));
-                Assert.That(prototypes.HasIndex<ReactionPrototype>("Spaceacillin"));
-                Assert.That(prototypes.HasIndex<WoundPrototype>("WFWolfmedNecrosisWound"));
+                Assert.That(prototypes.HasIndex<ReagentPrototype>(SpaceacillinProto));
+                Assert.That(prototypes.HasIndex<ReactionPrototype>(SpaceacillinReactionProto));
+                Assert.That(prototypes.HasIndex<WoundPrototype>(WFWolfmedNecrosisWoundProto));
                 Assert.That(prototypes.HasIndex<WolfmedInfectionProfilePrototype>(WolfmedInfectionSystem.DefaultProfile));
 
                 Assert.That(locale.HasString("wolfmed-wound-name-necrosis"));

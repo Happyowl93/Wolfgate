@@ -90,15 +90,11 @@ public sealed partial class WolfmedDiagnosticPanel : BoxContainer
     }
 
     /// <summary>UI3: the procedure window is a separate window, so it has to go when the analyzer does.</summary>
-    protected override void Dispose(bool disposing)
+    protected override void ExitedTree()
     {
-        if (disposing)
-        {
-            _treatmentWindow?.Close();
-            _treatmentWindow = null;
-        }
-
-        base.Dispose(disposing);
+        base.ExitedTree();
+        _treatmentWindow?.Close();
+        _treatmentWindow = null;
     }
 
     private void SelectTab(WolfmedDiagnosticTab tab)

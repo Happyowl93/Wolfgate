@@ -22,6 +22,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestFixture]
 public sealed class WolfmedBorgInstrumentsTest : WolfmedGameTest
 {
+    private static readonly ProtoId<BorgTypePrototype> MedicalProto = "medical";
+
     /// <summary>Every tool a Wolfmed surgery step asks for is held by some item of the medical borg's default modules.</summary>
     [Test]
     public async Task MedicalBorgHoldsEveryWolfmedSurgeryToolTest()
@@ -32,9 +34,9 @@ public sealed class WolfmedBorgInstrumentsTest : WolfmedGameTest
         await Server.WaitAssertion(() =>
         {
             var items = new List<EntityPrototype>();
-            foreach (var module in prototypes.Index<BorgTypePrototype>("medical").DefaultModules)
+            foreach (var module in prototypes.Index<BorgTypePrototype>(MedicalProto).DefaultModules)
             {
-                if (prototypes.Index(module).TryGetComponent<ItemBorgModuleComponent>(out var provider, factory))
+                if (prototypes.Index(module).TryComp<ItemBorgModuleComponent>(out var provider, factory))
                     items.AddRange(provider.Items.Select(id => prototypes.Index<EntityPrototype>(id)));
             }
 
@@ -42,7 +44,7 @@ public sealed class WolfmedBorgInstrumentsTest : WolfmedGameTest
             foreach (var step in prototypes.EnumeratePrototypes<EntityPrototype>())
             {
                 if (step.Abstract || !step.ID.StartsWith("WFSurgeryStep") ||
-                    !step.TryGetComponent<SurgeryStepComponent>(out var comp, factory) || comp.Tool == null)
+                    !step.TryComp<SurgeryStepComponent>(out var comp, factory) || comp.Tool == null)
                     continue;
 
                 needed.UnionWith(comp.Tool.Keys);

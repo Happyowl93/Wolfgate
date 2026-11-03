@@ -21,6 +21,9 @@ namespace Content.IntegrationTests.Tests._WF.Biotype;
 [TestOf(typeof(WFBiotypeRequirement))]
 public sealed class BiotypeGatesTest
 {
+    private static readonly ProtoId<TraitPrototype> HemophiliaProto = "Hemophilia";
+    private static readonly ProtoId<TraitPrototype> VoraciousProto = "Voracious";
+
     private static HumanoidCharacterProfile Profile(string species, WFBiotype biotype) =>
         HumanoidCharacterProfile.DefaultWithSpecies(species).WithBiotype(biotype);
 
@@ -86,8 +89,8 @@ public sealed class BiotypeGatesTest
 
         await server.WaitAssertion(() =>
         {
-            var hemophilia = proto.Index<TraitPrototype>("Hemophilia");
-            var voracious = proto.Index<TraitPrototype>("Voracious");
+            var hemophilia = proto.Index<TraitPrototype>(HemophiliaProto);
+            var voracious = proto.Index<TraitPrototype>(VoraciousProto);
 
             Assert.Multiple(() =>
             {
@@ -171,6 +174,7 @@ public sealed class BiotypeGatesTest
         {
             // Breather boxes only: prisoners and tank-only roles get a bare tank, which a synthetic doesn't need.
             var breathers = Breathers(proto, "OxygenBreatherNF").Concat(Breathers(proto, "NitrogenBreatherNF"))
+                .Concat(Breathers(proto, "WaterBreather"))
                 .Where(id => proto.Index(id).Storage.Count > 0)
                 .ToHashSet();
             var synthetic = Breathers(proto, "WFSyntheticBody");
@@ -183,7 +187,7 @@ public sealed class BiotypeGatesTest
                     if (Picks(proto, role.ID, Profile("Human", WFBiotype.Default)).Any(breathers.Contains) != true)
                         continue;
 
-                    foreach (var species in new[] { "Human", "Vulpkanin", "Vox", "IPC" })
+                    foreach (var species in new[] { "Human", "Vulpkanin", "Vox", "Feroxi", "IPC" })
                     {
                         var picks = Picks(proto, role.ID, Profile(species, WFBiotype.Synthetic));
                         Assert.That(picks.Any(synthetic.Contains), $"{role.ID}: a synthetic {species} gets no synthetic box");

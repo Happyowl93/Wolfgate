@@ -164,6 +164,10 @@ public abstract partial class SharedStationSpawningSystem : EntitySystem
         if (startingGear == null)
             return;
 
+        // WOLFGATE(LiveFixes): a mob deleted during spawn can't take gear
+        if (TerminatingOrDeleted(entity))
+            return;
+
         var xform = _xformQuery.GetComponent(entity);
 
         if (InventorySystem.TryGetSlots(entity, out var slotDefinitions))

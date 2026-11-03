@@ -55,9 +55,9 @@ public sealed class AsfAccessTest
 
             // A buyer's only ID card is in the console's slot while they buy, so the console must not check ID access.
             var console = prototypes.Index(ShipyardConsole);
-            Assert.That(console.TryGetComponent<AccessReaderComponent>(out _, factory), Is.False,
+            Assert.That(console.TryComp<AccessReaderComponent>(out _, factory), Is.False,
                 $"{ShipyardConsole} checks ID access, which denies a buyer whose card is in its slot.");
-            Assert.That(console.TryGetComponent<CompanyAccessReaderComponent>(out var company, factory), Is.True);
+            Assert.That(console.TryComp<CompanyAccessReaderComponent>(out var company, factory), Is.True);
             Assert.That(company!.RequiredCompanies.Select(c => c.Id), Does.Contain("WFAsf"));
         });
 

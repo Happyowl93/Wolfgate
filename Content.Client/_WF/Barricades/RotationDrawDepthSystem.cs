@@ -4,7 +4,7 @@ using Robust.Client.GameObjects;
 namespace Content.Client._WF.Barricades;
 
 /// <summary>Draws south-facing barricades over mobs so they cover whoever stands behind them.</summary>
-public sealed class RotationDrawDepthSystem : EntitySystem
+public sealed partial class RotationDrawDepthSystem : EntitySystem
 {
     [Dependency] private SpriteSystem _sprite = default!;
 

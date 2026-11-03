@@ -11,7 +11,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// amputation event, so the artery overlay can tell a neck from a shoulder on the same torso, and closes the stump
 /// when that part, or a replacement for it, is attached again.
 /// </summary>
-public sealed class WolfmedStumpTagSystem : EntitySystem
+public sealed partial class WolfmedStumpTagSystem : EntitySystem
 {
     [Dependency] private WoundSystem _wounds = default!;
     [Dependency] private SharedBodySystem _body = default!;

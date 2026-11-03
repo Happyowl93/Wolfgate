@@ -66,7 +66,7 @@ public sealed class CavernGutTest
         {
             foreach (var spawnerId in NativeSpawners)
             {
-                Assert.That(protoMan.Index<EntityPrototype>(spawnerId).TryGetComponent<WFPlanetFaunaSpawnerComponent>(out var spawner, factory), Is.True,
+                Assert.That(protoMan.Index<EntityPrototype>(spawnerId).TryComp<WFPlanetFaunaSpawnerComponent>(out var spawner, factory), Is.True,
                     $"{spawnerId} spawns no wildlife.");
                 CollectSpawns(protoMan, protoMan.Index(spawner!.Table).Table, natives);
             }

@@ -12,7 +12,7 @@ namespace Content.Client._WF.Audio;
 /// Takes Doppler off looping sounds. OpenAL Soft 1.24.3 writes past its mix buffer when a pitched-up loop wraps,
 /// which crashes the client; a fast missile's engine loop does it.
 /// </summary>
-public sealed class WFLoopDopplerSystem : EntitySystem
+public sealed partial class WFLoopDopplerSystem : EntitySystem
 {
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private SharedPhysicsSystem _physics = default!;

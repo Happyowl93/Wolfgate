@@ -169,7 +169,7 @@ public sealed partial class MappingToolsSystem
     /// <summary>The sides a device's pipe nodes open to at rest, as its prototype has them.</summary>
     private PipeDirection DevicePorts(EntityPrototype prototype)
     {
-        if (!prototype.TryGetComponent<NodeContainerComponent>(out var container, _factory))
+        if (!prototype.TryComp<NodeContainerComponent>(out var container, _factory))
             return PipeDirection.None;
 
         var ports = PipeDirection.None;
@@ -193,7 +193,7 @@ public sealed partial class MappingToolsSystem
         if (layer == AtmosPipeLayer.Primary)
             return true;
 
-        if (!prototype.TryGetComponent<AtmosPipeLayersComponent>(out var layers, _factory))
+        if (!prototype.TryComp<AtmosPipeLayersComponent>(out var layers, _factory))
             return false;
 
         if (_pipeLayers.TryGetAlternativePrototype(layers, layer, out var alternative) &&

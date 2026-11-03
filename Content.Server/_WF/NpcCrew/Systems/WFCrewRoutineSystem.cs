@@ -12,7 +12,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.NpcCrew.Systems;
 
 /// <summary>Keeps console operators facing their stations and spaces deck patrols apart.</summary>
-public sealed class WFCrewRoutineSystem : EntitySystem
+public sealed partial class WFCrewRoutineSystem : EntitySystem
 {
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private WFCrewPlannerSystem _planner = default!;
@@ -43,7 +43,7 @@ public sealed class WFCrewRoutineSystem : EntitySystem
                 || _work.HomeGrid(uid) != null || _weapons.HasLiveThreat(uid))
                 continue;
             crew.NextPatrol = _timing.CurTime + TimeSpan.FromSeconds(_random.Next(45, 91));
-            var posts = _planner.DeckPosts(grid).Where(post => !post.Coordinates.InRange(EntityManager, xform.Coordinates, 3f)).ToList();
+            var posts = _planner.DeckPosts(grid).Where(post => !_transform.InRange(post.Coordinates, xform.Coordinates, 3f)).ToList();
             if (posts.Count == 0)
                 continue;
             htn.Blackboard.SetValue(WFCrewSystem.PostKey, _random.Pick(posts).Coordinates);

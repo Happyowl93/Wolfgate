@@ -41,12 +41,14 @@ public sealed class ClothingLayerTest : InteractionTest
 
         await Client.WaitAssertion(() =>
         {
-            var sprite = CEntMan.GetComponent<SpriteComponent>(ToClient(target));
+            var spriteUid = ToClient(target);
+            var sprites = CEntMan.System<SpriteSystem>();
+            var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
             var drawn = Indices(target, "jumpsuit");
 
             int Body(HumanoidVisualLayers part)
             {
-                Assert.That(sprite.LayerMapTryGet(part, out var i), Is.True, $"The body has no {part} layer.");
+                Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), part, out var i, false), Is.True, $"The body has no {part} layer.");
                 return i;
             }
 
@@ -220,11 +222,13 @@ public sealed class ClothingLayerTest : InteractionTest
     private int[] Indices(NetEntity target, string slot)
     {
         var mob = ToClient(target);
-        var sprite = CEntMan.GetComponent<SpriteComponent>(mob);
+        var spriteUid = mob;
+        var sprites = CEntMan.System<SpriteSystem>();
+        var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
         var slots = CEntMan.GetComponent<InventorySlotsComponent>(mob);
         Assert.That(slots.VisualLayerKeys.TryGetValue(slot, out var keys) && keys.Count > 0, Is.True,
             $"The {slot} slot drew nothing.");
-        return keys!.Select(k => sprite.LayerMapTryGet(k, out var i) ? i : -1).ToArray();
+        return keys!.Select(k => sprites.LayerMapTryGet((spriteUid, sprite), k, out var i, false) ? i : -1).ToArray();
     }
 
     private async Task AssertAbove(NetEntity target, string upper, string lower)

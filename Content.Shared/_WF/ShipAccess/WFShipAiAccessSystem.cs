@@ -8,7 +8,7 @@ namespace Content.Shared._WF.ShipAccess;
 /// A ship's own AI opens its doors. The AI's core carries a record key naming the grid it is anchored on, which the
 /// server adds to every keyed reader on that ship, so a locked ship admits the AI it carries and no other.
 /// </summary>
-public sealed class WFShipAiAccessSystem : EntitySystem
+public sealed partial class WFShipAiAccessSystem : EntitySystem
 {
     /// <summary>The record id of a ship AI's key. Real crew records count up from zero.</summary>
     public const uint AiKeyId = uint.MaxValue;

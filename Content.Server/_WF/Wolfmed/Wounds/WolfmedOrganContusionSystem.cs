@@ -19,7 +19,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// Answers <see cref="WolfmedWoundLifecycleEvent"/> because the directed wound-lifecycle subscriptions are
 /// taken. Server-side: organ health, like bleeding and healing, is not simulated on the client.
 /// </remarks>
-public sealed class WolfmedOrganContusionSystem : EntitySystem
+public sealed partial class WolfmedOrganContusionSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IRobustRandom _random = default!;

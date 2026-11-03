@@ -15,6 +15,8 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestStoryMeleeProto => "WFTestStoryMelee";
+
     [TestPrototypes]
     private const string BattlePrototypes = @"
 - type: wfEncounter
@@ -56,7 +58,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, intruder = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryMelee");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryMeleeProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-39000, -39000), MapData.MapId), out encounter), Is.True);
             var ships = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships;
             // Its first target is lost with all hands.

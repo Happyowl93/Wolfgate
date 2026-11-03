@@ -19,7 +19,7 @@ namespace Content.Server._WF.Wolfmed.Damage;
 /// changes no damage number, and dead tissue is not damage at all. Server only, like every other wound
 /// write; the client reads the networked result.
 /// </remarks>
-public sealed class WolfmedDegradationVisualsSystem : EntitySystem
+public sealed partial class WolfmedDegradationVisualsSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private SharedBodySystem _body = default!;

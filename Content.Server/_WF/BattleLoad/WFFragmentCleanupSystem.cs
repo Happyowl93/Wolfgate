@@ -9,7 +9,7 @@ using Robust.Shared.Player;
 namespace Content.Server._WF.BattleLoad;
 
 /// <summary>Deletes the tiny grids a hull sheds as it breaks up, unless a player or a mob is aboard.</summary>
-public sealed class WFFragmentCleanupSystem : EntitySystem
+public sealed partial class WFFragmentCleanupSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private SharedMapSystem _map = default!;
@@ -57,7 +57,7 @@ public sealed class WFFragmentCleanupSystem : EntitySystem
     public bool IsSmall(Entity<MapGridComponent> grid)
     {
         var count = 0;
-        var tiles = _map.GetAllTilesEnumerator(grid, grid.Comp);
+        var tiles = _map.GetAllTiles(grid, grid.Comp);
         while (tiles.MoveNext(out _))
         {
             if (++count > _maxTiles)

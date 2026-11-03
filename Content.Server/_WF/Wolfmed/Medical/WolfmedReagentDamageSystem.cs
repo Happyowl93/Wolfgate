@@ -19,7 +19,7 @@ namespace Content.Server._WF.Wolfmed.Medical;
 /// harms. Healing, Poison and the other systemic types pass through unchanged, and a reaction on the skin is not a
 /// metabolism.
 /// </summary>
-public sealed class WolfmedReagentDamageSystem : EntitySystem
+public sealed partial class WolfmedReagentDamageSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private WolfmedShutdownSystem _shutdown = default!;

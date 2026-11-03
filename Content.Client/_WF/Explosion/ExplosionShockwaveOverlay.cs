@@ -8,8 +8,10 @@ namespace Content.Client._WF.Explosion;
 /// <summary>
 /// Draws every live explosion shockwave as a screen space displacement ring.
 /// </summary>
-public sealed class ExplosionShockwaveOverlay : Overlay
+public sealed partial class ExplosionShockwaveOverlay : Overlay
 {
+    private static readonly ProtoId<ShaderPrototype> WFExplosionShockwaveProto = "WFExplosionShockwave";
+
     [Dependency] private IPrototypeManager _proto = default!;
 
     /// <summary>Waves that can distort the screen at once. The shader's array lengths match this.</summary>
@@ -32,7 +34,7 @@ public sealed class ExplosionShockwaveOverlay : Overlay
         IoCManager.InjectDependencies(this);
 
         _system = system;
-        _shader = _proto.Index<ShaderPrototype>("WFExplosionShockwave").Instance().Duplicate();
+        _shader = _proto.Index<ShaderPrototype>(WFExplosionShockwaveProto).Instance().Duplicate();
         ZIndex = 102; // After the singularity's own distortion, which sits at 101.
     }
 

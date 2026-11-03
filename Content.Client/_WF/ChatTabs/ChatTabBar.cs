@@ -89,7 +89,7 @@ public sealed class ChatTabBar : BoxContainer
 
     private void Rebuild()
     {
-        _buttons.DisposeAllChildren();
+        _buttons.RemoveAllChildren();
 
         for (var i = 0; i < _tabs.Tabs.Count; i++)
         {

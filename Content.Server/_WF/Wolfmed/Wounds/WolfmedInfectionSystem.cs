@@ -37,7 +37,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 // Poison; the toxin load is its own route. Playtest 5: septic shock is a consciousness pressure (the patient is out,
 // not dying) and the organ damage past wolfmed.sepsis_organ_damage_from is the only death in it: the lungs fail and
 // the brain starves.
-public sealed class WolfmedInfectionSystem : EntitySystem
+public sealed partial class WolfmedInfectionSystem : EntitySystem
 {
     /// <summary>The shipped profile. A downstream server retunes the prototype, not this file.</summary>
     public const string DefaultProfile = "WFWolfmedDefaultInfection";
@@ -271,7 +271,8 @@ public sealed class WolfmedInfectionSystem : EntitySystem
 
         if (infection.Cleaned && infection.Stage < WolfmedInfectionStage.Spreading)
             SetProgress(wound, infection.Progress - profile.CleanDecayPerMinute * minutes, profile);
-        else if (HasReason(wound, part)) // Playtest 5: a wound with nothing to go bad from holds where it is
+        else if (HasReason(wound, part) && // Playtest 5: a wound with nothing to go bad from holds where it is
+                 !(body is { } wearer && IsSterile(wearer, part))) // a sterile weave over it keeps it from going bad
             SetProgress(wound,
                 infection.Progress +
                 profile.ProgressPerMinute * minutes * openness * infection.Contamination *
@@ -719,24 +720,42 @@ public sealed class WolfmedInfectionSystem : EntitySystem
     {
         var cleaned = 0;
         foreach (var part in Parts(body))
-        {
-            foreach (var wound in _wounds.GetWounds(part).ToArray())
-            {
-                if (wound.Comp.State is WoundState.Healed or WoundState.Scarred ||
-                    !TryComp(wound, out WolfmedInfectionComponent? infection) || infection.Cleaned)
-                    continue;
-
-                infection.Cleaned = true;
-                infection.Contamination = 1f;
-                Dirty(wound.Owner, infection);
-                cleaned++;
-            }
-        }
+            cleaned += CleanPart(part);
 
         if (cleaned > 0)
             _popup.PopupEntity(Loc.GetString("wolfmed-wound-cleaned"), body, body);
 
         return cleaned;
+    }
+
+    /// <summary>Antiseptic over one part's open wounds, without the popup. Returns how many it reached.</summary>
+    public int CleanPart(EntityUid part)
+    {
+        var cleaned = 0;
+        foreach (var wound in _wounds.GetWounds(part).ToArray())
+        {
+            if (wound.Comp.State is WoundState.Healed or WoundState.Scarred ||
+                !TryComp(wound, out WolfmedInfectionComponent? infection) || infection.Cleaned)
+                continue;
+
+            infection.Cleaned = true;
+            infection.Contamination = 1f;
+            Dirty(wound.Owner, infection);
+            cleaned++;
+        }
+
+        return cleaned;
+    }
+
+    /// <summary>
+    /// Whether worn gear keeps infection out: of <paramref name="part"/>'s wounds, or, with no part, of the wounds
+    /// <paramref name="body"/> treats.
+    /// </summary>
+    public bool IsSterile(EntityUid body, EntityUid? part = null)
+    {
+        var ev = new WolfmedSterileEvent(part);
+        RaiseLocalEvent(body, ref ev);
+        return ev.Sterile;
     }
 
     /// <summary>

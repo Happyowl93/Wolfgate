@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Numerics;
 using Content.Server._NF.Bank;
+using Content.Server._WF.TradeGoods.Systems;
 using Content.Server.Cargo.Systems;
 using Content.Server.Destructible;
 using Content.Server.Popups;
@@ -54,6 +55,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
     [Dependency] private SharedPhysicsSystem _physics = default!;
     [Dependency] private SharedMaterialStorageSystem _materials = default!;
     [Dependency] private DestructibleSystem _destructible = default!;
+    [Dependency] private WFTradeMarketSystem _tradeMarket = default!;
 
     /// <summary>Upper bound on ship tiles kept for ambient sparks.</summary>
     private const int MaxSparkTiles = 512;
@@ -316,7 +318,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         {
             foreach (var (specId, spec) in chunk.Entities)
             {
-                if (!IsMissing(ship, spec))
+                if (!IsMissing(ship, spec) || IsSpotTaken(ship, data, chunk, spec))
                     continue;
 
                 var proto = _prototype.Index<EntityPrototype>(data.EntityPalette[spec.ProtoIndex].Id);
@@ -327,7 +329,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
                     SpecId = specId,
                     Cost = RebuildPrice(comp, proto),
                     Prototype = proto.ID,
-                    Mounted = proto.TryGetComponent<HardpointAnchorableOnlyComponent>(out _, Factory),
+                    Mounted = proto.TryComp<HardpointAnchorableOnlyComponent>(out _, Factory),
                     LocalPos = spec.LocalPosition,
                 });
             }
@@ -424,7 +426,8 @@ public sealed partial class WFDrydockSystem : EntitySystem
         if (!TryComp<ShipRepairDataComponent>(ship, out var data) ||
             !data.Chunks.TryGetValue(item.ChunkPos, out var chunk) ||
             !chunk.Entities.TryGetValue(item.SpecId, out var spec) ||
-            !IsMissing(ship, spec))
+            !IsMissing(ship, spec) ||
+            IsSpotTaken(ship, data, chunk, spec))
             return;
 
         // Only a drifting or debris original can still be here; remove it before rebuilding.
@@ -593,7 +596,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
                 }
                 else
                 {
-                    state.RepairPrice = WorkPrice(berthed, comp, null, items);
+                    state.RepairPrice = WorkPrice(console, berthed, comp, null, items);
                 }
             }
         }
@@ -734,7 +737,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         if (upgrade == null && TryStartVoucherRepair(console, comp, ship, actor, items))
             return true;
 
-        var price = WorkPrice(ship, comp, upgrade, items);
+        var price = WorkPrice(console, ship, comp, upgrade, items);
         if (!TryCharge(console, comp, actor, price))
             return false;
 
@@ -940,7 +943,7 @@ public sealed partial class WFDrydockSystem : EntitySystem
         if (!TryComp<MapGridComponent>(ship, out var grid))
             return;
 
-        var tiles = _map.GetAllTilesEnumerator(ship, grid);
+        var tiles = _map.GetAllTiles(ship, grid);
         while (job.SparkTiles.Count < MaxSparkTiles && tiles.MoveNext(out var tile))
         {
             var indices = tile!.Value.GridIndices;
@@ -966,6 +969,13 @@ public sealed partial class WFDrydockSystem : EntitySystem
         // A part whose floor was blown out is deparented into space; it is lost, as the repair tool treats it.
         var grid = Transform(original).GridUid;
         return grid == null || grid != ship && _hull.IsDebrisOf(grid, ship);
+    }
+
+    /// <summary>Whether something anchored since holds a snapshot entity's spot, such as a gun swapped onto its hardpoint.</summary>
+    private bool IsSpotTaken(EntityUid ship, ShipRepairDataComponent data, ShipRepairChunk chunk, ShipRepairEntitySpecifier spec)
+    {
+        return TryComp<MapGridComponent>(ship, out var grid) &&
+            _hull.IsSpotTaken((ship, grid), data.EntityPalette[spec.ProtoIndex], _hull.TileOf(ship, spec.LocalPosition), data, chunk);
     }
 
     /// <summary>Resolves a spec's recorded original entity, or false if it no longer exists.</summary>

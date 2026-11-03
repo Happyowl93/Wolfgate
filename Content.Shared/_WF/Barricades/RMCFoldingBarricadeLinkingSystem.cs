@@ -11,7 +11,7 @@ using Robust.Shared.Map.Components;
 namespace Content.Shared._WF.Barricades;
 
 /// <summary>Linked folding barricade doors in a row open and close together.</summary>
-public sealed class RMCFoldingBarricadeLinkingSystem : EntitySystem
+public sealed partial class RMCFoldingBarricadeLinkingSystem : EntitySystem
 {
     [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
@@ -225,7 +225,7 @@ public sealed class RMCFoldingBarricadeLinkingSystem : EntitySystem
     private void UpdateAnchoredAt(Entity<MapGridComponent> grid, EntityCoordinates coordinates)
     {
         var tile = _map.LocalToTile(grid, grid, coordinates);
-        var anchored = _map.GetAnchoredEntitiesEnumerator(grid, grid, tile);
+        var anchored = _map.GetAnchoredEntities(grid, grid, tile);
         while (anchored.MoveNext(out var anchoredUid))
         {
             if (_linkingQuery.TryComp(anchoredUid, out var linking))
@@ -271,7 +271,7 @@ public sealed class RMCFoldingBarricadeLinkingSystem : EntitySystem
 
         var facing = xform.LocalRotation.GetCardinalDir();
         var tile = _map.LocalToTile(gridUid, grid, xform.Coordinates.Offset(direction.ToVec()));
-        var anchored = _map.GetAnchoredEntitiesEnumerator(gridUid, grid, tile);
+        var anchored = _map.GetAnchoredEntities(gridUid, grid, tile);
         while (anchored.MoveNext(out var anchoredUid))
         {
             if (anchoredUid == ent.Owner ||

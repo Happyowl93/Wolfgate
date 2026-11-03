@@ -23,7 +23,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        # Pinned: on ubuntu-26.04 the cockpit and console label-width tests fail with the same code.
+        os: [ubuntu-24.04]
         shard: [ wf-heavy, wf-rest, core ]
         include:
         - shard: wf-heavy
@@ -78,7 +79,9 @@ jobs:
         # dotnet test --no-build --configuration DebugOpt Content.IntegrationTests/Content.IntegrationTests.csproj --filter "FullyQualifiedName!~ShipyardTest" -- NUnit.ConsoleOut=0 NUnit.MapWarningTo=Failed NUnit.TestOutputXml="logs" NUnit.WorkDirectory="$(pwd)/test_results"
         # dotnet test --no-build --configuration DebugOpt Content.IntegrationTests/Content.IntegrationTests.csproj -- 'NUnit.Where=test !~ ShipyardTest' NUnit.ConsoleOut=0 NUnit.MapWarningTo=Failed NUnit.TestOutputXml="logs" NUnit.WorkDirectory="$(pwd)/test_results"
         # Each shard's filter comes from the matrix; together they cover every test but the Shipyard ones.
-        dotnet test --no-build --configuration DebugOpt Content.IntegrationTests/Content.IntegrationTests.csproj -- "NUnit.Where=${{ matrix.where }}" NUnit.ConsoleOut=0 NUnit.MapWarningTo=Failed NUnit.TestOutputXml="logs" NUnit.WorkDirectory="$(pwd)/test_results"
+        # dotnet test --no-build --configuration DebugOpt Content.IntegrationTests/Content.IntegrationTests.csproj -- "NUnit.Where=${{ matrix.where }}" NUnit.ConsoleOut=0 NUnit.MapWarningTo=Failed NUnit.TestOutputXml="logs" NUnit.WorkDirectory="$(pwd)/test_results"
+        # Above AssemblySelectLimit (default 2000) the adapter runs the whole assembly and only hides the extra results.
+        dotnet test --no-build --configuration DebugOpt Content.IntegrationTests/Content.IntegrationTests.csproj -- "NUnit.Where=${{ matrix.where }}" NUnit.AssemblySelectLimit=100000 NUnit.ConsoleOut=0 NUnit.MapWarningTo=Failed NUnit.TestOutputXml="logs" NUnit.WorkDirectory="$(pwd)/test_results"
         # WOLFGATE END
 
     - name: Archive NUnit3 test results.

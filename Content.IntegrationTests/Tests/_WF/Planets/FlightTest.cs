@@ -1070,7 +1070,7 @@ public sealed class FlightTest
     private static int TileCount(IEntityManager entMan, SharedMapSystem maps, EntityUid grid)
     {
         var count = 0;
-        var tiles = maps.GetAllTilesEnumerator(grid, entMan.GetComponent<MapGridComponent>(grid));
+        var tiles = maps.GetAllTiles(grid, entMan.GetComponent<MapGridComponent>(grid));
 
         while (tiles.MoveNext(out _))
         {

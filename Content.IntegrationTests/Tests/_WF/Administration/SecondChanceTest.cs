@@ -26,6 +26,8 @@ namespace Content.IntegrationTests.Tests._WF.Administration;
 [TestOf(typeof(SecondChanceSystem))]
 public sealed class SecondChanceTest : InteractionTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     private const string Body = "WFSecondChanceTestMob";
 
     [TestPrototypes]
@@ -140,7 +142,7 @@ public sealed class SecondChanceTest : InteractionTest
             body = SEntMan.SpawnEntity(Body, SEntMan.GetCoordinates(PlayerCoords));
             minds.TransferTo(mind, body, mind: mind);
 
-            var blunt = ProtoMan.Index<DamageTypePrototype>("Blunt");
+            var blunt = ProtoMan.Index<DamageTypePrototype>(BluntProto);
             SEntMan.System<DamageableSystem>().TryChangeDamage(body, new DamageSpecifier(blunt, 150), true);
             Assert.That(SEntMan.System<MobStateSystem>().IsDead(body), "The test body should die.");
 

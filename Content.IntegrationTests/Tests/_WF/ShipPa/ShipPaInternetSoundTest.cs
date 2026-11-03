@@ -28,7 +28,7 @@ public sealed class ShipPaInternetSoundTest
     /// <summary>A short shipped sound, standing in for a fetched track.</summary>
     public sealed class FinishedObserver : EntitySystem
     {
-        public int Count;
+        public new int Count;
         public override void Initialize()
         {
             base.Initialize();
@@ -67,7 +67,7 @@ public sealed class ShipPaInternetSoundTest
 
             Assert.That(resourceManager.ContentFileExists(new ResPath(path)), Is.True,
                 "A stored track should resolve through the mounted content root.");
-            Assert.That(server.System<SharedAudioSystem>().GetAudioLength(path), Is.GreaterThan(TimeSpan.Zero),
+            Assert.That(server.System<SharedAudioSystem>().GetAudioLength(new ResolvedPathSpecifier(path)), Is.GreaterThan(TimeSpan.Zero),
                 "The audio system must decode a track mounted at runtime.");
 
             var mapSys = entMan.System<SharedMapSystem>();

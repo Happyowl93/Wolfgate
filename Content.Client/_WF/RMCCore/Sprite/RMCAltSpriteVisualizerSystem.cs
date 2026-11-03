@@ -64,12 +64,12 @@ public sealed partial class RMCAltSpriteVisualizerSystem : VisualizerSystem<RMCA
 
         if (sprite.BaseRSI != res.RSI)
         {
-            sprite.BaseRSI = res.RSI;
+            SpriteSystem.SetBaseRsi((ent, sprite), res.RSI);
 
             //Reset frames
             for (var i = 0; i < sprite.AllLayers.Count(); i++)
             {
-                sprite.LayerSetAnimationTime(i, 0);
+                SpriteSystem.LayerSetAnimationTime((ent, sprite), i, 0);
             }
         }
     }

@@ -12,6 +12,7 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Cleaning;
 
@@ -23,6 +24,8 @@ namespace Content.IntegrationTests.Tests._WF.Cleaning;
 [TestOf(typeof(WFDecalCleaningSystem))]
 public sealed class DecalCleaningTest
 {
+    private static readonly ProtoId<ReagentPrototype> SpaceCleanerProto = "SpaceCleaner";
+
     private const string Dirt = "Dirt";
     private const string Splatter = "splatter";
     // A floor marking: not cleanable by default, so it must stay.
@@ -49,7 +52,7 @@ public sealed class DecalCleaningTest
             Assert.That(decals.GetDecalsIntersecting(map.Grid, Floor).All(d => !d.Decal.Cleanable), Is.True);
 
             var grid = entMan.GetComponent<MapGridComponent>(map.Grid);
-            server.ProtoMan.Index<ReagentPrototype>("SpaceCleaner")
+            server.ProtoMan.Index<ReagentPrototype>(SpaceCleanerProto)
                 .ReactionTile(mapSys.GetTileRef(map.Grid, grid, Vector2i.Zero), FixedPoint2.New(5), entMan, null);
 
             var left = decals.GetDecalsIntersecting(map.Grid, Floor).Select(d => d.Decal.Id).ToList();

@@ -32,7 +32,7 @@ namespace Content.Server._WF.Wolfmed.Gore;
 /// be an entity because decals draw under walls; a floor splat is a cleanable decal, so space cleaner
 /// already washes it off.
 /// </remarks>
-public sealed class WolfmedGoreSystem : EntitySystem
+public sealed partial class WolfmedGoreSystem : EntitySystem
 {
     [Dependency] private WFBloodColourSystem _bloodColour = default!;
     [Dependency] private WFDecalCleaningSystem _cleaning = default!;
@@ -223,7 +223,7 @@ public sealed class WolfmedGoreSystem : EntitySystem
         float tiles,
         Color color)
     {
-        var start = _map.TileIndicesFor(grid.Owner, grid.Comp, _transform.GetMapCoordinates(xform.Owner));
+        var start = _map.TileIndicesFor(grid.Owner, grid.Comp, _transform.GetMapCoordinates(xform));
         // The walk is in the grid's own frame; the angle is a world angle, so the grid's rotation comes off.
         var step = (angle - _transform.GetWorldRotation(grid.Owner)).ToVec();
         var reach = Math.Max(1, (int) MathF.Round(tiles));

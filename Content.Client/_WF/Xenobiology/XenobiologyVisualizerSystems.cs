@@ -47,8 +47,6 @@ public sealed partial class XenoSlimeVisualizerSystem : VisualizerSystem<SlimeCo
             return;
 
         args.Sprite.LayerSetShader(index, shaderProto.InstanceUnique());
-        args.Sprite.GetScreenTexture = true;
-        args.Sprite.RaiseShaderEvent = true;
     }
 }
 

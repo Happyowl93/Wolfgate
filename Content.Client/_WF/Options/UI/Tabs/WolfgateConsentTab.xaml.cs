@@ -80,7 +80,7 @@ public sealed partial class WolfgateConsentTab : Control
             return;
         }
 
-        ConsentSettings.DisposeAllChildren();
+        ConsentSettings.RemoveAllChildren();
         _toggles.Clear();
 
         foreach (var toggle in wanted)
@@ -191,6 +191,7 @@ public sealed partial class WolfgateConsentTab : Control
         SaveConsentSettings.Disabled = false;
     }
 
+#pragma warning disable CS0672, CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
     protected override void Dispose(bool disposing)
     {
         if (disposing)
@@ -198,4 +199,5 @@ public sealed partial class WolfgateConsentTab : Control
 
         base.Dispose(disposing);
     }
+#pragma warning restore CS0672, CS0618
 }

@@ -43,6 +43,9 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed.Scenarios;
 [TestFixture]
 public sealed class WolfmedPlaytestThreeTest : WolfmedGameTest
 {
+    private static readonly Regex ComingRoundRegex = new(@"^COMING ROUND IN (\d+) S$");
+    private static readonly Regex SecondsRegex = new(@"(\d+)");
+
     private const float FaintSeconds = 20f;
 
     private async Task Pin()
@@ -142,7 +145,7 @@ public sealed class WolfmedPlaytestThreeTest : WolfmedGameTest
             var countdown = WolfmedExplanationCard.Countdown(SProtoMan, comp, card, now);
             var left = (card!.WakeEnd!.Value - now).TotalSeconds;
             Assert.That(countdown, Is.Not.Null, "a faint has no countdown row.");
-            var match = Regex.Match(countdown!.Value.Text, @"^COMING ROUND IN (\d+) S$");
+            var match = ComingRoundRegex.Match(countdown!.Value.Text);
             Assert.That(match.Success, Is.True, $"the countdown reads '{countdown.Value.Text}'.");
             firstSeconds = int.Parse(match.Groups[1].Value);
             first = countdown.Value.Fraction;
@@ -204,7 +207,7 @@ public sealed class WolfmedPlaytestThreeTest : WolfmedGameTest
         await Server.WaitAssertion(() =>
         {
             var later = WolfmedExplanationCard.Countdown(SProtoMan, Consc(faint), Card(faint), SGameTiming.CurTime);
-            var seconds = int.Parse(Regex.Match(later!.Value.Text, @"(\d+)").Groups[1].Value);
+            var seconds = int.Parse(SecondsRegex.Match(later!.Value.Text).Groups[1].Value);
             trace += $"; 3 s later {later.Value.Text} (bar {later.Value.Fraction:0.000})";
             Assert.Multiple(() =>
             {

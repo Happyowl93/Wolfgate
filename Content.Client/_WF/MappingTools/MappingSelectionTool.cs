@@ -15,7 +15,7 @@ namespace Content.Client._WF.MappingTools;
 /// Selection for the mapping tools: click and box selection, dragging, and the requests for every edit. The server
 /// makes the edits; this keeps the selection for the overlay to draw.
 /// </summary>
-public sealed class MappingSelectionTool
+public sealed partial class MappingSelectionTool
 {
     [Dependency] private IEntityManager _entities = default!;
     [Dependency] private IEyeManager _eye = default!;

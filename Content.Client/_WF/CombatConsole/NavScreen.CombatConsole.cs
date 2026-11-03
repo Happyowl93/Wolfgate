@@ -120,7 +120,7 @@ public sealed partial class NavScreen
         var rightScroll = Scroll(right);
         rightScroll.HorizontalExpand = false;
         rightScroll.SetWidth = 260;
-        DisposeAllChildren();
+        RemoveAllChildren();
         SeparationOverride = 8;
         AddChild(leftScroll);
         AddChild(radar);

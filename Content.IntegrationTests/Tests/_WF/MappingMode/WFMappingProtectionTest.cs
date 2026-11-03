@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -103,7 +104,7 @@ public sealed class WFMappingProtectionTest
         }
 
         int Count(string prototype) => entMan.EntityQuery<MetaDataComponent>(true)
-            .Count(m => m.EntityPrototype?.ID == prototype && !entMan.IsQueuedForDeletion(m.Owner));
+            .Count(m => m.EntityPrototype?.ID == prototype && !entMan.IsQueuedForDeletion(m.Uid()));
 
         int Protected() => entMan.EntityQuery<WFMappingObserverComponent>(true).Count() +
                            entMan.EntityQuery<GhostComponent>(true).Count();
@@ -255,7 +256,7 @@ public sealed class WFMappingProtectionTest
                 new List<Vector2i> { new(0, 3) }, null, 0, "WFMappingProtectTestItem", Angle.Zero));
             var placed = entMan.EntityQuery<MetaDataComponent>(true)
                 .Single(m => m.EntityPrototype?.ID == "WFMappingProtectTestItem" &&
-                             entMan.GetComponent<TransformComponent>(m.Owner).ParentUid == grid.Owner).Owner;
+                             entMan.GetComponent<TransformComponent>(m.Uid()).ParentUid == grid.Owner).Uid();
             xformSys.SetCoordinates(adminGhost, new EntityCoordinates(placed, Vector2.Zero));
 
             tools.StepHistory(a, redo: false);
@@ -300,8 +301,8 @@ public sealed class WFMappingProtectionTest
 
             tools.StepHistory(a, redo: false);
             var restored = entMan.EntityQuery<MapGridComponent>(true)
-                .Single(g => entMan.GetComponent<TransformComponent>(g.Owner).MapUid == session.RootMap);
-            grid = (restored.Owner, restored);
+                .Single(g => entMan.GetComponent<TransformComponent>(g.Uid()).MapUid == session.RootMap);
+            grid = (restored.Uid(), restored);
             Assert.That(Count(Wall), Is.EqualTo(5), "Undo brings the grid back with its walls.");
             foreach (var target in new[] { adminGhost, detached, body })
             {

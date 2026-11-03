@@ -5,6 +5,7 @@ using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
 using Content.Shared.Traits;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 
@@ -13,6 +14,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(PlateletFactoriesSystem))]
 public sealed class WolfmedNaniteDronesTest
 {
+    private static readonly ProtoId<TraitPrototype> NaniteRepairDronesProto = "NaniteRepairDrones";
+
     [Test]
     public async Task NaniteDronesCloseAChassisBreachTest()
     {
@@ -29,7 +32,7 @@ public sealed class WolfmedNaniteDronesTest
             torso = em.System<SharedBodySystem>().GetBodyChildren(body)
                 .Single(part => part.Component.PartType == BodyPartType.Torso).Id;
             breach = em.System<WoundSystem>().CreateOrMergeWound(torso, "WFWolfmedBreachWound", 10)!.Value;
-            em.AddComponents(body, server.ProtoMan.Index<TraitPrototype>("NaniteRepairDrones").Components, false);
+            em.AddComponents(body, server.ProtoMan.Index<TraitPrototype>(NaniteRepairDronesProto).Components, false);
         });
 
         await server.WaitRunTicks(server.Timing.TickRate * 12);

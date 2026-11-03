@@ -24,6 +24,8 @@ namespace Content.IntegrationTests.Tests._WF.ShipPa;
 [TestOf(typeof(ShipPaSystem))]
 public sealed class ShipPaTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     private const string SpeakerProto = "WFWallmountShipPaSpeaker";
     private const string Chime = "/Audio/Announcements/attention.ogg";
 
@@ -116,7 +118,7 @@ public sealed class ShipPaTest
 
         await server.WaitAssertion(() =>
         {
-            var blunt = protoManager.Index<DamageTypePrototype>("Blunt");
+            var blunt = protoManager.Index<DamageTypePrototype>(BluntProto);
             var speakerCompA = entMan.GetComponent<ShipPaSpeakerComponent>(speakerA);
 
             damageSys.TryChangeDamage(speakerA, new DamageSpecifier(blunt, FixedPoint2.New(30)), ignoreResistances: true);
@@ -172,7 +174,7 @@ public sealed class ShipPaTest
             Assert.That(CountLoopingStreams(entMan), Is.EqualTo(0));
             Assert.That(pa.IsAlarmActive(gridUid, ShipAlertSystem.GeneralQuartersAlarm), Is.True);
 
-            var blunt = protoManager.Index<DamageTypePrototype>("Blunt");
+            var blunt = protoManager.Index<DamageTypePrototype>(BluntProto);
             damageSys.TryChangeDamage(speakerA, new DamageSpecifier(blunt, FixedPoint2.New(70)), ignoreResistances: true);
 
             Assert.That(entMan.GetComponent<ShipPaSpeakerComponent>(speakerA).Broken, Is.True);

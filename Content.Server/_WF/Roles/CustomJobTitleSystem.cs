@@ -10,7 +10,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._WF.Roles;
 
 /// <summary>Puts a player's custom job title on their ID card, mind and station records when they spawn.</summary>
-public sealed class CustomJobTitleSystem : EntitySystem
+public sealed partial class CustomJobTitleSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLogger = default!;
     [Dependency] private IdCardSystem _idCard = default!;
@@ -25,6 +25,10 @@ public sealed class CustomJobTitleSystem : EntitySystem
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
         SubscribeLocalEvent<AfterGeneralRecordCreatedEvent>(OnGeneralRecordCreated);
     }
+
+    /// <summary>Whether this body's mind carries a chosen title, such as a company rank, that a ship purchase must not replace.</summary>
+    public bool HasCustomTitle(EntityUid body) =>
+        _mind.TryGetMind(body, out var mindId, out _) && HasComp<CustomJobTitleComponent>(mindId);
 
     private void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent ev)
     {

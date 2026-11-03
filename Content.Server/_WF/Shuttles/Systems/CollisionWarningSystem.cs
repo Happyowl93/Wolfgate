@@ -24,8 +24,10 @@ namespace Content.Server._WF.Shuttles.Systems;
 /// to hit and how soon, and puts a <see cref="CollisionWarningComponent"/> on the grid plus an alarm on
 /// the ship's PA. Only closing speeds hard enough to hurt count, so ordinary station approaches are quiet.
 /// </summary>
-public sealed class CollisionWarningSystem : EntitySystem
+public sealed partial class CollisionWarningSystem : EntitySystem
 {
+    private static readonly ProtoId<ContentTileDefinition> PlatingProto = "Plating";
+
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedMapSystem _mapManager = default!;
@@ -104,7 +106,7 @@ public sealed class CollisionWarningSystem : EntitySystem
     {
         base.Initialize();
 
-        PlatingMass = _proto.Index<ContentTileDefinition>("Plating").Mass;
+        PlatingMass = _proto.Index<ContentTileDefinition>(PlatingProto).Mass;
 
         _gridQuery = GetEntityQuery<MapGridComponent>();
         _physicsQuery = GetEntityQuery<PhysicsComponent>();

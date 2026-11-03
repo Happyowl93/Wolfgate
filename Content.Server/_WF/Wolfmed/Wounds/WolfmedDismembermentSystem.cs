@@ -22,7 +22,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// <see cref="WolfmedWoundSfxComponent"/>'s throttle with the wound sounds: the hit that takes an arm off
 /// also creates the stump's wounds, and that is one noise.
 /// </remarks>
-public sealed class WolfmedDismembermentSystem : EntitySystem
+public sealed partial class WolfmedDismembermentSystem : EntitySystem
 {
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private BloodstreamSystem _bloodstream = default!;

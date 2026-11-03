@@ -71,6 +71,7 @@ public sealed partial class PlanetControlWindow : DefaultWindow
         _planets.RequestList();
     }
 
+#pragma warning disable CS0672, CS0618 // Dispose is still how the engine tears a control down, and this cleanup depends on it.
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
@@ -78,6 +79,7 @@ public sealed partial class PlanetControlWindow : DefaultWindow
         if (disposing)
             _planets.ListReceived -= OnList;
     }
+#pragma warning restore CS0672, CS0618
 
     private void OnList(List<PlanetControlInfo> list)
     {

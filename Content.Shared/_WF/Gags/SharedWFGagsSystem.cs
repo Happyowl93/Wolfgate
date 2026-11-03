@@ -6,7 +6,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._WF.Gags;
 
 /// <summary>Sets the colours of recolourable items, including the ones a loadout spawns.</summary>
-public abstract class SharedWFGagsSystem : EntitySystem
+public abstract partial class SharedWFGagsSystem : EntitySystem
 {
     [Dependency] private InventorySystem _inventory = default!;
     [Dependency] private IPrototypeManager _prototype = default!;
@@ -33,7 +33,7 @@ public abstract class SharedWFGagsSystem : EntitySystem
     /// <summary>The colours an item prototype starts with, or null when it isn't recolourable.</summary>
     public List<Color>? DefaultColors(EntityPrototype? proto)
     {
-        if (proto == null || !proto.TryGetComponent<WFGagsComponent>(out var gags, Factory))
+        if (proto == null || !proto.TryComp<WFGagsComponent>(out var gags, Factory))
             return null;
 
         return gags.Colors;

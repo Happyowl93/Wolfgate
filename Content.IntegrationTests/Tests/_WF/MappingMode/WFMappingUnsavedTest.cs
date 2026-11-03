@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -28,6 +29,10 @@ namespace Content.IntegrationTests.Tests._WF.MappingMode;
 [TestFixture]
 public sealed class WFMappingUnsavedTest
 {
+    private static readonly EntProtoId MobCorgiProto = "MobCorgi";
+    private static readonly EntProtoId MobCorgiMouseProto = "MobCorgiMouse";
+    private static readonly EntProtoId CrowbarProto = "Crowbar";
+
     [TestPrototypes]
     private const string Prototypes = @"
 - type: entity
@@ -100,9 +105,9 @@ public sealed class WFMappingUnsavedTest
                 // The plain corgi has no spawner; items never enter the index, as they save.
                 Assert.That(index.TryGetSpawner("MobCorgi", out _), Is.False);
                 Assert.That(index.TryGetSpawner("Crowbar", out _), Is.False);
-                Assert.That(WFMappingSpawnerIndex.WontSave(prototypes.Index<EntityPrototype>("MobCorgi")), Is.True);
-                Assert.That(WFMappingSpawnerIndex.WontSave(prototypes.Index<EntityPrototype>("MobCorgiMouse")), Is.True);
-                Assert.That(WFMappingSpawnerIndex.WontSave(prototypes.Index<EntityPrototype>("Crowbar")), Is.False);
+                Assert.That(WFMappingSpawnerIndex.WontSave(prototypes.Index(MobCorgiProto)), Is.True);
+                Assert.That(WFMappingSpawnerIndex.WontSave(prototypes.Index(MobCorgiMouseProto)), Is.True);
+                Assert.That(WFMappingSpawnerIndex.WontSave(prototypes.Index(CrowbarProto)), Is.False);
 
                 // The exclusive spawner beats the wide one, which still serves the other mob; a spawner that waits
                 // for a game rule serves nobody.
@@ -138,7 +143,7 @@ public sealed class WFMappingUnsavedTest
         var plating = new Tile(tileDefs["Plating"].TileId);
 
         int Count(string prototype) => entMan.EntityQuery<MetaDataComponent>(true)
-            .Count(m => m.EntityPrototype?.ID == prototype && !entMan.IsQueuedForDeletion(m.Owner));
+            .Count(m => m.EntityPrototype?.ID == prototype && !entMan.IsQueuedForDeletion(m.Uid()));
 
         void Draw(string prototype, params Vector2i[] cells) =>
             tools.Draw(a, new MappingToolsDrawEvent(entMan.GetNetEntity(grid), MappingDrawOp.SpawnEntities,

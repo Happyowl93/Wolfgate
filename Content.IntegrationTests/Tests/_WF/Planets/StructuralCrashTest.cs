@@ -89,7 +89,7 @@ public sealed class StructuralCrashTest
         {
             Assert.That(server.System<MapLoaderSystem>().TryLoadGrid(map.MapId, new ResPath(path), out var hull), Is.True);
             var tiles = new HashSet<Vector2i>();
-            var all = server.System<SharedMapSystem>().GetAllTilesEnumerator(hull!.Value.Owner, hull.Value.Comp);
+            var all = server.System<SharedMapSystem>().GetAllTiles(hull!.Value.Owner, hull.Value.Comp);
             while (all.MoveNext(out var tile)) tiles.Add(tile.Value.GridIndices);
             var cut = WFCrashFractures.Plan(tiles, 4);
             Assert.That(cut.Count, Is.InRange(1, tiles.Count / 8));
@@ -118,7 +118,7 @@ public sealed class StructuralCrashTest
             server.System<SharedTransformSystem>().SetWorldRotation(hull, Angle.FromDegrees(rotation));
             var grid = em.GetComponent<MapGridComponent>(hull);
             var maps = server.System<SharedMapSystem>();
-            var tiles = maps.GetAllTilesEnumerator(hull, grid);
+            var tiles = maps.GetAllTiles(hull, grid);
             while (tiles.MoveNext(out _)) originalTiles++;
             var standing = em.SpawnEntity("MobHuman", new EntityCoordinates(hull, new Vector2(2.5f, 2.5f)));
             var seated = em.SpawnEntity("MobHuman", new EntityCoordinates(hull, new Vector2(3.5f, 2.5f)));
@@ -168,7 +168,7 @@ public sealed class StructuralCrashTest
                 Assert.That(grind.Params.MaxDistance, Is.GreaterThanOrEqualTo(80f));
                 // Each section has its own tile frame; this maps it back onto the hull's.
                 Assert.That(server.System<WFGridSplitOriginSystem>().TryGetOffset(uid, hull, out var offset), Is.True);
-                var tiles = server.System<SharedMapSystem>().GetAllTilesEnumerator(uid, grid);
+                var tiles = server.System<SharedMapSystem>().GetAllTiles(uid, grid);
                 while (tiles.MoveNext(out var tile))
                 {
                     remaining++;

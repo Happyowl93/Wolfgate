@@ -6,7 +6,7 @@ using static Robust.Client.Graphics.RSI;
 namespace Content.Client._WF.Barricades;
 
 /// <summary>Draws the connection pieces between linked folding barricades, turned with the eye.</summary>
-public sealed class RMCFoldingBarricadeLinkingVisualizerSystem : EntitySystem
+public sealed partial class RMCFoldingBarricadeLinkingVisualizerSystem : EntitySystem
 {
     [Dependency] private AppearanceSystem _appearance = default!;
     [Dependency] private IEyeManager _eye = default!;

@@ -35,7 +35,7 @@ namespace Content.Server._WF.Wolfmed.Consciousness;
 /// destroyed brain, a gib, an admin).
 /// </para>
 /// </remarks>
-public sealed class WolfmedConsciousnessSystem : SharedWolfmedConsciousnessSystem
+public sealed partial class WolfmedConsciousnessSystem : SharedWolfmedConsciousnessSystem
 {
     [Dependency] private IConfigurationManager _configuration = default!;
     [Dependency] private IGameTiming _timing = default!;

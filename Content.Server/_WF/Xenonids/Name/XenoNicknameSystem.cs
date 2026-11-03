@@ -13,7 +13,7 @@ namespace Content.Server._WF.Xenonids.Name;
 /// A xeno may name itself once: a tag of up to four letters or digits that replaces the XX in "Drone (XX-297)".
 /// The tag follows it through evolution, and the action goes away once used.
 /// </summary>
-public sealed class XenoNicknameSystem : EntitySystem
+public sealed partial class XenoNicknameSystem : EntitySystem
 {
     [Dependency] private SharedActionsSystem _actions = default!;
     [Dependency] private NameModifierSystem _nameModifier = default!;

@@ -22,7 +22,7 @@ namespace Content.Server._WF.Synthetics;
 /// collector and leaks into the core at half rate; missing or burnt out, it all corrupts the core. A pulled collector
 /// vents its charge and can be welded back to full integrity; at zero integrity it burns out and is gone.
 /// </summary>
-public sealed class WFRadCollectorSystem : EntitySystem
+public sealed partial class WFRadCollectorSystem : EntitySystem
 {
     private static readonly ProtoId<DamageTypePrototype> Radiation = "Radiation";
     private static readonly TimeSpan WarningCooldown = TimeSpan.FromSeconds(30);

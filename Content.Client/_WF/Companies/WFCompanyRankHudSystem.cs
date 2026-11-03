@@ -10,7 +10,7 @@ using Robust.Shared.Utility;
 namespace Content.Client._WF.Companies;
 
 /// <summary>Swaps the HUD job icon for the company rank icon of the ID a body carries.</summary>
-public sealed class WFCompanyRankHudSystem : EntitySystem
+public sealed partial class WFCompanyRankHudSystem : EntitySystem
 {
     [Dependency] private AccessReaderSystem _accessReader = default!;
     [Dependency] private WFCompanyClientSystem _companies = default!;

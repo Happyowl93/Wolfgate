@@ -796,6 +796,10 @@ VariedXenoArtifactItem: ComplexXenoArtifactItem
 GoonSetpiecesBloodwall: TauCetiMeatlandWall
 # WOLFGATE END
 
+# WOLFGATE(DecorImport) START: bamboo wall cut from the import
+TgMineralBamboo: null
+# WOLFGATE END
+
 # WOLFGATE(ShipArmor) START: adamantite walls renamed to durasteel
 # 2026-11-03
 WFWallAdamantite: WFWallDurasteel

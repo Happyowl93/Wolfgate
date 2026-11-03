@@ -159,6 +159,9 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
 
     private Lobby? FindLobby(NetUserId user) => _lobbies.Values.FirstOrDefault(l => l.Members.ContainsKey(user));
 
+    /// <summary>Whether the player belongs to a crew.</summary>
+    public bool IsInCrew(NetUserId user) => FindLobby(user) != null;
+
     /// <summary>Requires loaded lobby status and the global permission to enter the round.</summary>
     private bool CanEnter(ICommonSession session) =>
         session.Status == SessionStatus.InGame &&
@@ -751,7 +754,7 @@ public sealed partial class WFRoundSetupSystem : EntitySystem
         {
             InRound = _ticker.RunLevel != GameRunLevel.PreRoundLobby,
             JoinConfirmed = joinConfirmed,
-            CanJoin = canEnter, CanJoinLive = canJoinLive, RecruitingStations = RecruitingStations(),
+            CanJoin = canEnter, CanJoinLive = canJoinLive,
             OwnCompany = _companies.CompanyIdOf(session),
             CompanyRank = _companies.RankFor(session)?.Title,
             FieldCompanies = own == null || own.Host == session.UserId ? FieldCompanies(session) : Array.Empty<WFRoundSetupCompany>(), CrashlandedAvailable = _crash.IsAvailable, DoomedAvailable = _doomed.IsAvailable, OwnLobby = own?.Id,

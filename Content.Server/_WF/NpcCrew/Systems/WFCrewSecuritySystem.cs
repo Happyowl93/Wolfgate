@@ -18,7 +18,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.NpcCrew.Systems;
 
 /// <summary>Checks boarding and docking authorization independently of nearby players or radio operators.</summary>
-public sealed class WFCrewSecuritySystem : EntitySystem
+public sealed partial class WFCrewSecuritySystem : EntitySystem
 {
     [Dependency] private NpcFactionSystem _factions = default!;
     [Dependency] private MobStateSystem _mobs = default!;
@@ -118,6 +118,8 @@ public sealed class WFCrewSecuritySystem : EntitySystem
                 _hostileDocks.Remove(key);
             foreach (var key in _warned.Keys.Where(key => key.Grid == grid && key.Group == member.Group).ToArray())
                 _warned.Remove(key);
+            // The gunners keep their chosen target between selections; a docking threat withdrawn here is dropped at once.
+            EntityManager.System<WFGunnerDutySystem>().Reselect(grid, member.Group);
         }
     }
 

@@ -5,7 +5,7 @@ using Robust.Client.GameObjects;
 namespace Content.Client._WF.BloodColour;
 
 /// <summary>Tints a mob's brute damage overlays with its profile's blood colour instead of its species'.</summary>
-public sealed class WFBloodColourVisualsSystem : EntitySystem
+public sealed partial class WFBloodColourVisualsSystem : EntitySystem
 {
     [Dependency] private SpriteSystem _sprite = default!;
 

@@ -17,7 +17,7 @@ namespace Content.Server._WF.NpcCrew.Systems;
 /// and has <see cref="BrandishTime"/> to do it before the crew turn on him; a player seen by one of its fighters picking
 /// up something of the ship's is a thief and is fought at once. Crews already hostile to strangers are left to that.
 /// </summary>
-public sealed class WFCrewConductSystem : EntitySystem
+public sealed partial class WFCrewConductSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private ChatSystem _chat = default!;

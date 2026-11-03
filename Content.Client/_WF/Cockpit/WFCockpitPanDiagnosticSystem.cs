@@ -8,7 +8,7 @@ using Robust.Shared.Timing;
 namespace Content.Client._WF.Cockpit;
 
 /// <summary>Remembers how each cockpit pan surface answered the last right-press, for the wf_cockpitpan command.</summary>
-public sealed class WFCockpitPanDiagnosticSystem : EntitySystem
+public sealed partial class WFCockpitPanDiagnosticSystem : EntitySystem
 {
     [Dependency] private IClyde _clyde = default!;
     [Dependency] private IGameTiming _timing = default!;

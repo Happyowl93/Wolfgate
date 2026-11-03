@@ -17,6 +17,8 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestStoryRivalProto => "WFTestStoryRival";
+
     /// <summary>
     /// An encounter ship's captain drops its deed when he dies; used, it cuts the ship loose from its encounter, which
     /// then never removes it, even when ended.
@@ -27,7 +29,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, ship = default, captain = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryRival");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryRivalProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-45000, -45000), MapData.MapId), out encounter), Is.True);
             ship = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["rival"].Grid;
 

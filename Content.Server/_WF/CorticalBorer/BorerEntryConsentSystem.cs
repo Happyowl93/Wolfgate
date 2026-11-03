@@ -8,7 +8,7 @@ namespace Content.Server._WF.CorticalBorer;
 /// <summary>
 /// Lets players refuse cortical borers through the consent menu.
 /// </summary>
-public sealed class BorerEntryConsentSystem : EntitySystem
+public sealed partial class BorerEntryConsentSystem : EntitySystem
 {
     [Dependency] private SharedConsentSystem _consent = default!;
     [Dependency] private SharedPopupSystem _popup = default!;

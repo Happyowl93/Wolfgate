@@ -20,7 +20,7 @@ namespace Content.Server._WF.Wolfmed.Consciousness;
 /// every pain change, relief and faint, so this takes no subscription. A machine shows the same icons under its own
 /// alert, whose text reads as sensor overload; it never faints. The Downed alerts keep their meaning.
 /// </remarks>
-public sealed class WolfmedPainAlertSystem : EntitySystem
+public sealed partial class WolfmedPainAlertSystem : EntitySystem
 {
     public static readonly ProtoId<AlertPrototype> Alert = "WFWolfmedPain";
     public static readonly ProtoId<AlertPrototype> MechanicalAlert = "WFWolfmedPainMechanical";

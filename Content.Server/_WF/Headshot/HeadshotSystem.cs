@@ -22,7 +22,7 @@ namespace Content.Server._WF.Headshot;
 /// Gives spawned characters their profile headshot and shows it to examiners who can see their face. Images are
 /// fetched once per URL and handed to a client only for hashes it was shown.
 /// </summary>
-public sealed class HeadshotSystem : EntitySystem
+public sealed partial class HeadshotSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private IAdminManager _admin = default!;

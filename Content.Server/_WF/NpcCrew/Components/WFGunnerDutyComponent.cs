@@ -12,6 +12,9 @@ public sealed partial class WFGunnerDutyComponent : Component
     [ViewVariables] public TimeSpan NextReach;
     [ViewVariables] public bool AtConsole;
 
+    /// <summary>When the costlier checks that the gunner still holds his post next run.</summary>
+    [ViewVariables] public TimeSpan NextPostCheck;
+
     /// <summary>How far off the target the guns are laid right now, by the gunner's skill.</summary>
     [ViewVariables] public System.Numerics.Vector2 AimError;
     [ViewVariables] public TimeSpan NextAimError;

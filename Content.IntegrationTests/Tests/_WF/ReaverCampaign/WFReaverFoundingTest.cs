@@ -30,6 +30,8 @@ namespace Content.IntegrationTests.Tests._WF.ReaverCampaign;
 [TestOf(typeof(WFReaverCampaignSystem))]
 public sealed class WFReaverFoundingTest : WFReaverTestBase
 {
+    private static readonly ProtoId<WFEncounterPrototype> WFEncounterPirateRaidersProto = "WFEncounterPirateRaiders";
+
     /// <summary>The cells 14 to 24 km from the origin, where the first stronghold may go.</summary>
     private static List<WFSectorCell> Band()
     {
@@ -335,7 +337,7 @@ public sealed class WFReaverFoundingTest : WFReaverTestBase
             var campaign = Server.System<WFReaverCampaignSystem>();
             var config = Server.ResolveDependency<IConfigurationManager>();
             var prototypes = Server.ResolveDependency<IPrototypeManager>();
-            var raiders = prototypes.Index<WFEncounterPrototype>("WFEncounterPirateRaiders");
+            var raiders = prototypes.Index<WFEncounterPrototype>(WFEncounterPirateRaidersProto);
             var unlisted = prototypes.Index<WFEncounterPrototype>(Stronghold);
 
             float Weight(WFEncounterPrototype prototype)

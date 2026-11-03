@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System;
 using System.Linq;
 using System.Numerics;
@@ -89,7 +90,7 @@ public sealed class WFReaverNeutralTest : WFReaverTestBase
             Assert.That(activity.IsNeutralTo(Reavers, ship), Is.False);
             var port = SEntMan.EntityQuery<DockingComponent, TransformComponent>().First(entry => entry.Item2.GridUid == station).Item1;
             var own = SEntMan.EntityQuery<DockingComponent, TransformComponent>().First(entry => entry.Item2.GridUid == ship).Item1;
-            own.DockedWith = port.Owner;
+            own.DockedWith = port.Uid();
             Assert.That(activity.IsNeutralTo(Reavers, ship), Is.True, "Docked to its station.");
             own.DockedWith = null;
 
@@ -97,7 +98,7 @@ public sealed class WFReaverNeutralTest : WFReaverTestBase
             SEntMan.RemoveComponent<StationMemberComponent>(skiff);
             Fly(skiff, Underground);
             var theirs = SEntMan.EntityQuery<DockingComponent, TransformComponent>().First(entry => entry.Item2.GridUid == skiff).Item1;
-            own.DockedWith = theirs.Owner;
+            own.DockedWith = theirs.Uid();
             Assert.That(activity.IsNeutralTo(Reavers, skiff), Is.True, "The skiff flies the flag.");
             Assert.That(activity.IsNeutralTo(Reavers, ship), Is.False, "A ship berthed beside a neutral ship, not a neutral station, is not neutral.");
             own.DockedWith = null;

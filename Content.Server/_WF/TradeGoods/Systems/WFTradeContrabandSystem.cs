@@ -10,7 +10,7 @@ namespace Content.Server._WF.TradeGoods.Systems;
 /// Contraband at open chutes. Every sale pays, but customs flags some sellers: a criminal warrant goes on the bounty
 /// board in their name and security hears who sold it where. A flagged seller isn't flagged again for a while.
 /// </summary>
-public sealed class WFTradeContrabandSystem : EntitySystem
+public sealed partial class WFTradeContrabandSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IRobustRandom _random = default!;

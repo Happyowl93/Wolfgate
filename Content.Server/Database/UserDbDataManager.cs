@@ -45,8 +45,15 @@ public sealed partial class UserDbDataManager : IPostInjectInit
     public void ClientDisconnected(ICommonSession session)
     {
         _users.Remove(session.UserId, out var data);
+        // WOLFGATE(LiveFixes) START: a repeat disconnect has nothing left to clean up and shouldn't throw
+        // if (data == null)
+        //     throw new InvalidOperationException("Did not have cached data in ClientDisconnect!");
         if (data == null)
-            throw new InvalidOperationException("Did not have cached data in ClientDisconnect!");
+        {
+            _sawmill.Warning($"Did not have cached data in ClientDisconnect for {session}");
+            return;
+        }
+        // WOLFGATE END
 
         data.Cancel.Cancel();
         data.Cancel.Dispose();

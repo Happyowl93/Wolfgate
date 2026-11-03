@@ -8,7 +8,7 @@ namespace Content.Client._WF.MappingTools;
 /// <summary>
 /// Reads the z-stack the local player is on and sends the mapping tools' level requests.
 /// </summary>
-public sealed class MappingZLevelsSystem : EntitySystem
+public sealed partial class MappingZLevelsSystem : EntitySystem
 {
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private CESharedZLevelsSystem _zLevels = default!;

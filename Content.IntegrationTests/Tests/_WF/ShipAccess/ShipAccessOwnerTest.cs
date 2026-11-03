@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using Content.IntegrationTests.Pair;
@@ -260,7 +261,7 @@ public sealed class ShipAccessOwnerTest
             Assert.That(ship, Is.Not.EqualTo(EntityUid.Invalid), "The team's ship has ship access.");
             Assert.That(entMan.GetComponent<WFShipAccessComponent>(ship).Locked, Is.False, "With nobody aboard yet there is no card to lock it to.");
             var slot = entMan.EntityQuery<WolfgateErtSpawnerComponent>().Single();
-            role = entMan.GetComponent<GhostRoleComponent>(slot.Owner).Identifier;
+            role = entMan.GetComponent<GhostRoleComponent>(slot.Uid()).Identifier;
         });
 
         await server.WaitAssertion(() =>
@@ -344,7 +345,7 @@ public sealed class ShipAccessOwnerTest
             };
             Assert.That(entMan.System<ErtSystem>().TrySpawnTeam(session, config, out var message), Is.True, message);
             var slot = entMan.EntityQuery<WolfgateErtSpawnerComponent>().Single();
-            role = entMan.GetComponent<GhostRoleComponent>(slot.Owner).Identifier;
+            role = entMan.GetComponent<GhostRoleComponent>(slot.Uid()).Identifier;
         });
 
         await server.WaitAssertion(() =>

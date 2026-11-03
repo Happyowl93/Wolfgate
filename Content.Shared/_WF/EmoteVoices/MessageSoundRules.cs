@@ -52,7 +52,7 @@ public static class MessageSoundRules
     {
         if (!protoManager.TryIndex(species, out var speciesProto)
             || !protoManager.TryIndex(speciesProto.Prototype, out var body)
-            || !body.TryGetComponent<SpeechComponent>(out var speech, factory))
+            || !body.TryComp<SpeechComponent>(out var speech, factory))
             return null;
 
         return speech.SpeechSounds;

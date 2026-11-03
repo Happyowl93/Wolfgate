@@ -644,7 +644,7 @@ public sealed class GenitalSurgeryTest
 
                 foreach (var surgery in Procedures.SelectMany(p => new[] { p.Remove, p.Insert }))
                 {
-                    if (!protoMan.Index<EntityPrototype>(surgery).TryGetComponent<SurgeryComponent>(out var comp, factory))
+                    if (!protoMan.Index<EntityPrototype>(surgery).TryComp<SurgeryComponent>(out var comp, factory))
                     {
                         Assert.Fail($"{surgery} has no Surgery component.");
                         continue;
@@ -672,20 +672,20 @@ public sealed class GenitalSurgeryTest
             return;
         }
 
-        Assert.That(proto.TryGetComponent<SurgeryComponent>(out var surgery, factory), $"{id} has no Surgery component.");
+        Assert.That(proto.TryComp<SurgeryComponent>(out var surgery, factory), $"{id} has no Surgery component.");
         Assert.That(surgery?.Requirement, Is.EqualTo((EntProtoId?) new EntProtoId(OpenIncision)), $"{id} must need the open incision.");
         Assert.That(surgery?.Steps.Select(s => s.Id), Is.EqualTo(steps), $"{id} must use the generic organ steps.");
 
-        Assert.That(proto.TryGetComponent<SurgeryPartConditionComponent>(out var part, factory), $"{id} has no part condition.");
+        Assert.That(proto.TryComp<SurgeryPartConditionComponent>(out var part, factory), $"{id} has no part condition.");
         Assert.That(part?.Part, Is.EqualTo(BodyPartType.Torso), $"{id} must target the torso.");
         Assert.That(part?.Inverse, Is.False, $"{id} must target the torso.");
 
-        Assert.That(proto.TryGetComponent<SurgeryOrganConditionComponent>(out var organ, factory), $"{id} has no organ condition.");
+        Assert.That(proto.TryComp<SurgeryOrganConditionComponent>(out var organ, factory), $"{id} has no organ condition.");
         Assert.That(organ?.Organ?.Keys, Is.EquivalentTo(new[] { marker }), $"{id} must select the {marker} organ.");
         Assert.That(organ?.Inverse, Is.EqualTo(insert), $"{id} has the wrong organ condition direction.");
         Assert.That(organ?.Reattaching, Is.EqualTo(insert), $"{id} has the wrong reattaching flag.");
 
-        var hasSlot = proto.TryGetComponent<SurgeryOrganSlotConditionComponent>(out var slot, factory);
+        var hasSlot = proto.TryComp<SurgeryOrganSlotConditionComponent>(out var slot, factory);
         Assert.That(hasSlot, Is.EqualTo(insert), $"{id}: only insertions need an organ slot.");
         if (insert)
             Assert.That(slot?.OrganSlot, Is.EqualTo(slotId), $"{id} targets the wrong organ slot.");

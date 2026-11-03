@@ -85,7 +85,7 @@ public sealed partial class WFRolledSleevesVisualsSystem : EntitySystem
                 sprite[index] is not SpriteComponent.Layer layer ||
                 layer.State.Name is not { } state ||
                 (speciesSuffix != null && state.EndsWith(speciesSuffix)) ||
-                sprite.LayerGetActualRSI(index) is not { } rsi ||
+                _sprite.LayerGetEffectiveRsi((args.Equipee, sprite), index) is not { } rsi ||
                 rsi.Size.X != MaskSize || rsi.Size.Y != MaskSize)
             {
                 continue;

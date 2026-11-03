@@ -31,7 +31,7 @@ public partial class ShuttleNavControl
         if (_wfTerrainDiagnostic == status)
             return;
         _wfTerrainDiagnostic = status;
-        Logger.DebugS("wf.radar", status);
+        IoCManager.Resolve<ILogManager>().GetSawmill("wf.radar").Debug(status);
     }
 
     private void AddWfTerrainButton(LayoutContainer parent)

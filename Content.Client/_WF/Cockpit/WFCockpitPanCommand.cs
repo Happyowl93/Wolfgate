@@ -3,7 +3,7 @@ using Robust.Shared.Console;
 namespace Content.Client._WF.Cockpit;
 
 /// <summary>Prints why the last right-press did or did not start a cockpit pan.</summary>
-public sealed class WFCockpitPanCommand : LocalizedEntityCommands
+public sealed partial class WFCockpitPanCommand : LocalizedEntityCommands
 {
     [Dependency] private WFCockpitPanDiagnosticSystem _diagnostics = default!;
 

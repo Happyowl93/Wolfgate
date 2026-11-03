@@ -1002,7 +1002,7 @@ public sealed partial class HailingSystem : EntitySystem
 
     private EntityUid? GridOf(EntityUid console)
     {
-        return TryComp<TransformComponent>(console, out var xform) ? xform.GridUid : null;
+        return TryComp(console, out TransformComponent? xform) ? xform.GridUid : null;
     }
 
     private bool Usable(EntityUid console, out EntityUid grid)

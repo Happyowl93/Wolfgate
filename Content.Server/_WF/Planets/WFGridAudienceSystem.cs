@@ -27,7 +27,7 @@ public sealed partial class WFGridAudienceSystem : EntitySystem
 
         foreach (var session in _players.Sessions)
         {
-            if (session.AttachedEntity is not { } ent || !TryComp<TransformComponent>(ent, out var xform))
+            if (session.AttachedEntity is not { } ent || !TryComp(ent, out TransformComponent? xform))
                 continue;
 
             if (xform.GridUid == grid || xform.MapUid != map)

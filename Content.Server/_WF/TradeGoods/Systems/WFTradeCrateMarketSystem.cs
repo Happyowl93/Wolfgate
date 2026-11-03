@@ -12,7 +12,7 @@ namespace Content.Server._WF.TradeGoods.Systems;
 /// each sale adds pressure there, and they count toward a ship's cargo value. A pallet sale prices all its crates
 /// before raising the sale, so each crate priced in a tick is priced as if those before it had sold.
 /// </summary>
-public sealed class WFTradeCrateMarketSystem : EntitySystem
+public sealed partial class WFTradeCrateMarketSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private WFTradeMarketSystem _market = default!;

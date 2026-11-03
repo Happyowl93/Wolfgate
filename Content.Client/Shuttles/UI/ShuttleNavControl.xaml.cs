@@ -300,6 +300,7 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
 
         parent.AddChild(_radarModeButtons);
         AddWfTerrainButton(parent); // WOLFGATE(Planets): terrain toggle overlays the radar, not the settings column.
+        AddWfWaypointControls(parent); // WOLFGATE(Waypoints): the waypoint key and panel overlay the radar.
         LayoutContainer.SetAnchorAndMarginPreset(_radarModeButtons, LayoutContainer.LayoutPreset.BottomLeft, margin: 10);
     }
 
@@ -469,6 +470,10 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
 
     protected override void KeyBindDown(GUIBoundKeyEventArgs args)
     {
+        // WOLFGATE(Waypoints): a pick takes the click before the cockpit's aim handler or the guns see it.
+        if (WfTryPickWaypoint(args))
+            return;
+
         base.KeyBindDown(args);
 
         // WOLFGATE(Cockpit): a cockpit aim handler owns its consumed click through release.
@@ -485,6 +490,10 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
 
     protected override void KeyBindUp(GUIBoundKeyEventArgs args)
     {
+        // WOLFGATE(Waypoints): the release of a picking click stays out of the radar's click handling.
+        if (WfTrySwallowPickRelease(args))
+            return;
+
         base.KeyBindUp(args);
 
         // WOLFGATE(Cockpit): a cockpit aim handler owns its consumed click through release.
@@ -504,6 +513,7 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
     {
         base.FrameUpdate(args);
         WfSaveDisplaySettings(); // WOLFGATE(Shuttles): keep a changed radar display choice for the next radar.
+        WfUpdateWaypoints(); // WOLFGATE(Waypoints): keep the panel on the grid's current list.
 
         _updateAccumulator += args.DeltaSeconds;
 
@@ -660,6 +670,7 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
         DrawWolfgateShields(handle, xform, worldToView); // WOLFGATE(ShipShields): hull contours and directional coverage on all radar views.
         DrawCrewGroups(handle, xform, worldToView); // WOLFGATE(NpcCrew): Admin tags and battlegroup lines for NPC-crewed ships.
         DrawEncounterMarkers(handle, xform, worldToView); // WOLFGATE(Encounters): Sector markers for visible encounters.
+        DrawWfWaypoints(handle, worldToView, xform.MapUid); // WOLFGATE(Waypoints): the crew's marked positions.
 
         // Frontier Corvax: north line drawing
         DrawNorthLine(handle, worldRot);
@@ -797,6 +808,7 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
             }
         }
         #endregion
+        DrawWfCoordinateReadout(handle); // WOLFGATE(Waypoints): cursor and scanner coordinates over everything else.
     }
 
     private void DrawGrids(List<Entity<MapGridComponent>> _grids, DrawingHandleScreen handle, Entity<MapGridComponent>? ourGrid, bool renderFill)

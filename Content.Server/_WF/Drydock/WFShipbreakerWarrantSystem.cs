@@ -16,7 +16,7 @@ namespace Content.Server._WF.Drydock;
 /// Warrants on shipbreakers: posted on the bounty board's warrant list, raised by each further break, and paid to the
 /// players who hurt the wanted in person once they die. Withdrawn unpaid if the wanted's body is gone first.
 /// </summary>
-public sealed class WFShipbreakerWarrantSystem : EntitySystem
+public sealed partial class WFShipbreakerWarrantSystem : EntitySystem
 {
     [Dependency] private BountyContractSystem _board = default!;
     [Dependency] private WFEncounterBountySystem _bounties = default!;

@@ -15,7 +15,7 @@ public partial class NavMapControl
         _beacons.HorizontalAlignment = HAlignment.Stretch;
         _recenter.HorizontalExpand = false;
         _recenter.MinWidth = 90;
-        DisposeAllChildren();
+        RemoveAllChildren();
         return controls;
     }
 }

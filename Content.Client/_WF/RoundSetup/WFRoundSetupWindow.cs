@@ -386,7 +386,7 @@ public sealed partial class WFRoundSetupWindow : DefaultWindow
     {
         return first.Payment == second.Payment && first.CrewShips.SequenceEqual(second.CrewShips) && first.PendingShip == second.PendingShip &&
                first.InRound == second.InRound && first.CanJoin == second.CanJoin && first.CanJoinLive == second.CanJoinLive && first.OwnLobby == second.OwnLobby &&
-               first.RecruitingStations.SequenceEqual(second.RecruitingStations) && first.OwnCompany == second.OwnCompany &&
+               first.OwnCompany == second.OwnCompany &&
                first.FieldCompanies.SequenceEqual(second.FieldCompanies) && first.CompanyRank == second.CompanyRank &&
                first.CrashlandedAvailable == second.CrashlandedAvailable && first.DoomedAvailable == second.DoomedAvailable && first.Factions.SequenceEqual(second.Factions) && first.HostBalance == second.HostBalance &&
                SameSavedSetups(first.SavedSetups, second.SavedSetups) && first.Vessels.SequenceEqual(second.Vessels) &&

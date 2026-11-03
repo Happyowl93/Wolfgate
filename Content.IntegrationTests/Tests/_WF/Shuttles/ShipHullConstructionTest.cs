@@ -22,6 +22,9 @@ namespace Content.IntegrationTests.Tests._WF.Shuttles;
 /// <summary>Distinguishes completed structural deconstruction from damage and cancelled construction.</summary>
 public sealed class ShipHullConstructionTest
 {
+    private static readonly ProtoId<RCDPrototype> DeconstructProto = "Deconstruct";
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     [Test]
     public async Task NativeConstructionAndRcdCompletionRemoveOnlyIntentionalHullCapacity()
     {
@@ -58,7 +61,7 @@ public sealed class ShipHullConstructionTest
             Assert.That(status.GetStatus(console)!.Summary.HullIntegrity, Is.EqualTo(1f));
             var rcd = em.SpawnEntity("RCD", map.GridCoords);
             var component = em.GetComponent<RCDComponent>(rcd);
-            var prototype = pair.Server.ProtoMan.Index<RCDPrototype>("Deconstruct");
+            var prototype = pair.Server.ProtoMan.Index<RCDPrototype>(DeconstructProto);
             typeof(RCDComponent).GetProperty(nameof(RCDComponent.CachedPrototype))!.SetValue(component, prototype);
             var data = new MapGridData(map.Grid.Owner, map.Grid.Comp, map.GridCoords, map.Tile, Vector2i.Zero);
             // Exercise the native successful-operation branch; tool range and do-after checks are independent.
@@ -293,7 +296,7 @@ public sealed class ShipHullConstructionTest
         {
             var rcd = em.SpawnEntity("RCD", map.GridCoords);
             var component = em.GetComponent<RCDComponent>(rcd);
-            var prototype = pair.Server.ProtoMan.Index<RCDPrototype>("Deconstruct");
+            var prototype = pair.Server.ProtoMan.Index<RCDPrototype>(DeconstructProto);
             typeof(RCDComponent).GetProperty(nameof(RCDComponent.CachedPrototype))!.SetValue(component, prototype);
             var tile = maps.GetTileRef(map.Grid.Owner, map.Grid.Comp, index);
             var data = new MapGridData(map.Grid.Owner, map.Grid.Comp, map.GridCoords, tile, index);
@@ -335,7 +338,7 @@ public sealed class ShipHullConstructionTest
 
     private static void Hit(IEntityManager em, IPrototypeManager prototypes, EntityUid target, int amount)
     {
-        var blunt = prototypes.Index<DamageTypePrototype>("Blunt");
+        var blunt = prototypes.Index<DamageTypePrototype>(BluntProto);
         em.System<DamageableSystem>().TryChangeDamage(target, new DamageSpecifier(blunt, FixedPoint2.New(amount)),
             ignoreResistances: true);
     }

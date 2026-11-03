@@ -354,7 +354,7 @@ public sealed class GenitalCoverageTest
             {
                 foreach (var vest in vests)
                 {
-                    var hasData = vest.TryGetComponent<GenitalCoverageComponent>(out var coverage, factory);
+                    var hasData = vest.TryComp<GenitalCoverageComponent>(out var coverage, factory);
                     Assert.That(hasData, Is.True, $"{vest.ID} has no GenitalCoverage data, so it would cover the groin.");
                     if (coverage != null)
                         Assert.That(coverage.Regions, Is.EqualTo(GenitalRegion.Chest), $"{vest.ID} should cover the chest only.");

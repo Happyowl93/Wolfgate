@@ -27,8 +27,8 @@ public sealed class WFBottomlessRegenTest
             foreach (var proto in server.ProtoMan.EnumeratePrototypes<EntityPrototype>())
             {
                 if (proto.Abstract ||
-                    !proto.TryGetComponent<SolutionRegenerationComponent>(out var regen, factory) ||
-                    !proto.TryGetComponent<SolutionContainerManagerComponent>(out var manager, factory) ||
+                    !proto.TryComp<SolutionRegenerationComponent>(out var regen, factory) ||
+                    !proto.TryComp<SolutionContainerManagerComponent>(out var manager, factory) ||
                     manager.Solutions is not { } solutions)
                 {
                     continue;

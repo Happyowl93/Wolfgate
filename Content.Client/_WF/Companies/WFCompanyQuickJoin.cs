@@ -10,7 +10,7 @@ using Robust.Shared.Timing;
 namespace Content.Client._WF.Companies;
 
 /// <summary>One card with every way a company member can get into the round: company crews, hangar ships and joining as their rank.</summary>
-public sealed class WFCompanyQuickJoin : BoxContainer
+public sealed partial class WFCompanyQuickJoin : BoxContainer
 {
     private sealed record Option(string Text, string? ToolTip, Action Pressed);
 

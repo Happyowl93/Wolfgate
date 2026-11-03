@@ -41,7 +41,7 @@ public sealed class ShieldSidearmTest
         {
             bool Exempt(string id)
             {
-                return prototypes.Index<EntityPrototype>(id).TryGetComponent(out CanShootWithShieldComponent? exempt, factory)
+                return prototypes.Index<EntityPrototype>(id).TryComp(out CanShootWithShieldComponent? exempt, factory)
                        && exempt.Enabled;
             }
 

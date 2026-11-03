@@ -1,5 +1,6 @@
 using Content.Shared._WF.Xenonids.ForTheHive;
 using Robust.Client.GameObjects;
+using Robust.Shared.Utility;
 
 namespace Content.Client._WF.Xenonids.ForTheHive;
 
@@ -26,7 +27,7 @@ public sealed partial class XenoForTheHiveVisualizerSystem : VisualizerSystem<Fo
         if (xeno.Comp.ActiveSprite != null)
         {
             _sprite.SetAutoAnimateSync(sprite, spriteLayer, 0);
-            sprite.LayerSetRSI(layer, xeno.Comp.ActiveSprite);
+            _sprite.LayerSetRsi((xeno, sprite), layer, new ResPath(xeno.Comp.ActiveSprite));
         }
     }
 
@@ -42,27 +43,12 @@ public sealed partial class XenoForTheHiveVisualizerSystem : VisualizerSystem<Fo
         if (xeno.Comp.BaseSprite != null)
         {
             _sprite.SetAutoAnimateSync(sprite, spriteLayer, 0);
-            sprite.LayerSetRSI(layer, xeno.Comp.BaseSprite);
+            _sprite.LayerSetRsi((xeno, sprite), layer, new ResPath(xeno.Comp.BaseSprite));
         }
     }
 
     protected override void OnAppearanceChange(EntityUid xeno, ForTheHiveComponent component, ref AppearanceChangeEvent args)
     {
-        return; // TODO RMC14 make the animation speed up overtime
-
-        var sprite = args.Sprite;
-
-        if (!HasComp<ActiveForTheHiveComponent>(xeno))
-            return;
-
-        if (sprite == null || !AppearanceSystem.TryGetData<float>(xeno, ForTheHiveVisuals.Time, out var ratio, args.Component))
-            return;
-
-        if (!_sprite.LayerMapTryGet((xeno, sprite), ForTheHiveVisualLayers.Base, out var layer, false))
-            return;
-
-        if (ratio >= 0)
-            sprite.LayerSetAnimationTime(layer, (float)(component.AnimationTimeBase.TotalSeconds * ratio));
-
+        // TODO RMC14 make the animation speed up overtime
     }
 }

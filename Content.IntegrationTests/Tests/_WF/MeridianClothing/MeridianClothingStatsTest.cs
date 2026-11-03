@@ -28,13 +28,13 @@ public sealed class MeridianClothingStatsTest
 
         await server.WaitPost(() =>
         {
-            insulated = server.ProtoMan.Index<EntityPrototype>(InsulatedGloves).TryGetComponent<InsulatedComponent>(out _, factory);
+            insulated = server.ProtoMan.Index<EntityPrototype>(InsulatedGloves).TryComp<InsulatedComponent>(out _, factory);
 
             foreach (var proto in server.ProtoMan.EnumeratePrototypes<EntityPrototype>())
             {
                 if (proto.Abstract || !proto.ID.StartsWith("WFMeridianClothing") ||
-                    !proto.TryGetComponent<ClothingComponent>(out var clothing, factory) ||
-                    !proto.TryGetComponent<TemperatureProtectionComponent>(out _, factory))
+                    !proto.TryComp<ClothingComponent>(out var clothing, factory) ||
+                    !proto.TryComp<TemperatureProtectionComponent>(out _, factory))
                     continue;
 
                 // Coefficients multiply across worn items, so only suits and helmets may carry them.

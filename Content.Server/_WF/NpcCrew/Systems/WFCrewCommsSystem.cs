@@ -11,7 +11,7 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.NpcCrew.Systems;
 
 /// <summary>Shares sightings only with crew whose equipped radios actually receive the report.</summary>
-public sealed class WFCrewCommsSystem : EntitySystem
+public sealed partial class WFCrewCommsSystem : EntitySystem
 {
     [Dependency] private RadioSystem _radio = default!;
     [Dependency] private InventorySystem _inventory = default!;

@@ -25,6 +25,8 @@ public sealed partial class ShipSteeringSystem : EntitySystem
 {
     // WOLFGATE(Performance): how often steering works out a new input
     private const int WFSteeringPeriod = 2;
+    // WOLFGATE(Performance): how many steering turns one area search for obstacles lasts
+    private const int WFScanTurns = 3;
     [Dependency] private Robust.Shared.Timing.IGameTiming _wfTiming = default!;
 
     [Dependency] private EntityLookupSystem _lookup = default!;
@@ -154,6 +156,7 @@ public sealed partial class ShipSteeringSystem : EntitySystem
         var context = new SteeringContext
         {
             PilotUid = ent.Owner, // WOLFGATE(NpcCrew): Keep destination-hull avoidance scoped to crew pilots.
+            Steerer = ent.Comp, // WOLFGATE(Performance): holds this pilot's last obstacle search
             ShipUid = shipUid.Value,
             ShipXform = shipXform,
             ShipBody = shipBody,
@@ -330,6 +333,12 @@ public sealed partial class ShipSteeringSystem : EntitySystem
         var scanBounds = new Box2(scanBoundsLocal.BottomLeft + shipPosVec, scanBoundsLocal.TopRight + shipPosVec);
         var scanBoundsWorld = new Box2Rotated(scanBounds, velAngle - new Angle(Math.PI), shipPosVec);
 
+        // WOLFGATE(Performance) START: the area searches run every few turns; what they found is looked at again every turn
+        _avoidPotentialEnts = ctx.Steerer.WFNearby;
+        if (ctx.Steerer.WFScanWait-- <= 0)
+        {
+            ctx.Steerer.WFScanWait = WFScanTurns - 1;
+        // WOLFGATE END
         // query for everything nearby
         _avoidGrids.Clear();
         if (config.AvoidCollisions)
@@ -337,8 +346,9 @@ public sealed partial class ShipSteeringSystem : EntitySystem
 
         _avoidProjs.Clear();
         if (config.AvoidProjectiles)
-            _avoidProjs = _lookup.GetEntitiesInRange<ShipWeaponProjectileComponent>(
-                ctx.ShipPos, ProjectileSearchBounds, LookupFlags.Approximate | LookupFlags.Dynamic | LookupFlags.Sensors);
+            // WOLFGATE(Performance): fills the kept set, was a new one per search
+            _lookup.GetEntitiesInRange<ShipWeaponProjectileComponent>(
+                ctx.ShipPos, ProjectileSearchBounds, _avoidProjs, LookupFlags.Approximate | LookupFlags.Dynamic | LookupFlags.Sensors);
 
         // pool all queried ents
         _avoidPotentialEnts.Clear();
@@ -348,6 +358,7 @@ public sealed partial class ShipSteeringSystem : EntitySystem
         foreach (var proj in _avoidProjs)
             if (!_phaseQuery.TryComp(proj, out var phase) || phase.SourceGrid != ctx.ShipUid)
                 _avoidPotentialEnts.Add((proj, false));
+        } // WOLFGATE(Performance): end of the area searches
 
         _avoidEnts.Clear();
         foreach (var (ent, isGrid) in _avoidPotentialEnts)
@@ -402,6 +413,10 @@ public sealed partial class ShipSteeringSystem : EntitySystem
         in BrakeContext brake,
         Vector2 wishDir)
     {
+        // WOLFGATE(Performance): with nothing to avoid the wish is clear, so skip working out every sector's thrust
+        if (_avoidEnts.Count == 0)
+            return new(null, false);
+
         var shipPos = ctx.ShipPos.Position;
         var shipVel = ctx.ShipBody.LinearVelocity;
         // we have to take radius so that if we rotate it doesn't clip us into the obstacle
@@ -755,6 +770,7 @@ public sealed partial class ShipSteeringSystem : EntitySystem
     private ref struct SteeringContext
     {
         public EntityUid? PilotUid; // WOLFGATE(NpcCrew): Identifies crew steering without changing other NPC navigation.
+        public ShipSteererComponent Steerer; // WOLFGATE(Performance): holds this pilot's last obstacle search
         // ship
         public EntityUid ShipUid;
         public TransformComponent ShipXform;

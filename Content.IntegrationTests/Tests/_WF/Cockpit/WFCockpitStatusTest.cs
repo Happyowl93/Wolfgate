@@ -1,5 +1,6 @@
 #nullable enable annotations
 
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -161,7 +162,7 @@ public sealed class WFCockpitStatusTest
                 Assert.That(lamp.Reading.State, Is.EqualTo(expected), reason);
                 Assert.That(window.FindControl<NavScreen>("NavContainer").Visible, Is.True,
                     "Autopilot telemetry must not open the strategic MFD.");
-                bank.Dispose();
+                bank.Teardown();
             });
         }
 

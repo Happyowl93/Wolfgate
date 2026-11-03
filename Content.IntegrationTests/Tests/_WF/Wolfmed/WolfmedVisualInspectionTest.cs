@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -728,7 +729,7 @@ public sealed class WolfmedVisualInspectionTest : WolfmedGameTest
                     "the title and the clothing notice are labels, not rows.");
             });
 
-            root.Dispose();
+            root.Teardown();
         });
     }
 

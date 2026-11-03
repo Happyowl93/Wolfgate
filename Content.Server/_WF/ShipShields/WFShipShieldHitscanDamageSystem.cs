@@ -4,7 +4,7 @@ using Content.Shared._WF.ShipShields;
 namespace Content.Server._WF.ShipShields;
 
 /// <summary>Applies beam impacts after shared shield interception.</summary>
-public sealed class WFShipShieldHitscanDamageSystem : EntitySystem
+public sealed partial class WFShipShieldHitscanDamageSystem : EntitySystem
 {
     [Dependency] private ShipShieldsSystem _shields = default!;
 

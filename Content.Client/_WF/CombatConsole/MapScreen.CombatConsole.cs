@@ -22,7 +22,7 @@ public sealed partial class MapScreen
         var side = Column(jump, destinations);
         side.MinWidth = side.MaxWidth = 260;
         side.VerticalExpand = true;
-        DisposeAllChildren();
+        RemoveAllChildren();
         SeparationOverride = 8;
         AddChild(plot);
         AddChild(side);

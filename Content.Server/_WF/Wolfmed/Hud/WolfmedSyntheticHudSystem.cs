@@ -28,7 +28,7 @@ namespace Content.Server._WF.Wolfmed.Hud;
 /// for one body, pushed instead of pulled, because the client can see neither the wound entities nor the
 /// bloodstream. Rebuilt twice a second and dirtied only when something actually moved.
 /// </summary>
-public sealed class WolfmedSyntheticHudSystem : EntitySystem
+public sealed partial class WolfmedSyntheticHudSystem : EntitySystem
 {
     /// <summary>Fluid fraction below which the readout calls it out.</summary>
     public const float LowFluid = 0.7f;

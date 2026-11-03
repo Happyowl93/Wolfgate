@@ -7,7 +7,7 @@ namespace Content.Client._WF.Audio;
 /// Stops a toggled item's predicted active loop once the item is off. The loop is local to the client that turned the
 /// item on, so when someone else turned it off only their copy stopped and the holder kept hearing the hum.
 /// </summary>
-public sealed class WFToggleLoopStopSystem : EntitySystem
+public sealed partial class WFToggleLoopStopSystem : EntitySystem
 {
     [Dependency] private SharedAudioSystem _audio = default!;
 

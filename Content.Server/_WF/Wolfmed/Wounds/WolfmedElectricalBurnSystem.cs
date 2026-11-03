@@ -27,7 +27,7 @@ namespace Content.Server._WF.Wolfmed.Wounds;
 /// <c>wolfmed.electric_heart_from</c> takes <c>wolfmed.electric_heart_factor</c> health per point, read off
 /// <see cref="WolfmedPartDamageEvent"/>, the broadcast seam for systems that answer a hit.
 /// </remarks>
-public sealed class WolfmedElectricalBurnSystem : EntitySystem
+public sealed partial class WolfmedElectricalBurnSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _config = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;

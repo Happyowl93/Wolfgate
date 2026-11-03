@@ -25,7 +25,7 @@ public sealed class VehicleSeatPrototypeTest
             var factory = entMan.ComponentFactory;
             foreach (var proto in server.ProtoMan.EnumeratePrototypes<EntityPrototype>())
             {
-                if (!proto.Abstract && proto.TryGetComponent<VehicleWeaponsSeatComponent>(out _, factory))
+                if (!proto.Abstract && proto.TryComp<VehicleWeaponsSeatComponent>(out _, factory))
                     seatIds.Add(proto.ID);
             }
         });

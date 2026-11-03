@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Reflection;
 using Content.Client._WF.Options.UI.Tabs;
 using Content.Client.Options.UI;
@@ -44,7 +45,7 @@ public sealed class WolfgateExtraTabTest
             {
                 var applied = config.GetCVar(HeatHazeCVars.Enabled);
                 config.SetCVar(HeatHazeCVars.Enabled, original);
-                menu.Dispose();
+                menu.Teardown();
                 Assert.That(applied, Is.EqualTo(!original), "Apply must write the setting.");
             }
         });

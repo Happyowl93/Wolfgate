@@ -20,9 +20,10 @@ namespace Content.Server._WF.Wolfmed.Medical;
 /// sprays the person clicked, or the user on a use in hand, straight onto their skin by the touch reaction the vapor
 /// would have used, and never pours down anyone's throat. A click on the world still sprays a cloud.
 /// </summary>
-public sealed class WolfmedAntisepticSpraySystem : EntitySystem
+public sealed partial class WolfmedAntisepticSpraySystem : EntitySystem
 {
     [Dependency] private ReactiveSystem _reactive = default!;
+    [Dependency] private Content.Shared._WF.ArmorSpecialization.WFCivilianSpecializationSystem _wfSpecs = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
@@ -69,7 +70,8 @@ public sealed class WolfmedAntisepticSpraySystem : EntitySystem
         }
 
         var dose = _solutions.SplitSolution(soln.Value, nozzle.TransferAmount);
-        _reactive.DoEntityReaction(target, dose, ReactionMethod.Touch);
+        // Antiseptic is treatment, so a decon coating lets it through.
+        _wfSpecs.BypassDecon(() => _reactive.DoEntityReaction(target, dose, ReactionMethod.Touch));
         _audio.PlayPvs(nozzle.SpraySound, spray);
         _popup.PopupEntity(user == target
                 ? Loc.GetString("wolfmed-antiseptic-spray-self")

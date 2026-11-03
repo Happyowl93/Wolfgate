@@ -29,7 +29,7 @@ namespace Content.Server._WF.NpcCrew.Systems;
 /// Spawns crew, keeps the HTN blackboard in step with <see cref="WFCrewComponent"/>, puts role titles on names and
 /// reports crew going down.
 /// </summary>
-public sealed class WFCrewSystem : EntitySystem
+public sealed partial class WFCrewSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NPCSystem _npc = default!;

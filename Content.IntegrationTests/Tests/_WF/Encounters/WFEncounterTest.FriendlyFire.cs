@@ -24,7 +24,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, player = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestStoryMelee");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestStoryMeleeProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(-47000, -47000), MapData.MapId), out encounter), Is.True);
             var ships = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships;
 

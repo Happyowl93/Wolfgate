@@ -43,6 +43,10 @@ public sealed partial class AutoExtendRuleSystem : EntitySystem
             var hasNearbyPlayer = false;
             foreach (var entUid in extendRule.Entities)
             {
+                // WOLFGATE(LiveFixes): a watched grid can be deleted before the rule ends
+                if (TerminatingOrDeleted(entUid))
+                    continue;
+
                 // this is copypasted and modified from NPCSystem
                 var xform = Transform(entUid);
                 var ourCoords = xform.Coordinates;

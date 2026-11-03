@@ -19,7 +19,7 @@ namespace Content.Server._WF.Traders;
 /// <summary>
 /// Sells a vending machine's stock through a trader, at that machine's prices, one basket at a time.
 /// </summary>
-public sealed class TraderShopSystem : EntitySystem
+public sealed partial class TraderShopSystem : EntitySystem
 {
     [Dependency] private BankSystem _bank = default!;
     [Dependency] private GameTicker _gameTicker = default!;
@@ -247,11 +247,11 @@ public sealed class TraderShopSystem : EntitySystem
         if (!_proto.TryIndex(vendor, out var vendorProto))
             return false;
 
-        if (!vendorProto.TryGetComponent<VendingMachineComponent>(out var vendComp, _componentFactory))
+        if (!vendorProto.TryComp<VendingMachineComponent>(out var vendComp, _componentFactory))
             return false;
 
         vend = vendComp;
-        vendorProto.TryGetComponent<MarketModifierComponent>(out modifier, _componentFactory);
+        vendorProto.TryComp<MarketModifierComponent>(out modifier, _componentFactory);
         return true;
     }
 

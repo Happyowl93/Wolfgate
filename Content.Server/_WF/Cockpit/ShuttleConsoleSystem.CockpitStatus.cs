@@ -44,7 +44,7 @@ public sealed partial class ShuttleConsoleSystem
             TryComp<ShipSteererComponent>(uid, out var steering) && steering.Status == ShipSteeringStatus.Moving &&
             htn.Blackboard.TryGetValue<EntityCoordinates>(helm.AutopilotTargetKey, out var target, EntityManager) &&
             !TerminatingOrDeleted(target.EntityId) &&
-            TryComp<TransformComponent>(uid, out var transform) && transform.GridUid is { } grid &&
+            TryComp(uid, out TransformComponent? transform) && transform.GridUid is { } grid &&
             (!HasComp<AnchorableComponent>(uid) || transform.Anchored) && this.IsPowered(uid, EntityManager) &&
             HasComp<ShuttleComponent>(grid) && TryComp<PilotedShuttleComponent>(grid, out var piloted) &&
             piloted.InputSources.Contains(uid);

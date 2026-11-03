@@ -13,7 +13,7 @@ using Robust.Shared.Random;
 namespace Content.Server._WF.Wolfmed.Explosion;
 
 /// <summary>Routes explosion damage on wound hosts through the distributed per-part split instead of one flat body hit.</summary>
-public sealed class WolfmedExplosionSystem : EntitySystem
+public sealed partial class WolfmedExplosionSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private WoundDamageRoutingSystem _routing = default!;

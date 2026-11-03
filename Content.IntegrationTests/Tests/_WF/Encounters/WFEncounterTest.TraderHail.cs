@@ -81,7 +81,7 @@ public sealed partial class WFEncounterTest
 
         await Server.WaitAssertion(() =>
         {
-            var proto = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestTraderUnderWay");
+            var proto = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestTraderUnderWayProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(proto, new MapCoordinates(at + new Vector2(400f, 0f), MapData.MapId),
                 out encounter), Is.True);
             ship = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["trader"];

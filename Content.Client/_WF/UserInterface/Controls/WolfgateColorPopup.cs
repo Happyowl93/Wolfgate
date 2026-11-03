@@ -212,11 +212,10 @@ public sealed class WolfgateColorPopup : Popup
         SetExact(color, _hex);
     }
 
-    protected override void Dispose(bool disposing)
+    protected override void ExitedTree()
     {
-        base.Dispose(disposing);
-        if (disposing)
-            _sv.DisposeTexture();
+        base.ExitedTree();
+        _sv.DisposeTexture();
     }
 
     /// <summary>Saturation left to right, value bottom to top, for the current hue.</summary>

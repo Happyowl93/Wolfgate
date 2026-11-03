@@ -76,6 +76,9 @@ wf-mapping-issue-map-unsaved-hint = Mobs and other save:false prototypes are dro
 wf-mapping-issue-map-denied = {$name} isn't allowed in mapping mode.
 wf-mapping-issue-map-denied-hint = Erase it; it is removed when the map is opened again.
 
+wf-mapping-issue-map-lint = {$name} ({$id}) can't be mapped here.
+wf-mapping-issue-map-lint-hint = The repository's map check refuses it, so the export is refused too. Erase or replace it.
+
 ## Closing note of a capped list
 
 wf-mapping-issue-more = {$count} more {$count ->

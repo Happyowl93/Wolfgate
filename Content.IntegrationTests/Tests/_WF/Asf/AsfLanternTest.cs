@@ -27,6 +27,8 @@ namespace Content.IntegrationTests.Tests._WF.Asf;
 [TestFixture]
 public sealed class AsfLanternTest
 {
+    private static readonly ProtoId<DepartmentPrototype> WFAsfProto = "WFAsf";
+
     private static readonly ResPath Lantern = new("/Maps/_WF/Asf/lantern.yml");
 
     /// <summary>ASF voucher entities; each has a lathe recipe of the same ID.</summary>
@@ -71,7 +73,7 @@ public sealed class AsfLanternTest
                     spawns.Add(job);
             }
 
-            var roles = prototypes.Index<DepartmentPrototype>("WFAsf").Roles;
+            var roles = prototypes.Index<DepartmentPrototype>(WFAsfProto).Roles;
             Assert.That(roles, Is.Not.Empty);
             foreach (var role in roles)
             {
@@ -93,7 +95,7 @@ public sealed class AsfLanternTest
             var vouchered = new HashSet<string>();
             foreach (var voucherId in Vouchers)
             {
-                Assert.That(prototypes.Index<EntityPrototype>(voucherId).TryGetComponent<ShipyardVoucherComponent>(out var voucher, factory));
+                Assert.That(prototypes.Index<EntityPrototype>(voucherId).TryComp<ShipyardVoucherComponent>(out var voucher, factory));
                 foreach (var vessel in voucher!.Vessels)
                 {
                     Assert.That(listed, Does.Contain(vessel.Id), $"{voucherId} names {vessel}, which the ASF console doesn't sell.");

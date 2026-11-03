@@ -28,6 +28,8 @@ namespace Content.IntegrationTests.Tests._WF.Shuttles;
 /// </summary>
 public sealed class ShipStatusTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     [Test]
     public async Task DamagedWallIsReported()
     {
@@ -78,7 +80,7 @@ public sealed class ShipStatusTest
             Assert.That(clean.Summary.HullIntegrity, Is.EqualTo(1f));
 
             // Hit the wall hard enough to be well past the reporting threshold but not destroy it.
-            var damage = new DamageSpecifier(protoManager.Index<DamageTypePrototype>("Blunt"), FixedPoint2.New(100));
+            var damage = new DamageSpecifier(protoManager.Index<DamageTypePrototype>(BluntProto), FixedPoint2.New(100));
             damageSystem.TryChangeDamage(wall, damage, ignoreResistances: true);
 
             var damaged = statusSystem.GetStatus(console);
@@ -167,7 +169,7 @@ public sealed class ShipStatusTest
         void DamageWall(int x)
         {
             var wall = em.SpawnEntity("WallSolid", new EntityCoordinates(map.Grid.Owner, new Vector2(x + 0.5f, 0.5f)));
-            var prototype = pair.Server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>("Blunt");
+            var prototype = pair.Server.ResolveDependency<IPrototypeManager>().Index<DamageTypePrototype>(BluntProto);
             em.System<DamageableSystem>().TryChangeDamage(wall, new DamageSpecifier(prototype, FixedPoint2.New(100)), ignoreResistances: true);
         }
 
@@ -230,7 +232,7 @@ public sealed class ShipStatusTest
             Assert.That(status.GetStatus(console)!.Summary.HullIntegrity, Is.EqualTo(1f));
 
             var prototypes = server.ResolveDependency<IPrototypeManager>();
-            var damage = new DamageSpecifier(prototypes.Index<DamageTypePrototype>("Blunt"), FixedPoint2.New(1400));
+            var damage = new DamageSpecifier(prototypes.Index<DamageTypePrototype>(BluntProto), FixedPoint2.New(1400));
             em.System<DamageableSystem>().TryChangeDamage(wall, damage, ignoreResistances: true);
             maps.SetTile(map.Grid.Owner, map.Grid.Comp, missingFloor, Tile.Empty);
         });
@@ -281,7 +283,7 @@ public sealed class ShipStatusTest
             structures.Add(em.SpawnEntity("ReinforcedWindowDiagonal", At(2)));
             Assert.That(status.GetStatus(console)!.Summary.HullIntegrity, Is.EqualTo(1f));
 
-            var blunt = server.ProtoMan.Index<DamageTypePrototype>("Blunt");
+            var blunt = server.ProtoMan.Index<DamageTypePrototype>(BluntProto);
             foreach (var structure in structures)
                 em.System<DamageableSystem>().TryChangeDamage(structure,
                     new DamageSpecifier(blunt, FixedPoint2.New(5000)), ignoreResistances: true);

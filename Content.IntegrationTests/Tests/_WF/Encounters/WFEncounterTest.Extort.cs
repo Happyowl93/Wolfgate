@@ -37,6 +37,8 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 /// </summary>
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestExtorterProto => "WFTestExtorter";
+
     private const int ExtortToll = 5000;
     private const int ExtortBase = 10000;
 
@@ -593,7 +595,7 @@ public sealed partial class WFEncounterTest
             {
                 board = EnsureBoard();
                 grid = PutPlayerOnGrid(new Vector2(40000, -88000));
-                var proto = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestExtorter");
+                var proto = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestExtorterProto);
                 Assert.That(Server.System<WFEncounterSystem>().TrySpawn(proto, new MapCoordinates(new Vector2(40400, -88000), MapData.MapId),
                     out encounter), Is.True);
                 ship = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["extorter"];
@@ -685,7 +687,7 @@ public sealed partial class WFEncounterTest
         WFEncounterShipState other = default!;
         await Server.WaitAssertion(() =>
         {
-            var proto = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestExtorter");
+            var proto = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestExtorterProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(proto, new MapCoordinates(at - new Vector2(400f, 0f), MapData.MapId),
                 out second), Is.True);
             other = SEntMan.GetComponent<WFEncounterComponent>(second).Ships["extorter"];

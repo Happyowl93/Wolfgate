@@ -1,3 +1,4 @@
+#pragma warning disable RA0039 // These checks run without a prototype manager.
 using System.Collections.Generic;
 using Content.Server._WF.Genitals;
 using Content.Shared._WF.Genitals;

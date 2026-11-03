@@ -14,7 +14,7 @@ namespace Content.Server._WF.Wolfmed.Range;
 /// </summary>
 // loadmap leaves a map uninitialised, so the range's species markers never fire and its power net never forms.
 [AdminCommand(AdminFlags.Mapping)]
-public sealed class WolfmedRangeCommand : LocalizedEntityCommands
+public sealed partial class WolfmedRangeCommand : LocalizedEntityCommands
 {
     public static readonly ResPath MapPath = new("/Maps/_WF/Wolfmed/wolfmed_range.yml");
 

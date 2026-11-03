@@ -1,3 +1,4 @@
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using System.Collections.Generic;
 using System.Numerics;
@@ -201,7 +202,7 @@ public sealed partial class WFRoundSetupLobbyTest
                         "Pregame balancing uses the selected crew job instead of saved civilian preferences.");
                     ticker.StartRound(force: true);
                     var jobs = server.System<StationJobsSystem>();
-                    station = server.EntMan.EntityQuery<StationJobsComponent>().Select(comp => comp.Owner)
+                    station = server.EntMan.EntityQuery<StationJobsComponent>().Select(comp => comp.Uid())
                         .Single(uid => server.System<WFRoundSetupSystem>().IsStandardStation(uid) && jobs.TryGetJobSlot(uid, hostJob, out _));
                 });
                 state = await Request(pair, new WFRoundSetupRequest(WFRoundSetupAction.Refresh));

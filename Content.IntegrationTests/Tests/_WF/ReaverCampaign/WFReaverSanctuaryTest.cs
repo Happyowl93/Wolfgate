@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ public sealed class WFReaverSanctuaryTest : WFReaverTestBase
         transform.SetWorldPosition(station, transform.GetWorldPosition(ship) + new Vector2(4f, 0f));
         var port = SEntMan.SpawnAtPosition("AirlockShuttle", new EntityCoordinates(ship, new Vector2(0.5f)));
         var stationPort = SEntMan.EntityQuery<DockingComponent, TransformComponent>()
-            .Single(pair => pair.Item2.GridUid == station).Item1.Owner;
+            .Single(pair => pair.Item2.GridUid == station).Item1.Uid();
         Server.System<DockingSystem>().Dock((port, SEntMan.GetComponent<DockingComponent>(port)),
             (stationPort, SEntMan.GetComponent<DockingComponent>(stationPort)));
         return (port, stationPort);

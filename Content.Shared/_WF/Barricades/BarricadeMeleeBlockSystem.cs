@@ -11,7 +11,7 @@ using Robust.Shared.Timing;
 namespace Content.Shared._WF.Barricades;
 
 /// <summary>Turns a melee attack into a hit on a barricade standing between the attacker and the target.</summary>
-public sealed class BarricadeMeleeBlockSystem : EntitySystem
+public sealed partial class BarricadeMeleeBlockSystem : EntitySystem
 {
     [Dependency] private SharedPhysicsSystem _physics = default!;
     [Dependency] private IGameTiming _timing = default!;

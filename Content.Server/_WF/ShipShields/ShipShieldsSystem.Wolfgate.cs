@@ -78,7 +78,7 @@ public sealed partial class ShipShieldsSystem
     private void FollowWolfgateShieldGrid(EntityUid shield, EntityUid grid)
     {
         if (TerminatingOrDeleted(shield) || TerminatingOrDeleted(grid) ||
-            !TryComp<TransformComponent>(grid, out var gridTransform))
+            !TryComp(grid, out TransformComponent? gridTransform))
             return;
         if (gridTransform.MapUid == null || gridTransform.MapID == MapId.Nullspace)
         {

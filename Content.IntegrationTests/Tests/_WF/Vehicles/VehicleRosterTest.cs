@@ -75,8 +75,8 @@ public sealed class VehicleRosterTest
             foreach (var proto in server.ProtoMan.EnumeratePrototypes<EntityPrototype>())
             {
                 if (proto.Abstract ||
-                    !proto.TryGetComponent<RMCVehicleComponent>(out _, factory) ||
-                    !proto.TryGetComponent<VehicleEnterComponent>(out var enter, factory))
+                    !proto.TryComp<RMCVehicleComponent>(out _, factory) ||
+                    !proto.TryComp<VehicleEnterComponent>(out var enter, factory))
                 {
                     continue;
                 }
@@ -88,7 +88,7 @@ public sealed class VehicleRosterTest
                     continue;
 
                 var starting = new Dictionary<string, string>();
-                if (proto.TryGetComponent<ItemSlotsComponent>(out var itemSlots, factory))
+                if (proto.TryComp<ItemSlotsComponent>(out var itemSlots, factory))
                 {
                     foreach (var (id, slot) in itemSlots.Slots)
                     {
@@ -100,20 +100,20 @@ public sealed class VehicleRosterTest
                 // A part with slots of its own, a turret, starts with parts too. Only the slots the hardpoint system owns are
                 // hardpoints; a port gun sits in a plain item slot.
                 var hardpointSlots = new HashSet<string>();
-                if (proto.TryGetComponent<HardpointSlotsComponent>(out var vehicleHardpoints, factory))
+                if (proto.TryComp<HardpointSlotsComponent>(out var vehicleHardpoints, factory))
                     hardpointSlots.UnionWith(vehicleHardpoints.Slots.Select(s => s.Id));
 
                 var nested = new List<NestedStart>();
                 foreach (var (id, itemId) in starting)
                 {
                     if (!server.ProtoMan.TryIndex<EntityPrototype>(itemId, out var held) ||
-                        !held.TryGetComponent<ItemSlotsComponent>(out var heldSlots, factory))
+                        !held.TryComp<ItemSlotsComponent>(out var heldSlots, factory))
                     {
                         continue;
                     }
 
                     var heldHardpoints = new HashSet<string>();
-                    if (held.TryGetComponent<HardpointSlotsComponent>(out var partHardpoints, factory))
+                    if (held.TryComp<HardpointSlotsComponent>(out var partHardpoints, factory))
                         heldHardpoints.UnionWith(partHardpoints.Slots.Select(s => s.Id));
 
                     foreach (var (childId, childSlot) in heldSlots.Slots)

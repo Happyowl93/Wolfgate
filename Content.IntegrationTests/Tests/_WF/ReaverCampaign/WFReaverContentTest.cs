@@ -22,6 +22,10 @@ namespace Content.IntegrationTests.Tests._WF.ReaverCampaign;
 [TestFixture]
 public sealed class WFReaverContentTest
 {
+    private static readonly ProtoId<CompanyPrototype> WFUndergroundProto = "WFUnderground";
+    private static readonly ProtoId<WFSectorFactionPrototype> WFSectorFactionReaversProto = "WFSectorFactionReavers";
+    private static ProtoId<PointOfInterestPrototype> UndergroundProto => "Underground";
+
     private static bool IsTest(string id)
     {
         return id.StartsWith("WFTest");
@@ -91,12 +95,12 @@ public sealed class WFReaverContentTest
         {
             var prototypes = pair.Server.ResolveDependency<IPrototypeManager>();
             var localization = pair.Server.ResolveDependency<ILocalizationManager>();
-            var company = prototypes.Index<CompanyPrototype>("WFUnderground");
+            var company = prototypes.Index<CompanyPrototype>(WFUndergroundProto);
             Assert.That(company.Name, Is.EqualTo("Underground"));
             Assert.That(company.Disabled, Is.True, "Nobody picks it at character setup.");
             Assert.That(localization.TryGetString(company.Description, out _), Is.True, "Its description is a string.");
 
-            var reavers = prototypes.Index<WFSectorFactionPrototype>("WFSectorFactionReavers");
+            var reavers = prototypes.Index<WFSectorFactionPrototype>(WFSectorFactionReaversProto);
             Assert.That(reavers.NeutralCompanies.Select(entry => entry.Id), Is.EquivalentTo(new[] { "WFUnderground" }));
             Assert.That(reavers.NeutralStations, Is.EquivalentTo(new[] { "Underground" }));
             foreach (var faction in prototypes.EnumeratePrototypes<WFSectorFactionPrototype>())
@@ -112,7 +116,7 @@ public sealed class WFReaverContentTest
                 Assert.That(prototypes.Index<JobPrototype>(job).AssignedCompany.Id, Is.EqualTo("WFUnderground"), $"{job} flies the Underground flag");
             }
 
-            var station = prototypes.Index<PointOfInterestPrototype>("Underground");
+            var station = prototypes.Index<PointOfInterestPrototype>(UndergroundProto);
             Assert.That(station.AddComponents.TryGetValue("Company", out var entry), Is.True, "The station flies it too.");
             Assert.That(((CompanyComponent) entry!.Component).CompanyName.Id, Is.EqualTo("WFUnderground"));
         });

@@ -23,6 +23,11 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 /// <summary>Judging an encounter that begins beside another, stranded ships, and who speaks and in what colour.</summary>
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestCoreRunningProto => "WFTestCoreRunning";
+    private static ProtoId<WFEncounterPrototype> WFTestCoreWaitingProto => "WFTestCoreWaiting";
+    private static ProtoId<WFEncounterPrototype> WFTestCoreStrandedProto => "WFTestCoreStranded";
+    private static ProtoId<WFEncounterPrototype> WFTestCoreTwoSidesProto => "WFTestCoreTwoSides";
+
     [TestPrototypes]
     private const string BatchCorePrototypes = @"
 - type: wfEncounter
@@ -105,9 +110,9 @@ public sealed partial class WFEncounterTest
         {
             var system = Server.System<WFEncounterSystem>();
             var prototypes = Server.ResolveDependency<IPrototypeManager>();
-            Assert.That(system.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestCoreRunning"),
+            Assert.That(system.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestCoreRunningProto),
                 new MapCoordinates(new Vector2(31000, 31000), MapData.MapId), out running), Is.True);
-            Assert.That(system.TrySpawn(prototypes.Index<WFEncounterPrototype>("WFTestCoreWaiting"),
+            Assert.That(system.TrySpawn(prototypes.Index<WFEncounterPrototype>(WFTestCoreWaitingProto),
                 new MapCoordinates(new Vector2(33000, 33000), MapData.MapId), out waiting), Is.True);
             Server.System<SharedTransformSystem>().SetCoordinates(SEntMan.GetEntity(Player),
                 new EntityCoordinates(MapData.MapUid, new Vector2(33100, 33000)));
@@ -140,7 +145,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, dry = default, wrecked = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestCoreStranded");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestCoreStrandedProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(35000, 35000), MapData.MapId), out encounter), Is.True);
             var comp = SEntMan.GetComponent<WFEncounterComponent>(encounter);
             dry = comp.Ships["dry"].Grid;
@@ -200,7 +205,7 @@ public sealed partial class WFEncounterTest
     {
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestCoreTwoSides");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestCoreTwoSidesProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(37000, 37000), MapData.MapId), out var encounter), Is.True);
             var comp = SEntMan.GetComponent<WFEncounterComponent>(encounter);
             var raider = comp.Ships["raider"];

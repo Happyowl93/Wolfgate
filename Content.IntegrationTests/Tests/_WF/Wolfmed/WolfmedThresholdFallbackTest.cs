@@ -22,6 +22,8 @@ namespace Content.IntegrationTests.Tests._WF.Wolfmed;
 [TestOf(typeof(MobThresholdSystem))]
 public sealed class WolfmedThresholdFallbackTest : WolfmedGameTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     [Test]
     public async Task NonWoundHostCritsAndDiesAtItsThresholdsTest()
     {
@@ -43,7 +45,7 @@ public sealed class WolfmedThresholdFallbackTest : WolfmedGameTest
             Assert.That(thresholds.TryGetThresholdForState(mob, MobState.Critical, out var crit), Is.True);
             Assert.That(thresholds.TryGetThresholdForState(mob, MobState.Dead, out var dead), Is.True);
 
-            var blunt = protos.Index<DamageTypePrototype>("Blunt");
+            var blunt = protos.Index<DamageTypePrototype>(BluntProto);
             var one = FixedPoint2.New(1);
 
             damageable.TryChangeDamage(mob, new DamageSpecifier(blunt, crit!.Value - one), true);

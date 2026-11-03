@@ -240,7 +240,7 @@ public sealed class CavernMouthTest
                 foreach (var surfaceId in Surfaces)
                 {
                     var shade = protoMan.Index<EntityPrototype>(CavernOf(pair, surfaceId).Mouths.Shade.Id);
-                    Assert.That(shade.TryGetComponent<SpriteComponent>(out var sprite, factory), Is.True,
+                    Assert.That(shade.TryComp<SpriteComponent>(out var sprite, factory), Is.True,
                         $"{shade.ID} has no sprite.");
 
                     Assert.That(sprite?.BaseRSI, Is.Not.Null, $"{shade.ID} has no RSI.");

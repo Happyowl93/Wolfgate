@@ -1,4 +1,5 @@
 #nullable enable
+using Content.IntegrationTests.Tests._WF.EngineCompat;
 using System.Linq;
 using Content.Server.Mind;
 using Content.Shared._WF.Xenonids.Parasite;
@@ -39,7 +40,7 @@ public sealed class XenoBurstRepairTest
             Assert.That(entities.System<MobStateSystem>().IsDead(host), "A burst host is dead.");
             var larvae = entities.EntityQuery<WFBurstLarvaComponent>().ToList();
             Assert.That(larvae, Has.Count.EqualTo(1), "The larva remembers its host.");
-            larva = larvae[0].Owner;
+            larva = larvae[0].Uid();
             Assert.That(larvae[0].Host, Is.EqualTo(host));
         });
         return (host, larva);

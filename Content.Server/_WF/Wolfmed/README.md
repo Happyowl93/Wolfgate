@@ -111,6 +111,7 @@ Skipped ("dirty-disposed").
 - [`Content.Server/_WF/Wolfmed/Medical/WolfmedBrainMendSystem.cs`](Medical/WolfmedBrainMendSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/WolfmedFluidPackSystem.cs`](Medical/WolfmedFluidPackSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/WolfmedIvDripSystem.cs`](Medical/WolfmedIvDripSystem.cs)
+- [`Content.Server/_WF/Wolfmed/Medical/WolfmedIvLineSystem.cs`](Medical/WolfmedIvLineSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/WolfmedOralAbsorptionSystem.cs`](Medical/WolfmedOralAbsorptionSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/WolfmedReagentDamageSystem.cs`](Medical/WolfmedReagentDamageSystem.cs)
 - [`Content.Server/_WF/Wolfmed/Medical/WolfmedReagentWoundMendSystem.cs`](Medical/WolfmedReagentWoundMendSystem.cs)
@@ -613,8 +614,10 @@ Skipped ("dirty-disposed").
 - [`Resources/Textures/_WF/Wolfmed/Damage/wounds.rsi/`](../../../Resources/Textures/_WF/Wolfmed/Damage/wounds.rsi/)
 - [`Resources/Textures/_WF/Wolfmed/Effects/blood_splatter.rsi/`](../../../Resources/Textures/_WF/Wolfmed/Effects/blood_splatter.rsi/)
 - [`Resources/Textures/_WF/Wolfmed/Effects/gibs.rsi/`](../../../Resources/Textures/_WF/Wolfmed/Effects/gibs.rsi/)
+- [`Resources/Textures/_WF/Wolfmed/Effects/iv_line.rsi/`](../../../Resources/Textures/_WF/Wolfmed/Effects/iv_line.rsi/)
 - [`Resources/Textures/_WF/Wolfmed/Effects/part_degradation.rsi/`](../../../Resources/Textures/_WF/Wolfmed/Effects/part_degradation.rsi/)
 - [`Resources/Textures/_WF/Wolfmed/Interface/Alerts/downed.rsi/`](../../../Resources/Textures/_WF/Wolfmed/Interface/Alerts/downed.rsi/)
+- [`Resources/Textures/_WF/Wolfmed/Interface/Alerts/iv_connected.rsi/`](../../../Resources/Textures/_WF/Wolfmed/Interface/Alerts/iv_connected.rsi/)
 - [`Resources/Textures/_WF/Wolfmed/Interface/Alerts/pain.rsi/`](../../../Resources/Textures/_WF/Wolfmed/Interface/Alerts/pain.rsi/)
 - [`Resources/Textures/_WF/Wolfmed/Interface/Alerts/sepsis.rsi/`](../../../Resources/Textures/_WF/Wolfmed/Interface/Alerts/sepsis.rsi/)
 - [`Resources/Textures/_WF/Wolfmed/Interface/analyzer_icons.rsi/`](../../../Resources/Textures/_WF/Wolfmed/Interface/analyzer_icons.rsi/)
@@ -1141,7 +1144,9 @@ Skipped ("dirty-disposed").
   - the body or its gear may refuse a deeper bleed.
   - playtest 4: a tourniquet stays tied whatever the wound does under it (the strap's own
   - playtest 1: once per cooldown, not every vacuum tick
+  - a clotted systemic bleed left an untreatable wound
   - dressing
+  - a stopped systemic bleed left an untreatable wound
   - gauze that stops a bleed stays on the wound as a dressing. Removing the component here let the
   - W2: an arterial bleed does not give up severity to a dressing.
   - BRAIN: cardiac arrest drops passive bleeding to a trickle. Applied to the body's
@@ -1180,6 +1185,7 @@ Skipped ("dirty-disposed").
   - Wolfmed wound hosts own their own bleeding.
   - CONSC
   - M3
+  - salted food and water must not form saline
   - M3: an impaired heart regenerates at its band's factor (plan §8); 1 everywhere else.
   - CONSC: blood volume is a consciousness input and the bloodstream raises no event
   - GUARD E, wound hosts get their bleeding from WoundBleedingSystem instead.
@@ -1197,6 +1203,8 @@ Skipped ("dirty-disposed").
   - M2: "Can't breathe: no air" on a wound host
 - [`Content.Server/Body/Systems/StomachSystem.cs`](../../Body/Systems/StomachSystem.cs)
   - playtest 1
+  - salted food and water must not form saline
+  - reaction products were stuck in the stomach for good
   - playtest 1: painkillers absorb fast
 - [`Content.Server/Chat/EmoteOnDamageComponent.cs`](../../Chat/EmoteOnDamageComponent.cs)
   - HOOK 17, ProtoId\<> for the Wolfmed pain-sound thresholds.
@@ -1206,6 +1214,7 @@ Skipped ("dirty-disposed").
   - M2: OD17, damage totals do not kill a wound host; its suicide is brain 0 then death.
 - [`Content.Server/Chat/Systems/ChatSystem.Emote.cs`](../../Chat/Systems/ChatSystem.Emote.cs): HOOK 6, overrides SharedChatSystem's shared entry point (D25).
 - [`Content.Server/Chat/Systems/EmoteOnDamageSystem.cs`](../../Chat/Systems/EmoteOnDamageSystem.cs): HOOK 18, Wolfmed pain sounds (\<Onyx-PainSounds>); never a second subscription.
+- [`Content.Server/Construction/ConstructionSystem.Initial.cs`](../../Construction/ConstructionSystem.Initial.cs): crafting tore the jumpsuit off the crafter's back
 - [`Content.Server/Damage/Commands/HurtCommand.cs`](../../Damage/Commands/HurtCommand.cs)
   - P6, optional 5th arg is a body part.
   - P6, the uid stays args[3] when a body part follows it.
@@ -1339,6 +1348,7 @@ Skipped ("dirty-disposed").
   - revival pass, the blast roll reads the part's whole total as the threshold path does
   - P3-D15
   - revival pass, a limb is armed by its thresholds with the overflow counted
+  - P3-D15; the explosion flag is for blast liners.
   - D8. The severity comes off the PARENT the stump is left on, not off the severed part.
   - D9
   - Shitmed's BodyPartComponent has no Parent field.
@@ -1349,10 +1359,11 @@ Skipped ("dirty-disposed").
   - Shitmed has no BodyPartComponent.Parent.
   - compat shim
   - V124: the one damage-driven detach path, so the dismemberment feedback hangs here
-  - D8/P3-D15
+  - D8/P3-D15; explosion for blast liners.
   - worn armour with a limb lock may keep the limb on.
   - asked only once a hit would take the limb, so ordinary hits skip the inventory relay.
   - P3-D15 drops Onyx's BodyPartComponent parameter; the data it read is on WolfmedBodyPartComponent.
+  - P3-D15; explosion for blast liners.
   - revival pass, an overflowing hit's whole effect on a capped part, for the blast roll.
   - revival pass, a capped part never reaches its stored thresholds, so its overflow
 - [`Content.Shared/_Onyx/Wounds/BodyPartFunctionalitySystem.cs`](../../../Content.Shared/_Onyx/Wounds/BodyPartFunctionalitySystem.cs): Wolfgate keeps CyberneticsComponent under _Shitmed.
@@ -1384,7 +1395,7 @@ Skipped ("dirty-disposed").
   - playtest 5, a floor that has not risen for a while settles toward wolfmed.pain_floor_rest
   - playtest 4, the share of the pain no open wound backs (Value over WoundPain) fades at
   - M1a: CVar
-  - an unconscious body does not scream.
+  - an unconscious body does not scream, nor one whose gear silences it.
   - BRAIN: a shock on a body that has already bled out stops the heart.
   - P2-D8: Wolfgate's PainNumbness trait grants the legacy PainNumbnessComponent
   - M1a: OD5, adrenaline leaves pain alone; it speeds the crawl instead (WolfmedBodyPainSystem).
@@ -1585,7 +1596,7 @@ Skipped ("dirty-disposed").
   - GUARD F, a wound host gets a visual inspection instead (P2-D20/D2).
 - [`Content.Shared/Inventory/InventorySystem.Relay.cs`](../../../Content.Shared/Inventory/InventorySystem.Relay.cs)
   - worn items may refuse a bleed.
-  - worn items may refuse a wound or a lost limb, or dull pain.
+  - worn items may refuse a wound or a lost limb, dull pain, steady treatment or keep wounds clean.
 - [`Content.Shared/Medical/HealingDoAfterEvent.cs`](../../../Content.Shared/Medical/HealingDoAfterEvent.cs): the wound-host limb chosen when treatment started, kept across repeats.
 - [`Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs`](../../../Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs)
   - EXT 2 — Wolfmed diagnostic payload types.

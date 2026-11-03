@@ -11,7 +11,7 @@ using Robust.Shared.Utility;
 namespace Content.Client._WF.MarkingToggles;
 
 /// <summary>Adds the Markings verb on the player's own body, which opens a window to show or hide each marking.</summary>
-public sealed class MarkingToggleSystem : EntitySystem
+public sealed partial class MarkingToggleSystem : EntitySystem
 {
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private IUserInterfaceManager _ui = default!;

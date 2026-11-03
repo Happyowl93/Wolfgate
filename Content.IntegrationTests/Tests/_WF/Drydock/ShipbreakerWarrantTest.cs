@@ -20,6 +20,7 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Maths;
 using Robust.Shared.Network;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.Drydock;
 
@@ -27,12 +28,14 @@ namespace Content.IntegrationTests.Tests._WF.Drydock;
 [TestFixture]
 public sealed class ShipbreakerWarrantTest
 {
+    private static readonly ProtoId<DamageTypePrototype> BluntProto = "Blunt";
+
     private const int Reward = 15000;
 
     /// <summary>Hurts a mob by an origin, then kills it.</summary>
     private static void Kill(TestPair pair, EntityUid target, EntityUid? origin)
     {
-        var blunt = pair.Server.ProtoMan.Index<DamageTypePrototype>("Blunt");
+        var blunt = pair.Server.ProtoMan.Index<DamageTypePrototype>(BluntProto);
         pair.Server.System<DamageableSystem>().TryChangeDamage(target, new DamageSpecifier(blunt, 10),
             ignoreResistances: true, origin: origin);
         pair.Server.System<MobStateSystem>().ChangeMobState(target, MobState.Dead, origin: origin);

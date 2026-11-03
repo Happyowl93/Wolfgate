@@ -100,15 +100,15 @@ public sealed class WolfgateColorPicker : BoxContainer
         _popup.Open(UIBox2.FromDimensions(origin, new Vector2(260, 334)));
     }
 
-    protected override void Dispose(bool disposing)
+    protected override void ExitedTree()
     {
-        base.Dispose(disposing);
-        if (disposing && _popup != null)
-        {
-            _popup.Close();
-            _popup.Orphan();
-            _popup.Dispose();
-            _popup = null;
-        }
+        base.ExitedTree();
+
+        if (_popup == null)
+            return;
+
+        _popup.Close();
+        _popup.Orphan();
+        _popup = null;
     }
 }

@@ -22,6 +22,9 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 /// <summary>A station patrol keeps its ships on the orbit, evenly spaced, and puts a lost one back opposite the other.</summary>
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFStationPatrolPrototype> WFTestStationPatrolProto => "WFTestStationPatrol";
+    private static readonly ProtoId<WFEncounterPrototype> WFEncounterJudgePatrolProto = "WFEncounterJudgePatrol";
+
     [TestPrototypes]
     private const string StationPatrolPrototypes = @"
 - type: wfEncounter
@@ -61,7 +64,7 @@ public sealed partial class WFEncounterTest
         await RunTicks(5);
 
         var patrols = Server.System<WFStationPatrolSystem>();
-        var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFStationPatrolPrototype>("WFTestStationPatrol");
+        var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFStationPatrolPrototype>(WFTestStationPatrolProto);
         EntityUid first = default;
         EntityUid second = default;
         await Server.WaitAssertion(() =>
@@ -101,7 +104,7 @@ public sealed partial class WFEncounterTest
 
         var patrols = Server.System<WFStationPatrolSystem>();
         var objectives = Server.System<WFCrewObjectiveSystem>();
-        var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFStationPatrolPrototype>("WFTestStationPatrol");
+        var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFStationPatrolPrototype>(WFTestStationPatrolProto);
         var ships = new List<WFEncounterShipState>();
         await Server.WaitAssertion(() =>
         {
@@ -157,7 +160,7 @@ public sealed partial class WFEncounterTest
     {
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFEncounterJudgePatrol");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFEncounterJudgePatrolProto);
             var station = ClampDeck(new Vector2(81000, 83000)).Grid;
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(81000, 81000), MapData.MapId), out var encounter,
                 stops: new List<EntityUid> { station }), Is.True);

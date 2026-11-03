@@ -18,6 +18,9 @@ namespace Content.IntegrationTests.Tests._WF.Encounters;
 /// <summary>A piloted mech flying free of any grid is a vessel to encounter ships: zones and hits make it a target.</summary>
 public sealed partial class WFEncounterTest
 {
+    private static ProtoId<WFEncounterPrototype> WFTestMechQuietProto => "WFTestMechQuiet";
+    private static readonly ProtoId<Content.Shared.Damage.Prototypes.DamageTypePrototype> BluntDamageTypeProto = "Blunt";
+
     [TestPrototypes]
     private const string MechPrototypes = @"
 - type: wfEncounter
@@ -49,7 +52,7 @@ public sealed partial class WFEncounterTest
         EntityUid encounter = default, mech = default;
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestAuditZoneGuarded");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestAuditZoneGuardedProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(57000, -57000), MapData.MapId), out encounter), Is.True);
 
             mech = SEntMan.SpawnEntity("MechRipley", new MapCoordinates(new Vector2(57100, -57000), MapData.MapId));
@@ -81,7 +84,7 @@ public sealed partial class WFEncounterTest
     {
         await Server.WaitAssertion(() =>
         {
-            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>("WFTestMechQuiet");
+            var prototype = Server.ResolveDependency<IPrototypeManager>().Index<WFEncounterPrototype>(WFTestMechQuietProto);
             Assert.That(Server.System<WFEncounterSystem>().TrySpawn(prototype, new MapCoordinates(new Vector2(58000, -58000), MapData.MapId), out var encounter), Is.True);
             var state = SEntMan.GetComponent<WFEncounterComponent>(encounter).Ships["quiet"];
 
@@ -98,7 +101,7 @@ public sealed partial class WFEncounterTest
             }
 
             Assert.That(victim, Is.Not.Null);
-            var damage = new DamageSpecifier(Server.ResolveDependency<IPrototypeManager>().Index<Content.Shared.Damage.Prototypes.DamageTypePrototype>("Blunt"), 1);
+            var damage = new DamageSpecifier(Server.ResolveDependency<IPrototypeManager>().Index<Content.Shared.Damage.Prototypes.DamageTypePrototype>(BluntDamageTypeProto), 1);
             Server.System<DamageableSystem>().TryChangeDamage(victim, damage, origin: pilot);
 
             var alerts = Server.System<WFCrewAlertSystem>();

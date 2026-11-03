@@ -17,7 +17,7 @@ public readonly record struct WFMappingIssueRule(
 
 /// <summary>
 /// Every rule the checker knows, so a client can render a report without knowing the rules. Pure: the server
-/// decides when a rule fires. Rules with the <see cref="WFMappingIssueScope.Map"/> scope run for both scopes;
+/// decides when a rule fires. Rules with the <see cref="WFMappingIssueScope.Map"/> scope run for every scope;
 /// <see cref="WFMappingIssueScope.Ship"/> ones only for a ship.
 /// </summary>
 public static class WFMappingIssueCatalog
@@ -52,6 +52,7 @@ public static class WFMappingIssueCatalog
     public const string MapLooseEntity = "map-loose-entity";
     public const string MapUnsaved = "map-unsaved";
     public const string MapDenied = "map-denied";
+    public const string MapLint = "map-lint";
 
     private static readonly WFMappingIssueRule[] RuleList =
     {
@@ -76,6 +77,7 @@ public static class WFMappingIssueCatalog
         new(MapLooseEntity, WFMappingIssueSeverity.Warning, WFMappingIssueScope.Map),
         new(MapUnsaved, WFMappingIssueSeverity.Error, WFMappingIssueScope.Map),
         new(MapDenied, WFMappingIssueSeverity.Error, WFMappingIssueScope.Map),
+        new(MapLint, WFMappingIssueSeverity.Error, WFMappingIssueScope.Map),
         new(More, WFMappingIssueSeverity.Note, WFMappingIssueScope.Map),
     };
 

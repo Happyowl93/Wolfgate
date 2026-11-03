@@ -28,6 +28,7 @@ using Robust.Shared.Network.Messages;
 using Robust.Shared.Placement;
 using Robust.Shared.Utility;
 using static Content.IntegrationTests.Tests._WF.MappingMode.WFMappingModeTestUtil;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.MappingMode;
 
@@ -40,6 +41,10 @@ namespace Content.IntegrationTests.Tests._WF.MappingMode;
 [TestFixture]
 public sealed class WFMappingTestModeTest
 {
+    private static readonly System.Text.RegularExpressions.Regex LevelFileRegex = new(@"^z-?\d+\.yml$");
+
+    private static readonly ProtoId<RadioChannelPrototype> CommonProto = "Common";
+
     private const string MapName = "Test Mode Ship";
 
     private static List<string> Versions(IResourceManager res, NetUserId user, string map)
@@ -147,7 +152,7 @@ public sealed class WFMappingTestModeTest
             // Nothing of the running copy reaches past the test: no global announcements, no FTL, no radio across.
             var ship = session.Test!.Ship!.Value;
             var shuttle = entMan.System<ShuttleSystem>();
-            var common = server.ProtoMan.Index<RadioChannelPrototype>("Common");
+            var common = server.ProtoMan.Index<RadioChannelPrototype>(CommonProto);
             var outward = new RadioReceiveAttemptEvent(common, mob, ownGrid);
             entMan.EventBus.RaiseEvent(EventSource.Local, ref outward);
             var inward = new RadioReceiveAttemptEvent(common, ownGrid, mob);
@@ -210,7 +215,7 @@ public sealed class WFMappingTestModeTest
             Assert.That(versions, Has.Count.EqualTo(1));
             var folder = WFMappingLibraryNames.VersionFolder(a.UserId, MapName, versions[0]);
             var levelFiles = res.UserData.DirectoryEntries(folder)
-                .Where(f => System.Text.RegularExpressions.Regex.IsMatch(f, @"^z-?\d+\.yml$"))
+                .Where(f => LevelFileRegex.IsMatch(f))
                 .ToList();
             Assert.That(levelFiles, Is.EquivalentTo(new[] { "z0.yml" }), "One level file: the session's own.");
             Assert.That(mapSys.IsInitialized(session.RootMap), Is.False, "Saving didn't initialise anything.");
