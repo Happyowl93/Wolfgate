@@ -77,9 +77,8 @@ and `lamp` (the lamp's numeral).
 
 The durasteel plating line is `WFHullPlatingRefit` (`WFHullPlatingRefitSystem`): one tier that replaces every
 plastitanium wall in place with its durasteel wall (ShipArmor module), at 1,000 cr per wall, or 6 plasteel and 2
-plastitanium sheets per wall at a mobile drydock. It is the only way to get durasteel. The repair snapshot keeps the
-plastitanium wall, so the ship repair tool rebuilds plastitanium and a drydock repair plates it again at the repair
-share.
+plastitanium sheets per wall at a mobile drydock. It is the only way to get durasteel. Each swap is recorded in the
+ship's repair snapshot, so the ship repair tool and drydock repairs rebuild durasteel, with no refit charge.
 
 A refit buys the next tier any unit falls short of, for every unit of the line, and is recorded once its job finishes
 with nothing skipped. A repair then brings each owned line back to tier, rebuilt machines included: units the ship paid

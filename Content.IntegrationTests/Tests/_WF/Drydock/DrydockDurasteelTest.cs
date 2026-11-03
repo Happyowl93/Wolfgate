@@ -4,6 +4,7 @@ using System.Linq;
 using Content.IntegrationTests.Pair;
 using Content.Server._Mono.ShipRepair;
 using Content.Server._WF.Drydock;
+using Content.Shared._Mono.ShipRepair.Components;
 using Content.Shared._WF.Drydock;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Maths;
@@ -12,8 +13,8 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WF.Drydock;
 
 /// <summary>
-/// The durasteel plating refit swaps plastitanium walls in place, leaves the repair snapshot whole, and comes back on a
-/// rebuilt wall at the repair share.
+/// The durasteel plating refit swaps plastitanium walls in place and records them in the repair snapshot, so repairs
+/// rebuild durasteel.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFHullPlatingRefitSystem))]
@@ -127,7 +128,10 @@ public sealed class DrydockDurasteelTest
         await pair.CleanReturnAsync();
     }
 
-    /// <summary>A ship that owns the plating gets a destroyed wall back as durasteel, at the repair share.</summary>
+    /// <summary>
+    /// The repair snapshot records the durasteel wall, so the ship repair tool and a drydock repair rebuild it as durasteel,
+    /// with no refit charge.
+    /// </summary>
     [Test]
     public async Task RepairRestoresDurasteel()
     {
@@ -156,11 +160,19 @@ public sealed class DrydockDurasteelTest
         {
             refits.Apply(durasteel, wall, 1);
             refits.SetRefit(grid, DurasteelRefit.Id, 1, 1);
-            em.DeleteEntity(FindAt(pair, grid, "WFWallDurasteel", WallTile));
+            var data = em.GetComponent<ShipRepairDataComponent>(grid);
+            var spec = data.Chunks.Values.SelectMany(c => c.Entities.Values)
+                .Single(s => s.OriginalEntity == em.GetNetEntity(FindAt(pair, grid, "WFWallDurasteel", WallTile)));
+            Assert.That(data.EntityPalette[spec.ProtoIndex].Id, Is.EqualTo("WFWallDurasteel"),
+                "The snapshot should record the durasteel wall, which the repair tool rebuilds.");
 
+            em.DeleteEntity(FindAt(pair, grid, "WFWallDurasteel", WallTile));
             var rebuild = drydock.BuildRepairItems(grid, console).Single(i => i.Kind == WFDrydockWorkKind.Entity);
-            Assert.That(rebuild.RefitCost, Is.EqualTo((int) Math.Ceiling(durasteel.Tiers[0].Price * console.RefitRepairShare)),
-                "A covered wall should be plated again at the repair share.");
+            Assert.Multiple(() =>
+            {
+                Assert.That(rebuild.Prototype?.Id, Is.EqualTo("WFWallDurasteel"), "The drydock should rebuild durasteel.");
+                Assert.That(rebuild.RefitCost, Is.Zero, "A rebuilt durasteel wall carries no refit charge.");
+            });
 
             drydock.ApplyItem(grid, rebuild);
             Assert.Multiple(() =>

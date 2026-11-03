@@ -2,12 +2,13 @@ using Content.Shared._Mono.ShipRepair.Components;
 using Content.Shared._WF.Drydock;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.Drydock;
 
 /// <summary>
 /// Hull plating refits (<see cref="WFHullPlatingRefit"/>): each stock wall replaced in place by its plated wall. Each
-/// wall is a unit. The repair snapshot keeps the stock wall, so a rebuild comes back stock and an owned refit plates it.
+/// wall is a unit. The repair snapshot records the plated wall, so the ship repair tool and drydock repairs rebuild it.
 /// </summary>
 public sealed partial class WFHullPlatingRefitSystem : EntitySystem
 {
@@ -76,12 +77,12 @@ public sealed partial class WFHullPlatingRefitSystem : EntitySystem
         if (!Transform(spawned).Anchored)
             _transform.AnchorEntity(spawned);
 
-        Repoint(grid, coordinates, wall, spawned);
+        Record(grid, coordinates, wall, spawned, plated);
         Del(wall);
     }
 
-    /// <summary>Points the repair snapshot's entry for a replaced wall at its replacement, keeping the stock prototype.</summary>
-    private void Repoint(EntityUid grid, EntityCoordinates coordinates, EntityUid old, EntityUid replacement)
+    /// <summary>Records a replaced wall's replacement and its prototype in the repair snapshot, in place of the old wall.</summary>
+    private void Record(EntityUid grid, EntityCoordinates coordinates, EntityUid old, EntityUid replacement, EntProtoId plated)
     {
         if (!TryComp<ShipRepairDataComponent>(grid, out var data) || !TryComp<MapGridComponent>(grid, out var gridComp))
             return;
@@ -99,6 +100,14 @@ public sealed partial class WFHullPlatingRefitSystem : EntitySystem
             if (spec.OriginalEntity != oldNet)
                 continue;
 
+            var index = data.EntityPalette.IndexOf(plated);
+            if (index == -1)
+            {
+                data.EntityPalette.Add(plated);
+                index = data.EntityPalette.Count - 1;
+            }
+
+            spec.ProtoIndex = index;
             spec.OriginalEntity = GetNetEntity(replacement);
             Dirty(grid, data);
             return;
