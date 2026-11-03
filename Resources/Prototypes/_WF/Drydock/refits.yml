@@ -111,7 +111,8 @@
 
 # Durasteel plating: every plastitanium wall replaced in place by its durasteel wall, five thirds as tough. At 1,000 cr a
 # wall, about three quarters of what a hull is worth per wall, plating a whole hull costs most of what the hull did. A
-# mobile drydock bills 6 plasteel and 2 plastitanium sheets per wall.
+# mobile drydock bills 15 plasteel and 5 plastitanium units per wall, so plating a Luda (398 walls) takes about 60
+# plasteel and 20 plastitanium sheets.
 - type: wfShipRefit
   id: WFRefitDurasteel
   name: drydock-upgrade-durasteel
@@ -126,5 +127,5 @@
   tiers:
   - price: 1000
     materials:
-      Plasteel: 600
-      Plastitanium: 200
+      Plasteel: 15
+      Plastitanium: 5
