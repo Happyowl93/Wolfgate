@@ -68,6 +68,14 @@ public sealed class TradeFreightTest
             entMan.RemoveComponent<WFEncounterGridComponent>(ship);
     }
 
+    /// <summary>Spawns a crate in a hull's hold as cargo loaded for its run.</summary>
+    private static EntityUid Load(IEntityManager entMan, string good, EntityUid ship, int slot)
+    {
+        var crate = entMan.SpawnEntity(good, new EntityCoordinates(ship, slot + 0.5f, 0.5f));
+        entMan.GetComponent<WFTradeOriginComponent>(crate).Run = TradeTestWorld.Name(entMan, ship);
+        return crate;
+    }
+
     /// <summary>Seals a crate as freight bound for a station.</summary>
     private static void Seal(IEntityManager entMan, EntityUid crate, EntityUid destination)
     {
@@ -184,19 +192,22 @@ public sealed class TradeFreightTest
 
         EntityUid ship = default;
         EntityUid run = default;
+        EntityUid stowed = default;
         var crates = new List<EntityUid>();
 
         await server.WaitAssertion(() =>
         {
             TradeTestWorld.MarketChute(entMan, map);
             var (second, _) = TradeTestWorld.Station(entMan, map, new Vector2(0f, 60f), "WF test second stop");
-            ship = TradeTestWorld.Grid(entMan, map, new Vector2(0f, -60f), "WF test freighter", 4);
+            ship = TradeTestWorld.Grid(entMan, map, new Vector2(0f, -60f), "WF test freighter", 5);
             run = Run(entMan, GeneralManifest, map.Grid.Owner, second);
             Board(entMan, run, ship);
             for (var i = 0; i < 4; i++)
             {
-                crates.Add(entMan.SpawnEntity(Fabric, new EntityCoordinates(ship, i + 0.5f, 0.5f)));
+                crates.Add(Load(entMan, Fabric, ship, i));
             }
+
+            stowed = entMan.SpawnEntity(Fabric, new EntityCoordinates(ship, 4.5f, 0.5f));
 
             entMan.System<WFTradeMarketSystem>().Row(map.Grid.Owner, Fabric).Inbound = Plenty;
             var docked = new WFPilotDockedEvent(EntityUid.Invalid, ship, map.Grid.Owner);
@@ -207,6 +218,7 @@ public sealed class TradeFreightTest
         await server.WaitAssertion(() =>
         {
             Assert.That(crates.Count(entMan.EntityExists), Is.EqualTo(2), "A stop should take its share off the hull, leaving the rest to steal.");
+            Assert.That(entMan.EntityExists(stowed), "A crate a player put aboard isn't the run's freight.");
             Drop(entMan, run, ship);
         });
 
@@ -282,7 +294,7 @@ public sealed class TradeFreightTest
             ship = TradeTestWorld.Grid(entMan, map, new Vector2(0f, -60f), "WF test freighter", aboard);
             for (var i = 0; i < aboard; i++)
             {
-                crates.Add(entMan.SpawnEntity(Fabric, new EntityCoordinates(ship, i + 0.5f, 0.5f)));
+                crates.Add(Load(entMan, Fabric, ship, i));
             }
 
             run = Run(entMan, GeneralManifest, stop);

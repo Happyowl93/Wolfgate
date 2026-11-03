@@ -122,7 +122,8 @@ public sealed partial class WFTradeMarketSystem
         if (!TryComp<WFTradeMarketComponent>(grid, out var market) || !market.Ledger.TryGetValue(good, out var row))
             return 0f;
 
-        var amount = MathF.Min(row.Inbound, most);
+        // Only what fits on the shelf comes off; the rest stays owed.
+        var amount = MathF.Min(MathF.Min(row.Inbound, most), Profile(grid).VendorStock - row.Stock);
         if (amount <= 0f)
             return 0f;
 

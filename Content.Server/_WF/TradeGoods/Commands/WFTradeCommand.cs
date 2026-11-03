@@ -168,7 +168,10 @@ public sealed partial class WFTradeCommand : LocalizedEntityCommands
                 continue;
 
             shell.WriteLine(Loc.GetString("cmd-wf_trade-ledger-station", ("station", Name(grid)), ("role", role.ID)));
-            foreach (var (good, row) in EntityManager.GetComponent<WFTradeMarketComponent>(grid).Ledger.OrderBy(entry => entry.Key))
+            if (!EntityManager.TryGetComponent<WFTradeMarketComponent>(grid, out var market))
+                continue;
+
+            foreach (var (good, row) in market.Ledger.OrderBy(entry => entry.Key))
             {
                 shell.WriteLine(Loc.GetString("cmd-wf_trade-ledger-row", ("good", _market.GoodName(good)), ("stock", (int) row.Stock),
                     ("level", WFTradeMarketSystem.Shown(_market.Level(grid, good))), ("priced", WFTradeMarketSystem.Shown(row.Priced)),

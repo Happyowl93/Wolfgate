@@ -133,10 +133,11 @@ public sealed partial class WFTradeFreightSystem : EntitySystem
 
         // A crewed hull carries what is still aboard, so cargo taken off it never arrives; a simulated one, its manifest.
         var aboard = new Dictionary<string, List<EntityUid>>();
+        var run = Name(args.Grid);
         var query = EntityQueryEnumerator<WFTradeOriginComponent, TransformComponent, MetaDataComponent>();
-        while (query.MoveNext(out var uid, out _, out var xform, out var meta))
+        while (query.MoveNext(out var uid, out var origin, out var xform, out var meta))
         {
-            if (xform.GridUid == args.Grid && meta.EntityPrototype is { } proto)
+            if (xform.GridUid == args.Grid && origin.Run == run && meta.EntityPrototype is { } proto)
                 aboard.GetOrNew(proto.ID).Add(uid);
         }
 
@@ -150,6 +151,7 @@ public sealed partial class WFTradeFreightSystem : EntitySystem
         var supplied = new List<string>();
         var goods = new HashSet<string>();
         var profile = _market.Profile(station);
+        var carrying = hold.Values.Any(count => count > 0);
         var stopsLeft = Math.Max(1, encounter.Stops.Count - reached.Count + 1);
         foreach (var (good, count) in hold.ToList())
         {
@@ -177,7 +179,7 @@ public sealed partial class WFTradeFreightSystem : EntitySystem
         }
 
         // Nothing else refills a station, so stopping the freighters starves it of what they carry.
-        if (hold.Values.Any(count => count > 0) && _stock.WfRestock(station, profile.FreightRestock, manifest.Materials))
+        if (carrying && _stock.WfRestock(station, profile.FreightRestock, manifest.Materials))
             supplied.Add(Loc.GetString("wf-trade-goods-materials"));
 
         _shortages.Relieve(args.Station, goods);

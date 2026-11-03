@@ -43,6 +43,7 @@
   # WOLFGATE(TradeGoods) START: goes into a lathe like a sheet
   - type: Tag
     tags:
+    - Structure
     - RawMaterial
   - type: Material
   - type: PhysicalComposition
@@ -74,6 +75,7 @@
   # WOLFGATE(TradeGoods) START: goes into a lathe like a sheet
   - type: Tag
     tags:
+    - Structure
     - RawMaterial
   - type: Material
   - type: PhysicalComposition
@@ -132,6 +134,7 @@
   # WOLFGATE(TradeGoods) START: goes into a lathe like a sheet
   - type: Tag
     tags:
+    - Structure
     - RawMaterial
   - type: Material
   - type: PhysicalComposition
@@ -205,6 +208,7 @@
   # WOLFGATE(TradeGoods) START: goes into a lathe like a sheet
   - type: Tag
     tags:
+    - Structure
     - RawMaterial
   - type: Material
   - type: PhysicalComposition
@@ -269,6 +273,7 @@
   # WOLFGATE(TradeGoods) START: goes into a lathe like a sheet
   - type: Tag
     tags:
+    - Structure
     - RawMaterial
   - type: Material
   - type: PhysicalComposition
