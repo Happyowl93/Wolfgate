@@ -4792,3 +4792,127 @@ Entries:
   id: 100318
   time: '2026-11-02T09:48:52.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/455
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: The test suite runs three times faster on developer machines.
+  id: 100319
+  time: '2026-11-02T21:45:42.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/456
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Leg and foot markings no longer hide under the other limb when facing
+        east or west.
+  id: 100320
+  time: '2026-11-02T22:28:18.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/461
+- author: Balls2zawall
+  changes:
+    - type: Tweak
+      message: >-
+        Changed the configuration of the Shiv's ore magnet and ore processor,
+        and increased the size of the blast doors to make the whole thing more
+        accessible to use.
+  id: 100321
+  time: '2026-11-02T22:28:37.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/458
+- author: Happyowl93
+  changes:
+    - type: Add
+      message: >-
+        Added the ARACHNE hacking harpoon, a ship gun that fires a dart on a 250
+        m cable. A hit disables the target's FTL, then parks it and stops its
+        guns firing on you, but your own ship guns stay locked until the cable
+        is gone.  Made available to PDV, VG and Underground Market
+    - type: Tweak
+      message: New sprites for the tow harpoon, its turret and its cable.
+    - type: Tweak
+      message: Cables now draw as smooth curves and fold less when slack.
+  id: 100322
+  time: '2026-11-02T23:35:38.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/460
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        NPC gunners stand down at once when their crew's docking policy is
+        reset.
+  id: 100323
+  time: '2026-11-02T23:35:51.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/462
+- author: TheSlapper
+  changes:
+    - type: Add
+      message: Added various urban items for mapping.
+  id: 100324
+  time: '2026-11-03T00:45:47.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/463
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: >-
+        Artifacts that turn invisible can still be examined, so close inspection
+        nodes can be finished.
+    - type: Fix
+      message: >-
+        The medical recipes guidebook page lists the medical assembler's recipes
+        again.
+    - type: Fix
+      message: The Dredger's station records computer faces the cockpit.
+    - type: Fix
+      message: >-
+        Ghost roles no longer draw company pay, company radio or company cuts
+        from your character.
+    - type: Fix
+      message: Mining laser power buttons stay in place when an asteroid is scanned.
+    - type: Fix
+      message: Ghosts can hear company and crew radio.
+    - type: Fix
+      message: Waypoints stay with every piece of a ship that splits.
+    - type: Fix
+      message: Slimes hunt monkeys and other passive mobs.
+    - type: Fix
+      message: Slimes always split into at least two.
+    - type: Tweak
+      message: >-
+        Smuggling money reaches the Ashfall Reavers at most once every 20
+        minutes.
+    - type: Fix
+      message: A flare that was already fired leaves the flare gun when fired again.
+  id: 100325
+  time: '2026-11-03T01:55:12.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/465
+- author: Gandalf2k15
+  changes:
+    - type: Fix
+      message: Selling a ship no longer freezes the server.
+    - type: Fix
+      message: >-
+        Sold ships no longer lose their storage, device links or toggleable
+        clothing when copied for the used lot.
+    - type: Fix
+      message: >-
+        Salvage expeditions no longer fail to generate when their cables can't
+        all connect.
+    - type: Fix
+      message: >-
+        Admins can run Toolshed commands like entities and nearby without the >
+        prefix.
+  id: 100326
+  time: '2026-11-03T01:55:26.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/466
+- author: Gandalf2k15
+  changes:
+    - type: Add
+      message: Ships holding a hostage show it on the mass scanner.
+    - type: Add
+      message: >-
+        Pay an abductor's ransom over a hail, then dock and collect the
+        prisoner.
+    - type: Tweak
+      message: Judges no longer fire on ships with players aboard or docked to them.
+  id: 100327
+  time: '2026-11-03T02:29:35.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/454
