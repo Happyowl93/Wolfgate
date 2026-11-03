@@ -1,5 +1,5 @@
-# Crystal recipes ported from wizden (wizden#45105, #45329): the same results as Mono's material recipes, paid in
-# xenoborg crystals instead. IDs are wizden's, except the shell, which prints Mono's selectable chassis.
+# Shells and every weapon module cost xenoborg crystals only; utility modules cost materials only. Recipe IDs are
+# wizden's (wizden#45105, #45329) where wizden has the recipe, WF-prefixed otherwise.
 
 - type: latheRecipe
   id: XenoborgExtractorRecipe
@@ -13,35 +13,44 @@
   result: BorgChassisSelectableXenoborg
   completetime: 10
   materials:
+    XenoborgCrystal: 1000
+
+# Primary weapons.
+
+- type: latheRecipe
+  id: WFXenoborgModuleDefenseRecipe
+  result: XenoborgModuleDefense
+  completetime: 2
+  materials:
     XenoborgCrystal: 100
 
 - type: latheRecipe
-  id: XenoborgModuleDoorControlRecipe
-  result: XenoborgModuleDoorControl
+  id: WFXenoborgModuleLaserRecipe
+  result: XenoborgModuleLaser
+  completetime: 2
+  materials:
+    XenoborgCrystal: 100
+
+- type: latheRecipe
+  id: WFXenoborgModuleSwordRecipe
+  result: XenoborgModuleSword
+  completetime: 2
+  materials:
+    XenoborgCrystal: 100
+
+- type: latheRecipe
+  id: WFXenoborgModuleHypoRecipe
+  result: XenoborgModuleHypo
   completetime: 2
   materials:
     XenoborgCrystal: 200
 
 - type: latheRecipe
-  id: XenoborgModuleDeflectorFieldRecipe
-  result: XenoborgModuleDeflectorField
+  id: XenoborgModuleBioKinfeRecipe
+  result: XenoborgModuleBioKinfe
   completetime: 2
   materials:
-    XenoborgCrystal: 100
-
-- type: latheRecipe
-  id: XenoborgModuleZapRecipe
-  result: XenoborgModuleZap
-  completetime: 2
-  materials:
-    XenoborgCrystal: 100
-
-- type: latheRecipe
-  id: XenoborgModuleOilGunRecipe
-  result: XenoborgModuleOilGun
-  completetime: 2
-  materials:
-    XenoborgCrystal: 300
+    XenoborgCrystal: 200
 
 - type: latheRecipe
   id: XenoborgModuleNaniteGunRecipe
@@ -58,6 +67,36 @@
     XenoborgCrystal: 200
 
 - type: latheRecipe
+  id: XenoborgModuleBurstFireLaserRecipe
+  result: XenoborgModuleBurstFireLaser
+  completetime: 2
+  materials:
+    XenoborgCrystal: 200
+
+- type: latheRecipe
+  id: XenoborgModuleOilGunRecipe
+  result: XenoborgModuleOilGun
+  completetime: 2
+  materials:
+    XenoborgCrystal: 300
+
+- type: latheRecipe
+  id: XenoborgModuleEnergySwordRecipe
+  result: XenoborgModuleEnergySword
+  completetime: 2
+  materials:
+    XenoborgCrystal: 300
+
+# Secondary weapons.
+
+- type: latheRecipe
+  id: WFXenoborgModuleTileGunRecipe
+  result: XenoborgModuleTileGun
+  completetime: 2
+  materials:
+    XenoborgCrystal: 100
+
+- type: latheRecipe
   id: XenoborgModuleGuidedMissileLauncherRecipe
   result: XenoborgModuleGuidedMissileLauncher
   completetime: 2
@@ -71,12 +110,14 @@
   materials:
     XenoborgCrystal: 400
 
+# Weapons that take no weapon slot.
+
 - type: latheRecipe
-  id: XenoborgModuleBurstFireLaserRecipe
-  result: XenoborgModuleBurstFireLaser
+  id: XenoborgModuleZapRecipe
+  result: XenoborgModuleZap
   completetime: 2
   materials:
-    XenoborgCrystal: 200
+    XenoborgCrystal: 100
 
 - type: latheRecipe
   id: XenoborgModuleHeavyRadioactiveRecipe
@@ -84,31 +125,3 @@
   completetime: 2
   materials:
     XenoborgCrystal: 100
-
-- type: latheRecipe
-  id: XenoborgModuleEnergySwordRecipe
-  result: XenoborgModuleEnergySword
-  completetime: 2
-  materials:
-    XenoborgCrystal: 300
-
-- type: latheRecipe
-  id: XenoborgModuleJumpRecipe
-  result: XenoborgModuleJump
-  completetime: 2
-  materials:
-    XenoborgCrystal: 100
-
-- type: latheRecipe
-  id: XenoborgModuleBioKinfeRecipe
-  result: XenoborgModuleBioKinfe
-  completetime: 2
-  materials:
-    XenoborgCrystal: 200
-
-- type: latheRecipe
-  id: XenoborgModuleSuperCloakDeviceRecipe
-  result: XenoborgModuleSuperCloakDevice
-  completetime: 2
-  materials:
-    XenoborgCrystal: 300

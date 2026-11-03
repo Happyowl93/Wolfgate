@@ -20,8 +20,9 @@ metabolizer bonus, shock delay and the jump ability's own action.
 Xenoborg crystals are a second currency at the mothership core. The core prints a xenoborg extractor flatpack
 (`XenoborgExtractorSystem`). The extractor only anchors on a station's grid, which here includes player ships. It
 drains that grid's HV power and grows a crystal every 15 seconds at full draw. The core takes the crystals for
-wizden's crystal-priced recipes: shells, and the modules wizden prices in crystals. These sit next to Mono's material
-recipes rather than replacing them. Crystals sell for nothing, so the extractor can't turn power into money.
+shells (10 crystals) and every weapon module (1 to 4), including Mono's defense, laser cannon and hypo modules; utility
+modules cost materials only, so each module has one recipe. Crystals sell for nothing, so the extractor can't turn
+power into money.
 
 The xenoborg plating floors are recoloured cobalt blue; the circuit floor uses the old circuit tile's royal blue.
 Its traces glow and breathe between deep and pale royal blue
@@ -222,8 +223,10 @@ keyed triggers that make missiles explode at the end of their flight (here they 
 - [`Resources/Prototypes/_Mono/game_presets.yml`](../../../Resources/Prototypes/_Mono/game_presets.yml): Monolith #4558
 - [`Resources/Prototypes/_Mono/GameRules/xenoborgs.yml`](../../../Resources/Prototypes/_Mono/GameRules/xenoborgs.yml): ported from Monolith #4558, not merged there
 - [`Resources/Prototypes/_Mono/Recipes/Lathes/Xenoborgs/Packs/xenoborgs.yml`](../../../Resources/Prototypes/_Mono/Recipes/Lathes/Xenoborgs/Packs/xenoborgs.yml)
+  - shells cost crystals only (WFXenoborgCrystalRecipes)
   - Monolith #4558
-  - modules ported from wizden
+  - weapons cost crystals only
+  - utility modules ported from wizden; their weapons cost crystals only
 - [`Resources/Prototypes/_Mono/Recipes/Lathes/Xenoborgs/xenoborgs.yml`](../../../Resources/Prototypes/_Mono/Recipes/Lathes/Xenoborgs/xenoborgs.yml)
   - added Plastic and Glass cost
   - added Plastic cost
@@ -234,7 +237,9 @@ keyed triggers that make missiles explode at the end of their flight (here they 
   - wizden#43013 + #45168 xenoborg laser cannon sprite and blue beam, same damage
 - [`Resources/Prototypes/Entities/Structures/Walls/walls.yml`](../../../Resources/Prototypes/Entities/Structures/Walls/walls.yml): Banded blue resprite
 - [`Resources/Prototypes/Tiles/floors.yml`](../../../Resources/Prototypes/Tiles/floors.yml): Blue recolor of the wizden resprite.
-- [`Resources/ServerInfo/_Mono/Guidebook/Creatures/Xenoborgs.xml`](../../../Resources/ServerInfo/_Mono/Guidebook/Creatures/Xenoborgs.xml): wizden upgrade modules
+- [`Resources/ServerInfo/_Mono/Guidebook/Creatures/Xenoborgs.xml`](../../../Resources/ServerInfo/_Mono/Guidebook/Creatures/Xenoborgs.xml)
+  - shells and weapon modules cost crystals
+  - wizden upgrade modules
 - [`Resources/Textures/_Mono/Structures/Storage/Crates/xeno.rsi/`](../../../Resources/Textures/_Mono/Structures/Storage/Crates/xeno.rsi/): Xenoborg crate sprites, ported from Monolith
 - [`Resources/Textures/_Mono/Structures/Walls/xorgreinforced.rsi/`](../../../Resources/Textures/_Mono/Structures/Walls/xorgreinforced.rsi/): Xenoborg reinforced wall sprites, ported from Monolith
 - [`Resources/Textures/_Mono/Structures/Walls/xorgreinforced_Diag.rsi/`](../../../Resources/Textures/_Mono/Structures/Walls/xorgreinforced_Diag.rsi/): Xenoborg diagonal wall sprites, ported from Monolith

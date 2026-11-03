@@ -9,17 +9,18 @@
   id: WFXenoborgCrystalRecipes
   recipes:
   - WFXenoborgShellCrystalRecipe
-  - XenoborgModuleDoorControlRecipe
-  - XenoborgModuleDeflectorFieldRecipe
-  - XenoborgModuleZapRecipe
-  - XenoborgModuleOilGunRecipe
+  - WFXenoborgModuleDefenseRecipe
+  - WFXenoborgModuleLaserRecipe
+  - WFXenoborgModuleSwordRecipe
+  - WFXenoborgModuleHypoRecipe
+  - XenoborgModuleBioKinfeRecipe
   - XenoborgModuleNaniteGunRecipe
   - XenoborgModuleHeavyLaserRecipe
+  - XenoborgModuleBurstFireLaserRecipe
+  - XenoborgModuleOilGunRecipe
+  - XenoborgModuleEnergySwordRecipe
+  - WFXenoborgModuleTileGunRecipe
   - XenoborgModuleGuidedMissileLauncherRecipe
   - XenoborgModuleRocketRecipe
-  - XenoborgModuleBurstFireLaserRecipe
+  - XenoborgModuleZapRecipe
   - XenoborgModuleHeavyRadioactiveRecipe
-  - XenoborgModuleEnergySwordRecipe
-  - XenoborgModuleJumpRecipe
-  - XenoborgModuleBioKinfeRecipe
-  - XenoborgModuleSuperCloakDeviceRecipe

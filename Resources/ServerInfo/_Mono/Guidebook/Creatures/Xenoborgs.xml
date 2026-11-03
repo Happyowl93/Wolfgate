@@ -31,7 +31,7 @@
   </Box>
   As the mothership, you must grow your army of borgs. To do so, you must convert all the sentient beings you can find. This can be achieved in the following manner:
   - 1. Have your Xenoborgs bring dead crew to your ship, placing them in the body crusher
-  - 2. As the mothership core, you can print Xenoborg shells by inserting materials into yourself and then using yourself as a lathe
+  <!-- WOLFGATE(Xenoborgs): shells and weapon modules cost crystals -->- 2. As the mothership core, you can print Xenoborg shells from xenoborg crystals: have your xenoborgs build a xenoborg extractor, which grows crystals from its grid's power, then insert the crystals into yourself and use yourself as a lathe. Weapon modules cost crystals too; every other module costs materials
  
   ## Xenoborg Chassis
   There is a total of four types of Xenoborgs. Each Borg type has certain abilities that the others lack and require teamwork to help grow the xenoborgs numbers.
