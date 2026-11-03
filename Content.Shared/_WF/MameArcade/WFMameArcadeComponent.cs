@@ -17,4 +17,29 @@ public sealed partial class WFMameArcadeComponent : Component
 
     [ViewVariables]
     public string Fingerprint = string.Empty;
+
+    /// <summary>Whose game the cabinet shows: player 1 of a 2-player game, or someone playing alone.</summary>
+    [ViewVariables]
+    public EntityUid? Player;
+
+    [ViewVariables]
+    public string PlayerGame = string.Empty;
+
+    /// <summary>Bystanders receiving the picture.</summary>
+    [ViewVariables]
+    public HashSet<EntityUid> Watchers = new();
+
+    /// <summary>Times anyone started watching, so the player knows to send a keyframe.</summary>
+    [ViewVariables]
+    public int WatcherJoins;
+
+    /// <summary>Stream bytes the player may still send this second, refilled each second.</summary>
+    [ViewVariables]
+    public int AudioAllowance;
+
+    [ViewVariables]
+    public int VideoAllowance;
+
+    [ViewVariables]
+    public TimeSpan AllowanceRefill;
 }

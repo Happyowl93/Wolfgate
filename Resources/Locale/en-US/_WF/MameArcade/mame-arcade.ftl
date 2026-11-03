@@ -34,3 +34,12 @@ mame-arcade-seat = { $game } · Player { $seat }, with { $partner } · { $delay 
 mame-arcade-waiting-partner = Waiting for the other player...
 mame-arcade-partner-left = The other player left. Player { $seat } stays idle.
 mame-arcade-desynced = The two games went out of sync, so you're playing alone now.
+
+mame-arcade-showing = { $player } is playing { $game } on this cabinet.
+mame-arcade-watch = Watch
+mame-arcade-watch-full = Watch (full)
+mame-arcade-stop-watching = Stop watching
+mame-arcade-watching = Watching { $player } play { $game }
+mame-arcade-watch-waiting = Waiting for the picture...
+mame-arcade-watch-ended = The game you were watching ended.
+mame-arcade-status-watched = { $status } · { $count } watching

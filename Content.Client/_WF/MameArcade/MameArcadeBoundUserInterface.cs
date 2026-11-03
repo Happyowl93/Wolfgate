@@ -3,7 +3,7 @@ using Robust.Client.UserInterface;
 
 namespace Content.Client._WF.MameArcade;
 
-/// <summary>Opens the cabinet's window and carries its lobby and 2-player inputs to and from the server.</summary>
+/// <summary>Opens the cabinet's window and carries its lobby, 2-player inputs and streams to and from the server.</summary>
 public sealed partial class MameArcadeBoundUserInterface : BoundUserInterface
 {
     [Dependency] private MameArcadeNetManager _net = default!;
@@ -23,13 +23,34 @@ public sealed partial class MameArcadeBoundUserInterface : BoundUserInterface
         _window.JoinRequested += fingerprint => SendMessage(new MameArcadeJoinMessage(fingerprint));
         _window.LeaveRequested += () => SendMessage(new MameArcadeLeaveMessage());
         _window.InputsReady += SendInputs;
+        _window.SoloStarted += game => SendMessage(new MameArcadeSoloMessage(game));
+        _window.WatchRequested += watching => SendMessage(new MameArcadeWatchMessage(watching));
+        _window.StreamReady += SendStream;
         _net.InputReceived += OnInputReceived;
+        _net.StreamReceived += OnStreamReceived;
     }
 
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
         _net.InputReceived -= OnInputReceived;
+        _net.StreamReceived -= OnStreamReceived;
+    }
+
+    private void SendStream(MameArcadeStreamKind kind, byte[] data)
+    {
+        _net.Send(new MsgMameArcadeStream
+        {
+            Cabinet = EntMan.GetNetEntity(Owner),
+            Kind = kind,
+            Data = data,
+        });
+    }
+
+    private void OnStreamReceived(MsgMameArcadeStream message)
+    {
+        if (message.Kind == MameArcadeStreamKind.Video && message.Cabinet == EntMan.GetNetEntity(Owner))
+            _window?.ReceiveVideo(message.Data);
     }
 
     private void SendInputs(int firstFrame, ushort[] inputs, int checksumFrame, uint checksum, int margin, int delay)

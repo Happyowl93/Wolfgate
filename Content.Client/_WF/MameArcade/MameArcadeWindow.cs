@@ -1,8 +1,10 @@
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using Content.Client._WF.MameArcade.NeoGeo;
 using Content.Shared._WF.MameArcade;
+using Content.Shared.CCVar;
 using Robust.Client.Audio;
 using Robust.Client.Player;
 using Robust.Client.UserInterface;
@@ -15,11 +17,21 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace Content.Client._WF.MameArcade;
 
-/// <summary>The player's ROM library, the cabinet's 2-player lobby, and the running game.</summary>
+/// <summary>
+/// The player's ROM library, the cabinet's 2-player lobby, and the running or watched game. The game on the
+/// cabinet's screen streams its sound, and its picture while anyone watches.
+/// </summary>
 public sealed partial class MameArcadeWindow : DefaultWindow
 {
     // How long a 2-player game may wait on the partner before the screen says so.
     private const float StallNotice = 0.5f;
+
+    // A tenth of a second of sound per packet.
+    private const int AudioPacketSamples = MameAudioCodec.SampleRate / 10;
+
+    // The picture's frame rate when the rate allows it, and how often a keyframe resets a watcher's screen.
+    private const float VideoInterval = 1f / 15f;
+    private const float KeyframeSeconds = 5f;
 
     [Dependency] private IAudioManager _audioManager = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
@@ -48,9 +60,28 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     private readonly Button _loadButton;
     private readonly MameArcadeScreen _screen = new();
 
+    private readonly BoxContainer _showingRow;
+    private readonly Label _showingLabel;
+    private readonly Button _watchButton;
+    private readonly BoxContainer _watchPanel;
+    private readonly Label _watchStatus;
+    private readonly MameArcadeScreen _watchScreen = new() { CanKeyboardFocus = false, KeyboardFocusOnClick = false };
+    private MameVideoDecoder? _decoder;
+    private string _watchedGame = string.Empty;
+
     private readonly List<short[]> _audioScratch = new();
     private readonly List<(int Frame, uint Checksum)> _checksumScratch = new();
     private readonly Queue<(int Frame, uint Checksum)> _checksumsToSend = new();
+
+    // What this client sends while its game is on the cabinet.
+    private readonly List<short> _stereoOut = new();
+    private readonly List<short> _monoOut = new();
+    private MameVideoEncoder _encoder = new();
+    private Task<byte[]>? _encoding;
+    private float _videoAllowance;
+    private float _sinceVideo;
+    private float _sinceKeyframe;
+    private int _joinsSeen;
 
     // Inputs can beat the start message here, which waits for its game tick; kept until the game starts.
     private readonly List<(int First, ushort[] Inputs, int ChecksumFrame, uint Checksum, int Margin, int Delay)> _early = new();
@@ -70,6 +101,15 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     public event Action? LeaveRequested;
     /// <summary>First frame, inputs, checksum frame, checksum, this side's slack and delay, for the partner.</summary>
     public event Action<int, ushort[], int, uint, int, int>? InputsReady;
+
+    /// <summary>Started a 1-player game, by set name.</summary>
+    public event Action<string>? SoloStarted;
+
+    /// <summary>Starts or stops watching the cabinet's game.</summary>
+    public event Action<bool>? WatchRequested;
+
+    /// <summary>A packet of this client's game for the people around the cabinet.</summary>
+    public event Action<MameArcadeStreamKind, byte[]>? StreamReady;
 
     public MameArcadeWindow()
     {
@@ -102,6 +142,11 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         _hostButton = new Button { Text = Loc.GetString("mame-arcade-host"), Disabled = true };
         _hostButton.OnPressed += _ => Host();
 
+        _showingLabel = new Label { HorizontalExpand = true };
+        _watchButton = new Button { Text = Loc.GetString("mame-arcade-watch") };
+        _watchButton.OnPressed += _ => Watch();
+        _showingRow = new BoxContainer { Visible = false, Children = { _showingLabel, _watchButton } };
+
         _libraryPanel = new BoxContainer
         {
             Orientation = BoxContainer.LayoutOrientation.Vertical,
@@ -112,6 +157,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
                 new Label { Text = Loc.GetString("mame-arcade-library-help") },
                 new BoxContainer { Children = { import, folder, refresh } },
                 new BoxContainer { Children = { _lobbyLabel, _joinButton, _cancelButton } },
+                _showingRow,
                 _games,
                 _details,
                 new BoxContainer { Children = { _playButton, _hostButton } },
@@ -140,10 +186,26 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             },
         };
 
+        _watchStatus = new Label { HorizontalExpand = true };
+        var stopWatching = new Button { Text = Loc.GetString("mame-arcade-stop-watching") };
+        stopWatching.OnPressed += _ => StopWatching(null);
+
+        _watchPanel = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
+            VerticalExpand = true,
+            Visible = false,
+            Children =
+            {
+                new BoxContainer { Children = { _watchStatus, stopWatching } },
+                _watchScreen,
+            },
+        };
+
         Contents.AddChild(new BoxContainer
         {
             Orientation = BoxContainer.LayoutOrientation.Vertical,
-            Children = { _libraryPanel, _gamePanel },
+            Children = { _libraryPanel, _gamePanel, _watchPanel },
         });
 
         RefreshLibrary();
@@ -155,6 +217,19 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     {
         _lobby = state;
         UpdateLobby();
+
+        if (_decoder != null && (state.Showing.Player == null || state.Showing.Game != _watchedGame))
+            StopWatching(Loc.GetString("mame-arcade-watch-ended"));
+    }
+
+    /// <summary>A picture packet of the watched game.</summary>
+    public void ReceiveVideo(byte[] packet)
+    {
+        if (_decoder == null || !_decoder.Decode(packet))
+            return;
+
+        _watchScreen.SetFrame(_decoder.Frame, _decoder.Width, _decoder.Height);
+        _watchStatus.Text = WatchingText();
     }
 
     /// <summary>The server seated both players; start from power-on.</summary>
@@ -213,9 +288,11 @@ public sealed partial class MameArcadeWindow : DefaultWindow
                 return;
             case MameSessionState.Failed:
                 _sawmill.Error($"MAME arcade stopped: {_session.Error}");
+                LeaveRequested?.Invoke();
                 StopSession(Loc.GetString("mame-arcade-failed"));
                 return;
             case MameSessionState.Stopped:
+                LeaveRequested?.Invoke();
                 StopSession(null);
                 return;
         }
@@ -223,17 +300,29 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         _session.Update(args.DeltaSeconds, _screen.Held);
         _session.Netplay?.Adapt(args.DeltaSeconds);
 
-        if (_session.TryTakeFrame(out var pixels))
+        var showing = IsShowing();
+        var newFrame = _session.TryTakeFrame(out var pixels);
+        if (newFrame)
             _screen.SetFrame(pixels, _session.Width, _session.Height);
+
+        UpdateVideo(args.DeltaSeconds, showing, newFrame ? pixels : null);
 
         _session.TakeAudio(_audioScratch);
         foreach (var samples in _audioScratch)
         {
             _audio?.Feed(samples);
+            if (showing)
+                _stereoOut.AddRange(samples);
         }
 
         _audioScratch.Clear();
-        _audio?.Update();
+        if (_audio != null)
+        {
+            _audio.Gain = _cfg.GetCVar(CCVars.InterfaceVolume);
+            _audio.Update();
+        }
+
+        SendAudio(showing);
 
         if (_session.TryTakeSavedState(out var state))
         {
@@ -245,12 +334,122 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             UpdateNetplay(netplay, args.DeltaSeconds);
         else
             _status.Text = _session.Set.Title;
+
+        if (showing && _lobby?.Showing.Watchers is > 0 and var watchers)
+            _status.Text = Loc.GetString("mame-arcade-status-watched", ("status", _status.Text ?? string.Empty), ("count", watchers));
     }
 
     public override void Close()
     {
         StopSession(null);
         base.Close();
+    }
+
+    /// <summary>This client's game is the one on the cabinet.</summary>
+    private bool IsShowing()
+    {
+        return _session != null
+            && _lobby?.Showing.Player is { } player
+            && player == _entMan.GetNetEntity(_player.LocalEntity);
+    }
+
+    /// <summary>Sends the game's sound a tenth of a second at a time, for the people near the cabinet.</summary>
+    private void SendAudio(bool showing)
+    {
+        if (!showing)
+        {
+            _stereoOut.Clear();
+            _monoOut.Clear();
+            return;
+        }
+
+        MameAudioCodec.Downmix(_stereoOut, _monoOut);
+        while (_monoOut.Count >= AudioPacketSamples)
+        {
+            StreamReady?.Invoke(MameArcadeStreamKind.Audio, MameAudioCodec.Encode(_monoOut.GetRange(0, AudioPacketSamples)));
+            _monoOut.RemoveRange(0, AudioPacketSamples);
+        }
+    }
+
+    /// <summary>
+    /// While anyone watches, encodes a frame on a worker whenever the server's rate allows, so a busy screen comes
+    /// through at a lower frame rate rather than late.
+    /// </summary>
+    private void UpdateVideo(float delta, bool showing, Rgba32[]? pixels)
+    {
+        if (_encoding is { IsCompleted: true } done)
+        {
+            _encoding = null;
+#pragma warning disable RA0004 // IsCompleted was checked above, so this can't block.
+            if (done.IsCompletedSuccessfully && showing)
+            {
+                _videoAllowance -= done.Result.Length;
+                StreamReady?.Invoke(MameArcadeStreamKind.Video, done.Result);
+            }
+#pragma warning restore RA0004
+        }
+
+        if (!showing || _lobby?.Showing is not { Watchers: > 0, VideoRate: > 0 } audience)
+        {
+            _videoAllowance = 0f;
+            _sinceKeyframe = KeyframeSeconds;
+            return;
+        }
+
+        _videoAllowance = MathF.Min(_videoAllowance + audience.VideoRate * delta, audience.VideoRate);
+        _sinceVideo += delta;
+        _sinceKeyframe += delta;
+
+        if (pixels == null || _encoding != null || _videoAllowance <= 0f || _sinceVideo < VideoInterval)
+            return;
+
+        var keyframe = _sinceKeyframe >= KeyframeSeconds || audience.Joins != _joinsSeen;
+        _joinsSeen = audience.Joins;
+        if (keyframe)
+            _sinceKeyframe = 0f;
+
+        _sinceVideo = 0f;
+        var frame = (Rgba32[]) pixels.Clone();
+        var (width, height, encoder) = (_session!.Width, _session.Height, _encoder);
+        _encoding = Task.Run(() => encoder.Encode(frame, width, height, keyframe));
+    }
+
+    private void Watch()
+    {
+        if (_lobby?.Showing is not { Player: not null } showing || _session != null)
+            return;
+
+        _decoder = new MameVideoDecoder();
+        _watchedGame = showing.Game;
+        _watchScreen.Clear();
+        _watchStatus.Text = Loc.GetString("mame-arcade-watch-waiting");
+        _libraryPanel.Visible = false;
+        _watchPanel.Visible = true;
+        WatchRequested?.Invoke(true);
+    }
+
+    private void StopWatching(string? message)
+    {
+        if (_decoder == null)
+            return;
+
+        _decoder = null;
+        _watchedGame = string.Empty;
+        _watchScreen.Clear();
+        _watchPanel.Visible = false;
+        _libraryPanel.Visible = true;
+        if (message != null)
+            _details.Text = message;
+
+        WatchRequested?.Invoke(false);
+        UpdateLobby();
+    }
+
+    private string WatchingText()
+    {
+        var showing = _lobby?.Showing;
+        var title = NeoGeoSets.Find(_watchedGame)?.Title ?? _watchedGame;
+        return Loc.GetString("mame-arcade-watching", ("player", showing?.PlayerName ?? string.Empty), ("game", title));
     }
 
     private void UpdateNetplay(MameNetplay netplay, float delta)
@@ -343,6 +542,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         var lobby = _lobby;
         _joinButton.Visible = false;
         _cancelButton.Visible = false;
+        UpdateShowing(lobby?.Showing, local);
 
         if (lobby?.Host is not { } host)
         {
@@ -375,6 +575,24 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         Select(_selected);
     }
 
+    /// <summary>Offers to watch another player's game on the cabinet.</summary>
+    private void UpdateShowing(MameArcadeShowing? showing, NetEntity? local)
+    {
+        if (showing?.Player is not { } player || player == local || _session != null)
+        {
+            _showingRow.Visible = false;
+            return;
+        }
+
+        var title = NeoGeoSets.Find(showing.Game)?.Title ?? showing.Game;
+        var full = showing.Watchers >= showing.MaxWatchers;
+        _showingRow.Visible = true;
+        _showingLabel.Text = Loc.GetString("mame-arcade-showing", ("player", showing.PlayerName), ("game", title));
+        _watchButton.Visible = showing.VideoRate > 0;
+        _watchButton.Disabled = full;
+        _watchButton.Text = Loc.GetString(full ? "mame-arcade-watch-full" : "mame-arcade-watch");
+    }
+
     private async void Import()
     {
         var (stream, name) = await _dialogs.GetFileAndName(
@@ -395,8 +613,11 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 
     private void PlaySolo()
     {
-        if (_selected != null)
-            StartSession(_selected, null);
+        if (_selected == null)
+            return;
+
+        StartSession(_selected, null);
+        SoloStarted?.Invoke(_selected.Name);
     }
 
     private void Host()
@@ -434,9 +655,11 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     private void StartSession(NeoGeoSet set, MameNetplay? netplay)
     {
         StopSession(null);
+        StopWatching(null);
 
         _session = new MameArcadeSession(set, _library.Snapshot(), _library.Nvram(), netplay);
-        _audio = new MameArcadeAudio(_audioManager, _cfg);
+        _audio = new MameArcadeAudio(_audioManager);
+        _encoder = new MameVideoEncoder();
         _lastFrame = 0;
         _stalled = 0f;
         _checksumsToSend.Clear();
@@ -452,9 +675,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 
     private void Quit()
     {
-        if (_session?.Netplay is { Alone: false })
-            LeaveRequested?.Invoke();
-
+        LeaveRequested?.Invoke();
         StopSession(null);
     }
 
@@ -477,6 +698,9 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         _screen.Clear();
         _hostedGame = string.Empty;
         _early.Clear();
+        _stereoOut.Clear();
+        _monoOut.Clear();
+        _encoding = null;
 
         _gamePanel.Visible = false;
         _libraryPanel.Visible = true;

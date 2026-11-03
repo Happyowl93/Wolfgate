@@ -58,6 +58,59 @@ public sealed class WFMameArcadeTest
     }
 
     [Test]
+    public async Task ShowsOneGameToItsWatchers()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+
+        await server.WaitAssertion(() =>
+        {
+            var entMan = server.EntMan;
+            var system = entMan.System<WFMameArcadeSystem>();
+            var uid = entMan.SpawnEntity("WFMameArcade", map.GridCoords);
+            var cabinet = new Entity<WFMameArcadeComponent>(uid, entMan.GetComponent<WFMameArcadeComponent>(uid));
+            var comp = cabinet.Comp;
+            var solo = entMan.SpawnEntity(null, map.GridCoords);
+            var host = entMan.SpawnEntity(null, map.GridCoords);
+            var guest = entMan.SpawnEntity(null, map.GridCoords);
+            var watcher = entMan.SpawnEntity(null, map.GridCoords);
+
+            Assert.That(system.TryWatch(cabinet, watcher), Is.False, "Nothing to watch yet");
+            Assert.That(system.TryShowSolo(cabinet, solo, "mslug"));
+            Assert.That(system.TryShowSolo(cabinet, host, "kof94"), Is.False, "One game on the screen");
+            Assert.That(system.TryWatch(cabinet, solo), Is.False, "Players don't watch their own game");
+            Assert.That(system.TryWatch(cabinet, watcher));
+            Assert.That(comp.Watchers, Is.EquivalentTo(new[] { watcher }));
+
+            Assert.That(system.TryHost(cabinet, host, "kof94", Kof94));
+            Assert.That(system.TryJoin(cabinet, guest, Kof94));
+            Assert.That(comp.Player, Is.EqualTo(host), "A 2-player game shows player 1's screen");
+            Assert.That(comp.Watchers, Is.Empty, "A different game starts with no audience");
+
+            Assert.That(system.TryWatch(cabinet, watcher));
+            Assert.That(system.TryWatch(cabinet, guest), Is.False);
+            system.Leave(cabinet, host);
+            Assert.That(comp.Player, Is.EqualTo(guest), "Player 2 plays on alone, still on the screen");
+            Assert.That(comp.Watchers, Is.EquivalentTo(new[] { watcher }), "The audience keeps watching the same game");
+
+            system.Leave(cabinet, watcher);
+            Assert.That(comp.Watchers, Is.Empty);
+            system.Leave(cabinet, guest);
+            Assert.That(comp.Player, Is.Null);
+            Assert.That(system.TryShowSolo(cabinet, solo, "mslug"), "The screen is free again");
+
+            server.CfgMan.SetCVar(WFMameArcadeCVars.VideoRate, 0);
+            Assert.That(system.TryWatch(cabinet, watcher), Is.False, "Watching can be turned off");
+            server.CfgMan.SetCVar(WFMameArcadeCVars.VideoRate, WFMameArcadeCVars.VideoRate.DefaultValue);
+
+            entMan.DeleteEntity(uid);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
     public async Task CabinetOpensWindow()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });

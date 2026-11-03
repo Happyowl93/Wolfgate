@@ -19,9 +19,18 @@ public static class MameArcadeProtocol
 
     /// <summary>No checksum in this message.</summary>
     public const int NoChecksum = -1;
+
+    /// <summary>Largest sound or picture packet; a full Neo Geo keyframe is about 30 KiB.</summary>
+    public const int MaxStreamPacket = 96 * 1024;
+
+    /// <summary>Most sound a cabinet may relay, in bytes per second; the game sends about 8 KiB.</summary>
+    public const int MaxAudioBytesPerSecond = 16 * 1024;
+
+    /// <summary>How far away other players hear a cabinet.</summary>
+    public const float HearRange = 10f;
 }
 
-/// <summary>The cabinet's 2-player lobby, shown to everyone with it open.</summary>
+/// <summary>The cabinet's 2-player lobby and whose game it shows, sent to everyone with it open.</summary>
 [Serializable, NetSerializable]
 public sealed class MameArcadeBuiState(
     NetEntity? host,
@@ -29,7 +38,8 @@ public sealed class MameArcadeBuiState(
     string game,
     string fingerprint,
     NetEntity? guest,
-    string guestName) : BoundUserInterfaceState
+    string guestName,
+    MameArcadeShowing showing) : BoundUserInterfaceState
 {
     public readonly NetEntity? Host = host;
     public readonly string HostName = hostName;
@@ -37,6 +47,35 @@ public sealed class MameArcadeBuiState(
     public readonly string Fingerprint = fingerprint;
     public readonly NetEntity? Guest = guest;
     public readonly string GuestName = guestName;
+    public readonly MameArcadeShowing Showing = showing;
+}
+
+/// <summary>
+/// The game on the cabinet's screen and speaker. Its player streams the sound to people nearby, and the picture
+/// while anyone watches, up to <see cref="VideoRate"/> bytes a second.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class MameArcadeShowing(
+    NetEntity? player,
+    string playerName,
+    string game,
+    int watchers,
+    int joins,
+    int maxWatchers,
+    int videoRate)
+{
+    public readonly NetEntity? Player = player;
+    public readonly string PlayerName = playerName;
+    public readonly string Game = game;
+    public readonly int Watchers = watchers;
+
+    /// <summary>Counts up whenever someone starts watching, who needs a keyframe to start from.</summary>
+    public readonly int Joins = joins;
+
+    public readonly int MaxWatchers = maxWatchers;
+
+    /// <summary>0 when the server turned spectating off.</summary>
+    public readonly int VideoRate = videoRate;
 }
 
 /// <summary>Offers a 2-player game. The fingerprint says which ROMs and BIOS the host's copy uses.</summary>
@@ -53,7 +92,21 @@ public sealed class MameArcadeJoinMessage(string fingerprint) : BoundUserInterfa
     public readonly string Fingerprint = fingerprint;
 }
 
-/// <summary>Cancels a lobby or leaves a 2-player game.</summary>
+/// <summary>Started a 1-player game; it shows on the cabinet unless another game already does.</summary>
+[Serializable, NetSerializable]
+public sealed class MameArcadeSoloMessage(string game) : BoundUserInterfaceMessage
+{
+    public readonly string Game = game;
+}
+
+/// <summary>Starts or stops watching the game on the cabinet's screen.</summary>
+[Serializable, NetSerializable]
+public sealed class MameArcadeWatchMessage(bool watching) : BoundUserInterfaceMessage
+{
+    public readonly bool Watching = watching;
+}
+
+/// <summary>Cancels a lobby, or stops or leaves a game.</summary>
 [Serializable, NetSerializable]
 public sealed class MameArcadeLeaveMessage : BoundUserInterfaceMessage;
 
