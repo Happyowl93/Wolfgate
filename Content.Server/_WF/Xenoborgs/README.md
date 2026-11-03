@@ -24,6 +24,10 @@ shells (10 crystals) and every weapon module (1 to 4), including Mono's defense,
 modules cost materials only, so each module has one recipe. Crystals sell for nothing, so the extractor can't turn
 power into money.
 
+The mothership core's AI has a Xenoborg cameras action (`WFActionXenoborgCameras`) that opens a camera monitor on
+its xenoborgs, which are cameras already. The core routes their camera subnet itself, so this works on every xenoborg
+ship, not only the mothership with its router; the feed shows one xenoborg at a time.
+
 The xenoborg plating floors are recoloured cobalt blue; the circuit floor uses the old circuit tile's royal blue.
 Its traces glow and breathe between deep and pale royal blue
 as a wave across the floor, and light whatever stands on them: a `wfTileGlow` prototype names the tile, its trace
@@ -73,6 +77,7 @@ keyed triggers that make missiles explode at the end of their flight (here they 
 ### Prototypes
 
 - [`Resources/Prototypes/_WF/Xenoborgs/Catalogs/Fills/Crates/misc.yml`](../../../Resources/Prototypes/_WF/Xenoborgs/Catalogs/Fills/Crates/misc.yml)
+- [`Resources/Prototypes/_WF/Xenoborgs/core_cameras.yml`](../../../Resources/Prototypes/_WF/Xenoborgs/core_cameras.yml)
 - [`Resources/Prototypes/_WF/Xenoborgs/Entities/Objects/Materials/xenoborg_crystal.yml`](../../../Resources/Prototypes/_WF/Xenoborgs/Entities/Objects/Materials/xenoborg_crystal.yml)
 - [`Resources/Prototypes/_WF/Xenoborgs/Entities/Objects/Specific/Robotics/borg_modules.yml`](../../../Resources/Prototypes/_WF/Xenoborgs/Entities/Objects/Specific/Robotics/borg_modules.yml)
 - [`Resources/Prototypes/_WF/Xenoborgs/Entities/Objects/Specific/Robotics/wizden_modules.yml`](../../../Resources/Prototypes/_WF/Xenoborgs/Entities/Objects/Specific/Robotics/wizden_modules.yml)
@@ -96,6 +101,7 @@ keyed triggers that make missiles explode at the end of their flight (here they 
 ### Localization
 
 - [`Resources/Locale/en-US/_WF/Xenoborgs/borg/wizden-modules.ftl`](../../../Resources/Locale/en-US/_WF/Xenoborgs/borg/wizden-modules.ftl)
+- [`Resources/Locale/en-US/_WF/Xenoborgs/core/cameras.ftl`](../../../Resources/Locale/en-US/_WF/Xenoborgs/core/cameras.ftl)
 - [`Resources/Locale/en-US/_WF/Xenoborgs/events/xenoborgs.ftl`](../../../Resources/Locale/en-US/_WF/Xenoborgs/events/xenoborgs.ftl)
 - [`Resources/Locale/en-US/_WF/Xenoborgs/gamerules/gamemodes.ftl`](../../../Resources/Locale/en-US/_WF/Xenoborgs/gamerules/gamemodes.ftl)
 - [`Resources/Locale/en-US/_WF/Xenoborgs/prototypes/access/accesses.ftl`](../../../Resources/Locale/en-US/_WF/Xenoborgs/prototypes/access/accesses.ftl)
@@ -213,8 +219,10 @@ keyed triggers that make missiles explode at the end of their flight (here they 
   - wizden flash immunity for heavy and scout xenoborgs
 - [`Resources/Prototypes/_Mono/Entities/Mobs/Cyborgs/base_borg_chassis.yml`](../../../Resources/Prototypes/_Mono/Entities/Mobs/Cyborgs/base_borg_chassis.yml): wizden#45193, EMPs don't drain xenoborgs; CellHolderEmpResistanceSystem lends it to the cell
 - [`Resources/Prototypes/_Mono/Entities/Mobs/Player/silicon.yml`](../../../Resources/Prototypes/_Mono/Entities/Mobs/Player/silicon.yml)
+  - routes the xenoborgs' cameras to the AI's monitor on any xenoborg ship
   - wizden#45105, the core takes extractor crystals
   - wizden#42796 + #45105, the extractor and crystal-priced recipes
+  - the core watches its xenoborgs through their cameras
 - [`Resources/Prototypes/_Mono/Entities/Objects/Specific/Robotics/borg_modules.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Specific/Robotics/borg_modules.yml)
   - wizden#42850
   - Monolith #4558, regenerating xenoborg jetpack instead of JetpackADMFilled
