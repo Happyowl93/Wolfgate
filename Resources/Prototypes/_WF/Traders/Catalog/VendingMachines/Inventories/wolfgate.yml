@@ -21,6 +21,7 @@
     WFChemicalSiloFlatpack: 2
     WFDoomArcadeFlatpack: 3
     WFFreedoom2ArcadeFlatpack: 3
+    WFMameArcadeFlatpack: 3
     # Wolfmed field medicine.
     WFWolfmedSplint: 6
     WFWolfmedAntisepticSpray: 6
