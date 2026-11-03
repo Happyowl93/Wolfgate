@@ -31,7 +31,7 @@ namespace Content.IntegrationTests.Tests._WF.FactionLock;
 [TestOf(typeof(WFFactionLockSystem))]
 public sealed class WFFactionLockTest
 {
-    private static readonly ProtoId<JobPrototype> Pirate = "Pirate";
+    private static readonly ProtoId<JobPrototype> FirstMate = "PirateFirstMate";
     private static readonly ProtoId<JobPrototype> Sheriff = "Sheriff";
     private static readonly ProtoId<JobPrototype> Deputy = "Deputy";
 
@@ -48,6 +48,11 @@ public sealed class WFFactionLockTest
                 var company = job.AssignedCompany.Id;
                 Assert.That(WFFactionLockPolicy.FactionOf(company) != null || company is "None" or "Colonial", Is.True,
                     $"{job.ID} flies {company}, which WFFactionLockPolicy.FactionOf doesn't know.");
+            }
+            foreach (var grunt in WFFactionLockPolicy.GruntJobs)
+            {
+                Assert.That(prototypes.TryIndex<JobPrototype>(grunt, out var job) && WFFactionLockPolicy.FactionOf(job.AssignedCompany.Id) != null,
+                    Is.True, $"Grunt job {grunt} isn't a faction job.");
             }
         });
         await pair.CleanReturnAsync();
@@ -85,7 +90,7 @@ public sealed class WFFactionLockTest
                     vote.Cancel();
                 preferences.SetProfile(player.UserId, otherSlot, original.WithName("Bo Other")).Wait();
                 preferences.SetProfile(player.UserId, slot, original.WithName("Ada Sworn").WithBankBalance(1000000)).Wait();
-                Assert.That(locks.IsBarred(player, "Pirate"), Is.False, "Nothing is barred before a faction is played.");
+                Assert.That(locks.IsBarred(player, FirstMate), Is.False, "Nothing is barred before a faction is played.");
             });
             await FlushCompanies(pair, companies);
             await server.WaitPost(() =>
@@ -100,6 +105,7 @@ public sealed class WFFactionLockTest
                     if (!setup.IsStandardStation(station))
                         continue;
                     jobs.TrySetJobSlot(station, "Deputy", 4, createSlot: true);
+                    jobs.TrySetJobSlot(station, "Cadet", 4, createSlot: true);
                     spawnStation = station;
                 }
             });
@@ -112,7 +118,19 @@ public sealed class WFFactionLockTest
             });
             await pair.RunTicksSync(5);
             await FlushCompanies(pair, companies);
-            await server.WaitAssertion(() => Assert.That(locks.IsBarred(player, "Pirate"), Is.False, "A rolled-back spawn binds nobody."));
+            await server.WaitAssertion(() => Assert.That(locks.IsBarred(player, FirstMate), Is.False, "A rolled-back spawn binds nobody."));
+
+            // A grunt spawn that stays in the round binds nobody either.
+            await server.WaitPost(() => ticker.MakeJoinGame(player, spawnStation, "Cadet"));
+            await pair.RunTicksSync(5);
+            await server.WaitAssertion(() =>
+            {
+                Assert.That(ticker.UserHasJoinedGame(player), Is.True, "The character spawned as a Cadet.");
+                var profile = (HumanoidCharacterProfile) preferences.GetPreferences(player.UserId).Characters[slot];
+                Assert.That(WFFactionLockPolicy.Played(profile.Flags), Is.Empty, "A grunt spawn binds nobody.");
+            });
+            await server.WaitPost(() => ticker.Respawn(player));
+            await pair.RunTicksSync(5);
 
             await server.WaitPost(() => ticker.MakeJoinGame(player, spawnStation, "Deputy"));
             await pair.RunTicksSync(pair.SecondsToTicks(1.5f));
@@ -123,19 +141,21 @@ public sealed class WFFactionLockTest
                 var profile = (HumanoidCharacterProfile) preferences.GetPreferences(player.UserId).Characters[slot];
                 Assert.That(profile.Flags, Does.Contain(WFFactionLockPolicy.Flag("TSF")));
                 Assert.That(profile.Name, Is.EqualTo("Ada Sworn"), "Binding kept the character.");
-                Assert.That(locks.IsBarred(player, "Pirate"), Is.True, "PDV is barred.");
-                Assert.That(locks.IsBarred(player, "MMCEmployee"), Is.True, "MMC is barred.");
-                Assert.That(locks.IsBarred(player, "Fugitive"), Is.True, "The Underground is barred.");
+                Assert.That(locks.IsBarred(player, FirstMate), Is.True, "PDV is barred.");
+                Assert.That(locks.IsBarred(player, "MMCSecurity"), Is.True, "MMC is barred.");
+                Assert.That(locks.IsBarred(player, "Godfather"), Is.True, "The Underground is barred.");
+                foreach (var grunt in WFFactionLockPolicy.GruntJobs)
+                    Assert.That(locks.IsBarred(player, grunt), Is.False, $"{grunt} stays open to every faction.");
                 Assert.That(locks.IsBarred(player, "TsfCivilian"), Is.False, "Their own faction's civilians are open.");
                 Assert.That(locks.IsBarred(player, "Sheriff"), Is.False, "Their own faction is open.");
                 Assert.That(locks.IsBarred(player, "Contractor"), Is.False, "Neutral jobs are open.");
-                var allowed = new IsJobAllowedEvent(player, new ProtoId<JobPrototype>("Pirate"));
+                var allowed = new IsJobAllowedEvent(player, FirstMate);
                 server.EntMan.EventBus.RaiseEvent(EventSource.Local, ref allowed);
                 Assert.That(allowed.Cancelled, Is.True, "Spawning refuses the barred job.");
-                var candidates = new System.Collections.Generic.List<ProtoId<JobPrototype>> { "Pirate", "Contractor", "Sheriff" };
+                var candidates = new System.Collections.Generic.List<ProtoId<JobPrototype>> { FirstMate, "Pirate", "Contractor", "Sheriff" };
                 var query = new Content.Server.Station.Events.StationJobsGetCandidatesEvent(player.UserId, candidates);
                 server.EntMan.EventBus.RaiseEvent(EventSource.Local, ref query);
-                Assert.That(candidates.Select(job => job.Id), Is.EquivalentTo(new[] { "Contractor", "Sheriff" }), "Round start skips the barred job.");
+                Assert.That(candidates.Select(job => job.Id), Is.EquivalentTo(new[] { "Pirate", "Contractor", "Sheriff" }), "Round start skips the barred job.");
             });
 
             // The client's profile copy is stale, so the snapshot has to carry the lock to the job lists.
@@ -151,11 +171,12 @@ public sealed class WFFactionLockTest
                 Assert.That(state.PlayedFactions.ContainsKey(otherSlot), Is.False, "The player's other character is free.");
                 Assert.That(state.CanJoin, Is.False, "The window closes companies to this character.");
                 var clientPrototypes = pair.Client.ResolveDependency<IPrototypeManager>();
-                var pirate = clientPrototypes.Index(Pirate);
+                var pirate = clientPrototypes.Index(FirstMate);
                 var saved = (HumanoidCharacterProfile) clientPreferences.Preferences!.Characters[slot];
                 Assert.That(clientLocks.IsAllowed(pirate, saved, out var reason), Is.False);
                 Assert.That(reason!.ToString(), Does.Contain("Trans-Solarian Federation"));
                 Assert.That(clientLocks.IsAllowed(clientPrototypes.Index(Sheriff), saved, out _), Is.True);
+                Assert.That(clientLocks.IsAllowed(clientPrototypes.Index<JobPrototype>("Pirate"), saved, out _), Is.True, "Grunt jobs stay unlocked.");
             });
 
             // Companies refuse the character however it tries to get in.
@@ -177,7 +198,7 @@ public sealed class WFFactionLockTest
                 var prefs = preferences.GetPreferences(player.UserId);
                 Assert.That(prefs.SelectedCharacterIndex, Is.EqualTo(slot), "Unlocking doesn't switch the player's character.");
                 Assert.That(((HumanoidCharacterProfile) prefs.Characters[otherSlot]).Flags, Is.Empty);
-                Assert.That(locks.IsBarred(player, "Pirate"), Is.True, "The bound character is still bound.");
+                Assert.That(locks.IsBarred(player, FirstMate), Is.True, "The bound character is still bound.");
             });
 
             // The admin command frees the character, keeps the selection and tells the client at once.
@@ -187,7 +208,7 @@ public sealed class WFFactionLockTest
                 balance = ((HumanoidCharacterProfile) preferences.GetPreferences(player.UserId).Characters[slot]).BankBalance;
                 server.ConsoleHost.ExecuteCommand($"factionunlock {player.Name} {slot}");
             });
-            await WaitFor(pair, () => !locks.IsBarred(player, "Pirate"));
+            await WaitFor(pair, () => !locks.IsBarred(player, FirstMate));
             await FlushCompanies(pair, companies);
             await pair.RunTicksSync(pair.SecondsToTicks(0.5f));
             await server.WaitAssertion(() =>
@@ -198,7 +219,7 @@ public sealed class WFFactionLockTest
             });
             await pair.Client.WaitAssertion(() =>
             {
-                var pirate = pair.Client.ResolveDependency<IPrototypeManager>().Index(Pirate);
+                var pirate = pair.Client.ResolveDependency<IPrototypeManager>().Index(FirstMate);
                 var saved = (HumanoidCharacterProfile) clientPreferences.Preferences!.Characters[slot];
                 Assert.That(clientLocks.IsAllowed(pirate, saved, out _), Is.True, "The job list opens without a reconnect.");
             });
@@ -254,6 +275,7 @@ public sealed class WFFactionLockTest
             {
                 Assert.That(locks.IsBarred(owner, "Deputy"), Is.True, "Company members can't serve a faction.");
                 Assert.That(locks.IsBarred(owner, "Contractor"), Is.False, "Company members keep neutral jobs.");
+                Assert.That(locks.IsBarred(owner, "Cadet"), Is.False, "Company members keep grunt jobs.");
             });
 
             // A snapshot taken while companies reload at round restart knows no memberships; the job lists keep their locks.

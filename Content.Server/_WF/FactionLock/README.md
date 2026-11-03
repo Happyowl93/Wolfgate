@@ -7,9 +7,13 @@ characters are unaffected, and deleting a character deletes its lock. Civilian a
 their faction. Neutral jobs, such as Colonial station staff, Contractor and the other ship crew jobs, bind nobody and
 stay open to everyone.
 
+Each faction's lowest rank (`WFFactionLockPolicy.GruntJobs`: Cadet, Pirate, Viper Group Infanteer, USSP Rifleman,
+Fugitive, MMC Employee and ASF Colonist) works the same way: open to every character, bound or in a company, and
+playing one binds nobody. Civilian jobs still count as their faction.
+
 Factions and player companies exclude each other. A character who has played a faction can't create, join or apply to
 a company, and loses any invitation or application they had when they first play one. A company member can't take a
-faction job; leaving the company opens them again.
+faction job other than a grunt job; leaving the company opens them again.
 
 The lock is a persistent profile flag, `wf-faction:<faction>` (`PersistentProfileSystem`), which client saves can't
 change. Admins manage it with `factionunlock <player>`, which lists the player's characters and their locks, and

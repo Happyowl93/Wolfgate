@@ -58,7 +58,7 @@ public sealed partial class WFFactionLockClientSystem : EntitySystem
     public bool IsAllowed(JobPrototype job, HumanoidCharacterProfile? profile, [NotNullWhen(false)] out FormattedMessage? reason)
     {
         reason = null;
-        if (profile == null || WFFactionLockPolicy.FactionOf(job.AssignedCompany.Id) is not { } wanted ||
+        if (profile == null || WFFactionLockPolicy.IsOpen(job.ID) || WFFactionLockPolicy.FactionOf(job.AssignedCompany.Id) is not { } wanted ||
             _state is not { } state || _preferences.Preferences is not { } preferences ||
             !preferences.TryIndexOfCharacter(profile, out var slot))
             return true;

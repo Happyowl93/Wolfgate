@@ -20,6 +20,13 @@ public static class WFFactionLockPolicy
         _ => null,
     };
 
+    /// <summary>Each faction's lowest rank: open to every character, and playing one binds nobody.</summary>
+    public static readonly string[] GruntJobs =
+        { "Cadet", "Pirate", "VGInfanteer", "USSPRifleman", "Fugitive", "MMCEmployee", "WFAsfColonist" };
+
+    /// <summary>Whether a job stays open whatever faction or company the character has.</summary>
+    public static bool IsOpen(string job) => GruntJobs.Contains(job);
+
     /// <summary>The persistent profile flag recording that a character has played a faction.</summary>
     public static string Flag(string faction) => FlagPrefix + faction;
 

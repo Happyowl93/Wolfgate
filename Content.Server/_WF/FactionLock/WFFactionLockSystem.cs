@@ -55,7 +55,8 @@ public sealed partial class WFFactionLockSystem : EntitySystem
     /// <summary>Whether the session's selected character can't take a job: an opposing faction's, or any faction's while in a company.</summary>
     public bool IsBarred(ICommonSession session, ProtoId<JobPrototype> jobId)
     {
-        if (!_prototypes.TryIndex(jobId, out var job) || WFFactionLockPolicy.FactionOf(job.AssignedCompany.Id) is not { } wanted ||
+        if (WFFactionLockPolicy.IsOpen(jobId.Id) ||
+            !_prototypes.TryIndex(jobId, out var job) || WFFactionLockPolicy.FactionOf(job.AssignedCompany.Id) is not { } wanted ||
             _preferences.GetPreferencesOrNull(session.UserId)?.SelectedCharacter is not HumanoidCharacterProfile profile)
             return false;
         return _companies.CompanyIdOf(session) != null ||
@@ -86,7 +87,7 @@ public sealed partial class WFFactionLockSystem : EntitySystem
 
     private void OnSpawned(PlayerSpawnCompleteEvent args)
     {
-        if (args.JobId != null && _prototypes.TryIndex<JobPrototype>(args.JobId, out var job) &&
+        if (args.JobId != null && !WFFactionLockPolicy.IsOpen(args.JobId) && _prototypes.TryIndex<JobPrototype>(args.JobId, out var job) &&
             WFFactionLockPolicy.FactionOf(job.AssignedCompany.Id) is { } faction)
             _pendingBinds.Add((args.Player, WFFactionLockPolicy.Flag(faction)));
     }

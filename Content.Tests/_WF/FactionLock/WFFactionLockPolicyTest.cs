@@ -39,6 +39,16 @@ public sealed class WFFactionLockPolicyTest
         Assert.That(WFFactionLockPolicy.Barring(new[] { played }, wanted), Is.EqualTo(barring));
     }
 
+    [TestCase("Cadet", true)]
+    [TestCase("Pirate", true)]
+    [TestCase("WFAsfColonist", true)]
+    [TestCase("Deputy", false)]
+    [TestCase("PirateCaptain", false)]
+    public void OnlyGruntJobsStayOpen(string job, bool open)
+    {
+        Assert.That(WFFactionLockPolicy.IsOpen(job), Is.EqualTo(open));
+    }
+
     [Test]
     public void NothingPlayedBarsNothing()
     {
