@@ -51,6 +51,35 @@ public sealed class CrateMaterialTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>A silo or flatpacker can't eject a crate's material, so it must not take the crate.</summary>
+    [Test]
+    public async Task StorageThatCantGiveACrateBackRefusesIt()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var storage = entMan.System<SharedMaterialStorageSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var user = entMan.SpawnEntity(null, map.GridCoords);
+            foreach (var machine in new[] { "MachineMaterialSilo", "MachineFlatpacker" })
+            {
+                var uid = entMan.SpawnEntity(machine, map.GridCoords);
+                entMan.RemoveComponent<ApcPowerReceiverComponent>(uid);
+                var crate = entMan.SpawnEntity(Ammo, map.GridCoords);
+                Assert.That(storage.TryInsertMaxPossibleMaterialEntity(user, crate, uid, out _), Is.False, $"{machine} took a crate it can't give back.");
+                Assert.That(entMan.EntityExists(crate), Is.True);
+
+                var sheet = entMan.SpawnEntity("SheetSteel1", map.GridCoords);
+                Assert.That(storage.TryInsertMaxPossibleMaterialEntity(user, sheet, uid, out _), Is.True, $"{machine} should still take sheets.");
+            }
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     [Test]
     public async Task EveryCrateMaterialIsUsedAndAddsNoValue()
     {
