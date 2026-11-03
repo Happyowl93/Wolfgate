@@ -6,7 +6,7 @@
   parent: WallPlastitanium
   id: WFWallDurasteel
   name: durasteel wall
-  description: Plastitanium plating over a durasteel lattice. Soaks up the hits meant for what's mounted on it.
+  description: A durasteel frame under plastitanium skin. Best in class for protection.
   components:
   - type: Sprite
     sprite: _WF/ShipArmor/durasteel.rsi
@@ -45,7 +45,7 @@
   parent: WallPlastitaniumDiagonal
   id: WFWallDurasteelDiagonal
   name: durasteel wall
-  description: Plastitanium plating over a durasteel lattice. Soaks up the hits meant for what's mounted on it.
+  description: A durasteel frame under plastitanium skin. Best in class for protection.
   components:
   - type: Sprite
     drawdepth: Walls
@@ -87,7 +87,7 @@
   parent: WallPlastitaniumCapital
   id: WFWallDurasteelCapital
   name: reinforced durasteel wall
-  description: Plastitanium plating over a durasteel lattice. Soaks up the hits meant for what's mounted on it.
+  description: Durasteel laid thick for capital hulls. Best in class for protection.
   components:
   - type: Sprite
     sprite: _WF/ShipArmor/rdurasteel.rsi
@@ -126,7 +126,7 @@
   parent: WallPlastitaniumDiagonalCapital
   id: WFWallDurasteelDiagonalCapital
   name: reinforced durasteel wall
-  description: Plastitanium plating over a durasteel lattice. Soaks up the hits meant for what's mounted on it.
+  description: Durasteel laid thick for capital hulls. Best in class for protection.
   components:
   - type: Sprite
     drawdepth: Walls
