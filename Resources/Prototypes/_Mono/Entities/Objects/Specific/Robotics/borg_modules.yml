@@ -264,6 +264,7 @@
     - Screwdriver
     - Wirecutter
     - Multitool
+    - RefuelingWelder # WOLFGATE(Xenoborgs): wizden#42850
   - type: BorgModuleIcon
     icon: { sprite: _Mono/Interface/Action/actions_borg.rsi, state: xenoborg-tool-module }
 
@@ -341,6 +342,17 @@
         - BodyPart
   - type: BorgModuleIcon
     icon: { sprite: _Mono/Interface/Action/actions_borg.rsi, state: xenoborg-laser2-module }
+  # WOLFGATE(Xenoborgs) START: wizden#45329 one primary weapon module per xenoborg
+  - type: BorgModuleWhitelist
+    whitelistInfo: borg-module-whitelist-primary-weapon
+    moduleBlacklist:
+      tags:
+      - XenoborgModulePrimaryWeapon
+  - type: Tag
+    tags:
+    - BorgModuleXenoborgHeavy
+    - XenoborgModulePrimaryWeapon
+  # WOLFGATE END
 
 - type: entity
   id: XenoborgModuleAccessBreaker
@@ -391,7 +403,11 @@
   - type: ItemBorgModule
     moduleId: Xenoborg_Tools
     items:
-    - JawsOfLife
+    # WOLFGATE(Xenoborgs) START: wizden#42850 xenoborg jaws of death and a self-recharging extinguisher
+    # - JawsOfLife
+    - XenoborgJawsOfLife
+    - SelfRechargingFireExtinguisher
+    # WOLFGATE END
     - PowerDrill
     - Multitool
     - WelderExperimental
@@ -421,6 +437,17 @@
     - NocturineHypo
   - type: BorgModuleIcon
     icon: { sprite: _Mono/Interface/Action/actions_borg.rsi, state: xenoborg-hypo-module }
+  # WOLFGATE(Xenoborgs) START: wizden#45329 one primary weapon module per xenoborg
+  - type: BorgModuleWhitelist
+    whitelistInfo: borg-module-whitelist-primary-weapon
+    moduleBlacklist:
+      tags:
+      - XenoborgModulePrimaryWeapon
+  - type: Tag
+    tags:
+    - BorgModuleXenoborgStealth
+    - XenoborgModulePrimaryWeapon
+  # WOLFGATE END
 
 - type: entity
   id: XenoborgModuleChameleonProjector

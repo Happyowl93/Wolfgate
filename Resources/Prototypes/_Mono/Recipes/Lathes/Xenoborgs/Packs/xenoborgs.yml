@@ -19,5 +19,23 @@
   - XenoborgModuleHypo
   - XenoborgModuleChameleonProjector
   - XenoborgModuleSuperCloakDevice
+  # WOLFGATE(Xenoborgs) START: modules ported from wizden
+  - XenoborgModuleSpaceMovement
+  - XenoborgModuleConstruction
+  - XenoborgModuleJump
+  - XenoborgModuleSword
+  - XenoborgModuleEnergySword
+  - XenoborgModuleBioKinfe
+  - XenoborgModuleTileGun
+  - XenoborgModuleDeflectorField
+  - XenoborgModuleZap
+  - XenoborgModuleLaser
+  - XenoborgModuleOilGun
+  - XenoborgModuleBurstFireLaser
+  - XenoborgModuleGuidedMissileLauncher
+  - XenoborgModuleRocket
+  - XenoborgModuleHeavyRadioactive
+  - XenoborgModuleNaniteGun
+  # WOLFGATE END
   - AiRemoteBrain
   - MMI

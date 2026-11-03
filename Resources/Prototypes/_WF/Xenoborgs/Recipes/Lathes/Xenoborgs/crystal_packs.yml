@@ -1,0 +1,25 @@
+# Packs for the mothership core's crystal recipes.
+
+- type: latheRecipePack
+  id: XenoborgMachines
+  recipes:
+  - XenoborgExtractorRecipe
+
+- type: latheRecipePack
+  id: WFXenoborgCrystalRecipes
+  recipes:
+  - WFXenoborgShellCrystalRecipe
+  - XenoborgModuleDoorControlRecipe
+  - XenoborgModuleDeflectorFieldRecipe
+  - XenoborgModuleZapRecipe
+  - XenoborgModuleOilGunRecipe
+  - XenoborgModuleNaniteGunRecipe
+  - XenoborgModuleHeavyLaserRecipe
+  - XenoborgModuleGuidedMissileLauncherRecipe
+  - XenoborgModuleRocketRecipe
+  - XenoborgModuleBurstFireLaserRecipe
+  - XenoborgModuleHeavyRadioactiveRecipe
+  - XenoborgModuleEnergySwordRecipe
+  - XenoborgModuleJumpRecipe
+  - XenoborgModuleBioKinfeRecipe
+  - XenoborgModuleSuperCloakDeviceRecipe

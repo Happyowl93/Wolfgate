@@ -4,3 +4,136 @@
   completetime: 2
   materials:
     Steel: 3000
+
+# Modules ported from wizden, priced like Mono's: Steel for utility, plus Plastic for weapons, plus Bluespace for the strongest.
+
+- type: latheRecipe
+  id: XenoborgModuleSpaceMovement
+  result: XenoborgModuleSpaceMovement
+  completetime: 2
+  materials:
+    Steel: 3000
+
+- type: latheRecipe
+  id: XenoborgModuleConstruction
+  result: XenoborgModuleConstruction
+  completetime: 2
+  materials:
+    Steel: 3000
+
+- type: latheRecipe
+  id: XenoborgModuleJump
+  result: XenoborgModuleJump
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+
+- type: latheRecipe
+  id: XenoborgModuleSword
+  result: XenoborgModuleSword
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+
+- type: latheRecipe
+  id: XenoborgModuleEnergySword
+  result: XenoborgModuleEnergySword
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+
+- type: latheRecipe
+  id: XenoborgModuleBioKinfe
+  result: XenoborgModuleBioKinfe
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+
+- type: latheRecipe
+  id: XenoborgModuleTileGun
+  result: XenoborgModuleTileGun
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+
+- type: latheRecipe
+  id: XenoborgModuleDeflectorField
+  result: XenoborgModuleDeflectorField
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+
+- type: latheRecipe
+  id: XenoborgModuleZap
+  result: XenoborgModuleZap
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+
+- type: latheRecipe
+  id: XenoborgModuleLaser
+  result: XenoborgModuleLaser
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+
+- type: latheRecipe
+  id: XenoborgModuleOilGun
+  result: XenoborgModuleOilGun
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+
+- type: latheRecipe
+  id: XenoborgModuleBurstFireLaser
+  result: XenoborgModuleBurstFireLaser
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+    Bluespace: 100
+
+- type: latheRecipe
+  id: XenoborgModuleGuidedMissileLauncher
+  result: XenoborgModuleGuidedMissileLauncher
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+    Bluespace: 100
+
+- type: latheRecipe
+  id: XenoborgModuleRocket
+  result: XenoborgModuleRocket
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+    Bluespace: 100
+
+- type: latheRecipe
+  id: XenoborgModuleHeavyRadioactive
+  result: XenoborgModuleHeavyRadioactive
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+    Bluespace: 100
+
+- type: latheRecipe
+  id: XenoborgModuleNaniteGun
+  result: XenoborgModuleNaniteGun
+  completetime: 2
+  materials:
+    Steel: 3000
+    Plastic: 3000
+    Bluespace: 100
