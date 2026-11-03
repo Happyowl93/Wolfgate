@@ -203,10 +203,12 @@ public sealed class StationSupplyTest
 
             var rush = rushes.Start(new ProtoId<WFTradeRushPrototype>("WFTradeRushLuxuries"));
             Assert.That(rush!.Grid, Is.EqualTo(grid), "An order should go to the station scarce of its goods.");
-            rushes.Clear();
 
             market.Sell(chute, crate, entMan.SpawnEntity(null, map.GridCoords), quote.Amount);
             Assert.That(market.VendorStock(grid, Luxuries), Is.EqualTo(start), "A delivery should go on the shelf.");
+            Assert.That(market.Quote(chute, Luxuries), Is.Not.Null, "An open order keeps taking its goods once the shortage ends.");
+
+            rushes.Clear();
             Assert.That(market.Quote(chute, Luxuries), Is.Null, "A filled shelf should stop taking crates.");
         });
 

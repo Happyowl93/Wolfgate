@@ -24,6 +24,7 @@ public sealed partial class WFTradeMarketSystem
 {
     [Dependency] private PricingSystem _pricing = default!;
     [Dependency] private IRobustRandom _random = default!;
+    [Dependency] private WFTradeRushSystem _rush = default!;
 
     private static readonly TimeSpan VendorInterval = TimeSpan.FromSeconds(5);
 
@@ -220,10 +221,13 @@ public sealed partial class WFTradeMarketSystem
                && row.Stock < profile.StockTarget * profile.ScarceLevel;
     }
 
-    /// <summary>What a chute pays for a good its table doesn't list but its station is scarce of: the best any open table lists.</summary>
+    /// <summary>
+    /// What a chute pays for a good its table doesn't list but its station is scarce of, or has an open order for: the
+    /// best any open table lists. An order keeps the chute taking the good after the first crates end the shortage.
+    /// </summary>
     private int? RestockBase(EntityUid grid, string good)
     {
-        if (!Restocking(grid, good))
+        if (!Restocking(grid, good) && !_rush.Wants(grid, good))
             return null;
 
         if (_openBestTick != _timing.CurTick)

@@ -75,6 +75,12 @@ public sealed partial class WFTradeRushSystem : EntitySystem
         _nextBulk = null;
     }
 
+    /// <summary>Whether a station has an open order that still wants a good.</summary>
+    public bool Wants(EntityUid grid, string good)
+    {
+        return RushFor(grid, good) != null;
+    }
+
     private WFTradeRush? RushFor(EntityUid grid, string good)
     {
         return _active.FirstOrDefault(rush => rush.Grid == grid && rush.Remaining > 0 && _market.InGroup(good, rush.Group));
