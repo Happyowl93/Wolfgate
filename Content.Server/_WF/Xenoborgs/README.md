@@ -23,6 +23,14 @@ drains that grid's HV power and grows a crystal every 15 seconds at full draw. T
 wizden's crystal-priced recipes: shells, and the modules wizden prices in crystals. These sit next to Mono's material
 recipes rather than replacing them. Crystals sell for nothing, so the extractor can't turn power into money.
 
+The xenoborg plating floors are recoloured cobalt blue; the circuit floor uses the old circuit tile's royal blue.
+Its traces glow and breathe between deep and pale royal blue
+as a wave across the floor, and light whatever stands on them: a `wfTileGlow` prototype names the tile, its trace
+texture and colours, and the client's `WFTileGlowOverlay` draws it, since the engine can't animate or light tiles.
+
+The xenoborg walls (`WallXenoborg`, `WallNanolaminateXorg` and their diagonals) keep their panel frames, with the
+carved panels in a muted royal blue and the nanolaminate wall's neon band along their open edges in the circuit floor's royal blue.
+
 Not ported: wizden's xenoborg game mode and its borg-bodied mothership core (Mono's core stays a playable station AI
 with a lathe), and the
 keyed triggers that make missiles explode at the end of their flight (here they despawn).
@@ -47,12 +55,15 @@ keyed triggers that make missiles explode at the end of their flight (here they 
 - [`Content.Shared/_WF/Xenoborgs/SharedGunSystem.InteractLoader.cs`](../../../Content.Shared/_WF/Xenoborgs/SharedGunSystem.InteractLoader.cs)
 - [`Content.Shared/_WF/Xenoborgs/SharedGunSystem.SelfRefiller.cs`](../../../Content.Shared/_WF/Xenoborgs/SharedGunSystem.SelfRefiller.cs)
 - [`Content.Shared/_WF/Xenoborgs/SharedGunSystem.TargetFinder.cs`](../../../Content.Shared/_WF/Xenoborgs/SharedGunSystem.TargetFinder.cs)
+- [`Content.Shared/_WF/Xenoborgs/WFTileGlowPrototype.cs`](../../../Content.Shared/_WF/Xenoborgs/WFTileGlowPrototype.cs)
 - [`Content.Shared/_WF/Xenoborgs/XenoborgExtractorVisuals.cs`](../../../Content.Shared/_WF/Xenoborgs/XenoborgExtractorVisuals.cs)
 
 ### Client
 
 - [`Content.Client/_WF/Xenoborgs/CursorOffsetInHandSystem.cs`](../../../Content.Client/_WF/Xenoborgs/CursorOffsetInHandSystem.cs)
 - [`Content.Client/_WF/Xenoborgs/CustomSpriteAmmoCounterSystem.cs`](../../../Content.Client/_WF/Xenoborgs/CustomSpriteAmmoCounterSystem.cs)
+- [`Content.Client/_WF/Xenoborgs/WFTileGlowOverlay.cs`](../../../Content.Client/_WF/Xenoborgs/WFTileGlowOverlay.cs)
+- [`Content.Client/_WF/Xenoborgs/WFTileGlowSystem.cs`](../../../Content.Client/_WF/Xenoborgs/WFTileGlowSystem.cs)
 
 ### Integration tests
 
@@ -78,6 +89,7 @@ keyed triggers that make missiles explode at the end of their flight (here they 
 - [`Resources/Prototypes/_WF/Xenoborgs/Recipes/Lathes/Xenoborgs/crystal_recipes.yml`](../../../Resources/Prototypes/_WF/Xenoborgs/Recipes/Lathes/Xenoborgs/crystal_recipes.yml)
 - [`Resources/Prototypes/_WF/Xenoborgs/Recipes/Lathes/Xenoborgs/xenoborgs.yml`](../../../Resources/Prototypes/_WF/Xenoborgs/Recipes/Lathes/Xenoborgs/xenoborgs.yml)
 - [`Resources/Prototypes/_WF/Xenoborgs/Tiles/floors.yml`](../../../Resources/Prototypes/_WF/Xenoborgs/Tiles/floors.yml)
+- [`Resources/Prototypes/_WF/Xenoborgs/Tiles/glow.yml`](../../../Resources/Prototypes/_WF/Xenoborgs/Tiles/glow.yml)
 - [`Resources/Prototypes/_WF/Xenoborgs/wizden_misc.yml`](../../../Resources/Prototypes/_WF/Xenoborgs/wizden_misc.yml)
 
 ### Localization
@@ -123,7 +135,12 @@ keyed triggers that make missiles explode at the end of their flight (here they 
 - [`Resources/Textures/_WF/Xenoborgs/Objects/Weapons/Melee/bioknife.rsi/`](../../../Resources/Textures/_WF/Xenoborgs/Objects/Weapons/Melee/bioknife.rsi/)
 - [`Resources/Textures/_WF/Xenoborgs/Structures/Holo/xenoborg.rsi/`](../../../Resources/Textures/_WF/Xenoborgs/Structures/Holo/xenoborg.rsi/)
 - [`Resources/Textures/_WF/Xenoborgs/Structures/Machines/xenoborg_extractor.rsi/`](../../../Resources/Textures/_WF/Xenoborgs/Structures/Machines/xenoborg_extractor.rsi/)
-- [`Resources/Textures/_WF/Xenoborgs/Tiles/Malicous_blue_circuit.png`](../../../Resources/Textures/_WF/Xenoborgs/Tiles/Malicous_blue_circuit.png)
+- [`Resources/Textures/_WF/Xenoborgs/Structures/Walls/xenoborg.rsi/`](../../../Resources/Textures/_WF/Xenoborgs/Structures/Walls/xenoborg.rsi/)
+- [`Resources/Textures/_WF/Xenoborgs/Structures/Walls/xenoborg_diagonal.rsi/`](../../../Resources/Textures/_WF/Xenoborgs/Structures/Walls/xenoborg_diagonal.rsi/)
+- [`Resources/Textures/_WF/Xenoborgs/Tiles/attributions.yml`](../../../Resources/Textures/_WF/Xenoborgs/Tiles/attributions.yml)
+- [`Resources/Textures/_WF/Xenoborgs/Tiles/Xeno_Circuit.png`](../../../Resources/Textures/_WF/Xenoborgs/Tiles/Xeno_Circuit.png)
+- [`Resources/Textures/_WF/Xenoborgs/Tiles/Xeno_Circuit_glow.png`](../../../Resources/Textures/_WF/Xenoborgs/Tiles/Xeno_Circuit_glow.png)
+- [`Resources/Textures/_WF/Xenoborgs/Tiles/Xeno_Exo.png`](../../../Resources/Textures/_WF/Xenoborgs/Tiles/Xeno_Exo.png)
 - [`Resources/Textures/_WF/Xenoborgs/Tiles/Xeno_Mono.png`](../../../Resources/Textures/_WF/Xenoborgs/Tiles/Xeno_Mono.png)
 - [`Resources/Textures/_WF/Xenoborgs/Tiles/Xeno_Squares.png`](../../../Resources/Textures/_WF/Xenoborgs/Tiles/Xeno_Squares.png)
 
@@ -215,6 +232,8 @@ keyed triggers that make missiles explode at the end of their flight (here they 
 - [`Resources/Prototypes/Entities/Objects/Weapons/Guns/Battery/battery_guns.yml`](../../../Resources/Prototypes/Entities/Objects/Weapons/Guns/Battery/battery_guns.yml)
   - wizden#45168 blue xenoborg laser beam, same damage
   - wizden#43013 + #45168 xenoborg laser cannon sprite and blue beam, same damage
+- [`Resources/Prototypes/Entities/Structures/Walls/walls.yml`](../../../Resources/Prototypes/Entities/Structures/Walls/walls.yml): Banded blue resprite
+- [`Resources/Prototypes/Tiles/floors.yml`](../../../Resources/Prototypes/Tiles/floors.yml): Blue recolor of the wizden resprite.
 - [`Resources/ServerInfo/_Mono/Guidebook/Creatures/Xenoborgs.xml`](../../../Resources/ServerInfo/_Mono/Guidebook/Creatures/Xenoborgs.xml): wizden upgrade modules
 - [`Resources/Textures/_Mono/Structures/Storage/Crates/xeno.rsi/`](../../../Resources/Textures/_Mono/Structures/Storage/Crates/xeno.rsi/): Xenoborg crate sprites, ported from Monolith
 - [`Resources/Textures/_Mono/Structures/Walls/xorgreinforced.rsi/`](../../../Resources/Textures/_Mono/Structures/Walls/xorgreinforced.rsi/): Xenoborg reinforced wall sprites, ported from Monolith
