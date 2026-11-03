@@ -8,6 +8,12 @@ window's Open ROM folder). Nothing is downloaded or shared: the server only ever
 uses. Each game needs its MAME set and `neogeo.zip` for the BIOS; chips are found by CRC and size across every zip, so
 split, merged and non-merged sets all work. Battery RAM and save states live beside them.
 
+**Window.** `MameArcadeLibraryView` is the start screen: what is happening on the cabinet (an open 2-player game to
+join, or a game to watch), the player's games with a search and a ready-only filter, and the chosen game's details,
+missing files and Play and Host buttons. It warns when no BIOS is found and lists zips that hold no game it runs. Under
+the game, `MameArcadeControlDeck` draws both players' joysticks and A B C D, Start and Coin buttons, lit as they are
+pressed, with the keys printed on the local player's side.
+
 **Emulation.** `Engine/` is the MAME.NET core (GPL-3.0, see `Engine/NOTICE.txt` for what changed). MAME.NET loads
 pre-built region files rather than MAME's chip dumps, so `NeoGeo/NeoGeoLoader.cs` assembles them the way MAME's ROM
 macros do, from the layouts in `NeoGeo/NeoGeoSets.cs`. That table is generated from MAME's `neogeo.cpp` by
@@ -27,10 +33,11 @@ the games drift apart, the other plays on alone.
 
 **Bystanders.** The cabinet shows one game: player 1's in a 2-player game, or else the first player to start one
 alone (`WFMameArcadeComponent.Player`). That client streams its sound to the server as 16 kHz mono ADPCM, about
-8 KiB a second (`MameAudioCodec`), and the server relays it to everyone within 10 tiles except the players, whose
+8 KiB a second (`MameAudioCodec`), and the server relays it to everyone within 10 tiles except the players; their
 `MameArcadeNearbySystem` plays it from the cabinet. Anyone else with the window open can press Watch. While someone
 watches, the player also sends the picture (`MameVideoCodec`): 15-bit colour, only the 8x8 tiles that changed,
-deflated, with a keyframe for each new watcher and every 5 seconds. A busy Neo Geo screen is about 11 KiB, so the
+deflated, with a keyframe for each new watcher and every 5 seconds, and both players' controls for the watcher's
+control deck. A busy Neo Geo screen is about 11 KiB, so the
 frame rate drops to fit `wf.mame_arcade.video_rate` (KiB a second, 0 turns watching off) rather than lagging; up to
 `wf.mame_arcade.max_watchers` can watch a cabinet. Both streams are raw net messages (`MsgMameArcadeStream`) the
 server checks for sender and rate but never decodes. Bystanders need no ROMs.
@@ -251,7 +258,9 @@ server checks for sender and rate but never decodes. Bystanders need no ROMs.
 - [`Content.Client/_WF/MameArcade/Engine/sound/YMDeltat.cs`](../../../Content.Client/_WF/MameArcade/Engine/sound/YMDeltat.cs)
 - [`Content.Client/_WF/MameArcade/MameArcadeAudio.cs`](../../../Content.Client/_WF/MameArcade/MameArcadeAudio.cs)
 - [`Content.Client/_WF/MameArcade/MameArcadeBoundUserInterface.cs`](../../../Content.Client/_WF/MameArcade/MameArcadeBoundUserInterface.cs)
+- [`Content.Client/_WF/MameArcade/MameArcadeControlDeck.cs`](../../../Content.Client/_WF/MameArcade/MameArcadeControlDeck.cs)
 - [`Content.Client/_WF/MameArcade/MameArcadeControls.cs`](../../../Content.Client/_WF/MameArcade/MameArcadeControls.cs)
+- [`Content.Client/_WF/MameArcade/MameArcadeLibraryView.cs`](../../../Content.Client/_WF/MameArcade/MameArcadeLibraryView.cs)
 - [`Content.Client/_WF/MameArcade/MameArcadeNearbySystem.cs`](../../../Content.Client/_WF/MameArcade/MameArcadeNearbySystem.cs)
 - [`Content.Client/_WF/MameArcade/MameArcadeNetManager.cs`](../../../Content.Client/_WF/MameArcade/MameArcadeNetManager.cs)
 - [`Content.Client/_WF/MameArcade/MameArcadeScreen.cs`](../../../Content.Client/_WF/MameArcade/MameArcadeScreen.cs)

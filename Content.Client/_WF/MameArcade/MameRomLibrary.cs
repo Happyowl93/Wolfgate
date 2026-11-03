@@ -19,19 +19,33 @@ public sealed class MameRomLibrary
 
     private readonly IWritableDirProvider _data;
     private Dictionary<(uint Crc, long Size), ChipLocation> _index = new();
+    private List<(string Zip, List<(uint Crc, long Size)> Chips)> _zips = new();
 
     public MameRomLibrary(IWritableDirProvider data)
     {
         _data = data;
     }
 
-    public int ZipCount { get; private set; }
+    public int ZipCount => _zips.Count;
+
+    /// <summary>Zips none of whose chips <paramref name="known"/> accepts, such as a game this cabinet can't run.</summary>
+    public List<string> UnusedZips(Func<uint, long, bool> known)
+    {
+        var unused = new List<string>();
+        foreach (var (zip, chips) in _zips)
+        {
+            if (!chips.Exists(chip => known(chip.Crc, chip.Size)))
+                unused.Add(zip);
+        }
+
+        return unused;
+    }
 
     /// <summary>Re-reads the zips' directories.</summary>
     public void Refresh()
     {
         var index = new Dictionary<(uint, long), ChipLocation>();
-        var zips = 0;
+        var zips = new List<(string, List<(uint, long)>)>();
         _data.CreateDir(RomFolder);
 
         foreach (var entry in _data.DirectoryEntries(RomFolder))
@@ -43,13 +57,17 @@ public sealed class MameRomLibrary
             try
             {
                 using var stream = _data.OpenRead(path);
+                var chips = new List<(uint, long)>();
                 foreach (var file in MameZip.ReadDirectory(stream))
                 {
-                    if (file.Size > 0)
-                        index.TryAdd((file.Crc, file.Size), new ChipLocation(path, file));
+                    if (file.Size <= 0)
+                        continue;
+
+                    index.TryAdd((file.Crc, file.Size), new ChipLocation(path, file));
+                    chips.Add((file.Crc, file.Size));
                 }
 
-                zips++;
+                zips.Add((entry, chips));
             }
             catch (InvalidDataException)
             {
@@ -58,7 +76,7 @@ public sealed class MameRomLibrary
         }
 
         _index = index;
-        ZipCount = zips;
+        _zips = zips;
     }
 
     /// <summary>A fixed view for the loader, unaffected by later refreshes.</summary>
@@ -95,6 +113,8 @@ public sealed class MameRomLibrary
     public void OpenFolder() => _data.OpenOsWindow(RomFolder);
 
     public INvramStore Nvram() => new NvramStore(_data);
+
+    public bool HasState(string game) => _data.Exists(StateFolder / $"{game}.sta");
 
     public bool TryLoadState(string game, out byte[] state)
     {

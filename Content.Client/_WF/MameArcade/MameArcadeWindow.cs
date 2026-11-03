@@ -44,14 +44,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     private readonly MameRomLibrary _library;
     private readonly ISawmill _sawmill;
 
-    private readonly BoxContainer _libraryPanel;
-    private readonly Label _lobbyLabel;
-    private readonly Button _joinButton;
-    private readonly Button _cancelButton;
-    private readonly ItemList _games;
-    private readonly Label _details;
-    private readonly Button _playButton;
-    private readonly Button _hostButton;
+    private readonly MameArcadeLibraryView _libraryPanel = new();
 
     private readonly BoxContainer _gamePanel;
     private readonly Label _status;
@@ -59,13 +52,12 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     private readonly Button _saveButton;
     private readonly Button _loadButton;
     private readonly MameArcadeScreen _screen = new();
+    private readonly MameArcadeControlDeck _deck = new();
 
-    private readonly BoxContainer _showingRow;
-    private readonly Label _showingLabel;
-    private readonly Button _watchButton;
     private readonly BoxContainer _watchPanel;
     private readonly Label _watchStatus;
     private readonly MameArcadeScreen _watchScreen = new() { CanKeyboardFocus = false, KeyboardFocusOnClick = false };
+    private readonly MameArcadeControlDeck _watchDeck = new();
     private MameVideoDecoder? _decoder;
     private string _watchedGame = string.Empty;
 
@@ -90,7 +82,6 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     private MameArcadeSession? _session;
     private MameArcadeAudio? _audio;
     private MameArcadeBuiState? _lobby;
-    private NeoGeoSet? _selected;
     private string _hostedGame = string.Empty;
     private string _partnerName = string.Empty;
     private int _lastFrame;
@@ -118,51 +109,17 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         _library = new MameRomLibrary(_resources.UserData);
 
         Title = Loc.GetString("mame-arcade-title");
-        SetSize = new Vector2(820, 700);
-        MinSize = new Vector2(480, 420);
+        SetSize = new Vector2(900, 760);
+        MinSize = new Vector2(640, 520);
 
-        var import = new Button { Text = Loc.GetString("mame-arcade-import") };
-        import.OnPressed += _ => Import();
-        var folder = new Button { Text = Loc.GetString("mame-arcade-open-folder") };
-        folder.OnPressed += _ => _library.OpenFolder();
-        var refresh = new Button { Text = Loc.GetString("mame-arcade-refresh") };
-        refresh.OnPressed += _ => RefreshLibrary();
-
-        _lobbyLabel = new Label { HorizontalExpand = true };
-        _joinButton = new Button { Text = Loc.GetString("mame-arcade-lobby-join") };
-        _joinButton.OnPressed += _ => Join();
-        _cancelButton = new Button { Text = Loc.GetString("mame-arcade-lobby-cancel") };
-        _cancelButton.OnPressed += _ => LeaveRequested?.Invoke();
-
-        _games = new ItemList { VerticalExpand = true, SelectMode = ItemList.ItemListSelectMode.Single };
-        _games.OnItemSelected += args => Select(_games[args.ItemIndex].Metadata as NeoGeoSet);
-        _details = new Label { FontColorOverride = Color.Gray };
-        _playButton = new Button { Text = Loc.GetString("mame-arcade-play"), Disabled = true };
-        _playButton.OnPressed += _ => PlaySolo();
-        _hostButton = new Button { Text = Loc.GetString("mame-arcade-host"), Disabled = true };
-        _hostButton.OnPressed += _ => Host();
-
-        _showingLabel = new Label { HorizontalExpand = true };
-        _watchButton = new Button { Text = Loc.GetString("mame-arcade-watch") };
-        _watchButton.OnPressed += _ => Watch();
-        _showingRow = new BoxContainer { Visible = false, Children = { _showingLabel, _watchButton } };
-
-        _libraryPanel = new BoxContainer
-        {
-            Orientation = BoxContainer.LayoutOrientation.Vertical,
-            VerticalExpand = true,
-            SeparationOverride = 6,
-            Children =
-            {
-                new Label { Text = Loc.GetString("mame-arcade-library-help") },
-                new BoxContainer { Children = { import, folder, refresh } },
-                new BoxContainer { Children = { _lobbyLabel, _joinButton, _cancelButton } },
-                _showingRow,
-                _games,
-                _details,
-                new BoxContainer { Children = { _playButton, _hostButton } },
-            },
-        };
+        _libraryPanel.ImportPressed += Import;
+        _libraryPanel.FolderPressed += _library.OpenFolder;
+        _libraryPanel.RefreshPressed += RefreshLibrary;
+        _libraryPanel.PlayPressed += PlaySolo;
+        _libraryPanel.HostPressed += Host;
+        _libraryPanel.JoinPressed += Join;
+        _libraryPanel.CancelPressed += () => LeaveRequested?.Invoke();
+        _libraryPanel.WatchPressed += Watch;
 
         _status = new Label { HorizontalExpand = true };
         _saveButton = new Button { Text = Loc.GetString("mame-arcade-save-state") };
@@ -178,11 +135,13 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             Orientation = BoxContainer.LayoutOrientation.Vertical,
             VerticalExpand = true,
             Visible = false,
+            SeparationOverride = 4,
             Children =
             {
                 new BoxContainer { Children = { _status, _saveButton, _loadButton, quit } },
                 _screen,
                 _notice,
+                _deck,
             },
         };
 
@@ -195,10 +154,12 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             Orientation = BoxContainer.LayoutOrientation.Vertical,
             VerticalExpand = true,
             Visible = false,
+            SeparationOverride = 4,
             Children =
             {
                 new BoxContainer { Children = { _watchStatus, stopWatching } },
                 _watchScreen,
+                _watchDeck,
             },
         };
 
@@ -230,6 +191,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 
         _watchScreen.SetFrame(_decoder.Frame, _decoder.Width, _decoder.Height);
         _watchStatus.Text = WatchingText();
+        UpdateWatchDeck(_decoder.Deck);
     }
 
     /// <summary>The server seated both players; start from power-on.</summary>
@@ -337,12 +299,67 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 
         if (showing && _lobby?.Showing.Watchers is > 0 and var watchers)
             _status.Text = Loc.GetString("mame-arcade-status-watched", ("status", _status.Text ?? string.Empty), ("count", watchers));
+
+        UpdateDeck();
+    }
+
+    /// <summary>The local seat shows the keys as pressed, the partner's what their last frame used.</summary>
+    private void UpdateDeck()
+    {
+        var held = _screen.Held;
+        if (_session?.Netplay is not { } netplay)
+        {
+            _deck.SetSeat(0, held, string.Empty, local: true, active: true);
+            _deck.SetSeat(1, MameControls.None, string.Empty, local: false, active: false);
+            return;
+        }
+
+        var (one, two) = _session.LastControls;
+        var partner = 1 - netplay.Seat;
+        _deck.SetSeat(netplay.Seat, held, string.Empty, local: true, active: true);
+        _deck.SetSeat(partner, partner == 0 ? one : two, _partnerName, local: false, active: !netplay.Alone);
+    }
+
+    private void UpdateWatchDeck(MameDeckState deck)
+    {
+        var lobby = _lobby;
+        var twoPlayer = lobby?.Host != null && lobby.Guest != null;
+        var one = twoPlayer ? lobby!.HostName : lobby?.Showing.PlayerName ?? string.Empty;
+        var two = twoPlayer ? lobby!.GuestName : lobby?.Showing.PlayerName ?? string.Empty;
+        _watchDeck.SetSeat(0, deck.PlayerOne, one, local: false, active: deck.OneActive);
+        _watchDeck.SetSeat(1, deck.PlayerTwo, two, local: false, active: deck.TwoActive);
+    }
+
+    /// <summary>What the watchers' decks show: the seats in play and their controls in the frame sent.</summary>
+    private MameDeckState DeckForWatchers()
+    {
+        if (_session == null)
+            return default;
+
+        var (one, two) = _session.LastControls;
+        if (_session.Netplay is not { } netplay)
+            return new MameDeckState(one, two, true, false);
+
+        var partnerPlays = !netplay.Alone;
+        return new MameDeckState(one, two, netplay.Seat == 0 || partnerPlays, netplay.Seat == 1 || partnerPlays);
     }
 
     public override void Close()
     {
         StopSession(null);
         base.Close();
+    }
+
+    /// <summary>
+    /// Stops the game and any watching without telling the server, for when the server closed the cabinet first,
+    /// such as when the player walks away. The window is then disposed without <see cref="Close"/>.
+    /// </summary>
+    public void Shutdown()
+    {
+        StopSession(null);
+        _decoder = null;
+        _watchedGame = string.Empty;
+        _watchScreen.Clear();
     }
 
     /// <summary>This client's game is the one on the cabinet.</summary>
@@ -410,8 +427,8 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 
         _sinceVideo = 0f;
         var frame = (Rgba32[]) pixels.Clone();
-        var (width, height, encoder) = (_session!.Width, _session.Height, _encoder);
-        _encoding = Task.Run(() => encoder.Encode(frame, width, height, keyframe));
+        var (width, height, encoder, deck) = (_session!.Width, _session.Height, _encoder, DeckForWatchers());
+        _encoding = Task.Run(() => encoder.Encode(frame, width, height, keyframe, deck));
     }
 
     private void Watch()
@@ -422,6 +439,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         _decoder = new MameVideoDecoder();
         _watchedGame = showing.Game;
         _watchScreen.Clear();
+        UpdateWatchDeck(default);
         _watchStatus.Text = Loc.GetString("mame-arcade-watch-waiting");
         _libraryPanel.Visible = false;
         _watchPanel.Visible = true;
@@ -438,8 +456,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         _watchScreen.Clear();
         _watchPanel.Visible = false;
         _libraryPanel.Visible = true;
-        if (message != null)
-            _details.Text = message;
+        _libraryPanel.SetMessage(message);
 
         WatchRequested?.Invoke(false);
         UpdateLobby();
@@ -495,84 +512,60 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     private void RefreshLibrary()
     {
         _library.Refresh();
-        var source = _library.Snapshot();
-
-        _games.Clear();
-        var entries = NeoGeoSets.All
-            .Select(set => (Set: set, Missing: NeoGeoLoader.Missing(set, source)))
-            .Where(e => e.Set.Chips.Values.Any(source.Has))
-            .OrderBy(e => e.Missing.Count > 0)
-            .ThenBy(e => e.Set.Title);
-
-        foreach (var (set, missing) in entries)
-        {
-            var status = missing.Count == 0
-                ? Loc.GetString("mame-arcade-game-ready")
-                : Loc.GetString("mame-arcade-game-missing", ("count", missing.Count));
-            var text = Loc.GetString("mame-arcade-game-entry",
-                ("title", set.Title), ("year", set.Year), ("maker", set.Manufacturer), ("status", status));
-            _games.AddItem(text, metadata: set);
-        }
-
-        if (_games.Count == 0)
-            _details.Text = Loc.GetString("mame-arcade-no-games");
-
-        Select(_selected);
+        _libraryPanel.SetLibrary(_library.Snapshot(), _library.ZipCount, _library.UnusedZips(IsKnownChip), _library.HasState);
         UpdateLobby();
     }
 
-    private void Select(NeoGeoSet? set)
+    /// <summary>A chip some supported game or the BIOS uses.</summary>
+    private static bool IsKnownChip(uint crc, long size)
     {
-        _selected = set;
-        var missing = set == null ? null : NeoGeoLoader.Missing(set, _library.Snapshot());
-        _playButton.Disabled = missing is not { Count: 0 };
-        _hostButton.Disabled = missing is not { Count: 0 } || _lobby?.Host != null;
+        foreach (var set in NeoGeoSets.All)
+        {
+            if (set.Chips.TryGetValue(crc, out var chip) && chip.Size == size)
+                return true;
+        }
 
-        if (set == null || missing == null)
-            return;
+        foreach (var bios in NeoGeoLoader.MainBioses)
+        {
+            if (bios.Crc == crc && bios.Size == size)
+                return true;
+        }
 
-        _details.Text = missing.Count == 0
-            ? Loc.GetString("mame-arcade-game-ready")
-            : Loc.GetString("mame-arcade-missing-list", ("files", string.Join(", ", missing.Select(m => m.Name))));
+        return crc == NeoGeoLoader.FixedBios.Crc || crc == NeoGeoLoader.ZoomTable.Crc || crc == NeoGeoLoader.AudioBios.Crc;
     }
 
     private void UpdateLobby()
     {
         var local = _entMan.GetNetEntity(_player.LocalEntity);
         var lobby = _lobby;
-        _joinButton.Visible = false;
-        _cancelButton.Visible = false;
         UpdateShowing(lobby?.Showing, local);
 
         if (lobby?.Host is not { } host)
         {
-            _lobbyLabel.Text = string.Empty;
-            Select(_selected);
+            _libraryPanel.SetLobby(null, false, false, hostBlocked: false);
             return;
         }
 
         var title = NeoGeoSets.Find(lobby.Game)?.Title ?? lobby.Game;
         if (lobby.Guest != null)
         {
-            _lobbyLabel.Text = Loc.GetString("mame-arcade-lobby-busy", ("host", lobby.HostName), ("guest", lobby.GuestName), ("game", title));
+            var text = Loc.GetString("mame-arcade-lobby-busy", ("host", lobby.HostName), ("guest", lobby.GuestName), ("game", title));
+            _libraryPanel.SetLobby(text, false, false, hostBlocked: true);
         }
         else if (host == local)
         {
-            _lobbyLabel.Text = Loc.GetString("mame-arcade-lobby-waiting", ("game", title));
-            _cancelButton.Visible = true;
+            _libraryPanel.SetLobby(Loc.GetString("mame-arcade-lobby-waiting", ("game", title)), false, true, hostBlocked: true);
         }
         else
         {
             var set = NeoGeoSets.Find(lobby.Game);
             var canJoin = set != null && NeoGeoLoader.Fingerprint(set, _library.Snapshot()) == lobby.Fingerprint
                 && NeoGeoLoader.Missing(set, _library.Snapshot()).Count == 0;
-            _lobbyLabel.Text = canJoin
+            var text = canJoin
                 ? Loc.GetString("mame-arcade-lobby-hosting", ("host", lobby.HostName), ("game", title))
                 : Loc.GetString("mame-arcade-lobby-need-game", ("host", lobby.HostName), ("game", title));
-            _joinButton.Visible = canJoin && _session == null;
+            _libraryPanel.SetLobby(text, canJoin && _session == null, false, hostBlocked: true);
         }
-
-        Select(_selected);
     }
 
     /// <summary>Offers to watch another player's game on the cabinet.</summary>
@@ -580,17 +573,13 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     {
         if (showing?.Player is not { } player || player == local || _session != null)
         {
-            _showingRow.Visible = false;
+            _libraryPanel.SetShowing(null, false, false);
             return;
         }
 
         var title = NeoGeoSets.Find(showing.Game)?.Title ?? showing.Game;
-        var full = showing.Watchers >= showing.MaxWatchers;
-        _showingRow.Visible = true;
-        _showingLabel.Text = Loc.GetString("mame-arcade-showing", ("player", showing.PlayerName), ("game", title));
-        _watchButton.Visible = showing.VideoRate > 0;
-        _watchButton.Disabled = full;
-        _watchButton.Text = Loc.GetString(full ? "mame-arcade-watch-full" : "mame-arcade-watch");
+        var text = Loc.GetString("mame-arcade-showing", ("player", showing.PlayerName), ("game", title));
+        _libraryPanel.SetShowing(text, showing.VideoRate > 0, showing.Watchers >= showing.MaxWatchers);
     }
 
     private async void Import()
@@ -604,8 +593,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 
         await using (stream)
         {
-            if (!_library.Import(name, stream))
-                _details.Text = Loc.GetString("mame-arcade-import-failed");
+            _libraryPanel.SetMessage(_library.Import(name, stream) ? null : Loc.GetString("mame-arcade-import-failed"));
         }
 
         RefreshLibrary();
@@ -613,24 +601,24 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 
     private void PlaySolo()
     {
-        if (_selected == null)
+        if (_libraryPanel.Selected is not { } set)
             return;
 
-        StartSession(_selected, null);
-        SoloStarted?.Invoke(_selected.Name);
+        StartSession(set, null);
+        SoloStarted?.Invoke(set.Name);
     }
 
     private void Host()
     {
-        if (_selected == null)
+        if (_libraryPanel.Selected is not { } set)
             return;
 
-        var fingerprint = NeoGeoLoader.Fingerprint(_selected, _library.Snapshot());
+        var fingerprint = NeoGeoLoader.Fingerprint(set, _library.Snapshot());
         if (fingerprint.Length == 0)
             return;
 
-        _hostedGame = _selected.Name;
-        HostRequested?.Invoke(_selected.Name, fingerprint);
+        _hostedGame = set.Name;
+        HostRequested?.Invoke(set.Name, fingerprint);
     }
 
     private void Join()
@@ -667,7 +655,8 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         var solo = netplay == null;
         _saveButton.Visible = solo;
         _loadButton.Visible = solo;
-        _notice.Text = Loc.GetString("mame-arcade-controls-neogeo");
+        _notice.Text = string.Empty;
+        _libraryPanel.SetMessage(null);
         _libraryPanel.Visible = false;
         _gamePanel.Visible = true;
         _screen.GrabKeyboardFocus();
@@ -705,7 +694,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         _gamePanel.Visible = false;
         _libraryPanel.Visible = true;
         if (message != null)
-            _details.Text = message;
+            _libraryPanel.SetMessage(message);
 
         UpdateLobby();
     }

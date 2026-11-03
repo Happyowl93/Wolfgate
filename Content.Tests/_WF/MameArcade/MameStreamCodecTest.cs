@@ -30,10 +30,12 @@ public sealed class MameStreamCodecTest
 
         // A sprite moves: only its tiles go out again.
         var moved = Scene(12);
-        var change = encoder.Encode(moved, Width, Height, keyframe: false);
+        var deck = new MameDeckState(MameControls.Right | MameControls.Button1, MameControls.Start, true, true);
+        var change = encoder.Encode(moved, Width, Height, keyframe: false, deck);
         Assert.That(change.Length, Is.LessThan(key.Length / 4), "A change sends only the tiles that differ");
         Assert.That(decoder.Decode(change));
         AssertSame(decoder.Frame, moved);
+        Assert.That(decoder.Deck, Is.EqualTo(deck), "The watcher's control deck shows what both players hold");
 
         var still = encoder.Encode(moved, Width, Height, keyframe: false);
         Assert.That(still.Length, Is.LessThan(64), "An unchanged screen costs next to nothing");
@@ -61,8 +63,8 @@ public sealed class MameStreamCodecTest
     {
         var decoder = new MameVideoDecoder();
         Assert.That(decoder.Decode(Array.Empty<byte>()), Is.False);
-        Assert.That(decoder.Decode(new byte[] { 1, 0xff, 0xff, 0xff, 0xff, 1, 2, 3 }), Is.False, "Too large a screen");
-        Assert.That(decoder.Decode(new byte[] { 1, 64, 1, 224, 0, 0xde, 0xad, 0xbe, 0xef }), Is.False, "Not deflate data");
+        Assert.That(decoder.Decode(new byte[] { 1, 0xff, 0xff, 0xff, 0xff, 0, 0, 0, 0, 1, 2, 3 }), Is.False, "Too large a screen");
+        Assert.That(decoder.Decode(new byte[] { 1, 64, 1, 224, 0, 0, 0, 0, 0, 0xde, 0xad, 0xbe, 0xef }), Is.False, "Not deflate data");
 
         var key = new MameVideoEncoder().Encode(Scene(0), Width, Height, keyframe: true);
         Assert.That(decoder.Decode(key[..(key.Length / 2)]), Is.False, "Cut short");

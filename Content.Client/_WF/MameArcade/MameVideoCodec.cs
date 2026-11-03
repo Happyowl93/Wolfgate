@@ -4,15 +4,21 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace Content.Client._WF.MameArcade;
 
+/// <summary>Which seats are played and what they hold, shown on a watcher's control deck.</summary>
+public readonly record struct MameDeckState(MameControls PlayerOne, MameControls PlayerTwo, bool OneActive, bool TwoActive);
+
 /// <summary>
 /// Frames for spectators: 15-bit colour, only the 8x8 tiles that changed since the last packet, deflated. A keyframe
 /// carries every tile, so a watcher can start from it. Raw pixels deflate better here than palettes, planes or deltas.
+/// The header also carries both seats' controls for the watcher's control deck.
 /// </summary>
 public static class MameVideoCodec
 {
     public const int Tile = 8;
     public const byte KeyframeFlag = 1;
-    public const int HeaderBytes = 5;
+    public const byte OneActiveFlag = 2;
+    public const byte TwoActiveFlag = 4;
+    public const int HeaderBytes = 9;
 
     // Larger than any Neo Geo screen, so a bad packet can't make a watcher allocate much.
     public const int MaxSide = 512;
@@ -42,7 +48,7 @@ public sealed class MameVideoEncoder
     private int _width;
     private int _height;
 
-    public byte[] Encode(Rgba32[] pixels, int width, int height, bool keyframe)
+    public byte[] Encode(Rgba32[] pixels, int width, int height, bool keyframe, MameDeckState deck = default)
     {
         if (width != _width || height != _height)
         {
@@ -77,10 +83,18 @@ public sealed class MameVideoEncoder
 
         (_previous, _current) = (_current, _previous);
 
+        var flags = keyframe ? MameVideoCodec.KeyframeFlag : (byte) 0;
+        if (deck.OneActive)
+            flags |= MameVideoCodec.OneActiveFlag;
+        if (deck.TwoActive)
+            flags |= MameVideoCodec.TwoActiveFlag;
+
         var packet = new MemoryStream();
-        packet.WriteByte(keyframe ? MameVideoCodec.KeyframeFlag : (byte) 0);
+        packet.WriteByte(flags);
         WriteUShort(packet, (ushort) width);
         WriteUShort(packet, (ushort) height);
+        WriteUShort(packet, (ushort) deck.PlayerOne);
+        WriteUShort(packet, (ushort) deck.PlayerTwo);
         using (var deflate = new DeflateStream(packet, CompressionLevel.Optimal, leaveOpen: true))
         {
             deflate.Write(mask);
@@ -136,6 +150,9 @@ public sealed class MameVideoDecoder
     /// <summary>The screen, valid after <see cref="Decode"/> returns true.</summary>
     public Rgba32[] Frame => _frame;
 
+    /// <summary>The players' controls as of the last decoded packet.</summary>
+    public MameDeckState Deck { get; private set; }
+
     /// <summary>False if the packet can't be applied: malformed, or a change before the first keyframe.</summary>
     public bool Decode(byte[] packet)
     {
@@ -147,6 +164,12 @@ public sealed class MameVideoDecoder
         var height = packet[3] | packet[4] << 8;
         if (width is 0 or > MameVideoCodec.MaxSide || height is 0 or > MameVideoCodec.MaxSide)
             return false;
+
+        var deck = new MameDeckState(
+            (MameControls) (packet[5] | packet[6] << 8),
+            (MameControls) (packet[7] | packet[8] << 8),
+            (packet[0] & MameVideoCodec.OneActiveFlag) != 0,
+            (packet[0] & MameVideoCodec.TwoActiveFlag) != 0);
 
         if (width != Width || height != Height)
         {
@@ -201,6 +224,7 @@ public sealed class MameVideoDecoder
             }
         }
 
+        Deck = deck;
         return true;
     }
 

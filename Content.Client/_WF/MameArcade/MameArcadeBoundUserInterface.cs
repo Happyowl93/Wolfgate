@@ -32,6 +32,10 @@ public sealed partial class MameArcadeBoundUserInterface : BoundUserInterface
 
     protected override void Dispose(bool disposing)
     {
+        // Disposing the window skips its Close, which would leave the game's worker holding the emulator.
+        if (disposing)
+            _window?.Shutdown();
+
         base.Dispose(disposing);
         _net.InputReceived -= OnInputReceived;
         _net.StreamReceived -= OnStreamReceived;

@@ -59,6 +59,9 @@ public sealed class MameArcadeSession : IDisposable
     /// <summary>Set for a 2-player game.</summary>
     public readonly MameNetplay? Netplay;
 
+    /// <summary>Both seats' controls in the last frame handed to the emulator.</summary>
+    public (MameControls PlayerOne, MameControls PlayerTwo) LastControls { get; private set; }
+
     /// <param name="nvram">Where battery RAM persists. Leave null for 2-player games, which must start identical.</param>
     public MameArcadeSession(NeoGeoSet set, IMameChipSource chips, INvramStore? nvram, MameNetplay? netplay)
     {
@@ -113,6 +116,7 @@ public sealed class MameArcadeSession : IDisposable
                 }
 
                 _jobs.Enqueue(new FrameJob(frame, playerOne, playerTwo));
+                LastControls = (playerOne, playerTwo);
                 _accumulator -= _frameSeconds;
             }
 
