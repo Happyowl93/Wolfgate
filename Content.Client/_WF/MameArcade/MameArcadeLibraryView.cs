@@ -51,7 +51,7 @@ public sealed class MameArcadeLibraryView : BoxContainer
 
     private List<Entry> _entries = new();
     private Func<string, bool> _hasState = _ => false;
-    private bool _hostBlocked;
+    private bool _cabinetBusy;
 
     public event Action? ImportPressed;
     public event Action? FolderPressed;
@@ -257,14 +257,17 @@ public sealed class MameArcadeLibraryView : BoxContainer
         SelectInList(entry);
     }
 
-    /// <summary>The cabinet's open 2-player game; null text hides it.</summary>
-    public void SetLobby(string? text, bool canJoin, bool canCancel, bool hostBlocked)
+    /// <summary>
+    /// The cabinet's open 2-player game; null text hides it. While the cabinet is busy with a game or a lobby, Play
+    /// and Host stay off.
+    /// </summary>
+    public void SetLobby(string? text, bool canJoin, bool canCancel, bool busy)
     {
         _lobbyRow.Visible = text != null;
         _lobbyLabel.Text = text ?? string.Empty;
         _joinButton.Visible = canJoin;
         _cancelButton.Visible = canCancel;
-        _hostBlocked = hostBlocked;
+        _cabinetBusy = busy;
         UpdateCabinetCard();
         UpdateButtons();
     }
@@ -383,8 +386,8 @@ public sealed class MameArcadeLibraryView : BoxContainer
     private void UpdateButtons()
     {
         var ready = _entries.FirstOrDefault(e => e.Set == Selected) is { Missing.Count: 0 };
-        _playButton.Disabled = !ready;
-        _hostButton.Disabled = !ready || _hostBlocked;
+        _playButton.Disabled = !ready || _cabinetBusy;
+        _hostButton.Disabled = !ready || _cabinetBusy;
     }
 
     private static PanelContainer Panel(Color background, Color edge, Control content)

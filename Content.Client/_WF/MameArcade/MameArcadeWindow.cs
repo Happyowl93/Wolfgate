@@ -223,6 +223,11 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 
         if (Spectator && _decoder == null && state.Showing.Player != null)
             Watch();
+
+        // The server refused this game because someone else took the cabinet first.
+        var local = _entMan.GetNetEntity(_player.LocalEntity);
+        if (_session is { Netplay: null } && (state.Host != null || state.Showing.Player is { } player && player != local))
+            StopSession(Loc.GetString("mame-arcade-cabinet-busy"));
     }
 
     /// <summary>Whether the window shows another player's game.</summary>
@@ -649,7 +654,8 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 
         if (lobby?.Host is not { } host)
         {
-            _libraryPanel.SetLobby(null, false, false, hostBlocked: false);
+            var otherPlaying = lobby?.Showing.Player is { } player && player != local;
+            _libraryPanel.SetLobby(null, false, false, busy: otherPlaying);
             return;
         }
 
@@ -657,11 +663,11 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         if (lobby.Guest != null)
         {
             var text = Loc.GetString("mame-arcade-lobby-busy", ("host", lobby.HostName), ("guest", lobby.GuestName), ("game", title));
-            _libraryPanel.SetLobby(text, false, false, hostBlocked: true);
+            _libraryPanel.SetLobby(text, false, false, busy: true);
         }
         else if (host == local)
         {
-            _libraryPanel.SetLobby(Loc.GetString("mame-arcade-lobby-waiting", ("game", title)), false, true, hostBlocked: true);
+            _libraryPanel.SetLobby(Loc.GetString("mame-arcade-lobby-waiting", ("game", title)), false, true, busy: true);
         }
         else
         {
@@ -669,7 +675,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             var text = canJoin
                 ? Loc.GetString("mame-arcade-lobby-hosting", ("host", lobby.HostName), ("game", title))
                 : Loc.GetString("mame-arcade-lobby-need-game", ("host", lobby.HostName), ("game", title));
-            _libraryPanel.SetLobby(text, canJoin && _session == null, false, hostBlocked: true);
+            _libraryPanel.SetLobby(text, canJoin && _session == null, false, busy: true);
         }
     }
 

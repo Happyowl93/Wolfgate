@@ -66,11 +66,12 @@ public sealed partial class WFMameArcadeSystem : EntitySystem
         });
     }
 
-    /// <summary>Offers a 2-player game at the cabinet. False if one is already open.</summary>
+    /// <summary>Offers a 2-player game at the cabinet. False if one is already open or someone is playing.</summary>
     public bool TryHost(Entity<WFMameArcadeComponent> cabinet, EntityUid player, string game, string fingerprint)
     {
         var comp = cabinet.Comp;
         if (comp.Host != null
+            || comp.Player != null
             || game.Length is 0 or > MameArcadeProtocol.MaxGameName
             || fingerprint.Length is 0 or > MameArcadeProtocol.MaxFingerprint)
         {
@@ -130,12 +131,19 @@ public sealed partial class WFMameArcadeSystem : EntitySystem
         UpdateState(cabinet);
     }
 
-    /// <summary>Shows a 1-player game on the cabinet. False if another player's game already shows.</summary>
+    /// <summary>
+    /// Shows a 1-player game on the cabinet. False if another player's game already shows or a 2-player game is
+    /// open; one game plays at a time, and everyone else watches.
+    /// </summary>
     public bool TryShowSolo(Entity<WFMameArcadeComponent> cabinet, EntityUid player, string game)
     {
         var comp = cabinet.Comp;
-        if (game.Length is 0 or > MameArcadeProtocol.MaxGameName || comp.Player != null && comp.Player != player)
+        if (game.Length is 0 or > MameArcadeProtocol.MaxGameName
+            || comp.Player != null && comp.Player != player
+            || comp.Host != null)
+        {
             return false;
+        }
 
         Show(comp, player, game);
         AddSpectators(cabinet);

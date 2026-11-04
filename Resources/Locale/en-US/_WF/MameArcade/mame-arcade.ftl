@@ -53,6 +53,7 @@ mame-arcade-partner-left = The other player left. Player { $seat } stays idle.
 mame-arcade-desynced = The two games went out of sync, so you're playing alone now.
 
 mame-arcade-showing = { $player } is playing { $game } on this cabinet.
+mame-arcade-cabinet-busy = Someone else started a game on this cabinet first. You can watch it instead.
 mame-arcade-watch = Watch
 mame-arcade-watch-full = Watch (full)
 mame-arcade-stop-watching = Stop watching

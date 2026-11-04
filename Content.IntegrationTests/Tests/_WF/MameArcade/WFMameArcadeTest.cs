@@ -85,7 +85,11 @@ public sealed class WFMameArcadeTest
             Assert.That(system.TryWatch(cabinet, watcher));
             Assert.That(comp.Watchers, Is.EquivalentTo(new[] { watcher }));
 
+            Assert.That(system.TryHost(cabinet, host, "kof94", Kof94), Is.False, "No 2-player game while someone plays");
+            system.Leave(cabinet, solo);
+
             Assert.That(system.TryHost(cabinet, host, "kof94", Kof94));
+            Assert.That(system.TryShowSolo(cabinet, solo, "mslug"), Is.False, "No solo game while a 2-player game is open");
             Assert.That(system.TryJoin(cabinet, guest, Kof94));
             Assert.That(comp.Player, Is.EqualTo(host), "A 2-player game shows player 1's screen");
             Assert.That(comp.Watchers, Is.Empty, "A different game starts with no audience");
