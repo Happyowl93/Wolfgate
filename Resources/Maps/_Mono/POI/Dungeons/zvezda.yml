@@ -5,7 +5,7 @@ meta:
   forkId: wolfgate-mapping
   forkVersion: 20261025-205332-84bd22a-tm231-b001ee70
   time: 10/27/2026 15:10:17
-  entityCount: 11094
+  entityCount: 11095
 maps: []
 grids:
 - 2
@@ -29792,6 +29792,13 @@ entities:
       parent: 2
       rot: -1.5707963267948966 rad
       pos: 15.5,5.5
+- proto: WFVendingMachineTraderZvezda
+  entities:
+  - uid: 11095
+    components:
+    - type: Transform
+      parent: 2
+      pos: 45.5,-21.5
 - proto: filingCabinetDrawerRandom
   entities:
   - uid: 4732
