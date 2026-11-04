@@ -90,3 +90,4 @@ mame-arcade-deck-key-hp = L
 mame-arcade-deck-key-lk = U
 mame-arcade-deck-key-mk = I
 mame-arcade-deck-key-hk = O
+mame-arcade-joining = Joining { $host }'s game as player 2...

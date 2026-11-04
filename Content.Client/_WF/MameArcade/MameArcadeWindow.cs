@@ -199,11 +199,54 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     /// <summary>The cabinet's lobby changed.</summary>
     public void SetLobby(MameArcadeBuiState state)
     {
+        var first = _lobby == null;
         _lobby = state;
         UpdateLobby();
 
         if (_decoder != null && (state.Showing.Player == null || state.Showing.Game != _watchedGame))
             StopWatching(Loc.GetString("mame-arcade-watch-ended"));
+
+        if (first)
+            StepUp(state);
+    }
+
+    /// <summary>Whether the window shows another player's game.</summary>
+    public bool Watching => _decoder != null;
+
+    /// <summary>
+    /// What walking up to the cabinet does: take the free seat of a 2-player game waiting for one, if this player
+    /// has the same set; otherwise watch the game on the screen. Afterwards the player chooses for themselves.
+    /// </summary>
+    private void StepUp(MameArcadeBuiState state)
+    {
+        if (_session != null || _decoder != null)
+            return;
+
+        var local = _entMan.GetNetEntity(_player.LocalEntity);
+        if (state.Host is { } host && host != local && state.Guest == null)
+        {
+            if (!CanJoin(state))
+                return;
+
+            _libraryPanel.SetMessage(Loc.GetString("mame-arcade-joining", ("host", state.HostName)));
+            Join();
+            return;
+        }
+
+        if (state.Showing is { Player: { } player, VideoRate: > 0 } showing
+            && player != local
+            && showing.Watchers < showing.MaxWatchers)
+        {
+            Watch();
+        }
+    }
+
+    /// <summary>The player has the set and BIOS the lobby's host plays with.</summary>
+    private bool CanJoin(MameArcadeBuiState lobby)
+    {
+        return MameGames.Find(lobby.Game) is { } set
+            && MameGames.Fingerprint(set, _library.Snapshot()) == lobby.Fingerprint
+            && MameGames.Missing(set, _library.Snapshot()).Count == 0;
     }
 
     /// <summary>A picture packet of the watched game.</summary>
@@ -625,9 +668,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         }
         else
         {
-            var set = MameGames.Find(lobby.Game);
-            var canJoin = set != null && MameGames.Fingerprint(set, _library.Snapshot()) == lobby.Fingerprint
-                && MameGames.Missing(set, _library.Snapshot()).Count == 0;
+            var canJoin = CanJoin(lobby);
             var text = canJoin
                 ? Loc.GetString("mame-arcade-lobby-hosting", ("host", lobby.HostName), ("game", title))
                 : Loc.GetString("mame-arcade-lobby-need-game", ("host", lobby.HostName), ("game", title));

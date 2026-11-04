@@ -111,6 +111,52 @@ public sealed class WFMameArcadeTest
     }
 
     [Test]
+    public async Task OpeningABusyCabinetWatches()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var client = pair.Client;
+        var map = await pair.CreateTestMap();
+        EntityUid cabinet = default;
+        EntityUid player = default;
+
+        await server.WaitPost(() =>
+        {
+            var entMan = server.EntMan;
+            player = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            server.PlayerMan.SetAttachedEntity(server.PlayerMan.Sessions.Single(), player);
+            cabinet = entMan.SpawnEntity("WFMameArcade", map.GridCoords);
+            var someone = entMan.SpawnEntity(null, map.GridCoords);
+            var system = entMan.System<WFMameArcadeSystem>();
+            system.TryShowSolo((cabinet, entMan.GetComponent<WFMameArcadeComponent>(cabinet)), someone, "mslug");
+            server.System<SharedUserInterfaceSystem>().OpenUi(cabinet, MameArcadeUiKey.Key, player);
+        });
+
+        await pair.RunTicksSync(30);
+
+        await client.WaitAssertion(() =>
+        {
+            var window = client.ResolveDependency<IUserInterfaceManager>().WindowRoot.Children
+                .OfType<MameArcadeWindow>()
+                .Single();
+            Assert.That(window.Watching, "Someone else's game was on the screen, so the window opens watching it");
+        });
+
+        await server.WaitAssertion(() =>
+        {
+            var comp = server.EntMan.GetComponent<WFMameArcadeComponent>(cabinet);
+            Assert.That(comp.Watchers, Does.Contain(player), "The server sends the picture to the new watcher");
+        });
+
+        await client.WaitPost(() => client.ResolveDependency<IUserInterfaceManager>().WindowRoot.Children
+            .OfType<MameArcadeWindow>()
+            .Single()
+            .Close());
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
     public async Task CabinetOpensWindow()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });

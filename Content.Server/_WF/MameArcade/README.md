@@ -8,6 +8,10 @@ window's Open ROM folder). Nothing is downloaded or shared: the server only ever
 uses. Each game needs its MAME set, and Neo Geo games `neogeo.zip` for the BIOS; chips are found by CRC and size
 across every zip, so split, merged and non-merged sets all work. Battery RAM and save states live beside them.
 
+**Walking up.** Opening a cabinet picks the obvious thing: a player whose zips match an open 2-player game takes the
+second seat, and anyone else watches the game on the screen, if one is on and the audience isn't full. Otherwise, or
+after leaving either, the player gets the library and chooses.
+
 **Window.** `MameArcadeLibraryView` is the start screen: what is happening on the cabinet (an open 2-player game to
 join, or a game to watch), the player's games with a search and a ready-only filter, and the chosen game's details,
 missing files and Play and Host buttons. Other versions of a game the player can already run share most of its chips,
