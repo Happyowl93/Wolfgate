@@ -50,6 +50,9 @@ public sealed class WFMameArcadeTest
 
             system.Leave(cabinet, guest);
             Assert.That(cabinet.Comp.Host, Is.Null);
+            Assert.That(system.TryHost(cabinet, other, "mslug", "mslug:9036d879"), Is.False, "Player 1 still plays on alone");
+
+            system.Leave(cabinet, host);
             Assert.That(system.TryHost(cabinet, other, "mslug", "mslug:9036d879"), "The cabinet is free again");
 
             Assert.That(system.TryHost(cabinet, host, "", Kof94), Is.False);
@@ -143,7 +146,7 @@ public sealed class WFMameArcadeTest
             server.System<MobStateSystem>().ChangeMobState(player, MobState.Critical);
             Assert.That(server.System<SharedUserInterfaceSystem>().IsUiOpen(cabinet.Owner, MameArcadeUiKey.Key, player), Is.False,
                 "Going into crit closes the cabinet");
-            Assert.That(cabinet.Comp.Player, Is.Null, "Their game leaves the screen");
+            Assert.That(cabinet.Comp!.Player, Is.Null, "Their game leaves the screen");
         });
 
         await pair.RunTicksSync(10);
@@ -188,7 +191,7 @@ public sealed class WFMameArcadeTest
         await pair.RunTicksSync(30);
 
         await server.WaitAssertion(() =>
-            Assert.That(cabinet.Comp.Watchers, Does.Contain(ghost), "The server counts the ghost in when a game starts"));
+            Assert.That(cabinet.Comp!.Watchers, Does.Contain(ghost), "The server counts the ghost in when a game starts"));
         await client.WaitAssertion(() => Assert.That(Window().Watching, "The ghost's window watches the new game"));
 
         await server.WaitPost(() =>
@@ -200,14 +203,14 @@ public sealed class WFMameArcadeTest
         await pair.RunTicksSync(30);
 
         await server.WaitAssertion(() =>
-            Assert.That(cabinet.Comp.Watchers, Does.Contain(ghost), "The ghost stays in the audience for the next game"));
+            Assert.That(cabinet.Comp!.Watchers, Does.Contain(ghost), "The ghost stays in the audience for the next game"));
         await client.WaitAssertion(() => Assert.That(Window().Watching, "The ghost's window follows the next game"));
 
         await client.WaitPost(() => Window().Close());
         await pair.RunTicksSync(5);
 
         await server.WaitAssertion(() =>
-            Assert.That(cabinet.Comp.Watchers, Does.Not.Contain(ghost), "Closing the window leaves the audience"));
+            Assert.That(cabinet.Comp!.Watchers, Does.Not.Contain(ghost), "Closing the window leaves the audience"));
 
         await pair.CleanReturnAsync();
     }
