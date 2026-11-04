@@ -11,7 +11,7 @@ public sealed class WFMameArcadeCVars
     /// 11 KiB a frame. 0 turns spectating off.
     /// </summary>
     public static readonly CVarDef<int> VideoRate =
-        CVarDef.Create("wf.mame_arcade.video_rate", 64, CVar.SERVERONLY);
+        CVarDef.Create("wf.mame_arcade.video_rate", 128, CVar.SERVERONLY);
 
     /// <summary>Players who may watch one cabinet at once.</summary>
     public static readonly CVarDef<int> MaxWatchers =

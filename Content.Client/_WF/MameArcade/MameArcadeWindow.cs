@@ -30,8 +30,8 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     private const int AudioPacketSamples = MameAudioCodec.SampleRate / 10;
 
     // The picture's frame rate when the rate allows it, and how often a keyframe resets a watcher's screen.
-    private const float VideoInterval = 1f / 15f;
-    private const float KeyframeSeconds = 5f;
+    private const float VideoInterval = 1f / 20f;
+    private const float KeyframeSeconds = 10f;
 
     [Dependency] private IAudioManager _audioManager = default!;
     [Dependency] private IConfigurationManager _cfg = default!;

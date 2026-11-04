@@ -36,7 +36,7 @@ alone (`WFMameArcadeComponent.Player`). That client streams its sound to the ser
 8 KiB a second (`MameAudioCodec`), and the server relays it to everyone within 10 tiles except the players; their
 `MameArcadeNearbySystem` plays it from the cabinet. Anyone else with the window open can press Watch. While someone
 watches, the player also sends the picture (`MameVideoCodec`): 15-bit colour, only the 8x8 tiles that changed,
-deflated, with a keyframe for each new watcher and every 5 seconds, and both players' controls for the watcher's
+deflated, with a keyframe for each new watcher and every 10 seconds, and both players' controls for the watcher's
 control deck. A busy Neo Geo screen is about 11 KiB, so the
 frame rate drops to fit `wf.mame_arcade.video_rate` (KiB a second, 0 turns watching off) rather than lagging; up to
 `wf.mame_arcade.max_watchers` can watch a cabinet. Both streams are raw net messages (`MsgMameArcadeStream`) the
