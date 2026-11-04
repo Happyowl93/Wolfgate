@@ -63,7 +63,7 @@ public sealed class MameArcadeLibraryView : BoxContainer
     public event Action? WatchPressed;
 
     /// <summary>The game whose details show.</summary>
-    public NeoGeoSet? Selected { get; private set; }
+    public IMameGame? Selected { get; private set; }
 
     public MameArcadeLibraryView()
     {
@@ -211,13 +211,24 @@ public sealed class MameArcadeLibraryView : BoxContainer
         Children.Add(_unused);
     }
 
-    /// <summary>Lists the games the player's zips hold at least part of.</summary>
+    /// <summary>
+    /// Lists the games the player can run, and the ones they hold part of. Other versions of a game they can run
+    /// share most of its chips, so an incomplete set only shows if the player has a chip no ready game uses.
+    /// </summary>
     public void SetLibrary(IMameChipSource source, int zipCount, List<string> unusedZips, Func<string, bool> hasState)
     {
         _hasState = hasState;
-        _entries = NeoGeoSets.All
-            .Where(set => set.Chips.Values.Any(source.Has))
-            .Select(set => new Entry(set, NeoGeoLoader.Missing(set, source)))
+        var held = MameGames.All
+            .Where(game => game.Chips.Values.Any(source.Has))
+            .Select(game => new Entry(game, MameGames.Missing(game, source)))
+            .ToList();
+        var usedByReady = held
+            .Where(e => e.Missing.Count == 0)
+            .SelectMany(e => e.Set.Chips.Keys)
+            .ToHashSet();
+
+        _entries = held
+            .Where(e => e.Missing.Count == 0 || e.Set.Chips.Values.Any(c => source.Has(c) && !usedByReady.Contains(c.Crc)))
             .OrderBy(e => e.Missing.Count > 0)
             .ThenBy(e => e.Set.Title)
             .ToList();
@@ -226,7 +237,7 @@ public sealed class MameArcadeLibraryView : BoxContainer
         _summary.Text = Loc.GetString("mame-arcade-library-summary",
             ("ready", ready), ("incomplete", _entries.Count - ready), ("zips", zipCount));
 
-        _biosBanner.Visible = zipCount > 0 && !NeoGeoLoader.MainBioses.Any(source.Has);
+        _biosBanner.Visible = held.Any(e => e.Set.Board == MameBoard.NeoGeo) && MameGames.LacksNeoGeoBios(source);
 
         _unused.Visible = unusedZips.Count > 0;
         if (_unused.Visible)
@@ -344,7 +355,8 @@ public sealed class MameArcadeLibraryView : BoxContainer
         _detailTitle.SetMessage(FormattedMessage.FromMarkupOrThrow(
             $"[font size=16][bold]{FormattedMessage.EscapeText(set.Title)}[/bold][/font]"));
 
-        _detailMaker.Text = Loc.GetString("mame-arcade-detail-maker", ("year", set.Year), ("maker", set.Manufacturer));
+        var board = Loc.GetString(set.Board == MameBoard.Cps2 ? "mame-arcade-board-cps2" : "mame-arcade-board-neogeo");
+        _detailMaker.Text = Loc.GetString("mame-arcade-detail-maker", ("year", set.Year), ("maker", set.Manufacturer), ("board", board));
         _detailSet.Text = set.Parent.Length > 0
             ? Loc.GetString("mame-arcade-detail-clone", ("set", set.Name), ("parent", set.Parent))
             : Loc.GetString("mame-arcade-detail-set", ("set", set.Name));
@@ -391,5 +403,5 @@ public sealed class MameArcadeLibraryView : BoxContainer
         return new PanelContainer { PanelOverride = box, Children = { content } };
     }
 
-    private sealed record Entry(NeoGeoSet Set, List<MameChip> Missing);
+    private sealed record Entry(IMameGame Set, List<MameChip> Missing);
 }

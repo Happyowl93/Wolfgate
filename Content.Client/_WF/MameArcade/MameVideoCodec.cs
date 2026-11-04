@@ -10,7 +10,8 @@ public readonly record struct MameDeckState(MameControls PlayerOne, MameControls
 /// <summary>
 /// Frames for spectators: 15-bit colour, only the 8x8 tiles that changed since the last packet, deflated. A keyframe
 /// carries every tile, so a watcher can start from it. Raw pixels deflate better here than palettes, planes or deltas.
-/// The header also carries both seats' controls for the watcher's control deck.
+/// The header also carries both seats' controls for the watcher's control deck, and when the player's client took the
+/// frame, so a watcher can show frames as evenly as they were taken.
 /// </summary>
 public static class MameVideoCodec
 {
@@ -18,10 +19,22 @@ public static class MameVideoCodec
     public const byte KeyframeFlag = 1;
     public const byte OneActiveFlag = 2;
     public const byte TwoActiveFlag = 4;
-    public const int HeaderBytes = 9;
+    public const int HeaderBytes = 13;
+    private const int StampAt = 9;
 
     // Larger than any Neo Geo screen, so a bad packet can't make a watcher allocate much.
     public const int MaxSide = 512;
+
+    /// <summary>When the frame in a packet was taken, in milliseconds of the player's clock.</summary>
+    public static bool TryReadStamp(byte[] packet, out uint stamp)
+    {
+        stamp = 0;
+        if (packet.Length < HeaderBytes)
+            return false;
+
+        stamp = (uint) (packet[StampAt] | packet[StampAt + 1] << 8 | packet[StampAt + 2] << 16 | packet[StampAt + 3] << 24);
+        return true;
+    }
 
     public static int TileCount(int width, int height) => TilesAcross(width) * TilesAcross(height);
 
@@ -48,7 +61,8 @@ public sealed class MameVideoEncoder
     private int _width;
     private int _height;
 
-    public byte[] Encode(Rgba32[] pixels, int width, int height, bool keyframe, MameDeckState deck = default)
+    /// <param name="stamp">When the frame was taken, in milliseconds of this client's clock.</param>
+    public byte[] Encode(Rgba32[] pixels, int width, int height, bool keyframe, MameDeckState deck = default, uint stamp = 0)
     {
         if (width != _width || height != _height)
         {
@@ -95,6 +109,8 @@ public sealed class MameVideoEncoder
         WriteUShort(packet, (ushort) height);
         WriteUShort(packet, (ushort) deck.PlayerOne);
         WriteUShort(packet, (ushort) deck.PlayerTwo);
+        WriteUShort(packet, (ushort) stamp);
+        WriteUShort(packet, (ushort) (stamp >> 16));
         using (var deflate = new DeflateStream(packet, CompressionLevel.Optimal, leaveOpen: true))
         {
             deflate.Write(mask);

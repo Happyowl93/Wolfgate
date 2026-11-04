@@ -63,48 +63,103 @@ public sealed class MameStreamCodecTest
     {
         var decoder = new MameVideoDecoder();
         Assert.That(decoder.Decode(Array.Empty<byte>()), Is.False);
-        Assert.That(decoder.Decode(new byte[] { 1, 0xff, 0xff, 0xff, 0xff, 0, 0, 0, 0, 1, 2, 3 }), Is.False, "Too large a screen");
-        Assert.That(decoder.Decode(new byte[] { 1, 64, 1, 224, 0, 0, 0, 0, 0, 0xde, 0xad, 0xbe, 0xef }), Is.False, "Not deflate data");
+        Assert.That(decoder.Decode(new byte[] { 1, 0xff, 0xff, 0xff, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3 }), Is.False, "Too large a screen");
+        Assert.That(decoder.Decode(new byte[] { 1, 64, 1, 224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xde, 0xad, 0xbe, 0xef }), Is.False, "Not deflate data");
 
         var key = new MameVideoEncoder().Encode(Scene(0), Width, Height, keyframe: true);
         Assert.That(decoder.Decode(key[..(key.Length / 2)]), Is.False, "Cut short");
     }
 
     [Test]
+    public void PacketsCarryWhenTheFrameWasTaken()
+    {
+        var packet = new MameVideoEncoder().Encode(Scene(0), Width, Height, keyframe: true, stamp: 0xdeadbeef);
+        Assert.That(MameVideoCodec.TryReadStamp(packet, out var stamp));
+        Assert.That(stamp, Is.EqualTo(0xdeadbeef));
+        Assert.That(new MameVideoDecoder().Decode(packet), "The stamp doesn't disturb the picture");
+        Assert.That(MameVideoCodec.TryReadStamp(new byte[] { 1, 2, 3 }, out _), Is.False);
+    }
+
+    [Test]
     public void SoundSurvivesTheTrip()
     {
-        var samples = new short[MameAudioCodec.SampleRate / 10];
-        for (var i = 0; i < samples.Length; i++)
-        {
-            samples[i] = (short) (12000 * Math.Sin(2 * Math.PI * 440 * i / MameAudioCodec.SampleRate));
-        }
-
+        var samples = Tone(0);
         var packet = MameAudioCodec.Encode(samples);
         Assert.That(packet.Length, Is.EqualTo(3 + samples.Length / 2), "4 bits a sample");
 
         var decoded = MameAudioCodec.Decode(packet);
         Assert.That(decoded, Has.Length.EqualTo(samples.Length));
-
-        double signal = 0, noise = 0;
-        for (var i = 0; i < samples.Length; i++)
-        {
-            signal += (double) samples[i] * samples[i];
-            noise += Math.Pow(samples[i] - decoded[i], 2);
-        }
-
-        Assert.That(10 * Math.Log10(signal / noise), Is.GreaterThan(20), "Signal to noise in dB");
+        Assert.That(SignalToNoise(samples, decoded, samples.Length), Is.GreaterThan(20), "Signal to noise in dB");
         Assert.That(MameAudioCodec.Decode(new byte[] { 1 }), Is.Empty);
     }
 
     [Test]
-    public void DownmixAveragesThreeStereoFrames()
+    public void APacketPicksUpTheStepWhereTheLastEnded()
     {
-        var stereo = new List<short> { 300, 0, 0, 0, 0, 600, 100, 100, 50 };
-        var mono = new List<short>();
-        MameAudioCodec.Downmix(stereo, mono);
+        var encoder = new MameAudioEncoder();
+        encoder.Encode(Tone(0));
+        var next = Tone(1);
+        var carried = MameAudioCodec.Decode(encoder.Encode(next));
+        var fresh = MameAudioCodec.Decode(MameAudioCodec.Encode(next));
 
-        Assert.That(mono, Is.EqualTo(new short[] { 150 }));
-        Assert.That(stereo, Is.EqualTo(new short[] { 100, 100, 50 }), "A partial group waits for the rest");
+        // The first millisecond, where a fresh start is still ramping up its step.
+        const int head = MameAudioCodec.SampleRate / 1000;
+        Assert.That(SignalToNoise(next, carried, head), Is.GreaterThan(SignalToNoise(next, fresh, head) + 10));
+        Assert.That(SignalToNoise(next, carried, head), Is.GreaterThan(20));
+    }
+
+    [Test]
+    public void DownmixKeepsTheToneAndDropsWhatWouldFoldBack()
+    {
+        Assert.That(Level(1000), Is.InRange(0.97, 1.03), "A 1 kHz tone passes");
+        Assert.That(Level(8000), Is.InRange(0.9, 1.05), "So does an 8 kHz one");
+        Assert.That(Level(20000), Is.LessThan(0.01), "A 20 kHz tone would come back as 4 kHz");
+    }
+
+    /// <summary>A tenth of a second of a loud 440 Hz tone at the codec's rate, the <paramref name="part"/>th one.</summary>
+    private static short[] Tone(int part)
+    {
+        var samples = new short[MameAudioCodec.SampleRate / 10];
+        for (var i = 0; i < samples.Length; i++)
+        {
+            var t = (double) (part * samples.Length + i) / MameAudioCodec.SampleRate;
+            samples[i] = (short) (12000 * Math.Sin(2 * Math.PI * 440 * t));
+        }
+
+        return samples;
+    }
+
+    private static double SignalToNoise(short[] expected, short[] actual, int count)
+    {
+        double signal = 0, noise = 0;
+        for (var i = 0; i < count; i++)
+        {
+            signal += (double) expected[i] * expected[i];
+            noise += Math.Pow(expected[i] - actual[i], 2);
+        }
+
+        return 10 * Math.Log10(signal / Math.Max(noise, 1));
+    }
+
+    /// <summary>How loud a 48 kHz stereo tone comes out of the downmix, against how it went in.</summary>
+    private static double Level(double hertz)
+    {
+        var stereo = new List<short>();
+        for (var i = 0; i < MameArcadeAudio.SampleRate / 10; i++)
+        {
+            var sample = (short) (10000 * Math.Sin(2 * Math.PI * hertz * i / MameArcadeAudio.SampleRate));
+            stereo.Add(sample);
+            stereo.Add(sample);
+        }
+
+        var mono = new List<short>();
+        new MameAudioEncoder().Downmix(stereo, mono);
+        Assert.That(stereo, Is.Empty, "Every frame is taken");
+        Assert.That(mono, Has.Count.EqualTo(MameAudioCodec.SampleRate / 10));
+
+        // Past the filter's fill.
+        var settled = mono.Skip(64).ToArray();
+        return Math.Sqrt(settled.Average(s => (double) s * s)) / (10000 / Math.Sqrt(2));
     }
 
     /// <summary>A gradient backdrop with a block sprite at <paramref name="x"/>, in colours 15-bit holds exactly.</summary>

@@ -1,4 +1,5 @@
 using System.IO;
+using Content.Client._WF.MameArcade.Cps2;
 using Content.Client._WF.MameArcade.Engine;
 using Content.Client._WF.MameArcade.NeoGeo;
 using SixLabors.ImageSharp.PixelFormats;
@@ -12,12 +13,19 @@ namespace Content.Client._WF.MameArcade;
 public static class MameMachine
 {
     public const string NeoGeoBoard = "Neo Geo";
+    public const string Cps2Board = "CPS2";
 
     // Neo Geo's visible area in MAME.NET's 384-pixel-wide frame buffer.
     private const int NeoGeoLeft = 30;
     private const int NeoGeoTop = 16;
     private const int NeoGeoWidth = 320;
     private const int NeoGeoHeight = 224;
+
+    // CPS2's visible area in its 512-pixel-wide frame buffer, which MAME.NET draws 0x100 lines down.
+    private const int Cps2Left = 64;
+    private const int Cps2Top = 0x100 + 16;
+    private const int Cps2Width = 384;
+    private const int Cps2Height = 224;
 
     private static bool _running;
 
@@ -27,10 +35,51 @@ public static class MameMachine
     /// <summary>Seconds of emulated time per frame.</summary>
     public static double FrameSeconds => Video.frame_update_time.attoseconds / 1e18;
 
-    /// <summary>Boots a Neo Geo game from region files built by <see cref="NeoGeoLoader"/>.</summary>
+    /// <summary>Loads a game's ROMs from the player's zips and boots it.</summary>
     /// <param name="nvram">Where battery RAM persists; null keeps none, as both players of a 2-player game must.</param>
     /// <param name="audio">Receives 16-bit stereo samples at 48 kHz.</param>
+    public static void Start(IMameGame game, IMameChipSource chips, INvramStore? nvram, Action<byte[], int>? audio)
+    {
+        switch (game)
+        {
+            case NeoGeoSet neo:
+                StartNeoGeo(neo, NeoGeoLoader.Load(neo, chips), nvram, audio);
+                break;
+            case Cps2Set cps2:
+                StartCps2(cps2, Cps2Loader.Load(cps2, chips), audio);
+                break;
+            default:
+                throw new InvalidOperationException($"No board runs {game.Name}.");
+        }
+    }
+
+    /// <summary>Boots a Neo Geo game from region files built by <see cref="NeoGeoLoader"/>.</summary>
     public static void StartNeoGeo(NeoGeoSet set, NeoGeoImage image, INvramStore? nvram, Action<byte[], int>? audio)
+    {
+        Begin(set, NeoGeoBoard, image.Regions, image.Bios, nvram, audio);
+        Frame(NeoGeoLeft, NeoGeoTop, NeoGeoWidth, NeoGeoHeight);
+
+        Neogeo.NeogeoInit();
+        Boot(set);
+    }
+
+    /// <summary>Boots a CPS2 game from region files built by <see cref="Cps2Loader"/>. CPS2 keeps no battery RAM.</summary>
+    public static void StartCps2(Cps2Set set, Dictionary<string, byte[]> regions, Action<byte[], int>? audio)
+    {
+        Begin(set, Cps2Board, regions, new Dictionary<string, byte[]>(), null, audio);
+        Frame(Cps2Left, Cps2Top, Cps2Width, Cps2Height);
+
+        CPS.CPSInit();
+        Boot(set);
+    }
+
+    private static void Begin(
+        IMameGame game,
+        string board,
+        Dictionary<string, byte[]> regions,
+        Dictionary<string, byte[]> bios,
+        INvramStore? nvram,
+        Action<byte[], int>? audio)
     {
         if (_running)
             Stop();
@@ -39,40 +88,46 @@ public static class MameMachine
         Engine.Timer.lt = new List<Engine.Timer.emu_timer>();
         Machine.rom = new RomInfo
         {
-            Name = set.Name,
-            Board = NeoGeoBoard,
-            Parent = set.Parent,
+            Name = game.Name,
+            Board = board,
+            Parent = game.Parent,
             Direction = string.Empty,
-            Description = set.Title,
-            Year = set.Year,
-            Manufacturer = set.Manufacturer,
+            Description = game.Title,
+            Year = game.Year,
+            Manufacturer = game.Manufacturer,
         };
         RomInfo.Rom = Machine.rom;
-        Machine.sName = set.Name;
-        Machine.sParent = set.Parent;
-        Machine.sBoard = NeoGeoBoard;
+        Machine.sName = game.Name;
+        Machine.sParent = game.Parent;
+        Machine.sBoard = board;
         Machine.sDirection = string.Empty;
-        Machine.sDescription = set.Title;
-        Machine.sManufacturer = set.Manufacturer;
-        Machine.lsParents = string.IsNullOrEmpty(set.Parent) ? new List<string> { set.Name } : new List<string> { set.Name, set.Parent };
-        Machine.RomSource = name => image.Regions.GetValueOrDefault(name);
-        Machine.BiosSource = name => image.Bios.GetValueOrDefault(name);
+        Machine.sDescription = game.Title;
+        Machine.sManufacturer = game.Manufacturer;
+        Machine.lsParents = string.IsNullOrEmpty(game.Parent) ? new List<string> { game.Name } : new List<string> { game.Name, game.Parent };
+        Machine.RomSource = name => regions.GetValueOrDefault(name);
+        Machine.BiosSource = name => bios.GetValueOrDefault(name);
         Machine.Nvram = nvram;
         Engine.Sound.AudioSink = audio;
         Keyboard.Reset();
         Mame.is_foreground = true;
         Mame.paused = false;
         Mame.exit_pending = false;
+    }
 
+    /// <summary>The visible part of the board's frame buffer.</summary>
+    private static void Frame(int left, int top, int width, int height)
+    {
         Video.iMode = 0;
-        Video.offsetx = NeoGeoLeft;
-        Video.offsety = NeoGeoTop;
-        Video.width = NeoGeoWidth;
-        Video.height = NeoGeoHeight;
+        Video.offsetx = left;
+        Video.offsety = top;
+        Video.width = width;
+        Video.height = height;
+    }
 
-        Neogeo.NeogeoInit();
+    private static void Boot(IMameGame game)
+    {
         if (!Machine.bRom)
-            throw new InvalidOperationException($"{set.Name} is missing a region MAME.NET needs.");
+            throw new InvalidOperationException($"{game.Name} is missing a region MAME.NET needs.");
 
         Mame.init_machine();
         Generic.nvram_load();
@@ -148,6 +203,11 @@ public static class MameMachine
         FM.ymsndrom = null;
         YMDeltat.ymsnddeltatrom = null;
         YM2610.F2610.pcmbuf = null;
+        CPS.gfxrom = null;
+        CPS.gfx1rom = null;
+        CPS.mainromop = null;
+        CPS.audioromop = null;
+        QSound.qsoundrom = null;
     }
 
     /// <summary>

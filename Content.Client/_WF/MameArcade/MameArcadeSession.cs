@@ -34,7 +34,7 @@ public sealed class MameArcadeSession : IDisposable
     private readonly Queue<FrameJob> _jobs = new();
     private readonly List<short[]> _audioOut = new();
     private readonly List<(int Frame, uint Checksum)> _checksums = new();
-    private readonly NeoGeoSet _set;
+    private readonly IMameGame _set;
     private readonly IMameChipSource _chips;
     private readonly INvramStore? _nvram;
     private Rgba32[] _front = Array.Empty<Rgba32>();
@@ -51,7 +51,7 @@ public sealed class MameArcadeSession : IDisposable
     public string? Error { get; private set; }
     public int Width { get; private set; }
     public int Height { get; private set; }
-    public NeoGeoSet Set => _set;
+    public IMameGame Set => _set;
 
     /// <summary>Seconds per emulated frame, once loaded.</summary>
     public double FrameSeconds => _frameSeconds;
@@ -63,7 +63,7 @@ public sealed class MameArcadeSession : IDisposable
     public (MameControls PlayerOne, MameControls PlayerTwo) LastControls { get; private set; }
 
     /// <param name="nvram">Where battery RAM persists. Leave null for 2-player games, which must start identical.</param>
-    public MameArcadeSession(NeoGeoSet set, IMameChipSource chips, INvramStore? nvram, MameNetplay? netplay)
+    public MameArcadeSession(IMameGame set, IMameChipSource chips, INvramStore? nvram, MameNetplay? netplay)
     {
         _set = set;
         _chips = chips;
@@ -200,8 +200,7 @@ public sealed class MameArcadeSession : IDisposable
     {
         try
         {
-            var image = NeoGeoLoader.Load(_set, _chips);
-            MameMachine.StartNeoGeo(_set, image, _nvram, OnAudio);
+            MameMachine.Start(_set, _chips, _nvram, OnAudio);
 
             lock (_lock)
             {

@@ -47,8 +47,11 @@ public sealed record NeoGeoRegion(NeoGeoRegionKind Kind, int Size, NeoGeoLoad[] 
 
 /// <summary>A MAME ROM set and how its chips make up the cartridge.</summary>
 public sealed record NeoGeoSet(string Name, string Parent, string Title, string Year, string Manufacturer, NeoGeoRegion[] Regions)
+    : IMameGame
 {
     private Dictionary<uint, MameChip>? _chips;
+
+    public MameBoard Board => MameBoard.NeoGeo;
 
     /// <summary>Every chip the set needs, by CRC.</summary>
     public IReadOnlyDictionary<uint, MameChip> Chips => _chips ??= BuildChips();

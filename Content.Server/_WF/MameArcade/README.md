@@ -1,25 +1,38 @@
 # MameArcade
 
 The retro arcade cabinet (`WFMameArcade`, sold flat-packed by the Wolfgate vendor) runs the player's own MAME ROM
-sets on their client, alone or with a second player at the same cabinet. Only Neo Geo games load for now.
+sets on their client, alone or with a second player at the same cabinet. It runs Neo Geo and Capcom CPS2 games.
 
 **ROMs.** Players import zips through the window, or drop them into `wolfgate_mame/roms` in their user data (the
 window's Open ROM folder). Nothing is downloaded or shared: the server only ever sees a set name and which BIOS it
-uses. Each game needs its MAME set and `neogeo.zip` for the BIOS; chips are found by CRC and size across every zip, so
-split, merged and non-merged sets all work. Battery RAM and save states live beside them.
+uses. Each game needs its MAME set, and Neo Geo games `neogeo.zip` for the BIOS; chips are found by CRC and size
+across every zip, so split, merged and non-merged sets all work. Battery RAM and save states live beside them.
 
 **Window.** `MameArcadeLibraryView` is the start screen: what is happening on the cabinet (an open 2-player game to
 join, or a game to watch), the player's games with a search and a ready-only filter, and the chosen game's details,
-missing files and Play and Host buttons. It warns when no BIOS is found and lists zips that hold no game it runs. Under
-the game, `MameArcadeControlDeck` draws both players' joysticks and A B C D, Start and Coin buttons, lit as they are
-pressed, with the keys printed on the local player's side.
+missing files and Play and Host buttons. Other versions of a game the player can already run share most of its chips,
+so an incomplete set is only listed if the player has a chip no ready game uses. It warns when Neo Geo games have no
+BIOS and lists zips that hold no game it runs. Under the game, `MameArcadeControlDeck` draws both players' joysticks,
+the board's buttons (A B C D, or CPS2's three punches over three kicks), Start and Coin, lit as they are pressed,
+with the keys printed on the local player's side.
 
 **Emulation.** `Engine/` is the MAME.NET core (GPL-3.0, see `Engine/NOTICE.txt` for what changed). MAME.NET loads
 pre-built region files rather than MAME's chip dumps, so `NeoGeo/NeoGeoLoader.cs` assembles them the way MAME's ROM
 macros do, from the layouts in `NeoGeo/NeoGeoSets.cs`. That table is generated from MAME's `neogeo.cpp` by
 `Tools/_WF/MameArcade/gen_neogeo_sets.py`, and lists only the games MAME.NET emulates whose cartridges hold plain,
-unencrypted data. `MameArcadeSession` runs the emulator on a worker thread and paces it to the game's refresh rate;
-`MameArcadeAudio` plays its sound as overlapping clips, since content can't stream audio.
+unencrypted data. `MameGames` lists both boards' games behind `IMameGame` and starts the right board.
+`MameArcadeSession` runs the emulator on a worker thread and paces it to the game's refresh rate; `MameArcadeAudio`
+plays its sound as overlapping clips, since content can't stream audio.
+
+**CPS2.** `Cps2/Cps2Sets.cs` is generated from MAME's `cps2.cpp` by `Tools/_WF/MameArcade/gen_cps2_sets.py`: the
+standard games for one or two players (213 sets), leaving out Phoenix and bootleg boards, games for three or four
+players and special controls. CPS2 boards encrypt opcode fetches, so `Cps2Crypt` (a port of MAME's `cps2crypt.cpp`,
+BSD-3-Clause) decrypts the program into the `maincpuop.rom` region MAME.NET reads opcodes from, beside the raw program
+for data reads. The key comes from the set's `.key` file, or from the table MAME 0.150 kept, since zips made before
+MAME shipped key files have none. Older dumps MAME marks `BAD_DUMP` but used to accept still load, and the 2-player
+fingerprint names which dump each chip is. `Cps2Loader` reproduces MAME's ROM interleaves and `cps2_gfx_decode`
+(unshuffle, then pack each bitplane group into pens). MAME.NET draws CPS2 0x100 lines down its frame buffer, which
+`MameMachine` allows for. CPS2 keeps no EEPROM between sessions, so a game's settings are its defaults.
 
 **Two players.** One player hosts from the window and another joins at the same cabinet if their set and BIOS match.
 Both clients boot the game from power-on and run in lockstep (`MameNetplay`): each frame's controls are picked a few
@@ -32,13 +45,15 @@ have the same slack, so neither player ends up with all the lag. The clients com
 the games drift apart, the other plays on alone.
 
 **Bystanders.** The cabinet shows one game: player 1's in a 2-player game, or else the first player to start one
-alone (`WFMameArcadeComponent.Player`). That client streams its sound to the server as 16 kHz mono ADPCM, about
-8 KiB a second (`MameAudioCodec`), and the server relays it to everyone within 10 tiles except the players; their
+alone (`WFMameArcadeComponent.Player`). That client streams its sound to the server as 24 kHz mono ADPCM, about
+12 KiB a second (`MameAudioCodec`), and the server relays it to everyone within 10 tiles except the players; their
 `MameArcadeNearbySystem` plays it from the cabinet. Anyone else with the window open can press Watch. While someone
 watches, the player also sends the picture (`MameVideoCodec`): 15-bit colour, only the 8x8 tiles that changed,
 deflated, with a keyframe for each new watcher and every 10 seconds, and both players' controls for the watcher's
 control deck. A busy Neo Geo screen is about 11 KiB, so the
-frame rate drops to fit `wf.mame_arcade.video_rate` (KiB a second, 0 turns watching off) rather than lagging; up to
+frame rate (30 at most) drops to fit `wf.mame_arcade.video_rate` (KiB a second, 0 turns watching off) rather than
+lagging, with frames spaced evenly. Each packet carries when its frame was taken, and the watcher shows it about
+100 ms later, so frames that bunch up on the way still show at the pace they were taken. Up to
 `wf.mame_arcade.max_watchers` can watch a cabinet. Both streams are raw net messages (`MsgMameArcadeStream`) the
 server checks for sender and rate but never decodes. Bystanders need no ROMs.
 
@@ -61,6 +76,10 @@ server checks for sender and rate but never decodes. Bystanders need no ROMs.
 
 ### Client
 
+- [`Content.Client/_WF/MameArcade/Cps2/Cps2Crypt.cs`](../../../Content.Client/_WF/MameArcade/Cps2/Cps2Crypt.cs)
+- [`Content.Client/_WF/MameArcade/Cps2/Cps2Loader.cs`](../../../Content.Client/_WF/MameArcade/Cps2/Cps2Loader.cs)
+- [`Content.Client/_WF/MameArcade/Cps2/Cps2Set.cs`](../../../Content.Client/_WF/MameArcade/Cps2/Cps2Set.cs)
+- [`Content.Client/_WF/MameArcade/Cps2/Cps2Sets.cs`](../../../Content.Client/_WF/MameArcade/Cps2/Cps2Sets.cs)
 - [`Content.Client/_WF/MameArcade/Engine/cpu/m6502/Ill02.cs`](../../../Content.Client/_WF/MameArcade/Engine/cpu/m6502/Ill02.cs)
 - [`Content.Client/_WF/MameArcade/Engine/cpu/m6502/M6502.cs`](../../../Content.Client/_WF/MameArcade/Engine/cpu/m6502/M6502.cs)
 - [`Content.Client/_WF/MameArcade/Engine/cpu/m6502/M6502op.cs`](../../../Content.Client/_WF/MameArcade/Engine/cpu/m6502/M6502op.cs)
@@ -267,6 +286,7 @@ server checks for sender and rate but never decodes. Bystanders need no ROMs.
 - [`Content.Client/_WF/MameArcade/MameArcadeSession.cs`](../../../Content.Client/_WF/MameArcade/MameArcadeSession.cs)
 - [`Content.Client/_WF/MameArcade/MameArcadeWindow.cs`](../../../Content.Client/_WF/MameArcade/MameArcadeWindow.cs)
 - [`Content.Client/_WF/MameArcade/MameAudioCodec.cs`](../../../Content.Client/_WF/MameArcade/MameAudioCodec.cs)
+- [`Content.Client/_WF/MameArcade/MameGames.cs`](../../../Content.Client/_WF/MameArcade/MameGames.cs)
 - [`Content.Client/_WF/MameArcade/MameMachine.cs`](../../../Content.Client/_WF/MameArcade/MameMachine.cs)
 - [`Content.Client/_WF/MameArcade/MameNetplay.cs`](../../../Content.Client/_WF/MameArcade/MameNetplay.cs)
 - [`Content.Client/_WF/MameArcade/MameRomLibrary.cs`](../../../Content.Client/_WF/MameArcade/MameRomLibrary.cs)
@@ -282,6 +302,7 @@ server checks for sender and rate but never decodes. Bystanders need no ROMs.
 
 ### Unit tests
 
+- [`Content.Tests/_WF/MameArcade/Cps2LoaderTest.cs`](../../../Content.Tests/_WF/MameArcade/Cps2LoaderTest.cs)
 - [`Content.Tests/_WF/MameArcade/MameMachineTest.cs`](../../../Content.Tests/_WF/MameArcade/MameMachineTest.cs)
 - [`Content.Tests/_WF/MameArcade/MameNetplayTest.cs`](../../../Content.Tests/_WF/MameArcade/MameNetplayTest.cs)
 - [`Content.Tests/_WF/MameArcade/MameStreamCodecTest.cs`](../../../Content.Tests/_WF/MameArcade/MameStreamCodecTest.cs)
@@ -298,6 +319,7 @@ server checks for sender and rate but never decodes. Bystanders need no ROMs.
 
 ### Tools
 
+- [`Tools/_WF/MameArcade/gen_cps2_sets.py`](../../../Tools/_WF/MameArcade/gen_cps2_sets.py)
 - [`Tools/_WF/MameArcade/gen_neogeo_sets.py`](../../../Tools/_WF/MameArcade/gen_neogeo_sets.py)
 
 ## Non-modular edits

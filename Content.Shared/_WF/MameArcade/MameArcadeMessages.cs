@@ -23,7 +23,7 @@ public static class MameArcadeProtocol
     /// <summary>Largest sound or picture packet; a full Neo Geo keyframe is about 30 KiB.</summary>
     public const int MaxStreamPacket = 96 * 1024;
 
-    /// <summary>Most sound a cabinet may relay, in bytes per second; the game sends about 8 KiB.</summary>
+    /// <summary>Most sound a cabinet may relay, in bytes per second; the game sends about 12 KiB.</summary>
     public const int MaxAudioBytesPerSecond = 16 * 1024;
 
     /// <summary>How far away other players hear a cabinet.</summary>

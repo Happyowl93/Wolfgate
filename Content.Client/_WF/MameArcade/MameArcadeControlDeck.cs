@@ -7,8 +7,9 @@ using Robust.Client.UserInterface;
 namespace Content.Client._WF.MameArcade;
 
 /// <summary>
-/// The cabinet's control deck under the screen: a joystick, the Neo Geo's A B C D buttons, Start and Coin for each
-/// player, lit as they are pressed. The local player's station shows which key works each control.
+/// The cabinet's control deck under the screen: a joystick, the board's buttons (the Neo Geo's A B C D, or CPS2's
+/// three punches and three kicks), Start and Coin for each player, lit as they are pressed. The local player's
+/// station shows which key works each control.
 /// </summary>
 public sealed partial class MameArcadeControlDeck : Control
 {
@@ -19,6 +20,7 @@ public sealed partial class MameArcadeControlDeck : Control
     private const float BallRadius = 12f;
     private const float StickTravel = 14f;
     private const float ButtonRadius = 15f;
+    private const float SixButtonRadius = 13f;
     private const float SmallButtonRadius = 8f;
 
     private static readonly Color Deck = Color.FromHex("#17171d");
@@ -28,21 +30,30 @@ public sealed partial class MameArcadeControlDeck : Control
     private static readonly Color Hint = Color.FromHex("#8a8a99");
     private static readonly Color[] SeatColors = { Color.FromHex("#e04848"), Color.FromHex("#4a86e8") };
 
-    // The Neo Geo's four buttons as MAME.NET's driver reads them, in their deck colours.
-    private static readonly (MameControls Control, string Name, string Key, Color Color)[] Buttons =
+    // The Neo Geo's four buttons as MAME.NET's driver reads them, in a shallow arc and their deck colours.
+    private static readonly ButtonSpot[] NeoGeoButtons =
     {
-        (MameControls.Button1, "mame-arcade-deck-a", "mame-arcade-deck-key-a", Color.FromHex("#e23b3b")),
-        (MameControls.Button2, "mame-arcade-deck-b", "mame-arcade-deck-key-b", Color.FromHex("#f2c318")),
-        (MameControls.Button4, "mame-arcade-deck-c", "mame-arcade-deck-key-c", Color.FromHex("#3fb950")),
-        (MameControls.Button5, "mame-arcade-deck-d", "mame-arcade-deck-key-d", Color.FromHex("#3b7ff2")),
+        new(MameControls.Button1, "mame-arcade-deck-a", "mame-arcade-deck-key-a", Color.FromHex("#e23b3b"), 112, 52, ButtonRadius),
+        new(MameControls.Button2, "mame-arcade-deck-b", "mame-arcade-deck-key-b", Color.FromHex("#f2c318"), 152, 58, ButtonRadius),
+        new(MameControls.Button4, "mame-arcade-deck-c", "mame-arcade-deck-key-c", Color.FromHex("#3fb950"), 192, 60, ButtonRadius),
+        new(MameControls.Button5, "mame-arcade-deck-d", "mame-arcade-deck-key-d", Color.FromHex("#3b7ff2"), 232, 58, ButtonRadius),
     };
 
-    // Neo Geo decks set the buttons in a shallow arc.
-    private static readonly float[] ButtonRise = { 6f, 0f, -2f, 0f };
+    // CPS2's punches over its kicks, light to heavy, as Capcom's six-button decks colour them.
+    private static readonly ButtonSpot[] Cps2Buttons =
+    {
+        new(MameControls.Button1, "mame-arcade-deck-lp", "mame-arcade-deck-key-lp", Color.FromHex("#3b7ff2"), 112, 38, SixButtonRadius),
+        new(MameControls.Button2, "mame-arcade-deck-mp", "mame-arcade-deck-key-mp", Color.FromHex("#f2c318"), 148, 34, SixButtonRadius),
+        new(MameControls.Button3, "mame-arcade-deck-hp", "mame-arcade-deck-key-hp", Color.FromHex("#e23b3b"), 184, 34, SixButtonRadius),
+        new(MameControls.Button4, "mame-arcade-deck-lk", "mame-arcade-deck-key-lk", Color.FromHex("#3b7ff2"), 112, 78, SixButtonRadius),
+        new(MameControls.Button5, "mame-arcade-deck-mk", "mame-arcade-deck-key-mk", Color.FromHex("#f2c318"), 148, 74, SixButtonRadius),
+        new(MameControls.Button6, "mame-arcade-deck-hk", "mame-arcade-deck-key-hk", Color.FromHex("#e23b3b"), 184, 74, SixButtonRadius),
+    };
 
     [Dependency] private IResourceCache _cache = default!;
 
     private readonly Seat[] _seats = { new(), new() };
+    private ButtonSpot[] _buttons = NeoGeoButtons;
     private readonly Font _label;
     private readonly Font _small;
 
@@ -53,6 +64,12 @@ public sealed partial class MameArcadeControlDeck : Control
         _small = _cache.NotoStack(size: 9);
         MinSize = new Vector2(0, DeckHeight);
         HorizontalExpand = true;
+    }
+
+    /// <summary>The board whose buttons the deck shows.</summary>
+    public MameBoard Board
+    {
+        set => _buttons = value == MameBoard.Cps2 ? Cps2Buttons : NeoGeoButtons;
     }
 
     /// <summary>What one station shows. An idle station is dimmed, for a seat nobody plays.</summary>
@@ -109,14 +126,13 @@ public sealed partial class MameArcadeControlDeck : Control
         if (seat.Local)
             DrawCentred(handle, _small, Loc.GetString("mame-arcade-deck-key-stick"), At(48, 98), scale, Hint);
 
-        for (var i = 0; i < Buttons.Length; i++)
+        foreach (var spot in _buttons)
         {
-            var (control, label, key, color) = Buttons[i];
-            var centre = At(112 + i * 40, 58 - ButtonRise[i]);
-            DrawButton(handle, centre, ButtonRadius * scale, color, (seat.Held & control) != 0, dim);
-            DrawCentred(handle, _label, Loc.GetString(label), centre - new Vector2(0, 7 * scale), scale, Fade(Color.Black, dim * 0.75f));
+            var centre = At(spot.X, spot.Y);
+            DrawButton(handle, centre, spot.Radius * scale, spot.Color, (seat.Held & spot.Control) != 0, dim);
+            DrawCentred(handle, _label, Loc.GetString(spot.Label), centre - new Vector2(0, 7 * scale), scale, Fade(Color.Black, dim * 0.75f));
             if (seat.Local)
-                DrawCentred(handle, _small, Loc.GetString(key), centre + new Vector2(0, 19 * scale), scale, Hint);
+                DrawCentred(handle, _small, Loc.GetString(spot.Key), centre + new Vector2(0, (spot.Radius + 3) * scale), scale, Hint);
         }
 
         DrawSmall(handle, At(286, 44), Color.FromHex("#e6e6ea"), seat, MameControls.Start,
@@ -180,6 +196,8 @@ public sealed partial class MameArcadeControlDeck : Control
 
     private static Color Lighten(Color color) =>
         new(MathF.Min(color.R * 1.25f + 0.1f, 1f), MathF.Min(color.G * 1.25f + 0.1f, 1f), MathF.Min(color.B * 1.25f + 0.1f, 1f), color.A);
+
+    private readonly record struct ButtonSpot(MameControls Control, string Label, string Key, Color Color, float X, float Y, float Radius);
 
     private sealed class Seat
     {

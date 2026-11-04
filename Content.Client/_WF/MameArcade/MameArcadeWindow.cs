@@ -30,8 +30,20 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     private const int AudioPacketSamples = MameAudioCodec.SampleRate / 10;
 
     // The picture's frame rate when the rate allows it, and how often a keyframe resets a watcher's screen.
-    private const float VideoInterval = 1f / 20f;
+    private const float VideoInterval = 1f / 30f;
     private const float KeyframeSeconds = 10f;
+
+    // How far behind the quickest packet a watcher shows the picture, in ms, so frames that arrive unevenly show evenly.
+    private const double WatchBufferMs = 100;
+
+    // How fast that delay follows the network, in ms a second: slow enough that the change in speed goes unseen.
+    private const double WatchLagDrift = 30;
+
+    // How fast the quickest trip is forgotten, in ms a second, so the delay recovers after the route slows.
+    private const double TripForget = 20;
+
+    // Packets a watcher holds before showing them regardless, about three seconds.
+    private const int MaxWatchQueue = 90;
 
     [Dependency] private IAudioManager _audioManager = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
@@ -40,6 +52,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     [Dependency] private ILogManager _log = default!;
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private IResourceManager _resources = default!;
+    [Dependency] private IGameTiming _timing = default!;
 
     private readonly MameRomLibrary _library;
     private readonly ISawmill _sawmill;
@@ -61,6 +74,11 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     private MameVideoDecoder? _decoder;
     private string _watchedGame = string.Empty;
 
+    // Picture packets waiting for their moment, and how long after its frame was taken each one shows.
+    private readonly Queue<(uint Stamp, byte[] Packet)> _watchQueue = new();
+    private double _watchLag = double.NaN;
+    private double _quickestTrip;
+
     private readonly List<short[]> _audioScratch = new();
     private readonly List<(int Frame, uint Checksum)> _checksumScratch = new();
     private readonly Queue<(int Frame, uint Checksum)> _checksumsToSend = new();
@@ -68,8 +86,13 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     // What this client sends while its game is on the cabinet.
     private readonly List<short> _stereoOut = new();
     private readonly List<short> _monoOut = new();
+    private MameAudioEncoder _audioEncoder = new();
     private MameVideoEncoder _encoder = new();
     private Task<byte[]>? _encoding;
+    private bool _encodingKeyframe;
+
+    // A typical change packet, so frames go out evenly spaced when the rate can't take every one.
+    private float _videoPacketBytes;
     private float _videoAllowance;
     private float _sinceVideo;
     private float _sinceKeyframe;
@@ -186,7 +209,41 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     /// <summary>A picture packet of the watched game.</summary>
     public void ReceiveVideo(byte[] packet)
     {
-        if (_decoder == null || !_decoder.Decode(packet))
+        if (_decoder == null || !MameVideoCodec.TryReadStamp(packet, out var stamp))
+            return;
+
+        var trip = Trip(stamp);
+        if (double.IsNaN(_watchLag))
+        {
+            _watchLag = trip + WatchBufferMs;
+            _quickestTrip = trip;
+        }
+
+        _quickestTrip = Math.Min(_quickestTrip, trip);
+        _watchQueue.Enqueue((stamp, packet));
+    }
+
+    /// <summary>
+    /// Shows the watched packets whose moment has come. The delay trails the quickest recent packet by a fixed buffer
+    /// and drifts toward it, so the picture keeps the player's pace however the packets bunch up on the way.
+    /// </summary>
+    private void ShowWatched(float delta)
+    {
+        if (_decoder == null || double.IsNaN(_watchLag))
+            return;
+
+        _quickestTrip += delta * TripForget;
+        var drift = delta * WatchLagDrift;
+        _watchLag = Math.Clamp(_quickestTrip + WatchBufferMs, _watchLag - drift, _watchLag + drift);
+
+        var shown = false;
+        while (_watchQueue.TryPeek(out var next) && (Trip(next.Stamp) >= _watchLag || _watchQueue.Count > MaxWatchQueue))
+        {
+            _watchQueue.Dequeue();
+            shown |= _decoder.Decode(next.Packet);
+        }
+
+        if (!shown)
             return;
 
         _watchScreen.SetFrame(_decoder.Frame, _decoder.Width, _decoder.Height);
@@ -194,11 +251,22 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         UpdateWatchDeck(_decoder.Deck);
     }
 
+    /// <summary>Milliseconds from the player's clock at <paramref name="stamp"/> to this client's clock now.</summary>
+    private double Trip(uint stamp) => unchecked((int) (Now() - stamp));
+
+    private uint Now() => (uint) _timing.RealTime.TotalMilliseconds;
+
+    private void ResetWatchClock()
+    {
+        _watchQueue.Clear();
+        _watchLag = double.NaN;
+    }
+
     /// <summary>The server seated both players; start from power-on.</summary>
     public void StartTwoPlayer(MameArcadeStartMessage message)
     {
         var game = message.Seat == 0 ? _hostedGame : _lobby?.Game ?? string.Empty;
-        if (NeoGeoSets.Find(game) is not { } set)
+        if (MameGames.Find(game) is not { } set)
         {
             LeaveRequested?.Invoke();
             return;
@@ -239,6 +307,8 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     protected override void FrameUpdate(FrameEventArgs args)
     {
         base.FrameUpdate(args);
+
+        ShowWatched(args.DeltaSeconds);
 
         if (_session == null)
             return;
@@ -360,6 +430,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         _decoder = null;
         _watchedGame = string.Empty;
         _watchScreen.Clear();
+        ResetWatchClock();
     }
 
     /// <summary>This client's game is the one on the cabinet.</summary>
@@ -380,17 +451,18 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             return;
         }
 
-        MameAudioCodec.Downmix(_stereoOut, _monoOut);
+        _audioEncoder.Downmix(_stereoOut, _monoOut);
         while (_monoOut.Count >= AudioPacketSamples)
         {
-            StreamReady?.Invoke(MameArcadeStreamKind.Audio, MameAudioCodec.Encode(_monoOut.GetRange(0, AudioPacketSamples)));
+            StreamReady?.Invoke(MameArcadeStreamKind.Audio, _audioEncoder.Encode(_monoOut.GetRange(0, AudioPacketSamples)));
             _monoOut.RemoveRange(0, AudioPacketSamples);
         }
     }
 
     /// <summary>
     /// While anyone watches, encodes a frame on a worker whenever the server's rate allows, so a busy screen comes
-    /// through at a lower frame rate rather than late.
+    /// through at a lower frame rate rather than late. Frames go out evenly spaced at the rate a typical packet allows,
+    /// rather than in bursts whenever the allowance refills.
     /// </summary>
     private void UpdateVideo(float delta, bool showing, Rgba32[]? pixels)
     {
@@ -400,6 +472,13 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 #pragma warning disable RA0004 // IsCompleted was checked above, so this can't block.
             if (done.IsCompletedSuccessfully && showing)
             {
+                if (!_encodingKeyframe)
+                {
+                    _videoPacketBytes = _videoPacketBytes == 0f
+                        ? done.Result.Length
+                        : MathHelper.Lerp(_videoPacketBytes, done.Result.Length, 0.2f);
+                }
+
                 _videoAllowance -= done.Result.Length;
                 StreamReady?.Invoke(MameArcadeStreamKind.Video, done.Result);
             }
@@ -417,7 +496,8 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         _sinceVideo += delta;
         _sinceKeyframe += delta;
 
-        if (pixels == null || _encoding != null || _videoAllowance <= 0f || _sinceVideo < VideoInterval)
+        var interval = MathF.Max(VideoInterval, _videoPacketBytes / audience.VideoRate);
+        if (pixels == null || _encoding != null || _videoAllowance <= 0f || _sinceVideo < interval)
             return;
 
         var keyframe = _sinceKeyframe >= KeyframeSeconds || audience.Joins != _joinsSeen;
@@ -425,10 +505,12 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         if (keyframe)
             _sinceKeyframe = 0f;
 
-        _sinceVideo = 0f;
+        // Keeps the remainder, so frames that land just short of the interval don't slip to every other one.
+        _sinceVideo = MathF.Min(_sinceVideo - interval, interval);
+        _encodingKeyframe = keyframe;
         var frame = (Rgba32[]) pixels.Clone();
-        var (width, height, encoder, deck) = (_session!.Width, _session.Height, _encoder, DeckForWatchers());
-        _encoding = Task.Run(() => encoder.Encode(frame, width, height, keyframe, deck));
+        var (width, height, encoder, deck, stamp) = (_session!.Width, _session.Height, _encoder, DeckForWatchers(), Now());
+        _encoding = Task.Run(() => encoder.Encode(frame, width, height, keyframe, deck, stamp));
     }
 
     private void Watch()
@@ -437,8 +519,10 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             return;
 
         _decoder = new MameVideoDecoder();
+        ResetWatchClock();
         _watchedGame = showing.Game;
         _watchScreen.Clear();
+        _watchDeck.Board = MameGames.Find(showing.Game)?.Board ?? MameBoard.NeoGeo;
         UpdateWatchDeck(default);
         _watchStatus.Text = Loc.GetString("mame-arcade-watch-waiting");
         _libraryPanel.Visible = false;
@@ -452,6 +536,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             return;
 
         _decoder = null;
+        ResetWatchClock();
         _watchedGame = string.Empty;
         _watchScreen.Clear();
         _watchPanel.Visible = false;
@@ -465,7 +550,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     private string WatchingText()
     {
         var showing = _lobby?.Showing;
-        var title = NeoGeoSets.Find(_watchedGame)?.Title ?? _watchedGame;
+        var title = MameGames.Find(_watchedGame)?.Title ?? _watchedGame;
         return Loc.GetString("mame-arcade-watching", ("player", showing?.PlayerName ?? string.Empty), ("game", title));
     }
 
@@ -512,26 +597,8 @@ public sealed partial class MameArcadeWindow : DefaultWindow
     private void RefreshLibrary()
     {
         _library.Refresh();
-        _libraryPanel.SetLibrary(_library.Snapshot(), _library.ZipCount, _library.UnusedZips(IsKnownChip), _library.HasState);
+        _libraryPanel.SetLibrary(_library.Snapshot(), _library.ZipCount, _library.UnusedZips(MameGames.IsKnownChip), _library.HasState);
         UpdateLobby();
-    }
-
-    /// <summary>A chip some supported game or the BIOS uses.</summary>
-    private static bool IsKnownChip(uint crc, long size)
-    {
-        foreach (var set in NeoGeoSets.All)
-        {
-            if (set.Chips.TryGetValue(crc, out var chip) && chip.Size == size)
-                return true;
-        }
-
-        foreach (var bios in NeoGeoLoader.MainBioses)
-        {
-            if (bios.Crc == crc && bios.Size == size)
-                return true;
-        }
-
-        return crc == NeoGeoLoader.FixedBios.Crc || crc == NeoGeoLoader.ZoomTable.Crc || crc == NeoGeoLoader.AudioBios.Crc;
     }
 
     private void UpdateLobby()
@@ -546,7 +613,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             return;
         }
 
-        var title = NeoGeoSets.Find(lobby.Game)?.Title ?? lobby.Game;
+        var title = MameGames.Find(lobby.Game)?.Title ?? lobby.Game;
         if (lobby.Guest != null)
         {
             var text = Loc.GetString("mame-arcade-lobby-busy", ("host", lobby.HostName), ("guest", lobby.GuestName), ("game", title));
@@ -558,9 +625,9 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         }
         else
         {
-            var set = NeoGeoSets.Find(lobby.Game);
-            var canJoin = set != null && NeoGeoLoader.Fingerprint(set, _library.Snapshot()) == lobby.Fingerprint
-                && NeoGeoLoader.Missing(set, _library.Snapshot()).Count == 0;
+            var set = MameGames.Find(lobby.Game);
+            var canJoin = set != null && MameGames.Fingerprint(set, _library.Snapshot()) == lobby.Fingerprint
+                && MameGames.Missing(set, _library.Snapshot()).Count == 0;
             var text = canJoin
                 ? Loc.GetString("mame-arcade-lobby-hosting", ("host", lobby.HostName), ("game", title))
                 : Loc.GetString("mame-arcade-lobby-need-game", ("host", lobby.HostName), ("game", title));
@@ -577,7 +644,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             return;
         }
 
-        var title = NeoGeoSets.Find(showing.Game)?.Title ?? showing.Game;
+        var title = MameGames.Find(showing.Game)?.Title ?? showing.Game;
         var text = Loc.GetString("mame-arcade-showing", ("player", showing.PlayerName), ("game", title));
         _libraryPanel.SetShowing(text, showing.VideoRate > 0, showing.Watchers >= showing.MaxWatchers);
     }
@@ -613,7 +680,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         if (_libraryPanel.Selected is not { } set)
             return;
 
-        var fingerprint = NeoGeoLoader.Fingerprint(set, _library.Snapshot());
+        var fingerprint = MameGames.Fingerprint(set, _library.Snapshot());
         if (fingerprint.Length == 0)
             return;
 
@@ -623,10 +690,10 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 
     private void Join()
     {
-        if (_lobby == null || NeoGeoSets.Find(_lobby.Game) is not { } set)
+        if (_lobby == null || MameGames.Find(_lobby.Game) is not { } set)
             return;
 
-        JoinRequested?.Invoke(NeoGeoLoader.Fingerprint(set, _library.Snapshot()));
+        JoinRequested?.Invoke(MameGames.Fingerprint(set, _library.Snapshot()));
     }
 
     private void LoadState()
@@ -640,14 +707,16 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             _notice.Text = Loc.GetString("mame-arcade-no-state");
     }
 
-    private void StartSession(NeoGeoSet set, MameNetplay? netplay)
+    private void StartSession(IMameGame set, MameNetplay? netplay)
     {
         StopSession(null);
         StopWatching(null);
 
         _session = new MameArcadeSession(set, _library.Snapshot(), _library.Nvram(), netplay);
         _audio = new MameArcadeAudio(_audioManager);
+        _audioEncoder = new MameAudioEncoder();
         _encoder = new MameVideoEncoder();
+        _videoPacketBytes = 0f;
         _lastFrame = 0;
         _stalled = 0f;
         _checksumsToSend.Clear();
@@ -659,6 +728,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         _libraryPanel.SetMessage(null);
         _libraryPanel.Visible = false;
         _gamePanel.Visible = true;
+        _deck.Board = set.Board;
         _screen.GrabKeyboardFocus();
     }
 

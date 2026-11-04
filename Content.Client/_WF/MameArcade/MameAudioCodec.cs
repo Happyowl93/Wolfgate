@@ -1,15 +1,15 @@
 namespace Content.Client._WF.MameArcade;
 
 /// <summary>
-/// Shrinks the game's sound for nearby players: 16 kHz mono, 4-bit IMA ADPCM. Each packet starts its own predictor,
-/// so one can be decoded without the ones before it.
+/// Shrinks the game's sound for nearby players: 24 kHz mono, 4-bit IMA ADPCM. Each packet carries its predictor and
+/// step size, so one can be decoded without the ones before it.
 /// </summary>
 public static class MameAudioCodec
 {
-    public const int SampleRate = 16000;
+    public const int SampleRate = 24000;
 
-    // The emulator's 48 kHz frames averaged three at a time.
-    private const int Decimation = MameArcadeAudio.SampleRate / SampleRate;
+    // The emulator's 48 kHz frames, one kept of every two after the low-pass.
+    public const int Decimation = MameArcadeAudio.SampleRate / SampleRate;
 
     private const int HeaderBytes = 3;
 
@@ -24,29 +24,18 @@ public static class MameAudioCodec
         27086, 29794, 32767,
     };
 
-    /// <summary>Moves interleaved 48 kHz stereo into 16 kHz mono; a partial group of frames stays behind.</summary>
-    public static void Downmix(List<short> stereo, List<short> into)
+    public static byte[] Encode(IReadOnlyList<short> samples)
     {
-        var frames = stereo.Count / 2 / Decimation * Decimation;
-        for (var frame = 0; frame < frames; frame += Decimation)
-        {
-            var sum = 0;
-            for (var i = 0; i < Decimation; i++)
-            {
-                sum += stereo[(frame + i) * 2] + stereo[(frame + i) * 2 + 1];
-            }
-
-            into.Add((short) (sum / (Decimation * 2)));
-        }
-
-        stereo.RemoveRange(0, frames * 2);
+        var index = 0;
+        return Encode(samples, ref index);
     }
 
-    public static byte[] Encode(IReadOnlyList<short> samples)
+    /// <summary>Encodes from step <paramref name="index"/> and leaves it where the packet ends, for the next one.</summary>
+    public static byte[] Encode(IReadOnlyList<short> samples, ref int index)
     {
         var packet = new byte[HeaderBytes + (samples.Count + 1) / 2];
         int predictor = samples.Count > 0 ? samples[0] : 0;
-        var index = 0;
+        index = Math.Clamp(index, 0, StepTable.Length - 1);
         packet[0] = (byte) predictor;
         packet[1] = (byte) (predictor >> 8);
         packet[2] = (byte) index;
@@ -120,5 +109,70 @@ public static class MameAudioCodec
         }
 
         return samples;
+    }
+}
+
+/// <summary>
+/// Turns the emulator's 48 kHz stereo into <see cref="MameAudioCodec"/> packets. Low-passes before dropping samples,
+/// so the high end doesn't fold back as noise, and carries the ADPCM step from packet to packet, so a packet doesn't
+/// open with a burst of distortion. Not thread-safe.
+/// </summary>
+public sealed class MameAudioEncoder
+{
+    // Windowed sinc, flat to about 9 kHz and well down by the 12 kHz the codec can carry.
+    private static readonly float[] Taps = LowPass(63, 11000f / MameArcadeAudio.SampleRate);
+
+    private readonly float[] _history = new float[Taps.Length];
+    private int _at;
+    private int _phase;
+    private int _index;
+
+    /// <summary>Moves interleaved stereo into mono at <see cref="MameAudioCodec.SampleRate"/>.</summary>
+    public void Downmix(List<short> stereo, List<short> into)
+    {
+        var frames = stereo.Count / 2;
+        for (var frame = 0; frame < frames; frame++)
+        {
+            _history[_at] = (stereo[frame * 2] + stereo[frame * 2 + 1]) * 0.5f;
+            _at = (_at + 1) % _history.Length;
+            if (++_phase < MameAudioCodec.Decimation)
+                continue;
+
+            _phase = 0;
+            var sum = 0f;
+            for (var i = 0; i < Taps.Length; i++)
+            {
+                sum += Taps[i] * _history[(_at + i) % _history.Length];
+            }
+
+            into.Add((short) Math.Clamp(MathF.Round(sum), short.MinValue, short.MaxValue));
+        }
+
+        stereo.RemoveRange(0, frames * 2);
+    }
+
+    public byte[] Encode(IReadOnlyList<short> samples) => MameAudioCodec.Encode(samples, ref _index);
+
+    /// <summary>A Blackman-windowed sinc cutting off at <paramref name="cutoff"/> of the sample rate, with unit gain.</summary>
+    private static float[] LowPass(int length, float cutoff)
+    {
+        var taps = new float[length];
+        var middle = (length - 1) / 2.0;
+        var sum = 0.0;
+        for (var i = 0; i < length; i++)
+        {
+            var x = i - middle;
+            var sinc = x == 0 ? 2 * cutoff : Math.Sin(2 * Math.PI * cutoff * x) / (Math.PI * x);
+            var window = 0.42 - 0.5 * Math.Cos(2 * Math.PI * i / (length - 1)) + 0.08 * Math.Cos(4 * Math.PI * i / (length - 1));
+            taps[i] = (float) (sinc * window);
+            sum += taps[i];
+        }
+
+        for (var i = 0; i < length; i++)
+        {
+            taps[i] = (float) (taps[i] / sum);
+        }
+
+        return taps;
     }
 }
