@@ -46,7 +46,6 @@ public abstract partial class SharedGunSystem
             return;
 
         comp.TargetAssigner = args.Sink;
-        Dirty(uid, comp);
     }
 
     [SubscribeLocalEvent]
@@ -56,7 +55,6 @@ public abstract partial class SharedGunSystem
             return;
 
         comp.TargetAssigner = null;
-        Dirty(uid, comp);
     }
 
     private void UpdateTarget(Entity<TargetFinderComponent> ent, EntityUid target)

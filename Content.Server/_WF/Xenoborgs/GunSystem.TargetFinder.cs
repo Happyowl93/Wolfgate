@@ -21,7 +21,6 @@ public sealed partial class GunSystem
                 continue;
 
             chasing.ChasingEntity = target;
-            chasing.NextChangeVectorTime = TimeSpan.MaxValue;
 
             EnsureComp<TargetedProjectileComponent>(projectile).Target = target;
         }

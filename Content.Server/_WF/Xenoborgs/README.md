@@ -178,6 +178,7 @@ keyed triggers that make missiles explode at the end of their flight (here they 
   - wizden#44391 shock delay
   - wizden#44391 delay between shocks, for the zap xenoborg module
   - wizden#44391 delay between shocks
+  - wizden#44391 delay between shocks, for power-net shocks too
 - [`Content.Server/Physics/Components/ChasingWalkComponent.cs`](../../Physics/Components/ChasingWalkComponent.cs)
   - wizden#45247, GunSystem aims guided missiles
   - wizden#45247 turn rate limit for guided missiles

@@ -59,6 +59,9 @@ public abstract partial class SharedGunSystem
             return;
 
         refiller.NextAutoRefill += refiller.AutoRefillRate;
+        // A timer left far behind (added after map init) restarts instead of refilling every tick to catch up.
+        if (refiller.NextAutoRefill < Timing.CurTime)
+            refiller.NextAutoRefill = Timing.CurTime + refiller.AutoRefillRate;
         DirtyField(entity.Owner, refiller, nameof(BallisticAmmoSelfRefillerComponent.NextAutoRefill));
 
         if (!refiller.AutoRefill || GetBallisticShots(ammo) >= ammo.Capacity)

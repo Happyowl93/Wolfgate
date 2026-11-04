@@ -259,8 +259,11 @@ public sealed partial class ElectrocutionSystem : SharedElectrocutionSystem
                 );
             }
             // WOLFGATE(Xenoborgs) START: wizden#44391 delay between shocks
-            if (lastRet)
+            if (lastRet && electrified.ShockDelay != null)
+            {
                 electrified.NextShock = _timing.CurTime + electrified.ShockDelay;
+                Dirty(uid, electrified);
+            }
             // WOLFGATE END
             return lastRet;
         }
@@ -290,6 +293,13 @@ public sealed partial class ElectrocutionSystem : SharedElectrocutionSystem
                     true,
                     electrified.SiemensCoefficient);
             }
+            // WOLFGATE(Xenoborgs) START: wizden#44391 delay between shocks, for power-net shocks too
+            if (lastRet && electrified.ShockDelay != null)
+            {
+                electrified.NextShock = _timing.CurTime + electrified.ShockDelay;
+                Dirty(uid, electrified);
+            }
+            // WOLFGATE END
             return lastRet;
         }
     }

@@ -1,13 +1,14 @@
 using Content.Shared._Mono.Emp;
 using Content.Shared.PowerCell;
 using Content.Shared.PowerCell.Components;
+using Content.Shared.Silicons.Borgs.Components;
 using Robust.Shared.Containers;
 
 namespace Content.Shared._WF.Xenoborgs;
 
 /// <summary>
-/// Lends the <see cref="EmpResistanceComponent"/> of whatever holds a power cell in a cell slot to the cell, like
-/// wizden's cell EMP relay, so a resistant borg chassis also shields its cell. EMP drains the cell directly.
+/// Lends a borg chassis's <see cref="EmpResistanceComponent"/> to the power cell in its slot, like wizden's cell EMP
+/// relay, so a resistant chassis also shields its cell. EMP drains the cell directly.
 /// </summary>
 public sealed partial class CellHolderEmpResistanceSystem : EntitySystem
 {
@@ -22,7 +23,8 @@ public sealed partial class CellHolderEmpResistanceSystem : EntitySystem
     private void OnInserted(Entity<PowerCellComponent> ent, ref EntGotInsertedIntoContainerMessage args)
     {
         var holder = args.Container.Owner;
-        if (!HasComp<PowerCellSlotComponent>(holder) ||
+        if (!HasComp<BorgChassisComponent>(holder) ||
+            !HasComp<PowerCellSlotComponent>(holder) ||
             !TryComp<EmpResistanceComponent>(holder, out var holderResistance))
             return;
 
