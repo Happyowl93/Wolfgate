@@ -29,7 +29,7 @@ public sealed partial class WFMameArcadeComponent : Component
     [ViewVariables]
     public HashSet<EntityUid> Watchers = new();
 
-    /// <summary>Times anyone started watching, so the player knows to send a keyframe.</summary>
+    /// <summary>Bumped when a watcher needs a keyframe: someone started watching, or a picture packet was dropped.</summary>
     [ViewVariables]
     public int WatcherJoins;
 
@@ -42,4 +42,18 @@ public sealed partial class WFMameArcadeComponent : Component
 
     [ViewVariables]
     public TimeSpan AllowanceRefill;
+
+    /// <summary>Input frames and messages each seat may still send this second.</summary>
+    [ViewVariables]
+    public int HostInputAllowance;
+
+    [ViewVariables]
+    public int GuestInputAllowance;
+
+    [ViewVariables]
+    public TimeSpan InputRefill;
+
+    /// <summary>When a dropped picture packet may next ask the player for a keyframe.</summary>
+    [ViewVariables]
+    public TimeSpan NextResync;
 }

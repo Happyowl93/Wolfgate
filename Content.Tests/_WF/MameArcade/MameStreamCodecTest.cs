@@ -94,6 +94,13 @@ public sealed class MameStreamCodecTest
     }
 
     [Test]
+    public void OddSoundPacketKeepsItsLength()
+    {
+        var samples = Tone(0)[..101];
+        Assert.That(MameAudioCodec.Decode(MameAudioCodec.Encode(samples)), Has.Length.EqualTo(101));
+    }
+
+    [Test]
     public void APacketPicksUpTheStepWhereTheLastEnded()
     {
         var encoder = new MameAudioEncoder();

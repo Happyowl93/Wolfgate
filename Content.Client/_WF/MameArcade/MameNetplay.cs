@@ -33,6 +33,12 @@ public sealed class MameNetplay
     // Holding back for balance skips at most one frame in this many, so it never shows as a stutter.
     private const int FramesPerHold = 6;
 
+    // The partner runs at most one delay ahead and queues one more, so inputs past this many frames ahead are bogus.
+    public const int MaxAhead = 4 * MaxDelay;
+
+    // Checksums this many frames old that never found their pair are dropped.
+    private const int ChecksumLifetime = 4 * ChecksumInterval;
+
     private readonly Dictionary<int, MameControls> _local = new();
     private readonly Dictionary<int, MameControls> _remote = new();
     private readonly Dictionary<int, uint> _localChecksums = new();
@@ -166,6 +172,17 @@ public sealed class MameNetplay
         _stretch = 0f;
         _stalledThisStretch = false;
         _lowestThisStretch = int.MaxValue;
+        PruneChecksums(_localChecksums);
+        PruneChecksums(_remoteChecksums);
+    }
+
+    private void PruneChecksums(Dictionary<int, uint> checksums)
+    {
+        foreach (var frame in checksums.Keys)
+        {
+            if (frame < Frame - ChecksumLifetime)
+                checksums.Remove(frame);
+        }
     }
 
     /// <summary>
@@ -180,7 +197,7 @@ public sealed class MameNetplay
         for (var i = 0; i < inputs.Count; i++)
         {
             var frame = firstFrame + i;
-            if (frame >= Frame)
+            if (frame >= Frame && frame <= Frame + MaxAhead)
                 _remote[frame] = (MameControls) inputs[i];
         }
 
@@ -216,6 +233,9 @@ public sealed class MameNetplay
     /// <summary>Records the partner's checksum after <paramref name="frame"/>; true if it already disagrees.</summary>
     public bool AddRemoteChecksum(int frame, uint checksum)
     {
+        if (frame % ChecksumInterval != 0 || frame < Frame - ChecksumLifetime || frame > Frame + ChecksumLifetime)
+            return false;
+
         _remoteChecksums[frame] = checksum;
         return Compare(frame);
     }

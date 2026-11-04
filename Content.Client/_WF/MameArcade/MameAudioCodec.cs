@@ -13,6 +13,9 @@ public static class MameAudioCodec
 
     private const int HeaderBytes = 3;
 
+    // Set on the step byte when the last nibble is padding; steps only reach 88.
+    private const byte OddFlag = 0x80;
+
     private static readonly int[] IndexTable = { -1, -1, -1, -1, 2, 4, 6, 8, -1, -1, -1, -1, 2, 4, 6, 8 };
 
     private static readonly int[] StepTable =
@@ -38,7 +41,7 @@ public static class MameAudioCodec
         index = Math.Clamp(index, 0, StepTable.Length - 1);
         packet[0] = (byte) predictor;
         packet[1] = (byte) (predictor >> 8);
-        packet[2] = (byte) index;
+        packet[2] = (byte) (index | (samples.Count % 2 == 1 ? OddFlag : 0));
 
         for (var i = 0; i < samples.Count; i++)
         {
@@ -87,8 +90,12 @@ public static class MameAudioCodec
             return Array.Empty<short>();
 
         int predictor = (short) (packet[0] | packet[1] << 8);
-        var index = Math.Clamp((int) packet[2], 0, StepTable.Length - 1);
-        var samples = new short[(packet.Length - HeaderBytes) * 2];
+        var index = Math.Clamp(packet[2] & ~OddFlag, 0, StepTable.Length - 1);
+        var count = (packet.Length - HeaderBytes) * 2;
+        if ((packet[2] & OddFlag) != 0 && count > 0)
+            count--;
+
+        var samples = new short[count];
 
         for (var i = 0; i < samples.Length; i++)
         {

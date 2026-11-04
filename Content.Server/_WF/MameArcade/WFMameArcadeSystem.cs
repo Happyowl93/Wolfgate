@@ -41,6 +41,9 @@ public sealed partial class WFMameArcadeSystem : EntitySystem
     // Seconds of picture the player may send at once, so a keyframe fits on top of the steady rate.
     private const int VideoBurstSeconds = 2;
 
+    // After a dropped picture packet, how long before another drop asks for a keyframe again.
+    private static readonly TimeSpan ResyncCooldown = TimeSpan.FromSeconds(1);
+
     private readonly List<INetChannel> _recipients = new();
 
     public override void Initialize()
@@ -264,7 +267,8 @@ public sealed partial class WFMameArcadeSystem : EntitySystem
             || Partner(comp, player) is not { } partner
             || !TryComp<ActorComponent>(partner, out var actor)
             || message.Inputs.Length == 0
-            || message.FirstFrame < 0)
+            || message.FirstFrame < 0
+            || !TrySpendInput(comp, player == comp.Host, message.Inputs.Length + 1))
         {
             return;
         }
@@ -290,9 +294,17 @@ public sealed partial class WFMameArcadeSystem : EntitySystem
             || !TryComp<WFMameArcadeComponent>(cabinet, out var comp)
             || comp.Player != player
             || message.Data.Length == 0
-            || !_ui.IsUiOpen(cabinet.Value, MameArcadeUiKey.Key, player)
-            || !TrySpend(comp, message.Kind, message.Data.Length))
+            || !_ui.IsUiOpen(cabinet.Value, MameArcadeUiKey.Key, player))
         {
+            return;
+        }
+
+        if (!TrySpend(comp, message.Kind, message.Data.Length))
+        {
+            // Watchers' screens are built from changes, so a lost one leaves them wrong until a keyframe.
+            if (message.Kind == MameArcadeStreamKind.Video)
+                RequestKeyframe((cabinet.Value, comp));
+
             return;
         }
 
@@ -349,6 +361,37 @@ public sealed partial class WFMameArcadeSystem : EntitySystem
 
         comp.VideoAllowance -= bytes;
         return true;
+    }
+
+    /// <summary>Charges a seat's input message to its allowance, refilled each second. False if it's spent.</summary>
+    private bool TrySpendInput(WFMameArcadeComponent comp, bool host, int cost)
+    {
+        var now = _timing.RealTime;
+        if (now >= comp.InputRefill)
+        {
+            comp.InputRefill = now + TimeSpan.FromSeconds(1);
+            comp.HostInputAllowance = MameArcadeProtocol.MaxInputCostPerSecond;
+            comp.GuestInputAllowance = MameArcadeProtocol.MaxInputCostPerSecond;
+        }
+
+        ref var allowance = ref host ? ref comp.HostInputAllowance : ref comp.GuestInputAllowance;
+        if (allowance < cost)
+            return false;
+
+        allowance -= cost;
+        return true;
+    }
+
+    /// <summary>Asks the player for a keyframe, at most once per <see cref="ResyncCooldown"/>.</summary>
+    private void RequestKeyframe(Entity<WFMameArcadeComponent> cabinet)
+    {
+        var now = _timing.RealTime;
+        if (cabinet.Comp.Watchers.Count == 0 || now < cabinet.Comp.NextResync)
+            return;
+
+        cabinet.Comp.NextResync = now + ResyncCooldown;
+        cabinet.Comp.WatcherJoins++;
+        UpdateState(cabinet);
     }
 
     /// <summary>Picture bytes a second per watcher; 0 turns watching off.</summary>

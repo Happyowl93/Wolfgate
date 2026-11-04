@@ -50,6 +50,20 @@ public sealed class MameNetplayTest
     }
 
     [Test]
+    public void FarFutureInputsAreIgnored()
+    {
+        var netplay = new MameNetplay(0, 2);
+        netplay.ReceiveInputs(MameNetplay.MaxAhead + 1, new ushort[] { 1 }, MameNetplay.UnknownMargin, 2);
+        netplay.ReceiveInputs(int.MaxValue - 1, new ushort[] { 1, 1, 1 }, MameNetplay.UnknownMargin, 2);
+
+        // Only the two delay frames are known, so the third waits for the partner.
+        Assert.That(netplay.TryAdvance(MameControls.None, out _, out _), Is.True);
+        Assert.That(netplay.TryAdvance(MameControls.None, out _, out _), Is.True);
+        Assert.That(netplay.TryAdvance(MameControls.None, out _, out _), Is.False);
+        Assert.That(netplay.AddRemoteChecksum(MameNetplay.ChecksumInterval * 1000, 1), Is.False);
+    }
+
+    [Test]
     public void DelayComesDownWhenTheLinkIsFast()
     {
         var match = new Match(20, 20, _ => 2);

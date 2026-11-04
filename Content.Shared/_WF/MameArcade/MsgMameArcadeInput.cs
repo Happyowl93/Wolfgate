@@ -38,7 +38,14 @@ public sealed class MsgMameArcadeInput : NetMessage
         Cabinet = new NetEntity(buffer.ReadInt32());
         FirstFrame = buffer.ReadInt32();
 
-        var count = Math.Min((int) buffer.ReadByte(), MameArcadeProtocol.MaxInputsPerMessage);
+        // A longer message is malformed; the server drops one with no inputs.
+        var count = (int) buffer.ReadByte();
+        if (count > MameArcadeProtocol.MaxInputsPerMessage)
+        {
+            Inputs = Array.Empty<ushort>();
+            return;
+        }
+
         Inputs = new ushort[count];
         for (var i = 0; i < count; i++)
         {

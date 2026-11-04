@@ -42,14 +42,16 @@ server and again at the other client, which lockstep feels on every frame. The s
 both players' pings. Each input message carries how early the sender gets the partner's inputs; player 1 picks one
 delay for both from that and sends it along, and whichever client runs ahead holds back the odd frame until both
 have the same slack, so neither player ends up with all the lag. The clients compare a checksum of work RAM every two seconds; if a partner leaves or
-the games drift apart, the other plays on alone.
+the games drift apart, the other plays on alone. The server drops a seat's inputs past about four times the normal
+rate, and each client ignores inputs and checksums for frames far beyond any real partner's lead.
 
 **Bystanders.** The cabinet shows one game: player 1's in a 2-player game, or else the first player to start one
 alone (`WFMameArcadeComponent.Player`). That client streams its sound to the server as 24 kHz mono ADPCM, about
 12 KiB a second (`MameAudioCodec`), and the server relays it to everyone within 10 tiles except the players; their
 `MameArcadeNearbySystem` plays it from the cabinet. Anyone else with the window open can press Watch. While someone
 watches, the player also sends the picture (`MameVideoCodec`): 15-bit colour, only the 8x8 tiles that changed,
-deflated, with a keyframe for each new watcher and every 10 seconds, and both players' controls for the watcher's
+deflated, with a keyframe for each new watcher, every 10 seconds, and whenever the server drops a picture packet
+over the rate, and both players' controls for the watcher's
 control deck. A busy Neo Geo screen is about 11 KiB, so the
 frame rate (30 at most) drops to fit `wf.mame_arcade.video_rate` (KiB a second, 0 turns watching off) rather than
 lagging, with frames spaced evenly. Each packet carries when its frame was taken, and the watcher shows it about

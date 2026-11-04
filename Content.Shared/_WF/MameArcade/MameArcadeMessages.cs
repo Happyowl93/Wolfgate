@@ -17,11 +17,20 @@ public static class MameArcadeProtocol
     /// <summary>Most frames of input one message may carry.</summary>
     public const int MaxInputsPerMessage = 32;
 
+    /// <summary>
+    /// Input frames plus messages one seat may send a second. A player sends about 60 of each; more than this is a
+    /// flood, and the server drops it.
+    /// </summary>
+    public const int MaxInputCostPerSecond = 240;
+
     /// <summary>No checksum in this message.</summary>
     public const int NoChecksum = -1;
 
-    /// <summary>Largest sound or picture packet; a full Neo Geo keyframe is about 30 KiB.</summary>
-    public const int MaxStreamPacket = 96 * 1024;
+    /// <summary>
+    /// Largest sound or picture packet. A typical keyframe is about 30 KiB; this fits even an incompressible CPS2
+    /// keyframe (384x224 at 2 bytes a pixel), so no real screen is ever too big to send.
+    /// </summary>
+    public const int MaxStreamPacket = 192 * 1024;
 
     /// <summary>Most sound a cabinet may relay, in bytes per second; the game sends about 12 KiB.</summary>
     public const int MaxAudioBytesPerSecond = 16 * 1024;
