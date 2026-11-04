@@ -59,6 +59,7 @@ mame-arcade-stop-watching = Stop watching
 mame-arcade-watching = Watching { $player } play { $game }
 mame-arcade-watch-waiting = Waiting for the picture...
 mame-arcade-watch-ended = The game you were watching ended.
+mame-arcade-spectator-idle = Nothing is on the screen.
 mame-arcade-status-watched = { $status } · { $count } watching
 
 mame-arcade-deck-seat = { $seat }P
@@ -90,4 +91,3 @@ mame-arcade-deck-key-hp = L
 mame-arcade-deck-key-lk = U
 mame-arcade-deck-key-mk = I
 mame-arcade-deck-key-hk = O
-mame-arcade-joining = Joining { $host }'s game as player 2...

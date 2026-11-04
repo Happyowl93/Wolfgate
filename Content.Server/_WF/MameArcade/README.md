@@ -8,10 +8,6 @@ window's Open ROM folder). Nothing is downloaded or shared: the server only ever
 uses. Each game needs its MAME set, and Neo Geo games `neogeo.zip` for the BIOS; chips are found by CRC and size
 across every zip, so split, merged and non-merged sets all work. Battery RAM and save states live beside them.
 
-**Walking up.** Opening a cabinet picks the obvious thing: a player whose zips match an open 2-player game takes the
-second seat, and anyone else watches the game on the screen, if one is on and the audience isn't full. Otherwise, or
-after leaving either, the player gets the library and chooses.
-
 **Window.** `MameArcadeLibraryView` is the start screen: what is happening on the cabinet (an open 2-player game to
 join, or a game to watch), the player's games with a search and a ready-only filter, and the chosen game's details,
 missing files and Play and Host buttons. Other versions of a game the player can already run share most of its chips,
@@ -58,7 +54,9 @@ control deck. A busy Neo Geo screen is about 11 KiB, so the
 frame rate (30 at most) drops to fit `wf.mame_arcade.video_rate` (KiB a second, 0 turns watching off) rather than
 lagging, with frames spaced evenly. Each packet carries when its frame was taken, and the watcher shows it about
 100 ms later, so frames that bunch up on the way still show at the pace they were taken. Up to
-`wf.mame_arcade.max_watchers` can watch a cabinet. Both streams are raw net messages (`MsgMameArcadeStream`) the
+`wf.mame_arcade.max_watchers` can watch a cabinet. Ghosts and anyone else the cabinet takes no buttons from can only watch: the UI drops their
+messages, so the server puts them in the audience itself whenever a game is on, and their window shows nothing else.
+A player who goes into crit or dies has the window closed on them, which leaves their game or the audience. Both streams are raw net messages (`MsgMameArcadeStream`) the
 server checks for sender and rate but never decodes. Bystanders need no ROMs.
 
 <!-- WOLFGATE-GENERATED START -->

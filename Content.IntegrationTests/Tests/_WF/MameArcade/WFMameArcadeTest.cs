@@ -3,6 +3,8 @@ using System.Linq;
 using Content.Client._WF.MameArcade;
 using Content.Server._WF.MameArcade;
 using Content.Shared._WF.MameArcade;
+using Content.Shared.Mobs;
+using Content.Shared.Mobs.Systems;
 using Robust.Client.UserInterface;
 using Robust.Shared.GameObjects;
 
@@ -111,13 +113,12 @@ public sealed class WFMameArcadeTest
     }
 
     [Test]
-    public async Task OpeningABusyCabinetWatches()
+    public async Task CritPlayerLeavesTheCabinet()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
         var server = pair.Server;
-        var client = pair.Client;
         var map = await pair.CreateTestMap();
-        EntityUid cabinet = default;
+        Entity<WFMameArcadeComponent> cabinet = default;
         EntityUid player = default;
 
         await server.WaitPost(() =>
@@ -125,33 +126,84 @@ public sealed class WFMameArcadeTest
             var entMan = server.EntMan;
             player = entMan.SpawnEntity("MobHuman", map.GridCoords);
             server.PlayerMan.SetAttachedEntity(server.PlayerMan.Sessions.Single(), player);
-            cabinet = entMan.SpawnEntity("WFMameArcade", map.GridCoords);
-            var someone = entMan.SpawnEntity(null, map.GridCoords);
-            var system = entMan.System<WFMameArcadeSystem>();
-            system.TryShowSolo((cabinet, entMan.GetComponent<WFMameArcadeComponent>(cabinet)), someone, "mslug");
-            server.System<SharedUserInterfaceSystem>().OpenUi(cabinet, MameArcadeUiKey.Key, player);
+            var uid = entMan.SpawnEntity("WFMameArcade", map.GridCoords);
+            cabinet = (uid, entMan.GetComponent<WFMameArcadeComponent>(uid));
+            server.System<SharedUserInterfaceSystem>().OpenUi(uid, MameArcadeUiKey.Key, player);
+            Assert.That(server.System<WFMameArcadeSystem>().TryShowSolo(cabinet, player, "mslug"));
+        });
+
+        await pair.RunTicksSync(10);
+
+        await server.WaitAssertion(() =>
+        {
+            server.System<MobStateSystem>().ChangeMobState(player, MobState.Critical);
+            Assert.That(server.System<SharedUserInterfaceSystem>().IsUiOpen(cabinet.Owner, MameArcadeUiKey.Key, player), Is.False,
+                "Going into crit closes the cabinet");
+            Assert.That(cabinet.Comp.Player, Is.Null, "Their game leaves the screen");
+        });
+
+        await pair.RunTicksSync(10);
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task GhostsWatchWithoutAsking()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var client = pair.Client;
+        var map = await pair.CreateTestMap();
+        Entity<WFMameArcadeComponent> cabinet = default;
+        EntityUid ghost = default;
+        EntityUid someone = default;
+
+        await server.WaitPost(() =>
+        {
+            var entMan = server.EntMan;
+            ghost = entMan.SpawnEntity("MobObserver", map.GridCoords);
+            server.PlayerMan.SetAttachedEntity(server.PlayerMan.Sessions.Single(), ghost);
+            var uid = entMan.SpawnEntity("WFMameArcade", map.GridCoords);
+            cabinet = (uid, entMan.GetComponent<WFMameArcadeComponent>(uid));
+            someone = entMan.SpawnEntity(null, map.GridCoords);
+            server.System<SharedUserInterfaceSystem>().OpenUi(uid, MameArcadeUiKey.Key, ghost);
         });
 
         await pair.RunTicksSync(30);
 
+        MameArcadeWindow Window() => client.ResolveDependency<IUserInterfaceManager>().WindowRoot.Children
+            .OfType<MameArcadeWindow>()
+            .Single();
+
         await client.WaitAssertion(() =>
         {
-            var window = client.ResolveDependency<IUserInterfaceManager>().WindowRoot.Children
-                .OfType<MameArcadeWindow>()
-                .Single();
-            Assert.That(window.Watching, "Someone else's game was on the screen, so the window opens watching it");
+            Assert.That(Window().Spectator, "A ghost's buttons never reach the server");
+            Assert.That(Window().Watching, Is.False, "Nothing is on the screen yet");
         });
+
+        await server.WaitPost(() => server.System<WFMameArcadeSystem>().TryShowSolo(cabinet, someone, "mslug"));
+        await pair.RunTicksSync(30);
 
         await server.WaitAssertion(() =>
-        {
-            var comp = server.EntMan.GetComponent<WFMameArcadeComponent>(cabinet);
-            Assert.That(comp.Watchers, Does.Contain(player), "The server sends the picture to the new watcher");
-        });
+            Assert.That(cabinet.Comp.Watchers, Does.Contain(ghost), "The server counts the ghost in when a game starts"));
+        await client.WaitAssertion(() => Assert.That(Window().Watching, "The ghost's window watches the new game"));
 
-        await client.WaitPost(() => client.ResolveDependency<IUserInterfaceManager>().WindowRoot.Children
-            .OfType<MameArcadeWindow>()
-            .Single()
-            .Close());
+        await server.WaitPost(() =>
+        {
+            var system = server.System<WFMameArcadeSystem>();
+            system.Leave(cabinet, someone);
+            system.TryShowSolo(cabinet, someone, "kof98");
+        });
+        await pair.RunTicksSync(30);
+
+        await server.WaitAssertion(() =>
+            Assert.That(cabinet.Comp.Watchers, Does.Contain(ghost), "The ghost stays in the audience for the next game"));
+        await client.WaitAssertion(() => Assert.That(Window().Watching, "The ghost's window follows the next game"));
+
+        await client.WaitPost(() => Window().Close());
+        await pair.RunTicksSync(5);
+
+        await server.WaitAssertion(() =>
+            Assert.That(cabinet.Comp.Watchers, Does.Not.Contain(ghost), "Closing the window leaves the audience"));
 
         await pair.CleanReturnAsync();
     }

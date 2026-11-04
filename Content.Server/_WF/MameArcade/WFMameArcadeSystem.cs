@@ -1,5 +1,7 @@
 using Content.Shared._WF.MameArcade;
+using Content.Shared.ActionBlocker;
 using Content.Shared.IdentityManagement;
+using Content.Shared.Mobs;
 using Content.Shared.Power;
 using Robust.Server.GameObjects;
 using Robust.Server.Player;
@@ -17,6 +19,7 @@ namespace Content.Server._WF.MameArcade;
 /// </summary>
 public sealed partial class WFMameArcadeSystem : EntitySystem
 {
+    [Dependency] private ActionBlockerSystem _actionBlocker = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPlayerManager _players = default!;
@@ -45,6 +48,7 @@ public sealed partial class WFMameArcadeSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<WFMameArcadeComponent, PowerChangedEvent>(OnPowerChanged);
+        SubscribeLocalEvent<MobStateChangedEvent>(OnMobStateChanged);
 
         // Server systems start before the server takes connections, so the messages are known when clients join.
         _net.RegisterNetMessage<MsgMameArcadeInput>(OnInput);
@@ -90,6 +94,7 @@ public sealed partial class WFMameArcadeSystem : EntitySystem
 
         comp.Guest = player;
         Show(comp, host, comp.Game);
+        AddSpectators(cabinet);
         var delay = InputDelay(host, player);
         _ui.ServerSendUiMessage(cabinet.Owner, MameArcadeUiKey.Key, new MameArcadeStartMessage(0, delay, Name(player)), host);
         _ui.ServerSendUiMessage(cabinet.Owner, MameArcadeUiKey.Key, new MameArcadeStartMessage(1, delay, Name(host)), player);
@@ -133,6 +138,7 @@ public sealed partial class WFMameArcadeSystem : EntitySystem
             return false;
 
         Show(comp, player, game);
+        AddSpectators(cabinet);
         UpdateState(cabinet);
         return true;
     }
@@ -185,9 +191,26 @@ public sealed partial class WFMameArcadeSystem : EntitySystem
             .RemoveWhereAttachedEntity(e => e == comp.Player || e == comp.Host || e == comp.Guest);
     }
 
+    /// <summary>Whether the cabinet ignores this player's buttons, such as a ghost's, so they can only watch.</summary>
+    private bool IsSpectator(EntityUid cabinet, EntityUid player) => !_actionBlocker.CanInteract(player, cabinet);
+
+    /// <summary>
+    /// Puts everyone with the window open who can only watch into the audience. Their own watch messages never reach
+    /// this system, since the UI drops every message but opening from someone who can't interact.
+    /// </summary>
+    private void AddSpectators(Entity<WFMameArcadeComponent> cabinet)
+    {
+        foreach (var actor in _ui.GetActors(cabinet.Owner, MameArcadeUiKey.Key))
+        {
+            if (IsSpectator(cabinet, actor))
+                TryWatch(cabinet, actor);
+        }
+    }
+
     private void OnOpened(Entity<WFMameArcadeComponent> ent, ref BoundUIOpenedEvent args)
     {
         UpdateState(ent);
+        AddSpectators(ent);
     }
 
     private void OnClosed(Entity<WFMameArcadeComponent> ent, ref BoundUIClosedEvent args)
@@ -334,6 +357,23 @@ public sealed partial class WFMameArcadeSystem : EntitySystem
 
         comp.Player = player;
         comp.PlayerGame = player == null ? string.Empty : game;
+    }
+
+    /// <summary>
+    /// Closes the cabinet for a player who goes into crit or dies, so they stop playing or watching. Their controls and
+    /// streams are raw net messages, which the UI's interaction checks never see.
+    /// </summary>
+    private void OnMobStateChanged(MobStateChangedEvent args)
+    {
+        if (args.NewMobState is not (MobState.Critical or MobState.Dead))
+            return;
+
+        var query = EntityQueryEnumerator<WFMameArcadeComponent>();
+        while (query.MoveNext(out var uid, out _))
+        {
+            if (_ui.IsUiOpen(uid, MameArcadeUiKey.Key, args.Target))
+                _ui.CloseUi(uid, MameArcadeUiKey.Key, args.Target);
+        }
     }
 
     private void OnPowerChanged(Entity<WFMameArcadeComponent> ent, ref PowerChangedEvent args)

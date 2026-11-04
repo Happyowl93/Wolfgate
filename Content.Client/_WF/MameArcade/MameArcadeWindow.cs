@@ -69,6 +69,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
 
     private readonly BoxContainer _watchPanel;
     private readonly Label _watchStatus;
+    private readonly Button _stopWatching;
     private readonly MameArcadeScreen _watchScreen = new() { CanKeyboardFocus = false, KeyboardFocusOnClick = false };
     private readonly MameArcadeControlDeck _watchDeck = new();
     private MameVideoDecoder? _decoder;
@@ -169,8 +170,8 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         };
 
         _watchStatus = new Label { HorizontalExpand = true };
-        var stopWatching = new Button { Text = Loc.GetString("mame-arcade-stop-watching") };
-        stopWatching.OnPressed += _ => StopWatching(null);
+        _stopWatching = new Button { Text = Loc.GetString("mame-arcade-stop-watching") };
+        _stopWatching.OnPressed += _ => StopWatching(null);
 
         _watchPanel = new BoxContainer
         {
@@ -180,7 +181,7 @@ public sealed partial class MameArcadeWindow : DefaultWindow
             SeparationOverride = 4,
             Children =
             {
-                new BoxContainer { Children = { _watchStatus, stopWatching } },
+                new BoxContainer { Children = { _watchStatus, _stopWatching } },
                 _watchScreen,
                 _watchDeck,
             },
@@ -196,50 +197,36 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         UpdateLobby();
     }
 
+    /// <summary>
+    /// Whether the cabinet ignores this player's buttons, such as a ghost's. The server puts them in the audience
+    /// itself, and the window only ever shows the game on the screen.
+    /// </summary>
+    public bool Spectator { get; private set; }
+
+    public void SetSpectator()
+    {
+        Spectator = true;
+        _libraryPanel.Visible = false;
+        _watchPanel.Visible = true;
+        _stopWatching.Visible = false;
+        _watchStatus.Text = Loc.GetString("mame-arcade-spectator-idle");
+    }
+
     /// <summary>The cabinet's lobby changed.</summary>
     public void SetLobby(MameArcadeBuiState state)
     {
-        var first = _lobby == null;
         _lobby = state;
         UpdateLobby();
 
         if (_decoder != null && (state.Showing.Player == null || state.Showing.Game != _watchedGame))
             StopWatching(Loc.GetString("mame-arcade-watch-ended"));
 
-        if (first)
-            StepUp(state);
+        if (Spectator && _decoder == null && state.Showing.Player != null)
+            Watch();
     }
 
     /// <summary>Whether the window shows another player's game.</summary>
     public bool Watching => _decoder != null;
-
-    /// <summary>
-    /// What walking up to the cabinet does: take the free seat of a 2-player game waiting for one, if this player
-    /// has the same set; otherwise watch the game on the screen. Afterwards the player chooses for themselves.
-    /// </summary>
-    private void StepUp(MameArcadeBuiState state)
-    {
-        if (_session != null || _decoder != null)
-            return;
-
-        var local = _entMan.GetNetEntity(_player.LocalEntity);
-        if (state.Host is { } host && host != local && state.Guest == null)
-        {
-            if (!CanJoin(state))
-                return;
-
-            _libraryPanel.SetMessage(Loc.GetString("mame-arcade-joining", ("host", state.HostName)));
-            Join();
-            return;
-        }
-
-        if (state.Showing is { Player: { } player, VideoRate: > 0 } showing
-            && player != local
-            && showing.Watchers < showing.MaxWatchers)
-        {
-            Watch();
-        }
-    }
 
     /// <summary>The player has the set and BIOS the lobby's host plays with.</summary>
     private bool CanJoin(MameArcadeBuiState lobby)
@@ -570,7 +557,10 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         _watchStatus.Text = Loc.GetString("mame-arcade-watch-waiting");
         _libraryPanel.Visible = false;
         _watchPanel.Visible = true;
-        WatchRequested?.Invoke(true);
+
+        // The server already counts a spectator in, and would drop their message.
+        if (!Spectator)
+            WatchRequested?.Invoke(true);
     }
 
     private void StopWatching(string? message)
@@ -582,6 +572,13 @@ public sealed partial class MameArcadeWindow : DefaultWindow
         ResetWatchClock();
         _watchedGame = string.Empty;
         _watchScreen.Clear();
+
+        if (Spectator)
+        {
+            _watchStatus.Text = Loc.GetString("mame-arcade-spectator-idle");
+            return;
+        }
+
         _watchPanel.Visible = false;
         _libraryPanel.Visible = true;
         _libraryPanel.SetMessage(message);

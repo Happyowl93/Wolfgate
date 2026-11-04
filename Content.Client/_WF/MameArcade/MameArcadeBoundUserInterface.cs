@@ -1,4 +1,5 @@
 using Content.Shared._WF.MameArcade;
+using Content.Shared.ActionBlocker;
 using Robust.Client.UserInterface;
 
 namespace Content.Client._WF.MameArcade;
@@ -19,6 +20,9 @@ public sealed partial class MameArcadeBoundUserInterface : BoundUserInterface
         base.Open();
 
         _window = this.CreateWindow<MameArcadeWindow>();
+        if (PlayerManager.LocalEntity is not { } local || !EntMan.System<ActionBlockerSystem>().CanInteract(local, Owner))
+            _window.SetSpectator();
+
         _window.HostRequested += (game, fingerprint) => SendMessage(new MameArcadeHostMessage(game, fingerprint));
         _window.JoinRequested += fingerprint => SendMessage(new MameArcadeJoinMessage(fingerprint));
         _window.LeaveRequested += () => SendMessage(new MameArcadeLeaveMessage());
