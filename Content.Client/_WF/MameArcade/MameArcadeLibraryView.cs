@@ -109,10 +109,15 @@ public sealed class MameArcadeLibraryView : BoxContainer
         _cancelButton.OnPressed += _ => CancelPressed?.Invoke();
         _lobbyRow = new BoxContainer { Children = { _lobbyLabel, _joinButton, _cancelButton } };
 
-        _showingLabel = new Label { HorizontalExpand = true, VerticalAlignment = VAlignment.Center };
-        _watchButton = new Button { Text = Loc.GetString("mame-arcade-watch") };
+        _showingLabel = new Label { ClipText = true };
+        _watchButton = new Button { Text = Loc.GetString("mame-arcade-watch"), HorizontalAlignment = HAlignment.Left };
         _watchButton.OnPressed += _ => WatchPressed?.Invoke();
-        _showingRow = new BoxContainer { Children = { _showingLabel, _watchButton } };
+        _showingRow = new BoxContainer
+        {
+            Orientation = LayoutOrientation.Vertical,
+            SeparationOverride = 4,
+            Children = { _showingLabel, _watchButton },
+        };
 
         _cabinetCard = Panel(Card, CardEdge, new BoxContainer
         {
