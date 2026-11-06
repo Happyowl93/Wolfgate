@@ -30,8 +30,9 @@ gives the exact amount. Mail sometimes brings a hemophage four blood packs (`WFM
 `MailSystem`), as Meridian's quirk mail goodie does.
 
 Actions: Drain Victim, granted by a corrupted tongue (`WFHemophageDrainerComponent`), so it goes with the tongue: a
-3 s bite from a living body being pulled, refused for chaplains, garlic eaters and the wrong blood; animal blood
-(monkeys and kobolds included) is foul, caps at normal and sickens; a player's blood is worth more and satiates the tumor for 30 minutes. Dormant State (a tenth
+3 s bite from a living body being pulled, refused for chaplains, garlic eaters and blood that isn't blood (sap,
+slime, sugar, a machine's fluids); animal blood (monkeys and kobolds included) and other species' blood
+(`ForeignBloods`: ammonia, copper, insect and the like) is foul, caps at normal, never satisfies and sickens; a player's blood is worth more and satiates the tumor for 30 minutes. Dormant State (a tenth
 of the blood use, but slow, three times the brute, burn and toxin damage, 1.5 times the stamina damage through a
 marked read-back in `StaminaSystem`, and no other powers), Hemokinetic Regeneration, Hemokinetic Clot (the clot
 reopens when the limb is hurt) and Master of the House (breathe again, half the stamina, slowly regain blood; ending

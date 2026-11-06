@@ -92,6 +92,7 @@ wf-hemophage-drain-animal-full = Their inferior blood can't sate you any further
 wf-hemophage-drain-stopped = You stop feeding.
 wf-hemophage-drain-victim = { CAPITALIZE(THE($user)) } drains some of your blood!
 wf-hemophage-drain-animal = You choke back tepid mouthfuls of foul blood from { THE($target) }. The taste is absolutely vile.
+wf-hemophage-drain-foreign = You force down mouthfuls of { THE($target) }'s strange blood. Your tumor recoils at every drop.
 wf-hemophage-drain-person = You pull greedy gulps of precious lifeblood from { THE($target) }'s veins!
 wf-hemophage-drain-player = You pull greedy gulps of precious lifeblood from { THE($target) }'s veins! That tasted particularly good!
 wf-hemophage-drain-slaked = Your thirst is slaked for now; you can hold no more new blood.

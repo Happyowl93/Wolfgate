@@ -97,7 +97,7 @@ public sealed partial class WFHemophageSystem
         }
 
         if (!TryComp<BloodstreamComponent>(victim, out var victimBlood)
-            || victimBlood.BloodReagent != blood.BloodReagent
+            || victimBlood.BloodReagent != blood.BloodReagent && !rules.ForeignBloods.Contains(victimBlood.BloodReagent)
             || BloodOf(victim, victimBlood) <= FixedPoint2.Zero)
         {
             _popup.PopupEntity(Loc.GetString("wf-hemophage-drain-unsuitable", ("target", victim)), uid, uid, PopupType.SmallCaution);
@@ -118,7 +118,7 @@ public sealed partial class WFHemophageSystem
             return false;
         }
 
-        if (IsAnimal(rules, victim) && BloodOf(uid, blood) >= blood.BloodMaxVolume * rules.AnimalBloodCapRatio)
+        if (IsFoul(rules, victim, blood, victimBlood) && BloodOf(uid, blood) >= blood.BloodMaxVolume * rules.AnimalBloodCapRatio)
         {
             _popup.PopupEntity(Loc.GetString("wf-hemophage-drain-animal-full"), uid, uid, PopupType.SmallCaution);
             return false;
@@ -138,6 +138,12 @@ public sealed partial class WFHemophageSystem
     {
         return !TryComp<HumanoidAppearanceComponent>(victim, out var humanoid)
                || rules.LesserSpecies.Contains(humanoid.Species);
+    }
+
+    /// <summary>Blood the tumor takes but scorns: an animal's, or another species' own kind.</summary>
+    private bool IsFoul(WFHemophageComponent rules, EntityUid victim, BloodstreamComponent blood, BloodstreamComponent victimBlood)
+    {
+        return IsAnimal(rules, victim) || victimBlood.BloodReagent != blood.BloodReagent;
     }
 
     private void OnDrainDoAfter(Entity<WFHemophageDrainerComponent> ent, ref WFHemophageDrainDoAfterEvent args)
@@ -167,8 +173,9 @@ public sealed partial class WFHemophageSystem
         var hemophage = CompOrNull<WFHemophageComponent>(drinker);
         var normal = blood.BloodMaxVolume;
         var animal = IsAnimal(rules, victim);
-        var player = !animal && HasComp<ActorComponent>(victim);
-        var cap = FixedPoint2.Min(DrinkerMax(drinker, blood), animal ? normal * rules.AnimalBloodCapRatio : DrinkerMax(drinker, blood));
+        var foul = IsFoul(rules, victim, blood, victimBlood);
+        var player = !foul && HasComp<ActorComponent>(victim);
+        var cap = FixedPoint2.Min(DrinkerMax(drinker, blood), foul ? normal * rules.AnimalBloodCapRatio : DrinkerMax(drinker, blood));
         var bite = normal * rules.BiteRatio;
         var drained = FixedPoint2.Min(BloodOf(victim, victimBlood), FixedPoint2.Min(bite, cap - BloodOf(drinker, blood)));
         if (drained <= FixedPoint2.Zero)
@@ -187,6 +194,7 @@ public sealed partial class WFHemophageSystem
 
         _popup.PopupEntity(Loc.GetString("wf-hemophage-drain-victim", ("user", drinker)), victim, victim, PopupType.MediumCaution);
         var message = animal ? "wf-hemophage-drain-animal"
+            : foul ? "wf-hemophage-drain-foreign"
             : player ? "wf-hemophage-drain-player"
             : "wf-hemophage-drain-person";
         _popup.PopupEntity(Loc.GetString(message, ("target", victim)), drinker, drinker);
@@ -209,7 +217,7 @@ public sealed partial class WFHemophageSystem
             hemophage.Nausea *= hemophage.PlayerBloodNauseaMultiplier;
         }
 
-        if (animal && hemophage != null)
+        if (foul && hemophage != null)
             Sicken((drinker, hemophage), hemophage.VileNausea);
 
         var deathLine = victimNormal * rules.DeathRatio;

@@ -63,7 +63,17 @@ public sealed partial class WFHemophageComponent : Component
     [DataField]
     public HashSet<ProtoId<SpeciesPrototype>> LesserSpecies = new() { "Monkey", "Kobold" };
 
-    /// <summary>Animal blood can't fill a hemophage past this.</summary>
+    /// <summary>
+    /// Other species' blood the tumor will take, as foul as an animal's. Any other blood but the hemophage's own (sap,
+    /// slime, sugar, a machine's fluids) is refused.
+    /// </summary>
+    [DataField]
+    public HashSet<ProtoId<ReagentPrototype>> ForeignBloods = new()
+    {
+        "AmmoniaBlood", "CopperBlood", "InsectBlood", "AvaliBlood", "DarkBlood", "ShimmeringBlood", "GoblinBlood",
+    };
+
+    /// <summary>Animal and foreign blood can't fill a hemophage past this.</summary>
     [DataField] public float AnimalBloodCapRatio = 1f;
 
     /// <summary>Blood the tumor uses per second.</summary>

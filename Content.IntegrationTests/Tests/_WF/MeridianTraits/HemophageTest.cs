@@ -178,6 +178,16 @@ public sealed class HemophageTest
             Assert.That(hemophages.TryFeed(hemophage, monkey), Is.GreaterThan(FixedPoint2.Zero));
             Assert.That(comp.Nausea, Is.EqualTo(comp.VileNausea));
 
+            // Another species' blood is just as foul; sap isn't blood at all.
+            hemophages.RemoveBlood(full, hemophages.TotalBlood(full) - normal * 0.8f);
+            comp.Nausea = 0f;
+            var arachnid = entMan.SpawnEntity("MobArachnid", map.MapCoords);
+            Assert.That(hemophages.TryFeed(hemophage, arachnid), Is.GreaterThan(FixedPoint2.Zero), "Copper blood should feed.");
+            Assert.That(comp.Nausea, Is.EqualTo(comp.VileNausea), "Copper blood should sicken.");
+            Assert.That(hemophages.TotalBlood(full), Is.LessThanOrEqualTo(normal * comp.AnimalBloodCapRatio), "Foreign blood caps like an animal's.");
+            var diona = entMan.SpawnEntity("MobDiona", map.MapCoords);
+            Assert.That(hemophages.TryFeed(hemophage, diona), Is.EqualTo(FixedPoint2.Zero), "Sap should be refused.");
+
             // Out of blood, the tumor starves its host to death.
             hemophages.RemoveBlood(full, hemophages.TotalBlood(full) - normal * 0.1f);
         });
