@@ -368,8 +368,8 @@
   hullSwaps:
     WFWallDurasteel: WallPlastitanium
     WFWallDurasteelDiagonal: WallPlastitaniumDiagonal
-    WFWallDurasteelCapital: WallPlastitanium
-    WFWallDurasteelDiagonalCapital: WallPlastitaniumDiagonal
+    WFWallDurasteelCapital: WallPlastitaniumCapital
+    WFWallDurasteelDiagonalCapital: WallPlastitaniumDiagonalCapital
   components:
   - type: PirateAccent
   - type: WFCrewSuitUp

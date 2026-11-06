@@ -45,7 +45,7 @@ public sealed partial class WFCrewTest
             var plain = FindAnchored(map, deck, gridComp, new Vector2i(2, 2));
             var corner = FindAnchored(map, deck, gridComp, new Vector2i(4, 2));
             Assert.That(plain, Is.EqualTo("WallPlastitanium"), "The straight wall is plastitanium.");
-            Assert.That(corner, Is.EqualTo("WallPlastitaniumDiagonal"), "The diagonal keeps its shape.");
+            Assert.That(corner, Is.EqualTo("WallPlastitaniumDiagonalCapital"), "The reinforced diagonal stays reinforced and keeps its shape.");
             var rotated = map.GetAnchoredEntities(deck, gridComp, new Vector2i(4, 2));
             foreach (var part in rotated)
             {

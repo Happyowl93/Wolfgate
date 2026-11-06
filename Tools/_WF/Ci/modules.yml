@@ -2254,6 +2254,51 @@ unmarked:
   - path: Resources/SharedMaps/_Mono/Shuttles/Civilian/guppy.yml
     module: Shipyard
     reason: Saved with its air filled in; the starter ship spawned as vacuum.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/inertia.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/mock.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/MotleyAnne/snakelet.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/bazalt.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/europa.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/gadfly.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_em.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/kortik_r.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/kresta.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/kynda.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/neptune.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/ontos.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/osa.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/scorpion.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
+  - path: Resources/SharedMaps/_Mono/Shuttles/PDV/tethys.yml
+    module: null
+    reason: PDV pack hull, back to Monolith's plastitanium walls after the adamantite refit was reverted.
   - path: Resources/SharedMaps/_Mono/Shuttles/Civilian/caracara.yml
     module: null
     reason: PDV pack, top-left thruster was mapped disabled.
