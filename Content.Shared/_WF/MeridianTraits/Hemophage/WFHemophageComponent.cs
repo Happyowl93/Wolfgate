@@ -76,8 +76,8 @@ public sealed partial class WFHemophageComponent : Component
     /// <summary>Animal and foreign blood can't fill a hemophage past this.</summary>
     [DataField] public float AnimalBloodCapRatio = 1f;
 
-    /// <summary>Blood the tumor uses per second.</summary>
-    [DataField] public float DrainPerSecond = 0.05f / 560f;
+    /// <summary>Blood the tumor uses per second: a full reserve runs down to the death line in two hours.</summary>
+    [DataField] public float DrainPerSecond = (1000f - 112f) / 560f / 7200f;
 
     [DataField] public float DormantDrainDivisor = 10f;
 
