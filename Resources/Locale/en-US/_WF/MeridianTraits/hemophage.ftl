@@ -90,6 +90,7 @@ wf-hemophage-drain-garlic-victim = { CAPITALIZE(THE($user)) } tries to bite you,
 wf-hemophage-drain-garlic = { CAPITALIZE(THE($target)) } reeks of garlic! You can't bring yourself to drain such tainted blood.
 wf-hemophage-drain-animal-full = Their inferior blood can't sate you any further!
 wf-hemophage-drain-stopped = You stop feeding.
+wf-hemophage-drain-held = { CAPITALIZE(THE($user)) } sinks their teeth into you! You're held fast!
 wf-hemophage-drain-victim = { CAPITALIZE(THE($user)) } drains some of your blood!
 wf-hemophage-drain-animal = You choke back tepid mouthfuls of foul blood from { THE($target) }. The taste is absolutely vile.
 wf-hemophage-drain-foreign = You force down mouthfuls of { THE($target) }'s strange blood. Your tumor recoils at every drop.

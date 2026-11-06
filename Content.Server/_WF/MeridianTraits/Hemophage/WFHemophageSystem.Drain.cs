@@ -18,8 +18,12 @@ namespace Content.Server._WF.MeridianTraits.Hemophage;
 public sealed partial class WFHemophageSystem
 {
     [Dependency] private AudioSystem _audio = default!;
+    [Dependency] private WFBeingDrainedSystem _held = default!;
 
     private static readonly SoundSpecifier DrinkSound = new SoundPathSpecifier("/Audio/Items/drink.ogg");
+
+    /// <summary>How long past the bite the victim's hold lasts if the bite never reports its end.</summary>
+    private static readonly TimeSpan HoldGrace = TimeSpan.FromSeconds(1);
 
     /// <summary>Feeding rules for a body that has a corrupted tongue but no tumor of its own.</summary>
     private static readonly WFHemophageComponent DrainDefaults = new();
@@ -61,13 +65,18 @@ public sealed partial class WFHemophageSystem
             return;
 
         args.Handled = true;
-        var doAfter = new DoAfterArgs(EntityManager, ent, Rules(ent).BiteTime, new WFHemophageDrainDoAfterEvent(), ent, target: victim)
+        var biteTime = Rules(ent).BiteTime;
+        var doAfter = new DoAfterArgs(EntityManager, ent, biteTime, new WFHemophageDrainDoAfterEvent(), ent, target: victim)
         {
             BreakOnMove = true,
             BreakOnDamage = true,
             NeedHand = false,
         };
-        _doAfter.TryStartDoAfter(doAfter);
+        if (!_doAfter.TryStartDoAfter(doAfter))
+            return;
+
+        _held.Hold(victim, ent, biteTime + HoldGrace);
+        _popup.PopupEntity(Loc.GetString("wf-hemophage-drain-held", ("user", ent)), victim, victim, PopupType.MediumCaution);
     }
 
     private WFHemophageComponent Rules(EntityUid drinker) => CompOrNull<WFHemophageComponent>(drinker) ?? DrainDefaults;
@@ -148,6 +157,9 @@ public sealed partial class WFHemophageSystem
 
     private void OnDrainDoAfter(Entity<WFHemophageDrainerComponent> ent, ref WFHemophageDrainDoAfterEvent args)
     {
+        if (args.Target is { } held)
+            _held.Release(held, ent);
+
         if (args.Cancelled)
         {
             _popup.PopupEntity(Loc.GetString("wf-hemophage-drain-stopped"), ent, ent);

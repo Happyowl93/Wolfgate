@@ -30,7 +30,8 @@ gives the exact amount. Mail sometimes brings a hemophage four blood packs (`WFM
 `MailSystem`), as Meridian's quirk mail goodie does.
 
 Actions: Drain Victim, granted by a corrupted tongue (`WFHemophageDrainerComponent`), so it goes with the tongue: a
-3 s bite from a living body being pulled, refused for chaplains, garlic eaters and blood that isn't blood (sap,
+3 s bite from a living body being pulled, during which the victim can't move, break free, interact, attack, shoot or
+throw (`WFBeingDrainedSystem`, shared so the victim's client predicts it), refused for chaplains, garlic eaters and blood that isn't blood (sap,
 slime, sugar, a machine's fluids); animal blood (monkeys and kobolds included) and other species' blood
 (`ForeignBloods`: ammonia, copper, insect and the like) is foul, caps at normal, never satisfies and sickens; a player's blood is worth more and satiates the tumor for 30 minutes. Dormant State (a tenth
 of the blood use, but slow, three times the brute, burn and toxin damage, 1.5 times the stamina damage through a
@@ -73,6 +74,8 @@ to. Peanut butter in the blood cake is sugar here.
 ### Shared
 
 - [`Content.Shared/_WF/MeridianTraits/Hemophage/SharedWFHemophageSystem.cs`](../../../Content.Shared/_WF/MeridianTraits/Hemophage/SharedWFHemophageSystem.cs)
+- [`Content.Shared/_WF/MeridianTraits/Hemophage/WFBeingDrainedComponent.cs`](../../../Content.Shared/_WF/MeridianTraits/Hemophage/WFBeingDrainedComponent.cs)
+- [`Content.Shared/_WF/MeridianTraits/Hemophage/WFBeingDrainedSystem.cs`](../../../Content.Shared/_WF/MeridianTraits/Hemophage/WFBeingDrainedSystem.cs)
 - [`Content.Shared/_WF/MeridianTraits/Hemophage/WFHemophageComponent.cs`](../../../Content.Shared/_WF/MeridianTraits/Hemophage/WFHemophageComponent.cs)
 - [`Content.Shared/_WF/MeridianTraits/Hemophage/WFHemophageEvents.cs`](../../../Content.Shared/_WF/MeridianTraits/Hemophage/WFHemophageEvents.cs)
 - [`Content.Shared/_WF/MeridianTraits/Hemophage/WFHemophageTumorComponent.cs`](../../../Content.Shared/_WF/MeridianTraits/Hemophage/WFHemophageTumorComponent.cs)

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Content.Server._WF.MeridianTraits;
 using Content.Shared._Onyx.Wounds;
+using Content.Shared.ActionBlocker;
 using Content.Shared.Actions;
+using Content.Shared.Movement.Pulling.Components;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Movement.Pulling.Systems;
@@ -219,6 +221,7 @@ public sealed class HemophageTest
         var pulling = entMan.System<PullingSystem>();
         var stamina = entMan.System<StaminaSystem>();
         var wounds = entMan.System<WoundSystem>();
+        var blocker = entMan.System<ActionBlockerSystem>();
         var map = await WolfmedGameTest.CreateTestMap(pair);
 
         EntityUid hemophage = default, victim = default, control = default;
@@ -258,6 +261,14 @@ public sealed class HemophageTest
             var drain = new WFHemophageDrainActionEvent { Performer = hemophage };
             entMan.EventBus.RaiseLocalEvent(hemophage, drain);
             Assert.That(drain.Handled, "Draining a pulled living victim should start.");
+
+            // The victim is held fast for the bite.
+            Assert.That(entMan.HasComponent<WFBeingDrainedComponent>(victim));
+            Assert.That(blocker.CanMove(victim), Is.False, "A bitten victim can't walk out of the grab.");
+            Assert.That(blocker.CanInteract(victim, null), Is.False, "A bitten victim can't let go of the pull.");
+            Assert.That(blocker.CanAttack(victim, hemophage), Is.False, "A bitten victim can't fight back.");
+            Assert.That(pulling.TryStopPull(victim, entMan.GetComponent<PullableComponent>(victim), victim), Is.False);
+            Assert.That(blocker.CanAttack(control, hemophage), "Bystanders can still attack.");
         });
 
         await pair.RunSeconds(4);
@@ -266,6 +277,8 @@ public sealed class HemophageTest
         {
             var victimNow = hemophages.BloodOf(victim, entMan.GetComponent<BloodstreamComponent>(victim));
             Assert.That(victimNow, Is.LessThan(victimBefore), "The bite should take the victim's blood.");
+            Assert.That(entMan.HasComponent<WFBeingDrainedComponent>(victim), Is.False, "The hold ends with the bite.");
+            Assert.That(blocker.CanMove(victim), "The victim can move again after the bite.");
             Assert.That(hemophages.TotalBlood((hemophage, comp, blood)), Is.GreaterThan(before));
 
             // Dormant state through its action and do-after.
