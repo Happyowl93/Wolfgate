@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Server._WF.Wolfmed.Stasis;
 using Content.Server.Body.Components;
 using Content.Shared._Onyx.Wounds;
 using Content.Shared._Shitmed.Body.Components;
@@ -22,6 +23,8 @@ public sealed partial class WFHemophageSystem
     [Dependency] private DamageableSystem _damageable = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private MetaDataSystem _metaData = default!;
+    [Dependency] private WolfmedStasisSystem _stasis = default!;
+    [Dependency] private WoundDamageRoutingSystem _routing = default!;
     [Dependency] private WoundBleedingSystem _bleeding = default!;
     [Dependency] private WoundSystem _wounds = default!;
 
@@ -257,6 +260,10 @@ public sealed partial class WFHemophageSystem
                + damageable.DamagePerGroup.GetValueOrDefault(Burn).Float();
     }
 
+    /// <summary>
+    /// One tick of regeneration, as Avali stasis heals: stored damage thinned and wounds closed at topical strength from
+    /// the same budget, so the wounds a hit left close with its damage instead of outlasting it.
+    /// </summary>
     private void TickRegen(Entity<WFHemophageComponent, BloodstreamComponent> ent, float seconds)
     {
         var (uid, comp, blood) = ent;
@@ -268,9 +275,6 @@ public sealed partial class WFHemophageSystem
             return;
         }
 
-        if (before <= 0f)
-            return;
-
         if (!TryComp<DamageableComponent>(uid, out var damageable))
             return;
 
@@ -278,14 +282,24 @@ public sealed partial class WFHemophageSystem
         var heal = new DamageSpecifier();
         AddGroupHeal(heal, damageable, Brute, amount);
         AddGroupHeal(heal, damageable, Burn, amount);
-        if (heal.Empty)
-            return;
+        if (!heal.Empty && !_routing.TryApplyDamage(uid, heal, origin: uid, ignoreResistances: true, healWounds: false))
+            _damageable.TryChangeDamage(uid, heal, ignoreResistances: true, interruptsDoAfters: false);
 
-        _damageable.TryChangeDamage(uid, heal, ignoreResistances: true, interruptsDoAfters: false);
+        var closed = CloseGroupWounds(uid, Brute, amount) + CloseGroupWounds(uid, Burn, amount);
+        var healed = FixedPoint2.Max(FixedPoint2.New(before - BruteBurn(uid)), closed);
+        if (healed > FixedPoint2.Zero)
+            RemoveBlood(ent, blood.BloodMaxVolume * comp.HealCostRatio * healed.Float());
+    }
 
-        var healed = before - BruteBurn(uid);
-        if (healed > 0f)
-            RemoveBlood(ent, blood.BloodMaxVolume * comp.HealCostRatio * healed);
+    /// <summary>Spends <paramref name="budget"/> closing the body's wounds of the group's types.</summary>
+    /// <returns>The budget spent.</returns>
+    private FixedPoint2 CloseGroupWounds(EntityUid uid, ProtoId<DamageGroupPrototype> groupId, FixedPoint2 budget)
+    {
+        var left = budget;
+        foreach (var type in _proto.Index(groupId).DamageTypes)
+            left = _stasis.CloseWounds(uid, type, left);
+
+        return budget - left;
     }
 
     /// <summary>

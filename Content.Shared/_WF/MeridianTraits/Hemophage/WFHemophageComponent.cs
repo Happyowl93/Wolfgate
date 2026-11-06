@@ -92,8 +92,11 @@ public sealed partial class WFHemophageComponent : Component
 
     [DataField] public float ClotCostRatio = 50f / 560f;
 
-    /// <summary>Brute and burn each healed per second by Hemokinetic Regeneration.</summary>
-    [DataField] public float RegenPerSecond = 1.8f;
+    /// <summary>
+    /// Brute and burn each healed per second by Hemokinetic Regeneration, and wound severity of each closed. A quarter
+    /// of Avali stasis's 2 a type, as it works on the move and has no time limit.
+    /// </summary>
+    [DataField] public float RegenPerSecond = 0.5f;
 
     /// <summary>Hemokinetic Regeneration stops at this much brute and burn together.</summary>
     [DataField] public float RegenDamageLimit = 50f;

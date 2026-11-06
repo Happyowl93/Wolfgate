@@ -208,6 +208,7 @@ public sealed class HemophageTest
         var damageable = entMan.System<DamageableSystem>();
         var pulling = entMan.System<PullingSystem>();
         var stamina = entMan.System<StaminaSystem>();
+        var wounds = entMan.System<WoundSystem>();
         var map = await WolfmedGameTest.CreateTestMap(pair);
 
         EntityUid hemophage = default, victim = default, control = default;
@@ -224,7 +225,7 @@ public sealed class HemophageTest
         WFHemophageComponent comp = default!;
         BloodstreamComponent blood = default!;
         WFHemophageDrainerComponent drainer = default!;
-        FixedPoint2 victimBefore = default, before = default;
+        FixedPoint2 victimBefore = default, before = default, bruise = default;
         await server.WaitAssertion(() =>
         {
             comp = entMan.GetComponent<WFHemophageComponent>(hemophage);
@@ -291,6 +292,8 @@ public sealed class HemophageTest
             entMan.EventBus.RaiseLocalEvent(hemophage, new WFHemophageRegenActionEvent { Performer = hemophage });
             Assert.That(comp.Regenerating);
             before = hemophages.TotalBlood((hemophage, comp, blood));
+            bruise = WoundSeverity(body, wounds, hemophage);
+            Assert.That(bruise, Is.GreaterThan(FixedPoint2.Zero), "The blow should leave a wound.");
         });
 
         await pair.RunSeconds(4);
@@ -301,6 +304,9 @@ public sealed class HemophageTest
             // Three ticks at least, all of it on the one damaged type.
             Assert.That(brute.Float(), Is.LessThanOrEqualTo(20f - comp.RegenPerSecond * 3f + 0.01f), "Regeneration should heal its full rate.");
             Assert.That(hemophages.TotalBlood((hemophage, comp, blood)), Is.LessThan(before), "Healing costs blood.");
+            Assert.That(WoundSeverity(body, wounds, hemophage).Float(),
+                Is.LessThanOrEqualTo(FixedPoint2.Max(FixedPoint2.Zero, bruise - comp.RegenPerSecond * 3f).Float() + 0.01f),
+                "Regeneration should close wounds at its full rate, not only what damage removal does.");
             entMan.EventBus.RaiseLocalEvent(hemophage, new WFHemophageRegenActionEvent { Performer = hemophage });
             Assert.That(comp.Regenerating, Is.False);
 
@@ -332,6 +338,18 @@ public sealed class HemophageTest
         });
 
         await pair.CleanReturnAsync();
+    }
+
+    private static FixedPoint2 WoundSeverity(SharedBodySystem body, WoundSystem wounds, EntityUid uid)
+    {
+        var total = FixedPoint2.Zero;
+        foreach (var (part, _) in body.GetBodyChildren(uid))
+        {
+            foreach (var wound in wounds.GetWounds(part))
+                total += wound.Comp.Severity;
+        }
+
+        return total;
     }
 
     private static void FillStomach(IEntityManager entMan, SharedBodySystem body, SharedSolutionContainerSystem solutions, EntityUid uid)
