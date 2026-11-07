@@ -66,6 +66,10 @@ tab's `WFBeaconJumpPanel` and the sector map window's Region view. Design: [desi
 
 - [`Resources/Locale/en-US/_WF/SectorTravel/sector-travel.ftl`](../../../Resources/Locale/en-US/_WF/SectorTravel/sector-travel.ftl)
 
+### Textures
+
+- [`Resources/Textures/_WF/SectorTravel/jump_beacon.rsi/`](../../../Resources/Textures/_WF/SectorTravel/jump_beacon.rsi/)
+
 ### Docs
 
 - [`Docs/_WF/SectorTravel/design.md`](../../../Docs/_WF/SectorTravel/design.md)

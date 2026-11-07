@@ -12,12 +12,13 @@
   - type: Clickable
   - type: InteractionOutline
   - type: Sprite
-    sprite: _Mono/Structures/Machines/beacon.rsi
-    scale: 3,3
+    sprite: _WF/SectorTravel/jump_beacon.rsi
+    # Lifts the art so the plinth, not the crystal, sits on the collision circle.
+    offset: 0,0.3
     drawdepth: Mobs
     layers:
-    - state: beacon
-    - state: beacon_lights_active
+    - state: base
+    - state: lights
       shader: unshaded
   - type: PointLight
     radius: 12
