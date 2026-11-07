@@ -1,0 +1,36 @@
+# Errant, the grey world at True Sight's centre: bare airless rock, space cold. Drawn in True Sight's space only;
+# it has no surface yet.
+- type: planetType
+  id: WFPlanetErrant
+  name: Errant
+  shader: RockyPlanet
+  earthMass: 0.6
+  rotation: 1.3
+  palette: WFPaletteErrant
+  customData:
+    floats:
+      terrainScale: 1.2
+      macroFrequency: 3.0
+      macroAmplitude: 0.6
+      ridgeFrequency: 1.4
+      ridgeAmplitude: 6.0
+      detailFrequency: 9.0
+      detailAmplitude: 0.35
+      polarCapColor: 0.875
+      polarCapCoverage: 0.0
+
+- type: planetPalette
+  id: WFPaletteErrant
+  color1: '#4A4A4F'
+  color2: '#26262A'
+  color3: '#8C8C92'
+  color4: '#D2D2D8'
+
+# The light Errant is seen by: the halo's cold glow, from far off. Only its colour and brightness are used; it is
+# never drawn.
+- type: starType
+  id: WFStarTrueSightHalo
+  name: True Sight Halo
+  shader: MainSequenceStar
+  solarMass: 0.8
+  color: '#C4D6FF'

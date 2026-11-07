@@ -5,6 +5,7 @@ using Content.Server._NF.GameRule;
 using Content.Server._NF.GameTicking.Events;
 using Content.Server._NF.Trade;
 using Content.Server._WF.Encounters.Systems;
+using Content.Server._WF.Lattice;
 using Content.Server._WF.Planets;
 using Content.Server._WF.SectorTravel.Components;
 using Content.Server._WF.TradeGoods.Components;
@@ -12,6 +13,7 @@ using Content.Server.GameTicking;
 using Content.Server.Shuttles.Events;
 using Content.Server.Station.Systems;
 using Content.Server.Worldgen.Prototypes;
+using Content.Shared._FarHorizons.StarSystem.Helpers;
 using Content.Shared._WF.Planets;
 using Content.Shared._WF.SectorTravel;
 using Content.Shared.CCVar;
@@ -20,6 +22,7 @@ using Content.Shared.Ghost;
 using Content.Shared.Parallax;
 using Content.Server.Salvage.Expeditions;
 using Content.Shared.Tiles;
+using Robust.Server.GameStates;
 using Robust.Shared.Configuration;
 using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.Map;
@@ -48,6 +51,8 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
     [Dependency] private ISerializationManager _serialization = default!;
     [Dependency] private GameTicker _ticker = default!;
     [Dependency] private MapLoaderSystem _mapLoader = default!;
+    [Dependency] private WFLatticeSystem _lattice = default!;
+    [Dependency] private PvsOverrideSystem _pvsOverride = default!;
     [Dependency] private MetaDataSystem _meta = default!;
     [Dependency] private PointOfInterestSystem _poi = default!;
     [Dependency] private SharedMapSystem _maps = default!;
@@ -141,15 +146,23 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
         }
     }
 
-    /// <summary>Makes a sector's map, lit and backed like the home sector's, with its asteroids.</summary>
+    /// <summary>Makes a sector's map, lit like the home sector's, under its own sky or the home's, with its asteroids.</summary>
     private void LoadSector(WFSectorPrototype sector, EntityUid home)
     {
         var mapUid = _maps.CreateMap(out _);
         _meta.SetEntityName(mapUid, Loc.GetString(sector.Name));
         Stamp(mapUid, sector.ID, true);
         EnsureComp<WFTradeMarketMapComponent>(mapUid);
-        if (TryComp<ParallaxComponent>(home, out var parallax))
+        if (sector.Parallax is { } sky)
+        {
+            var own = EnsureComp<ParallaxComponent>(mapUid);
+            own.Parallax = sky;
+            Dirty(mapUid, own);
+        }
+        else if (TryComp<ParallaxComponent>(home, out var parallax))
+        {
             EntityManager.CopyComponent(home, mapUid, parallax);
+        }
         if (TryComp<MapLightComponent>(home, out var light))
             EntityManager.CopyComponent(home, mapUid, light);
 
@@ -157,8 +170,26 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
             && _proto.TryIndex<WorldgenConfigPrototype>(_cfg.GetCVar(CCVars.WorldgenConfig), out var worldgen))
             worldgen.Apply(mapUid, _serialization, EntityManager);
 
+        // After worldgen, so the field's bands follow the drone rings it set up.
+        if (sector.Lattice is { } lattice)
+            _lattice.Setup(mapUid, lattice);
+
+        SpawnWorlds(sector, mapUid);
+
         _sectorMaps[sector.ID] = mapUid;
         Log.Info($"Loaded sector {sector.ID} on {ToPrettyString(mapUid)}");
+    }
+
+    /// <summary>A named marker for each of the sector's worlds, for warps and radar; clients draw the world itself.</summary>
+    private void SpawnWorlds(WFSectorPrototype sector, EntityUid mapUid)
+    {
+        var mapId = Transform(mapUid).MapID;
+        foreach (var world in sector.Worlds)
+        {
+            var marker = Spawn(Planet.PLANET_ENTITY, new MapCoordinates(world.Position, mapId));
+            _meta.SetEntityName(marker, Loc.GetString(world.Name));
+            _pvsOverride.AddGlobalOverride(marker);
+        }
     }
 
     private void SpawnPois(WFSectorPrototype sector, EntityUid mapUid)

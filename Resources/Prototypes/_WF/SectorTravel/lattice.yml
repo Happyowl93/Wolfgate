@@ -1,0 +1,6 @@
+# True Sight's Lattice: the default field held by a single anchor beside Errant, not a hexagon.
+- type: wfLatticeProfile
+  id: WFTrueSight
+  parent: WFDefault
+  anchorCount: 1
+  anchorRadius: 1500

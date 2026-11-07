@@ -1,0 +1,11 @@
+# True Sight's sky: no stars, only a blue halo round an empty void, drifting slowly with the view.
+- type: parallax
+  id: WFTrueSight
+  layers:
+  - texture:
+      !type:ImageParallaxTextureSource
+      path: "/Textures/_WF/SectorTravel/Parallaxes/true_sight_halo.png"
+    slowness: 0.998046875
+    scale: "1, 1"
+    tiled: false
+  layersLQUseHQ: true

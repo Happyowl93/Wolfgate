@@ -19,10 +19,12 @@ using Content.Server.Power.Components;
 using Content.Server.Power.EntitySystems;
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Systems;
+using Content.Shared._WF.Lattice;
 using Content.Shared._WF.SectorControl;
 using Content.Shared._WF.SectorTravel;
 using Content.Shared._WF.TradeGoods;
 using Content.Shared.Interaction;
+using Content.Shared.Parallax;
 using Content.Shared.Shuttles.Components;
 using Content.Shared.Shuttles.Systems;
 using Robust.Shared.Configuration;
@@ -164,6 +166,7 @@ public sealed class WFSectorTravelTest
             Assert.That(farMap, Is.Not.Null, "Far Reach should be loaded.");
             Assert.That(sectors.SectorOf(map.MapUid), Is.EqualTo(Home));
             Assert.That(sectors.SectorOf(farMap), Is.EqualTo(Far));
+            Assert.That(entMan.GetComponent<ParallaxComponent>(farMap!.Value).Parallax, Is.EqualTo("WFTrueSight"), "A sector with its own sky gets it.");
 
             var ship = Ship(entMan, map, new MapCoordinates(new Vector2(-2000f, 0f), map.MapId));
             var shuttles = entMan.System<SharedShuttleSystem>();
@@ -211,6 +214,45 @@ public sealed class WFSectorTravelTest
             }
 
             Assert.That(platforms, Is.EqualTo(2));
+        });
+
+        await server.WaitPost(() => UnloadRegion(entMan, map, oldDefault));
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>True Sight sets up its own Lattice, held by one anchor near the centre, with Errant marked at the centre.</summary>
+    [Test]
+    public async Task TrueSightHasOneAnchorAndErrant()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var oldDefault = MapId.Nullspace;
+
+        await server.WaitAssertion(() =>
+        {
+            oldDefault = LoadRegion(entMan, map);
+            var farMap = entMan.System<WFSectorTravelSystem>().MapOf(Far)!.Value;
+            Assert.That(entMan.GetComponent<WFLatticeFieldComponent>(farMap).Profile, Is.EqualTo("WFTrueSight"));
+
+            var xforms = entMan.System<SharedTransformSystem>();
+            var anchors = new List<System.Numerics.Vector2>();
+            var query = entMan.EntityQueryEnumerator<WFLatticeAnchorComponent, TransformComponent>();
+            while (query.MoveNext(out var uid, out var anchor, out var xform))
+            {
+                if (anchor.Primary && xform.MapUid == farMap)
+                    anchors.Add(xforms.GetWorldPosition(uid));
+            }
+
+            Assert.That(anchors, Has.Count.EqualTo(1), "True Sight has a single primary anchor.");
+            Assert.That(anchors[0].Length(), Is.LessThan(2500f), "Its anchor stands near the centre.");
+
+            var errant = entMan.EntityQuery<MetaDataComponent>()
+                .Where(meta => meta.EntityName == "Errant" && entMan.GetComponent<TransformComponent>(meta.Owner).MapUid == farMap)
+                .ToList();
+            Assert.That(errant, Has.Count.EqualTo(1));
+            Assert.That(xforms.GetWorldPosition(errant[0].Owner).Length(), Is.LessThan(1f), "Errant is at the centre.");
         });
 
         await server.WaitPost(() => UnloadRegion(entMan, map, oldDefault));

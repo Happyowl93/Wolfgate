@@ -1,4 +1,6 @@
 using System.Numerics;
+using Content.Shared._FarHorizons.StarSystem.Prototypes;
+using Content.Shared._WF.Lattice;
 using Content.Shared._WF.SectorControl;
 using Robust.Shared.Prototypes;
 
@@ -30,9 +32,45 @@ public sealed partial class WFSectorPrototype : IPrototype
     [DataField]
     public bool Worldgen = true;
 
+    /// <summary>The parallax prototype for the sector's sky; null copies the home sector's.</summary>
+    [DataField]
+    public string? Parallax;
+
+    /// <summary>The Lattice profile set up on the sector's map; null leaves it to the Lattice's default.</summary>
+    [DataField]
+    public ProtoId<WFLatticeProfilePrototype>? Lattice;
+
+    /// <summary>Worlds drawn in the sector's space, each with a marker for warps and radar. They have no surface.</summary>
+    [DataField]
+    public List<WFSectorWorld> Worlds = new();
+
     /// <summary>The sector's jump beacons, one per linked sector.</summary>
     [DataField]
     public List<WFSectorBeacon> Beacons = new();
+}
+
+/// <summary>A world seen from a sector's space: drawn by the star system planet shader, lit from a far, unseen light.</summary>
+[DataDefinition]
+public sealed partial class WFSectorWorld
+{
+    [DataField(required: true)]
+    public ProtoId<PlanetTypePrototype> Planet;
+
+    /// <summary>The world's name on radar and in the warp list.</summary>
+    [DataField(required: true)]
+    public LocId Name;
+
+    /// <summary>Where the world sits, in metres from the map's centre.</summary>
+    [DataField]
+    public Vector2 Position;
+
+    /// <summary>The star type whose colour and brightness light the world; it is not drawn.</summary>
+    [DataField(required: true)]
+    public ProtoId<StarTypePrototype> Light;
+
+    /// <summary>Where the light comes from, in metres from the map's centre.</summary>
+    [DataField]
+    public Vector2 LightPosition = new(-40000f, 30000f);
 }
 
 /// <summary>A point of interest a sector loads at round start.</summary>

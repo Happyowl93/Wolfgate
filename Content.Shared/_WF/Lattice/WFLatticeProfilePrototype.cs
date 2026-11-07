@@ -1,15 +1,22 @@
 using Content.Shared._WF.Announcements;
 using System.Numerics;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype.Array;
 
 namespace Content.Shared._WF.Lattice;
 
 /// <summary>How a sector's Lattice is laid out and what each band of its field does.</summary>
 [Prototype("wfLatticeProfile")]
-public sealed partial class WFLatticeProfilePrototype : IPrototype
+public sealed partial class WFLatticeProfilePrototype : IPrototype, IInheritingPrototype
 {
     [IdDataField]
     public string ID { get; private set; } = default!;
+
+    [ParentDataField(typeof(AbstractPrototypeIdArraySerializer<WFLatticeProfilePrototype>))]
+    public string[]? Parents { get; private set; }
+
+    [AbstractDataField]
+    public bool Abstract { get; private set; }
 
     /// <summary>Primary anchors spawned on a sector map that has none, at the corners of a regular polygon.</summary>
     [DataField]

@@ -47,6 +47,8 @@ tab's `WFBeaconJumpPanel` and the sector map window's Region view. Design: [desi
 - [`Content.Client/_WF/SectorTravel/WFBeaconJumpPanel.cs`](../../../Content.Client/_WF/SectorTravel/WFBeaconJumpPanel.cs)
 - [`Content.Client/_WF/SectorTravel/WFRegionClientSystem.cs`](../../../Content.Client/_WF/SectorTravel/WFRegionClientSystem.cs)
 - [`Content.Client/_WF/SectorTravel/WFRegionMapControl.cs`](../../../Content.Client/_WF/SectorTravel/WFRegionMapControl.cs)
+- [`Content.Client/_WF/SectorTravel/WFSectorWorldOverlay.cs`](../../../Content.Client/_WF/SectorTravel/WFSectorWorldOverlay.cs)
+- [`Content.Client/_WF/SectorTravel/WFSectorWorldSystem.cs`](../../../Content.Client/_WF/SectorTravel/WFSectorWorldSystem.cs)
 
 ### Integration tests
 
@@ -60,6 +62,9 @@ tab's `WFBeaconJumpPanel` and the sector map window's Region view. Design: [desi
 ### Prototypes
 
 - [`Resources/Prototypes/_WF/SectorTravel/entities.yml`](../../../Resources/Prototypes/_WF/SectorTravel/entities.yml)
+- [`Resources/Prototypes/_WF/SectorTravel/errant.yml`](../../../Resources/Prototypes/_WF/SectorTravel/errant.yml)
+- [`Resources/Prototypes/_WF/SectorTravel/lattice.yml`](../../../Resources/Prototypes/_WF/SectorTravel/lattice.yml)
+- [`Resources/Prototypes/_WF/SectorTravel/parallax.yml`](../../../Resources/Prototypes/_WF/SectorTravel/parallax.yml)
 - [`Resources/Prototypes/_WF/SectorTravel/sectors.yml`](../../../Resources/Prototypes/_WF/SectorTravel/sectors.yml)
 
 ### Localization
@@ -69,6 +74,9 @@ tab's `WFBeaconJumpPanel` and the sector map window's Region view. Design: [desi
 ### Textures
 
 - [`Resources/Textures/_WF/SectorTravel/jump_beacon.rsi/`](../../../Resources/Textures/_WF/SectorTravel/jump_beacon.rsi/)
+- [`Resources/Textures/_WF/SectorTravel/Parallaxes/attributions.yml`](../../../Resources/Textures/_WF/SectorTravel/Parallaxes/attributions.yml)
+- [`Resources/Textures/_WF/SectorTravel/Parallaxes/true_sight_halo.png`](../../../Resources/Textures/_WF/SectorTravel/Parallaxes/true_sight_halo.png)
+- [`Resources/Textures/_WF/SectorTravel/Parallaxes/true_sight_halo.png.yml`](../../../Resources/Textures/_WF/SectorTravel/Parallaxes/true_sight_halo.png.yml)
 
 ### Maps
 

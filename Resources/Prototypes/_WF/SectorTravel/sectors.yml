@@ -15,6 +15,12 @@
   id: WFSectorFarReach
   name: wf-sector-far-reach
   galaxyPosition: 1.5,0.5
+  parallax: WFTrueSight
+  lattice: WFTrueSight
+  worlds:
+  - planet: WFPlanetErrant
+    name: wf-sector-world-errant
+    light: WFStarTrueSightHalo
   beacons:
   - link: WFSectorCore
     position: -7000,0
