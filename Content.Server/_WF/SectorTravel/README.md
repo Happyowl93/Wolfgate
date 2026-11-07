@@ -1,17 +1,17 @@
 # SectorTravel
 
 Splits the region into sector maps, each kept small enough to avoid floating-point error, joined only by jump beacons.
-A ship inside a beacon's zone spools from the helm's MAP tab and jumps to the linked sector, spending jump fuel from its
+A ship inside a beacon's zone spools from the helm's STRATEGIC tab and jumps to the linked sector, spending jump fuel from its
 FTL drive. Jump fuel is Fusion Fuel: bought through the same panel while docked at a station that sells it, or loaded as
 crates into a fuel intake (or the drive). Normal FTL never leaves its own sector. The spool breaks if the ship leaves the
-zone, takes hull damage or comes near a jump interdictor. NPC freight runs can end in a linked sector and cross the
-beacon too. A faction holding a beacon's cell closes the link, which blockades every station in a sector cut off from
+zone, takes hull damage or comes near a jump interdictor. NPC freight runs can end in a linked sector; any NPC crew
+whose dock, escort or follow target is over there queues a Cross order and jumps from the beacon too. A faction holding a beacon's cell closes the link, which blockades every station in a sector cut off from
 home; raiders named on a beacon move on its cell from time to time. Crates sold in another sector than they were bought
 in pay a bonus per link. Admins use `wf_region`.
 
-Entry points: `WFSectorTravelSystem` (round setup, `SectorOf`, `TryTransit`, region state, raids, freight crossings,
+Entry points: `WFSectorTravelSystem` (round setup, `SectorOf`, `TryTransit`, region state, raids, NPC crossings,
 haul bonus), `WFJumpBeaconSystem` (zones, spools, interdiction, lockout), `WFJumpFuelSystem` (tanks, intake, fuel
-service), the `wfSector` prototypes in `Resources/Prototypes/_WF/SectorTravel/sectors.yml`, and on the client the MAP
+service), the `wfSector` prototypes in `Resources/Prototypes/_WF/SectorTravel/sectors.yml`, and on the client the STRATEGIC
 tab's `WFBeaconJumpPanel` and the sector map window's Region view. Design: [design.md](../../../Docs/_WF/SectorTravel/design.md).
 
 <!-- WOLFGATE-GENERATED START -->
@@ -50,6 +50,7 @@ tab's `WFBeaconJumpPanel` and the sector map window's Region view. Design: [desi
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/SectorTravel/WFBeaconPanelTest.cs`](../../../Content.IntegrationTests/Tests/_WF/SectorTravel/WFBeaconPanelTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/SectorTravel/WFSectorTravelTest.cs`](../../../Content.IntegrationTests/Tests/_WF/SectorTravel/WFSectorTravelTest.cs)
 
 ### Unit tests

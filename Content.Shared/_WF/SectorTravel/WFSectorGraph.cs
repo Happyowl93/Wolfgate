@@ -65,6 +65,27 @@ public static class WFSectorGraph
         return null;
     }
 
+    /// <summary>
+    /// The sector one link from <paramref name="from"/> on a shortest open path to <paramref name="to"/>, or null if
+    /// none leads there.
+    /// </summary>
+    public static string? NextHop(IPrototypeManager prototypes, string from, string to, Func<string, string, bool>? closed = null)
+    {
+        if (Hops(prototypes, from, to, closed) is not { } hops || hops == 0
+            || !prototypes.TryIndex<WFSectorPrototype>(from, out var sector))
+            return null;
+
+        foreach (var beacon in sector.Beacons)
+        {
+            var next = beacon.Link.Id;
+            if (Linked(prototypes, from, next) && closed?.Invoke(from, next) != true
+                && Hops(prototypes, next, to, closed) == hops - 1)
+                return next;
+        }
+
+        return null;
+    }
+
     /// <summary>The home sector, the one on the game ticker's default map.</summary>
     public static WFSectorPrototype? Home(IPrototypeManager prototypes)
     {

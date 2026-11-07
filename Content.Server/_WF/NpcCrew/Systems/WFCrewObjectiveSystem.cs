@@ -74,8 +74,67 @@ public sealed partial class WFCrewObjectiveSystem : EntitySystem
             return false;
         if (item.Kind is WFCrewObjectiveKind.Hold or WFCrewObjectiveKind.GoTo or WFCrewObjectiveKind.Undock or WFCrewObjectiveKind.Repair)
             return true;
-        return item.Target is { } net && TryGetEntity(net, out var target) && target is { } uid && uid != grid
-            && IsShip(uid) && Transform(uid).MapUid == Transform(grid).MapUid;
+        if (item.Target is not { } net || !TryGetEntity(net, out var target) || target is not { } uid || uid == grid)
+            return false;
+        // A crossing aims at the beacon it jumps from, and stays good on the far side until it reports the ship over.
+        if (item.Kind == WFCrewObjectiveKind.Cross)
+            return !TerminatingOrDeleted(uid);
+        return IsShip(uid) && (Transform(uid).MapUid == Transform(grid).MapUid || LegTo(grid, uid, item.Kind) != null);
+    }
+
+    /// <summary>The order that takes a ship to the map of a dock, escort or follow target elsewhere, if there is a way.</summary>
+    private WFCrewObjective? LegTo(EntityUid grid, EntityUid target, WFCrewObjectiveKind kind)
+    {
+        if (kind is not (WFCrewObjectiveKind.Dock or WFCrewObjectiveKind.Escort or WFCrewObjectiveKind.Follow))
+            return null;
+
+        var ev = new WFCrewTargetAwayEvent(grid, target);
+        RaiseLocalEvent(ref ev);
+        return ev.Leg;
+    }
+
+    /// <summary>Puts the leg to a target on another map ahead of the order aimed at it; true if it did.</summary>
+    private bool LegFirst(EntityUid grid, string group, QueueState state, WFCrewObjective item)
+    {
+        if (item.Target is not { } net || !TryGetEntity(net, out var target) || target is not { } uid
+            || TerminatingOrDeleted(uid) || Transform(uid).MapUid == Transform(grid).MapUid
+            || LegTo(grid, uid, item.Kind) is not { } leg)
+            return false;
+
+        HoldCrew(grid, group);
+        state.Items.Insert(0, leg);
+        state.Started = false;
+        state.Elapsed = 0;
+        state.Status = "pending";
+        UpdateEscort(grid, group, state);
+        return true;
+    }
+
+    /// <summary>Has the beacon's handler move a ship along its Cross order; the order ends once the ship is over, or is lost.</summary>
+    private WFCrewCrossProgress StepCross(EntityUid grid, QueueState state, WFCrewObjective item, bool simulated)
+    {
+        var beacon = item.Target is { } net && TryGetEntity(net, out var uid) ? uid.Value : EntityUid.Invalid;
+        var ev = new WFCrewCrossStepEvent(grid, beacon, simulated) { Progress = WFCrewCrossProgress.Failed };
+        if (beacon.IsValid() && !TerminatingOrDeleted(beacon))
+        {
+            ev.Progress = WFCrewCrossProgress.Waiting;
+            RaiseLocalEvent(ref ev);
+        }
+
+        if (ev.Progress == WFCrewCrossProgress.Waiting && item.Duration > 0 && state.Elapsed >= item.Duration)
+            ev.Progress = WFCrewCrossProgress.Failed;
+
+        if (ev.Progress == WFCrewCrossProgress.Done)
+        {
+            Finish(state);
+        }
+        else if (ev.Progress == WFCrewCrossProgress.Failed)
+        {
+            state.Paused = true;
+            state.Status = "target-lost";
+        }
+
+        return ev.Progress;
     }
 
     /// <summary>The raw status of a crew's queue, such as running, dock-failed or target-lost; null without a queue.</summary>
@@ -203,7 +262,7 @@ public sealed partial class WFCrewObjectiveSystem : EntitySystem
             // A simulated ship flies its queue as a point; it has no pilot to wait on.
             if (TryComp<WFCrewVirtualShipComponent>(grid, out var simulated))
             {
-                StepVirtual((grid, simulated), state, elapsed);
+                StepVirtual((grid, simulated), group, state, elapsed);
                 continue;
             }
             if (state.Paused || state.Items.Count == 0)
@@ -236,6 +295,9 @@ public sealed partial class WFCrewObjectiveSystem : EntitySystem
                 continue;
             }
             var item = state.Items[0];
+            // A ship to dock at, escort or follow that is in another sector is reached by crossing there first.
+            if (LegFirst(grid, group, state, item))
+                continue;
             if (!Valid(grid, item))
             {
                 HoldCrew(grid, group);
@@ -248,7 +310,8 @@ public sealed partial class WFCrewObjectiveSystem : EntitySystem
                 state.Evaded = false;
                 // The restored course doesn't redo an arrival or docking undone by the evasion; fly the task again.
                 if (item.Kind is WFCrewObjectiveKind.GoTo or WFCrewObjectiveKind.Dock or WFCrewObjectiveKind.Undock
-                    or WFCrewObjectiveKind.Retreat or WFCrewObjectiveKind.Resupply or WFCrewObjectiveKind.Salvage or WFCrewObjectiveKind.Loot)
+                    or WFCrewObjectiveKind.Retreat or WFCrewObjectiveKind.Resupply or WFCrewObjectiveKind.Salvage or WFCrewObjectiveKind.Loot
+                    or WFCrewObjectiveKind.Cross)
                     state.Started = false;
             }
             var target = item.Target is { } net ? GetEntity(net) : EntityUid.Invalid;
@@ -284,6 +347,17 @@ public sealed partial class WFCrewObjectiveSystem : EntitySystem
                 continue;
             }
             state.Status = "running";
+            if (item.Kind == WFCrewObjectiveKind.Cross)
+            {
+                state.Elapsed += elapsed;
+                if (StepCross(grid, state, item, simulated: false) != WFCrewCrossProgress.Waiting)
+                {
+                    _pilots.Hold(pilot);
+                    UpdateEscort(grid, group, state);
+                }
+
+                continue;
+            }
             // Docked or without thrust, a travel order waits on crew, a visitor or repairs, not on the flight.
             if (!travels || !duty.Docked && !EntityManager.System<WFCrewShipStatusSystem>().IsAdrift(grid))
                 state.Elapsed += elapsed;
@@ -441,6 +515,9 @@ public sealed partial class WFCrewObjectiveSystem : EntitySystem
                 _pilots.GoTo(pilot, new List<EntityCoordinates> { new(Transform(grid).MapUid!.Value, item.Position) }); break;
             case WFCrewObjectiveKind.Dock: _pilots.Dock(pilot, target); break;
             case WFCrewObjectiveKind.Undock: _pilots.Undock(pilot); break;
+            case WFCrewObjectiveKind.Cross:
+                // Into the beacon's zone, to the point the leg picked; the beacon's handler spools the jump from there.
+                _pilots.GoTo(pilot, new List<EntityCoordinates> { new(Transform(grid).MapUid!.Value, item.Position) }); break;
             case WFCrewObjectiveKind.Follow: _pilots.Follow(pilot, target, item.Range); break;
             case WFCrewObjectiveKind.Escort: _pilots.Escort(pilot, target, item.Range); break;
             case WFCrewObjectiveKind.Circle:

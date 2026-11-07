@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using Content.Server._WF.Encounters.Components;
 using Content.Server._WF.SectorControl.Systems;
+using Content.Shared._WF.NpcCrew;
+using Content.Shared._NF.Shipyard.Components;
+using Content.Server._WF.NpcCrew.Systems;
+using Content.Server._WF.NpcCrew.Components;
+using Content.Server._WF.NpcCrew;
 using Content.Server._WF.SectorTravel;
 using Content.Server._WF.SectorTravel.Components;
 using Content.Server._WF.TradeGoods;
@@ -15,7 +19,6 @@ using Content.Server.Power.Components;
 using Content.Server.Power.EntitySystems;
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Systems;
-using Content.Shared._WF.CCVar;
 using Content.Shared._WF.SectorControl;
 using Content.Shared._WF.SectorTravel;
 using Content.Shared._WF.TradeGoods;
@@ -541,70 +544,6 @@ public sealed class WFSectorTravelTest
         await pair.CleanReturnAsync();
     }
 
-    [Test]
-    public async Task FreightCrossesTheBeaconLiveAndSimulated()
-    {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entMan = server.EntMan;
-        var sectors = entMan.System<WFSectorTravelSystem>();
-        var oldDefault = MapId.Nullspace;
-        var proxy = EntityUid.Invalid;
-        var hull = EntityUid.Invalid;
-        var encounter = EntityUid.Invalid;
-        var config = server.ResolveDependency<IConfigurationManager>();
-        var simulated = config.GetCVar(EncountersCVars.Simulate);
-
-        await server.WaitPost(() =>
-        {
-            // With nobody near, the stand-in stays simulated instead of being built into a hull.
-            config.SetCVar(EncountersCVars.Simulate, true);
-            oldDefault = LoadRegion(entMan, map);
-            var destination = FarStation(entMan, sectors);
-            var origin = Ship(entMan, map, new MapCoordinates(new Vector2(-4000f, -4000f), map.MapId));
-            var leg = sectors.CrossingLeg(origin, destination);
-            Assert.That(leg, Is.Not.Null, "A route between sectors flies to the beacon and holds there.");
-            Assert.That(leg!.Count, Is.EqualTo(2));
-
-            var zone = InZone(entMan, Beacon(entMan, Home, Far));
-            proxy = entMan.SpawnEntity(null, zone);
-            hull = Ship(entMan, map, new MapCoordinates(zone.Position + new Vector2(0f, 200f), zone.MapId));
-            encounter = entMan.SpawnEntity(null, MapCoordinates.Nullspace);
-            var comp = entMan.AddComponent<WFEncounterComponent>(encounter);
-            comp.Prototype = "WFEncounterFreightSmall";
-            comp.Stops.Add(origin);
-            comp.Stops.Add(destination);
-            comp.Ships["freighter"] = new WFEncounterShipState { Grid = proxy, Virtual = true };
-            comp.Ships["escort"] = new WFEncounterShipState { Grid = hull };
-            // Marked as the encounter's own, so its jump isn't taken for a player's that would build the stand-in into a hull.
-            var marker = entMan.AddComponent<WFEncounterGridComponent>(hull);
-            marker.Encounter = encounter;
-            marker.Key = "escort";
-        });
-
-        await PoolManager.WaitUntil(server,
-            () => sectors.SectorOfEntity(proxy) == Far && sectors.SectorOfEntity(hull) == Far, maxTicks: 3000);
-
-        await server.WaitAssertion(() =>
-        {
-            var far = Beacon(entMan, Far, Home);
-            var xforms = entMan.System<SharedTransformSystem>();
-            var landed = Vector2.Distance(xforms.GetWorldPosition(proxy), xforms.GetWorldPosition(far));
-            Assert.That(landed, Is.InRange(far.Comp.ArrivalMin - 10f, far.Comp.ArrivalMax + 10f), "The stand-in lands on the far ring.");
-        });
-
-        await server.WaitPost(() =>
-        {
-            entMan.DeleteEntity(encounter);
-            entMan.DeleteEntity(proxy);
-            entMan.DeleteEntity(hull);
-            UnloadRegion(entMan, map, oldDefault);
-            config.SetCVar(EncountersCVars.Simulate, simulated);
-        });
-        await pair.CleanReturnAsync();
-    }
-
     /// <summary>The trade station Far Reach loaded.</summary>
     private static EntityUid FarStation(IEntityManager entMan, WFSectorTravelSystem sectors)
     {
@@ -620,84 +559,178 @@ public sealed class WFSectorTravelTest
     }
 
     [Test]
-    public async Task StandInBuiltIntoAHullMidCrossingStillCrosses()
+    public async Task CrewOrdersReachADockInAnotherSector()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
         var server = pair.Server;
         var map = await pair.CreateTestMap();
         var entMan = server.EntMan;
         var sectors = entMan.System<WFSectorTravelSystem>();
-        var config = server.ResolveDependency<IConfigurationManager>();
-        var simulated = config.GetCVar(EncountersCVars.Simulate);
+        var objectives = entMan.System<WFCrewObjectiveSystem>();
+        var territory = entMan.System<WFSectorTerritorySystem>();
         var oldDefault = MapId.Nullspace;
         var proxy = EntityUid.Invalid;
-        var hull = EntityUid.Invalid;
-        var encounter = EntityUid.Invalid;
-        var deleted = EntityUid.Invalid;
+        var station = EntityUid.Invalid;
+        var player = EntityUid.Invalid;
 
         await server.WaitPost(() =>
         {
-            config.SetCVar(EncountersCVars.Simulate, true);
             oldDefault = LoadRegion(entMan, map);
-            foreach (var beacon in entMan.EntityQuery<WFJumpBeaconComponent>())
+            station = FarStation(entMan, sectors);
+            var home = Beacon(entMan, Home, Far);
+            proxy = entMan.SpawnEntity(null, InZone(entMan, home));
+            entMan.AddComponent<WFCrewVirtualShipComponent>(proxy).Speed = 2000f;
+
+            // The way over is a crossing from this sector's beacon.
+            var away = new WFCrewTargetAwayEvent(proxy, station);
+            entMan.EventBus.RaiseEvent(EventSource.Local, ref away);
+            Assert.That(away.Leg, Is.Not.Null, "A station in the linked sector has a way over.");
+            Assert.That(away.Leg!.Kind, Is.EqualTo(WFCrewObjectiveKind.Cross));
+            Assert.That(away.Leg.Target, Is.EqualTo(entMan.GetNetEntity(home.Owner)), "It crosses from the beacon here.");
+
+            // Player ships aren't chased across.
+            var farMap = entMan.GetComponent<TransformComponent>(sectors.MapOf(Far)!.Value).MapID;
+            player = Ship(entMan, map, new MapCoordinates(new Vector2(3000f, 3000f), farMap));
+            entMan.AddComponent<ShuttleDeedComponent>(player);
+            var chase = new WFCrewTargetAwayEvent(proxy, player);
+            entMan.EventBus.RaiseEvent(EventSource.Local, ref chase);
+            Assert.That(chase.Leg, Is.Null, "No crew follows a player ship through a beacon.");
+
+            // A blockade on the link leaves no way over.
+            var (beaconMap, cell) = sectors.BeaconCell(Beacon(entMan, Far, Home));
+            Assert.That(territory.TryClaim(beaconMap, cell, Holder, null), Is.True);
+            var closed = new WFCrewTargetAwayEvent(proxy, station);
+            entMan.EventBus.RaiseEvent(EventSource.Local, ref closed);
+            Assert.That(closed.Leg, Is.Null, "A blockaded link offers no way over.");
+            territory.Free(beaconMap, cell);
+
+            // The order itself is valid from here; the crew flies the crossing first.
+            Assert.That(objectives.SetQueue(proxy, "test", new List<WFCrewObjective>
             {
-                beacon.Spool = 10f;
-            }
-
-            var zone = InZone(entMan, Beacon(entMan, Home, Far));
-            proxy = entMan.SpawnEntity(null, zone);
-            encounter = entMan.SpawnEntity(null, MapCoordinates.Nullspace);
-            var comp = entMan.AddComponent<WFEncounterComponent>(encounter);
-            comp.Prototype = "WFEncounterFreightSmall";
-            comp.Stops.Add(Ship(entMan, map, new MapCoordinates(new Vector2(-4000f, -4000f), map.MapId)));
-            comp.Stops.Add(FarStation(entMan, sectors));
-            comp.Ships["freighter"] = new WFEncounterShipState { Grid = proxy, Virtual = true };
-
-            // A second run whose destination is gone: the watcher must skip it, not throw.
-            deleted = Ship(entMan, map, new MapCoordinates(new Vector2(-6000f, -4000f), map.MapId));
-            var broken = entMan.AddComponent<WFEncounterComponent>(entMan.SpawnEntity(null, MapCoordinates.Nullspace));
-            broken.Prototype = "WFEncounterFreightSmall";
-            broken.Stops.Add(comp.Stops[0]);
-            broken.Stops.Add(deleted);
+                new() { Kind = WFCrewObjectiveKind.Dock, Target = entMan.GetNetEntity(station), Range = 100f },
+            }), Is.True, "A dock in another sector is a valid order.");
         });
 
-        // The stand-in starts its crossing (the watcher looks once a second), then a player comes near and it is built
-        // into a hull before it lands.
-        await server.WaitRunTicks(server.Timing.TickRate * 2);
+        await PoolManager.WaitUntil(server, () => sectors.SectorOfEntity(proxy) == Far, maxTicks: 3000);
+        await PoolManager.WaitUntil(server,
+            () => entMan.GetComponent<WFCrewVirtualShipComponent>(proxy).DockedTo == station, maxTicks: 3000);
+
         await server.WaitPost(() =>
         {
-            entMan.DeleteEntity(deleted);
-            Assert.That(sectors.InCrossing(proxy), "The stand-in is crossing.");
-            var zone = InZone(entMan, Beacon(entMan, Home, Far));
-            hull = Ship(entMan, map, zone);
-            var marker = entMan.AddComponent<WFEncounterGridComponent>(hull);
-            marker.Encounter = encounter;
-            marker.Key = "freighter";
-            var state = entMan.GetComponent<WFEncounterComponent>(encounter).Ships["freighter"];
-            state.Grid = hull;
-            state.Virtual = false;
             entMan.DeleteEntity(proxy);
+            entMan.DeleteEntity(player);
+            UnloadRegion(entMan, map, oldDefault);
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>One step of a crossing for a live hull, as its crew's order runs it.</summary>
+    private static WFCrewCrossProgress CrossStep(IEntityManager entMan, EntityUid ship, EntityUid beacon)
+    {
+        var step = new WFCrewCrossStepEvent(ship, beacon, false) { Progress = WFCrewCrossProgress.Waiting };
+        entMan.EventBus.RaiseEvent(EventSource.Local, ref step);
+        return step.Progress;
+    }
+
+    [Test]
+    public async Task ALiveHullRetriesABrokenSpoolUntilItCrosses()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var sectors = entMan.System<WFSectorTravelSystem>();
+        var oldDefault = MapId.Nullspace;
+        var hull = EntityUid.Invalid;
+        var beacon = EntityUid.Invalid;
+
+        await server.WaitPost(() =>
+        {
+            oldDefault = LoadRegion(entMan, map);
+            var home = Beacon(entMan, Home, Far);
+            home.Comp.Spool = 10f;
+            beacon = home.Owner;
+            hull = Ship(entMan, map, InZone(entMan, beacon));
+
+            Assert.That(CrossStep(entMan, hull, beacon), Is.EqualTo(WFCrewCrossProgress.Waiting));
+            Assert.That(entMan.HasComponent<WFBeaconJumpComponent>(hull), "The hull spools a beacon jump.");
+
+            // Hull damage, an interdictor or the zone breaks the spool: the next step spools again.
+            entMan.System<ShuttleSystem>().WfAbortFtlSpool(hull);
+            entMan.RemoveComponent<WFBeaconJumpComponent>(hull);
+            Assert.That(CrossStep(entMan, hull, beacon), Is.EqualTo(WFCrewCrossProgress.Waiting));
+            Assert.That(entMan.HasComponent<WFBeaconJumpComponent>(hull), "A broken spool is spooled again.");
         });
 
         await PoolManager.WaitUntil(server, () => sectors.SectorOfEntity(hull) == Far, maxTicks: 3000);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(CrossStep(entMan, hull, beacon), Is.EqualTo(WFCrewCrossProgress.Done), "Over in the linked sector, the crossing is done.");
+        });
 
         await server.WaitPost(() =>
         {
-            var running = new List<EntityUid>();
-            var encounters = entMan.EntityQueryEnumerator<WFEncounterComponent>();
-            while (encounters.MoveNext(out var uid, out _))
-            {
-                running.Add(uid);
-            }
-
-            foreach (var uid in running)
-            {
-                entMan.DeleteEntity(uid);
-            }
-
             entMan.DeleteEntity(hull);
             UnloadRegion(entMan, map, oldDefault);
-            config.SetCVar(EncountersCVars.Simulate, simulated);
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task AStandInBuiltIntoAHullMidCrossingStillCrosses()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var sectors = entMan.System<WFSectorTravelSystem>();
+        var objectives = entMan.System<WFCrewObjectiveSystem>();
+        var oldDefault = MapId.Nullspace;
+        var proxy = EntityUid.Invalid;
+        var hull = EntityUid.Invalid;
+        var beacon = EntityUid.Invalid;
+
+        await server.WaitPost(() =>
+        {
+            oldDefault = LoadRegion(entMan, map);
+            var home = Beacon(entMan, Home, Far);
+            home.Comp.Spool = 30f;
+            beacon = home.Owner;
+            proxy = entMan.SpawnEntity(null, InZone(entMan, beacon));
+            entMan.AddComponent<WFCrewVirtualShipComponent>(proxy);
+            Assert.That(objectives.SetQueue(proxy, "test", new List<WFCrewObjective>
+            {
+                new() { Kind = WFCrewObjectiveKind.Dock, Target = entMan.GetNetEntity(FarStation(entMan, sectors)), Range = 100f },
+            }), Is.True);
+        });
+
+        await PoolManager.WaitUntil(server, () => sectors.InCrossing(proxy), maxTicks: 600);
+
+        // A player comes near and the stand-in is built into a hull before it lands; the hull takes its queue.
+        await server.WaitPost(() =>
+        {
+            hull = Ship(entMan, map, InZone(entMan, beacon));
+            objectives.MoveQueue(proxy, hull, "test");
+            entMan.DeleteEntity(proxy);
+        });
+        await server.WaitRunTicks(server.Timing.TickRate * 2);
+
+        await server.WaitPost(() =>
+        {
+            Assert.That(sectors.InCrossing(proxy), Is.False, "The deleted stand-in's crossing is dropped.");
+            Assert.That(objectives.TryGetQueue(hull, "test", out var queue) && queue[0].Kind == WFCrewObjectiveKind.Cross,
+                "The hull still has the crossing ahead.");
+            Assert.That(CrossStep(entMan, hull, beacon), Is.EqualTo(WFCrewCrossProgress.Waiting));
+            Assert.That(entMan.HasComponent<WFBeaconJumpComponent>(hull), "The hull makes the jump itself.");
+        });
+
+        await PoolManager.WaitUntil(server, () => sectors.SectorOfEntity(hull) == Far, maxTicks: 6000);
+
+        await server.WaitPost(() =>
+        {
+            objectives.Cancel(hull, "test");
+            entMan.DeleteEntity(hull);
+            UnloadRegion(entMan, map, oldDefault);
         });
         await pair.CleanReturnAsync();
     }

@@ -245,12 +245,23 @@ bank account at that station's vendor price and takes the units off its ledger s
 is printed at the circuit imprinter. The helm's fuel gauge shows jump fuel on its tooltip; its bar still shows generator
 fuel.
 
-**Freight.** A freight run with two or more stops ends in a linked sector 35% of the time, over an open link only
-(`ExtendAcrossSectors`). Its route gets a crossing leg between stops in different sectors: fly into the beacon's zone,
-then hold (`CrossingLeg`). A live hull or escort in the zone spools an NPC beacon jump, which needs no fuel or working
-drive but breaks like any other spool. A simulated stand-in is moved to the far ring after the same spool and travel
-time; it counts as crossed only once it lands, so a stand-in built into a hull while it waits makes the jump as a hull.
-A run that finds its link closed at the beacon is sent away and doesn't cross.
+**Freight and NPC crews.** A freight run with two or more stops ends in a linked sector 35% of the time, over an open
+link only (`ExtendAcrossSectors`). The route itself is unchanged: its last order is a Dock at a station in the other
+sector. Crossing is a crew order. When a crew's Dock, Escort or Follow target is in another sector, the crew system
+raises `WFCrewTargetAwayEvent` and SectorTravel answers with a `Cross` order from this sector's beacon on the first
+link of an open path. The crew fly it first, and the order ends only once they are over (`WFCrewCrossStepEvent`).
+- A live hull in the zone spools an NPC beacon jump, which needs no fuel or working drive but breaks like any other
+  spool; a broken spool is spooled again on the next step.
+- A simulated stand-in is moved to the far ring after the same spool and travel time. One built into a hull while it
+  waits hands the hull its queue, and the hull makes the jump.
+- Escorts cross the same way: their leader in another sector, or in hyperspace bound for one, is an Escort target
+  elsewhere.
+- A blockaded link offers no way over, so the order is lost and the encounter skips that stop. Player ships are never
+  followed across. A crossing not done in 15 minutes is given up.
+
+Crews queue Cross themselves; Crew Setup doesn't offer it. Before this, a route with a stop in another sector failed
+validation (Dock targets had to be on the ship's map), so every cross-sector run was removed as soon as it was given
+its orders.
 
 **Encounter placement.** Station encounters try sectors with living players first, each drawn by its share of them
 (`EncounterMaps`); ghosts don't count, and a player on a planet layer or expedition counts toward its sector. One
@@ -270,7 +281,7 @@ change.
 
 **Admin command.** `wf_region status | jump <grid> <sector> | fuel <grid> <amount> | hold <sector> <link> <faction|free> | raid <sector> <link>`.
 
-**Tests.** `Content.IntegrationTests/Tests/_WF/SectorTravel/WFSectorTravelTest.cs`, 12 tests:
+**Tests.** `Content.IntegrationTests/Tests/_WF/SectorTravel/WFSectorTravelTest.cs`, 13 tests:
 - Console FTL is refused between sectors and unchanged inside one.
 - A beacon jump lands on the far ring, spends its fuel once, carries a loose crate along, crushes nothing on arrival and
   locks the ship out.
@@ -280,9 +291,12 @@ change.
 - Crates refuel a drive directly and through an intake.
 - A docked depot quotes jump fuel from its stock and refuses a buyer who can't pay.
 - Raiders contest the far beacon.
-- A freight stand-in and a live escort both cross a beacon.
-- A stand-in built into a hull mid-crossing still crosses, and a run whose last stop is deleted is skipped.
+- A crew ordered to dock at the Far Reach depot crosses and docks. The way over is a crossing from the home beacon,
+  with none to a player ship or over a blockaded link.
+- A live hull's broken spool is spooled again until it crosses.
+- A stand-in built into a hull mid-crossing hands the hull its crossing, and the hull jumps.
 - A drive built by construction starts with an empty tank.
 
-`Content.Tests/_WF/SectorTravel/WFSectorGraphTest.cs` checks the link count between sectors: a closed link doesn't
-hide a sector that another open way still reaches.
+`WFBeaconPanelTest` checks that the flight deck and the cockpit both carry the jump beacon panel, and that the panel
+never hides itself. `Content.Tests/_WF/SectorTravel/WFSectorGraphTest.cs` checks the link count between sectors: a
+closed link doesn't hide a sector that another open way still reaches.

@@ -154,6 +154,9 @@ Attack or Retreat to a grid. Append preserves the running task; Replace starts t
 entry. Edit, move up/down, remove, pause, resume and skip are available. Timed Hold/Loiter/Circle/Follow/Escort/Attack tasks use seconds;
 zero means indefinite until skipped. Travel, retreat, dock and undock advance on arrival. Missing targets or a failed
 dock pause the queue with a visible status; a replacement pilot can continue it. Immediate orders cancel the queue.
+A Dock, Escort or Follow target in another sector isn't missing: the crew queue a Cross order ahead of it, fly into
+the jump beacon's zone and jump, and the order ends once they are over (`WFCrewTargetAwayEvent`, `WFCrewCrossStepEvent`,
+answered by SectorTravel). Player ships are never followed across. Crews queue Cross themselves; Crew Setup doesn't offer it.
 Queues last for the round and are scoped by ship and group. Attack explicitly assigns the gunner's target, including
 a normally friendly grid. Incoming attacks temporarily override faction friendship for retaliation; vessel
 threats expire after sixty seconds without further attacks.

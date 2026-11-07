@@ -7,9 +7,12 @@ namespace Content.Shared._WF.NpcCrew;
 [Serializable, NetSerializable]
 public enum WFCrewSetupAction : byte { List, Plan, Spawn, Clear, Orders, Preview, Teleport, SpawnVessel, Objectives, AppendObjective, Pause, Resume, Skip, Rules, Crews }
 
-/// <summary>High-level crew tasks; timed tasks with zero duration continue until skipped.</summary>
+/// <summary>
+/// High-level crew tasks; timed tasks with zero duration continue until skipped. Cross jumps to another sector from the
+/// beacon it targets, and is only ever queued by the crew themselves, ahead of an order aimed at a ship over there.
+/// </summary>
 [Serializable, NetSerializable]
-public enum WFCrewObjectiveKind : byte { Hold, GoTo, Dock, Undock, Loiter, Follow, Attack, Retreat, Repair, Resupply, Salvage, Escort, Circle, Loot }
+public enum WFCrewObjectiveKind : byte { Hold, GoTo, Dock, Undock, Loiter, Follow, Attack, Retreat, Repair, Resupply, Salvage, Escort, Circle, Loot, Cross }
 
 /// <summary>Response to an unauthorized docking or boarding incident.</summary>
 [Serializable, NetSerializable]

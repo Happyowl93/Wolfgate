@@ -80,6 +80,7 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
         InitializeTransit();
         InitializeRegion();
         InitializeTrade();
+        InitializeFreight();
     }
 
     public override void Update(float frameTime)

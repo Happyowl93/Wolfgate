@@ -36,6 +36,29 @@ public readonly record struct WFPilotOrdersCompletedEvent(EntityUid Mob);
 [ByRefEvent]
 public readonly record struct WFPilotDockedEvent(EntityUid Mob, EntityUid Grid, EntityUid TargetGrid);
 
+/// <summary>
+/// Broadcast when a crew's Dock, Escort or Follow order aims at a ship on another map. A handler that knows the way
+/// sets <see cref="Leg"/> to the order that gets there, and the crew flies it first; with none, the target is lost.
+/// </summary>
+[ByRefEvent]
+public record struct WFCrewTargetAwayEvent(EntityUid Grid, EntityUid Target)
+{
+    public WFCrewObjective? Leg;
+}
+
+/// <summary>How a ship's Cross order stands after a step.</summary>
+public enum WFCrewCrossProgress : byte { Waiting, Done, Failed }
+
+/// <summary>
+/// Broadcast each step a ship flies a Cross order, real or simulated: the handler moves it across from the beacon and
+/// says once it is over, or that it can't go.
+/// </summary>
+[ByRefEvent]
+public record struct WFCrewCrossStepEvent(EntityUid Grid, EntityUid Beacon, bool Simulated)
+{
+    public WFCrewCrossProgress Progress;
+}
+
 /// <summary>Raised broadcast when a ship flown by the simulation, with no crew aboard, docks at a target for a Dock order.</summary>
 [ByRefEvent]
 public readonly record struct WFCrewVirtualDockedEvent(EntityUid Grid, EntityUid TargetGrid);

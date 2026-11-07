@@ -52,7 +52,8 @@ public sealed partial class WFCrewSetupWindow
 
         var editor = Column();
         editor.AddChild(Heading("add-task"));
-        foreach (var kind in Enum.GetValues<WFCrewObjectiveKind>())
+        // A crossing is queued by the crew themselves, ahead of a dock or escort order in another sector.
+        foreach (var kind in Enum.GetValues<WFCrewObjectiveKind>().Where(kind => kind != WFCrewObjectiveKind.Cross))
             _objectiveKind.AddItem(Loc.GetString($"wf-crew-objective-{kind.ToString().ToLowerInvariant()}"), (int) kind);
         SelectOnClick(_objectiveKind);
         SelectOnClick(_objectiveTarget);
@@ -265,6 +266,10 @@ public sealed partial class WFCrewSetupWindow
 
     private void EditObjective(int index, WFCrewObjective item)
     {
+        // A crew's own crossing has no editor entry; skip it, or edit the order it leads to.
+        if (item.Kind == WFCrewObjectiveKind.Cross)
+            return;
+
         if (CurrentEdits is { } edits)
             edits.Version++;
         _editing = index;

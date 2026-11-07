@@ -1,8 +1,9 @@
 using System.Linq;
 using System.Numerics;
-using Content.Server._WF.Encounters.Components;
 using Content.Server._WF.Encounters.Systems;
+using Content.Server._WF.NpcCrew;
 using Content.Server._WF.SectorTravel.Components;
+using Content.Shared._NF.Shipyard.Components;
 using Content.Shared._WF.Encounters;
 using Content.Shared._WF.NpcCrew;
 using Content.Shared._WF.SectorTravel;
@@ -13,41 +14,40 @@ using Robust.Shared.Random;
 namespace Content.Server._WF.SectorTravel;
 
 /// <summary>
-/// Freight between sectors. A freight run may take its last stop in a linked sector; its route then flies to the beacon,
-/// holds there while it crosses, and docks on the far side. A live hull spools a beacon jump like a player ship; a
-/// simulated one is moved to the far ring after the same spool and travel time. A closed link sends the run home.
+/// NPC crews between sectors. A freight run may take its last stop in a linked sector. A crew whose order aims at a
+/// station or an escorted ship in another sector gets a Cross order first: fly into the beacon's zone and jump. A live
+/// hull spools an NPC beacon jump, again after a broken spool; a simulated one is moved to the far ring after the same
+/// spool and travel time. The order ends only once the ship is over. A blockaded link offers no way across.
 /// </summary>
 public sealed partial class WFSectorTravelSystem
 {
     [Dependency] private WFEncounterSchedulerSystem _scheduler = default!;
-    [Dependency] private WFEncounterSystem _encounters = default!;
     [Dependency] private WFJumpBeaconSystem _beacons = default!;
 
     /// <summary>The chance a freight run with two or more stops ends in a linked sector.</summary>
     public const float CrossChance = 0.35f;
 
-    /// <summary>Extra time the freighter holds at the beacon beyond its spool and travel, in seconds.</summary>
-    private const float CrossingSlack = 20f;
+    /// <summary>How long a crew may take over a crossing, flight to the beacon included, before giving it up, in seconds.</summary>
+    private const float CrossBudget = 900f;
 
     /// <summary>A simulated ship stands in for this much hull when it lands on the far ring, in metres.</summary>
     private const float ProxySize = 60f;
 
     private static readonly TimeSpan FreightInterval = TimeSpan.FromSeconds(1);
 
-    /// <summary>Encounter ships that have made their crossing this run, by encounter and ship key.</summary>
-    private readonly HashSet<(EntityUid Encounter, string Key)> _crossed = new();
-
-    /// <summary>
-    /// Simulated ships between beacons: their encounter and key, where they go and when they land. A stand-in built
-    /// into a hull before it lands drops out of here uncrossed, and the hull then makes the jump itself.
-    /// </summary>
-    private readonly Dictionary<EntityUid, (EntityUid Encounter, string Key, string To, TimeSpan Lands)> _proxies = new();
+    /// <summary>Simulated ships between beacons: where each goes and when it lands.</summary>
+    private readonly Dictionary<EntityUid, (string To, TimeSpan Lands)> _proxies = new();
 
     private TimeSpan _nextFreight;
 
+    private void InitializeFreight()
+    {
+        SubscribeLocalEvent<WFCrewTargetAwayEvent>(OnTargetAway);
+        SubscribeLocalEvent<WFCrewCrossStepEvent>(OnCrossStep);
+    }
+
     private void ClearFreight()
     {
-        _crossed.Clear();
         _proxies.Clear();
         _nextFreight = TimeSpan.Zero;
     }
@@ -81,20 +81,73 @@ public sealed partial class WFSectorTravelSystem
     }
 
     /// <summary>
-    /// The legs a route flies between two stops in different sectors: out to the beacon's zone, then a hold while it
-    /// crosses. Null for stops in the same sector.
+    /// The way to a station or ship in another sector: the Cross order from this sector's beacon on the first link of an
+    /// open path there. Player ships aren't followed across.
     /// </summary>
-    public List<WFCrewObjective>? CrossingLeg(EntityUid from, EntityUid to)
+    private void OnTargetAway(ref WFCrewTargetAwayEvent args)
     {
-        if (SectorOfEntity(from) is not { } a || SectorOfEntity(to) is not { } b || a == b || FindBeacon(a, b) is not { } beacon)
-            return null;
+        if (args.Leg != null || HasComp<ShuttleDeedComponent>(args.Target)
+            || SectorOfEntity(args.Grid) is not { } from || TargetSector(args.Target) is not { } to || from == to
+            || WFSectorGraph.NextHop(_proto, from, to, LinkClosed) is not { } next || FindBeacon(from, next) is not { } beacon)
+            return;
 
-        var position = _transform.GetWorldPosition(beacon) + _random.NextAngle().ToVec() * beacon.Comp.ZoneRadius * 0.3f;
-        return new List<WFCrewObjective>
+        args.Leg = new WFCrewObjective
         {
-            new() { Kind = WFCrewObjectiveKind.GoTo, Position = position, Range = 200f },
-            new() { Kind = WFCrewObjectiveKind.Hold, Duration = beacon.Comp.Spool * 2f + TravelTime(beacon.Comp, a, b) + CrossingSlack },
+            Kind = WFCrewObjectiveKind.Cross,
+            Target = GetNetEntity(beacon),
+            Position = _transform.GetWorldPosition(beacon) + _random.NextAngle().ToVec() * beacon.Comp.ZoneRadius * 0.3f,
+            Range = 200f,
+            Duration = CrossBudget,
         };
+    }
+
+    /// <summary>The sector a ship is in, or for one in hyperspace the sector it is jumping to.</summary>
+    private string? TargetSector(EntityUid target)
+    {
+        if (SectorOfEntity(target) is { } sector)
+            return sector;
+
+        return TryComp<FTLComponent>(target, out var ftl) && ftl.TargetCoordinates.IsValid(EntityManager)
+            ? SectorOf(_transform.GetMap(ftl.TargetCoordinates))
+            : null;
+    }
+
+    /// <summary>
+    /// One step of a crew's crossing: done once the ship is in the linked sector. Until then a live hull in the zone spools
+    /// an NPC beacon jump, again if a spool broke, and a simulated one is timed across; outside the zone it flies on in.
+    /// </summary>
+    private void OnCrossStep(ref WFCrewCrossStepEvent args)
+    {
+        if (!TryComp<WFJumpBeaconComponent>(args.Beacon, out var beacon))
+        {
+            args.Progress = WFCrewCrossProgress.Failed;
+            return;
+        }
+
+        var here = SectorOfEntity(args.Grid);
+        if (here == beacon.Link.Id)
+        {
+            args.Progress = WFCrewCrossProgress.Done;
+            return;
+        }
+
+        args.Progress = WFCrewCrossProgress.Waiting;
+        if (args.Simulated ? _proxies.ContainsKey(args.Grid) : HasComp<FTLComponent>(args.Grid) || HasComp<WFBeaconJumpComponent>(args.Grid))
+            return;
+
+        if (here != beacon.Sector.Id || LinkClosed(beacon.Sector, beacon.Link))
+        {
+            args.Progress = WFCrewCrossProgress.Failed;
+            return;
+        }
+
+        if (!InZone(args.Grid, (args.Beacon, beacon)))
+            return;
+
+        if (args.Simulated)
+            _proxies[args.Grid] = (beacon.Link.Id, _timing.CurTime + TimeSpan.FromSeconds(beacon.Spool + TravelTime(beacon, beacon.Sector.Id, beacon.Link.Id)));
+        else if (!_beacons.TryJump(args.Grid, beacon.Link.Id, out var refusal, npc: true))
+            Log.Debug($"NPC ship {ToPrettyString(args.Grid)} couldn't cross to {beacon.Link}: {refusal}");
     }
 
     private void UpdateFreight()
@@ -104,24 +157,6 @@ public sealed partial class WFSectorTravelSystem
 
         _nextFreight = _timing.CurTime + FreightInterval;
         LandProxies();
-
-        var query = EntityQueryEnumerator<WFEncounterComponent>();
-        while (query.MoveNext(out var uid, out var encounter))
-        {
-            if (encounter.Resolution != null || encounter.Stops.Count < 2 || TerminatingOrDeleted(encounter.Stops[^1])
-                || SectorOfEntity(encounter.Stops[^1]) is not { } destination)
-                continue;
-
-            foreach (var (key, ship) in encounter.Ships)
-            {
-                if (TerminatingOrDeleted(ship.Grid) || _crossed.Contains((uid, key)) || _proxies.ContainsKey(ship.Grid)
-                    || SectorOfEntity(ship.Grid) is not { } here || here == destination
-                    || FindBeacon(here, destination) is not { } beacon || !InZone(ship.Grid, beacon))
-                    continue;
-
-                Cross((uid, encounter), key, ship, here, destination, beacon);
-            }
-        }
     }
 
     private bool InZone(EntityUid ship, Entity<WFJumpBeaconComponent> beacon)
@@ -130,40 +165,12 @@ public sealed partial class WFSectorTravelSystem
                && Vector2.Distance(_transform.GetWorldPosition(ship), _transform.GetWorldPosition(beacon)) <= beacon.Comp.ZoneRadius;
     }
 
-    /// <summary>Starts one encounter ship's crossing, or turns it back if a blockade closed the link.</summary>
-    private void Cross(Entity<WFEncounterComponent> encounter, string key, WFEncounterShipState ship, string from, string to,
-        Entity<WFJumpBeaconComponent> beacon)
-    {
-        if (LinkClosed(from, to))
-        {
-            _crossed.Add((encounter, key));
-            var away = _transform.GetWorldPosition(beacon) + _random.NextAngle().ToVec() * beacon.Comp.ZoneRadius * 2f;
-            _encounters.SetOrders((encounter.Owner, encounter.Comp), key,
-                new List<WFCrewObjective> { new() { Kind = WFCrewObjectiveKind.GoTo, Position = away, Range = 300f } });
-            return;
-        }
-
-        if (ship.Virtual)
-        {
-            var lands = _timing.CurTime + TimeSpan.FromSeconds(beacon.Comp.Spool + TravelTime(beacon.Comp, from, to));
-            _proxies[ship.Grid] = (encounter, key, to, lands);
-            return;
-        }
-
-        if (HasComp<FTLComponent>(ship.Grid) || HasComp<WFBeaconJumpComponent>(ship.Grid))
-            return;
-
-        if (_beacons.TryJump(ship.Grid, to, out var refusal, npc: true))
-            _crossed.Add((encounter, key));
-        else
-            Log.Debug($"Encounter ship {ToPrettyString(ship.Grid)} couldn't cross to {to}: {refusal}");
-    }
-
     /// <summary>Puts simulated ships whose crossing time is up on the far beacon's arrival ring.</summary>
     private void LandProxies()
     {
-        foreach (var (proxy, (encounter, key, to, lands)) in _proxies.ToList())
+        foreach (var (proxy, (to, lands)) in _proxies.ToList())
         {
+            // Built into a hull while it waited: the hull makes the jump itself.
             if (TerminatingOrDeleted(proxy))
             {
                 _proxies.Remove(proxy);
@@ -174,7 +181,6 @@ public sealed partial class WFSectorTravelSystem
                 continue;
 
             _proxies.Remove(proxy);
-            _crossed.Add((encounter, key));
             _transform.SetCoordinates(proxy, ArrivalPoint(proxy, arrival, ProxySize));
         }
     }

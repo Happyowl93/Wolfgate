@@ -88,7 +88,7 @@ public sealed partial class WFCrewObjectiveSystem
     }
 
     /// <summary>Flies a simulated ship's current task one step: travel at its speed, wait out a timed task, dock by reaching.</summary>
-    private void StepVirtual(Entity<WFCrewVirtualShipComponent> ship, QueueState state, float elapsed)
+    private void StepVirtual(Entity<WFCrewVirtualShipComponent> ship, string group, QueueState state, float elapsed)
     {
         ship.Comp.Velocity = Vector2.Zero;
         // Held for visitors or a hail when it was real: nobody is aboard a simulated ship to wait for, so it flies on.
@@ -110,6 +110,9 @@ public sealed partial class WFCrewObjectiveSystem
             Finish(state);
             return;
         }
+
+        if (LegFirst(ship, group, state, item))
+            return;
 
         if (!Valid(ship, item))
         {
@@ -141,6 +144,13 @@ public sealed partial class WFCrewObjectiveSystem
             case WFCrewObjectiveKind.Undock:
                 ship.Comp.DockedTo = null;
                 Finish(state);
+                return;
+            case WFCrewObjectiveKind.Cross:
+                // Into the zone while the beacon's handler times the crossing, which puts it on the far side.
+                ship.Comp.DockedTo = null;
+                if (StepCross(ship, state, item, simulated: true) == WFCrewCrossProgress.Waiting
+                    && Transform(target).MapID == Transform(ship).MapID)
+                    Approach(ship, from, item.Position, item.Range, elapsed);
                 return;
             case WFCrewObjectiveKind.GoTo:
                 ship.Comp.DockedTo = null;

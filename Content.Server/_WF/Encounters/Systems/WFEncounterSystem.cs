@@ -67,7 +67,6 @@ public sealed partial class WFEncounterSystem : EntitySystem
     [Dependency] private NpcFactionSystem _factions = default!;
     [Dependency] private WFPirateRetrofitSystem _retrofit = default!;
     [Dependency] private WFBattleHeatSystem _battleHeat = default!;
-    [Dependency] private Content.Server._WF.SectorTravel.WFSectorTravelSystem _sectorTravel = default!;
 
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
 
@@ -658,13 +657,8 @@ public sealed partial class WFEncounterSystem : EntitySystem
     private List<WFCrewObjective> BuildRoute(WFEncounterComponent comp, WFEncounterRoute route)
     {
         var queue = new List<WFCrewObjective>();
-        for (var i = 0; i < comp.Stops.Count; i++)
+        foreach (var stop in comp.Stops)
         {
-            var stop = comp.Stops[i];
-            // A stop in another sector is reached through the jump beacon between them.
-            if (i > 0 && _sectorTravel.CrossingLeg(comp.Stops[i - 1], stop) is { } crossing)
-                queue.AddRange(crossing);
-
             queue.Add(new WFCrewObjective { Kind = WFCrewObjectiveKind.Dock, Target = GetNetEntity(stop) });
             queue.Add(new WFCrewObjective
             {
