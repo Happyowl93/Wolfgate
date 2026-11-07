@@ -172,36 +172,26 @@ public sealed partial class WFHemophageSystem
 
     #region Stamina
 
-    /// <summary>Halves the stamina crit threshold under Master of the House, saving the body's own first.</summary>
+    /// <summary>Halves the stamina crit threshold under Master of the House.</summary>
     private void ApplyStamina(Entity<WFHemophageComponent> ent)
     {
-        var (uid, comp) = ent;
-        if (!TryComp<StaminaComponent>(uid, out var stamina))
-            return;
-
-        var factor = comp.MasterOfTheHouse ? comp.MasterStaminaMultiplier : 1f;
-
-        if (factor == 1f)
-        {
-            RestoreStamina(ent);
-            return;
-        }
-
-        comp.SavedStaminaCrit ??= stamina.CritThreshold;
-        stamina.CritThreshold = comp.SavedStaminaCrit.Value * factor;
-        Dirty(uid, stamina);
+        SetStaminaFactor(ent, ent.Comp.MasterOfTheHouse ? ent.Comp.MasterStaminaMultiplier : 1f);
     }
 
     private void RestoreStamina(Entity<WFHemophageComponent> ent)
     {
-        if (ent.Comp.SavedStaminaCrit is not { } saved)
+        SetStaminaFactor(ent, 1f);
+    }
+
+    /// <summary>Rescales the crit threshold by the change in factor, keeping changes other systems made meanwhile.</summary>
+    private void SetStaminaFactor(Entity<WFHemophageComponent> ent, float factor)
+    {
+        var comp = ent.Comp;
+        if (comp.AppliedStaminaFactor == factor || !TryComp<StaminaComponent>(ent, out var stamina))
             return;
 
-        ent.Comp.SavedStaminaCrit = null;
-        if (!TryComp<StaminaComponent>(ent, out var stamina))
-            return;
-
-        stamina.CritThreshold = saved;
+        stamina.CritThreshold = stamina.CritThreshold / comp.AppliedStaminaFactor * factor;
+        comp.AppliedStaminaFactor = factor;
         Dirty(ent, stamina);
     }
 
@@ -480,7 +470,7 @@ public sealed partial class WFHemophageSystem
 
         if (on)
         {
-            RemComp<BreathingImmunityComponent>(uid);
+            RemoveBreathingImmunity((uid, comp));
             _alerts.ShowAlert(uid, comp.MasterAlert);
             _popup.PopupEntity(Loc.GetString("wf-hemophage-master-on"), uid, uid);
             return;

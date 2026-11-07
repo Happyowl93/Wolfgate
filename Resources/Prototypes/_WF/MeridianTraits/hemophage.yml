@@ -150,7 +150,7 @@
   id: WFActionHemophageDrain
   components:
   - type: InstantAction
-    useDelay: 3
+    useDelay: 10 # well past the 3 s bite, so a victim gets a window to break free between bites
     itemIconStyle: NoItem
     icon:
       sprite: _WF/MeridianTraits/hemophage_actions.rsi

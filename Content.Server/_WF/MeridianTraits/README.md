@@ -30,7 +30,8 @@ gives the exact amount. Mail sometimes brings a hemophage four blood packs (`WFM
 `MailSystem`), as Meridian's quirk mail goodie does.
 
 Actions: Drain Victim, granted by a corrupted tongue (`WFHemophageDrainerComponent`), so it goes with the tongue: a
-3 s bite from a living body being pulled, during which the victim can't move, break free, interact, attack, shoot or
+3 s bite from a living body being pulled, on a 10 s cooldown so the victim gets a window to break free, and refused
+for players who turn off the `WFHemophageDrain` consent toggle. During the bite the victim can't move, break free, interact, attack, shoot or
 throw (`WFBeingDrainedSystem`, shared so the victim's client predicts it), refused for chaplains, garlic eaters and blood that isn't blood (sap,
 slime, sugar, a machine's fluids); animal blood (monkeys and kobolds included) and other species' blood
 (`ForeignBloods`: ammonia, copper, insect and the like) is foul, caps at normal, never satisfies and sickens; a player's blood is worth more and satiates the tumor for 30 minutes. Dormant State (a tenth
@@ -94,6 +95,7 @@ to. Peanut butter in the blood cake is sugar here.
 
 ### Prototypes
 
+- [`Resources/Prototypes/_WF/MeridianTraits/consent.yml`](../../../Resources/Prototypes/_WF/MeridianTraits/consent.yml)
 - [`Resources/Prototypes/_WF/MeridianTraits/hemophage.yml`](../../../Resources/Prototypes/_WF/MeridianTraits/hemophage.yml)
 - [`Resources/Prototypes/_WF/MeridianTraits/hemophage_food.yml`](../../../Resources/Prototypes/_WF/MeridianTraits/hemophage_food.yml)
 - [`Resources/Prototypes/_WF/MeridianTraits/traits.yml`](../../../Resources/Prototypes/_WF/MeridianTraits/traits.yml)

@@ -81,6 +81,7 @@ wf-hemophage-tasted-awful = That tasted awful...
 wf-hemophage-nausea = Your stomach turns.
 
 wf-hemophage-drain-no-target = You need to be pulling someone to feed on them!
+wf-hemophage-drain-no-consent = {CAPITALIZE(THE($target))} can't be fed on.
 wf-hemophage-drain-full = You're already full!
 wf-hemophage-drain-dead = You can't feed on the dead!
 wf-hemophage-drain-unsuitable = You can't drink { THE($target) }'s blood!

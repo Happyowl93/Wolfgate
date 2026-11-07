@@ -466,6 +466,7 @@ public sealed partial class WFHemophageSystem : SharedWFHemophageSystem
         var uid = ent.Owner;
         var comp = ent.Comp;
 
+        comp.HadBreathingImmunity = HasComp<BreathingImmunityComponent>(uid);
         EnsureComp<BreathingImmunityComponent>(uid);
         comp.RemovedHunger = RemComp<HungerComponent>(uid);
         comp.RemovedThirst = RemComp<ThirstComponent>(uid);
@@ -485,7 +486,7 @@ public sealed partial class WFHemophageSystem : SharedWFHemophageSystem
         if (TerminatingOrDeleted(uid))
             return;
 
-        RemComp<BreathingImmunityComponent>(uid);
+        RemoveBreathingImmunity(ent);
         if (comp.RemovedHunger)
             RestoreFromPrototype<HungerComponent>(uid);
         if (comp.RemovedThirst)
@@ -507,6 +508,13 @@ public sealed partial class WFHemophageSystem : SharedWFHemophageSystem
         comp.Dormant = false;
         comp.MasterOfTheHouse = false;
         Movement.RefreshMovementSpeedModifiers(uid);
+    }
+
+    /// <summary>Takes away the tumor's breathing immunity, unless the body had its own.</summary>
+    private void RemoveBreathingImmunity(Entity<WFHemophageComponent> ent)
+    {
+        if (!ent.Comp.HadBreathingImmunity)
+            RemComp<BreathingImmunityComponent>(ent);
     }
 
     /// <summary>Puts back a component the tumor took away, as the body's own prototype defines it.</summary>

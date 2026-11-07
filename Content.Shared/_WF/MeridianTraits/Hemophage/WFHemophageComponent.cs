@@ -158,8 +158,11 @@ public sealed partial class WFHemophageComponent : Component
     [DataField] public EntityUid? ClotAction;
     [DataField] public EntityUid? MasterAction;
 
-    /// <summary>The stamina crit threshold before the tumor changed it.</summary>
-    [DataField] public float? SavedStaminaCrit;
+    /// <summary>The factor the tumor currently applies to the stamina crit threshold.</summary>
+    [DataField] public float AppliedStaminaFactor = 1f;
+
+    /// <summary>The body was immune to breathing before the tumor, so the tumor never takes the immunity away.</summary>
+    [DataField] public bool HadBreathingImmunity;
 
     [DataField] public bool RemovedHunger;
     [DataField] public bool RemovedThirst;

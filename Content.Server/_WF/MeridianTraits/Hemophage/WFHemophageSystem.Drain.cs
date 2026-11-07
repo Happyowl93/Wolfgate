@@ -1,5 +1,6 @@
 using Content.Server.Bible.Components;
 using Content.Server.Body.Components;
+using Content.Shared._Common.Consent;
 using Content.Shared._NF.Implants.Components;
 using Content.Shared._WF.MeridianTraits.Hemophage;
 using Content.Shared.Database;
@@ -12,13 +13,18 @@ using Content.Shared.Popups;
 using Robust.Server.Audio;
 using Robust.Shared.Audio;
 using Robust.Shared.Player;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.MeridianTraits.Hemophage;
 
 public sealed partial class WFHemophageSystem
 {
     [Dependency] private AudioSystem _audio = default!;
+    [Dependency] private SharedConsentSystem _consent = default!;
     [Dependency] private WFBeingDrainedSystem _held = default!;
+
+    /// <summary>Consent toggle that lets hemophages feed on a player.</summary>
+    public static readonly ProtoId<ConsentTogglePrototype> DrainConsent = "WFHemophageDrain";
 
     private static readonly SoundSpecifier DrinkSound = new SoundPathSpecifier("/Audio/Items/drink.ogg");
 
@@ -63,6 +69,12 @@ public sealed partial class WFHemophageSystem
 
         if (!CanDrain(ent, blood, victim))
             return;
+
+        if (!_consent.HasConsent(victim, DrainConsent))
+        {
+            _popup.PopupEntity(Loc.GetString("wf-hemophage-drain-no-consent", ("target", victim)), ent, ent, PopupType.SmallCaution);
+            return;
+        }
 
         args.Handled = true;
         var biteTime = Rules(ent).BiteTime;
@@ -168,6 +180,12 @@ public sealed partial class WFHemophageSystem
 
         if (args.Handled || args.Target is not { } victim)
             return;
+
+        if (!TryComp<PullerComponent>(ent, out var puller) || puller.Pulling != victim)
+        {
+            _popup.PopupEntity(Loc.GetString("wf-hemophage-drain-stopped"), ent, ent);
+            return;
+        }
 
         args.Handled = true;
         TryFeed(ent, victim);

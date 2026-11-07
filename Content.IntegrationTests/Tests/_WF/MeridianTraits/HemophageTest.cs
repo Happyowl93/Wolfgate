@@ -303,12 +303,19 @@ public sealed class HemophageTest
             Assert.That(entMan.GetComponent<InstantActionComponent>(drainer.DrainAction!.Value).Enabled);
 
             // Master of the House gives the lungs back; ending it with clear lungs restores the immunity at once.
+            var staminaComp = entMan.GetComponent<StaminaComponent>(hemophage);
+            var crit = staminaComp.CritThreshold;
             entMan.EventBus.RaiseLocalEvent(hemophage, new WFHemophageMasterActionEvent { Performer = hemophage });
             Assert.That(comp.MasterOfTheHouse);
             Assert.That(entMan.HasComponent<BreathingImmunityComponent>(hemophage), Is.False);
+            Assert.That(staminaComp.CritThreshold, Is.EqualTo(crit * comp.MasterStaminaMultiplier).Within(0.01f));
+            // Another system raising the threshold mid-power keeps its change once the power ends.
+            staminaComp.CritThreshold += 10f;
             entMan.EventBus.RaiseLocalEvent(hemophage, new WFHemophageMasterActionEvent { Performer = hemophage });
             Assert.That(comp.MasterOfTheHouse, Is.False);
             Assert.That(entMan.HasComponent<BreathingImmunityComponent>(hemophage));
+            Assert.That(staminaComp.CritThreshold, Is.EqualTo(crit + 10f / comp.MasterStaminaMultiplier).Within(0.01f));
+            staminaComp.CritThreshold = crit;
 
             // Regeneration heals for blood.
             damageable.TryChangeDamage(hemophage, new DamageSpecifier(protoMan.Index(Blunt), 20));
