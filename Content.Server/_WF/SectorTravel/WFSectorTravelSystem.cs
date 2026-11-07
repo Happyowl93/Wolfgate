@@ -21,6 +21,7 @@ using Content.Shared.Parallax;
 using Content.Server.Salvage.Expeditions;
 using Content.Shared.Tiles;
 using Robust.Shared.Configuration;
+using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Physics;
@@ -30,6 +31,7 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Serialization.Manager;
 using Robust.Shared.Timing;
+using Robust.Shared.Utility;
 
 namespace Content.Server._WF.SectorTravel;
 
@@ -44,8 +46,8 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
     [Dependency] private IPrototypeManager _proto = default!;
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private ISerializationManager _serialization = default!;
-    [Dependency] private ITileDefinitionManager _tiles = default!;
     [Dependency] private GameTicker _ticker = default!;
+    [Dependency] private MapLoaderSystem _mapLoader = default!;
     [Dependency] private MetaDataSystem _meta = default!;
     [Dependency] private PointOfInterestSystem _poi = default!;
     [Dependency] private SharedMapSystem _maps = default!;
@@ -54,11 +56,8 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
     [Dependency] private StationSystem _station = default!;
 
     private static readonly EntProtoId BeaconPrototype = "WFJumpBeacon";
-    private static readonly EntProtoId RelayPrototype = "WFSectorRelay";
-    private const string BeaconTile = "Plating";
-
-    /// <summary>The beacon platform's radius in tiles.</summary>
-    private const int BeaconPlatform = 4;
+    /// <summary>The beacon platform grid; it carries the beacon and the sector's radio relay.</summary>
+    private static readonly ResPath BeaconPlatformPath = new("/Maps/_WF/SectorTravel/jump_beacon_platform.yml");
 
     /// <summary>How far a beacon keeps from other grids, and a sector's stations from its beacons, in metres.</summary>
     private const float BeaconClearance = 2500f;
@@ -229,20 +228,13 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
                 position = new Angle(MathF.PI / 6f).RotateVec(position);
             }
 
-            var grid = _maps.CreateGridEntity(mapId);
-            _transform.SetWorldPosition(grid.Owner, position);
-            var tile = new Tile(_tiles[BeaconTile].TileId);
-            var tiles = new List<(Vector2i, Tile)>();
-            for (var x = -BeaconPlatform; x <= BeaconPlatform; x++)
+            if (!_mapLoader.TryLoadGrid(mapId, BeaconPlatformPath, out var loaded, offset: position))
             {
-                for (var y = -BeaconPlatform; y <= BeaconPlatform; y++)
-                {
-                    if (x * x + y * y <= BeaconPlatform * BeaconPlatform + 1)
-                        tiles.Add((new Vector2i(x, y), tile));
-                }
+                Log.Error($"Failed to load the beacon platform for {sector.ID} -> {entry.Link}");
+                continue;
             }
 
-            _maps.SetTiles(grid.Owner, grid.Comp, tiles);
+            var grid = loaded.Value;
             _meta.SetEntityName(grid.Owner, Loc.GetString("wf-sector-beacon-name", ("sector", Loc.GetString(link.Name))));
             _shuttles.SetIFFColor(grid.Owner, Color.FromHex("#7fd4ff"));
             var protection = EnsureComp<ProtectedGridComponent>(grid.Owner);
@@ -254,7 +246,8 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
             _physics.SetBodyType(grid.Owner, BodyType.Static);
             EnsureComp<CleanupImmuneComponent>(grid.Owner);
 
-            var beacon = Spawn(BeaconPrototype, new EntityCoordinates(grid.Owner, new Vector2(0.5f, 0.5f)));
+            var beacon = FindOnGrid(grid.Owner, BeaconPrototype)
+                         ?? Spawn(BeaconPrototype, new EntityCoordinates(grid.Owner, new Vector2(0.5f, 0.5f)));
             var comp = EnsureComp<WFJumpBeaconComponent>(beacon);
             comp.Sector = sector.ID;
             comp.Link = entry.Link;
@@ -264,8 +257,20 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
             comp.RaidWarning = entry.RaidWarning;
             comp.NextRaid = _timing.CurTime + NextRaidIn(comp);
             _meta.SetEntityName(beacon, Loc.GetString("wf-sector-beacon-name", ("sector", Loc.GetString(link.Name))));
-            Spawn(RelayPrototype, new EntityCoordinates(grid.Owner, new Vector2(2.5f, 0.5f)));
         }
+    }
+
+    /// <summary>The first entity of a prototype directly on a grid, or null.</summary>
+    private EntityUid? FindOnGrid(EntityUid grid, EntProtoId proto)
+    {
+        var children = Transform(grid).ChildEnumerator;
+        while (children.MoveNext(out var child))
+        {
+            if (MetaData(child).EntityPrototype?.ID == proto.Id)
+                return child;
+        }
+
+        return null;
     }
 
     /// <summary>Marks a map as part of a sector.</summary>

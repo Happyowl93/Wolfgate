@@ -178,6 +178,45 @@ public sealed class WFSectorTravelTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>Each platform is the mapped grid: its own beacon gets the link data, and its relay is on board.</summary>
+    [Test]
+    public async Task BeaconPlatformCarriesMappedBeaconAndRelay()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var oldDefault = MapId.Nullspace;
+
+        await server.WaitAssertion(() =>
+        {
+            oldDefault = LoadRegion(entMan, map);
+            var platforms = 0;
+            var beacons = entMan.EntityQueryEnumerator<WFJumpBeaconComponent, TransformComponent>();
+            while (beacons.MoveNext(out _, out _, out var xform))
+            {
+                platforms++;
+                var grid = xform.GridUid!.Value;
+                var onGrid = new List<string>();
+                var children = entMan.GetComponent<TransformComponent>(grid).ChildEnumerator;
+                while (children.MoveNext(out var child))
+                {
+                    if (entMan.GetComponent<MetaDataComponent>(child).EntityPrototype?.ID is { } id)
+                        onGrid.Add(id);
+                }
+
+                Assert.That(onGrid.Count(id => id == "WFJumpBeacon"), Is.EqualTo(1), "The mapped beacon is the one configured.");
+                Assert.That(onGrid.Count(id => id == "WFSectorRelay"), Is.EqualTo(1));
+                Assert.That(onGrid, Does.Contain("WallPlastitaniumIndestructible"), "The platform is the mapped grid.");
+            }
+
+            Assert.That(platforms, Is.EqualTo(2));
+        });
+
+        await server.WaitPost(() => UnloadRegion(entMan, map, oldDefault));
+        await pair.CleanReturnAsync();
+    }
+
     [Test]
     public async Task BeaconJumpCrossesSpendsFuelAndLocksOut()
     {
