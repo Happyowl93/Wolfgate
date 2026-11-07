@@ -38,4 +38,8 @@ public sealed partial class WFTradeOriginComponent : Component
     /// <summary>The station the freight run was carrying the crate to, if any.</summary>
     [ViewVariables]
     public EntityUid? Destination;
+
+    /// <summary>The sector the crate was first stamped in; a re-stamp after a beacon jump keeps it.</summary>
+    [ViewVariables]
+    public string? Sector;
 }

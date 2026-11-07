@@ -216,7 +216,10 @@ public sealed partial class SalvageSystem
                                 continue;
 
                             // Frontier: try to find a potential destination for ship that doesn't collide with other grids.
-                            var mapId = _gameTicker.DefaultMap;
+                            // WOLFGATE(SectorTravel) START: return to the sector the expedition left from
+                            // var mapId = _gameTicker.DefaultMap;
+                            var mapId = EntityManager.System<Content.Server._WF.SectorTravel.WFSectorTravelSystem>().ReturnMap(uid);
+                            // WOLFGATE END
                             if (!_mapSystem.TryGetMap(mapId, out var mapUid))
                             {
                                 Log.Error($"Could not get DefaultMap EntityUID, shuttle {shuttleUid} may be stuck on expedition.");

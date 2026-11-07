@@ -24,6 +24,11 @@ public struct ShipFuelSummary
     /// <summary>Installed sources whose fuel capacity could not be measured.</summary>
     public int UnknownSources;
 
+    /// <summary>Jump fuel in the drive the ship would beacon-jump with, and that tank's capacity; zero capacity for no drive.</summary>
+    public float JumpFuel;
+
+    public float JumpCapacity;
+
     /// <summary>Whether the reading covers every installed fuel source.</summary>
     public readonly bool Available => Sources > 0 && UnknownSources == 0;
 

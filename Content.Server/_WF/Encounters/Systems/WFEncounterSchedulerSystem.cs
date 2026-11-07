@@ -42,6 +42,7 @@ public sealed partial class WFEncounterSchedulerSystem : EntitySystem
     [Dependency] private MobStateSystem _mobs = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private WarLevelSystem _warLevel = default!;
+    [Dependency] private Content.Server._WF.SectorTravel.WFSectorTravelSystem _sectorTravel = default!;
 
     /// <summary>Space that has to be free of other grids around an open-space origin.</summary>
     private const float Clearance = 600f;
@@ -367,7 +368,18 @@ public sealed partial class WFEncounterSchedulerSystem : EntitySystem
         if (prototype.Placement == WFEncounterPlacement.OpenSpace)
             return TryPlaceInOpenSpace(prototype, out origin);
 
-        return TryPlaceAtStations(prototype, _ticker.DefaultMap, out origin, out stops);
+        // Each sector's stations host their own encounters; sectors with players aboard are tried first.
+        foreach (var map in _sectorTravel.EncounterMaps())
+        {
+            if (!TryPlaceAtStations(prototype, map, out origin, out stops))
+                continue;
+
+            _sectorTravel.ExtendAcrossSectors(prototype, stops);
+            return true;
+        }
+
+        origin = MapCoordinates.Nullspace;
+        return false;
     }
 
     /// <summary>A station picked at random, each as likely as the weight <see cref="WFEncounterStationWeightEvent"/> gives it.</summary>

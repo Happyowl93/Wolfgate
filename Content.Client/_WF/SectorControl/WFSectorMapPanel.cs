@@ -1,4 +1,5 @@
 using System.Globalization;
+using Content.Client._WF.SectorTravel;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Timing;
 
@@ -10,6 +11,8 @@ public sealed class WFSectorMapPanel : BoxContainer
     private static readonly Color ScaleColor = Color.FromHex("#8a96a3");
 
     public readonly WFSectorMapControl MapControl;
+    public readonly WFRegionMapControl RegionControl;
+    public readonly Button RegionButton;
     public readonly Button CentreButton;
     public readonly Button WholeSectorButton;
     public readonly Label ScaleLabel;
@@ -27,6 +30,9 @@ public sealed class WFSectorMapPanel : BoxContainer
         CentreButton.OnPressed += _ => MapControl.CentreOnPlayer();
         WholeSectorButton = new Button { Text = Loc.GetString("wf-sector-map-whole-sector") };
         WholeSectorButton.OnPressed += _ => MapControl.ShowWholeSector();
+        RegionControl = new WFRegionMapControl { HorizontalExpand = true, VerticalExpand = true, Visible = false };
+        RegionButton = new Button { Text = Loc.GetString("wf-region-map-button"), ToggleMode = true };
+        RegionButton.OnToggled += args => ShowRegion(args.Pressed);
         ScaleLabel = new Label
         {
             HorizontalExpand = true,
@@ -42,10 +48,22 @@ public sealed class WFSectorMapPanel : BoxContainer
         };
         bar.AddChild(CentreButton);
         bar.AddChild(WholeSectorButton);
+        bar.AddChild(RegionButton);
         bar.AddChild(ScaleLabel);
 
         AddChild(MapControl);
+        AddChild(RegionControl);
         AddChild(bar);
+    }
+
+    /// <summary>Swaps the sector map for the region view of sectors and beacon links, or back.</summary>
+    private void ShowRegion(bool region)
+    {
+        RegionControl.Visible = region;
+        MapControl.Visible = !region;
+        CentreButton.Disabled = region;
+        WholeSectorButton.Disabled = region;
+        ScaleLabel.Visible = !region;
     }
 
     protected override void FrameUpdate(FrameEventArgs args)

@@ -40,6 +40,7 @@ public sealed partial class WFTradeSectorSystem : EntitySystem
     [Dependency] private WarLevelSystem _war = default!;
     [Dependency] private WFReaverCampaignSystem _reaver = default!;
     [Dependency] private WFEncounterRewardSystem _rewards = default!;
+    [Dependency] private Content.Server._WF.SectorTravel.WFSectorTravelSystem _sectorTravel = default!;
 
     /// <summary>The shortest time between two traffic stamps a station's deliveries make.</summary>
     private static readonly TimeSpan StampCooldown = TimeSpan.FromMinutes(5);
@@ -112,17 +113,21 @@ public sealed partial class WFTradeSectorSystem : EntitySystem
     {
         map = Transform(grid).MapID;
         cell = default;
-        if (!_territory.Enabled || map != _territory.SectorMap)
+        if (!_territory.Enabled || !_territory.IsSectorMap(map))
             return false;
 
         cell = _territory.GridCell(grid);
         return true;
     }
 
-    /// <summary>Whether a station is blockaded now, by a faction holding its cell or by raiders on its approaches.</summary>
+    /// <summary>
+    /// Whether a station is blockaded now: by a faction holding its cell, by raiders on its approaches, or because a
+    /// held jump beacon cuts its sector off from home.
+    /// </summary>
     public bool IsBlockaded(EntityUid grid)
     {
-        return RaidersBlockading(grid) || TryStationCell(grid, out var map, out var cell) && BlockadingOwner(map, cell, grid);
+        return RaidersBlockading(grid) || _sectorTravel.IsCutOffGrid(grid)
+            || TryStationCell(grid, out var map, out var cell) && BlockadingOwner(map, cell, grid);
     }
 
     /// <summary>Whether a running encounter is blockading a station.</summary>
@@ -264,7 +269,8 @@ public sealed partial class WFTradeSectorSystem : EntitySystem
         if (!TryStationCell(args.Grid, out var map, out var cell))
             return;
 
-        if (args.Ship is { } ship && _attempts.TryGetValue(cell, out var attempt))
+        // Blockade attempts are kept by cell on the home sector's map only; another sector's same cell is not theirs.
+        if (args.Ship is { } ship && map == _territory.SectorMap && _attempts.TryGetValue(cell, out var attempt))
             attempt.Sellers.Add(ship);
 
         // A real delivery to a station counts as traffic in its cell, so a docked seller keeps the lane open.

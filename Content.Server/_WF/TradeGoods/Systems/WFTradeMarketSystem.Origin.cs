@@ -109,6 +109,7 @@ public sealed partial class WFTradeMarketSystem
     public void Stamp(Entity<WFTradeOriginComponent> crate)
     {
         var grid = Transform(crate).GridUid;
+        crate.Comp.Sector ??= _sectorTravel.SectorOf(Transform(crate).MapUid);
         crate.Comp.Point = _transform.GetMapCoordinates(crate);
         crate.Comp.Grid = grid;
         crate.Comp.Docked = null;
@@ -152,6 +153,10 @@ public sealed partial class WFTradeMarketSystem
             return false;
 
         var chuteXform = Transform(chute);
+        // A crate carried across a beacon from another sector was hauled, wherever it was re-stamped on arrival.
+        if (origin.Sector is { } sector && _sectorTravel.SectorOf(chuteXform.MapUid) is { } chuteSector && sector != chuteSector)
+            return !MadeAt(origin, chuteXform.GridUid);
+
         return origin.Point.MapId == chuteXform.MapID
                && !MadeAt(origin, chuteXform.GridUid)
                && (origin.Point.Position - _transform.GetWorldPosition(chuteXform)).Length()

@@ -1,0 +1,214 @@
+# The jump beacon a sector's beacon platform carries. WFSectorTravelSystem adds its WFJumpBeacon data on spawn.
+- type: entity
+  id: WFJumpBeacon
+  name: jump beacon
+  description: A bluespace anchor the size of a building. A ship inside its zone can spool a jump to the sector it reaches.
+  categories: [ HideSpawnMenu ]
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Sprite
+    sprite: _Mono/Structures/Machines/beacon.rsi
+    scale: 3,3
+    drawdepth: Mobs
+    layers:
+    - state: beacon
+    - state: beacon_lights_active
+      shader: unshaded
+  - type: PointLight
+    radius: 12
+    energy: 3
+    color: "#7fd4ff"
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 1.3
+        density: 1000
+        mask:
+        - MachineMask
+        layer:
+        - WallLayer
+
+# Carries a sector's radio: non-long-range channels need a powered telecom server on the sender's map.
+- type: entity
+  id: WFSectorRelay
+  name: beacon relay
+  description: A telecom server sealed into the beacon platform. It carries radio across the sector.
+  categories: [ HideSpawnMenu ]
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Sprite
+    sprite: Structures/Machines/telecomms.rsi
+    snapCardinals: true
+    layers:
+    - state: icon
+    - state: unlit
+      shader: unshaded
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.4,-0.4,0.4,0.4"
+        density: 190
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: ApcPowerReceiver
+    needsPower: false
+  - type: TelecomServer
+  - type: EncryptionKeyHolder
+    keysUnlocked: false
+    keySlots: 10
+  - type: ContainerContainer
+    containers:
+      key_slots: !type:Container
+  - type: ContainerFill
+    containers:
+      key_slots:
+      - EncryptionKeyCommon
+      - EncryptionKeyCargo
+      - EncryptionKeyEngineering
+      - EncryptionKeyMedical
+      - EncryptionKeyScience
+      - EncryptionKeySecurity
+      - EncryptionKeyService
+      - EncryptionKeyCommand
+
+# A ship machine that cancels every beacon spool within its range while powered.
+- type: entity
+  parent: [ BaseMachinePowered, ConstructibleMachine ]
+  id: WFJumpInterdictor
+  name: jump interdictor
+  description: Floods the space around it with bluespace noise. While it runs, no ship within a kilometre can finish spooling a beacon jump.
+  components:
+  - type: Sprite
+    sprite: _Mono/Structures/Machines/beacon.rsi
+    layers:
+    - state: beacon
+    - state: beacon_lights_distress
+      shader: unshaded
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.4,-0.4,0.4,0.4"
+        density: 190
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: Transform
+    anchored: true
+  - type: ApcPowerReceiver
+    powerLoad: 8000
+  - type: Machine
+    board: WFJumpInterdictorCircuitboard
+  - type: WFJumpInterdictor
+  # Shown on radar within its range while it runs; WFJumpBeaconSystem switches it with the power.
+  - type: RadarBlip
+    enabled: false
+    radarColor: "#e06c5a"
+    scale: 2
+    shape: star
+    maxDistance: 1000
+
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: WFJumpInterdictorCircuitboard
+  name: jump interdictor machine board
+  description: A machine printed circuit board for a jump interdictor.
+  suffix: Machine Board
+  components:
+  - type: Sprite
+    state: engineering
+  - type: MachineBoard
+    prototype: WFJumpInterdictor
+    requirements:
+      Capacitor: 4
+      Manipulator: 2
+    stackRequirements:
+      Steel: 10
+      Plasma: 10
+
+- type: latheRecipe
+  parent: BaseCircuitboardRecipe
+  id: WFJumpInterdictorCircuitboard
+  result: WFJumpInterdictorCircuitboard
+  completetime: 8
+  materials:
+    Steel: 600
+    Glass: 500
+    Gold: 300
+    Plasma: 500
+
+# Takes fusion fuel crates and fills the jump fuel tank of the ship's FTL drive.
+- type: entity
+  parent: [ BaseMachine, ConstructibleMachine ]
+  id: WFJumpFuelIntake
+  name: jump fuel intake
+  description: A hopper plumbed into the FTL drive's jump fuel tank. Feed it fusion fuel crates.
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/telecomms.rsi
+    snapCardinals: true
+    layers:
+    - state: icon
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.4,-0.4,0.4,0.4"
+        density: 190
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: Transform
+    anchored: true
+  - type: Machine
+    board: WFJumpFuelIntakeCircuitboard
+  - type: WFJumpFuelIntake
+
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: WFJumpFuelIntakeCircuitboard
+  name: jump fuel intake machine board
+  description: A machine printed circuit board for a jump fuel intake.
+  suffix: Machine Board
+  components:
+  - type: Sprite
+    state: engineering
+  - type: MachineBoard
+    prototype: WFJumpFuelIntake
+    requirements:
+      MatterBin: 2
+    stackRequirements:
+      Steel: 5
+
+- type: latheRecipe
+  parent: BaseCircuitboardRecipe
+  id: WFJumpFuelIntakeCircuitboard
+  result: WFJumpFuelIntakeCircuitboard

@@ -12,6 +12,10 @@
   - OreProcessorMachineCircuitboard
   - SalvageMagnetMachineCircuitboard
   - SmartArmoryCircuitboard # Mono
+  # WOLFGATE(SectorTravel) START: the interdictor and fuel intake boards
+  - WFJumpInterdictorCircuitboard
+  - WFJumpFuelIntakeCircuitboard
+  # WOLFGATE END
 
 ## Dynamic
 

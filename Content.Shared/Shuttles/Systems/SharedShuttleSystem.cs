@@ -50,6 +50,9 @@ public abstract partial class SharedShuttleSystem : EntitySystem
 
         if (!WfAllowFTL(shuttleUid, mapUid)) // WOLFGATE(Planets): you only FTL out of a planet network from orbit, and never FTL into an orbit layer.
             return false;
+        // WOLFGATE(SectorTravel): only a jump beacon crosses between sectors
+        if (!WfSameSector(shuttleUid, mapUid))
+            return false;
 
         if (!TryComp<FTLDestinationComponent>(mapUid, out var destination) || !destination.Enabled)
             return false;

@@ -40,6 +40,7 @@ public sealed partial class WFTradeMarketSystem : EntitySystem
     [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private GameTicker _ticker = default!;
     [Dependency] private WFCargoLoadSystem _cargo = default!;
+    [Dependency] private Content.Server._WF.SectorTravel.WFSectorTravelSystem _sectorTravel = default!;
 
     public static readonly ProtoId<WFTradeMarketPrototype> DefaultProfile = "WFTradeMarketDefault";
     private static readonly EntProtoId Cash = "SpaceCash";

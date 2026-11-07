@@ -1442,8 +1442,11 @@ public sealed partial class ShuttleSystem
 
         foreach (var fixture in manager.Fixtures.Values)
         {
-            if (xform.MapID == _ticker.DefaultMap)
+            // WOLFGATE(SectorTravel) START: every sector map is spared, not only the default one
+            // if (xform.MapID == _ticker.DefaultMap)
+            if (xform.MapID == _ticker.DefaultMap || CompOrNull<Content.Shared._WF.SectorTravel.WFSectorMapComponent>(xform.MapUid)?.Primary == true)
                 break; //Frontier - FTL is too buggy to let it just fucking gib people wtf - so we disable for frontier's z-level
+            // WOLFGATE END
 
             if (!fixture.Hard)
                 continue;

@@ -3,6 +3,7 @@ using Content.Server._WF.Encounters.Systems;
 using Content.Server._WF.SectorControl.Components;
 using Content.Server.GameTicking;
 using Content.Shared._WF.SectorControl;
+using Content.Shared._WF.SectorTravel;
 using Content.Shared.GameTicking;
 using Robust.Shared.Configuration;
 using Robust.Shared.Map;
@@ -54,6 +55,30 @@ public sealed partial class WFSectorTerritorySystem : EntitySystem
 
     /// <summary>The sector map: the game ticker's default map.</summary>
     public MapId SectorMap => _ticker.DefaultMap;
+
+    /// <summary>Whether territory runs on a map: the default map, or another sector's own space map.</summary>
+    public bool IsSectorMap(MapId map)
+    {
+        return map != MapId.Nullspace && (map == SectorMap
+            || _map.TryGetMap(map, out var uid) && TryComp<WFSectorMapComponent>(uid, out var stamp) && stamp.Primary);
+    }
+
+    /// <summary>Every map territory runs on, the default map first.</summary>
+    public List<MapId> SectorMaps()
+    {
+        var maps = new List<MapId>();
+        if (SectorMap != MapId.Nullspace)
+            maps.Add(SectorMap);
+
+        var query = EntityQueryEnumerator<WFSectorMapComponent, MapComponent>();
+        while (query.MoveNext(out _, out var stamp, out var map))
+        {
+            if (stamp.Primary && map.MapId != SectorMap)
+                maps.Add(map.MapId);
+        }
+
+        return maps;
+    }
 
     public override void Initialize()
     {

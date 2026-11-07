@@ -223,6 +223,7 @@ public sealed partial class AlertLevelSystem : EntitySystem
                 //var filter = _stationSystem.GetInOwningStation(station); // Frontier: global alerts
                 var filter = Filter.Empty(); // Frontier
                 filter.AddInMap(_ticker.DefaultMap, EntityManager); // Frontier
+                EntityManager.System<Content.Server._WF.SectorTravel.WFSectorTravelSystem>().AddSectorMaps(filter); // WOLFGATE(SectorTravel): alerts sound in every sector
                 _audio.PlayGlobal(detail.Sound, filter, true, detail.Sound.Params);
             }
             else

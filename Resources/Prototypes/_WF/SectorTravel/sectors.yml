@@ -1,0 +1,27 @@
+# The region's sectors. The home sector is the game ticker's default map; the rest are loaded at round start.
+# Each beacon names the sector it reaches; that sector's beacon back is the other end of the link.
+
+- type: wfSector
+  id: WFSectorCore
+  name: wf-sector-core
+  home: true
+  galaxyPosition: 0,0
+  beacons:
+  - link: WFSectorFarReach
+    position: 16000,6000
+    protected: true
+
+- type: wfSector
+  id: WFSectorFarReach
+  name: wf-sector-far-reach
+  galaxyPosition: 1.5,0.5
+  beacons:
+  - link: WFSectorCore
+    position: -7000,0
+    raiders: WFSectorFactionReavers
+  pois:
+  - poi: CargoDepotAlt
+    name: wf-sector-far-reach-depot
+    minDistance: 5000
+    maxDistance: 9000
+    destination: CargoOther

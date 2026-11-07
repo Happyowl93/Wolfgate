@@ -3,6 +3,7 @@ using Content.Server.Chat.Systems;
 using Content.Server.GameTicking;
 using Content.Shared._WF.SectorControl;
 using Content.Shared.GameTicking;
+using Robust.Shared.Map;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
@@ -57,16 +58,23 @@ public sealed partial class WFSectorNoticeSystem : EntitySystem
         Check();
     }
 
-    /// <summary>One pass over the crewed ships of the sector map, as the timer runs it.</summary>
+    /// <summary>One pass over the crewed ships of every sector map, as the timer runs it.</summary>
     public void Check()
     {
         var now = _timing.CurTime;
-        var map = _territory.SectorMap;
-        var ships = _activity.CrewedShips(map);
+        var ships = new Dictionary<EntityUid, MapId>();
+        foreach (var sectorMap in _territory.SectorMaps())
+        {
+            foreach (var crewed in _activity.CrewedShips(sectorMap))
+            {
+                ships[crewed] = sectorMap;
+            }
+        }
+
         var gone = new List<EntityUid>();
         foreach (var (grid, tracked) in _ships)
         {
-            if (ships.Contains(grid))
+            if (ships.ContainsKey(grid))
             {
                 tracked.LastSeen = now;
                 continue;
@@ -82,7 +90,7 @@ public sealed partial class WFSectorNoticeSystem : EntitySystem
             _ships.Remove(grid);
         }
 
-        foreach (var grid in ships)
+        foreach (var (grid, map) in ships)
         {
             var cell = _territory.CellOf(_transform.GetMapCoordinates(grid));
             var owner = _territory.Owner(map, cell);

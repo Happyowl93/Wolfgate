@@ -52,12 +52,11 @@ public sealed partial class WFSectorSyncSystem : EntitySystem
     /// <summary>Sends the sector map with the next update even when empty, so clients pick up a new cell size or the switch.</summary>
     private void ForceSector()
     {
-        var map = _territory.SectorMap;
-        if (map == MapId.Nullspace)
-            return;
-
-        _forced.Add(map);
-        _dirty.Add(map);
+        foreach (var map in _territory.SectorMaps())
+        {
+            _forced.Add(map);
+            _dirty.Add(map);
+        }
     }
 
     private void OnCellChanged(ref WFSectorCellChangedEvent args)
@@ -172,16 +171,23 @@ public sealed partial class WFSectorSyncSystem : EntitySystem
     /// <summary>Sends one player the sector map, even before the first claim, any other held map and the legend.</summary>
     public void SendTo(ICommonSession player)
     {
-        var sector = _territory.SectorMap;
-        if (_territory.Enabled && sector != MapId.Nullspace && _map.MapExists(sector))
-            RaiseNetworkEvent(Build(sector), player);
-        else
-            sector = MapId.Nullspace;
+        var sectors = new HashSet<MapId>();
+        if (_territory.Enabled)
+        {
+            foreach (var sector in _territory.SectorMaps())
+            {
+                if (!_map.MapExists(sector))
+                    continue;
+
+                RaiseNetworkEvent(Build(sector), player);
+                sectors.Add(sector);
+            }
+        }
 
         var query = EntityQueryEnumerator<WFSectorTerritoryComponent, TransformComponent>();
         while (query.MoveNext(out _, out var territory, out var xform))
         {
-            if (xform.MapID != sector && (territory.Claims.Count > 0 || territory.Contests.Count > 0 || territory.Clearing.Count > 0))
+            if (!sectors.Contains(xform.MapID) && (territory.Claims.Count > 0 || territory.Contests.Count > 0 || territory.Clearing.Count > 0))
                 RaiseNetworkEvent(Build(xform.MapID), player);
         }
 
@@ -197,7 +203,7 @@ public sealed partial class WFSectorSyncSystem : EntitySystem
         {
             Map = map,
             CellSize = _territory.CellSize,
-            Sector = _territory.Enabled && map == _territory.SectorMap,
+            Sector = _territory.Enabled && _territory.IsSectorMap(map),
         };
 
         if (_territory.Territory(map) is not { } territory)

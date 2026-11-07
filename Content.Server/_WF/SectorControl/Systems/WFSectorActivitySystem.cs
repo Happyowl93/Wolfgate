@@ -65,13 +65,39 @@ public sealed partial class WFSectorActivitySystem : EntitySystem
         Scan();
     }
 
-    /// <summary>One activity scan of the sector map, as the minute timer runs it.</summary>
+    /// <summary>One activity scan of every sector map, as the minute timer runs it.</summary>
     public void Scan()
     {
         var now = _timing.CurTime;
         _lastScan = now;
-        var map = _territory.SectorMap;
-        var ships = CrewedShips(map);
+        var all = new HashSet<EntityUid>();
+        foreach (var map in _territory.SectorMaps())
+        {
+            var ships = CrewedShips(map);
+            all.UnionWith(ships);
+            ScanMap(map, ships, now);
+        }
+
+        // A ship in FTL is off the map for a scan or two; its track stays so the jump counts when it lands.
+        var gone = new List<EntityUid>();
+        foreach (var (grid, track) in _ships)
+        {
+            if (all.Contains(grid))
+                continue;
+
+            if (TerminatingOrDeleted(grid) || _territory.IsSectorMap(Transform(grid).MapID) || now - track.Seen > JumpGrace)
+                gone.Add(grid);
+        }
+
+        foreach (var grid in gone)
+        {
+            _ships.Remove(grid);
+        }
+    }
+
+    /// <summary>Counts the moving crewed ships on one sector map and drops its stale activity.</summary>
+    private void ScanMap(MapId map, HashSet<EntityUid> ships, TimeSpan now)
+    {
         var territory = ships.Count > 0 ? _territory.Territory(map, true) : _territory.Territory(map);
 
         foreach (var grid in ships)
@@ -97,22 +123,6 @@ public sealed partial class WFSectorActivitySystem : EntitySystem
             track.Position = position;
             track.Cell = cell;
             track.Seen = now;
-        }
-
-        // A ship in FTL is off the map for a scan or two; its track stays so the jump counts when it lands.
-        var gone = new List<EntityUid>();
-        foreach (var (grid, track) in _ships)
-        {
-            if (ships.Contains(grid))
-                continue;
-
-            if (TerminatingOrDeleted(grid) || Transform(grid).MapID == map || now - track.Seen > JumpGrace)
-                gone.Add(grid);
-        }
-
-        foreach (var grid in gone)
-        {
-            _ships.Remove(grid);
         }
 
         if (territory == null)
