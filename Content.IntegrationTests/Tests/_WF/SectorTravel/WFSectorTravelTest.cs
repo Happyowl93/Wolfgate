@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Reflection;
 using Content.Server._WF.SectorControl.Systems;
 using Content.Shared._WF.NpcCrew;
+using Content.Server._NF.GameRule;
 using Content.Shared._NF.Shipyard.Components;
 using Content.Server._WF.NpcCrew.Systems;
 using Content.Server._WF.NpcCrew.Components;
@@ -29,9 +30,11 @@ using Content.Shared.Shuttles.Components;
 using Content.Shared.Shuttles.Systems;
 using Robust.Shared.Configuration;
 using Robust.Shared.GameObjects;
+using Robust.Shared.IoC;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WF.SectorTravel;
 
@@ -422,6 +425,7 @@ public sealed class WFSectorTravelTest
             Assert.That(sectors.LinkClosed(Home, Far));
             Assert.That(sectors.IsCutOff(Far), "A held beacon on the only link cuts Far Reach off.");
 
+            FarStation(entMan, sectors);
             var station = territory.Stations(farMap).FirstOrDefault();
             if (station.Owner.IsValid())
                 Assert.That(entMan.System<WFTradeSectorSystem>().IsBlockaded(station), "Far Reach's stations are blockaded.");
@@ -613,7 +617,7 @@ public sealed class WFSectorTravelTest
             Assert.That(sectors.TryRaid(Beacon(entMan, Home, Far)), Is.False, "The home beacon has no raiders.");
 
             var far = Beacon(entMan, Far, Home);
-            Assert.That(far.Comp.Raiders, Is.Not.Null);
+            far.Comp.Raiders = "WFSectorFactionReavers";
             Assert.That(sectors.TryRaid(far), "Raiders move on the far beacon.");
             var (farMap, farCell) = sectors.BeaconCell(far);
             Assert.That(territory.ContestOf(farMap, farCell)?.Faction, Is.EqualTo(far.Comp.Raiders), "Its cell is contested by them.");
@@ -629,10 +633,12 @@ public sealed class WFSectorTravelTest
         await pair.CleanReturnAsync();
     }
 
-    /// <summary>The trade station Far Reach loaded.</summary>
+    /// <summary>A trade station in the far sector: a cargo depot loaded there, since the sector has none of its own.</summary>
     private static EntityUid FarStation(IEntityManager entMan, WFSectorTravelSystem sectors)
     {
         var farMap = entMan.GetComponent<TransformComponent>(sectors.MapOf(Far)!.Value).MapID;
+        var depot = IoCManager.Resolve<IPrototypeManager>().Index<PointOfInterestPrototype>("CargoDepotAlt");
+        entMan.System<PointOfInterestSystem>().WfSpawnSectorPoi(farMap, depot, new Vector2(6000f, 0f), null, out _);
         var stations = entMan.EntityQueryEnumerator<WFTradeStationComponent, TransformComponent>();
         while (stations.MoveNext(out var uid, out _, out var xform))
         {

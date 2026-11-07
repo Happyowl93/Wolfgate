@@ -2,7 +2,6 @@
 
 wf-sector-core = Caelestinus Sector
 wf-sector-far-reach = True Sight
-wf-sector-far-reach-depot = True Sight Depot
 wf-sector-world-errant = Errant
 wf-sector-beacon-name = Jump Beacon ({$sector})
 
