@@ -1,6 +1,8 @@
-# True Sight's Lattice: the default field held by a single anchor beside Errant, not a hexagon.
+# True Sight's Lattice: the default field, held by Errant itself rather than anchor stations. Its single anchor is a
+# plain marker at the planet that nothing can destroy, so True Sight never loses its hold.
 - type: wfLatticeProfile
   id: WFTrueSight
   parent: WFDefault
   anchorCount: 1
-  anchorRadius: 1500
+  anchorRadius: 0
+  anchorStations: false

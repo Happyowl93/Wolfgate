@@ -26,11 +26,10 @@
   color3: '#8C8C92'
   color4: '#D2D2D8'
 
-# The light Errant is seen by: the halo's cold glow, from far off. Only its colour and brightness are used; it is
-# never drawn.
+# The light Errant is seen by, from far off. Only its colour and brightness are used; it is never drawn.
 - type: starType
-  id: WFStarTrueSightHalo
-  name: True Sight Halo
+  id: WFStarTrueSightLight
+  name: True Sight Light
   shader: MainSequenceStar
   solarMass: 0.8
-  color: '#C4D6FF'
+  color: '#E6ECF5'

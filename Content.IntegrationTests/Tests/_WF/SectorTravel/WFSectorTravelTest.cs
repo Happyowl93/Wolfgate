@@ -166,7 +166,9 @@ public sealed class WFSectorTravelTest
             Assert.That(farMap, Is.Not.Null, "Far Reach should be loaded.");
             Assert.That(sectors.SectorOf(map.MapUid), Is.EqualTo(Home));
             Assert.That(sectors.SectorOf(farMap), Is.EqualTo(Far));
-            Assert.That(entMan.GetComponent<ParallaxComponent>(farMap!.Value).Parallax, Is.EqualTo("WFTrueSight"), "A sector with its own sky gets it.");
+            entMan.TryGetComponent<ParallaxComponent>(map.MapUid, out var homeSky);
+            entMan.TryGetComponent<ParallaxComponent>(farMap!.Value, out var farSky);
+            Assert.That(farSky?.Parallax, Is.EqualTo(homeSky?.Parallax), "A sector without its own sky copies the home sector's.");
 
             var ship = Ship(entMan, map, new MapCoordinates(new Vector2(-2000f, 0f), map.MapId));
             var shuttles = entMan.System<SharedShuttleSystem>();
@@ -220,9 +222,9 @@ public sealed class WFSectorTravelTest
         await pair.CleanReturnAsync();
     }
 
-    /// <summary>True Sight sets up its own Lattice, held by one anchor near the centre, with Errant marked at the centre.</summary>
+    /// <summary>True Sight sets up its own Lattice, held by one anchor at Errant in the centre, with no anchor station.</summary>
     [Test]
-    public async Task TrueSightHasOneAnchorAndErrant()
+    public async Task TrueSightIsHeldByErrant()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
         var server = pair.Server;
@@ -246,7 +248,9 @@ public sealed class WFSectorTravelTest
             }
 
             Assert.That(anchors, Has.Count.EqualTo(1), "True Sight has a single primary anchor.");
-            Assert.That(anchors[0].Length(), Is.LessThan(2500f), "Its anchor stands near the centre.");
+            Assert.That(anchors[0].Length(), Is.LessThan(1f), "Errant, at the centre, holds the field.");
+            Assert.That(entMan.EntityQuery<WFLatticeAnchorStationComponent>()
+                .Count(station => entMan.GetComponent<TransformComponent>(station.Owner).MapUid == farMap), Is.Zero, "True Sight has no anchor station.");
 
             var errant = entMan.EntityQuery<MetaDataComponent>()
                 .Where(meta => meta.EntityName == "Errant" && entMan.GetComponent<TransformComponent>(meta.Owner).MapUid == farMap)
