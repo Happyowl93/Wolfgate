@@ -658,9 +658,11 @@ public sealed partial class ShuttleSystem
         component = AddComp<FTLComponent>(uid);
         component.State = FTLState.Starting;
         SuppressWolfgateFtlShields(uid); // WOLFGATE(ShipShields): drop departing shield fields immediately after successful spoolup.
-        var audio = _audio.PlayPvs(_startupSound, uid);
-        _audio.SetGridAudio(audio);
-        component.StartupStream = audio?.Entity;
+        // WOLFGATE(FtlEffects) START: FtlSpoolAudioSystem times the spool sound so it ends on the jump, however long the spool
+        // var audio = _audio.PlayPvs(_startupSound, uid);
+        // _audio.SetGridAudio(audio);
+        // component.StartupStream = audio?.Entity;
+        // WOLFGATE END
 
         // TODO: Play previs here for docking arrival.
         // Make sure the map is setup before we leave to avoid pop-in (e.g. parallax).
@@ -1634,7 +1636,10 @@ public sealed partial class ShuttleSystem
             var clippedAudio = _audio.PlayStatic(_startupSound, Filter.Broadcast(),
                 new EntityCoordinates(fromMapUid.Value, _mapSystem.GetGridPosition(entity.Owner)), true, startupAudio.Params);
 
-            _audio.SetPlaybackPosition(clippedAudio, entity.Comp1.StartupTime);
+            // WOLFGATE(FtlEffects) START: the spool sound starts late in a long spool, so carry on from how far it has played
+            // _audio.SetPlaybackPosition(clippedAudio, entity.Comp1.StartupTime);
+            _audio.SetPlaybackPosition(clippedAudio, (float) (_gameTiming.CurTime - startupAudio.AudioStart).TotalSeconds);
+            // WOLFGATE END
             if (clippedAudio != null)
                 clippedAudio.Value.Component.Flags |= AudioFlags.NoOcclusion;
         }

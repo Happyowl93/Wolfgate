@@ -11,6 +11,12 @@ travel, docking or sounds. The client `FtlDepartureOverlay` draws the smooth fie
 Local north is forward, matching the upstream departure thrusters. Separate docked grids do not enlarge the
 lead ship's cone. Cancellation removes the effect; late observers use the same networked clock.
 
+The spool sound is timed by `FtlSpoolAudioSystem` so the jump in it lands on the ship's jump, whatever the spool:
+mass, cargo and beacon jumps all spool longer than the 5.5 seconds the sound was made for. A longer spool loops a
+drive-charging hum (`ChargeSound`, the gravity generator hum) and starts the spool sound 5.5 seconds before the
+jump; a shorter one starts the sound partway in. The tail left at the departure point carries on from where the
+sound actually is. A cancelled spool stops both.
+
 Outside observers see a 0.24-second accelerating launch and a rapid braking arrival. `FtlMotionOverlay`
 reprojects the already-rendered hull over the space saved by `FtlMotionBackgroundOverlay`; it never changes
 entity transforms or collision bodies. Its mask covers occupied tiles and their wall sprites, preserving gaps between wings.
@@ -45,6 +51,8 @@ are needed. `FtlConeGeometryTest`, `FtlDepartureTimingTest` and `FtlDepartureTes
 ### Server
 
 - [`Content.Server/_WF/FtlEffects/FtlDepartureSystem.cs`](FtlDepartureSystem.cs)
+- [`Content.Server/_WF/FtlEffects/FtlSpoolAudioSystem.cs`](FtlSpoolAudioSystem.cs)
+- [`Content.Server/_WF/FtlEffects/ShuttleSystem.FtlEffects.cs`](ShuttleSystem.FtlEffects.cs)
 
 ### Shared
 
@@ -62,6 +70,7 @@ are needed. `FtlConeGeometryTest`, `FtlDepartureTimingTest` and `FtlDepartureTes
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WF/FtlEffects/FtlDepartureTest.cs`](../../../Content.IntegrationTests/Tests/_WF/FtlEffects/FtlDepartureTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/FtlEffects/FtlSpoolAudioTest.cs`](../../../Content.IntegrationTests/Tests/_WF/FtlEffects/FtlSpoolAudioTest.cs)
 
 ### Unit tests
 
@@ -85,6 +94,8 @@ are needed. `FtlConeGeometryTest`, `FtlDepartureTimingTest` and `FtlDepartureTes
 
 ## Non-modular edits
 
-None.
+- [`Content.Server/Shuttles/Systems/ShuttleSystem.FasterThanLight.cs`](../../Shuttles/Systems/ShuttleSystem.FasterThanLight.cs)
+  - FtlSpoolAudioSystem times the spool sound so it ends on the jump, however long the spool
+  - the spool sound starts late in a long spool, so carry on from how far it has played
 
 <!-- WOLFGATE-GENERATED END -->
