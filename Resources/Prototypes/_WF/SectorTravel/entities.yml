@@ -102,6 +102,17 @@
   - type: Transform
     anchored: true
   - type: ShuttleConsole
+  # The console's startup adds these ports; declared here so spawning changes nothing.
+  - type: DeviceLinkSource
+    ports:
+    - device-button-1
+    - device-button-2
+    - device-button-3
+    - device-button-4
+    - device-button-5
+    - device-button-6
+    - device-button-7
+    - device-button-8
   - type: WFJumpBeaconConsole
 
 # The portal a beacon opens across a ship's nose. WFJumpBeaconSystem stretches it to the ship's width and deletes it
