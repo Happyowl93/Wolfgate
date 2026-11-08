@@ -19,9 +19,7 @@ public sealed partial class MapScreen
         var register = Column(DestinationSearch, list);
         register.VerticalExpand = true;
         var destinations = Panel("wf-console-destinations", register, true);
-        // The jump beacon panel shows its housing only inside a beacon's zone or docked where jump fuel is sold.
-        WfBeaconPanel.Frame(content => Panel("wf-sector-beacon-panel-title", content));
-        var side = Column(jump, WfBeaconPanel, destinations);
+        var side = Column(jump, destinations);
         side.MinWidth = side.MaxWidth = 260;
         side.VerticalExpand = true;
         RemoveAllChildren();

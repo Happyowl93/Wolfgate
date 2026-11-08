@@ -1,119 +1,96 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using Content.Server._Mono.Radar;
-using Content.Server._WF.CargoLoad;
+using Content.Server._WF.Hailing;
 using Content.Server._WF.SectorTravel.Components;
-using Content.Server.Power.EntitySystems;
-using Content.Server.Shuttles.Components;
+using Content.Server.Beam;
 using Content.Server.Shuttles.Events;
 using Content.Server.Shuttles.Systems;
-using Content.Shared._Mono.Ships;
+using Content.Shared._WF.Hailing;
 using Content.Shared._WF.SectorTravel;
-using Content.Shared._WF.Shuttles;
 using Content.Shared.Damage;
 using Content.Shared.Popups;
-using Content.Shared.Power;
 using Content.Shared.Shuttles.Components;
-using Content.Shared.Shuttles.Systems;
+using Content.Shared.Sprite;
+using Robust.Shared.Audio;
+using Robust.Shared.Audio.Systems;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Random;
 using Robust.Shared.Timing;
 
 namespace Content.Server._WF.SectorTravel;
 
 /// <summary>
-/// Jump beacons: finds the ships in each beacon's zone for the helm's panel, spools beacon jumps, cancels a spool when
-/// the ship leaves the zone, loses its drive, takes hull damage or comes near an interdictor, and locks a ship out of
-/// another jump for a while after it arrives.
+/// Jump beacons: a pilot inside a beacon's zone hails it, it confirms and counts down, then throws a bolt that opens a
+/// portal across the ship's nose. Crossing the portal starts the jump to the linked sector. Leaving the zone or taking
+/// hull damage during the countdown breaks it, and an arrival is locked out of another jump for a while.
 /// </summary>
 public sealed partial class WFJumpBeaconSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _proto = default!;
-    [Dependency] private SharedMapSystem _maps = default!;
+    [Dependency] private IRobustRandom _random = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
+    [Dependency] private SharedScaleVisualsSystem _scale = default!;
+    [Dependency] private SharedAudioSystem _audio = default!;
+    [Dependency] private BeamSystem _beam = default!;
     [Dependency] private ShuttleSystem _shuttle = default!;
-    [Dependency] private ShuttleConsoleSystem _console = default!;
-    [Dependency] private PowerReceiverSystem _power = default!;
-    [Dependency] private WFCargoLoadSystem _cargo = default!;
-    [Dependency] private WFJumpFuelSystem _fuel = default!;
+    [Dependency] private HailingSystem _hailing = default!;
     [Dependency] private WFSectorTravelSystem _sectors = default!;
 
     private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(0.5);
 
+    /// <summary>How long the beacon keeps the channel open after answering.</summary>
+    private static readonly TimeSpan HangUpDelay = TimeSpan.FromSeconds(5);
+
+    private static readonly EntProtoId PortalPrototype = "WFJumpPortal";
+    private static readonly EntProtoId BoltPrototype = "WFJumpBeaconBolt";
+    private static readonly EntProtoId BoltAnchorPrototype = "WFJumpBeaconBoltAnchor";
+    private static readonly SoundSpecifier PortalOpenSound = new SoundPathSpecifier("/Audio/Effects/Lightning/lightningbolt.ogg");
+
     /// <summary>Loose entities this far outside a jumping grid's bounds go with it, in metres.</summary>
     private const float CarryMargin = 6f;
 
-    private const float MassConstant = 50f;
-    private const float MassFactorMin = 0.5f;
-    private const float MassFactorMax = 5f;
+    /// <summary>The portal is this much wider than the ship on each side, in metres.</summary>
+    private const float PortalMargin = 3f;
+
+    /// <summary>The portal's depth as a share of its width: a ring seen tilted.</summary>
+    private const float PortalTilt = 0.3f;
+
+    /// <summary>Longest stretch of bolt drawn at each end, in metres; the beam spawns an entity per metre.</summary>
+    private const float BoltReach = 48f;
+
+    /// <summary>The spool after crossing, in seconds: the beacon has already done the charging.</summary>
+    private const float CrossingSpool = 1f;
+
+    /// <summary>How far past the portal plane a ship's centre still counts as going through it, in metres.</summary>
+    private const float CrossDepth = 20f;
 
     private TimeSpan _nextCheck;
-    private readonly HashSet<EntityUid> _inZone = new();
-    private readonly List<Entity<MapGridComponent>> _grids = new();
     private readonly HashSet<EntityUid> _group = new();
 
     public override void Initialize()
     {
         base.Initialize();
-        Subs.BuiEvents<ShuttleConsoleComponent>(ShuttleConsoleUiKey.Key, subs =>
-        {
-            subs.Event<WFBeaconJumpMessage>(OnJumpMessage);
-            subs.Event<WFBeaconCancelMessage>(OnCancelMessage);
-            subs.Event<WFFuelServiceMessage>(OnFuelServiceMessage);
-        });
         SubscribeLocalEvent<FTLStartedEvent>(OnFtlStarted);
         SubscribeLocalEvent<FTLCompletedEvent>(OnFtlCompleted);
-        SubscribeLocalEvent<WFJumpInterdictorComponent, PowerChangedEvent>(OnInterdictorPower);
-    }
-
-    /// <summary>A running interdictor shows on the radar of every ship within its range.</summary>
-    private void OnInterdictorPower(Entity<WFJumpInterdictorComponent> ent, ref PowerChangedEvent args)
-    {
-        if (TryComp<RadarBlipComponent>(ent, out var blip))
-            blip.Enabled = args.Powered;
+        SubscribeLocalEvent<WFBeaconJumpComponent, ComponentShutdown>(OnJumpShutdown);
     }
 
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
+        UpdatePortals();
         if (_timing.CurTime < _nextCheck)
             return;
 
         _nextCheck = _timing.CurTime + CheckInterval;
-        UpdateSpools();
-        UpdateZones();
-    }
-
-    /// <summary>The mass factor the upstream FTL drive applies to spool and travel.</summary>
-    public static float MassFactor(float mass, FTLDriveComponent drive)
-    {
-        return drive.MassAffectedDrive ? MassCurve(mass * drive.DriveMassMultiplier) : 1f;
-    }
-
-    /// <summary>The curve upstream FTL timing puts a mass on, from 0.5 to 5.</summary>
-    private static float MassCurve(float mass)
-    {
-        return Math.Clamp(MathF.Log(MathF.Sqrt(mass / MassConstant + MathF.E)), MassFactorMin, MassFactorMax);
-    }
-
-    /// <summary>
-    /// The fuel a ship spends to jump from a beacon to its linked sector, or null without a drive:
-    /// <c>FuelPerUnit x distance x massFactor x drive.DriveMassMultiplier</c>, where the mass factor is the docked
-    /// group's, on the curve FTL timing uses.
-    /// </summary>
-    public float? FuelCost(EntityUid ship, Entity<WFJumpBeaconComponent> beacon)
-    {
-        if (!_shuttle.TryGetFTLDrive(ship, out _, out var drive))
-            return null;
-
-        var distance = WFSectorGraph.Distance(_proto, beacon.Comp.Sector, beacon.Comp.Link);
-        var mass = drive.MassAffectedDrive ? MassCurve(_shuttle.GetFtlGroupMass(ship)) : 1f;
-        return beacon.Comp.FuelPerUnit * distance * mass * drive.DriveMassMultiplier;
+        UpdateHails();
+        UpdateCountdowns();
     }
 
     /// <summary>The beacon whose zone a ship's grid centre is in, if any.</summary>
@@ -139,119 +116,99 @@ public sealed partial class WFJumpBeaconSystem : EntitySystem
             : _transform.GetWorldPosition(grid);
     }
 
-    /// <summary>Gives every ship in a beacon zone the panel state its helm shows, and takes it off ships that left.</summary>
-    private void UpdateZones()
+    /// <summary>Answers hails at every beacon console, gives the caller the beacon's reply, and hangs up after.</summary>
+    private void UpdateHails()
     {
-        _inZone.Clear();
-        var beacons = EntityQueryEnumerator<WFJumpBeaconComponent, TransformComponent>();
-        while (beacons.MoveNext(out var beaconUid, out var beacon, out var beaconXform))
+        var now = _timing.CurTime;
+        var query = EntityQueryEnumerator<WFJumpBeaconConsoleComponent>();
+        while (query.MoveNext(out var console, out var control))
         {
-            var centre = _transform.GetWorldPosition(beaconXform);
-            _grids.Clear();
-            var grids = _grids;
-            _maps.FindGridsIntersecting(beaconXform.MapID, Box2.CenteredAround(centre, new Vector2(beacon.ZoneRadius * 2f)),
-                ref grids, approx: true, includeMap: false);
-            foreach (var grid in grids)
+            if (!TryComp<HailConsoleComponent>(console, out var hail))
             {
-                if (grid.Owner == beaconXform.GridUid || !HasComp<ShuttleComponent>(grid)
-                    || Vector2.Distance(GridCentre(grid), centre) > beacon.ZoneRadius)
-                    continue;
+                control.Answered = false;
+                continue;
+            }
 
-                _inZone.Add(grid);
-                Refresh(grid, (beaconUid, beacon));
+            switch (hail.State)
+            {
+                case HailState.Ringing:
+                    control.Answered = false;
+                    _hailing.AnswerAutomated(console, control.Beacon, true);
+                    break;
+
+                case HailState.Connected when hail.OperatorUid == control.Beacon:
+                    if (!control.Answered)
+                    {
+                        control.Answered = true;
+                        control.HangUp = now + HangUpDelay;
+                        Reply(console, control.Beacon, hail.PeerGrid);
+                    }
+                    else if (now >= control.HangUp)
+                    {
+                        _hailing.End(console);
+                    }
+
+                    break;
             }
         }
-
-        var zoned = EntityQueryEnumerator<WFBeaconZoneComponent>();
-        var left = new List<EntityUid>();
-        while (zoned.MoveNext(out var uid, out _))
-        {
-            if (!_inZone.Contains(uid) && !HasComp<WFBeaconJumpComponent>(uid))
-                left.Add(uid);
-        }
-
-        foreach (var uid in left)
-        {
-            RemComp<WFBeaconZoneComponent>(uid);
-        }
     }
 
-    /// <summary>Writes a ship's beacon panel state, dirtying it only when something it shows changed.</summary>
-    private void Refresh(EntityUid ship, Entity<WFJumpBeaconComponent> beacon)
+    /// <summary>Starts the caller's jump and confirms it, or tells them why not.</summary>
+    private void Reply(EntityUid console, EntityUid beaconUid, EntityUid? caller)
     {
-        var zone = EnsureComp<WFBeaconZoneComponent>(ship);
-        var cost = FuelCost(ship, beacon) ?? 0f;
-        var travel = _sectors.TravelTime(beacon.Comp, beacon.Comp.Sector, beacon.Comp.Link);
-        var link = new WFBeaconLink(beacon.Comp.Link, MathF.Ceiling(cost), MathF.Round(travel),
-            _sectors.LinkClosed(beacon.Comp.Sector, beacon.Comp.Link));
-        var (fuel, capacity) = _fuel.Reserve(ship);
-        var locked = TryComp<WFBeaconLockoutComponent>(ship, out var lockout) && lockout.Until > _timing.CurTime ? lockout.Until : (TimeSpan?) null;
-        var spooling = TryComp<WFBeaconJumpComponent>(ship, out var jump) ? jump.To.Id : null;
-
-        var changed = zone.Links.Count != 1 || zone.Links[0] != link
-            || MathF.Abs(zone.Fuel - MathF.Floor(fuel)) > 0.01f || MathF.Abs(zone.Capacity - capacity) > 0.01f
-            || zone.LockedUntil != locked || zone.Spooling != spooling;
-        if (!changed)
+        if (!TryComp<WFJumpBeaconComponent>(beaconUid, out var beacon))
             return;
 
-        zone.Links.Clear();
-        zone.Links.Add(link);
-        zone.Fuel = MathF.Floor(fuel);
-        zone.Capacity = capacity;
-        zone.LockedUntil = locked;
-        zone.Spooling = spooling;
-        Dirty(ship, zone);
+        string line;
+        if (caller is not { } ship)
+            line = Loc.GetString("wf-sector-beacon-reply-refuse-zone", ("radius", (int) beacon.ZoneRadius));
+        else if (TryJump(ship, beacon.Link, out var refusal, beacon: beaconUid))
+            line = Loc.GetString("wf-sector-beacon-reply-confirmed", ("sector", SectorName(beacon.Link)), ("seconds", (int) beacon.Countdown));
+        else
+            line = Loc.GetString(refusal + "-reply", ("radius", (int) beacon.ZoneRadius), ("seconds", LockoutLeft(ship)));
+
+        _hailing.Say(console, beaconUid, line);
     }
 
-    private EntityUid? ShipOf(EntityUid console)
+    private int LockoutLeft(EntityUid ship)
     {
-        var drone = _console.GetDroneConsole(console) ?? console;
-        return Transform(drone).GridUid;
+        return TryComp<WFBeaconLockoutComponent>(ship, out var lockout) && lockout.Until > _timing.CurTime
+            ? (int) Math.Ceiling((lockout.Until - _timing.CurTime).TotalSeconds)
+            : 0;
     }
 
-    private void OnJumpMessage(Entity<ShuttleConsoleComponent> ent, ref WFBeaconJumpMessage args)
+    /// <summary>
+    /// Starts a ship's beacon jump to a linked sector from the zone it is in: the countdown, then the portal. The refusal
+    /// is a loc id saying why not; with <paramref name="beacon"/> set, the ship must be in that beacon's zone.
+    /// </summary>
+    /// <remarks>No FTL drive is needed: the beacon does the jumping. An NPC ship goes through as soon as the portal opens.</remarks>
+    public bool TryJump(EntityUid ship, string sector, [NotNullWhen(false)] out string? refusal, bool npc = false, EntityUid? beacon = null)
     {
-        if (ShipOf(ent) is { } ship && !TryJump(ship, args.Sector, out var refusal))
-            _popup.PopupEntity(Loc.GetString(refusal), ent, args.Actor, PopupType.Medium);
-    }
-
-    /// <summary>Spools a ship's beacon jump to a linked sector from the zone it is in; the refusal says why not.</summary>
-    /// <remarks>An NPC ship needs neither a working drive nor fuel; its spool still breaks like anyone's.</remarks>
-    public bool TryJump(EntityUid ship, string sector, [NotNullWhen(false)] out string? refusal, bool npc = false)
-    {
-        refusal = Refuse(ship, sector, npc, out var beacon, out var drive);
+        refusal = Refuse(ship, sector, npc, beacon, out var zone);
         if (refusal != null)
-            return false;
-
-        var cost = npc ? 0f : FuelCost(ship, beacon) ?? 0f;
-        var spool = drive == null
-            ? beacon.Comp.Spool
-            : beacon.Comp.Spool * MassFactor(_shuttle.GetFtlGroupMass(ship), drive) + _cargo.SpoolPenalty(ship, drive);
-        var travel = _sectors.TravelTime(beacon.Comp, beacon.Comp.Sector, beacon.Comp.Link);
-        if (!_sectors.TryTransit(ship, sector, spool, travel, out refusal))
             return false;
 
         var (damage, structure) = Hull(ship);
         var jump = EnsureComp<WFBeaconJumpComponent>(ship);
-        jump.Beacon = beacon;
+        jump.Beacon = zone;
         jump.To = sector;
-        jump.Cost = cost;
+        jump.Fires = _timing.CurTime + TimeSpan.FromSeconds(zone.Comp.Countdown);
         jump.Damage = damage;
         jump.Structure = structure;
+        jump.Portal = null;
         jump.Departed = false;
         jump.Npc = npc;
-        Refresh(ship, beacon);
-        TellAboard(ship, Loc.GetString("wf-sector-beacon-spooling",
-            ("sector", SectorName(sector)), ("seconds", (int) MathF.Ceiling(spool))));
+        if (!npc)
+            TellAboard(ship, Loc.GetString("wf-sector-beacon-countdown",
+                ("sector", SectorName(sector)), ("seconds", (int) zone.Comp.Countdown)));
         return true;
     }
 
     /// <summary>Why a ship can't beacon-jump to a sector now, or null if it can.</summary>
-    private string? Refuse(EntityUid ship, string sector, bool npc, out Entity<WFJumpBeaconComponent> beacon, out FTLDriveComponent? drive)
+    private string? Refuse(EntityUid ship, string sector, bool npc, EntityUid? from, out Entity<WFJumpBeaconComponent> beacon)
     {
         beacon = default;
-        drive = null;
-        if (ZoneOf(ship) is not { } zone || zone.Comp.Link != sector)
+        if (ZoneOf(ship) is not { } zone || zone.Comp.Link != sector || from != null && zone.Owner != from)
             return "wf-sector-beacon-refuse-zone";
 
         beacon = zone;
@@ -261,56 +218,41 @@ public sealed partial class WFJumpBeaconSystem : EntitySystem
         if (TryComp<WFBeaconLockoutComponent>(ship, out var lockout) && lockout.Until > _timing.CurTime)
             return "wf-sector-beacon-refuse-lockout";
 
-        if (npc)
-        {
-            drive = _shuttle.TryGetFTLDrive(ship, out _, out var any) ? any : null;
-            return null;
-        }
-
-        if (_shuttle.GetFtlDriveStatus(ship) != WFFtlDriveStatus.Ready || !_shuttle.TryGetFTLDrive(ship, out _, out var found))
-            return "wf-sector-beacon-refuse-drive";
-
-        drive = found;
-        if (_fuel.Reserve(ship).Fuel < (FuelCost(ship, zone) ?? 0f))
-            return "wf-sector-beacon-refuse-fuel";
+        if (!npc && !_shuttle.CanFTL(ship, out _))
+            return "wf-sector-beacon-refuse-cannot";
 
         return null;
     }
 
-    private void OnFuelServiceMessage(Entity<ShuttleConsoleComponent> ent, ref WFFuelServiceMessage args)
+    /// <summary>Breaks countdowns whose ship left the zone or took damage, fires the due ones, and closes stale portals.</summary>
+    private void UpdateCountdowns()
     {
-        if (ShipOf(ent) is not { } ship)
-            return;
-
-        _popup.PopupEntity(Loc.GetString(_fuel.TryBuy(ship, args.Actor, out var refusal) ? "wf-jump-fuel-service-bought" : refusal!),
-            ent, args.Actor, PopupType.Medium);
-    }
-
-    private void OnCancelMessage(Entity<ShuttleConsoleComponent> ent, ref WFBeaconCancelMessage args)
-    {
-        if (ShipOf(ent) is { } ship && HasComp<WFBeaconJumpComponent>(ship))
-            Abort(ship, "wf-sector-beacon-cancelled");
-    }
-
-    /// <summary>Cancels every spool whose ship left the zone, lost its drive, took damage or came near an interdictor.</summary>
-    private void UpdateSpools()
-    {
-        var spooling = new List<(EntityUid Ship, string Reason)>();
+        var now = _timing.CurTime;
+        var broken = new List<(EntityUid Ship, string Reason)>();
+        var due = new List<EntityUid>();
         var stale = new List<EntityUid>();
         var query = EntityQueryEnumerator<WFBeaconJumpComponent>();
         while (query.MoveNext(out var ship, out var jump))
         {
+            // Crossed, but the FTL sequence was cut short before hyperspace.
             if (jump.Departed)
-                continue;
-
-            if (!TryComp<FTLComponent>(ship, out var ftl) || ftl.State != FTLState.Starting)
             {
-                stale.Add(ship);
+                if (!HasComp<FTLComponent>(ship))
+                    stale.Add(ship);
                 continue;
             }
 
-            if (SpoolBroken(ship, jump) is { } reason)
-                spooling.Add((ship, reason));
+            if (jump.Portal != null)
+            {
+                if (now >= jump.Expires)
+                    broken.Add((ship, "wf-sector-beacon-portal-closed"));
+                continue;
+            }
+
+            if (CountdownBroken(ship, jump) is { } reason)
+                broken.Add((ship, reason));
+            else if (now >= jump.Fires)
+                due.Add(ship);
         }
 
         foreach (var ship in stale)
@@ -318,49 +260,145 @@ public sealed partial class WFJumpBeaconSystem : EntitySystem
             RemComp<WFBeaconJumpComponent>(ship);
         }
 
-        foreach (var (ship, reason) in spooling)
+        foreach (var (ship, reason) in broken)
         {
             Abort(ship, reason);
         }
+
+        foreach (var ship in due)
+        {
+            if (TryComp<WFBeaconJumpComponent>(ship, out var jump))
+                OpenPortal((ship, jump));
+        }
     }
 
-    private string? SpoolBroken(EntityUid ship, WFBeaconJumpComponent jump)
+    private string? CountdownBroken(EntityUid ship, WFBeaconJumpComponent jump)
     {
         if (!TryComp<WFJumpBeaconComponent>(jump.Beacon, out var beacon) || ZoneOf(ship)?.Owner != jump.Beacon)
             return "wf-sector-beacon-cancel-zone";
-
-        if (!jump.Npc && _shuttle.GetFtlDriveStatus(ship) != WFFtlDriveStatus.Ready)
-            return "wf-sector-beacon-cancel-drive";
 
         var (damage, structure) = Hull(ship);
         var taken = damage - jump.Damage + Math.Max(0, jump.Structure - structure) * beacon.CancelDamage;
         if (taken >= beacon.CancelDamage)
             return "wf-sector-beacon-cancel-damage";
 
-        if (Interdicted(ship))
-            return "wf-sector-beacon-cancel-interdicted";
-
         return null;
     }
 
-    /// <summary>Whether a powered interdictor outside the ship's docked group is within its range of the ship.</summary>
-    private bool Interdicted(EntityUid ship)
+    /// <summary>The ship's nose: its grid's local north, the way upstream FTL and the ship builders face.</summary>
+    private Vector2 Forward(EntityUid ship)
     {
-        _group.Clear();
-        _shuttle.GetAllDockedShuttles(ship, _group);
-        var position = GridCentre(ship);
-        var map = Transform(ship).MapID;
-        var query = EntityQueryEnumerator<WFJumpInterdictorComponent, TransformComponent>();
-        while (query.MoveNext(out var uid, out var interdictor, out var xform))
-        {
-            if (xform.MapID != map || xform.GridUid is { } grid && _group.Contains(grid) || !_power.IsPowered(uid))
-                continue;
+        return _transform.GetWorldRotation(ship).RotateVec(Vector2.UnitY);
+    }
 
-            if (Vector2.Distance(_transform.GetWorldPosition(xform), position) <= interdictor.Range)
-                return true;
+    /// <summary>Throws the bolt and opens a portal as wide as the ship across its nose; an NPC ship goes straight through.</summary>
+    private void OpenPortal(Entity<WFBeaconJumpComponent> ship)
+    {
+        if (!TryComp<MapGridComponent>(ship, out var grid) || Transform(ship).MapUid is not { } map)
+        {
+            Abort(ship, "wf-sector-beacon-cancel-zone");
+            return;
         }
 
-        return false;
+        var bounds = grid.LocalAABB;
+        var forward = Forward(ship);
+        var gap = TryComp<WFJumpBeaconComponent>(ship.Comp.Beacon, out var beacon) ? beacon.PortalGap : 12f;
+        var position = GridCentre(ship) + forward * (bounds.Height / 2f + gap);
+        var width = bounds.Width + PortalMargin * 2f;
+
+        var portal = Spawn(PortalPrototype, new EntityCoordinates(map, position));
+        _transform.SetWorldRotation(portal, _transform.GetWorldRotation(ship));
+        _scale.SetSpriteScale(portal, new Vector2(width, width * PortalTilt));
+        _audio.PlayPvs(PortalOpenSound, portal);
+        Bolt(ship.Comp.Beacon, portal);
+
+        ship.Comp.Portal = portal;
+        ship.Comp.PortalAt = position;
+        ship.Comp.Forward = forward;
+        ship.Comp.HalfWidth = width / 2f;
+        ship.Comp.Expires = _timing.CurTime + (beacon?.PortalLifetime ?? TimeSpan.FromSeconds(60));
+
+        if (ship.Comp.Npc)
+        {
+            Cross(ship);
+            return;
+        }
+
+        TellAboard(ship, Loc.GetString("wf-sector-beacon-portal-open", ("sector", SectorName(ship.Comp.To))));
+    }
+
+    /// <summary>
+    /// A lightning bolt from the beacon to the portal. The beam spawns an entity per metre, so a long one is drawn as a
+    /// stretch out of the beacon and a stretch into the portal, along the same line.
+    /// </summary>
+    private void Bolt(EntityUid beacon, EntityUid portal)
+    {
+        if (!Exists(beacon))
+            return;
+
+        var from = _transform.GetMapCoordinates(beacon);
+        var to = _transform.GetMapCoordinates(portal);
+        if (from.MapId != to.MapId)
+            return;
+
+        var line = to.Position - from.Position;
+        var length = line.Length();
+        var state = $"lightning_{_random.Next(1, 13)}";
+        if (length <= BoltReach * 2f)
+        {
+            _beam.TryCreateBeam(beacon, portal, BoltPrototype, state);
+            return;
+        }
+
+        var direction = line / length;
+        var outward = Spawn(BoltAnchorPrototype, new MapCoordinates(from.Position + direction * BoltReach, from.MapId));
+        var inward = Spawn(BoltAnchorPrototype, new MapCoordinates(to.Position - direction * BoltReach, to.MapId));
+        _beam.TryCreateBeam(beacon, outward, BoltPrototype, state);
+        _beam.TryCreateBeam(inward, portal, BoltPrototype, state);
+    }
+
+    /// <summary>Sends every ship whose centre has passed through its open portal on its jump.</summary>
+    private void UpdatePortals()
+    {
+        var crossed = new List<Entity<WFBeaconJumpComponent>>();
+        var query = EntityQueryEnumerator<WFBeaconJumpComponent>();
+        while (query.MoveNext(out var ship, out var jump))
+        {
+            if (jump.Departed || jump.Portal is not { } portal || !Exists(portal))
+                continue;
+
+            // Through the portal plane from behind, within its width.
+            var offset = GridCentre(ship) - jump.PortalAt;
+            var depth = Vector2.Dot(offset, jump.Forward);
+            var lateral = Vector2.Dot(offset, new Vector2(jump.Forward.Y, -jump.Forward.X));
+            if (Transform(ship).MapUid == Transform(portal).MapUid
+                && depth is >= 0f and <= CrossDepth && MathF.Abs(lateral) <= jump.HalfWidth)
+                crossed.Add((ship, jump));
+        }
+
+        foreach (var ship in crossed)
+        {
+            Cross(ship);
+        }
+    }
+
+    /// <summary>Starts the FTL sequence to the linked sector for a ship going through its portal.</summary>
+    private void Cross(Entity<WFBeaconJumpComponent> ship)
+    {
+        if (!TryComp<WFJumpBeaconComponent>(ship.Comp.Beacon, out var beacon))
+        {
+            Abort(ship, "wf-sector-beacon-cancel-zone");
+            return;
+        }
+
+        var travel = _sectors.TravelTime(beacon, beacon.Sector, beacon.Link);
+        if (!_sectors.TryTransit(ship, ship.Comp.To, CrossingSpool, travel, out var refusal))
+        {
+            Abort(ship, refusal);
+            return;
+        }
+
+        ship.Comp.Departed = true;
     }
 
     /// <summary>Damage summed over the ship's anchored damageable structure, and how many such entities it has.</summary>
@@ -383,19 +421,29 @@ public sealed partial class WFJumpBeaconSystem : EntitySystem
 
     private void Abort(EntityUid ship, string reason)
     {
-        _shuttle.WfAbortFtlSpool(ship);
         RemComp<WFBeaconJumpComponent>(ship);
         TellAboard(ship, Loc.GetString(reason));
     }
 
-    /// <summary>On entering hyperspace: spend the fuel and bring along loose entities hugging the hull.</summary>
+    /// <summary>The portal closes with the jump it was opened for.</summary>
+    private void OnJumpShutdown(Entity<WFBeaconJumpComponent> ent, ref ComponentShutdown args)
+    {
+        if (ent.Comp.Portal is { } portal && !TerminatingOrDeleted(portal))
+            QueueDel(portal);
+    }
+
+    /// <summary>On entering hyperspace: bring along loose entities hugging the hull.</summary>
     private void OnFtlStarted(ref FTLStartedEvent args)
     {
-        if (!TryComp<WFBeaconJumpComponent>(args.Entity, out var jump) || jump.Departed)
+        if (!TryComp<WFBeaconJumpComponent>(args.Entity, out var jump) || !jump.Departed)
             return;
 
-        jump.Departed = true;
-        _fuel.Spend(args.Entity, jump.Cost);
+        if (jump.Portal is { } portal)
+        {
+            QueueDel(portal);
+            jump.Portal = null;
+        }
+
         if (args.FromMapUid is { } from)
             CarryLoose(args.Entity, from, args.FTLFrom);
     }

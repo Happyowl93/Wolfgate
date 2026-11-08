@@ -10,16 +10,15 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.SectorTravel.Commands;
 
-/// <summary>The region from the console: list the sectors and beacons, move a ship between sectors, set its fuel, hold a beacon.</summary>
+/// <summary>The region from the console: list the sectors and beacons, move a ship between sectors, hold or raid a beacon.</summary>
 [AdminCommand(AdminFlags.Admin)]
 public sealed partial class WFRegionCommand : LocalizedEntityCommands
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private WFSectorTravelSystem _sectors = default!;
-    [Dependency] private WFJumpFuelSystem _fuel = default!;
     [Dependency] private WFSectorTerritorySystem _territory = default!;
 
-    private static readonly string[] Subcommands = { "status", "jump", "fuel", "hold", "raid" };
+    private static readonly string[] Subcommands = { "status", "jump", "hold", "raid" };
 
     /// <summary>The spool an admin move takes, in seconds.</summary>
     private const float AdminSpool = 5f;
@@ -35,13 +34,6 @@ public sealed partial class WFRegionCommand : LocalizedEntityCommands
                 break;
             case "jump" when args.Length == 3:
                 Jump(shell, args[1], args[2]);
-                break;
-            case "fuel" when args.Length == 3:
-                if (TryGrid(shell, args[1], out var fueled) && float.TryParse(args[2], out var amount))
-                {
-                    _fuel.SetFuel(fueled, amount);
-                    shell.WriteLine(Loc.GetString("cmd-wf_region-fuel-set", ("fuel", (int) _fuel.Reserve(fueled).Fuel)));
-                }
                 break;
             case "hold" when args.Length == 4:
                 Hold(shell, args[1], args[2], args[3]);
@@ -65,9 +57,8 @@ public sealed partial class WFRegionCommand : LocalizedEntityCommands
         return args.Length switch
         {
             1 => CompletionResult.FromHintOptions(Subcommands, Loc.GetString("cmd-wf_region-hint-sub")),
-            2 when args[0] is "jump" or "fuel" => CompletionResult.FromHint(Loc.GetString("cmd-wf_region-hint-grid")),
+            2 when args[0] == "jump" => CompletionResult.FromHint(Loc.GetString("cmd-wf_region-hint-grid")),
             3 when args[0] == "jump" => CompletionResult.FromHintOptions(sectors, Loc.GetString("cmd-wf_region-hint-sector")),
-            3 when args[0] == "fuel" => CompletionResult.FromHint(Loc.GetString("cmd-wf_region-hint-amount")),
             2 or 3 when args[0] is "hold" or "raid" => CompletionResult.FromHintOptions(sectors, Loc.GetString("cmd-wf_region-hint-sector")),
             4 when args[0] == "hold" => CompletionResult.FromHintOptions(factions, Loc.GetString("cmd-wf_region-hint-faction")),
             _ => CompletionResult.Empty,

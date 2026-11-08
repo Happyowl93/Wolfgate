@@ -10,6 +10,7 @@ using Content.Shared._WF.Newbie;
 using Content.Shared.Chat;
 using Content.Shared.Database;
 using Content.Shared.IdentityManagement;
+using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Players.RateLimiting;
 using Content.Shared.Shuttles.Components;
@@ -991,12 +992,13 @@ public sealed partial class HailingSystem : EntitySystem
     }
 
     /// <summary>
-    /// Whether an NPC can man a console without a UI: it exists, is alive and is on the console's ship.
+    /// Whether an NPC can man a console without a UI: it exists, is alive and is on the console's ship. A machine
+    /// operator, with no mob state, is never dead.
     /// </summary>
     private bool AutomatedPresent(EntityUid console, EntityUid operatorUid)
     {
         return Exists(operatorUid) && !TerminatingOrDeleted(console) && !TerminatingOrDeleted(operatorUid) &&
-               _mobState.IsAlive(operatorUid) &&
+               (!HasComp<MobStateComponent>(operatorUid) || _mobState.IsAlive(operatorUid)) &&
                Transform(console).GridUid is { } grid && Transform(operatorUid).GridUid == grid;
     }
 

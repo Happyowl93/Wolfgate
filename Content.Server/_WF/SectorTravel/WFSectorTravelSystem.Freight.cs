@@ -145,7 +145,7 @@ public sealed partial class WFSectorTravelSystem
             return;
 
         if (args.Simulated)
-            _proxies[args.Grid] = (beacon.Link.Id, _timing.CurTime + TimeSpan.FromSeconds(beacon.Spool + TravelTime(beacon, beacon.Sector.Id, beacon.Link.Id)));
+            _proxies[args.Grid] = (beacon.Link.Id, _timing.CurTime + TimeSpan.FromSeconds(beacon.Countdown + TravelTime(beacon, beacon.Sector.Id, beacon.Link.Id)));
         else if (!_beacons.TryJump(args.Grid, beacon.Link.Id, out var refusal, npc: true))
             Log.Debug($"NPC ship {ToPrettyString(args.Grid)} couldn't cross to {beacon.Link}: {refusal}");
     }

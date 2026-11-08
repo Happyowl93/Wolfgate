@@ -17,7 +17,6 @@ public sealed class WFCockpitFuelBank : BoxContainer
     private float _poll;
     private int? _sources;
     private int? _unknown;
-    private int? _jumpFuel;
     private bool _initialized;
 
     /// <summary>Preserves missing and incomplete telemetry rather than displaying a false empty tank.</summary>
@@ -65,13 +64,11 @@ public sealed class WFCockpitFuelBank : BoxContainer
     private void RefreshTooltip()
     {
         var reading = Reading;
-        var jumpFuel = reading is { JumpCapacity: > 0f } jump ? (int) jump.JumpFuel : (int?) null;
-        if (_initialized && _sources == reading?.Sources && _unknown == reading?.UnknownSources && _jumpFuel == jumpFuel)
+        if (_initialized && _sources == reading?.Sources && _unknown == reading?.UnknownSources)
             return;
         _initialized = true;
         _sources = reading?.Sources;
         _unknown = reading?.UnknownSources;
-        _jumpFuel = jumpFuel;
         var status = reading switch
         {
             null => Loc.GetString("wf-cockpit-fuel-no-signal"),
@@ -84,8 +81,6 @@ public sealed class WFCockpitFuelBank : BoxContainer
             Loc.GetString("wf-cockpit-fuel-low-help", ("low", MathF.Round(ShipFuelSummary.LowThreshold * 100)),
                 ("critical", MathF.Round(ShipFuelSummary.CriticalThreshold * 100)),
                 ("emergency", MathF.Round(ShipFuelSummary.EmergencyThreshold * 100)));
-        if (reading is { JumpCapacity: > 0f } tank)
-            ToolTip += "\n" + Loc.GetString("wf-cockpit-fuel-jump", ("fuel", (int) tank.JumpFuel), ("capacity", (int) tank.JumpCapacity));
         _gauge.ToolTip = ToolTip;
         _lamp.ToolTip = ToolTip;
     }

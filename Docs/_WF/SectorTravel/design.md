@@ -7,16 +7,16 @@ How each part was built, and the two additions, are under [Implementation notes]
 
 One map can't grow past about 30 km before floating-point error shows, and the engine can't be changed without forking
 the launcher. So the region becomes several sector maps, each kept to the size the current sector already has, joined by
-**jump beacons**. A beacon is the only way between sectors. Holding one is the strongest blockade in the game, and
-crossing costs jump fuel, which the economy makes and blockades can choke.
+**jump beacons**. A beacon is the only way between sectors, and holding one is the strongest blockade in the game.
 
 Three designs were weighed:
 
 - **Seams** (SS13 edge transitions): a ship hundreds of metres wide crosses half at a time, loose entities stay behind, and
   nobody can see or shoot across the edge. There are no chokepoints. Rejected.
 - **Gates** (X4): fly through and arrive instantly. Every crossing is an escape hatch, and arrivals bunch at one exit.
-- **Beacons**: spool inside a beacon's zone and jump to the linked beacon. The spool is a window to interdict, the arrival
-  is spread over a ring, and the jump reuses upstream FTL almost entirely. Chosen.
+- **Beacons**: hail a beacon from inside its zone; after a countdown it opens a portal ahead of the ship, and crossing it
+  jumps to the linked beacon. The countdown is a window to strike, the arrival is spread over a ring, and the jump reuses
+  upstream FTL almost entirely. Chosen.
 
 Starsector-style hyperspace (a map you fly across, with fuel and a fall back into the nearest gravity well) was weighed as
 well. It costs several times more code and playtesting, and open hyperspace has no chokepoints. This design keeps the move
@@ -41,7 +41,7 @@ A `wfSector` prototype describes one sector:
 | Field | Meaning |
 |---|---|
 | `name` | LocId. |
-| `galaxyPosition` | Where the sector sits in the region, in galaxy units. Fuel and travel time use the distance between positions, and the region map draws them. |
+| `galaxyPosition` | Where the sector sits in the region, in galaxy units. Travel time uses the distance between positions, and the region map draws them. |
 | `home` | The one sector on `DefaultMap`. Players arrive here, and upstream code that reads `DefaultMap` keeps working. |
 | `pois` | The POI groups `PointOfInterestSystem` places on this map. The home sector keeps today's groups. |
 | `worldgen` | The worldgen config (asteroids, debris). Upstream applies it only to `DefaultMap`. |
@@ -75,9 +75,9 @@ Every crossing goes through one call:
 WFSectorTravelSystem.TryTransit(ship, from, to, arrival)
 ```
 
-Beacon jumps, NPC freighters, salvage returns and the admin command all use it. It checks fuel, starts the upstream FTL
-sequence with the destination and travel time worked out from the two sectors, and spends fuel when the ship enters
-hyperspace. If the region later becomes flyable hyperspace, only this call changes.
+Beacon jumps, NPC freighters, salvage returns and the admin command all use it. It starts the upstream FTL sequence with
+the destination and travel time worked out from the two sectors. If the region later becomes flyable hyperspace, only
+this call changes.
 
 **Normal FTL stays inside its sector.** `WfAllowFTL` refuses a destination map whose sector isn't the ship's own, so
 station maps in other sectors drop out of the MAP tab and console jumps. Planet hops and expeditions stay legal because
@@ -87,49 +87,28 @@ their maps belong to the ship's sector. Admin tools that move grids directly are
 
 A beacon is a large, indestructible structure on its own anchored grid (`WFJumpBeacon`), with an IFF label naming the
 sector it reaches. Its zone is a circle of `zoneRadius` (1500 m) around it, inside mass-scanner range (3 km), so anyone
-holding the beacon sees who is spooling.
+holding the beacon sees who is waiting on it.
 
-**Jumping.** A ship whose grid centre is in the zone and whose FTL drive is powered and ready sees a JUMP entry in the
-MAP tab for each linked sector, with the fuel it costs. Choosing one calls `TryTransit`.
+**Jumping.** The pilot hails the beacon platform like any other ship. Its traffic control answers at once: from a ship
+whose grid centre is in the zone and that isn't locked out, it replies "CONFIRMED. FTL SEQUENCE
+INITIATED." and starts the countdown; otherwise it says why not and the pilot hails again. No FTL drive is needed: the
+beacon does the jumping, which is the point of it, so a hull too small or too poor for a drive can still cross sectors.
 
 | Step | Rule |
 |---|---|
-| Spool | 20 s, scaled by mass and cargo the way FTL spool already is. Leaving the zone cancels it. |
-| Interruption | Hull damage over `cancelDamage` (structural, summed over the spool) cancels the jump. A drive powered down cancels it. No fuel is spent. |
+| Countdown | 10 s from the confirmation. Leaving the zone or hull damage over `cancelDamage` (structural, summed over the countdown) breaks it. |
+| Portal | A lightning bolt from the beacon opens a tilted bluespace portal as wide as the ship, a few metres ahead of its nose. It waits 60 s. |
+| Crossing | The ship's centre passing through the portal starts the upstream FTL sequence with a 1 s spool. |
 | Travel | 30 s plus 10 s per galaxy unit between the sectors, on the shared FTL map. |
-| Arrival | A random point on a ring 1 to 3 km from the linked beacon, placed with `TryFTLProximity`. Ships never stack on one exit point. |
+| Arrival | A random point on a ring 1 to 3 km from the linked beacon. Ships never stack on one exit point. |
 | Lockout | After arriving, a ship can't beacon-jump again for 120 s. Normal FTL keeps its own cooldown. |
 
-The spool is the combat window. Holding a beacon means stopping ships in that 20 s, and fleeing across a beacon needs a
-clean spool, so jumping is not an instant escape. The arrival ring spreads newcomers over about 25 km², which takes most of
-the profit out of camping the far side.
+The countdown is the combat window. Holding a beacon means stopping ships in those 10 s, and fleeing across a beacon
+needs a clean countdown, so jumping is not an instant escape. The arrival ring spreads newcomers over about 25 km², which
+takes most of the profit out of camping the far side.
 
-**Interdictor** (later phase). A ship module that, while powered, cancels any beacon spool within 1 km and shows on
-radar to every ship in that range.
-
-## Fuel
-
-Beacon jumps cost fuel. Normal FTL inside a sector does not, as in Starsector, where travel inside a system is free.
-
-```
-cost = baseCost x distance(from, to) x massFactor x drive.DriveMassMultiplier
-```
-
-`massFactor` uses the docked group's mass, as FTL timing already does, so a heavy hull pays more and the heavy drive's
-0.25 multiplier makes it the efficient hauler. Even when every link has the same distance at first, the cost is computed
-from galaxy positions.
-
-The FTL drive gets a jump-fuel tank (`WFJumpFuelComponent`: `Fuel`, `Capacity`). The helm's fuel gauge and the MAP tab
-show it next to the cost of each jump. Ships refuel in two ways:
-
-- **At a station.** A fuel service sells units at the station's Fusion Fuel price and draws them from its Fusion Fuel
-  stock. A dry station sells none.
-- **From crates.** A fuel intake machine on the ship takes a Fusion Fuel crate and converts it to units. A ship hauling
-  fuel can top up others, or itself.
-
-The good is the existing **Fusion Fuel**. Its chain already runs from the Fission Fuel import through Reactors at
-Caelestinus, so blockading Caelestinus or the import route starves jump fuel. A ship with an empty tank stays in its
-sector until it buys or is brought fuel. There is no free way out.
+Beacon jumps cost nothing. An earlier build charged Fusion Fuel per jump, with a tank on the drive, a station refuel
+service, a fuel intake and an interdictor machine; all of it was removed in favour of the hail and portal.
 
 ## Freight and the economy
 
@@ -137,7 +116,7 @@ The ledger and pool stay region-wide. Stations keep their own ledgers, and `Sect
 and records don't change.
 
 - **Routes.** Freight plans on the graph of sectors, where each edge is a link between two beacons. A virtual freighter
-  flies to the beacon, spools for the same 20 s, vanishes, and after the travel time appears on the far ring. A freighter
+  flies to the beacon, waits out the same 10 s countdown, vanishes, and after the travel time appears on the far ring. A freighter
   that is live as a grid when it reaches the zone jumps through `TryTransit` like a player ship.
 - **Blockades.** A beacon whose cell is held by a faction with `blockades: true` closes its edge to freight. A station that
   no open path reaches from where its imports come from counts as blockaded under the existing rule: imports run off the
@@ -145,8 +124,7 @@ and records don't change.
 - **Hauls.** `WFTradeMarketSystem.Origin` requires the origin and the chute to share a map. That check becomes "a
   different station", so a haul between sectors counts. A chute pays `1 + jumpBonus x jumps` times its price, where
   `jumps` is the shortest number of beacon links between the origin station's sector and the chute's (`jumpBonus` 0.15
-  to start). The bonus pays for the spool, the travel and the fuel. It must stay above the fuel a typical hauler burns
-  per crate, or no one hauls between sectors.
+  to start). The bonus pays for the time spent at the beacon and in transit.
 - **Encounters.** Station, route and circuit encounters are scheduled per sector instead of on `DefaultMap` only.
   Open-space placement already follows player maps.
 
@@ -180,32 +158,30 @@ Each place becomes per sector, or stays on the home sector on purpose:
 Four rules keep a later move to flyable hyperspace cheap:
 
 1. Every sector has a galaxy position, even though links alone would do.
-2. Fuel cost is a function of distance.
-3. Every crossing goes through `TryTransit`.
-4. Freight routes on the sector graph, not on a list of beacon pairs.
+2. Every crossing goes through `TryTransit`.
+3. Freight routes on the sector graph, not on a list of beacon pairs.
 
-With these, the move replaces `TryTransit`'s middle (a hyperspace map you fly across instead of the FTL map), turns fuel
-per jump into fuel per distance flown, and gives freight new edges. Beacons become the jump points where ships enter and
+With these, the move replaces `TryTransit`'s middle (a hyperspace map you fly across instead of the FTL map) and gives
+freight new edges. Beacons become the jump points where ships enter and
 leave hyperspace, so chokepoints survive at each sector's entry.
 
 ## Phases
 
 1. **Sectors.** `wfSector`, multi-map round setup with the home sector and one new sector, `SectorOf`, the `WfAllowFTL`
    sector rule, `TryTransit`, the per-map fixes above and an admin command to move a ship between sectors.
-2. **Beacons.** The structure, zone, MAP tab entry, spool, interruption, arrival ring, lockout and the region tab.
-3. **Fuel.** The tank, the costs, the station fuel service, the intake and the gauge.
-4. **Freight.** Sector-graph routing, beacon blockades, cross-sector hauls and per-sector encounters.
-5. **Military.** The interdictor, beacon claims in SectorControl and protection rules.
+2. **Beacons.** The structure, zone, hail, countdown, portal, arrival ring, lockout and the region tab.
+3. **Freight.** Sector-graph routing, beacon blockades, cross-sector hauls and per-sector encounters.
+4. **Military.** Beacon claims in SectorControl and protection rules.
 
 Each phase lands with integration tests under `Content.IntegrationTests/Tests/_WF/SectorTravel`: a grid and the loose
-entities near it cross intact, cross-sector console FTL is refused, an arrival on a sector map crushes nothing, fuel is
-spent once per jump and not on a cancelled spool, and a held beacon blockades the stations behind it.
+entities near it cross intact, cross-sector console FTL is refused, an arrival on a sector map crushes nothing, and a
+held beacon blockades the stations behind it.
 
 ## Decisions
 
 1. **Launch.** A proof of concept with two sectors: today's sector unchanged as the home sector, and one new sector, joined
    by a single pair of beacons. More sectors come once the plumbing is proven.
-2. **Fuel.** Fusion Fuel.
+2. **Fuel.** None: beacon jumps are free (an earlier Fusion Fuel cost was dropped).
 3. **Protection.** Provisional: the home side's beacon cell is protected like Halcyon's (`WFSectorProtectionSystem`), and
    the far side's is open. With one link, a claim on the home side would cut the whole new sector off, and the home
    sector's campaign drivers (Reaver, ADS) could do that by accident. The far side is where beacon fights happen.
@@ -225,34 +201,28 @@ Planet layers are stamped by a 10 s sweep, because they are built lazily. Expedi
 enters hyperspace. The telecom server is a sealed `WFSectorRelay` that needs no power, built onto every beacon
 platform.
 
-**Crossing.** The call is `TryTransit(ship, to, spool, travel, out reason)`: the caller passes the timings, and fuel is
-checked and spent by the beacon jump around it. Expedition returns stay inside a sector, so they don't cross and don't
+**Crossing.** The call is `TryTransit(ship, to, spool, travel, out reason)`: the caller passes the timings.
+Expedition returns stay inside a sector, so they don't cross and don't
 call it. The sector rule is `WfSameSector`, a marked line in `CanFTLTo` next to `WfAllowFTL`. Arrival points are picked
 clear of other grids by the module itself, because upstream position FTL does not use `TryFTLProximity`.
 
-**Beacons.** The platform is a static, protected, cleanup-immune grid. The JUMP entry is a JUMP BEACON panel
-(`WFBeaconJumpPanel`) with a cancel button: on the flight deck's STRATEGIC tab between DRIVE CONTROL and DESTINATION
-REGISTER, and in the cockpit's STRATEGIC page details. It hides its contents, never itself, because a hidden control
-gets no frame updates. The damage check sums damage over the ship's anchored structure,
-and a destroyed structure entity counts as the whole threshold. Entities floating free within 6 m of the hull go with
-it. The interdictor is a ship machine whose board is printed at the circuit imprinter (cargo boards). While powered it
-shows as a red star on the radar of ships within its 1 km range (Mono `RadarBlip`).
-
-**Fuel.** Every FTL drive that comes with a ship or station gets a full 300-unit tank. A drive built or rebuilt by
-construction starts empty, so rebuilding one is no free refill. A crate adds 100. The fuel service is a Refuel button
-on the same panel while the ship is docked to a station whose trade vendors sell Fusion Fuel; it charges the pilot's
-bank account at that station's vendor price and takes the units off its ledger stock. The fuel intake (`WFJumpFuelIntake`)
-is printed at the circuit imprinter. The helm's fuel gauge shows jump fuel on its tooltip; its bar still shows generator
-fuel.
+**Beacons.** The platform is a static, protected, cleanup-immune grid. Round setup puts a hidden shuttle console
+(`WFJumpBeaconConsole`) on the beacon, which makes the platform hailable; `WFJumpBeaconSystem` answers there as an
+automated end manned by the beacon itself, so the hail screen shows the beacon. It gives one line, starts the jump if it
+can, and closes the channel 5 s later. The bolt is the beam system's lightning (`WFJumpBeaconBolt`, harmless); a long
+one is drawn as 48 m out of the beacon and 48 m into the portal, because a beam spawns an entity per metre. The portal
+(`WFJumpPortal`) is the upstream blue portal sprite stretched to the ship's width plus 3 m a side and 0.3 of that deep,
+turned with the ship; the ship's nose is its grid's local north. A portal closes when its ship crosses, its jump breaks
+or it times out. The damage check sums damage over the ship's anchored structure, and a destroyed structure entity
+counts as the whole threshold. Entities floating free within 6 m of the hull go with it.
 
 **Freight and NPC crews.** A freight run with two or more stops ends in a linked sector 35% of the time, over an open
 link only (`ExtendAcrossSectors`). The route itself is unchanged: its last order is a Dock at a station in the other
 sector. Crossing is a crew order. When a crew's Dock, Escort or Follow target is in another sector, the crew system
 raises `WFCrewTargetAwayEvent` and SectorTravel answers with a `Cross` order from this sector's beacon on the first
 link of an open path. The crew fly it first, and the order ends only once they are over (`WFCrewCrossStepEvent`).
-- A live hull in the zone spools an NPC beacon jump, which needs no fuel or working drive but breaks like any other
-  spool; a broken spool is spooled again on the next step.
-- A simulated stand-in is moved to the far ring after the same spool and travel time. One built into a hull while it
+- A live hull in the zone starts an NPC beacon jump without hailing, and goes through as soon as its portal opens, but its countdown breaks like any other; a broken countdown is started again on the next step.
+- A simulated stand-in is moved to the far ring after the same countdown and travel time. One built into a hull while it
   waits hands the hull its queue, and the hull makes the jump.
 - Escorts cross the same way: their leader in another sector, or in hyperspace bound for one, is an Escort target
   elsewhere.
@@ -273,30 +243,26 @@ change.
 
 **Additions beyond the plan.**
 
-- The FTL drive itself also takes a Fusion Fuel crate, so a ship without an intake can still be refuelled by hand.
 - Beacon raids drive beacon claims in play. A beacon may name `raiders`, a blockading faction (Far Reach's names the
   Reavers). About every 60 minutes those raiders contest its cell for 10 minutes. If no ship flies the cell in that
   time, they take it, the link closes and Far Reach is cut off, announced region-wide. Players free the cell with the
   existing retake rule. The protected home-side beacon is never raided.
 
-**Admin command.** `wf_region status | jump <grid> <sector> | fuel <grid> <amount> | hold <sector> <link> <faction|free> | raid <sector> <link>`.
+**Admin command.** `wf_region status | jump <grid> <sector> | hold <sector> <link> <faction|free> | raid <sector> <link>`.
 
-**Tests.** `Content.IntegrationTests/Tests/_WF/SectorTravel/WFSectorTravelTest.cs`, 13 tests:
+**Tests.** `Content.IntegrationTests/Tests/_WF/SectorTravel/WFSectorTravelTest.cs`, 12 tests:
 - Console FTL is refused between sectors and unchanged inside one.
-- A beacon jump lands on the far ring, spends its fuel once, carries a loose crate along, crushes nothing on arrival and
-  locks the ship out.
-- A spool breaks outside the zone and near an interdictor without spending fuel.
+- A hailed beacon answers, confirms and starts the countdown.
+- A beacon's portal opens ahead of a ship with no FTL drive, and crossing it lands the ship on the far ring with a loose crate along,
+  closes the portal, crushes nothing on arrival and locks the ship out.
+- A countdown breaks outside the zone, and an uncrossed portal closes.
 - A held far beacon cuts Far Reach off and blockades its depot, while the home beacon refuses claims.
 - A crate from the next sector over earns one link's bonus.
-- Crates refuel a drive directly and through an intake.
-- A docked depot quotes jump fuel from its stock and refuses a buyer who can't pay.
 - Raiders contest the far beacon.
 - A crew ordered to dock at the Far Reach depot crosses and docks. The way over is a crossing from the home beacon,
   with none to a player ship or over a blockaded link.
-- A live hull's broken spool is spooled again until it crosses.
+- A live hull's broken countdown is started again until it crosses.
 - A stand-in built into a hull mid-crossing hands the hull its crossing, and the hull jumps.
-- A drive built by construction starts with an empty tank.
 
-`WFBeaconPanelTest` checks that the flight deck and the cockpit both carry the jump beacon panel, and that the panel
-never hides itself. `Content.Tests/_WF/SectorTravel/WFSectorGraphTest.cs` checks the link count between sectors: a
+`Content.Tests/_WF/SectorTravel/WFSectorGraphTest.cs` checks the link count between sectors: a
 closed link doesn't hide a sector that another open way still reaches.

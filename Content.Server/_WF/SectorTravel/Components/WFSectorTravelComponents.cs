@@ -1,9 +1,10 @@
+using System.Numerics;
 using Content.Shared._WF.SectorTravel;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.SectorTravel.Components;
 
-/// <summary>A jump beacon: ships inside its zone spool here and jump to the linked sector's beacon.</summary>
+/// <summary>A jump beacon: a ship inside its zone hails it, and it opens a portal ahead of the ship to the linked sector.</summary>
 [RegisterComponent]
 public sealed partial class WFJumpBeaconComponent : Component
 {
@@ -36,9 +37,17 @@ public sealed partial class WFJumpBeaconComponent : Component
     [DataField]
     public float ZoneRadius = 1500f;
 
-    /// <summary>Spool time before mass scaling, in seconds.</summary>
+    /// <summary>Seconds from a confirmed hail to the bolt that opens the portal.</summary>
     [DataField]
-    public float Spool = 20f;
+    public float Countdown = 10f;
+
+    /// <summary>How long an open portal waits for its ship.</summary>
+    [DataField]
+    public TimeSpan PortalLifetime = TimeSpan.FromSeconds(60);
+
+    /// <summary>Metres between the ship's nose and the portal it opens.</summary>
+    [DataField]
+    public float PortalGap = 12f;
 
     /// <summary>Travel time is this plus <see cref="TravelPerUnit"/> per galaxy unit, in seconds.</summary>
     [DataField]
@@ -58,16 +67,12 @@ public sealed partial class WFJumpBeaconComponent : Component
     [DataField]
     public TimeSpan Lockout = TimeSpan.FromSeconds(120);
 
-    /// <summary>Structural damage taken over the spool that cancels the jump.</summary>
+    /// <summary>Structural damage taken over the countdown that cancels the jump.</summary>
     [DataField]
     public float CancelDamage = 100f;
-
-    /// <summary>Jump fuel per galaxy unit before the ship's mass factor.</summary>
-    [DataField]
-    public float FuelPerUnit = 40f;
 }
 
-/// <summary>On a ship spooling a beacon jump: what to watch until it leaves.</summary>
+/// <summary>On a ship a beacon is sending through: the countdown, then the open portal it has to cross.</summary>
 [RegisterComponent]
 public sealed partial class WFBeaconJumpComponent : Component
 {
@@ -77,23 +82,41 @@ public sealed partial class WFBeaconJumpComponent : Component
     [DataField]
     public ProtoId<WFSectorPrototype> To;
 
-    /// <summary>The fuel the jump spends as the ship enters hyperspace.</summary>
+    /// <summary>When the beacon fires the bolt that opens the portal.</summary>
     [DataField]
-    public float Cost;
+    public TimeSpan Fires;
 
-    /// <summary>Damage summed over the ship's anchored structure when the spool began.</summary>
+    /// <summary>Damage summed over the ship's anchored structure when the countdown began.</summary>
     [DataField]
     public float Damage;
 
-    /// <summary>How many anchored damageable entities the ship had when the spool began; a loss counts as damage.</summary>
+    /// <summary>How many anchored damageable entities the ship had when the countdown began; a loss counts as damage.</summary>
     [DataField]
     public int Structure;
 
-    /// <summary>Set once the ship has entered hyperspace.</summary>
+    /// <summary>The open portal, once the bolt has fired.</summary>
+    [DataField]
+    public EntityUid? Portal;
+
+    /// <summary>The portal's centre on the map, the way through it, and half its width.</summary>
+    [DataField]
+    public Vector2 PortalAt;
+
+    [DataField]
+    public Vector2 Forward;
+
+    [DataField]
+    public float HalfWidth;
+
+    /// <summary>When an uncrossed portal closes.</summary>
+    [DataField]
+    public TimeSpan Expires;
+
+    /// <summary>Set once the ship has crossed and is in the FTL sequence.</summary>
     [DataField]
     public bool Departed;
 
-    /// <summary>An NPC ship's jump: no drive or fuel needed.</summary>
+    /// <summary>An NPC ship's jump: it goes through as soon as the portal opens.</summary>
     [DataField]
     public bool Npc;
 }
@@ -106,32 +129,18 @@ public sealed partial class WFBeaconLockoutComponent : Component
     public TimeSpan Until;
 }
 
-/// <summary>Jump fuel held by an FTL drive. Beacon jumps spend it; Fusion Fuel crates refill it.</summary>
+/// <summary>The beacon's traffic control: a hidden shuttle console on the platform that answers hails for the beacon.</summary>
 [RegisterComponent]
-public sealed partial class WFJumpFuelComponent : Component
+public sealed partial class WFJumpBeaconConsoleComponent : Component
 {
     [DataField]
-    public float Fuel = 300f;
+    public EntityUid Beacon;
 
+    /// <summary>Whether the current caller has had the beacon's answer.</summary>
     [DataField]
-    public float Capacity = 300f;
+    public bool Answered;
 
-    /// <summary>Fuel one crate of <see cref="Good"/> adds.</summary>
+    /// <summary>When the beacon closes the channel after answering.</summary>
     [DataField]
-    public float PerCrate = 100f;
-
-    [DataField]
-    public EntProtoId Good = "TradeGoodFusionFuel";
-}
-
-/// <summary>A ship machine that takes fusion fuel crates and fills the jump fuel tank of the drive the ship jumps with.</summary>
-[RegisterComponent]
-public sealed partial class WFJumpFuelIntakeComponent : Component;
-
-/// <summary>While powered, cancels any beacon spool within <see cref="Range"/> of it.</summary>
-[RegisterComponent]
-public sealed partial class WFJumpInterdictorComponent : Component
-{
-    [DataField]
-    public float Range = 1000f;
+    public TimeSpan HangUp;
 }

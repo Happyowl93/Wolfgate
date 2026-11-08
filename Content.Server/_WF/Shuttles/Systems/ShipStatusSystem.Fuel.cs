@@ -18,7 +18,6 @@ public sealed partial class ShipStatusSystem
     [Dependency] private MaterialStorageSystem _fuelMaterials = default!;
     [Dependency] private SharedSolutionContainerSystem _fuelSolutions = default!;
     [Dependency] private IPrototypeManager _fuelPrototypes = default!;
-    [Dependency] private Content.Server._WF.SectorTravel.WFJumpFuelSystem _jumpFuel = default!;
 
     private readonly Dictionary<EntityUid, ShipFuelSummary> _fuelReserves = new();
 
@@ -49,19 +48,6 @@ public sealed partial class ShipStatusSystem
         {
             if (InstalledFuelSource(uid, xform, grids, out var grid))
                 AddFuelReserve(grid, ReactorReserve(reactor));
-        }
-
-        // Beacon jump fuel rides along on the same reading, for the gauge's tooltip.
-        foreach (var grid in grids)
-        {
-            var (fuel, capacity) = _jumpFuel.Reserve(grid);
-            if (capacity <= 0f)
-                continue;
-
-            var summary = _fuelReserves.GetValueOrDefault(grid);
-            summary.JumpFuel = fuel;
-            summary.JumpCapacity = capacity;
-            _fuelReserves[grid] = summary;
         }
     }
 

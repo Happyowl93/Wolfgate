@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using Content.Server._WF.Hailing;
 using Content.Server._WF.SectorControl.Systems;
 using Content.Shared._WF.NpcCrew;
 using Content.Server._NF.GameRule;
@@ -20,11 +21,11 @@ using Content.Server.Power.Components;
 using Content.Server.Power.EntitySystems;
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Systems;
+using Content.Shared._WF.Hailing;
 using Content.Shared._WF.Lattice;
 using Content.Shared._WF.SectorControl;
 using Content.Shared._WF.SectorTravel;
 using Content.Shared._WF.TradeGoods;
-using Content.Shared.Interaction;
 using Content.Shared.Parallax;
 using Content.Shared.Shuttles.Components;
 using Content.Shared.Shuttles.Systems;
@@ -39,9 +40,9 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WF.SectorTravel;
 
 /// <summary>
-/// The region: normal FTL stays inside its sector, a beacon jump crosses with fuel spent and a lockout after, a spool
-/// breaks outside the zone or near an interdictor, a held beacon cuts its sector off, crates gain a bonus per link,
-/// and a fusion fuel crate refuels a drive.
+/// The region: normal FTL stays inside its sector, a hailed beacon opens a portal and crossing it jumps with a lockout
+/// after, a countdown breaks outside the zone and an uncrossed portal closes, a held beacon cuts its sector off, and
+/// crates gain a bonus per link.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFSectorTravelSystem))]
@@ -77,7 +78,7 @@ public sealed class WFSectorTravelTest
         var beacons = entMan.EntityQueryEnumerator<WFJumpBeaconComponent>();
         while (beacons.MoveNext(out var beacon))
         {
-            beacon.Spool = 1f;
+            beacon.Countdown = 0.5f;
             beacon.TravelBase = 1f;
             beacon.TravelPerUnit = 0f;
         }
@@ -99,8 +100,8 @@ public sealed class WFSectorTravelTest
         SetDefaultMap(entMan.System<GameTicker>(), oldDefault);
     }
 
-    /// <summary>A small ship with a drive that needs no power grid, at a map position.</summary>
-    private static EntityUid Ship(IEntityManager entMan, TestMapData map, MapCoordinates at)
+    /// <summary>A small ship at a map position, with an FTL drive that needs no power grid unless left without one.</summary>
+    private static EntityUid Ship(IEntityManager entMan, TestMapData map, MapCoordinates at, bool withDrive = true)
     {
         var mapSys = entMan.System<SharedMapSystem>();
         var grid = mapSys.CreateGridEntity(at.MapId);
@@ -115,6 +116,9 @@ public sealed class WFSectorTravelTest
         var xforms = entMan.System<SharedTransformSystem>();
         xforms.SetCoordinates(grid.Owner, new EntityCoordinates(mapSys.GetMapOrInvalid(at.MapId), at.Position));
         entMan.EnsureComponent<ShuttleComponent>(grid.Owner);
+        if (!withDrive)
+            return grid.Owner;
+
         var drive = entMan.SpawnEntity(Drive, new EntityCoordinates(grid.Owner, 0.5f, 0.5f));
         if (!entMan.GetComponent<TransformComponent>(drive).Anchored)
             xforms.AnchorEntity(drive);
@@ -266,8 +270,63 @@ public sealed class WFSectorTravelTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>A shuttle console on a ship that needs no power grid, and a stand-in with no mob state to man it.</summary>
+    private static (EntityUid Console, EntityUid Operator) Helm(IEntityManager entMan, EntityUid ship)
+    {
+        var console = entMan.SpawnEntity("ComputerShuttle", new EntityCoordinates(ship, -0.5f, 0.5f));
+        if (!entMan.GetComponent<TransformComponent>(console).Anchored)
+            entMan.System<SharedTransformSystem>().AnchorEntity(console);
+        Unplug(entMan, console);
+        return (console, entMan.SpawnEntity(null, new EntityCoordinates(ship, 0.5f, -0.5f)));
+    }
+
+    private static EntityUid Platform(IEntityManager entMan, string sector, string link)
+    {
+        return entMan.GetComponent<TransformComponent>(Beacon(entMan, sector, link)).GridUid!.Value;
+    }
+
     [Test]
-    public async Task BeaconJumpCrossesSpendsFuelAndLocksOut()
+    public async Task HailedBeaconConfirmsAndCountsDown()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        var hailing = entMan.System<HailingSystem>();
+        var oldDefault = MapId.Nullspace;
+        var ship = EntityUid.Invalid;
+        var helm = EntityUid.Invalid;
+
+        await server.WaitPost(() =>
+        {
+            oldDefault = LoadRegion(entMan, map);
+            Beacon(entMan, Home, Far).Comp.Countdown = 30f;
+            ship = Ship(entMan, map, InZone(entMan, Beacon(entMan, Home, Far)));
+            var (console, pilot) = Helm(entMan, ship);
+            helm = console;
+            Assert.That(hailing.TryHailAutomated(console, pilot, Platform(entMan, Home, Far), out var refused), Is.True,
+                $"The beacon platform can be hailed: {refused}");
+        });
+
+        await PoolManager.WaitUntil(server, () => entMan.HasComponent<WFBeaconJumpComponent>(ship), maxTicks: 300);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entMan.TryGetComponent<HailConsoleComponent>(helm, out var hail), "The channel is still open.");
+            Assert.That(hail!.Log.Any(line => !line.Own && line.Text.StartsWith("CONFIRMED")), "The beacon confirms the jump.");
+            Assert.That(entMan.GetComponent<WFBeaconJumpComponent>(ship).Portal, Is.Null, "The portal waits for the countdown.");
+        });
+
+        await server.WaitPost(() =>
+        {
+            entMan.DeleteEntity(ship);
+            UnloadRegion(entMan, map, oldDefault);
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task BeaconPortalJumpsAShipWithNoDriveAndLocksItOut()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
         var server = pair.Server;
@@ -275,30 +334,38 @@ public sealed class WFSectorTravelTest
         var entMan = server.EntMan;
         var sectors = entMan.System<WFSectorTravelSystem>();
         var beacons = entMan.System<WFJumpBeaconSystem>();
-        var fuel = entMan.System<WFJumpFuelSystem>();
+        var xforms = entMan.System<SharedTransformSystem>();
         var oldDefault = MapId.Nullspace;
         var ship = EntityUid.Invalid;
         var loose = EntityUid.Invalid;
-        var before = 0f;
-        var cost = 0f;
+        var portal = EntityUid.Invalid;
 
         await server.WaitPost(() =>
         {
             oldDefault = LoadRegion(entMan, map);
-            var zone = InZone(entMan, Beacon(entMan, Home, Far));
-            ship = Ship(entMan, map, zone);
-            // A crate floating free just off the hull, as EVA crew or loose cargo would be.
-            loose = Floating(entMan, new MapCoordinates(zone.Position + new Vector2(3f, 0f), zone.MapId));
+            ship = Ship(entMan, map, InZone(entMan, Beacon(entMan, Home, Far)), withDrive: false);
         });
         await server.WaitRunTicks(5);
+        await server.WaitAssertion(() => Assert.That(beacons.TryJump(ship, Far, out var refusal), Is.True,
+            $"The beacon jumps a ship with no FTL drive: {refusal}"));
 
-        await server.WaitAssertion(() =>
+        await PoolManager.WaitUntil(server, () => entMan.GetComponent<WFBeaconJumpComponent>(ship).Portal != null, maxTicks: 300);
+
+        await server.WaitPost(() =>
         {
-            before = fuel.Reserve(ship).Fuel;
-            cost = beacons.FuelCost(ship, Beacon(entMan, Home, Far))!.Value;
-            Assert.That(before, Is.GreaterThan(cost), "A new drive starts with a full tank.");
-            Assert.That(beacons.TryJump(ship, Far, out var refusal), Is.True, refusal);
-            Assert.That(entMan.HasComponent<WFBeaconJumpComponent>(ship));
+            var jump = entMan.GetComponent<WFBeaconJumpComponent>(ship);
+            portal = jump.Portal!.Value;
+            var nose = xforms.GetWorldRotation(ship).RotateVec(Vector2.UnitY);
+            var ahead = Vector2.Dot(xforms.GetWorldPosition(portal) - xforms.GetWorldPosition(ship), nose);
+            Assert.That(ahead, Is.GreaterThan(0f), "The portal opens ahead of the ship's nose.");
+            Assert.That(jump.HalfWidth * 2f, Is.GreaterThanOrEqualTo(3f), "The portal is at least as wide as the ship.");
+            Assert.That(entMan.HasComponent<FTLComponent>(ship), Is.False, "Nothing happens until the ship crosses.");
+
+            // Fly the ship's centre through the portal, with a crate floating free just off the hull.
+            var centre = entMan.GetComponent<MapGridComponent>(ship).LocalAABB.Center;
+            var through = jump.PortalAt + jump.Forward * 2f - xforms.GetWorldRotation(ship).RotateVec(centre);
+            xforms.SetCoordinates(ship, new EntityCoordinates(map.MapUid, through));
+            loose = Floating(entMan, new MapCoordinates(through + new Vector2(3f, 0f), map.MapId));
         });
 
         await PoolManager.WaitUntil(server, () => entMan.HasComponent<WFBeaconLockoutComponent>(ship), maxTicks: 3000);
@@ -306,11 +373,10 @@ public sealed class WFSectorTravelTest
         await server.WaitAssertion(() =>
         {
             var far = Beacon(entMan, Far, Home);
-            var xforms = entMan.System<SharedTransformSystem>();
             Assert.That(sectors.SectorOfEntity(ship), Is.EqualTo(Far), "The ship should arrive in Far Reach.");
             var distance = Vector2.Distance(xforms.GetWorldPosition(ship), xforms.GetWorldPosition(far));
             Assert.That(distance, Is.InRange(far.Comp.ArrivalMin - 10f, far.Comp.ArrivalMax + 10f), "Arrivals land on the ring.");
-            Assert.That(fuel.Reserve(ship).Fuel, Is.EqualTo(before - cost).Within(0.01f), "The jump spends its fuel once.");
+            Assert.That(entMan.Deleted(portal) || entMan.IsQueuedForDeletion(portal), "The portal closes behind the ship.");
             Assert.That(sectors.SectorOfEntity(loose), Is.EqualTo(Far), "Loose entities hugging the hull cross with it.");
 
             // Nothing under an arriving hull on a sector map is crushed.
@@ -333,7 +399,7 @@ public sealed class WFSectorTravelTest
     }
 
     [Test]
-    public async Task SpoolBreaksOutsideTheZoneAndNearAnInterdictor()
+    public async Task CountdownBreaksOutsideTheZoneAndAnUncrossedPortalCloses()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
         var server = pair.Server;
@@ -341,58 +407,56 @@ public sealed class WFSectorTravelTest
         var entMan = server.EntMan;
         var sectors = entMan.System<WFSectorTravelSystem>();
         var beacons = entMan.System<WFJumpBeaconSystem>();
-        var fuel = entMan.System<WFJumpFuelSystem>();
+        var xforms = entMan.System<SharedTransformSystem>();
         var oldDefault = MapId.Nullspace;
         var ship = EntityUid.Invalid;
-        var full = 0f;
+        var portal = EntityUid.Invalid;
 
         await server.WaitPost(() =>
         {
             oldDefault = LoadRegion(entMan, map);
-            foreach (var beacon in entMan.EntityQuery<WFJumpBeaconComponent>())
-            {
-                beacon.Spool = 30f;
-            }
-
-            ship = Ship(entMan, map, InZone(entMan, Beacon(entMan, Home, Far)));
+            var home = Beacon(entMan, Home, Far);
+            home.Comp.Countdown = 30f;
+            home.Comp.PortalLifetime = TimeSpan.FromSeconds(1);
+            ship = Ship(entMan, map, InZone(entMan, home));
         });
         await server.WaitRunTicks(5);
 
         await server.WaitAssertion(() =>
         {
-            full = fuel.Reserve(ship).Fuel;
             Assert.That(beacons.TryJump(ship, Far, out var refusal), Is.True, refusal);
-            var away = entMan.System<SharedTransformSystem>().GetMapCoordinates(Beacon(entMan, Home, Far)).Position + new Vector2(5000f, 0f);
-            entMan.System<SharedTransformSystem>().SetCoordinates(ship, new EntityCoordinates(map.MapUid, away));
+            var away = xforms.GetMapCoordinates(Beacon(entMan, Home, Far)).Position + new Vector2(5000f, 0f);
+            xforms.SetCoordinates(ship, new EntityCoordinates(map.MapUid, away));
         });
 
         await server.WaitRunTicks(60);
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(entMan.HasComponent<FTLComponent>(ship), Is.False, "Leaving the zone breaks the spool.");
-            Assert.That(entMan.HasComponent<WFBeaconJumpComponent>(ship), Is.False);
+            Assert.That(entMan.HasComponent<WFBeaconJumpComponent>(ship), Is.False, "Leaving the zone breaks the countdown.");
             Assert.That(sectors.SectorOfEntity(ship), Is.EqualTo(Home));
-            Assert.That(fuel.Reserve(ship).Fuel, Is.EqualTo(full), "A broken spool spends nothing.");
 
-            var zone = InZone(entMan, Beacon(entMan, Home, Far));
-            entMan.System<SharedTransformSystem>().SetCoordinates(ship, new EntityCoordinates(map.MapUid, zone.Position));
-            var jammer = Ship(entMan, map, new MapCoordinates(zone.Position + new Vector2(200f, 0f), zone.MapId));
-            var interdictor = entMan.SpawnEntity("WFJumpInterdictor", new EntityCoordinates(jammer, 1.5f, 0.5f));
-            Unplug(entMan, interdictor);
+            xforms.SetCoordinates(ship, new EntityCoordinates(map.MapUid, InZone(entMan, Beacon(entMan, Home, Far)).Position));
+            Beacon(entMan, Home, Far).Comp.Countdown = 0.5f;
+            Assert.That(beacons.TryJump(ship, Far, out var refusal), Is.True, refusal);
         });
 
-        await server.WaitRunTicks(5);
-        await server.WaitAssertion(() => Assert.That(beacons.TryJump(ship, Far, out var refusal), Is.True, refusal));
-        await server.WaitRunTicks(60);
+        await PoolManager.WaitUntil(server, () => entMan.GetComponent<WFBeaconJumpComponent>(ship).Portal != null, maxTicks: 300);
+        await server.WaitPost(() => portal = entMan.GetComponent<WFBeaconJumpComponent>(ship).Portal!.Value);
+        await PoolManager.WaitUntil(server, () => !entMan.HasComponent<WFBeaconJumpComponent>(ship), maxTicks: 300);
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(entMan.HasComponent<FTLComponent>(ship), Is.False, "An interdictor in range breaks the spool.");
+            Assert.That(entMan.Deleted(portal) || entMan.IsQueuedForDeletion(portal), "An uncrossed portal closes.");
+            Assert.That(entMan.HasComponent<FTLComponent>(ship), Is.False);
             Assert.That(sectors.SectorOfEntity(ship), Is.EqualTo(Home));
         });
 
-        await server.WaitPost(() => UnloadRegion(entMan, map, oldDefault));
+        await server.WaitPost(() =>
+        {
+            entMan.DeleteEntity(ship);
+            UnloadRegion(entMan, map, oldDefault);
+        });
         await pair.CleanReturnAsync();
     }
 
@@ -474,126 +538,6 @@ public sealed class WFSectorTravelTest
         });
 
         await server.WaitPost(() => UnloadRegion(entMan, map, oldDefault));
-        await pair.CleanReturnAsync();
-    }
-
-    [Test]
-    public async Task FusionFuelCrateRefuelsTheDrive()
-    {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entMan = server.EntMan;
-        var fuel = entMan.System<WFJumpFuelSystem>();
-
-        await server.WaitAssertion(() =>
-        {
-            var ship = Ship(entMan, map, new MapCoordinates(new Vector2(-3000f, 0f), map.MapId));
-            fuel.SetFuel(ship, 0f);
-            var drive = entMan.System<SharedShuttleSystem>().TryGetFTLDrive(ship, out var driveUid, out _) ? driveUid!.Value : EntityUid.Invalid;
-            var user = entMan.SpawnEntity(null, new EntityCoordinates(ship, 0.5f, 1.5f));
-            var crate = entMan.SpawnEntity("TradeGoodFusionFuel", new EntityCoordinates(ship, 0.5f, 1.5f));
-            var tank = entMan.GetComponent<WFJumpFuelComponent>(drive);
-
-            var ev = new InteractUsingEvent(user, crate, drive, new EntityCoordinates(ship, 0.5f, 0.5f));
-            entMan.EventBus.RaiseLocalEvent(drive, ev);
-            Assert.That(ev.Handled);
-            Assert.That(fuel.Reserve(ship).Fuel, Is.EqualTo(tank.PerCrate));
-            Assert.That(entMan.Deleted(crate) || entMan.IsQueuedForDeletion(crate), "The crate is used up.");
-            entMan.DeleteEntity(ship);
-        });
-
-        await pair.CleanReturnAsync();
-    }
-
-    [Test]
-    public async Task FuelIntakeFeedsTheShipsDrive()
-    {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entMan = server.EntMan;
-        var fuel = entMan.System<WFJumpFuelSystem>();
-
-        await server.WaitAssertion(() =>
-        {
-            var ship = Ship(entMan, map, new MapCoordinates(new Vector2(-3000f, 2000f), map.MapId));
-            fuel.SetFuel(ship, 0f);
-            var intake = entMan.SpawnEntity("WFJumpFuelIntake", new EntityCoordinates(ship, 1.5f, 0.5f));
-            var user = entMan.SpawnEntity(null, new EntityCoordinates(ship, 0.5f, 1.5f));
-            var crate = entMan.SpawnEntity("TradeGoodFusionFuel", new EntityCoordinates(ship, 0.5f, 1.5f));
-
-            var ev = new InteractUsingEvent(user, crate, intake, new EntityCoordinates(ship, 1.5f, 0.5f));
-            entMan.EventBus.RaiseLocalEvent(intake, ev);
-            Assert.That(ev.Handled, "The intake takes a fusion fuel crate.");
-            Assert.That(fuel.Reserve(ship).Fuel, Is.EqualTo(100f), "One crate fills the drive's tank by a crate's worth.");
-            entMan.DeleteEntity(ship);
-        });
-
-        await pair.CleanReturnAsync();
-    }
-
-    [Test]
-    public async Task DockedStationQuotesJumpFuelFromItsStock()
-    {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entMan = server.EntMan;
-        var sectors = entMan.System<WFSectorTravelSystem>();
-        var fuel = entMan.System<WFJumpFuelSystem>();
-        var market = entMan.System<WFTradeMarketSystem>();
-        var oldDefault = MapId.Nullspace;
-        var ship = EntityUid.Invalid;
-        var depot = EntityUid.Invalid;
-
-        await server.WaitPost(() =>
-        {
-            oldDefault = LoadRegion(entMan, map);
-            depot = FarStation(entMan, sectors);
-            market.SetVendorStock(depot, "TradeGoodFusionFuel", 50);
-            var at = entMan.System<SharedTransformSystem>().GetMapCoordinates(depot);
-            ship = Ship(entMan, map, new MapCoordinates(at.Position + new Vector2(300f, 0f), at.MapId));
-            var port = entMan.SpawnEntity("AirlockShuttle", new EntityCoordinates(ship, 1.5f, 0.5f));
-            if (!entMan.GetComponent<TransformComponent>(port).Anchored)
-                entMan.System<SharedTransformSystem>().AnchorEntity(port);
-        });
-        await server.WaitRunTicks(5);
-
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(depot.IsValid(), "Far Reach has its depot.");
-            var docking = entMan.System<DockingSystem>();
-            Entity<DockingComponent>? free = null;
-            var docks = entMan.EntityQueryEnumerator<DockingComponent, TransformComponent>();
-            while (docks.MoveNext(out var uid, out var dock, out var xform))
-            {
-                if (xform.GridUid == depot && !dock.Docked)
-                    free = (uid, dock);
-            }
-
-            var port = docking.GetDocks(ship).First();
-            Assert.That(free, Is.Not.Null, "The depot has a free dock.");
-            docking.Dock(port, free!.Value);
-            Assert.That(port.Comp.Docked, "The ship docks to the depot.");
-            fuel.SetFuel(ship, 0f);
-            var quote = fuel.ServiceQuote(ship);
-            Assert.That(quote, Is.Not.Null, "A docked depot that sells fusion fuel offers jump fuel.");
-            Assert.That(quote!.Value.Units, Is.EqualTo(300), "It fills the whole tank from a stocked shelf.");
-            Assert.That(quote.Value.Cost, Is.GreaterThan(0));
-
-            var stock = market.Row(depot, "TradeGoodFusionFuel").Stock;
-            var buyer = entMan.SpawnEntity(null, new EntityCoordinates(ship, 0.5f, 0.5f));
-            Assert.That(fuel.TryBuy(ship, buyer, out var refusal), Is.False, "Nobody without an account can pay.");
-            Assert.That(refusal, Is.EqualTo("wf-jump-fuel-service-funds"));
-            Assert.That(market.Row(depot, "TradeGoodFusionFuel").Stock, Is.EqualTo(stock), "A refused sale takes nothing off the shelf.");
-        });
-
-        await server.WaitPost(() =>
-        {
-            entMan.DeleteEntity(ship);
-            UnloadRegion(entMan, map, oldDefault);
-        });
         await pair.CleanReturnAsync();
     }
 
@@ -724,7 +668,7 @@ public sealed class WFSectorTravelTest
     }
 
     [Test]
-    public async Task ALiveHullRetriesABrokenSpoolUntilItCrosses()
+    public async Task ALiveHullRetriesABrokenCountdownUntilItCrosses()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
         var server = pair.Server;
@@ -739,18 +683,17 @@ public sealed class WFSectorTravelTest
         {
             oldDefault = LoadRegion(entMan, map);
             var home = Beacon(entMan, Home, Far);
-            home.Comp.Spool = 10f;
+            home.Comp.Countdown = 10f;
             beacon = home.Owner;
             hull = Ship(entMan, map, InZone(entMan, beacon));
 
             Assert.That(CrossStep(entMan, hull, beacon), Is.EqualTo(WFCrewCrossProgress.Waiting));
-            Assert.That(entMan.HasComponent<WFBeaconJumpComponent>(hull), "The hull spools a beacon jump.");
+            Assert.That(entMan.HasComponent<WFBeaconJumpComponent>(hull), "The hull starts a beacon countdown.");
 
-            // Hull damage, an interdictor or the zone breaks the spool: the next step spools again.
-            entMan.System<ShuttleSystem>().WfAbortFtlSpool(hull);
+            // Hull damage or leaving the zone breaks the countdown: the next step starts it again.
             entMan.RemoveComponent<WFBeaconJumpComponent>(hull);
             Assert.That(CrossStep(entMan, hull, beacon), Is.EqualTo(WFCrewCrossProgress.Waiting));
-            Assert.That(entMan.HasComponent<WFBeaconJumpComponent>(hull), "A broken spool is spooled again.");
+            Assert.That(entMan.HasComponent<WFBeaconJumpComponent>(hull), "A broken countdown is started again.");
         });
 
         await PoolManager.WaitUntil(server, () => sectors.SectorOfEntity(hull) == Far, maxTicks: 3000);
@@ -785,7 +728,7 @@ public sealed class WFSectorTravelTest
         {
             oldDefault = LoadRegion(entMan, map);
             var home = Beacon(entMan, Home, Far);
-            home.Comp.Spool = 30f;
+            home.Comp.Countdown = 30f;
             beacon = home.Owner;
             proxy = entMan.SpawnEntity(null, InZone(entMan, beacon));
             entMan.AddComponent<WFCrewVirtualShipComponent>(proxy);
@@ -823,32 +766,6 @@ public sealed class WFSectorTravelTest
             entMan.DeleteEntity(hull);
             UnloadRegion(entMan, map, oldDefault);
         });
-        await pair.CleanReturnAsync();
-    }
-
-    [Test]
-    public async Task ADriveBuiltByHandStartsEmpty()
-    {
-        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false });
-        var server = pair.Server;
-        var map = await pair.CreateTestMap();
-        var entMan = server.EntMan;
-
-        await server.WaitAssertion(() =>
-        {
-            var shipped = entMan.SpawnEntity(Drive, map.GridCoords);
-            Assert.That(entMan.GetComponent<WFJumpFuelComponent>(shipped).Fuel, Is.EqualTo(300f), "A drive that comes with a ship starts full.");
-
-            // Construction raises its change event on the new machine before initializing it, as a rebuilt drive is.
-            var built = entMan.CreateEntityUninitialized(Drive, map.GridCoords);
-            entMan.EventBus.RaiseLocalEvent(built, new Content.Server.Construction.ConstructionChangeEntityEvent(built, shipped), broadcast: true);
-            entMan.InitializeAndStartEntity(built);
-            Assert.That(entMan.GetComponent<WFJumpFuelComponent>(built).Fuel, Is.EqualTo(0f), "A drive built by hand starts empty.");
-
-            entMan.DeleteEntity(shipped);
-            entMan.DeleteEntity(built);
-        });
-
         await pair.CleanReturnAsync();
     }
 }

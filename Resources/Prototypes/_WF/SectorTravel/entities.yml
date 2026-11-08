@@ -2,7 +2,7 @@
 - type: entity
   id: WFJumpBeacon
   name: jump beacon
-  description: A bluespace anchor the size of a building. A ship inside its zone can spool a jump to the sector it reaches.
+  description: A bluespace anchor the size of a building. Hail it from inside its zone to jump to the next sector.
   categories: [ HideSpawnMenu ]
   placement:
     mode: SnapgridCenter
@@ -92,124 +92,74 @@
       - EncryptionKeyService
       - EncryptionKeyCommand
 
-# A ship machine that cancels every beacon spool within its range while powered.
+# The beacon's traffic control: a hidden shuttle console that makes the platform hailable, and with no power
+# receiver always powered. WFJumpBeaconSystem answers for the beacon; WFSectorTravelSystem spawns it on the beacon.
 - type: entity
-  parent: [ BaseMachinePowered, ConstructibleMachine ]
-  id: WFJumpInterdictor
-  name: jump interdictor
-  description: Floods the space around it with bluespace noise. While it runs, no ship within a kilometre can finish spooling a beacon jump.
+  id: WFJumpBeaconConsole
+  name: beacon traffic control
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+    anchored: true
+  - type: ShuttleConsole
+  - type: WFJumpBeaconConsole
+
+# The portal a beacon opens across a ship's nose. WFJumpBeaconSystem stretches it to the ship's width and deletes it
+# when the jump ends.
+- type: entity
+  id: WFJumpPortal
+  name: bluespace portal
+  description: Fly through to jump.
+  categories: [ HideSpawnMenu ]
   components:
   - type: Sprite
-    sprite: _Mono/Structures/Machines/beacon.rsi
+    sprite: Effects/portal.rsi
+    drawdepth: Effects
     layers:
-    - state: beacon
-    - state: beacon_lights_distress
+    - state: portal-blue
+      shader: unshaded
+  - type: PointLight
+    radius: 10
+    energy: 4
+    color: "#7fd4ff"
+    castShadows: false
+  - type: Tag
+    tags:
+    - HideContextMenu
+
+# The bolt a beacon throws to open a portal: lightning that harms nothing.
+- type: entity
+  id: WFJumpBeaconBolt
+  name: beacon bolt
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: Effects/lightning.rsi
+    drawdepth: Effects
+    layers:
+    - state: lightning_1
       shader: unshaded
   - type: Physics
-    bodyType: Static
-  - type: Fixtures
-    fixtures:
-      fix1:
-        shape:
-          !type:PhysShapeAabb
-          bounds: "-0.4,-0.4,0.4,0.4"
-        density: 190
-        mask:
-        - MachineMask
-        layer:
-        - MachineLayer
-  - type: Transform
-    anchored: true
-  - type: ApcPowerReceiver
-    powerLoad: 8000
-  - type: Machine
-    board: WFJumpInterdictorCircuitboard
-  - type: WFJumpInterdictor
-  # Shown on radar within its range while it runs; WFJumpBeaconSystem switches it with the power.
-  - type: RadarBlip
-    enabled: false
-    radarColor: "#e06c5a"
-    scale: 2
-    shape: star
-    maxDistance: 1000
+    canCollide: false
+  - type: PointLight
+    enabled: true
+    color: "#7fd4ff"
+    radius: 3.5
+    softness: 1
+    autoRot: true
+    castShadows: false
+  - type: Beam
+    sound: /Audio/Effects/Lightning/lightningshock.ogg
+  - type: TimedDespawn
+    lifetime: 1.5
+  - type: Tag
+    tags:
+    - HideContextMenu
 
+# An end point for a long beacon bolt, which is drawn only near its two ends.
 - type: entity
-  parent: BaseMachineCircuitboard
-  id: WFJumpInterdictorCircuitboard
-  name: jump interdictor machine board
-  description: A machine printed circuit board for a jump interdictor.
-  suffix: Machine Board
+  id: WFJumpBeaconBoltAnchor
+  categories: [ HideSpawnMenu ]
   components:
-  - type: Sprite
-    state: engineering
-  - type: MachineBoard
-    prototype: WFJumpInterdictor
-    requirements:
-      Capacitor: 4
-      Manipulator: 2
-    stackRequirements:
-      Steel: 10
-      Plasma: 10
-
-- type: latheRecipe
-  parent: BaseCircuitboardRecipe
-  id: WFJumpInterdictorCircuitboard
-  result: WFJumpInterdictorCircuitboard
-  completetime: 8
-  materials:
-    Steel: 600
-    Glass: 500
-    Gold: 300
-    Plasma: 500
-
-# Takes fusion fuel crates and fills the jump fuel tank of the ship's FTL drive.
-- type: entity
-  parent: [ BaseMachine, ConstructibleMachine ]
-  id: WFJumpFuelIntake
-  name: jump fuel intake
-  description: A hopper plumbed into the FTL drive's jump fuel tank. Feed it fusion fuel crates.
-  components:
-  - type: Sprite
-    sprite: Structures/Machines/telecomms.rsi
-    snapCardinals: true
-    layers:
-    - state: icon
-  - type: Physics
-    bodyType: Static
-  - type: Fixtures
-    fixtures:
-      fix1:
-        shape:
-          !type:PhysShapeAabb
-          bounds: "-0.4,-0.4,0.4,0.4"
-        density: 190
-        mask:
-        - MachineMask
-        layer:
-        - MachineLayer
-  - type: Transform
-    anchored: true
-  - type: Machine
-    board: WFJumpFuelIntakeCircuitboard
-  - type: WFJumpFuelIntake
-
-- type: entity
-  parent: BaseMachineCircuitboard
-  id: WFJumpFuelIntakeCircuitboard
-  name: jump fuel intake machine board
-  description: A machine printed circuit board for a jump fuel intake.
-  suffix: Machine Board
-  components:
-  - type: Sprite
-    state: engineering
-  - type: MachineBoard
-    prototype: WFJumpFuelIntake
-    requirements:
-      MatterBin: 2
-    stackRequirements:
-      Steel: 5
-
-- type: latheRecipe
-  parent: BaseCircuitboardRecipe
-  id: WFJumpFuelIntakeCircuitboard
-  result: WFJumpFuelIntakeCircuitboard
+  - type: TimedDespawn
+    lifetime: 2

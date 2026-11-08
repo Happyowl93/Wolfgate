@@ -61,6 +61,7 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
     [Dependency] private StationSystem _station = default!;
 
     private static readonly EntProtoId BeaconPrototype = "WFJumpBeacon";
+    private static readonly EntProtoId BeaconConsolePrototype = "WFJumpBeaconConsole";
     /// <summary>The beacon platform grid; it carries the beacon and the sector's radio relay.</summary>
     private static readonly ResPath BeaconPlatformPath = new("/Maps/_WF/SectorTravel/jump_beacon_platform.yml");
 
@@ -241,7 +242,7 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
         return grids.Count == 0;
     }
 
-    /// <summary>Builds a beacon platform for each of the sector's links, with the beacon and a radio relay on it.</summary>
+    /// <summary>Builds a beacon platform for each of the sector's links, with the beacon, its hail console and a radio relay on it.</summary>
     private void SpawnBeacons(WFSectorPrototype sector, EntityUid mapUid)
     {
         var mapId = Transform(mapUid).MapID;
@@ -288,6 +289,9 @@ public sealed partial class WFSectorTravelSystem : EntitySystem
             comp.RaidWarning = entry.RaidWarning;
             comp.NextRaid = _timing.CurTime + NextRaidIn(comp);
             _meta.SetEntityName(beacon, Loc.GetString("wf-sector-beacon-name", ("sector", Loc.GetString(link.Name))));
+
+            var console = Spawn(BeaconConsolePrototype, Transform(beacon).Coordinates);
+            EnsureComp<WFJumpBeaconConsoleComponent>(console).Beacon = beacon;
         }
     }
 
