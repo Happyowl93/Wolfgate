@@ -34,6 +34,7 @@ public sealed partial class WFJumpBeaconSystem : EntitySystem
     [Dependency] private IPrototypeManager _proto = default!;
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private SharedMapSystem _maps = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedScaleVisualsSystem _scale = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
@@ -67,8 +68,8 @@ public sealed partial class WFJumpBeaconSystem : EntitySystem
     /// <summary>The spool after crossing, in seconds: the beacon has already done the charging.</summary>
     private const float CrossingSpool = 1f;
 
-    /// <summary>How far past the portal plane a ship's centre still counts as going through it, in metres.</summary>
-    private const float CrossDepth = 20f;
+    /// <summary>The share of the portal's sprite the ring fills: a ship tile inside it counts as touching.</summary>
+    private const float PortalBody = 0.9f;
 
     private TimeSpan _nextCheck;
     private readonly HashSet<EntityUid> _group = new();
@@ -314,8 +315,10 @@ public sealed partial class WFJumpBeaconSystem : EntitySystem
 
         ship.Comp.Portal = portal;
         ship.Comp.PortalAt = position;
+        ship.Comp.PortalAngle = _transform.GetWorldRotation(ship);
         ship.Comp.Forward = forward;
         ship.Comp.HalfWidth = width / 2f;
+        ship.Comp.HalfDepth = width * PortalTilt / 2f;
         ship.Comp.Expires = _timing.CurTime + (beacon?.PortalLifetime ?? TimeSpan.FromSeconds(60));
 
         if (ship.Comp.Npc)
@@ -357,7 +360,7 @@ public sealed partial class WFJumpBeaconSystem : EntitySystem
         _beam.TryCreateBeam(inward, portal, BoltPrototype, state);
     }
 
-    /// <summary>Sends every ship whose centre has passed through its open portal on its jump.</summary>
+    /// <summary>Sends every ship with any tile touching its open portal on its jump.</summary>
     private void UpdatePortals()
     {
         var crossed = new List<Entity<WFBeaconJumpComponent>>();
@@ -367,12 +370,13 @@ public sealed partial class WFJumpBeaconSystem : EntitySystem
             if (jump.Departed || jump.Portal is not { } portal || !Exists(portal))
                 continue;
 
-            // Through the portal plane from behind, within its width.
-            var offset = GridCentre(ship) - jump.PortalAt;
-            var depth = Vector2.Dot(offset, jump.Forward);
-            var lateral = Vector2.Dot(offset, new Vector2(jump.Forward.Y, -jump.Forward.X));
-            if (Transform(ship).MapUid == Transform(portal).MapUid
-                && depth is >= 0f and <= CrossDepth && MathF.Abs(lateral) <= jump.HalfWidth)
+            if (Transform(ship).MapUid != Transform(portal).MapUid || !TryComp<MapGridComponent>(ship, out var grid))
+                continue;
+
+            var size = new Vector2(jump.HalfWidth, jump.HalfDepth) * 2f * PortalBody;
+            var area = new Box2Rotated(Box2.CenteredAround(jump.PortalAt, size), jump.PortalAngle, jump.PortalAt);
+            var tiles = _maps.GetTilesIntersecting(ship, grid, area);
+            if (tiles.MoveNext(out _))
                 crossed.Add((ship, jump));
         }
 

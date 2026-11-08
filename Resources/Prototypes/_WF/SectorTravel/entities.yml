@@ -105,13 +105,15 @@
   - type: WFJumpBeaconConsole
 
 # The portal a beacon opens across a ship's nose. WFJumpBeaconSystem stretches it to the ship's width and deletes it
-# when the jump ends.
+# when the jump ends. It never traverses grids, or the ship flying into it would pick it up and carry it.
 - type: entity
   id: WFJumpPortal
   name: bluespace portal
   description: Fly through to jump.
   categories: [ HideSpawnMenu ]
   components:
+  - type: Transform
+    gridTraversal: false
   - type: Sprite
     sprite: Effects/portal.rsi
     drawdepth: Effects

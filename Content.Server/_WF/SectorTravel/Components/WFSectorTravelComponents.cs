@@ -98,15 +98,21 @@ public sealed partial class WFBeaconJumpComponent : Component
     [DataField]
     public EntityUid? Portal;
 
-    /// <summary>The portal's centre on the map, the way through it, and half its width.</summary>
+    /// <summary>The portal's centre and rotation on the map, the way through it, and half its width and depth.</summary>
     [DataField]
     public Vector2 PortalAt;
+
+    [DataField]
+    public Angle PortalAngle;
 
     [DataField]
     public Vector2 Forward;
 
     [DataField]
     public float HalfWidth;
+
+    [DataField]
+    public float HalfDepth;
 
     /// <summary>When an uncrossed portal closes.</summary>
     [DataField]

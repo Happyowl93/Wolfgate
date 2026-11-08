@@ -361,11 +361,15 @@ public sealed class WFSectorTravelTest
             Assert.That(jump.HalfWidth * 2f, Is.GreaterThanOrEqualTo(3f), "The portal is at least as wide as the ship.");
             Assert.That(entMan.HasComponent<FTLComponent>(ship), Is.False, "Nothing happens until the ship crosses.");
 
-            // Fly the ship's centre through the portal, with a crate floating free just off the hull.
-            var centre = entMan.GetComponent<MapGridComponent>(ship).LocalAABB.Center;
-            var through = jump.PortalAt + jump.Forward * 2f - xforms.GetWorldRotation(ship).RotateVec(centre);
-            xforms.SetCoordinates(ship, new EntityCoordinates(map.MapUid, through));
-            loose = Floating(entMan, new MapCoordinates(through + new Vector2(3f, 0f), map.MapId));
+            // Bring only the ship's nose into the portal's near edge, with a crate floating free just off the hull.
+            var bounds = entMan.GetComponent<MapGridComponent>(ship).LocalAABB;
+            var centre = jump.PortalAt - jump.Forward * (jump.HalfDepth * 0.9f + bounds.Height / 2f - 0.5f);
+            var origin = centre - xforms.GetWorldRotation(ship).RotateVec(bounds.Center);
+            Assert.That(Vector2.Distance(centre, jump.PortalAt), Is.GreaterThan(jump.HalfDepth), "The ship's centre stays outside.");
+            xforms.SetCoordinates(ship, new EntityCoordinates(map.MapUid, origin));
+            loose = Floating(entMan, new MapCoordinates(origin + new Vector2(3f, 0f), map.MapId));
+            Assert.That(entMan.GetComponent<TransformComponent>(portal).ParentUid, Is.EqualTo(map.MapUid),
+                "The ship flying into the portal doesn't pick it up.");
         });
 
         await PoolManager.WaitUntil(server, () => entMan.HasComponent<WFBeaconLockoutComponent>(ship), maxTicks: 3000);
