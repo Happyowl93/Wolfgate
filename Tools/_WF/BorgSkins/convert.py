@@ -4,7 +4,8 @@
     python Tools/_WF/BorgSkins/convert.py <dir with the .dmi files> <Bubberstation commit sha>
 
 Rewrites Resources/Textures/_WF/BorgSkins, the subtype and chassis prototypes and the chassis names.
-Needs Pillow. The DMIs are modular_skyrat/modules/borgs/icons/{tallrobot,widerobot}*.dmi.
+Needs Pillow. The folder holds modular_skyrat/modules/borgs/icons/{tallrobot,widerobot}*.dmi and, in a zubbers
+subfolder, modular_zubbers/code/modules/silicons/borgs/sprites/tallrobot*.dmi (the dullahans).
 """
 import json
 import math
@@ -19,7 +20,9 @@ ROOT = Path(__file__).resolve().parents[3]
 TEXTURES = ROOT / 'Resources/Textures/_WF/BorgSkins'
 PROTOTYPES = ROOT / 'Resources/Prototypes/_WF/BorgSkins'
 LOCALE = ROOT / 'Resources/Locale/en-US/_WF/BorgSkins'
-SOURCE = 'https://github.com/Bubberstation/Bubberstation/blob/{sha}/modular_skyrat/modules/borgs/icons/{file}'
+SOURCE = 'https://github.com/Bubberstation/Bubberstation/blob/{sha}/{folder}/{file}'
+SKYRAT = 'modular_skyrat/modules/borgs/icons'
+ZUBBERS = 'modular_zubbers/code/modules/silicons/borgs/sprites'
 
 # Bubber department -> (folder and ID part, borg type, word used in the chassis name).
 # Departments with no borg type here are offered under the generic type.
@@ -35,6 +38,8 @@ DEPTS = {
     'ninja': ('Ninja', 'generic', 'ninja'),
     'syndi': ('Syndicate', 'generic', 'syndicate'),
     'clown': ('Clown', 'generic', 'clown'),
+    'sci': ('Research', 'generic', 'research'),
+    'tarkon': ('Tarkon', 'generic', 'Tarkon'),
 }
 
 # Borg type -> (body state, the type has a spriteBodyMovementState).
@@ -47,7 +52,7 @@ TYPES = {
     'service': ('service', False),
 }
 
-# kind, department, skin name, icon state, state the eye and lamp overlays come from if not its own.
+# kind (tall, wide, or dullahan: tall, from the zubbers sheets), department, skin name, icon state, state the eye and lamp overlays come from if not its own.
 # Names and light keys follow Bubberstation's borg_skins lists.
 SKINS = [
     ('tall', 'eng', 'Meka', 'mekaengi', None),
@@ -151,12 +156,38 @@ SKINS = [
     ('wide', 'pk', 'Drake', 'drakepeace', None),
     ('wide', 'pk', 'Vale', 'valepeace', None),
     ('wide', 'pk', 'Borgi', 'borgi', None),
+    ('dullahan', 'eng', 'Dullahan', 'dullahaneng', None),
+    ('dullahan', 'eng', 'Dullahan (Taur)', 'dullahantaureng', None),
+    ('dullahan', 'jani', 'Dullahan', 'dullahanjani', None),
+    ('dullahan', 'jani', 'Dullahan (Taur)', 'dullahantaurjani', None),
+    ('dullahan', 'med', 'Dullahan', 'dullahanmed', None),
+    ('dullahan', 'med', 'Dullahan (Taur)', 'dullahantaurmed', None),
+    ('dullahan', 'mine', 'Dullahan', 'dullahanmine', None),
+    ('dullahan', 'mine', 'Dullahan (Taur)', 'dullahantaurmine', None),
+    ('dullahan', 'serv', 'Dullahan', 'dullahanserv', None),
+    ('dullahan', 'serv', 'Dullahan (Alt)', 'dullahanserv_alt', None),
+    ('dullahan', 'serv', 'Dullahan (Taur)', 'dullahantaurserv', None),
+    ('dullahan', 'cargo', 'Dullahan', 'dullahancargo', None),
+    ('dullahan', 'cargo', 'Dullahan (Taur)', 'dullahantaurcargo', None),
+    ('dullahan', 'sec', 'Dullahan', 'dullahansec', None),
+    ('dullahan', 'pk', 'Dullahan', 'dullahanpeace', None),
+    ('dullahan', 'pk', 'Dullahan (Taur)', 'dullahantaurpeace', None),
+    ('dullahan', 'ninja', 'Dullahan', 'dullahanninja', None),
+    ('dullahan', 'ninja', 'Dullahan (Taur)', 'dullahantaurninja', None),
+    ('dullahan', 'syndi', 'Dullahan', 'dullahansyndi', None),
+    ('dullahan', 'syndi', 'Dullahan (Taur)', 'dullahantaursyndi', None),
+    ('dullahan', 'clown', 'Dullahan', 'dullahanclown', None),
+    ('dullahan', 'clown', 'Dullahan (Taur)', 'dullahantaurclown', None),
+    ('dullahan', 'sci', 'Dullahan', 'dullahansci', None),
+    ('dullahan', 'tarkon', 'Dullahan', 'dullahantarkon', None),
 ]
 
 FILES = {
     ('tall', d): f'tallrobot_{d}.dmi' for d in DEPTS
 } | {
     ('wide', d): ('widerobots_cargo.dmi' if d == 'cargo' else f'widerobot_{d}.dmi') for d in DEPTS
+} | {
+    ('dullahan', d): f'zubbers/tallrobot_{"syndie" if d == "syndi" else d}.dmi' for d in DEPTS
 }
 
 # Extra poses kept in each skin's RSI; nothing uses them yet.
@@ -171,6 +202,7 @@ class Dmi:
     def __init__(self, path):
         image = Image.open(path)
         self.name = path.name
+        self.folder = ZUBBERS if path.parent.name == 'zubbers' else SKYRAT
         self.width = self.height = 32
         self.states = {}
         self.used = set()
@@ -256,7 +288,7 @@ def write_meta(folder, dmi, entries, credit, sha):
     meta = {
         'version': 1,
         'license': 'CC-BY-SA-3.0',
-        'copyright': f'{credit}Taken from Bubberstation at {SOURCE.format(sha=sha, file=dmi.name)}',
+        'copyright': f'{credit}Taken from Bubberstation at {SOURCE.format(sha=sha, folder=dmi.folder, file=dmi.name)}',
         'size': {'x': dmi.width, 'y': dmi.height},
         'states': entries,
     }
@@ -264,6 +296,8 @@ def write_meta(folder, dmi, entries, credit, sha):
 
 
 def credit_for(kind, icon):
+    if kind == 'dullahan':
+        return 'Dullahan borg by Toriate and Cecily. '
     if kind == 'tall':
         if icon.startswith('k4t'):
             return 'K4T tallborg by zy.dras. '
@@ -295,7 +329,8 @@ def main():
         dmi = load(FILES[kind, dept])
         ident = folder_name + ''.join(w[0].upper() + w[1:] for w in re.findall(r'[A-Za-z0-9]+', name))
         snake = re.sub(r'[^a-z0-9]+', '_', name.lower()).strip('_')
-        rsi = TEXTURES / kind.title() / folder_name / f'{snake}.rsi'
+        size = 'Wide' if kind == 'wide' else 'Tall'
+        rsi = TEXTURES / size / folder_name / f'{snake}.rsi'
         rsi.mkdir(parents=True)
 
         lights = light_key or icon
@@ -341,7 +376,7 @@ def main():
         entry = (f'- type: borgSubtype\n  id: {subtype}\n  parentBorgType: {borg_type}\n'
                  f'  spritePath: {path}\n  dummyPrototype: {dummy}\n')
         extra = []
-        if kind == 'tall':
+        if size == 'Tall':
             extra.append('  offset: 0, 0.5')
         if animated:
             extra.append('  animated: true')
@@ -363,10 +398,15 @@ def main():
         if dmi is None:
             continue
         entries = []
-        folder = TEXTURES / kind.title() / DEPTS[dept][0] / 'extras.rsi'
+        own = kind == 'dullahan'
+        size = 'Wide' if kind == 'wide' else 'Tall'
+        folder = TEXTURES / size / DEPTS[dept][0] / ('dullahan_extras.rsi' if own else 'extras.rsi')
         for name, variants in dmi.states.items():
             for state in variants:
                 if (name, state['move']) in dmi.used or name in ('credit', 'k4tcredit'):
+                    continue
+                # The zubbers sheets also hold skins that aren't ported.
+                if own and not name.startswith(('dullahan', 'ov-opencover')):
                     continue
                 folder.mkdir(parents=True, exist_ok=True)
                 out = safe(name) + ('_moving' if state['move'] else '')
@@ -374,7 +414,7 @@ def main():
                     out += '_alt'
                 entries.append(write_state(folder, out, *dmi.take(name, state['move'])))
         if entries:
-            write_meta(folder, dmi, entries, '', sha)
+            write_meta(folder, dmi, entries, credit_for(kind, '') if own else '', sha)
 
     PROTOTYPES.mkdir(parents=True, exist_ok=True)
     LOCALE.mkdir(parents=True, exist_ok=True)

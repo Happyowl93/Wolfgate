@@ -807,3 +807,195 @@
   components:
   - type: BorgSwitchableSubtype
     borgSubtype: WFBorgSkinPeacekeeperBorgi
+
+- type: entity
+  id: WFBorgChassisEngineeringDullahan
+  parent: BorgChassisEngineer
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinEngineeringDullahan
+
+- type: entity
+  id: WFBorgChassisEngineeringDullahanTaur
+  parent: BorgChassisEngineer
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinEngineeringDullahanTaur
+
+- type: entity
+  id: WFBorgChassisJanitorDullahan
+  parent: BorgChassisJanitor
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinJanitorDullahan
+
+- type: entity
+  id: WFBorgChassisJanitorDullahanTaur
+  parent: BorgChassisJanitor
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinJanitorDullahanTaur
+
+- type: entity
+  id: WFBorgChassisMedicalDullahan
+  parent: BorgChassisMedical
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMedicalDullahan
+
+- type: entity
+  id: WFBorgChassisMedicalDullahanTaur
+  parent: BorgChassisMedical
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMedicalDullahanTaur
+
+- type: entity
+  id: WFBorgChassisMiningDullahan
+  parent: BorgChassisMining
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMiningDullahan
+
+- type: entity
+  id: WFBorgChassisMiningDullahanTaur
+  parent: BorgChassisMining
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMiningDullahanTaur
+
+- type: entity
+  id: WFBorgChassisServiceDullahan
+  parent: BorgChassisService
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinServiceDullahan
+
+- type: entity
+  id: WFBorgChassisServiceDullahanAlt
+  parent: BorgChassisService
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinServiceDullahanAlt
+
+- type: entity
+  id: WFBorgChassisServiceDullahanTaur
+  parent: BorgChassisService
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinServiceDullahanTaur
+
+- type: entity
+  id: WFBorgChassisCargoDullahan
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinCargoDullahan
+
+- type: entity
+  id: WFBorgChassisCargoDullahanTaur
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinCargoDullahanTaur
+
+- type: entity
+  id: WFBorgChassisSecurityDullahan
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinSecurityDullahan
+
+- type: entity
+  id: WFBorgChassisPeacekeeperDullahan
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinPeacekeeperDullahan
+
+- type: entity
+  id: WFBorgChassisPeacekeeperDullahanTaur
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinPeacekeeperDullahanTaur
+
+- type: entity
+  id: WFBorgChassisNinjaDullahan
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinNinjaDullahan
+
+- type: entity
+  id: WFBorgChassisNinjaDullahanTaur
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinNinjaDullahanTaur
+
+- type: entity
+  id: WFBorgChassisSyndicateDullahan
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinSyndicateDullahan
+
+- type: entity
+  id: WFBorgChassisSyndicateDullahanTaur
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinSyndicateDullahanTaur
+
+- type: entity
+  id: WFBorgChassisClownDullahan
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinClownDullahan
+
+- type: entity
+  id: WFBorgChassisClownDullahanTaur
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinClownDullahanTaur
+
+- type: entity
+  id: WFBorgChassisResearchDullahan
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinResearchDullahan
+
+- type: entity
+  id: WFBorgChassisTarkonDullahan
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinTarkonDullahan
