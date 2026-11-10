@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Converts Bubberstation's tall (32x64) and wide (64x32) borg DMIs into borg subtype RSIs.
+"""Converts Bubberstation's tall (32x64), wide (64x32) and large (64x64) borg DMIs into borg subtype RSIs.
 
     python Tools/_WF/BorgSkins/convert.py <dir with the .dmi files> <Bubberstation commit sha>
 
 Rewrites Resources/Textures/_WF/BorgSkins, the subtype and chassis prototypes and the chassis names.
 Needs Pillow. The folder holds modular_skyrat/modules/borgs/icons/{tallrobot,widerobot}*.dmi and, in a zubbers
-subfolder, modular_zubbers/code/modules/silicons/borgs/sprites/tallrobot*.dmi (the dullahans).
+subfolder, modular_zubbers/code/modules/silicons/borgs/sprites: tallrobot*.dmi (the dullahans) and the
+kittycatborgs, myomer and wyvern folders with their CREDIT and LICENSE files. A readme.md next to the skyrat sheets
+(from the tallborg artist) is copied along.
 """
 import json
 import math
@@ -52,7 +54,7 @@ TYPES = {
     'service': ('service', False),
 }
 
-# kind (tall, wide, or dullahan: tall, from the zubbers sheets), department, skin name, icon state, state the eye and lamp overlays come from if not its own.
+# kind (tall, wide, or dullahan: tall, from the zubbers sheets; the PACKS kinds are added below), department, skin name, icon state, state the eye and lamp overlays come from if not its own.
 # Names and light keys follow Bubberstation's borg_skins lists.
 SKINS = [
     ('tall', 'eng', 'Meka', 'mekaengi', None),
@@ -190,6 +192,38 @@ FILES = {
     ('dullahan', d): f'zubbers/tallrobot_{"syndie" if d == "syndi" else d}.dmi' for d in DEPTS
 }
 
+# Skin sets with a folder, a sheet per department and a licence of their own:
+# kind -> (skin name, zubbers folder, sheet name pattern, {department: (sheet name part, icon state)}).
+PACKS = {
+    'kitty': ('K1-T7Y', 'kittycatborgs/kittyborg', 'Kittyborg_{}.dmi', {
+        'eng': ('engi', 'engi'), 'jani': ('jani', 'jani'), 'med': ('medicat', 'medicat'), 'mine': ('mine', 'mining'),
+        'serv': ('service', 'service'), 'sec': ('sec', 'sec'), 'sci': ('sci', 'sci'),
+    }),
+    'cat': ('C9-T7O', 'kittycatborgs/catborgs', 'catborg_{}.dmi', {
+        'eng': ('engineering', 'engi'), 'med': ('medical', 'meowdical'), 'mine': ('mining', 'mining'),
+        'serv': ('service', 'service'), 'sec': ('security', 'sec'), 'sci': ('science', 'sci'),
+    }),
+    'myomer': ('Myomer', 'myomer', 'ProjectMyomer{}.dmi', {
+        'eng': ('Engi', 'myomer-engi'), 'jani': ('Jani', 'myomer-jani'), 'med': ('Medical', 'myomer-med'),
+        'mine': ('Mining', 'myomer-mine'), 'serv': ('Service', 'myomer-serv'), 'cargo': ('Cargo', 'myomer-cargo'),
+        'sec': ('Sec', 'myomer-sec'), 'pk': ('PeaceKeeper', 'myomer-pk'), 'ninja': ('Ninja', 'myomer-ninja'),
+        'syndi': ('Syndi', 'myomer-syndi'), 'sci': ('Sci', 'myomer-sci'),
+    }),
+    'wyvern': ('Wyvern', 'wyvern', 'WyvernFrame{}.dmi', {
+        'eng': ('Enginerding', 'wyvern-engi'), 'jani': ('Jani', 'wyvern-jani'), 'med': ('Medical', 'wyvern-medical'),
+        'mine': ('Mining', 'wyvern-mine'), 'sec': ('Sec', 'wyvern-sec'), 'pk': ('Peace', 'wyvern-pk'),
+        'syndi': ('Syndi', 'wyvern-syndi'), 'sci': ('Research', 'wyvern-sci'),
+    }),
+}
+for _kind, (_name, _folder, _pattern, _depts) in PACKS.items():
+    for _dept, (_part, _icon) in _depts.items():
+        SKINS.append((_kind, _dept, _name, _icon, None))
+        FILES[_kind, _dept] = f'zubbers/{_folder}/{_pattern.format(_part)}'
+
+# Texture folder per kind, by sprite size. Anything taller than a tile is raised half a tile to stand on it.
+SIZES = {'tall': 'Tall', 'dullahan': 'Tall', 'wide': 'Wide', 'kitty': 'Wide', 'cat': 'Wide', 'myomer': 'Wide',
+         'wyvern': 'Large'}
+
 # Extra poses kept in each skin's RSI; nothing uses them yet.
 POSES = ['rest', 'sit', 'bellyup', 'wreck', 'tipped']
 # The eng sheet has the Alina body but not its overlays.
@@ -199,10 +233,10 @@ LIGHT_FALLBACK = {'alina': 'widerobot_med.dmi'}
 class Dmi:
     """One .dmi: a PNG sheet plus a text chunk listing its states."""
 
-    def __init__(self, path):
+    def __init__(self, path, folder):
         image = Image.open(path)
         self.name = path.name
-        self.folder = ZUBBERS if path.parent.name == 'zubbers' else SKYRAT
+        self.folder = folder
         self.width = self.height = 32
         self.states = {}
         self.used = set()
@@ -284,11 +318,11 @@ def write_state(folder, name, frames, delays):
     return entry
 
 
-def write_meta(folder, dmi, entries, credit, sha):
+def write_meta(folder, dmi, entries, kind, icon, sha):
     meta = {
         'version': 1,
-        'license': 'CC-BY-SA-3.0',
-        'copyright': f'{credit}Taken from Bubberstation at {SOURCE.format(sha=sha, folder=dmi.folder, file=dmi.name)}',
+        'license': 'CC-BY-NC-SA-3.0' if kind in PACKS else 'CC-BY-SA-3.0',
+        'copyright': f'{credit_for(kind, icon)}Taken from Bubberstation at {SOURCE.format(sha=sha, folder=dmi.folder, file=dmi.name)}',
         'size': {'x': dmi.width, 'y': dmi.height},
         'states': entries,
     }
@@ -296,13 +330,20 @@ def write_meta(folder, dmi, entries, credit, sha):
 
 
 def credit_for(kind, icon):
+    if kind in ('kitty', 'cat'):
+        return ('Kittyborg and catborg by Toriate; licence holders Matica, Cameron The Raven and Spotteh '
+                '(https://github.com/VOREStation/VOREStation/pull/16910). ')
+    if kind == 'myomer':
+        return 'Project Myomer borg by Toriate, commissioned by The Sharkenning. '
+    if kind == 'wyvern':
+        return 'Wyvern Frame borg by Toriate, commissioned by Gearsin. '
     if kind == 'dullahan':
         return 'Dullahan borg by Toriate and Cecily. '
     if kind == 'tall':
         if icon.startswith('k4t'):
             return 'K4T tallborg by zy.dras. '
         return 'Tallborg and MekaNIKA skinline by TheOOZ (ghostsheep). '
-    if icon.startswith('drake'):
+    if kind == 'wide' and icon.startswith('drake'):
         return 'Drake borg originally by Navier. '
     return ''
 
@@ -313,13 +354,14 @@ def safe(name):
 
 def main():
     source, sha = Path(sys.argv[1]), sys.argv[2]
-    for folder in ('Tall', 'Wide'):
+    for folder in ('Tall', 'Wide', 'Large', 'Credits'):
         shutil.rmtree(TEXTURES / folder, ignore_errors=True)
     dmis = {}
 
     def load(file):
         if file not in dmis:
-            dmis[file] = Dmi(source / file)
+            parts = file.split('/')[:-1]
+            dmis[file] = Dmi(source / file, '/'.join([ZUBBERS] + parts[1:]) if parts else SKYRAT)
         return dmis[file]
 
     subtypes, chassis, names = [], [], []
@@ -329,7 +371,7 @@ def main():
         dmi = load(FILES[kind, dept])
         ident = folder_name + ''.join(w[0].upper() + w[1:] for w in re.findall(r'[A-Za-z0-9]+', name))
         snake = re.sub(r'[^a-z0-9]+', '_', name.lower()).strip('_')
-        size = 'Wide' if kind == 'wide' else 'Tall'
+        size = SIZES[kind]
         rsi = TEXTURES / size / folder_name / f'{snake}.rsi'
         rsi.mkdir(parents=True)
 
@@ -368,7 +410,7 @@ def main():
                 states.append(('credit', taken))
 
         entries = [write_state(rsi, state, frames, delays) for state, (frames, delays) in states]
-        write_meta(rsi, dmi, entries, credit_for(kind, icon), sha)
+        write_meta(rsi, dmi, entries, kind, icon, sha)
 
         subtype = f'WFBorgSkin{ident}'
         dummy = f'WFBorgChassis{ident}'
@@ -376,7 +418,7 @@ def main():
         entry = (f'- type: borgSubtype\n  id: {subtype}\n  parentBorgType: {borg_type}\n'
                  f'  spritePath: {path}\n  dummyPrototype: {dummy}\n')
         extra = []
-        if size == 'Tall':
+        if size != 'Wide':
             extra.append('  offset: 0, 0.5')
         if animated:
             extra.append('  animated: true')
@@ -398,15 +440,14 @@ def main():
         if dmi is None:
             continue
         entries = []
-        own = kind == 'dullahan'
-        size = 'Wide' if kind == 'wide' else 'Tall'
-        folder = TEXTURES / size / DEPTS[dept][0] / ('dullahan_extras.rsi' if own else 'extras.rsi')
+        own = kind not in ('tall', 'wide')
+        folder = TEXTURES / SIZES[kind] / DEPTS[dept][0] / (f'{kind}_extras.rsi' if own else 'extras.rsi')
         for name, variants in dmi.states.items():
             for state in variants:
                 if (name, state['move']) in dmi.used or name in ('credit', 'k4tcredit'):
                     continue
                 # The zubbers sheets also hold skins that aren't ported.
-                if own and not name.startswith(('dullahan', 'ov-opencover')):
+                if kind == 'dullahan' and not name.startswith(('dullahan', 'ov-opencover')):
                     continue
                 folder.mkdir(parents=True, exist_ok=True)
                 out = safe(name) + ('_moving' if state['move'] else '')
@@ -414,7 +455,17 @@ def main():
                     out += '_alt'
                 entries.append(write_state(folder, out, *dmi.take(name, state['move'])))
         if entries:
-            write_meta(folder, dmi, entries, credit_for(kind, '') if own else '', sha)
+            write_meta(folder, dmi, entries, kind if own else '', '', sha)
+
+    # The artists' terms travel with the sprites.
+    if (source / 'readme.md').exists():
+        shutil.copy(source / 'readme.md', TEXTURES / 'Tall/readme.md')
+    for pack in sorted({folder.split('/')[0] for _, folder, _, _ in PACKS.values()}):
+        target = TEXTURES / 'Credits' / pack
+        target.mkdir(parents=True)
+        for file in (source / 'zubbers' / pack).iterdir():
+            if file.is_file() and file.suffix.lower() in ('.md', '.txt'):
+                shutil.copy(file, target / file.name)
 
     PROTOTYPES.mkdir(parents=True, exist_ok=True)
     LOCALE.mkdir(parents=True, exist_ok=True)

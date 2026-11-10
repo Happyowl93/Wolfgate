@@ -999,3 +999,259 @@
   components:
   - type: BorgSwitchableSubtype
     borgSubtype: WFBorgSkinTarkonDullahan
+
+- type: entity
+  id: WFBorgChassisEngineeringK1T7Y
+  parent: BorgChassisEngineer
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinEngineeringK1T7Y
+
+- type: entity
+  id: WFBorgChassisJanitorK1T7Y
+  parent: BorgChassisJanitor
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinJanitorK1T7Y
+
+- type: entity
+  id: WFBorgChassisMedicalK1T7Y
+  parent: BorgChassisMedical
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMedicalK1T7Y
+
+- type: entity
+  id: WFBorgChassisMiningK1T7Y
+  parent: BorgChassisMining
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMiningK1T7Y
+
+- type: entity
+  id: WFBorgChassisServiceK1T7Y
+  parent: BorgChassisService
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinServiceK1T7Y
+
+- type: entity
+  id: WFBorgChassisSecurityK1T7Y
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinSecurityK1T7Y
+
+- type: entity
+  id: WFBorgChassisResearchK1T7Y
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinResearchK1T7Y
+
+- type: entity
+  id: WFBorgChassisEngineeringC9T7O
+  parent: BorgChassisEngineer
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinEngineeringC9T7O
+
+- type: entity
+  id: WFBorgChassisMedicalC9T7O
+  parent: BorgChassisMedical
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMedicalC9T7O
+
+- type: entity
+  id: WFBorgChassisMiningC9T7O
+  parent: BorgChassisMining
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMiningC9T7O
+
+- type: entity
+  id: WFBorgChassisServiceC9T7O
+  parent: BorgChassisService
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinServiceC9T7O
+
+- type: entity
+  id: WFBorgChassisSecurityC9T7O
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinSecurityC9T7O
+
+- type: entity
+  id: WFBorgChassisResearchC9T7O
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinResearchC9T7O
+
+- type: entity
+  id: WFBorgChassisEngineeringMyomer
+  parent: BorgChassisEngineer
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinEngineeringMyomer
+
+- type: entity
+  id: WFBorgChassisJanitorMyomer
+  parent: BorgChassisJanitor
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinJanitorMyomer
+
+- type: entity
+  id: WFBorgChassisMedicalMyomer
+  parent: BorgChassisMedical
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMedicalMyomer
+
+- type: entity
+  id: WFBorgChassisMiningMyomer
+  parent: BorgChassisMining
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMiningMyomer
+
+- type: entity
+  id: WFBorgChassisServiceMyomer
+  parent: BorgChassisService
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinServiceMyomer
+
+- type: entity
+  id: WFBorgChassisCargoMyomer
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinCargoMyomer
+
+- type: entity
+  id: WFBorgChassisSecurityMyomer
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinSecurityMyomer
+
+- type: entity
+  id: WFBorgChassisPeacekeeperMyomer
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinPeacekeeperMyomer
+
+- type: entity
+  id: WFBorgChassisNinjaMyomer
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinNinjaMyomer
+
+- type: entity
+  id: WFBorgChassisSyndicateMyomer
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinSyndicateMyomer
+
+- type: entity
+  id: WFBorgChassisResearchMyomer
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinResearchMyomer
+
+- type: entity
+  id: WFBorgChassisEngineeringWyvern
+  parent: BorgChassisEngineer
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinEngineeringWyvern
+
+- type: entity
+  id: WFBorgChassisJanitorWyvern
+  parent: BorgChassisJanitor
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinJanitorWyvern
+
+- type: entity
+  id: WFBorgChassisMedicalWyvern
+  parent: BorgChassisMedical
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMedicalWyvern
+
+- type: entity
+  id: WFBorgChassisMiningWyvern
+  parent: BorgChassisMining
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinMiningWyvern
+
+- type: entity
+  id: WFBorgChassisSecurityWyvern
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinSecurityWyvern
+
+- type: entity
+  id: WFBorgChassisPeacekeeperWyvern
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinPeacekeeperWyvern
+
+- type: entity
+  id: WFBorgChassisSyndicateWyvern
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinSyndicateWyvern
+
+- type: entity
+  id: WFBorgChassisResearchWyvern
+  parent: BorgChassisGeneric
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BorgSwitchableSubtype
+    borgSubtype: WFBorgSkinResearchWyvern
