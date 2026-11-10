@@ -29,7 +29,8 @@ on board.
   ID a cyborg can't have: `WFBorgIdCardServerSystem` files the cyborg on the sector records service when a player
   takes the chassis, so the card carries a crew record key, and `WFBorgIdCardSystem` has access readers count the
   card while its module is put away. Ship access and crews read it as the cyborg's own card, so a crew ship's
-  doors open for a cyborg in the crew.
+  doors open for a cyborg in the crew. A cyborg that spawns into a job has no tool module until it picks a type, so
+  it is issued the card in its chassis at spawn; the tool module then carries that card in place of its own.
 
 `BorgStackRefillTest` covers the issued kit and the charger refill, `BorgPowerTest` the drinker lookup,
 `BorgShipPurchaseTest` a cyborg buying a ship with its card, and `BorgShipAccessTest` a crew door admitting it.

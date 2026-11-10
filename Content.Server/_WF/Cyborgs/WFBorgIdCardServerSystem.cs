@@ -1,27 +1,40 @@
 using Content.Server._NF.SectorServices;
+using Content.Server._WF.Companies;
+using Content.Server.Silicons.Borgs;
 using Content.Server.StationRecords;
 using Content.Server.StationRecords.Systems;
+using Content.Shared._NF.Interaction.Components;
+using Content.Shared._NF.Interaction.Systems;
+using Content.Shared._NF.Silicons.Borgs;
 using Content.Shared._WF.Cyborgs;
 using Content.Shared.Access.Systems;
 using Content.Shared.Hands;
+using Content.Shared.GameTicking;
 using Content.Shared.Roles;
 using Content.Shared.Silicons.Borgs.Components;
 using Content.Shared.StationRecords;
+using Robust.Shared.Containers;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.Cyborgs;
 
 /// <summary>
-/// Gives a cyborg's issued ID card a crew record, the key ship doors, allow lists and crews admit a card by.
+/// Issues a crew cyborg its ID card and gives the card a crew record, the key ship doors, allow lists and crews
+/// admit a card by.
 /// </summary>
 public sealed partial class WFBorgIdCardServerSystem : EntitySystem
 {
     /// <summary>The job a cyborg's record is filed under.</summary>
     private static readonly ProtoId<JobPrototype> RecordJob = "Borg";
 
+    /// <summary>The card a crew cyborg is issued.</summary>
+    private static readonly EntProtoId IssuedCard = "WFBorgIdCard";
+
     [Dependency] private IPrototypeManager _proto = default!;
+    [Dependency] private HandPlaceholderSystem _placeholder = default!;
     [Dependency] private SectorServiceSystem _sectorService = default!;
+    [Dependency] private SharedContainerSystem _container = default!;
     [Dependency] private SharedIdCardSystem _idCard = default!;
     [Dependency] private StationRecordKeyStorageSystem _keyStorage = default!;
     [Dependency] private StationRecordsSystem _records = default!;
@@ -33,12 +46,52 @@ public sealed partial class WFBorgIdCardServerSystem : EntitySystem
 
         SubscribeLocalEvent<BorgChassisComponent, PlayerAttachedEvent>(OnPlayerAttached);
         SubscribeLocalEvent<WFBorgIdCardComponent, GotEquippedHandEvent>(OnCardEquipped);
+        // Before the company marks the spawned member's card.
+        SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnSpawnComplete, before: new[] { typeof(WFCompanySystem) });
+        // Before the borg system selects the module and puts its items in hand.
+        SubscribeLocalEvent<DroppableBorgModuleComponent, BorgModuleInstalledEvent>(OnModuleInstalled, before: new[] { typeof(BorgSystem) });
     }
 
     private void OnPlayerAttached(Entity<BorgChassisComponent> ent, ref PlayerAttachedEvent args)
     {
         if (_cards.TryGetCard(ent, out var card))
             EnsureRecord(ent, card);
+    }
+
+    /// <summary>
+    /// Issues a cyborg that spawned into a job its card in the chassis, since it has no tool module to carry one
+    /// until it picks a type.
+    /// </summary>
+    private void OnSpawnComplete(PlayerSpawnCompleteEvent args)
+    {
+        if (!HasComp<BorgChassisComponent>(args.Mob) || _cards.TryGetCard(args.Mob, out _))
+            return;
+
+        _container.EnsureContainer<Container>(args.Mob, WFBorgIdCardSystem.ContainerId);
+        if (TrySpawnInContainer(IssuedCard, args.Mob, WFBorgIdCardSystem.ContainerId, out var card))
+            EnsureRecord(args.Mob, card.Value);
+    }
+
+    /// <summary>A tool module carries the card the chassis was already issued, in place of its own blank one.</summary>
+    private void OnModuleInstalled(Entity<DroppableBorgModuleComponent> ent, ref BorgModuleInstalledEvent args)
+    {
+        if (!_container.TryGetContainer(args.ChassisEnt, WFBorgIdCardSystem.ContainerId, out var own) || own.ContainedEntities.Count == 0
+            || !_container.TryGetContainer(ent, ent.Comp.ContainerId, out var stowed))
+            return;
+
+        var issued = own.ContainedEntities[0];
+        foreach (var blank in stowed.ContainedEntities)
+        {
+            if (!HasComp<WFBorgIdCardComponent>(blank) || !TryComp<HandPlaceholderRemoveableComponent>(blank, out var removeable))
+                continue;
+
+            _placeholder.SetPlaceholder(issued, removeable.Placeholder);
+            _placeholder.SetEnabled(issued, false);
+            _container.Insert(issued, stowed, force: true);
+            // Deleted now: selecting the module hands out one stowed item per hand.
+            Del(blank);
+            return;
+        }
     }
 
     // Covers a tool module fitted after the player took the chassis.

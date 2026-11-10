@@ -21,7 +21,10 @@ public sealed partial class WFBorgIdCardSystem : EntitySystem
         SubscribeLocalEvent<BorgChassisComponent, GetAdditionalAccessEvent>(OnGetAdditionalAccess);
     }
 
-    /// <summary>The cyborg's issued card, in its hand or stowed in an installed module. False once it has parted with it.</summary>
+    /// <summary>The chassis container that holds a crew cyborg's card until a tool module takes it.</summary>
+    public const string ContainerId = "wf-borg-id";
+
+    /// <summary>The cyborg's issued card: in its hand, stowed in an installed module or kept in its chassis. False once it has parted with it.</summary>
     public bool TryGetCard(EntityUid borg, out EntityUid card)
     {
         card = default;
@@ -38,25 +41,32 @@ public sealed partial class WFBorgIdCardSystem : EntitySystem
         }
 
         // Startup creates the container, so a chassis the client has just received may not have it yet.
-        if (chassis.ModuleContainer == null)
-            return false;
-
-        foreach (var module in chassis.ModuleContainer.ContainedEntities)
+        if (chassis.ModuleContainer != null)
         {
-            if (!TryComp<DroppableBorgModuleComponent>(module, out var droppable)
-                || !_container.TryGetContainer(module, droppable.ContainerId, out var stowed))
-                continue;
-
-            foreach (var item in stowed.ContainedEntities)
+            foreach (var module in chassis.ModuleContainer.ContainedEntities)
             {
-                if (!HasComp<WFBorgIdCardComponent>(item))
-                    continue;
-
-                card = item;
-                return true;
+                if (TryComp<DroppableBorgModuleComponent>(module, out var droppable)
+                    && _container.TryGetContainer(module, droppable.ContainerId, out var stowed)
+                    && TryFindCard(stowed, out card))
+                    return true;
             }
         }
 
+        return _container.TryGetContainer(borg, ContainerId, out var own) && TryFindCard(own, out card);
+    }
+
+    private bool TryFindCard(BaseContainer container, out EntityUid card)
+    {
+        foreach (var item in container.ContainedEntities)
+        {
+            if (!HasComp<WFBorgIdCardComponent>(item))
+                continue;
+
+            card = item;
+            return true;
+        }
+
+        card = default;
         return false;
     }
 

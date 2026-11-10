@@ -144,8 +144,8 @@ public sealed partial class WFShipAccessSystem : EntitySystem
     }
 
     /// <summary>
-    /// Whether the user holds this grid's deed: on an ID card in their hands or id slot, directly or in a PDA, or on a
-    /// voucher in their hands, as Mono's own deed checks count it.
+    /// Whether the user holds this grid's deed: on an ID card in their hands or id slot, directly or in a PDA, on a
+    /// voucher in their hands, as Mono's own deed checks count it, or on a cyborg's issued card.
     /// </summary>
     public bool HasDeedFor(EntityUid user, EntityUid grid)
     {
@@ -155,7 +155,11 @@ public sealed partial class WFShipAccessSystem : EntitySystem
                 return true;
         }
 
-        return _inventory.TryGetSlotEntity(user, "id", out var worn) && HoldsDeedFor(worn.Value, grid);
+        if (_inventory.TryGetSlotEntity(user, "id", out var worn) && HoldsDeedFor(worn.Value, grid))
+            return true;
+
+        // A cyborg's issued card counts as worn while it is stowed.
+        return _borgCards.TryGetCard(user, out var issued) && IsDeedFor(issued, grid);
     }
 
     private bool HoldsDeedFor(EntityUid item, EntityUid grid)
@@ -195,7 +199,10 @@ public sealed partial class WFShipAccessSystem : EntitySystem
                 return true;
         }
 
-        return _inventory.TryGetSlotEntity(user, "id", out var worn) && IsOwnerCard(worn.Value, comp);
+        if (_inventory.TryGetSlotEntity(user, "id", out var worn) && IsOwnerCard(worn.Value, comp))
+            return true;
+
+        return _borgCards.TryGetCard(user, out var issued) && IsOwnerCard(issued, comp);
     }
 
     private bool IsOwnerCard(EntityUid item, WFShipAccessComponent comp)
