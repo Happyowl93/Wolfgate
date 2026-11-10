@@ -12,6 +12,7 @@ using Content.Shared._WF.Encounters;
 using Content.Shared.Anomaly;
 using Content.Shared.Anomaly.Components;
 using Content.Shared.Examine;
+using Content.Shared.Ghost;
 using Content.Shared.Physics;
 using Content.Shared.Stacks;
 using Content.Shared.Storage.Components;
@@ -37,6 +38,12 @@ public sealed partial class WFContractSystem
 
     /// <summary>Open space a bounty or wreck needs round it.</summary>
     private const float SiteClearance = 250f;
+
+    /// <summary>How far a site must be from every player, past the range any bounty target warns or opens fire at.</summary>
+    public const float PlayerClearance = 2000f;
+
+    /// <summary>How many times a site search runs: the first half at the contract's distance, then each half as far out again.</summary>
+    private const int SitePasses = 8;
 
     /// <summary>How far an escort's rendezvous must be from any station.</summary>
     private const float EscortClearance = 800f;
@@ -719,10 +726,18 @@ public sealed partial class WFContractSystem
 
     private bool PlayerNear(EntityUid uid, float range)
     {
-        var at = _transform.GetMapCoordinates(uid);
+        return PlayerNear(_transform.GetMapCoordinates(uid), range, ghosts: true);
+    }
+
+    /// <summary>Whether a player is within range of a point; ghosts count only if asked.</summary>
+    private bool PlayerNear(MapCoordinates at, float range, bool ghosts = false)
+    {
         var players = EntityQueryEnumerator<ActorComponent, TransformComponent>();
         while (players.MoveNext(out var player, out _, out var xform))
         {
+            if (!ghosts && HasComp<GhostComponent>(player))
+                continue;
+
             if (xform.MapID == at.MapId && (_transform.GetWorldPosition(xform) - at.Position).Length() <= range)
                 return true;
         }
@@ -731,27 +746,33 @@ public sealed partial class WFContractSystem
     }
 
     /// <summary>
-    /// Open space at a distance from a station, clear of grids, stations and gravity wells. A crowded band is tried
-    /// again wider and with half the station clearance, so busy sectors still find a site.
+    /// Open space at a distance from a station, clear of grids, stations, gravity wells and players. A crowded band is tried
+    /// again, then wider each pass, the first two of those with half the station clearance, so busy sectors still find a site.
     /// </summary>
-    private MapCoordinates? PickSite(EntityUid station, float min, float max, float clearance)
+    public MapCoordinates? PickSite(EntityUid station, float min, float max, float clearance)
     {
         if (_station.GetLargestGrid(station) is not { } grid)
             return null;
 
         var centre = _transform.GetMapCoordinates(grid);
         var far = Math.Max(min, max);
-        for (var pass = 0; pass < 3; pass++)
+        for (var pass = 0; pass < SitePasses; pass++)
         {
             for (var attempt = 0; attempt < 40; attempt++)
             {
                 var point = centre.Position + _random.NextAngle().ToVec() * _random.NextFloat(min, far);
-                if (_scheduler.IsClearSpace(centre.MapId, point, SiteClearance, clearance))
+                if (_scheduler.IsClearSpace(centre.MapId, point, SiteClearance, clearance)
+                    && !PlayerNear(new MapCoordinates(point, centre.MapId), PlayerClearance))
                     return new MapCoordinates(point, centre.MapId);
             }
 
+            var widened = pass + 2 - SitePasses / 2;
+            if (widened < 1)
+                continue;
+
             far *= 1.5f;
-            clearance *= 0.5f;
+            if (widened <= 2)
+                clearance *= 0.5f;
         }
 
         Log.Warning($"No clear contract site {min}-{max} m from {ToPrettyString(station)}.");
