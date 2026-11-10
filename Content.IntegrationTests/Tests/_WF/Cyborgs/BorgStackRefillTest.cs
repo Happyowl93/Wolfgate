@@ -58,7 +58,15 @@ public sealed class BorgStackRefillTest
             var cellSlot = containers.GetContainer(borg, "cell_slot");
             Assert.That(containers.Insert(cell, cellSlot, force: true), "The cyborg did not take a power cell.");
         });
-        await server.WaitRunTicks(5);
+
+        // Power receivers only update every half second, so the charger takes a while to notice it needs no power.
+        var receiver = entMan.GetComponent<ApcPowerReceiverComponent>(charger);
+        for (var i = 0; i < 20 && !receiver.Powered; i++)
+        {
+            await server.WaitRunTicks(5);
+        }
+
+        Assert.That(receiver.Powered, "The charger never powered up.");
 
         await server.WaitAssertion(() =>
         {
