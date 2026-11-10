@@ -8,7 +8,7 @@
   - type: InstantAction
     itemIconStyle: NoItem
     icon:
-      sprite: _WF/BorgSkins/Wide/Cargo/borgi.rsi
+      sprite: _WF/BorgSkins/Actions/poses.rsi
       state: rest
     event: !type:WFBorgPoseActionEvent
       pose: Rest
@@ -22,7 +22,7 @@
   - type: InstantAction
     itemIconStyle: NoItem
     icon:
-      sprite: _WF/BorgSkins/Wide/Cargo/borgi.rsi
+      sprite: _WF/BorgSkins/Actions/poses.rsi
       state: sit
     event: !type:WFBorgPoseActionEvent
       pose: Sit
@@ -36,7 +36,7 @@
   - type: InstantAction
     itemIconStyle: NoItem
     icon:
-      sprite: _WF/BorgSkins/Wide/Cargo/borgi.rsi
+      sprite: _WF/BorgSkins/Actions/poses.rsi
       state: bellyup
     event: !type:WFBorgPoseActionEvent
       pose: BellyUp

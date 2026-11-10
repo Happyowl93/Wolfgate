@@ -96,6 +96,7 @@ The cat borgs, Myomer and Wyvern are by Toriate and are CC BY-NC-SA 3.0: non-com
 
 ### Textures
 
+- [`Resources/Textures/_WF/BorgSkins/Actions/poses.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Actions/poses.rsi/)
 - [`Resources/Textures/_WF/BorgSkins/Credits/kittycatborgs/CREDIT.MD`](../../../Resources/Textures/_WF/BorgSkins/Credits/kittycatborgs/CREDIT.MD)
 - [`Resources/Textures/_WF/BorgSkins/Credits/kittycatborgs/LICENSE.txt`](../../../Resources/Textures/_WF/BorgSkins/Credits/kittycatborgs/LICENSE.txt)
 - [`Resources/Textures/_WF/BorgSkins/Credits/myomer/CREDIT.MD`](../../../Resources/Textures/_WF/BorgSkins/Credits/myomer/CREDIT.MD)

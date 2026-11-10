@@ -65,6 +65,8 @@ LIGHT_HUE = 0.04                # a pose colour this close in hue to the eyes ca
 LIGHT_VALUE = 0.6               # and is at least this bright
 LIGHT_STANDING = 0.15           # and has at most this share of the standing body next to its share of the poses,
 LIGHT_STANDING_EYE = 0.5        # or this for a colour the eye layer itself uses
+UNDER_EYES = 0.5                # a colour with this share of its standing pixels under the eye layer is a light
+UNDER_VALUE = 0.4               # if it is at least this bright
 TRIM_HUE = 0.02                 # a 'pose' light strip is this close in hue to a pose light
 TRIM_SATURATION = 0.75          # and at least this saturated
 TRIM_BRIGHT = (0.5, 0.55)       # the least saturation and value of any other light strip
@@ -129,6 +131,21 @@ def pose_lights(standing, posed, eyes):
             if hsv(c)[1] >= CHROMA and hsv(c)[2] >= LIGHT_VALUE
             and any(hue_distance(hsv(c)[0], hue) <= LIGHT_HUE for hue in hues)
             and standing[c] * scale < (LIGHT_STANDING_EYE if c in eyes else LIGHT_STANDING) * n}
+
+
+def eye_underpaint(src, pairs):
+    """The body colours the eye layer mostly covers: the unlit paint under a glow, which a pose shows bare."""
+    covered, total = Counter(), Counter()
+    for body, eyes in pairs:
+        body, eyes = Image.open(src / f'{body}.png').convert('RGBA'), Image.open(src / f'{eyes}.png').convert('RGBA')
+        if body.size != eyes.size:
+            continue
+        for under, over in zip(body.getdata(), eyes.getdata()):
+            if under[3]:
+                total[under[:3]] += 1
+                covered[under[:3]] += bool(over[3])
+    return {c for c, n in covered.items()
+            if n >= UNDER_EYES * total[c] and hsv(c)[1] >= CHROMA and hsv(c)[2] >= UNDER_VALUE}
 
 
 def accent_hue(colours):
@@ -275,6 +292,9 @@ def recolour(src, dst, faction, source_state, role_state):
                 if not light:
                     colours[pixel[:3]] += count
     lights = pose_lights(standing, posed, eyes)
+    lights |= eye_underpaint(src, [(body, eye) for body, eye in ((source_state, f'{source_state}_e'),
+                                   (f'{source_state}_moving', f'{source_state}_e_moving'))
+                                   if body in by_name and eye in by_name])
     visor = set()
     if src.name.startswith(VISORED) and source_state in by_name and f'{source_state}_e' in by_name:
         visor = visor_colours(Image.open(src / f'{source_state}.png').convert('RGBA'),
