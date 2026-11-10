@@ -6,9 +6,20 @@ and the Wyvern. Each is a cosmetic `borgSubtype`, picked in the borg's type menu
 departments with no borg type here (cargo, security, peacekeeper, ninja, syndicate, clown, research, Tarkon) are
 offered under the generic type.
 
-Entry points: `WFBorgSkinPrototype` (per-subtype offset and animation flags, same ID as the subtype) and the client
-`WFBorgSkinSystem`, which lifts tall sprites onto their tile, keeps the eye and lamp layers in step with an animated
-body and swaps to the `_moving` states while the borg has speed.
+Entry points: `WFBorgSkinPrototype` (per-subtype offset, animation flags and poses, same ID as the subtype) and the
+client `WFBorgSkinSystem`, which lifts tall sprites onto their tile, keeps the eye and lamp layers in step with an
+animated body, swaps to the `_moving` states while the borg has speed and shows the skin's poses.
+
+## Poses
+
+A skin's pose states replace the whole chassis sprite; a skin without a given state keeps its normal look.
+
+- `wreck` shows while the borg is critical or dead, `tipped` while it is stunned or knocked down, and a buckled
+  borg shows `sit`, or `rest` on a strap that lays it down. All are picked by the client from state that is
+  already networked.
+- `rest`, `sit` and `bellyup` are voluntary. `WFBorgPoseSystem` gives the borg an action for each one its skin lists
+  under `poses` when the subtype is chosen (a marked hook in `SharedBorgSwitchableTypeSystem`), and
+  `WFBorgPoseComponent` carries the pose. Using the action again or moving ends it. Poses are cosmetic.
 
 ## Sprites
 
@@ -23,7 +34,7 @@ The skyrat art is CC-BY-SA 3.0. The tallborg artist asks that the skinline is po
 (`Resources/Textures/_WF/BorgSkins/Tall/readme.md`) and the `credit` state stay with it, so every department is
 converted even where nothing uses it. Each RSI also keeps the `rest`, `sit`, `bellyup`, `wreck` and `tipped` poses,
 and each sheet's leftover states (cover and weapon overlays, sleeper lights) are in an `extras.rsi`; no code uses
-those yet.
+the extras yet.
 
 The dullahans are by Toriate and Cecily, who agreed to the port. Only the dullahan states are taken from the zubbers
 `tallrobot` sheets; the other skins in them are not ported.
@@ -38,6 +49,8 @@ The cat borgs, Myomer and Wyvern are by Toriate and are CC BY-NC-SA 3.0: non-com
 
 ### Shared
 
+- [`Content.Shared/_WF/BorgSkins/WFBorgPoseComponent.cs`](WFBorgPoseComponent.cs)
+- [`Content.Shared/_WF/BorgSkins/WFBorgPoseSystem.cs`](WFBorgPoseSystem.cs)
 - [`Content.Shared/_WF/BorgSkins/WFBorgSkinPrototype.cs`](WFBorgSkinPrototype.cs)
 
 ### Client
@@ -47,10 +60,12 @@ The cat borgs, Myomer and Wyvern are by Toriate and are CC BY-NC-SA 3.0: non-com
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/BorgSkins/WFBorgPoseTest.cs`](../../../Content.IntegrationTests/Tests/_WF/BorgSkins/WFBorgPoseTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/BorgSkins/WFBorgSkinTest.cs`](../../../Content.IntegrationTests/Tests/_WF/BorgSkins/WFBorgSkinTest.cs)
 
 ### Prototypes
 
+- [`Resources/Prototypes/_WF/BorgSkins/actions.yml`](../../../Resources/Prototypes/_WF/BorgSkins/actions.yml)
 - [`Resources/Prototypes/_WF/BorgSkins/chassis.yml`](../../../Resources/Prototypes/_WF/BorgSkins/chassis.yml)
 - [`Resources/Prototypes/_WF/BorgSkins/subtypes.yml`](../../../Resources/Prototypes/_WF/BorgSkins/subtypes.yml)
 
@@ -295,6 +310,6 @@ The cat borgs, Myomer and Wyvern are by Toriate and are CC BY-NC-SA 3.0: non-com
 
 ## Non-modular edits
 
-None.
+- [`Content.Shared/Silicons/Borgs/SharedBorgSwitchableTypeSystem.cs`](../../Silicons/Borgs/SharedBorgSwitchableTypeSystem.cs): tells the skin's pose system which subtype was chosen
 
 <!-- WOLFGATE-GENERATED END -->

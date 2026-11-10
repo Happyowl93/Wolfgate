@@ -23,6 +23,7 @@ on board.
   so the defibrillator module is no longer a default. The advanced treatment module has four beaker hands and a
   hand labeler.
 - TSF and PDV engineer and medical cyborgs have four spare module slots instead of two.
+- Every chassis has `Buckle` and `Climbing`, so a cyborg can take a seat and get onto a table.
 - **Ships** (`id.yml`): the tool module has a third hand holding a cyborg ID card, which goes in a shipyard console
   to buy a ship and unlocks that ship's consoles, through the stock ID card paths.
 
@@ -68,6 +69,7 @@ on board.
 - [`Resources/Prototypes/borg_types.yml`](../../../Resources/Prototypes/borg_types.yml): the treatment module carries the defibrillator
 - [`Resources/Prototypes/Entities/Mobs/Cyborgs/base_borg_chassis.yml`](../../../Resources/Prototypes/Entities/Mobs/Cyborgs/base_borg_chassis.yml)
   - recharge from APCs and loose cells, and a bank account for ATMs and pay
+  - buckle into seats and climb onto tables
   - the headlight Monolith commented out, back as a toggle
 - [`Resources/Prototypes/Entities/Mobs/Player/silicon.yml`](../../../Resources/Prototypes/Entities/Mobs/Player/silicon.yml): was PowerCellMedium, half an hour of work per charge
 - [`Resources/Prototypes/Entities/Objects/Specific/Robotics/borg_modules.yml`](../../../Resources/Prototypes/Entities/Objects/Specific/Robotics/borg_modules.yml)

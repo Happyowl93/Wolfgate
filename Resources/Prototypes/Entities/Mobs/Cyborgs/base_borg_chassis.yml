@@ -139,6 +139,10 @@
     drinkSpeed: 2
   - type: BankAccount
   # WOLFGATE END
+  # WOLFGATE(Cyborgs) START: buckle into seats and climb onto tables
+  - type: Buckle
+  - type: Climbing
+  # WOLFGATE END
   - type: ItemToggle
     onActivate: false # You should not be able to turn off a borg temporarily.
     activated: false # gets activated when a mind is added
