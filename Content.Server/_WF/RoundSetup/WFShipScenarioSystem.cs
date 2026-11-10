@@ -238,9 +238,11 @@ public sealed partial class WFShipScenarioSystem : EntitySystem
             TerminatingOrDeleted(scenario.Hull) || TerminatingOrDeleted(scenario.Station))
             return false;
         // A cyborg host takes the deed on its issued card, which may be stowed in its module.
-        if (!_credentials.TryGetCard(body, out var card))
+        var cardless = !_credentials.TryGetCard(body, out var card);
+        if (cardless)
         {
-            card = Spawn("IDCardStandard", Transform(body).Coordinates);
+            // A cyborg has no card until it picks a chassis type, so the deed card lands at its feet.
+            card = Spawn("PassengerIDCard", Transform(body).Coordinates);
             _cards.TryChangeFullName(card, Name(body));
             _hands.TryPickupAnyHand(body, card);
         }
@@ -249,6 +251,9 @@ public sealed partial class WFShipScenarioSystem : EntitySystem
         _shipyard.SetupShipyardIfNeeded();
         if (!_shipyard.TryAssignDeed(scenario.Hull, card, host, vessel, string.IsNullOrWhiteSpace(shipName) ? Name(scenario.Station) : shipName, existingStation: scenario.Station))
             return false;
+        // Without a card of their own the host owns the ship by account, whatever card they are issued later.
+        if (cardless)
+            _access.AddOwnerUser(scenario.Hull, host.UserId);
         scenario.Used = true;
         EnsureComp<ShipActivityComponent>(scenario.Hull);
         _repair.GenerateRepairData(scenario.Hull);

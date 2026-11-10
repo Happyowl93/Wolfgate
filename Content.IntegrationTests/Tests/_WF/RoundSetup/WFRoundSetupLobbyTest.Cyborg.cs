@@ -65,13 +65,14 @@ public sealed partial class WFRoundSetupLobbyTest
                 var body = owner.AttachedEntity!.Value;
                 Assert.That(em.HasComponent<BorgChassisComponent>(body), Is.True, "The cyborg job should spawn a chassis, not a humanoid.");
                 var grid = em.GetComponent<TransformComponent>(body).GridUid!.Value;
-                Assert.That(server.System<WFShipAccessSystem>().TryGetWornCard(body, out var card), Is.True, "The cyborg was issued no ID card.");
-                Assert.That(em.TryGetComponent<ShuttleDeedComponent>(card, out var deed) && deed.ShuttleUid == grid, Is.True,
-                    "The ship's deed should be on the cyborg's own card.");
+                Assert.That(em.TryGetComponent<ShuttleDeedComponent>(grid, out var deed) && deed.ShuttleUid == grid, Is.True,
+                    "The ship should be deeded.");
                 var access = em.GetComponent<WFShipAccessComponent>(grid);
                 Assert.That(access.CrewId, Is.EqualTo(id));
                 Assert.That(access.Mode, Is.EqualTo(WFShipAccessMode.Crew));
-                Assert.That(access.CrewKeys.Count, Is.EqualTo(1), "The cyborg's card should be a crew credential.");
+                // A chassis has no card until it picks a type, so it owns the ship by account.
+                Assert.That(access.OwnerUsers, Does.Contain(owner.UserId), "The cardless cyborg host should own its ship.");
+                Assert.That(server.System<WFShipAccessSystem>().IsOwner(body, grid), Is.True);
             });
         }
         finally
