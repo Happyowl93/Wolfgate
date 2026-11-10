@@ -4,7 +4,7 @@
   id: WFShieldGeneratorDeflector
   parent: ShieldGeneratorSmall
   name: MD-10 "Parasol" Deflector Generator
-  description: The Parasol. A micrometeorite reflector for long hauls that sips power off the grid and covers half the ship at most. In a pinch its field takes about half the sting out of incoming shells, and still stops missiles and energy fire outright.
+  description: A micrometeorite reflector for long hauls with a low power consumption to save costs while providing minimum protection. In a pinch its field can absorb some kinetic damage off incoming projectiles, and still stops missiles and energy fire outright.
   components:
   - type: ShipShieldEmitter
     # Same capacity as the MS-100: the draw limits and the power modifier shrink together.
