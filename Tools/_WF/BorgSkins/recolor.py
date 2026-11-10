@@ -204,7 +204,8 @@ def recolour(src, dst, faction, source_state, role_state):
         visor = visor_colours(Image.open(src / f'{source_state}.png').convert('RGBA'),
                               Image.open(src / f'{source_state}_e.png').convert('RGBA'))
     mapped = body_map(colours, faction, visor)
-    mapped.update({c: lamp_colour(c, faction) for c in lights})
+    # Only in the poses: the same colour in a walking frame is body shading, and lighting it there makes it flash.
+    lit = {**mapped, **{c: lamp_colour(c, faction) for c in lights}}
 
     if dst.exists():
         shutil.rmtree(dst)
@@ -213,7 +214,8 @@ def recolour(src, dst, faction, source_state, role_state):
     for source, output, light in wanted:
         image = Image.open(src / f'{source}.png')
         if source not in UNTOUCHED:
-            image = repaint(image, (lambda c: lamp_colour(c, faction)) if light else (lambda c: mapped.get(c, c)))
+            image = repaint(image, (lambda c: lamp_colour(c, faction)) if light
+                            else (lambda c: lit.get(c, c)) if source in POSES else (lambda c: mapped.get(c, c)))
         image.save(dst / f'{output}.png')
         states.append({**by_name[source], 'name': output})
     meta['states'] = states
