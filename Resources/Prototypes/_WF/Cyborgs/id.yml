@@ -5,6 +5,7 @@
   name: cyborg ID card
   description: An identification card issued to a cyborg. It can hold the deed to a ship.
   components:
+  - type: WFBorgIdCard
   - type: Sprite
     layers:
     - state: silver
