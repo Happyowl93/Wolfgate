@@ -36,7 +36,12 @@ converted even where nothing uses it. Each RSI also keeps the `rest`, `sit`, `be
 and each sheet's leftover states (cover and weapon overlays, sleeper lights) are in an `extras.rsi`; no code uses
 the extras yet.
 
-`Tools/_WF/BorgSkins/recolor.py` (run it after `convert.py`) repaints the engineering, medical and security skins in
+`Tools/_WF/BorgSkins/zoomba.py <dmi folder> <Meridian Rift commit>` does the same for the Zoomba, a normal-sized
+(32x32) skin for every department, from Meridian Rift's `modular_nova/modules/borgs/icons/robots*.dmi` (CC-BY-SA
+3.0), into `Small/<department>` and the `zoomba_*` prototype and locale files. A Zoomba has no eyes, so its status
+lights show while it has a mind.
+
+`Tools/_WF/BorgSkins/recolor.py` (run it after either script) repaints the engineering, medical and security skins in
 PDV and TSF colours for the faction engineer, medical and assault borg types, into `<size>/<PDV|TSF>/<role>` and the
 `faction_*` prototype and locale files. A skin's main accent takes the faction's body ramp, everything else becomes
 plain metal and the eyes take the faction's lamp colour; the `credit` state is copied as it is. The faction types
@@ -77,11 +82,14 @@ The cat borgs, Myomer and Wyvern are by Toriate and are CC BY-NC-SA 3.0: non-com
 - [`Resources/Prototypes/_WF/BorgSkins/faction_chassis.yml`](../../../Resources/Prototypes/_WF/BorgSkins/faction_chassis.yml)
 - [`Resources/Prototypes/_WF/BorgSkins/faction_subtypes.yml`](../../../Resources/Prototypes/_WF/BorgSkins/faction_subtypes.yml)
 - [`Resources/Prototypes/_WF/BorgSkins/subtypes.yml`](../../../Resources/Prototypes/_WF/BorgSkins/subtypes.yml)
+- [`Resources/Prototypes/_WF/BorgSkins/zoomba_chassis.yml`](../../../Resources/Prototypes/_WF/BorgSkins/zoomba_chassis.yml)
+- [`Resources/Prototypes/_WF/BorgSkins/zoomba_subtypes.yml`](../../../Resources/Prototypes/_WF/BorgSkins/zoomba_subtypes.yml)
 
 ### Localization
 
 - [`Resources/Locale/en-US/_WF/BorgSkins/chassis.ftl`](../../../Resources/Locale/en-US/_WF/BorgSkins/chassis.ftl)
 - [`Resources/Locale/en-US/_WF/BorgSkins/faction_chassis.ftl`](../../../Resources/Locale/en-US/_WF/BorgSkins/faction_chassis.ftl)
+- [`Resources/Locale/en-US/_WF/BorgSkins/zoomba_chassis.ftl`](../../../Resources/Locale/en-US/_WF/BorgSkins/zoomba_chassis.ftl)
 
 ### Textures
 
@@ -113,6 +121,21 @@ The cat borgs, Myomer and Wyvern are by Toriate and are CC BY-NC-SA 3.0: non-com
 - [`Resources/Textures/_WF/BorgSkins/Large/TSF/Assault/wyvern.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Large/TSF/Assault/wyvern.rsi/)
 - [`Resources/Textures/_WF/BorgSkins/Large/TSF/Engineer/wyvern.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Large/TSF/Engineer/wyvern.rsi/)
 - [`Resources/Textures/_WF/BorgSkins/Large/TSF/Medical/wyvern.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Large/TSF/Medical/wyvern.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/Cargo/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/Cargo/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/Engineering/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/Engineering/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/Janitor/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/Janitor/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/Medical/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/Medical/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/Mining/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/Mining/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/PDV/Assault/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/PDV/Assault/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/PDV/Engineer/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/PDV/Engineer/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/PDV/Medical/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/PDV/Medical/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/Peacekeeper/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/Peacekeeper/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/Security/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/Security/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/Service/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/Service/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/Standard/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/Standard/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/TSF/Assault/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/TSF/Assault/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/TSF/Engineer/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/TSF/Engineer/zoomba.rsi/)
+- [`Resources/Textures/_WF/BorgSkins/Small/TSF/Medical/zoomba.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Small/TSF/Medical/zoomba.rsi/)
 - [`Resources/Textures/_WF/BorgSkins/Tall/Cargo/dullahan.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Tall/Cargo/dullahan.rsi/)
 - [`Resources/Textures/_WF/BorgSkins/Tall/Cargo/dullahan_extras.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Tall/Cargo/dullahan_extras.rsi/)
 - [`Resources/Textures/_WF/BorgSkins/Tall/Cargo/dullahan_taur.rsi/`](../../../Resources/Textures/_WF/BorgSkins/Tall/Cargo/dullahan_taur.rsi/)
@@ -416,6 +439,7 @@ The cat borgs, Myomer and Wyvern are by Toriate and are CC BY-NC-SA 3.0: non-com
 
 - [`Tools/_WF/BorgSkins/convert.py`](../../../Tools/_WF/BorgSkins/convert.py)
 - [`Tools/_WF/BorgSkins/recolor.py`](../../../Tools/_WF/BorgSkins/recolor.py)
+- [`Tools/_WF/BorgSkins/zoomba.py`](../../../Tools/_WF/BorgSkins/zoomba.py)
 
 ## Non-modular edits
 
