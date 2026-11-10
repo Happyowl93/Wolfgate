@@ -8,7 +8,7 @@ on board.
   `WFBorgStackRefillSystem` adds one unit every five seconds, up to the component's target, while the cyborg sits in
   a powered charger. Plasteel and reinforced glass are issued once.
 - **Gripper hands**: the tool module, which every cyborg type starts with, has two droppable gripper hands. One takes power
-  cells, gas tanks, jerry cans, AME jars and flatpacks; the other takes any stack, so a cyborg can fuel a generator
+  cells, gas tanks, jerry cans, AME jars, flatpacks, ship vouchers and drydock repair vouchers; the other takes any stack, so a cyborg can fuel a generator
   or build with materials its modules don't issue.
 - **Scanners**: the RCD module also carries a gas analyzer, geiger counter and t-ray scanner.
 - **Headlight**: back as a toggle action, lighting the chassis sprite where it has a light layer. A marked edit on
@@ -55,6 +55,7 @@ on board.
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WF/Cyborgs/BorgPowerTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Cyborgs/BorgPowerTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Cyborgs/BorgRepairVoucherTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Cyborgs/BorgRepairVoucherTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Cyborgs/BorgShipAccessTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Cyborgs/BorgShipAccessTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Cyborgs/BorgShipPurchaseTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Cyborgs/BorgShipPurchaseTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Cyborgs/BorgStackRefillTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Cyborgs/BorgStackRefillTest.cs)

@@ -55,6 +55,23 @@ public sealed partial class WFBorgIdCardSystem : EntitySystem
         return _container.TryGetContainer(borg, ContainerId, out var own) && TryFindCard(own, out card);
     }
 
+    /// <summary>The items a cyborg's installed modules have put away, such as a voucher in a tool module that isn't selected.</summary>
+    public IEnumerable<EntityUid> StowedItems(EntityUid borg)
+    {
+        if (!TryComp<BorgChassisComponent>(borg, out var chassis) || chassis.ModuleContainer == null)
+            yield break;
+
+        foreach (var module in chassis.ModuleContainer.ContainedEntities)
+        {
+            if (!TryComp<DroppableBorgModuleComponent>(module, out var droppable)
+                || !_container.TryGetContainer(module, droppable.ContainerId, out var stowed))
+                continue;
+
+            foreach (var item in stowed.ContainedEntities)
+                yield return item;
+        }
+    }
+
     private bool TryFindCard(BaseContainer container, out EntityUid card)
     {
         foreach (var item in container.ContainedEntities)

@@ -215,6 +215,9 @@
         - AmeFuelContainer
         - Flatpack
         - ReagentTank # jerry cans
+        - NFShipyardVoucher # ship vouchers, for a shipyard console
+        tags:
+        - WFDrydockRepairVoucher
     - id: SheetSteel1
       whitelist:
         components:
