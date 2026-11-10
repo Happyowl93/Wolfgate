@@ -104,7 +104,13 @@ public sealed partial class ShipShieldsSystem
         {
             if (_prototypeManager.TryIndex(explosive.ExplosionType, out var type))
                 removed += explosive.TotalIntensity * (float) type.DamagePerIntensity.GetTotal() * reduction;
+            // Scaling all three weakens the blast on every tile over the same footprint; the total alone only shrinks it.
             explosive.TotalIntensity *= 1f - reduction;
+            if (reduction < 1f)
+            {
+                explosive.MaxIntensity *= 1f - reduction;
+                explosive.IntensitySlope *= 1f - reduction;
+            }
         }
 
         var charged = removed / strength;

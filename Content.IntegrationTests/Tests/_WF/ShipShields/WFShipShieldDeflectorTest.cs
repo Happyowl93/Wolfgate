@@ -59,12 +59,16 @@ public sealed class WFShipShieldDeflectorTest
             shell.Shooter = shooter;
             var hit = (float) shell.Damage.GetTotal();
             var intensity = explosive.TotalIntensity;
+            var peak = explosive.MaxIntensity;
+            var slope = explosive.IntensitySlope;
             var blast = intensity * (float) prototypes.Index<ExplosionPrototype>(explosive.ExplosionType).DamagePerIntensity.GetTotal();
             projectiles.ProjectileCollide((shellUid, shell, shellBody), shield);
             Assert.That(shell.ProjectileSpent, Is.False);
             Assert.That(entities.IsQueuedForDeletion(shellUid), Is.False);
             Assert.That((float) shell.Damage.GetTotal(), Is.EqualTo(hit / 2f).Within(0.01f));
             Assert.That(explosive.TotalIntensity, Is.EqualTo(intensity / 2f).Within(0.01f));
+            Assert.That(explosive.MaxIntensity, Is.EqualTo(peak / 2f).Within(0.01f));
+            Assert.That(explosive.IntensitySlope, Is.EqualTo(slope / 2f).Within(0.01f));
             Assert.That(emitter.Damage, Is.EqualTo((hit + blast) / 2f).Within(1f));
 
             // The field lets the slowed shell through and never charges for it twice.
