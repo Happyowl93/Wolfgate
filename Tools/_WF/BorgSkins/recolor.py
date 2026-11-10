@@ -8,7 +8,8 @@ their RSIs under Resources/Textures/_WF/BorgSkins/<size>/<faction>, plus faction
 faction_chassis.ftl. Run it again after either. The mapping is colour to colour, so shading steps are kept: a
 skin's main accent hue takes the faction's body ramp, every other colour becomes plain metal, and the eyes take the
 faction's lamp hue. Near-black detail stays black whatever its tint, and the visor of a body listed in VISORED
-becomes black glass. The dullahans are left out: their artists agreed to the port, not to recolours.
+becomes black glass. The poses have their lights painted in, as there is no eye layer to draw over them; those
+colours take the lamp hue too. The dullahans are left out: their artists agreed to the port, not to recolours.
 """
 import colorsys
 import json
@@ -48,6 +49,10 @@ PLATING_LUM = 0x70              # neutrals at least this bright are plating, dar
 HUE_WIDTH = 0.09
 DARK = 0.22                     # at or below this HSV value a colour is black detail, whatever its tint
 VISOR_WIDTH = 0.035             # a visor's accent is told from the body's by at least this much hue
+LIGHT_HUE = 0.04                # a pose colour this close in hue to the eyes can be a painted-in light
+LIGHT_VALUE = 0.6               # and is at least this bright
+LIGHT_STANDING = 0.15           # and has at most this share of the standing body next to its share of the poses,
+LIGHT_STANDING_EYE = 0.5        # or this for a colour the eye layer itself uses
 GLASS = ['#08080a', '#101014', '#1a1a20', '#26262e']   # black visor glass, dark to light
 
 
@@ -98,6 +103,17 @@ def visor_colours(body, eyes):
                 seen.add((nx, ny))
                 todo.append((nx, ny))
     return found
+
+
+def pose_lights(standing, posed, eyes):
+    """The colours of the lights painted into the poses: eye-like colours the standing body hardly uses."""
+    hues = {hsv(c)[0] for c in eyes if hsv(c)[1] >= CHROMA}
+    # The standing body has the eye layer for its lights, so a painted-in light is a colour it hardly uses itself.
+    scale = sum(posed.values()) / max(sum(standing.values()), 1)
+    return {c for c, n in posed.items()
+            if hsv(c)[1] >= CHROMA and hsv(c)[2] >= LIGHT_VALUE
+            and any(hue_distance(hsv(c)[0], hue) <= LIGHT_HUE for hue in hues)
+            and standing[c] * scale < (LIGHT_STANDING_EYE if c in eyes else LIGHT_STANDING) * n}
 
 
 def body_map(colours, faction, visor=()):
@@ -172,18 +188,23 @@ def recolour(src, dst, faction, source_state, role_state):
     wanted += [(pose, pose, False) for pose in POSES + UNTOUCHED]
     wanted = [entry for entry in wanted if entry[0] in by_name]
 
-    colours = Counter()
+    colours, standing, posed, eyes = Counter(), Counter(), Counter(), Counter()
     for source, _, light in wanted:
-        if light or source in UNTOUCHED:
+        if source in UNTOUCHED:
             continue
+        into = eyes if light else posed if source in POSES else standing
         for count, pixel in Image.open(src / f'{source}.png').convert('RGBA').getcolors(1 << 20):
             if pixel[3]:
-                colours[pixel[:3]] += count
+                into[pixel[:3]] += count
+                if not light:
+                    colours[pixel[:3]] += count
+    lights = pose_lights(standing, posed, eyes)
     visor = set()
     if src.name.startswith(VISORED) and source_state in by_name and f'{source_state}_e' in by_name:
         visor = visor_colours(Image.open(src / f'{source_state}.png').convert('RGBA'),
                               Image.open(src / f'{source_state}_e.png').convert('RGBA'))
     mapped = body_map(colours, faction, visor)
+    mapped.update({c: lamp_colour(c, faction) for c in lights})
 
     if dst.exists():
         shutil.rmtree(dst)
