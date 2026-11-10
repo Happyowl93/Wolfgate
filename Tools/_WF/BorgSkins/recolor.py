@@ -9,7 +9,8 @@ faction_chassis.ftl. Run it again after either. The mapping is colour to colour,
 skin's main accent hue takes the faction's body ramp, every other colour becomes plain metal, and the eyes take the
 faction's lamp hue. Near-black detail stays black whatever its tint, and the visor of a body listed in VISORED
 becomes black glass. The poses have their lights painted in, as there is no eye layer to draw over them; those
-colours take the lamp hue too. The dullahans are left out: their artists agreed to the port, not to recolours.
+colours take the lamp hue too, in the poses only. A body listed in TRIMMED has light strips drawn into it, which
+take the lamp hue in every state. The dullahans are left out: their artists agreed to the port, not to recolours.
 """
 import colorsys
 import json
@@ -40,6 +41,7 @@ ROLES = {
 }
 SKIPPED_BODIES = ('dullahan',)
 VISORED = ('meka',)             # bodies whose face is a glass dome rather than plating
+TRIMMED = ('vale',)             # bodies with light strips along the legs and tail, drawn into the body
 POSES = ('rest', 'sit', 'bellyup', 'wreck', 'tipped')
 UNTOUCHED = ('credit',)
 
@@ -53,6 +55,8 @@ LIGHT_HUE = 0.04                # a pose colour this close in hue to the eyes ca
 LIGHT_VALUE = 0.6               # and is at least this bright
 LIGHT_STANDING = 0.15           # and has at most this share of the standing body next to its share of the poses,
 LIGHT_STANDING_EYE = 0.5        # or this for a colour the eye layer itself uses
+TRIM_HUE = 0.02                 # a light strip is this close in hue to a pose light
+TRIM_SATURATION = 0.75          # and at least this saturated
 GLASS = ['#08080a', '#101014', '#1a1a20', '#26262e']   # black visor glass, dark to light
 
 
@@ -114,6 +118,14 @@ def pose_lights(standing, posed, eyes):
             if hsv(c)[1] >= CHROMA and hsv(c)[2] >= LIGHT_VALUE
             and any(hue_distance(hsv(c)[0], hue) <= LIGHT_HUE for hue in hues)
             and standing[c] * scale < (LIGHT_STANDING_EYE if c in eyes else LIGHT_STANDING) * n}
+
+
+def trim_lights(standing, lights):
+    """The colours of a standing body's light strips: the saturated ones in the hue of its pose lights."""
+    hues = {hsv(c)[0] for c in lights}
+    return {c for c in standing
+            if hsv(c)[1] >= TRIM_SATURATION and hsv(c)[2] >= LIGHT_VALUE
+            and any(hue_distance(hsv(c)[0], hue) <= TRIM_HUE for hue in hues)}
 
 
 def body_map(colours, faction, visor=()):
@@ -204,6 +216,8 @@ def recolour(src, dst, faction, source_state, role_state):
         visor = visor_colours(Image.open(src / f'{source_state}.png').convert('RGBA'),
                               Image.open(src / f'{source_state}_e.png').convert('RGBA'))
     mapped = body_map(colours, faction, visor)
+    if src.name.startswith(TRIMMED):
+        mapped.update({c: lamp_colour(c, faction) for c in trim_lights(standing, lights)})
     # Only in the poses: the same colour in a walking frame is body shading, and lighting it there makes it flash.
     lit = {**mapped, **{c: lamp_colour(c, faction) for c in lights}}
 
