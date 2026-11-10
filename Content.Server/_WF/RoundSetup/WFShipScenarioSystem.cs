@@ -54,6 +54,7 @@ public sealed partial class WFShipScenarioSystem : EntitySystem
     [Dependency] private HandsSystem _hands = default!;
     [Dependency] private ShipRepairSystem _repair = default!;
     [Dependency] private WFShipAccessServerSystem _access = default!;
+    [Dependency] private WFShipAccessSystem _credentials = default!;
     [Dependency] private WFSafeSpawnSystem _safeSpawn = default!;
 
     private readonly Dictionary<int, Scenario> _scenarios = new();
@@ -236,10 +237,8 @@ public sealed partial class WFShipScenarioSystem : EntitySystem
         if (!HasSectorServices() || host.AttachedEntity is not { } body || !scenario.Grids.Contains(Transform(body).GridUid ?? EntityUid.Invalid) ||
             TerminatingOrDeleted(scenario.Hull) || TerminatingOrDeleted(scenario.Station))
             return false;
-        EntityUid card;
-        if (_cards.TryFindIdCard(body, out var found))
-            card = found.Owner;
-        else
+        // A cyborg host takes the deed on its issued card, which may be stowed in its module.
+        if (!_credentials.TryGetCard(body, out var card))
         {
             card = Spawn("IDCardStandard", Transform(body).Coordinates);
             _cards.TryChangeFullName(card, Name(body));
