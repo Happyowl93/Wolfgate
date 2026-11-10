@@ -11,8 +11,8 @@ on board.
   cells, gas tanks, jerry cans, AME jars and flatpacks; the other takes any stack, so a cyborg can fuel a generator
   or build with materials its modules don't issue.
 - **Scanners**: the RCD module also carries a gas analyzer, geiger counter and t-ray scanner.
-- **Sight**: night vision is a full-colour, full-screen brightening, and the headlight is back as a toggle action,
-  lighting the chassis sprite where it has a light layer. Both are marked edits on `BaseBorgChassis`.
+- **Headlight**: back as a toggle action, lighting the chassis sprite where it has a light layer. A marked edit on
+  `BaseBorgChassis`.
 - The recharging ship repair device in the RCD module starts full.
 - **Power**: every chassis has `BatteryDrinker`, so alt-clicking an APC or a loose cell drains it into the cyborg's
   own cell; `WFBorgPowerSystem` points the drinker at the cell slot and names the installed cell on examine. Job
@@ -68,8 +68,6 @@ on board.
 - [`Resources/Prototypes/borg_types.yml`](../../../Resources/Prototypes/borg_types.yml): the treatment module carries the defibrillator
 - [`Resources/Prototypes/Entities/Mobs/Cyborgs/base_borg_chassis.yml`](../../../Resources/Prototypes/Entities/Mobs/Cyborgs/base_borg_chassis.yml)
   - recharge from APCs and loose cells, and a bank account for ATMs and pay
-  - was true, a green monochrome view through four goggle circles
-  - was #FFFFFF32, the shader's amplification is gone with the goggles
   - the headlight Monolith commented out, back as a toggle
 - [`Resources/Prototypes/Entities/Mobs/Player/silicon.yml`](../../../Resources/Prototypes/Entities/Mobs/Player/silicon.yml): was PowerCellMedium, half an hour of work per charge
 - [`Resources/Prototypes/Entities/Objects/Specific/Robotics/borg_modules.yml`](../../../Resources/Prototypes/Entities/Objects/Specific/Robotics/borg_modules.yml)

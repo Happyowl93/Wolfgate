@@ -146,13 +146,13 @@
   #- type: ItemTogglePointLight # Mono - Light removal PR: Borg Adjustments
   - type: NightVision # Gen 3 wide-quadtube
     relayOverlay: false
-    goggleEffect: false # WOLFGATE(Cyborgs): was true, a green monochrome view through four goggle circles
+    goggleEffect: true
     viewCircleRadius: 450
     viewCircleCount: 4
     viewCircleSpacing: 280
     action: ActionToggleNightVision
     phosphorColor: "#00FF00"
-    lightingColor: "#FFFFFF59" # WOLFGATE(Cyborgs): was #FFFFFF32, the shader's amplification is gone with the goggles
+    lightingColor: "#FFFFFF32"
   # WOLFGATE(Cyborgs) START: the headlight Monolith commented out, back as a toggle
   - type: ItemTogglePointLight
   - type: HandheldLight
