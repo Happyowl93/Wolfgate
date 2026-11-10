@@ -1,0 +1,40 @@
+# The treatment module's stacks, restocked in a charger like the construction ones.
+- type: entity
+  id: WFBrutepackBorg
+  parent: Brutepack10Lingering
+  suffix: Borg, Refilling
+  components:
+  - type: WFBorgStackRefill
+    target: 10
+
+- type: entity
+  id: WFOintmentBorg
+  parent: Ointment10Lingering
+  suffix: Borg, Refilling
+  components:
+  - type: WFBorgStackRefill
+    target: 10
+
+- type: entity
+  id: WFGauzeBorg
+  parent: Gauze10Lingering
+  suffix: Borg, Refilling
+  components:
+  - type: WFBorgStackRefill
+    target: 10
+
+- type: entity
+  id: WFBloodpackBorg
+  parent: Bloodpack10Lingering
+  suffix: Borg, Refilling
+  components:
+  - type: WFBorgStackRefill
+    target: 10
+
+- type: entity
+  id: WFSutureBorg
+  parent: Suture10Lingering
+  suffix: Borg, Refilling
+  components:
+  - type: WFBorgStackRefill
+    target: 10

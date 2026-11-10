@@ -203,6 +203,23 @@
     - WelderIndustrial # Frontier
     - MaintenanceJack # Frontier
     - NaniteApplicator # Monolith
+  # WOLFGATE(Cyborgs) START: two gripper hands, so any cyborg can carry cells, tanks, fuel, flatpacks and materials
+  - type: DroppableBorgModule
+    moduleId: Tools
+    items:
+    - id: PowerCellSmallPrinted
+      whitelist:
+        components:
+        - PowerCell
+        - GasTank
+        - AmeFuelContainer
+        - Flatpack
+        - ReagentTank # jerry cans
+    - id: SheetSteel1
+      whitelist:
+        components:
+        - Stack
+  # WOLFGATE END
   - type: BorgModuleIcon
     icon: { sprite: Interface/Actions/actions_borg.rsi, state: tool-module }
 
@@ -346,14 +363,25 @@
   - type: ItemBorgModule
     moduleId: Construction # Frontier
     items:
-    - SheetSteelLingering0
-    - SheetGlassLingering0
-    - SheetPlasticLingering0
-    - SheetPlasteelLingering0
-    - PartRodMetalLingering0
-    - FloorTileItemSteelLingering0
-    - FloorTileItemDarkLingering0
-    - FloorTileItemWhiteLingering0
+    # WOLFGATE(Cyborgs) START: stocked stacks that refill in a charger, plus reinforced glass
+    # - SheetSteelLingering0
+    # - SheetGlassLingering0
+    # - SheetPlasticLingering0
+    # - SheetPlasteelLingering0
+    # - PartRodMetalLingering0
+    # - FloorTileItemSteelLingering0
+    # - FloorTileItemDarkLingering0
+    # - FloorTileItemWhiteLingering0
+    - WFSheetSteelBorg
+    - WFSheetGlassBorg
+    - WFSheetRGlassBorg
+    - WFSheetPlasticBorg
+    - WFSheetPlasteelBorg
+    - WFPartRodMetalBorg
+    - WFFloorTileItemSteelBorg
+    - WFFloorTileItemDarkBorg
+    - WFFloorTileItemWhiteBorg
+    # WOLFGATE END
   # Frontier: droppable borg items
   - type: DroppableBorgModule
     moduleId: Construction
@@ -395,6 +423,11 @@
     - RCDRecharging
     - RPDRecharging # Goob
     - ShipRepairDeviceRecharging # Mono
+    # WOLFGATE(Cyborgs) START: the scanners a ship job needs, without a printed advanced tool module
+    - GasAnalyzer
+    - GeigerCounter
+    - trayScanner
+    # WOLFGATE END
   - type: BorgModuleIcon
     icon: { sprite: Interface/Actions/actions_borg.rsi, state: rcd-module }
 
@@ -495,13 +528,21 @@
     moduleId: Treatment # Frontier
     items:
     - HandheldHealthAnalyzerUnpowered
-    - Brutepack10Lingering
-    - Ointment10Lingering
-    - Gauze10Lingering
-    - Bloodpack10Lingering
+    # WOLFGATE(Cyborgs) START: stacks that refill in a charger, and the defibrillator without a module of its own
+    # - Brutepack10Lingering
+    # - Ointment10Lingering
+    # - Gauze10Lingering
+    # - Bloodpack10Lingering
+    - WFBrutepackBorg
+    - WFOintmentBorg
+    - WFGauzeBorg
+    - WFBloodpackBorg
+    - WFSutureBorg
+    - DefibrillatorOneHandedUnpowered
+    # WOLFGATE END
     - Syringe
     # WOLFGATE(Wolfmed): the field items Wolfmed's wound and IPC treatments call for
-    - Suture10Lingering
+    # - Suture10Lingering # WOLFGATE(Cyborgs): the refilling WFSutureBorg above replaces it
     - WFWolfmedTourniquetBorg
     - WFWolfmedSplintBorg
     - WFWolfmedAntisepticSpray
@@ -543,6 +584,7 @@
     # - Beaker # Frontier
     - BorgDropper
     - BorgHypo
+    - HandLabeler # WOLFGATE(Cyborgs): to tell the beakers apart
   # Frontier: droppable borg items
   - type: DroppableBorgModule
     moduleId: AdvancedTreatment
@@ -555,6 +597,16 @@
       whitelist:
         tags:
         - GlassBeaker
+    # WOLFGATE(Cyborgs) START: four beakers, two were not enough to mix anything
+    - id: Beaker
+      whitelist:
+        tags:
+        - GlassBeaker
+    - id: Beaker
+      whitelist:
+        tags:
+        - GlassBeaker
+    # WOLFGATE END
   # End Frontier: droppable borg items
   - type: BorgModuleIcon
     icon: { sprite: Interface/Actions/actions_borg.rsi, state: adv-diagnosis-module }
