@@ -47,7 +47,8 @@ stays free so a new crew never has to buy crates to fire. These materials cost n
 have no stack, so they can't be taken back out. A lathe names each by the crate it comes from. `CrateMaterialTest` covers this.
 
 The two kinds of cargo depot sell different goods (medical supplies only at the alt depot), so
-`PointOfInterestSystem.GenerateDepots` spawns one of each before any repeats (`DepotKindsTest`).
+`PointOfInterestSystem.GenerateDepots` spawns one of each before any repeats, counting a planet hub as the standard
+kind (`DepotKindsTest`).
 
 Players fill shelves too. Every crate a chute takes goes on the station's shelf. Once a good is scarce, the station's chutes take it
 even if they don't list it, at the best rate any open chute lists, and rush and bulk orders go to the station furthest under target
@@ -258,6 +259,7 @@ still well over the roughly 260 in materials it costs to print.
   - pay the live quote, print live prices
 - [`Content.Server/_NF/GameRule/PointOfInterestSystem.cs`](../../_NF/GameRule/PointOfInterestSystem.cs)
   - the depot kinds not spawned yet this round
+  - a planet hub is a standard depot, so the space slots owe the other kind
   - every kind of depot spawns once before any repeats, as each sells goods the other doesn't
   - stations take their economy role from their POI
 - [`Content.Server/Cargo/Systems/CargoSystem.Shuttle.cs`](../../Cargo/Systems/CargoSystem.Shuttle.cs): materials pay what the station's stock makes them worth

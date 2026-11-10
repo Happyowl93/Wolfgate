@@ -75,6 +75,7 @@ public sealed partial class PointOfInterestSystem : EntitySystem
             if (_wfCargoHubs.IsPlanetside(i))
             {
                 rotationOffset += rotation;
+                wfUnspawned.RemoveAll(kind => kind.ID == WFPlanetCargoHubSystem.DepotKind); // WOLFGATE(TradeGoods): a planet hub is a standard depot, so the space slots owe the other kind
                 continue;
             }
             // WOLFGATE END

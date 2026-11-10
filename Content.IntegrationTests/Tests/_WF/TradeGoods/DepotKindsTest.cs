@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Content.Server._NF.GameRule;
@@ -18,6 +19,18 @@ public sealed class DepotKindsTest
     [Test]
     public async Task EveryDepotKindSpawns()
     {
+        await RunRounds(planetHub: false);
+    }
+
+    /// <summary>A depot on a planet is a standard one, so the space depot left over is always the other kind.</summary>
+    [Test]
+    public async Task PlanetHubLeavesTheOtherKindInSpace()
+    {
+        await RunRounds(planetHub: true);
+    }
+
+    private static async Task RunRounds(bool planetHub)
+    {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Dirty = true });
         var server = pair.Server;
         var entMan = server.EntMan;
@@ -28,32 +41,49 @@ public sealed class DepotKindsTest
             var ticker = server.System<GameTicker>();
             var preset = typeof(GameTicker).GetProperty(nameof(GameTicker.CurrentPreset))!;
             var oldPreset = ticker.CurrentPreset;
-            preset.SetValue(ticker, server.ProtoMan.Index<GamePresetPrototype>("NFAdventure"));
             var oldCount = server.CfgMan.GetCVar(NFCCVars.CargoDepots);
-            server.CfgMan.SetCVar(NFCCVars.CargoDepots, 2);
-
-            var kinds = server.ProtoMan.EnumeratePrototypes<PointOfInterestPrototype>().Where(poi => poi.SpawnGroup == "CargoDepot").ToList();
-            Assert.That(kinds, Has.Count.EqualTo(2), "Two depots can't hold every kind; raise the count this test spawns.");
-            var maps = server.System<SharedMapSystem>();
-            var stations = server.System<StationSystem>();
-            for (var round = 0; round < 4; round++)
+            var hub = EntityUid.Invalid;
+            try
             {
-                maps.CreateMap(out var mapId);
-                server.System<PointOfInterestSystem>().GenerateDepots(mapId, kinds.ToList(), out var depots);
-                var spawned = depots.Select(depot => entMan.GetComponent<WFTradeStationComponent>(depot).Id).ToList();
-                Assert.That(spawned, Is.EquivalentTo(kinds.Select(kind => kind.ID)));
-                foreach (var depot in depots)
+                preset.SetValue(ticker, server.ProtoMan.Index<GamePresetPrototype>("NFAdventure"));
+                server.CfgMan.SetCVar(NFCCVars.CargoDepots, 2);
+
+                var kinds = server.ProtoMan.EnumeratePrototypes<PointOfInterestPrototype>().Where(poi => poi.SpawnGroup == "CargoDepot").ToList();
+                Assert.That(kinds, Has.Count.EqualTo(2), "Two depots can't hold every kind; raise the count this test spawns.");
+                var expected = kinds.Select(kind => kind.ID).ToList();
+                if (planetHub)
                 {
-                    if (stations.GetOwningStation(depot) is { } station)
-                        entMan.DeleteEntity(station);
+                    // Depot A stands on a planet, as most rounds have one.
+                    hub = entMan.Spawn();
+                    entMan.AddComponent<WFPlanetCargoHubComponent>(hub).Index = 0;
+                    expected.Remove(WFPlanetCargoHubSystem.DepotKind);
                 }
 
-                maps.DeleteMap(mapId);
-            }
+                var maps = server.System<SharedMapSystem>();
+                var stations = server.System<StationSystem>();
+                for (var round = 0; round < 8; round++)
+                {
+                    maps.CreateMap(out var mapId);
+                    server.System<PointOfInterestSystem>().GenerateDepots(mapId, kinds.ToList(), out var depots);
+                    var spawned = depots.Select(depot => entMan.GetComponent<WFTradeStationComponent>(depot).Id).ToList();
+                    foreach (var depot in depots)
+                    {
+                        if (stations.GetOwningStation(depot) is { } station)
+                            entMan.DeleteEntity(station);
+                    }
 
-            server.CfgMan.SetCVar(NFCCVars.CargoDepots, oldCount);
-            preset.SetValue(ticker, oldPreset);
-            server.System<WFPlanetCargoHubSystem>().ResetPlan();
+                    maps.DeleteMap(mapId);
+                    Assert.That(spawned, Is.EquivalentTo(expected), $"Round {round} spawned {string.Join(", ", spawned)}.");
+                }
+            }
+            finally
+            {
+                if (entMan.EntityExists(hub))
+                    entMan.DeleteEntity(hub);
+                server.CfgMan.SetCVar(NFCCVars.CargoDepots, oldCount);
+                preset.SetValue(ticker, oldPreset);
+                server.System<WFPlanetCargoHubSystem>().ResetPlan();
+            }
         });
 
         await pair.CleanReturnAsync();
