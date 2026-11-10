@@ -7,7 +7,8 @@ Reads the engineering, medical and security skins that convert.py and zoomba.py 
 their RSIs under Resources/Textures/_WF/BorgSkins/<size>/<faction>, plus faction_subtypes.yml, faction_chassis.yml and
 faction_chassis.ftl. Run it again after either. The mapping is colour to colour, so shading steps are kept: a
 skin's main accent hue takes the faction's body ramp, every other colour becomes plain metal, and the eyes take the
-faction's lamp hue. The dullahans are left out: their artists agreed to the port, not to recolours.
+faction's lamp hue. Near-black detail stays black whatever its tint, and the visor of a body listed in VISORED
+becomes black glass. The dullahans are left out: their artists agreed to the port, not to recolours.
 """
 import colorsys
 import json
@@ -37,6 +38,7 @@ ROLES = {
     'Security': ('Assault', 'robot', 'assault'),
 }
 SKIPPED_BODIES = ('dullahan',)
+VISORED = ('meka',)             # bodies whose face is a glass dome rather than plating
 POSES = ('rest', 'sit', 'bellyup', 'wreck', 'tipped')
 UNTOUCHED = ('credit',)
 
@@ -44,6 +46,9 @@ GREY_LO, GREY_HI = 0x26, 0x8c   # the stock chassis neutrals run #262626 to #787
 CHROMA = 0.22                   # below this saturation a colour counts as neutral
 PLATING_LUM = 0x70              # neutrals at least this bright are plating, darker ones frame and joints
 HUE_WIDTH = 0.09
+DARK = 0.22                     # at or below this HSV value a colour is black detail, whatever its tint
+VISOR_WIDTH = 0.035             # a visor's accent is told from the body's by at least this much hue
+GLASS = ['#08080a', '#101014', '#1a1a20', '#26262e']   # black visor glass, dark to light
 
 
 def rgb(text):
@@ -69,15 +74,44 @@ def hue_distance(a, b):
     return min(d, 1 - d)
 
 
-def body_map(colours, faction):
+def visor_colours(body, eyes):
+    """The accent colours of the visor: the patch of one hue that the eyes sit on, grown from the pixels under them."""
+    def accent(c):
+        return hsv(c)[1] >= CHROMA and hsv(c)[2] > DARK
+
+    width, height = min(body.width, eyes.width), min(body.height, eyes.height)
+    body, eyes = body.load(), eyes.load()
+    seeds = [(x, y) for y in range(height) for x in range(width) if eyes[x, y][3] and body[x, y][3]]
+    bins = Counter(round(hsv(body[x, y][:3])[0] * 24) % 24 for x, y in seeds if accent(body[x, y][:3]))
+    if not bins or sum(bins.values()) < 0.5 * len(seeds):
+        return set()
+    hue = max(bins, key=bins.get) / 24
+    found, todo, seen = set(), list(seeds), set(seeds)
+    while todo:
+        x, y = todo.pop()
+        c = body[x, y][:3]
+        if not body[x, y][3] or not accent(c) or hue_distance(hsv(c)[0], hue) > VISOR_WIDTH:
+            continue
+        found.add(c)
+        for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if 0 <= nx < width and 0 <= ny < height and (nx, ny) not in seen:
+                seen.add((nx, ny))
+                todo.append((nx, ny))
+    return found
+
+
+def body_map(colours, faction, visor=()):
     """Maps every body colour (a Counter of RGB to pixel count) to its faction colour."""
     ramp = [rgb(c) for c in FACTIONS[faction]['ramp']]
-    chromatic = {c: n for c, n in colours.items() if hsv(c)[1] >= CHROMA and hsv(c)[2] > 0.12}
+    chromatic = {c: n for c, n in colours.items() if hsv(c)[1] >= CHROMA and hsv(c)[2] > DARK}
     bins = Counter()
     for c, n in chromatic.items():
         bins[round(hsv(c)[0] * 24) % 24] += n
     main = max(bins, key=bins.get) / 24 if bins else None
-    primary = [c for c in chromatic if main is not None and hue_distance(hsv(c)[0], main) <= HUE_WIDTH]
+    # A visor in the body's own accent is part of the body.
+    glass = {c for c in visor if main is None or hue_distance(hsv(c)[0], main) > VISOR_WIDTH}
+    primary = [c for c in chromatic
+               if c not in glass and main is not None and hue_distance(hsv(c)[0], main) <= HUE_WIDTH]
 
     # A body that is mostly bare plating has too little accent to carry the faction: its light plating takes the ramp too.
     if sum(colours[c] for c in primary) < 0.3 * sum(colours.values()):
@@ -88,8 +122,13 @@ def body_map(colours, faction):
     rest = [lum(c) for c in colours if c not in primary] or [0, 1]
     rest_lo, rest_hi = min(rest), max(rest)
 
+    glass_ramp = [rgb(c) for c in GLASS]
+    glass_levels = [lum(c) for c in glass] or [0, 1]
     mapped = {}
     for c in colours:
+        if c in glass:
+            mapped[c] = ramp_at(glass_ramp, (lum(c) - min(glass_levels)) / max(max(glass_levels) - min(glass_levels), 1))
+            continue
         if c in primary:
             mapped[c] = ramp_at(ramp, (lum(c) - lo) / max(hi - lo, 1))
             continue
@@ -140,7 +179,11 @@ def recolour(src, dst, faction, source_state, role_state):
         for count, pixel in Image.open(src / f'{source}.png').convert('RGBA').getcolors(1 << 20):
             if pixel[3]:
                 colours[pixel[:3]] += count
-    mapped = body_map(colours, faction)
+    visor = set()
+    if src.name.startswith(VISORED) and source_state in by_name and f'{source_state}_e' in by_name:
+        visor = visor_colours(Image.open(src / f'{source_state}.png').convert('RGBA'),
+                              Image.open(src / f'{source_state}_e.png').convert('RGBA'))
+    mapped = body_map(colours, faction, visor)
 
     if dst.exists():
         shutil.rmtree(dst)

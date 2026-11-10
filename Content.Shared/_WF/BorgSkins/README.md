@@ -44,7 +44,8 @@ lights show while it has a mind.
 `Tools/_WF/BorgSkins/recolor.py` (run it after either script) repaints the engineering, medical and security skins in
 PDV and TSF colours for the faction engineer, medical and assault borg types, into `<size>/<PDV|TSF>/<role>` and the
 `faction_*` prototype and locale files. A skin's main accent takes the faction's body ramp, everything else becomes
-plain metal and the eyes take the faction's lamp colour; the `credit` state is copied as it is. The faction types
+plain metal and the eyes take the faction's lamp colour; near-black detail stays black and the meka's visor becomes
+black glass; the `credit` state is copied as it is. The faction types
 show one `_l` state as both eyes and headlight, so these skins have no separate lamp glow. The dullahans are not
 recoloured.
 
