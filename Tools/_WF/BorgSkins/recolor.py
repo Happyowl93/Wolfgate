@@ -9,8 +9,8 @@ faction_chassis.ftl. Run it again after either. The mapping is colour to colour,
 skin's main accent hue takes the faction's body ramp, every other colour becomes plain metal, and the eyes take the
 faction's lamp hue. Near-black detail stays black whatever its tint, and the visor of a body listed in VISORED
 becomes black glass. The poses have their lights painted in, as there is no eye layer to draw over them; those
-colours take the lamp hue too, in the poses only. A body listed in TRIMMED has light strips drawn into it, which
-take the lamp hue in every state. The dullahans are left out: their artists agreed to the port, not to recolours.
+colours take the lamp hue too, in the poses only. A body listed in TRIMMED has light strips drawn into it: those
+move to its light states, frame for frame, so they glow with the eyes, and are painted into its poses. The dullahans are left out: their artists agreed to the port, not to recolours.
 """
 import colorsys
 import json
@@ -41,7 +41,17 @@ ROLES = {
 }
 SKIPPED_BODIES = ('dullahan',)
 VISORED = ('meka',)             # bodies whose face is a glass dome rather than plating
-TRIMMED = ('vale',)             # bodies with light strips along the legs and tail, drawn into the body
+# Bodies with light strips or lamps drawn into the body, and how those are told from its plating.
+TRIMMED = {
+    'vale': 'pose',             # saturated colours in the hue of its pose lights
+    'darkhound': 'bright',      # every bright saturated colour
+    'hound': 'bright',
+    'alina': 'eyes',            # bright saturated colours in the hue of its eyes
+    'wyvern': 'other',          # bright saturated colours outside its main accent
+    'c9_t7o': 'other',
+    'k1_t7y': 'other',
+}
+UNTRIMMED = (('hound', 'Security'),)    # all accent, no strips
 POSES = ('rest', 'sit', 'bellyup', 'wreck', 'tipped')
 UNTOUCHED = ('credit',)
 
@@ -55,8 +65,9 @@ LIGHT_HUE = 0.04                # a pose colour this close in hue to the eyes ca
 LIGHT_VALUE = 0.6               # and is at least this bright
 LIGHT_STANDING = 0.15           # and has at most this share of the standing body next to its share of the poses,
 LIGHT_STANDING_EYE = 0.5        # or this for a colour the eye layer itself uses
-TRIM_HUE = 0.02                 # a light strip is this close in hue to a pose light
+TRIM_HUE = 0.02                 # a 'pose' light strip is this close in hue to a pose light
 TRIM_SATURATION = 0.75          # and at least this saturated
+TRIM_BRIGHT = (0.5, 0.55)       # the least saturation and value of any other light strip
 GLASS = ['#08080a', '#101014', '#1a1a20', '#26262e']   # black visor glass, dark to light
 
 
@@ -120,22 +131,37 @@ def pose_lights(standing, posed, eyes):
             and standing[c] * scale < (LIGHT_STANDING_EYE if c in eyes else LIGHT_STANDING) * n}
 
 
-def trim_lights(standing, lights):
-    """The colours of a standing body's light strips: the saturated ones in the hue of its pose lights."""
-    hues = {hsv(c)[0] for c in lights}
-    return {c for c in standing
-            if hsv(c)[1] >= TRIM_SATURATION and hsv(c)[2] >= LIGHT_VALUE
-            and any(hue_distance(hsv(c)[0], hue) <= TRIM_HUE for hue in hues)}
+def accent_hue(colours):
+    """The hue most of a body's coloured pixels have, or None for a body with no colour."""
+    bins = Counter()
+    for c, n in colours.items():
+        if hsv(c)[1] >= CHROMA and hsv(c)[2] > DARK:
+            bins[round(hsv(c)[0] * 24) % 24] += n
+    return max(bins, key=bins.get) / 24 if bins else None
+
+
+def trim_lights(kind, standing, lights, eyes):
+    """The colours of a standing body's light strips, by the rule TRIMMED gives the body."""
+    def near(c, others, width):
+        return any(hue_distance(hsv(c)[0], hsv(other)[0]) <= width for other in others)
+
+    if kind == 'pose':
+        return {c for c in standing
+                if hsv(c)[1] >= TRIM_SATURATION and hsv(c)[2] >= LIGHT_VALUE and near(c, lights, TRIM_HUE)}
+    bright = {c for c in standing if hsv(c)[1] >= TRIM_BRIGHT[0] and hsv(c)[2] >= TRIM_BRIGHT[1]}
+    if kind == 'eyes':
+        return {c for c in bright if near(c, [e for e in eyes if hsv(e)[1] >= CHROMA], LIGHT_HUE)}
+    if kind == 'other':
+        main = accent_hue(standing)
+        return {c for c in bright if main is not None and hue_distance(hsv(c)[0], main) > HUE_WIDTH}
+    return bright
 
 
 def body_map(colours, faction, visor=()):
     """Maps every body colour (a Counter of RGB to pixel count) to its faction colour."""
     ramp = [rgb(c) for c in FACTIONS[faction]['ramp']]
     chromatic = {c: n for c, n in colours.items() if hsv(c)[1] >= CHROMA and hsv(c)[2] > DARK}
-    bins = Counter()
-    for c, n in chromatic.items():
-        bins[round(hsv(c)[0] * 24) % 24] += n
-    main = max(bins, key=bins.get) / 24 if bins else None
+    main = accent_hue(colours)
     # A visor in the body's own accent is part of the body.
     glass = {c for c in visor if main is None or hue_distance(hsv(c)[0], main) > VISOR_WIDTH}
     primary = [c for c in chromatic
@@ -189,6 +215,44 @@ def repaint(image, colour_of):
     return image
 
 
+def frame_directions(state):
+    """The direction of each frame of a state, in sheet order."""
+    if 'delays' in state:
+        return [direction for direction, delays in enumerate(state['delays']) for _ in delays]
+    return list(range(state.get('directions', 1)))
+
+
+def frame_at(image, size, index):
+    columns = image.width // size[0]
+    x, y = index % columns * size[0], index // columns * size[1]
+    return image.crop((x, y, x + size[0], y + size[1]))
+
+
+def strip_lights(body, body_state, eyes, eye_state, size, trim, faction):
+    """A light state laid out like the body state: the recoloured eyes plus the body's light strips, frame for frame."""
+    body = body.convert('RGBA')
+    out = Image.new('RGBA', body.size)
+    directions = frame_directions(body_state)
+    eye_directions = frame_directions(eye_state)
+    columns = body.width // size[0]
+    for index, direction in enumerate(directions):
+        frame = Image.new('RGBA', size)
+        if len(eye_directions) == len(directions):
+            frame = frame_at(eyes, size, index)
+        elif direction in eye_directions:
+            # Eyes with fewer frames than the body hold still.
+            frame = frame_at(eyes, size, eye_directions.index(direction))
+        frame = repaint(frame, lambda c: lamp_colour(c, faction))
+        lit, under = frame.load(), frame_at(body, size, index).load()
+        for y in range(size[1]):
+            for x in range(size[0]):
+                r, g, b, a = under[x, y]
+                if a and not lit[x, y][3] and (r, g, b) in trim:
+                    lit[x, y] = (*lamp_colour((r, g, b), faction), a)
+        out.paste(frame, (index % columns * size[0], index // columns * size[1]))
+    return out
+
+
 def recolour(src, dst, faction, source_state, role_state):
     """Writes the faction RSI. The faction borg types show <state>_l as both eyes and lamp, so it is the skin's eyes."""
     meta = json.loads((src / 'meta.json').read_text(encoding='utf-8'))
@@ -216,10 +280,15 @@ def recolour(src, dst, faction, source_state, role_state):
         visor = visor_colours(Image.open(src / f'{source_state}.png').convert('RGBA'),
                               Image.open(src / f'{source_state}_e.png').convert('RGBA'))
     mapped = body_map(colours, faction, visor)
-    if src.name.startswith(TRIMMED):
-        mapped.update({c: lamp_colour(c, faction) for c in trim_lights(standing, lights)})
-    # Only in the poses: the same colour in a walking frame is body shading, and lighting it there makes it flash.
-    lit = {**mapped, **{c: lamp_colour(c, faction) for c in lights}}
+    body = src.name[:-len('.rsi')]
+    trim = set()
+    if body in TRIMMED and (body, src.parent.name) not in UNTRIMMED:
+        trim = trim_lights(TRIMMED[body], standing, lights, eyes)
+    # Only in the poses: a pose light's colour in a walking frame is body shading, and lighting it there makes it
+    # flash; a light strip there is in the light state instead, and dark with it.
+    lit = {**mapped, **{c: lamp_colour(c, faction) for c in lights | trim}}
+    size = (meta['size']['x'], meta['size']['y'])
+    body_of = {f'{source_state}_e': source_state, f'{source_state}_e_moving': f'{source_state}_moving'}
 
     if dst.exists():
         shutil.rmtree(dst)
@@ -227,6 +296,13 @@ def recolour(src, dst, faction, source_state, role_state):
     states = []
     for source, output, light in wanted:
         image = Image.open(src / f'{source}.png')
+        if light and trim and body_of[source] in by_name:
+            under = body_of[source]
+            image = strip_lights(Image.open(src / f'{under}.png'), by_name[under], image.convert('RGBA'),
+                                 by_name[source], size, trim, faction)
+            image.save(dst / f'{output}.png')
+            states.append({**by_name[under], 'name': output})
+            continue
         if source not in UNTOUCHED:
             image = repaint(image, (lambda c: lamp_colour(c, faction)) if light
                             else (lambda c: lit.get(c, c)) if source in POSES else (lambda c: mapped.get(c, c)))
