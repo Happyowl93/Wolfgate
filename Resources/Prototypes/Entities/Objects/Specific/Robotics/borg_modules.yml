@@ -203,7 +203,7 @@
     - WelderIndustrial # Frontier
     - MaintenanceJack # Frontier
     - NaniteApplicator # Monolith
-  # WOLFGATE(Cyborgs) START: two gripper hands, so any cyborg can carry cells, tanks, fuel, flatpacks and materials
+  # WOLFGATE(Cyborgs) START: gripper hands for cells, tanks, fuel, flatpacks and materials, and one holding an ID card
   - type: DroppableBorgModule
     moduleId: Tools
     items:
@@ -219,6 +219,10 @@
       whitelist:
         components:
         - Stack
+    - id: WFBorgIdCard # buys a ship and unlocks its consoles
+      whitelist:
+        components:
+        - IdCard
   # WOLFGATE END
   - type: BorgModuleIcon
     icon: { sprite: Interface/Actions/actions_borg.rsi, state: tool-module }
