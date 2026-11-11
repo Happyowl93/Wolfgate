@@ -4,11 +4,15 @@ using Content.Shared._WF.Narcotics.Delivery;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.FixedPoint;
+using Content.Shared.Storage.EntitySystems;
 using Robust.Shared.GameObjects;
 
 namespace Content.IntegrationTests.Tests._WF.Narcotics;
 
-/// <summary>A snorted line and a bong hit each move their drug into the bloodstream.</summary>
+/// <summary>
+/// A snorted line and a bong hit each move their drug into the bloodstream, and a baggie takes only powder and
+/// solid drugs.
+/// </summary>
 [TestFixture]
 [TestOf(typeof(WFDeliverySystem))]
 public sealed class DeliveryTest
@@ -53,6 +57,47 @@ public sealed class DeliveryTest
             Assert.That(delivery.Hit((bong, bongComp), smoker), Is.True);
             Assert.That(InBlood(smoker, "WFCrack"), Is.EqualTo(FixedPoint2.New(5)), "The last hit takes what's left.");
             Assert.That(bongComp.Lit, Is.False, "A spent bowl goes out.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task BaggieWhitelistTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+
+        await server.WaitAssertion(() =>
+        {
+            var solutions = server.System<SharedSolutionContainerSystem>();
+            var transfer = server.System<SolutionTransferSystem>();
+            var user = entMan.SpawnEntity("MobHuman", map.GridCoords);
+
+            FixedPoint2 Pour(string reagent)
+            {
+                var beaker = entMan.SpawnEntity("Beaker", map.GridCoords);
+                var baggie = entMan.SpawnEntity("WFBaggie", map.GridCoords);
+                solutions.TryGetSolution(beaker, "beaker", out var from, out _);
+                solutions.TryAddReagent(from!.Value, reagent, FixedPoint2.New(10));
+                solutions.TryGetSolution(baggie, "baggie", out var to, out _);
+                return transfer.Transfer(user, beaker, from.Value, baggie, to!.Value, FixedPoint2.New(5));
+            }
+
+            Assert.That(Pour("WFCocaine"), Is.EqualTo(FixedPoint2.New(5)), "Cocaine pours into a baggie.");
+            Assert.That(Pour("Water"), Is.EqualTo(FixedPoint2.Zero), "Water doesn't.");
+
+            var storage = server.System<SharedStorageSystem>();
+            var bag = entMan.SpawnEntity("WFBaggie", map.GridCoords);
+            foreach (var solid in new[] { "WFCrackRock", "WFHashBrick", "GroundCannabis", "FentanylSolidified" })
+            {
+                Assert.That(storage.CanInsert(bag, entMan.SpawnEntity(solid, map.GridCoords), out _), Is.True,
+                    $"{solid} fits a baggie.");
+            }
+            Assert.That(storage.CanInsert(bag, entMan.SpawnEntity("WFBaggieCocaine", map.GridCoords), out _), Is.False,
+                "A baggie doesn't take another baggie.");
         });
 
         await pair.CleanReturnAsync();

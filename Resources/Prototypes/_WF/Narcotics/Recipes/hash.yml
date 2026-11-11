@@ -20,5 +20,5 @@
   targetNode: brick
   category: construction-category-misc
   description: Dried cannabis pressed into a dense brick.
-  icon: { sprite: Objects/Specific/Hydroponics/tobacco.rsi, state: dried }
+  icon: { sprite: _WF/Narcotics/Objects/solids.rsi, state: hash }
   objectType: Item

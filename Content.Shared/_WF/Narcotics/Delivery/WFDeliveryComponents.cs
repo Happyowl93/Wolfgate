@@ -1,3 +1,4 @@
+using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.DoAfter;
 using Content.Shared.FixedPoint;
@@ -6,7 +7,7 @@ using Robust.Shared.Serialization;
 
 namespace Content.Shared._WF.Narcotics.Delivery;
 
-/// <summary>A powder baggie. Used on a table, it lays out a line.</summary>
+/// <summary>A powder baggie. Used on a table, it lays out a line. Takes only the listed reagents.</summary>
 [RegisterComponent]
 public sealed partial class WFBaggieComponent : Component
 {
@@ -19,6 +20,10 @@ public sealed partial class WFBaggieComponent : Component
 
     [DataField]
     public EntProtoId Line = "WFPowderLine";
+
+    /// <summary>The only reagents it takes; null takes anything.</summary>
+    [DataField]
+    public HashSet<ProtoId<ReagentPrototype>>? Reagents;
 }
 
 /// <summary>A line of powder on a surface. Snorting it moves its solution into the bloodstream.</summary>

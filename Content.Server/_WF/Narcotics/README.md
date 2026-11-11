@@ -48,6 +48,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 ### Shared
 
+- [`Content.Shared/_WF/Narcotics/Delivery/WFBaggieSystem.cs`](../../../Content.Shared/_WF/Narcotics/Delivery/WFBaggieSystem.cs)
 - [`Content.Shared/_WF/Narcotics/Delivery/WFDeliveryComponents.cs`](../../../Content.Shared/_WF/Narcotics/Delivery/WFDeliveryComponents.cs)
 - [`Content.Shared/_WF/Narcotics/SharedWFIntoxicationSystem.cs`](../../../Content.Shared/_WF/Narcotics/SharedWFIntoxicationSystem.cs)
 - [`Content.Shared/_WF/Narcotics/WFAnalyzerConditions.cs`](../../../Content.Shared/_WF/Narcotics/WFAnalyzerConditions.cs)
@@ -88,6 +89,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Resources/Prototypes/_WF/Narcotics/profiles.yml`](../../../Resources/Prototypes/_WF/Narcotics/profiles.yml)
 - [`Resources/Prototypes/_WF/Narcotics/reactions.yml`](../../../Resources/Prototypes/_WF/Narcotics/reactions.yml)
 - [`Resources/Prototypes/_WF/Narcotics/reagents.yml`](../../../Resources/Prototypes/_WF/Narcotics/reagents.yml)
+- [`Resources/Prototypes/_WF/Narcotics/Recipes/baggie.yml`](../../../Resources/Prototypes/_WF/Narcotics/Recipes/baggie.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Recipes/hash.yml`](../../../Resources/Prototypes/_WF/Narcotics/Recipes/hash.yml)
 - [`Resources/Prototypes/_WF/Narcotics/shaders.yml`](../../../Resources/Prototypes/_WF/Narcotics/shaders.yml)
 - [`Resources/Prototypes/_WF/Narcotics/tags.yml`](../../../Resources/Prototypes/_WF/Narcotics/tags.yml)
@@ -105,6 +107,12 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 ### Textures
 
+- [`Resources/Textures/_WF/Narcotics/Hydroponics/coca.rsi/`](../../../Resources/Textures/_WF/Narcotics/Hydroponics/coca.rsi/)
+- [`Resources/Textures/_WF/Narcotics/Hydroponics/opium_poppy.rsi/`](../../../Resources/Textures/_WF/Narcotics/Hydroponics/opium_poppy.rsi/)
+- [`Resources/Textures/_WF/Narcotics/Objects/baggie.rsi/`](../../../Resources/Textures/_WF/Narcotics/Objects/baggie.rsi/)
+- [`Resources/Textures/_WF/Narcotics/Objects/bong.rsi/`](../../../Resources/Textures/_WF/Narcotics/Objects/bong.rsi/)
+- [`Resources/Textures/_WF/Narcotics/Objects/powder_line.rsi/`](../../../Resources/Textures/_WF/Narcotics/Objects/powder_line.rsi/)
+- [`Resources/Textures/_WF/Narcotics/Objects/solids.rsi/`](../../../Resources/Textures/_WF/Narcotics/Objects/solids.rsi/)
 - [`Resources/Textures/_WF/Narcotics/Shaders/intoxication.swsl`](../../../Resources/Textures/_WF/Narcotics/Shaders/intoxication.swsl)
 - [`Resources/Textures/_WF/Narcotics/Shaders/intoxication_trail.swsl`](../../../Resources/Textures/_WF/Narcotics/Shaders/intoxication_trail.swsl)
 
@@ -124,6 +132,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.Server/Medical/HealthAnalyzerSystem.cs`](../../Medical/HealthAnalyzerSystem.cs): drug levels, held effects and dependence
 - [`Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs`](../../../Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs): drug levels, held effects and dependence
 - [`Resources/Prototypes/_Impstation/Reagents/biological.yml`](../../../Resources/Prototypes/_Impstation/Reagents/biological.yml): held while it is in the blood instead of piling up each tick
+- [`Resources/Prototypes/_Mono/Entities/Objects/Misc/solids.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Misc/solids.yml): fits a baggie
 - [`Resources/Prototypes/_Mono/Reagents/letoferol.yml`](../../../Resources/Prototypes/_Mono/Reagents/letoferol.yml): drunkenness follows the units in the blood
 - [`Resources/Prototypes/_Mono/Reagents/medicine.yml`](../../../Resources/Prototypes/_Mono/Reagents/medicine.yml)
   - only in an overdose, like its jitter
@@ -133,12 +142,14 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
   - held while it is in the blood instead of piling up each tick
   - held at the units left, as long as it used to pile up to
   - drunkenness follows the units in the blood
+- [`Resources/Prototypes/_NF/Entities/Objects/Specific/Hydroponics/leaves.yml`](../../../Resources/Prototypes/_NF/Entities/Objects/Specific/Hydroponics/leaves.yml): fits a baggie
 - [`Resources/Prototypes/_NF/Reagents/medicine.yml`](../../../Resources/Prototypes/_NF/Reagents/medicine.yml): held while it is in the blood instead of piling up each tick
 - [`Resources/Prototypes/_Onyx/Reagents/Medicine/medicine.yml`](../../../Resources/Prototypes/_Onyx/Reagents/Medicine/medicine.yml)
   - medical opioids build dependence slowly through the Opium profile
   - medical opioids build dependence slowly through the Heroin profile
 - [`Resources/Prototypes/Catalog/Fills/Crates/botany.yml`](../../../Resources/Prototypes/Catalog/Fills/Crates/botany.yml): drug crops come only from this crate and dealers
 - [`Resources/Prototypes/Entities/Objects/Consumable/Smokeables/Cigarettes/cigarette.yml`](../../../Resources/Prototypes/Entities/Objects/Consumable/Smokeables/Cigarettes/cigarette.yml): the THC cigarette held plant fertiliser instead of THC
+- [`Resources/Prototypes/Entities/Objects/Specific/Hydroponics/leaves.yml`](../../../Resources/Prototypes/Entities/Objects/Specific/Hydroponics/leaves.yml): fits a baggie
 - [`Resources/Prototypes/Guidebook/medical.yml`](../../../Resources/Prototypes/Guidebook/medical.yml): drugs, grades and neuroware
 - [`Resources/Prototypes/Hydroponics/seeds.yml`](../../../Resources/Prototypes/Hydroponics/seeds.yml): the opium poppy is a poppy mutation
 - [`Resources/Prototypes/Reagents/cleaning.yml`](../../../Resources/Prototypes/Reagents/cleaning.yml)

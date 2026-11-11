@@ -1,5 +1,6 @@
 wf-baggie-empty = The baggie is empty.
 wf-baggie-line-placed = You tip out a neat line.
+wf-baggie-refused = The baggie only takes powder. { $reagents } won't go in.
 wf-line-snort-start = You lean in over the line.
 wf-line-snort-done = You snort the line. Your nose burns.
 

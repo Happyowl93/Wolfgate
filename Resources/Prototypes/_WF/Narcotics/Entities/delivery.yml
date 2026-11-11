@@ -1,16 +1,21 @@
-# Ways in: powder lines laid from a baggie, and a bong that works from the hand. Placeholder sprites.
+# Ways in: powder lines laid from a baggie, and a bong that works from the hand.
 
 - type: entity
   id: WFPowderLine
   components:
   - type: Transform
     noRot: true
+  # Tinted by the powder it was laid from.
   - type: Sprite
     drawdepth: SmallObjects
-    sprite: Objects/Misc/reagent_fillings.rsi
-    state: powderpile
-    color: "#f4f4f0"
-    scale: 0.7, 0.35
+    sprite: _WF/Narcotics/Objects/powder_line.rsi
+    layers:
+    - state: line-1
+      map: [ "enum.SolutionContainerLayers.Fill" ]
+  - type: Appearance
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    fillBaseName: line-
   - type: Clickable
   - type: InteractionOutline
   - type: Physics
@@ -32,12 +37,19 @@
   id: WFBong
   components:
   - type: Sprite
-    sprite: Objects/Specific/Chemistry/beaker_large.rsi
-    state: beakerlarge
-    color: "#9fe0c0"
+    sprite: _WF/Narcotics/Objects/bong.rsi
+    layers:
+    - state: icon
+    - state: fill-1
+      map: [ "enum.SolutionContainerLayers.Fill" ]
+      visible: false
   - type: Item
     size: Small
-    sprite: Objects/Specific/Chemistry/beaker_large.rsi
+    sprite: _WF/Narcotics/Objects/bong.rsi
+  - type: Appearance
+  - type: SolutionContainerVisuals
+    maxFillLevels: 2
+    fillBaseName: fill-
   - type: SolutionContainerManager
     solutions:
       water:
