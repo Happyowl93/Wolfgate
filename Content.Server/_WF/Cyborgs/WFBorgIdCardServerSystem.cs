@@ -1,5 +1,6 @@
 using Content.Server._NF.SectorServices;
 using Content.Server._WF.Companies;
+using Content.Server._WF.Traders;
 using Content.Server.Silicons.Borgs;
 using Content.Server.StationRecords;
 using Content.Server.StationRecords.Systems;
@@ -20,8 +21,8 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._WF.Cyborgs;
 
 /// <summary>
-/// Issues a crew cyborg its ID card and gives the card a crew record, the key ship doors, allow lists and crews
-/// admit a card by.
+/// Issues a crew cyborg its ID card, gives the card a crew record, the key ship doors, allow lists and crews
+/// admit a card by, and stamps it with its player so traders take it.
 /// </summary>
 public sealed partial class WFBorgIdCardServerSystem : EntitySystem
 {
@@ -33,6 +34,7 @@ public sealed partial class WFBorgIdCardServerSystem : EntitySystem
 
     [Dependency] private IPrototypeManager _proto = default!;
     [Dependency] private HandPlaceholderSystem _placeholder = default!;
+    [Dependency] private IdCardOwnerSystem _idOwner = default!;
     [Dependency] private SectorServiceSystem _sectorService = default!;
     [Dependency] private SharedContainerSystem _container = default!;
     [Dependency] private SharedIdCardSystem _idCard = default!;
@@ -54,8 +56,12 @@ public sealed partial class WFBorgIdCardServerSystem : EntitySystem
 
     private void OnPlayerAttached(Entity<BorgChassisComponent> ent, ref PlayerAttachedEvent args)
     {
-        if (_cards.TryGetCard(ent, out var card))
-            EnsureRecord(ent, card);
+        if (!_cards.TryGetCard(ent, out var card))
+            return;
+
+        EnsureRecord(ent, card);
+        // Overwritten: the card follows whoever runs the chassis now, such as after a brain swap.
+        _idOwner.Stamp(card, ent, overwrite: true);
     }
 
     /// <summary>
@@ -68,8 +74,11 @@ public sealed partial class WFBorgIdCardServerSystem : EntitySystem
             return;
 
         _container.EnsureContainer<Container>(args.Mob, WFBorgIdCardSystem.ContainerId);
-        if (TrySpawnInContainer(IssuedCard, args.Mob, WFBorgIdCardSystem.ContainerId, out var card))
-            EnsureRecord(args.Mob, card.Value);
+        if (!TrySpawnInContainer(IssuedCard, args.Mob, WFBorgIdCardSystem.ContainerId, out var card))
+            return;
+
+        EnsureRecord(args.Mob, card.Value);
+        _idOwner.Stamp(card.Value, args.Mob);
     }
 
     /// <summary>A tool module carries the card the chassis was already issued, in place of its own blank one.</summary>
@@ -97,8 +106,12 @@ public sealed partial class WFBorgIdCardServerSystem : EntitySystem
     // Covers a tool module fitted after the player took the chassis.
     private void OnCardEquipped(Entity<WFBorgIdCardComponent> ent, ref GotEquippedHandEvent args)
     {
-        if (HasComp<BorgChassisComponent>(args.User))
-            EnsureRecord(args.User, ent);
+        if (!HasComp<BorgChassisComponent>(args.User))
+            return;
+
+        EnsureRecord(args.User, ent);
+        // Only a card nobody owns yet, so picking up another cyborg's card doesn't take it over.
+        _idOwner.Stamp(ent, args.User);
     }
 
     /// <summary>
