@@ -11,6 +11,7 @@
   meltingPoint: 170.0
   metabolisms:
     Poison:
+      metabolismRate: 0.01 # WOLFGATE(Narcotics): crystal stays in the blood for minutes, so per-tick numbers below are cut to match
       effects:
       - !type:HealthChange
         conditions:
@@ -18,12 +19,12 @@
           type: Yowie
         damage:
           groups:
-            Brute: -1
+            Brute: -0.02 # WOLFGATE(Narcotics): was -1 a tick at 50x the clearance
           types:
-            Heat: -0.5
-            Shock: -0.5
-            Cold: -0.5
-            Radiation: -0.5
+            Heat: -0.01 # WOLFGATE(Narcotics): was -0.5
+            Shock: -0.01 # WOLFGATE(Narcotics): was -0.5
+            Cold: -0.01 # WOLFGATE(Narcotics): was -0.5
+            Radiation: -0.01 # WOLFGATE(Narcotics): was -0.5
       - !type:HealthChange
         conditions:
         - !type:OrganType # Goobstation - Yowie
@@ -31,7 +32,7 @@
           shouldHave: false
         damage:
           types:
-            Poison: 0.75
+            Poison: 0.02 # WOLFGATE(Narcotics): was 0.75 a tick at 50x the clearance
       - !type:HealthChange
         conditions:
         - !type:OrganType # Goobstation - Yowie
@@ -41,14 +42,16 @@
           min: 30
         damage:
           types:
-            Poison: 2 # this is added to the base damage of the meth.
-            Asphyxiation: 2
+            Poison: 0.04 # this is added to the base damage of the meth. # WOLFGATE(Narcotics): was 2 a tick at 50x the clearance
+            Asphyxiation: 0.04 # WOLFGATE(Narcotics): was 2
     Narcotic:
+      metabolismRate: 0.01 # WOLFGATE(Narcotics): the crystal high and its effects last while it stays in the blood
       effects:
       # WOLFGATE(Narcotics) START: doses the Crystal profile for its overlay, dependence and crash
       - !type:WFDose
         profile: WFCrystal
         perUnit: 1
+        inBlood: true
       # WOLFGATE END
       - !type:MovespeedModifier
         walkSpeedModifier: 1.25
@@ -94,6 +97,7 @@
         tier: Stimulant
         strength: 8
     Medicine:
+      metabolismRate: 0.01 # WOLFGATE(Narcotics): clears with the rest of the crystal
       effects:
       - !type:ResetNarcolepsy
         conditions:
@@ -117,6 +121,7 @@
       - !type:WFDose
         profile: WFCrystal
         perUnit: 0.25
+        inBlood: true
       # WOLFGATE END
       - !type:HealthChange
         conditions:
@@ -298,11 +303,13 @@
     amount: -1
   metabolisms:
     Narcotic:
+      metabolismRate: 0.02 # WOLFGATE(Narcotics): a cannabis high lasts while the THC stays in the blood
       effects:
       # WOLFGATE(Narcotics) START: doses the Cannabis profile
       - !type:WFDose
         profile: WFCannabis
         perUnit: 1
+        inBlood: true
       # WOLFGATE END
       - !type:HealthChange
         conditions:
@@ -310,18 +317,18 @@
           type: Yowie
         damage:
           groups:
-            Brute: -1
+            Brute: -0.04 # WOLFGATE(Narcotics): was -1 a tick at 25x the clearance
           types:
-            Heat: -0.5
-            Shock: -0.5
-            Cold: -0.5
-            Radiation: -0.5
+            Heat: -0.02 # WOLFGATE(Narcotics): was -0.5
+            Shock: -0.02 # WOLFGATE(Narcotics): was -0.5
+            Cold: -0.02 # WOLFGATE(Narcotics): was -0.5
+            Radiation: -0.02 # WOLFGATE(Narcotics): was -0.5
       - !type:GenericStatusEffect
         key: SeeingRainbows
         component: SeeingRainbows
         type: Add
         time: 16
-        refresh: false
+        refresh: true # WOLFGATE(Narcotics): held while THC is in the blood instead of piling up 16 s a tick
 
 - type: reagent
   id: Nicotine
@@ -336,11 +343,13 @@
     amount: -5
   metabolisms:
     Narcotic:
+      metabolismRate: 0.01 # WOLFGATE(Narcotics): nicotine builds up in the blood over a cigarette
       effects:
       # WOLFGATE(Narcotics) START: doses the Nicotine profile, which is what builds the habit
       - !type:WFDose
         profile: WFNicotine
         perUnit: 1
+        inBlood: true
       # WOLFGATE END
       - !type:HealthChange
         conditions:
@@ -348,12 +357,12 @@
           type: Yowie
         damage:
           groups:
-            Brute: -0.2
+            Brute: -0.01 # WOLFGATE(Narcotics): was -0.2 a tick at 50x the clearance
           types:
-            Heat: -0.1
-            Shock: -0.1
-            Cold: -0.1
-            Radiation: -0.1
+            Heat: -0.01 # WOLFGATE(Narcotics): was -0.1
+            Shock: -0.01 # WOLFGATE(Narcotics): was -0.1
+            Cold: -0.01 # WOLFGATE(Narcotics): was -0.1
+            Radiation: -0.01 # WOLFGATE(Narcotics): was -0.1
 
 # TODO: Replace these nonstandardized effects with generic brain damage
 - type: reagent

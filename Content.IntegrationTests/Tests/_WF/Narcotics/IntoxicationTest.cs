@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using Content.Server._WF.Narcotics;
 using Content.Server.Body.Components;
+using Content.Server.Body.Systems;
 using Content.Shared._WF.Narcotics;
 using Content.Shared.Body.Systems;
 using Content.Shared.Chemistry.Components;
+using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Damage;
 using Content.Shared.Traits.Assorted;
@@ -15,7 +17,8 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WF.Narcotics;
 
 /// <summary>
-/// Levels pick tiers and decay, a long enough high ends in a crash, and only organic brains take chemical doses.
+/// Levels pick tiers and decay, follow a blood drug, a long enough high ends in a crash, and only organic brains take
+/// chemical doses.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFIntoxicationSystem))]
@@ -59,6 +62,30 @@ public sealed class IntoxicationTest
   - min: 2
   - min: 5
   - min: 10
+
+- type: wfDrugProfile
+  id: WFIntoxTestBlood
+  family: Stimulant
+  decay: 0
+  overdoseHalfLife: 10
+  tiers:
+  - min: 1
+  - min: 4
+  - min: 8
+
+- type: reagent
+  id: WFIntoxTestBloodDrug
+  name: reagent-name-nothing
+  desc: reagent-desc-nothing
+  physicalDesc: reagent-physical-desc-nothing
+  metabolisms:
+    Narcotic:
+      metabolismRate: 0.01
+      effects:
+      - !type:WFDose
+        profile: WFIntoxTestBlood
+        perUnit: 1
+        inBlood: true
 
 - type: reagent
   id: WFIntoxTestReagent
@@ -174,6 +201,69 @@ public sealed class IntoxicationTest
 
             sys.Tick(10f);
             Assert.That(comp.Phases.ContainsKey(profile), Is.False, "Below the first tier there is no phase.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task BloodLevelTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        const string profile = "WFIntoxTestBlood";
+        const string drug = "WFIntoxTestBloodDrug";
+
+        await server.WaitAssertion(() =>
+        {
+            var sys = server.System<WFIntoxicationSystem>();
+            var bloodstream = server.System<BloodstreamSystem>();
+            var solutions = server.System<SharedSolutionContainerSystem>();
+            var chemicals = BloodstreamComponent.DefaultChemicalsSolutionName;
+
+            FixedPoint2 Left(EntityUid mob)
+            {
+                Assert.That(solutions.TryGetSolution(mob, chemicals, out _, out var blood), Is.True);
+                return blood!.GetTotalPrototypeQuantity(drug);
+            }
+
+            WFIntoxicationComponent Inject(EntityUid mob, float units, float grade)
+            {
+                var dose = new Solution();
+                dose.AddReagent(drug, FixedPoint2.New(units), grade);
+                Assert.That(bloodstream.TryAddToChemicals(mob, dose), Is.True);
+                return entMan.EnsureComponent<WFIntoxicationComponent>(mob);
+            }
+
+            var cut = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            var cutComp = Inject(cut, 4f, 0.5f);
+            sys.Tick(0f);
+            Assert.Multiple(() =>
+            {
+                Assert.That(cutComp.Levels[profile], Is.EqualTo(2f).Within(0.01f), "4 u at 50% in the blood is level 2.");
+                Assert.That(cutComp.Fed, Is.Empty, "A blood drug feeds no level of its own.");
+                Assert.That(cutComp.Phases[profile], Is.EqualTo(WFDrugPhase.Light));
+            });
+
+            var mob = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            var comp = Inject(mob, 12f, 1f);
+            sys.Tick(10f);
+            Assert.That(Left(mob), Is.EqualTo(FixedPoint2.New(10)),
+                "One overdose half-life flushes half of the 4 above the overdose tier, spread over the 12 in the blood.");
+            sys.Tick(0f);
+            Assert.That(comp.Levels[profile], Is.EqualTo(10f).Within(0.01f));
+
+            sys.ReduceFamily(mob, WFDrugFamily.Stimulant, 4f);
+            Assert.That(Left(mob), Is.EqualTo(FixedPoint2.New(6)), "An antagonist purges the drug from the blood.");
+            sys.Tick(0f);
+            Assert.That(comp.Phases[profile], Is.EqualTo(WFDrugPhase.Heavy));
+
+            Assert.That(solutions.TryGetSolution(mob, chemicals, out var soln, out _), Is.True);
+            solutions.RemoveAllSolution(soln!.Value);
+            sys.Tick(0f);
+            Assert.That(comp.Levels.ContainsKey(profile), Is.False, "Purging the blood ends the high.");
         });
 
         await pair.CleanReturnAsync();

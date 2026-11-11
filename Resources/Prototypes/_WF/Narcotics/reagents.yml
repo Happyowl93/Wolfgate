@@ -1,5 +1,7 @@
 # Street drugs. Each one's high lives in its wfDrugProfile (profiles.yml); the reagent only doses it, so the
 # neuroware twin and the reagent stay identical. Effects that need reagent args, such as sedation, stay here.
+# The dose is inBlood: the high follows the units left in the blood, so metabolismRate sets how long it lasts. At
+# 0.01 a 5 u line stays about 8 minutes; crack and the combat drugs clear at 0.02.
 # pricePerUnit is street value at full grade; pricing scales it by the solution's grade.
 
 - type: reagent
@@ -17,6 +19,7 @@
       - !type:WFDose
         profile: WFCocaine
         perUnit: 0.2
+        inBlood: true
 
 - type: reagent
   id: WFCocaine
@@ -29,11 +32,12 @@
   pricePerUnit: 40
   metabolisms:
     Narcotic:
-      metabolismRate: 0.25
+      metabolismRate: 0.01
       effects:
       - !type:WFDose
         profile: WFCocaine
         perUnit: 1
+        inBlood: true
 
 - type: reagent
   id: WFCrack
@@ -46,11 +50,12 @@
   pricePerUnit: 50
   metabolisms:
     Narcotic:
-      metabolismRate: 1
+      metabolismRate: 0.02
       effects:
       - !type:WFDose
         profile: WFCrack
         perUnit: 1
+        inBlood: true
 
 - type: reagent
   id: WFOpium
@@ -63,11 +68,12 @@
   pricePerUnit: 15
   metabolisms:
     Narcotic:
-      metabolismRate: 0.1
+      metabolismRate: 0.01
       effects:
       - !type:WFDose
         profile: WFOpium
         perUnit: 1
+        inBlood: true
 
 - type: reagent
   id: WFHeroin
@@ -80,11 +86,12 @@
   pricePerUnit: 50
   metabolisms:
     Narcotic:
-      metabolismRate: 0.25
+      metabolismRate: 0.01
       effects:
       - !type:WFDose
         profile: WFHeroin
         perUnit: 1
+        inBlood: true
       # Sedation follows the units in the blood, so the overdose is Wolfmed's sedation airloss and Naloxone reverses
       # it. The relief itself is on the profile.
       - !type:WolfmedPainRelief
@@ -113,11 +120,12 @@
   pricePerUnit: 60
   metabolisms:
     Narcotic:
-      metabolismRate: 0.5
+      metabolismRate: 0.02
       effects:
       - !type:WFDose
         profile: WFRedline
         perUnit: 1
+        inBlood: true
 
 - type: reagent
   id: WFAnvilBase
@@ -140,11 +148,12 @@
   pricePerUnit: 60
   metabolisms:
     Narcotic:
-      metabolismRate: 0.5
+      metabolismRate: 0.02
       effects:
       - !type:WFDose
         profile: WFAnvil
         perUnit: 1
+        inBlood: true
 
 - type: reagent
   id: WFLatticeResidue
@@ -183,11 +192,12 @@
   pricePerUnit: 80
   metabolisms:
     Narcotic:
-      metabolismRate: 0.1
+      metabolismRate: 0.01
       effects:
       - !type:WFDose
         profile: WFChorus
         perUnit: 1
+        inBlood: true
 
 - type: reagent
   id: WFHaloBase
@@ -210,8 +220,9 @@
   pricePerUnit: 50
   metabolisms:
     Narcotic:
-      metabolismRate: 0.1
+      metabolismRate: 0.01
       effects:
       - !type:WFDose
         profile: WFHalo
         perUnit: 1
+        inBlood: true

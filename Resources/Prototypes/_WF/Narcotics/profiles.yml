@@ -1,7 +1,9 @@
 # Drug profiles. Level is in effective units (units x grade x perUnit). The first tier is the light phase, the last
 # the overdose, and any between are heavy; the screen look and a popup mark each step.
-# halfLife sets how long a high lasts: an ordinary 5 u dose runs about 10 minutes, the opiates and Chorus about 15,
-# crack about 3 and the combat drugs about 4. Numbers are starting values to tune in playtests.
+# A street drug's level follows the units in the blood (its reagent's WFDose is inBlood), so the reagent's
+# metabolismRate sets how long the high lasts, and overdoseHalfLife flushes the blood above the overdose tier faster.
+# Level fed directly, by an upstream reagent's metabolised dose or a neuroware program, decays by decay and halfLife.
+# Numbers are starting values to tune in playtests.
 
 # Cocaine: a short social stimulant.
 - type: wfDrugProfile
@@ -9,9 +11,10 @@
   family: Stimulant
   decay: 0.002
   halfLife: 700
+  overdoseHalfLife: 120
   dependenceGain: 0.015
   tiers:
-  - min: 2
+  - min: 1
     speed: 1.1
     overlay: 0.35
     effects:
@@ -72,9 +75,10 @@
   family: Stimulant
   decay: 0.004
   halfLife: 140
+  overdoseHalfLife: 120
   dependenceGain: 0.045
   tiers:
-  - min: 2
+  - min: 1
     speed: 1.15
     overlay: 0.45
     effects:
@@ -132,9 +136,10 @@
   family: Opioid
   decay: 0.002
   halfLife: 950
+  overdoseHalfLife: 120
   dependenceGain: 0.01
   tiers:
-  - min: 2
+  - min: 1
     speed: 0.95
     overlay: 0.35
     effects:
@@ -187,9 +192,10 @@
   family: Opioid
   decay: 0.002
   halfLife: 1200
+  overdoseHalfLife: 120
   dependenceGain: 0.03
   tiers:
-  - min: 2
+  - min: 1
     speed: 0.85
     overlay: 0.5
     effects:
@@ -252,15 +258,17 @@
     banner: wf-neuroware-null-loop-banner
     faults: [ wf-neuroware-null-loop-fault-1, wf-neuroware-null-loop-fault-2 ]
 
-# Crystal: Desoxyephedrine keeps its own effects; the profile adds the overlay, dependence and a long crash.
+# Crystal: Desoxyephedrine keeps its own effects; the profile adds the overlay, dependence and a long crash. Meth
+# clears at 0.01 a group over three groups, so a 5 u shard lasts about three minutes.
 - type: wfDrugProfile
   id: WFCrystal
   family: Stimulant
   decay: 0.002
   halfLife: 700
+  overdoseHalfLife: 120
   dependenceGain: 0.02
   tiers:
-  - min: 2
+  - min: 1
     overlay: 0.4
   - min: 8
     overlay: 0.6
@@ -289,9 +297,10 @@
   family: Combat
   decay: 0.003
   halfLife: 240
+  overdoseHalfLife: 120
   dependenceGain: 0.02
   tiers:
-  - min: 2
+  - min: 1
     speed: 1.3
     overlay: 0.6
     traits: [ StunResistance, IgnoreDamageSlowdown ]
@@ -354,9 +363,10 @@
   family: Combat
   decay: 0.003
   halfLife: 240
+  overdoseHalfLife: 120
   dependenceGain: 0.02
   tiers:
-  - min: 2
+  - min: 1
     speed: 0.85
     overlay: 0.5
     traits: [ Damper, StaminaCritResistance, HideDamage ]
@@ -399,9 +409,10 @@
   family: Psychedelic
   decay: 0.002
   halfLife: 1200
+  overdoseHalfLife: 120
   dependenceGain: 0.005
   tiers:
-  - min: 2
+  - min: 1
     overlay: 0.4
     hallucinationChance: 0.05
     hallucinations: [ Whisper, Blip, Sound ]
@@ -436,9 +447,10 @@
   family: Empathogen
   decay: 0.002
   halfLife: 700
+  overdoseHalfLife: 120
   dependenceGain: 0.01
   tiers:
-  - min: 2
+  - min: 1
     overlay: 0.45
     effects:
     - !type:WolfmedPainRelief
@@ -493,9 +505,10 @@
   family: Cannabinoid
   decay: 0.002
   halfLife: 700
+  overdoseHalfLife: 120
   dependenceGain: 0.003
   tiers:
-  - min: 2
+  - min: 1
     overlay: 0.35
   - min: 8
     overlay: 0.55
@@ -513,6 +526,7 @@
   family: Nicotine
   decay: 0.002
   halfLife: 700
+  overdoseHalfLife: 120
   dependenceGain: 0.01
   tiers:
   - min: 1

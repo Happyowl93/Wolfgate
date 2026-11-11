@@ -11,7 +11,8 @@ using Robust.Shared.Timing;
 namespace Content.Server._WF.Narcotics;
 
 /// <summary>
-/// Ticks drug levels once a second: decays them, applies the tier each reaches, and starts and ends crashes.
+/// Ticks drug levels once a second: reads the blood, decays fed level, applies the tier each reaches, and starts and
+/// ends crashes.
 /// </summary>
 public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
 {
@@ -58,20 +59,39 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
         var speedBefore = GetSpeed(comp);
         var args = new EntityEffectBaseArgs(uid, EntityManager);
 
+        var blood = ReadBlood(uid);
         _profiles.Clear();
         _profiles.AddRange(comp.Levels.Keys);
+        foreach (var profile in _blood.Keys)
+        {
+            if (!comp.Levels.ContainsKey(profile))
+                _profiles.Add(profile);
+        }
+
         foreach (var profile in _profiles)
         {
             if (!Proto.TryIndex(profile, out var proto))
             {
                 comp.Levels.Remove(profile);
+                comp.Fed.Remove(profile);
                 continue;
             }
 
+            // Tolerance speeds the fed level's decay and blunts the blood's.
             var decay = new WFDrugDecayEvent(proto.Family);
             RaiseLocalEvent(uid, ref decay);
-            var level = Decayed(proto, comp.Levels[profile], decay.Multiplier * seconds);
+            var fed = Decayed(proto, comp.Fed.GetValueOrDefault(profile), decay.Multiplier * seconds);
+            var fromBlood = _blood.GetValueOrDefault(profile) / decay.Multiplier;
+            var level = fed + fromBlood;
             var tier = proto.TierAt(level);
+
+            if (fed > 0f)
+                comp.Fed[profile] = fed;
+            else
+                comp.Fed.Remove(profile);
+
+            if (blood is { } soln)
+                Flush(soln, profile, proto, level, fromBlood, seconds);
             AnnouncePhase(ent, profile, proto, tier);
 
             if (tier >= 0)

@@ -12,9 +12,13 @@ public sealed partial class WFIntoxicationComponent : Component
 {
     public override bool SendOnlyToOwner => true;
 
-    /// <summary>Level of each profile, in effective units.</summary>
+    /// <summary>Level of each profile, in effective units: the drug in the blood plus <see cref="Fed"/>.</summary>
     [DataField, AutoNetworkedField]
     public Dictionary<ProtoId<WFDrugProfilePrototype>, float> Levels = new();
+
+    /// <summary>Level fed directly, by a metabolised dose or a neuroware program, which decays on its own.</summary>
+    [DataField]
+    public Dictionary<ProtoId<WFDrugProfilePrototype>, float> Fed = new();
 
     /// <summary>Seconds each profile has spent at or above its first tier this high.</summary>
     [DataField, AutoNetworkedField]

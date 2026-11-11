@@ -18,12 +18,31 @@ public sealed partial class Drunk : EntityEffect
     [DataField]
     public bool SlurSpeech = true;
 
+    // WOLFGATE(Narcotics) START: drunkenness that follows the reagent in the blood
+    /// <summary>
+    ///     When above zero, holds the drunk timer at BoozePower times this per unit left in the blood, instead of
+    ///     adding BoozePower each cycle.
+    /// </summary>
+    [DataField]
+    public float PerUnitInBlood;
+    // WOLFGATE END
+
     protected override string? ReagentEffectGuidebookText(IPrototypeManager prototype, IEntitySystemManager entSys)
         => Loc.GetString("reagent-effect-guidebook-drunk", ("chance", Probability));
 
     public override void Effect(EntityEffectBaseArgs args)
     {
         var boozePower = BoozePower;
+
+        // WOLFGATE(Narcotics) START: drunkenness that follows the reagent in the blood
+        if (PerUnitInBlood > 0f && args is EntityEffectReagentArgs { Source: { } blood, Reagent: { } reagent })
+        {
+            var units = blood.GetTotalPrototypeQuantity(reagent.ID).Float();
+            args.EntityManager.System<Content.Server._WF.Narcotics.WFAlcoholSystem>()
+                .HoldDrunkenness(args.TargetEntity, BoozePower * PerUnitInBlood * units, SlurSpeech);
+            return;
+        }
+        // WOLFGATE END
 
         if (args is EntityEffectReagentArgs reagentArgs) {
             boozePower *= reagentArgs.Scale.Float();

@@ -45,36 +45,53 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
         return false;
     }
 
-    /// <summary>Raises a profile's level, as a dose or a neuroware program does.</summary>
+    /// <summary>Raises a profile's fed level, as a metabolised dose or a neuroware program does.</summary>
     public void AddLevel(EntityUid uid, ProtoId<WFDrugProfilePrototype> profile, float amount)
+    {
+        if (amount <= 0f || !Proto.TryIndex(profile, out _))
+            return;
+
+        var comp = EnsureComp<WFIntoxicationComponent>(uid);
+        comp.Fed[profile] = comp.Fed.GetValueOrDefault(profile) + amount;
+        comp.Levels[profile] = comp.Levels.GetValueOrDefault(profile) + amount;
+        Dirty(uid, comp);
+        RegisterDose(uid, profile, amount);
+    }
+
+    /// <summary>
+    /// Counts a dose towards dependence without raising the level, for a drug whose level follows the blood. Starts
+    /// tracking the body if it wasn't already.
+    /// </summary>
+    public void RegisterDose(EntityUid uid, ProtoId<WFDrugProfilePrototype> profile, float amount)
     {
         if (amount <= 0f || !Proto.TryIndex(profile, out var proto))
             return;
 
-        var comp = EnsureComp<WFIntoxicationComponent>(uid);
-        comp.Levels[profile] = comp.Levels.GetValueOrDefault(profile) + amount;
-        Dirty(uid, comp);
-
+        EnsureComp<WFIntoxicationComponent>(uid);
         var ev = new WFDrugDosedEvent(profile, proto.Family, amount, proto.DependenceGain * amount);
         RaiseLocalEvent(uid, ref ev);
     }
 
     /// <summary>Lowers the level of every profile in a family, as an antagonist does.</summary>
-    public void ReduceFamily(EntityUid uid, WFDrugFamily family, float amount)
+    public virtual void ReduceFamily(EntityUid uid, WFDrugFamily family, float amount)
     {
         if (!TryComp<WFIntoxicationComponent>(uid, out var comp))
             return;
 
         foreach (var profile in new List<ProtoId<WFDrugProfilePrototype>>(comp.Levels.Keys))
         {
-            if (Proto.TryIndex(profile, out var proto) && proto.Family == family)
-                comp.Levels[profile] = Math.Max(0f, comp.Levels[profile] - amount);
+            if (!Proto.TryIndex(profile, out var proto) || proto.Family != family)
+                continue;
+
+            comp.Levels[profile] = Math.Max(0f, comp.Levels[profile] - amount);
+            if (comp.Fed.TryGetValue(profile, out var fed))
+                comp.Fed[profile] = Math.Max(0f, fed - amount);
         }
 
         Dirty(uid, comp);
     }
 
-    /// <summary>Drops every level to zero. Crashes still follow on the next tick, as they would when a high ends.</summary>
+    /// <summary>Drops every fed level to zero. Crashes still follow on the next tick, as they would when a high ends.</summary>
     public void ClearLevels(EntityUid uid)
     {
         if (!TryComp<WFIntoxicationComponent>(uid, out var comp))
@@ -85,6 +102,7 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
             comp.Levels[profile] = 0f;
         }
 
+        comp.Fed.Clear();
         Dirty(uid, comp);
     }
 

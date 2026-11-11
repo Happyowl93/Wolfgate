@@ -35,6 +35,7 @@ public sealed partial class WFIntoxicationSystem
     public override void Initialize()
     {
         base.Initialize();
+        InitializeBlood();
         SubscribeLocalEvent<WFIntoxicationComponent, DamageModifyEvent>(OnDamageModify);
         SubscribeLocalEvent<WFIntoxicationComponent, ComponentShutdown>(OnShutdown);
     }

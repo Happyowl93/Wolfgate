@@ -134,6 +134,7 @@
       - !type:WFDose
         profile: WFOpium
         perUnit: 0.5
+        inBlood: true
       # WOLFGATE END
       - !type:SuppressPain
         amount: 1.25
@@ -175,6 +176,7 @@
       - !type:WFDose
         profile: WFHeroin
         perUnit: 0.5
+        inBlood: true
       # WOLFGATE END
       - !type:SuppressPain
         amount: 2

@@ -1,9 +1,15 @@
 # Narcotics
 
-Street drugs and what they do to a body. Each drug doses a `wfDrugProfile` (a half-life; tiers with speed, traits,
-popups and an overlay, grouped into light, heavy and overdose phases; a crash; neuroware strings), and
-`WFIntoxicationSystem` ticks the levels, announces phase changes, runs tier effects and crashes, and
-grants trait components (damage slowdown, stun resistance, pain numbness, Anvil's damper and its Poison repayment).
+Street drugs and what they do to a body. Each drug doses a `wfDrugProfile` (tiers with speed, traits, popups and an
+overlay, grouped into light, heavy and overdose phases; a crash; neuroware strings). A street drug's level follows the
+units left in the blood (`WFDose` with `inBlood`), so its metabolism rate sets the length of the high, the analyzer
+shows it and purging ends it; the excess above an overdose flushes at `overdoseHalfLife`. Upstream reagents that dose a
+profile (meth, ephedrine, THC, nicotine, the medical opioids) do the same, with their rates and per-tick effects
+retuned; only neuroware and a `WFDose` without `inBlood` feed the level directly, and that part decays by `decay`
+and `halfLife`. `WFIntoxicationSystem` reads the
+blood, ticks the levels, announces phase changes, runs tier effects and crashes, and grants trait components (damage
+slowdown, stun resistance, pain numbness, Anvil's damper and its Poison repayment). `WFAlcoholSystem` does the same
+for ethanol: the `Drunk` effect's `perUnitInBlood` holds the drunk timer at the ethanol left.
 `WFDependenceSystem` builds a per-family habit with tolerance and withdrawal; three traits start a character
 dependent. The client draws one overlay per family.
 
@@ -24,8 +30,10 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 ### Server
 
+- [`Content.Server/_WF/Narcotics/WFAlcoholSystem.cs`](WFAlcoholSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFDeliverySystem.cs`](WFDeliverySystem.cs)
 - [`Content.Server/_WF/Narcotics/WFDependenceSystem.cs`](WFDependenceSystem.cs)
+- [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.Blood.cs`](WFIntoxicationSystem.Blood.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.cs`](WFIntoxicationSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.Traits.cs`](WFIntoxicationSystem.Traits.cs)
 
@@ -47,6 +55,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/Narcotics/AlcoholTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/AlcoholTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/DeliveryTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DeliveryTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/DependenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DependenceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs)
@@ -83,6 +92,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 ### Textures
 
 - [`Resources/Textures/_WF/Narcotics/Shaders/intoxication.swsl`](../../../Resources/Textures/_WF/Narcotics/Shaders/intoxication.swsl)
+- [`Resources/Textures/_WF/Narcotics/Shaders/intoxication_trail.swsl`](../../../Resources/Textures/_WF/Narcotics/Shaders/intoxication_trail.swsl)
 
 ### Guidebook
 
@@ -95,6 +105,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 ## Non-modular edits
 
 - [`Content.IntegrationTests/Pair/TestPair.cs`](../../../Content.IntegrationTests/Pair/TestPair.cs): records radio sends for the sold-alert test
+- [`Content.Server/EntityEffects/Effects/Drunk.cs`](../../EntityEffects/Effects/Drunk.cs): drunkenness that follows the reagent in the blood
 - [`Resources/Prototypes/_Mono/Reagents/narcotics.yml`](../../../Resources/Prototypes/_Mono/Reagents/narcotics.yml): doses the Heroin profile at one and a half strength
 - [`Resources/Prototypes/_Onyx/Reagents/Medicine/medicine.yml`](../../../Resources/Prototypes/_Onyx/Reagents/Medicine/medicine.yml)
   - medical opioids build dependence slowly through the Opium profile
@@ -103,12 +114,30 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Resources/Prototypes/Entities/Objects/Consumable/Smokeables/Cigarettes/cigarette.yml`](../../../Resources/Prototypes/Entities/Objects/Consumable/Smokeables/Cigarettes/cigarette.yml): the THC cigarette held plant fertiliser instead of THC
 - [`Resources/Prototypes/Guidebook/medical.yml`](../../../Resources/Prototypes/Guidebook/medical.yml): drugs, grades and neuroware
 - [`Resources/Prototypes/Hydroponics/seeds.yml`](../../../Resources/Prototypes/Hydroponics/seeds.yml): the opium poppy is a poppy mutation
+- [`Resources/Prototypes/Reagents/Consumable/Drink/alcohol.yml`](../../../Resources/Prototypes/Reagents/Consumable/Drink/alcohol.yml)
+  - drunk lasts while ethanol does, so it clears at half speed to keep the old duration
+  - halved since ethanol now stays twice as long above the threshold
+  - drunkenness follows the ethanol left in the blood
 - [`Resources/Prototypes/Reagents/medicine.yml`](../../../Resources/Prototypes/Reagents/medicine.yml): Haloperidol brings down stimulant and psychedelic highs
 - [`Resources/Prototypes/Reagents/narcotics.yml`](../../../Resources/Prototypes/Reagents/narcotics.yml)
   - crystal sells by grade
+  - crystal stays in the blood for minutes, so per-tick numbers below are cut to match
+  - was -1 a tick at 50x the clearance
+  - was -0.5
+  - was 0.75 a tick at 50x the clearance
+  - was 2 a tick at 50x the clearance
+  - was 2
+  - the crystal high and its effects last while it stays in the blood
   - doses the Crystal profile for its overlay, dependence and crash
+  - clears with the rest of the crystal
   - a weak dose of the Crystal profile
+  - a cannabis high lasts while the THC stays in the blood
   - doses the Cannabis profile
+  - was -1 a tick at 25x the clearance
+  - held while THC is in the blood instead of piling up 16 s a tick
+  - nicotine builds up in the blood over a cigarette
   - doses the Nicotine profile, which is what builds the habit
+  - was -0.2 a tick at 50x the clearance
+  - was -0.1
 
 <!-- WOLFGATE-GENERATED END -->
