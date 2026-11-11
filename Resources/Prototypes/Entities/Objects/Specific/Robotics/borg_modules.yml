@@ -370,7 +370,7 @@
   - type: ItemBorgModule
     moduleId: Construction # Frontier
     items:
-    # WOLFGATE(Cyborgs) START: stocked stacks that refill in a charger, plus reinforced glass
+    # WOLFGATE(Cyborgs) START: stocked stacks that refill from the cell, plus reinforced glass
     # - SheetSteelLingering0
     # - SheetGlassLingering0
     # - SheetPlasticLingering0
@@ -535,7 +535,7 @@
     moduleId: Treatment # Frontier
     items:
     - HandheldHealthAnalyzerUnpowered
-    # WOLFGATE(Cyborgs) START: stacks that refill in a charger, and the defibrillator without a module of its own
+    # WOLFGATE(Cyborgs) START: stacks that refill from the cell, and the defibrillator without a module of its own
     # - Brutepack10Lingering
     # - Ointment10Lingering
     # - Gauze10Lingering

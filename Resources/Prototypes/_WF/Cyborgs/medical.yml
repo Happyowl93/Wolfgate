@@ -1,4 +1,4 @@
-# The treatment module's stacks, restocked in a charger like the construction ones.
+# The treatment module's stacks, restocked from the cyborg's cell like the construction ones, at twice the charge.
 - type: entity
   id: WFBrutepackBorg
   parent: Brutepack10Lingering
@@ -6,6 +6,7 @@
   components:
   - type: WFBorgStackRefill
     target: 10
+    chargePerUnit: 40
 
 - type: entity
   id: WFOintmentBorg
@@ -14,6 +15,7 @@
   components:
   - type: WFBorgStackRefill
     target: 10
+    chargePerUnit: 40
 
 - type: entity
   id: WFGauzeBorg
@@ -22,6 +24,7 @@
   components:
   - type: WFBorgStackRefill
     target: 10
+    chargePerUnit: 40
 
 - type: entity
   id: WFBloodpackBorg
@@ -30,6 +33,7 @@
   components:
   - type: WFBorgStackRefill
     target: 10
+    chargePerUnit: 40
 
 - type: entity
   id: WFSutureBorg
@@ -38,3 +42,4 @@
   components:
   - type: WFBorgStackRefill
     target: 10
+    chargePerUnit: 40

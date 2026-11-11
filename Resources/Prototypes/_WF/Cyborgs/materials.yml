@@ -1,4 +1,4 @@
-# Construction module stacks. They start with stock; the ones with WFBorgStackRefill top back up in a cyborg charger.
+# Construction module stacks. They start with stock; the ones with WFBorgStackRefill top back up from the cyborg's cell.
 
 - type: entity
   parent: SheetSteel

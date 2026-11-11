@@ -5,8 +5,9 @@ on board.
 
 - **Construction stock** (`materials.yml`): the construction module's stacks start stocked and gain reinforced
   glass. The cheap ones (steel, glass, plastic, rods, floor tiles) carry `WFBorgStackRefill`, and
-  `WFBorgStackRefillSystem` adds one unit every five seconds, up to the component's target, while the cyborg sits in
-  a powered charger. Plasteel and reinforced glass are issued once.
+  `WFBorgStackRefillSystem` adds one unit every five seconds, up to the component's target, paid for out of the
+  cyborg's cell (`chargePerUnit`, 20 J a sheet and 40 J a medical pack). It never spends the last quarter of the
+  cell, so restocking can't run the cyborg flat. Plasteel and reinforced glass are issued once.
 - **Gripper hands**: the tool module, which every cyborg type starts with, has two droppable gripper hands. One takes power
   cells, gas tanks, jerry cans, AME jars, flatpacks, ship vouchers and drydock repair vouchers; the other takes any stack, so a cyborg can fuel a generator
   or build with materials its modules don't issue.
@@ -19,7 +20,7 @@ on board.
   cyborgs start on a high-capacity cell.
 - **Bank**: every chassis has `BankAccount`, which resolves to the player's selected character, so ATMs, pay and
   purchases work. Cash goes in the tool module's stack hand.
-- **Medical** (`medical.yml`): the treatment module's stacks refill in a charger and it carries the defibrillator,
+- **Medical** (`medical.yml`): the treatment module's stacks refill from the cell and it carries the defibrillator,
   so the defibrillator module is no longer a default. The advanced treatment module has four beaker hands and a
   hand labeler.
 - TSF and PDV engineer and medical cyborgs have four spare module slots instead of two.
@@ -32,7 +33,7 @@ on board.
   doors open for a cyborg in the crew. A cyborg that spawns into a job has no tool module until it picks a type, so
   it is issued the card in its chassis at spawn; the tool module then carries that card in place of its own.
 
-`BorgStackRefillTest` covers the issued kit and the charger refill, `BorgPowerTest` the drinker lookup,
+`BorgStackRefillTest` covers the issued kit and the cell-paid refill, `BorgPowerTest` the drinker lookup,
 `BorgShipPurchaseTest` a cyborg buying a ship with its card, and `BorgShipAccessTest` a crew door admitting it.
 
 <!-- WOLFGATE-GENERATED START -->
@@ -84,9 +85,9 @@ on board.
 - [`Resources/Prototypes/Entities/Mobs/Player/silicon.yml`](../../../Resources/Prototypes/Entities/Mobs/Player/silicon.yml): was PowerCellMedium, half an hour of work per charge
 - [`Resources/Prototypes/Entities/Objects/Specific/Robotics/borg_modules.yml`](../../../Resources/Prototypes/Entities/Objects/Specific/Robotics/borg_modules.yml)
   - gripper hands for cells, tanks, fuel, flatpacks and materials, and one holding an ID card
-  - stocked stacks that refill in a charger, plus reinforced glass
+  - stocked stacks that refill from the cell, plus reinforced glass
   - the scanners a ship job needs, without a printed advanced tool module
-  - stacks that refill in a charger, and the defibrillator without a module of its own
+  - stacks that refill from the cell, and the defibrillator without a module of its own
   - the refilling WFSutureBorg above replaces it
   - to tell the beakers apart
   - four beakers, two were not enough to mix anything

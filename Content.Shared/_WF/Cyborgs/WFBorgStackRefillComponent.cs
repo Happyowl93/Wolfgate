@@ -1,14 +1,20 @@
 namespace Content.Shared._WF.Cyborgs;
 
 /// <summary>
-/// A cyborg module stack that tops back up while its cyborg sits in a working charger.
+/// A cyborg module stack that restocks itself from its cyborg's power cell.
 /// </summary>
 [RegisterComponent]
 public sealed partial class WFBorgStackRefillComponent : Component
 {
     /// <summary>
-    /// The count the charger refills the stack to. Picking up more by hand can go past it.
+    /// The count the cell refills the stack to. Picking up more by hand can go past it.
     /// </summary>
     [DataField]
     public int Target = 15;
+
+    /// <summary>
+    /// Cell charge each restocked unit costs, in joules.
+    /// </summary>
+    [DataField]
+    public float ChargePerUnit = 20f;
 }
