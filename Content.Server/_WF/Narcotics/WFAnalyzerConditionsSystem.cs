@@ -196,8 +196,8 @@ public sealed class WFAnalyzerConditionsSystem : EntitySystem
                 }
 
                 var key = (soln.Value.Owner, proto.ID);
-                var known = quantities.GetValueOrDefault(key, (quantity, 0f, stomach));
-                quantities[key] = (known.Quantity, known.Rate + rate, known.Stomach);
+                var (known, knownRate, knownStomach) = quantities.GetValueOrDefault(key, (quantity, 0f, stomach));
+                quantities[key] = (known, knownRate + rate, knownStomach);
             }
         }
 
@@ -228,7 +228,7 @@ public sealed class WFAnalyzerConditionsSystem : EntitySystem
                         case GenericStatusEffect { Type: StatusEffectMetabolismType.Add } added:
                             Hold(index, reagent.ID, added.Key);
                             break;
-                        case Drunk:
+                        case Content.Server.EntityEffects.Effects.Drunk:
                             Hold(index, reagent.ID, SharedDrunkSystem.DrunkKey);
                             break;
                         case Jitter:
