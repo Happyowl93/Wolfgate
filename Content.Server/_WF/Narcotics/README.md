@@ -84,6 +84,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Resources/Prototypes/_WF/Narcotics/Entities/fence.yml`](../../../Resources/Prototypes/_WF/Narcotics/Entities/fence.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Entities/produce.yml`](../../../Resources/Prototypes/_WF/Narcotics/Entities/produce.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Entities/solids.yml`](../../../Resources/Prototypes/_WF/Narcotics/Entities/solids.yml)
+- [`Resources/Prototypes/_WF/Narcotics/Entities/vials.yml`](../../../Resources/Prototypes/_WF/Narcotics/Entities/vials.yml)
 - [`Resources/Prototypes/_WF/Narcotics/guidebook.yml`](../../../Resources/Prototypes/_WF/Narcotics/guidebook.yml)
 - [`Resources/Prototypes/_WF/Narcotics/listings.yml`](../../../Resources/Prototypes/_WF/Narcotics/listings.yml)
 - [`Resources/Prototypes/_WF/Narcotics/profiles.yml`](../../../Resources/Prototypes/_WF/Narcotics/profiles.yml)
@@ -91,6 +92,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Resources/Prototypes/_WF/Narcotics/reagents.yml`](../../../Resources/Prototypes/_WF/Narcotics/reagents.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Recipes/baggie.yml`](../../../Resources/Prototypes/_WF/Narcotics/Recipes/baggie.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Recipes/hash.yml`](../../../Resources/Prototypes/_WF/Narcotics/Recipes/hash.yml)
+- [`Resources/Prototypes/_WF/Narcotics/Recipes/vial.yml`](../../../Resources/Prototypes/_WF/Narcotics/Recipes/vial.yml)
 - [`Resources/Prototypes/_WF/Narcotics/shaders.yml`](../../../Resources/Prototypes/_WF/Narcotics/shaders.yml)
 - [`Resources/Prototypes/_WF/Narcotics/tags.yml`](../../../Resources/Prototypes/_WF/Narcotics/tags.yml)
 - [`Resources/Prototypes/_WF/Narcotics/traits.yml`](../../../Resources/Prototypes/_WF/Narcotics/traits.yml)
@@ -113,6 +115,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Resources/Textures/_WF/Narcotics/Objects/bong.rsi/`](../../../Resources/Textures/_WF/Narcotics/Objects/bong.rsi/)
 - [`Resources/Textures/_WF/Narcotics/Objects/powder_line.rsi/`](../../../Resources/Textures/_WF/Narcotics/Objects/powder_line.rsi/)
 - [`Resources/Textures/_WF/Narcotics/Objects/solids.rsi/`](../../../Resources/Textures/_WF/Narcotics/Objects/solids.rsi/)
+- [`Resources/Textures/_WF/Narcotics/Objects/vial.rsi/`](../../../Resources/Textures/_WF/Narcotics/Objects/vial.rsi/)
 - [`Resources/Textures/_WF/Narcotics/Shaders/intoxication.swsl`](../../../Resources/Textures/_WF/Narcotics/Shaders/intoxication.swsl)
 - [`Resources/Textures/_WF/Narcotics/Shaders/intoxication_trail.swsl`](../../../Resources/Textures/_WF/Narcotics/Shaders/intoxication_trail.swsl)
 

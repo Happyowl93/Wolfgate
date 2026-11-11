@@ -4,6 +4,7 @@ using Content.Shared._WF.Narcotics.Delivery;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.FixedPoint;
+using Content.Shared.Nutrition.EntitySystems;
 using Content.Shared.Storage.EntitySystems;
 using Robust.Shared.GameObjects;
 
@@ -11,7 +12,7 @@ namespace Content.IntegrationTests.Tests._WF.Narcotics;
 
 /// <summary>
 /// A snorted line and a bong hit each move their drug into the bloodstream, and a baggie takes only powder and
-/// solid drugs.
+/// solid drugs, and a sealed vial keeps its contents in.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFDeliverySystem))]
@@ -98,6 +99,20 @@ public sealed class DeliveryTest
             }
             Assert.That(storage.CanInsert(bag, entMan.SpawnEntity("WFBaggieCocaine", map.GridCoords), out _), Is.False,
                 "A baggie doesn't take another baggie.");
+
+            var openable = server.System<OpenableSystem>();
+            var sealedVial = entMan.SpawnEntity("WFVialRedline", map.GridCoords);
+            var emptyVial = entMan.SpawnEntity("WFVial", map.GridCoords);
+            solutions.TryGetSolution(sealedVial, "beaker", out var vialFrom, out var vialSolution);
+            solutions.TryGetSolution(emptyVial, "beaker", out var vialTo, out _);
+            Assert.That(vialSolution!.GetTotalPrototypeQuantity("WFRedline"), Is.EqualTo(FixedPoint2.New(10)));
+            Assert.That(openable.IsClosed(sealedVial), Is.True, "A filled vial comes sealed.");
+            Assert.That(openable.IsClosed(emptyVial), Is.False, "An empty vial comes open to fill.");
+            Assert.That(transfer.Transfer(user, sealedVial, vialFrom!.Value, emptyVial, vialTo!.Value, FixedPoint2.New(5)),
+                Is.EqualTo(FixedPoint2.Zero), "A sealed vial won't pour.");
+            openable.SetOpen(sealedVial, true);
+            Assert.That(transfer.Transfer(user, sealedVial, vialFrom.Value, emptyVial, vialTo.Value, FixedPoint2.New(5)),
+                Is.EqualTo(FixedPoint2.New(5)), "An opened one does.");
         });
 
         await pair.CleanReturnAsync();
