@@ -143,6 +143,9 @@
     solution: baggie
   - type: ExaminableSolution
     solution: baggie
+  # The storage window only lists solids, so the held baggie shows its powder here.
+  - type: SolutionItemStatus
+    solution: baggie
   - type: SolutionTransfer
     transferAmount: 5
     minTransferAmount: 1
