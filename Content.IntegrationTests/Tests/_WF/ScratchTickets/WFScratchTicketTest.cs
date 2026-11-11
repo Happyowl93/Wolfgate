@@ -241,7 +241,12 @@ public sealed class WFScratchTicketTest
             Assert.That(Bank(), Is.EqualTo(Balance), "A losing ticket paid out.");
         });
 
-        await server.WaitPost(() => Use(winner));
+        // Two uses in one tick, before the redeemed ticket is gone, pay once.
+        await server.WaitPost(() =>
+        {
+            Use(winner);
+            Use(winner);
+        });
         await pair.RunTicksSync(2);
         await server.WaitAssertion(() =>
         {

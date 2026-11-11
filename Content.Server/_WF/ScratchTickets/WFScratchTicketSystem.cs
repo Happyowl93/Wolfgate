@@ -158,6 +158,10 @@ public sealed partial class WFScratchTicketSystem : EntitySystem
 
         args.Handled = true;
 
+        // A redeemed ticket lingers until the end of the tick; a second use in that tick must not pay again.
+        if (EntityManager.IsQueuedForDeletion(args.Used) || TerminatingOrDeleted(args.Used))
+            return;
+
         if (!ticket.Scratched || ticket.Prize <= 0)
         {
             var refusal = ticket.Scratched ? "wf-scratch-ticket-atm-lost" : "wf-scratch-ticket-atm-fresh";
