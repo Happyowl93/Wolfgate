@@ -210,6 +210,19 @@ Start from existing shaders rather than writing each look from nothing.
 
 A body whose brain is a neuroware host gets none of these; see Neuroware.
 
+### Chat and speech
+
+- **Reading** (`WFDrugChatSystem`, client). Incoming speech, radio and emotes are rewritten on the high player's
+  screen only, from the same strongest high the overlay draws (`WFIntoxicationSystem.DominantHigh`): psychedelics
+  colour each word along a drifting hue and, heavy or overdosed, shuffle the middle letters of 6% or 15% of words;
+  opioids grey the text, empathogens tint it pink and cannabinoids green, stronger with the look. The change is
+  made as the message arrives, so lines read while high stay that way in the log. Hooked from
+  `ChatUIController.ProcessChatMessage` before codewords and highlights, which would split the message text.
+- **Speaking** (`WFDrugSpeechSystem`, server, an accent on `WFIntoxicationComponent`). A heavy stimulant high
+  doubles 15% of words and turns full stops into exclamations; an overdose doubles 30% and shouts 30%. A heavy
+  opioid high puts a pause after 12% of words (25% overdosed) and trails the end off. Chorus's top tier keeps its
+  scrambled accent, and its `Mimic` hallucination already puts lines nobody said into local chat.
+
 ## Substances
 
 `perUnit`, tiers and durations are starting values. Level is in effective units.

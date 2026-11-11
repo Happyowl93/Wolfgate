@@ -36,9 +36,6 @@ public sealed class WFIntoxicationOverlay : Overlay
     /// <summary>How fast a phase kick fades, per second.</summary>
     private const float KickFade = 1.2f;
 
-    /// <summary>How far past its start the overdose tier ramps to full strength, as a share of its start level.</summary>
-    private const float OverdoseRamp = 0.5f;
-
     /// <summary>
     /// Share of the last trail frame kept each frame at 60 fps, in the heavy phase and in an overdose. Families left
     /// out leave no trails.
@@ -94,24 +91,12 @@ public sealed class WFIntoxicationOverlay : Overlay
             && _entities.TryGetComponent(local, out WFIntoxicationComponent? comp)
             && !_system.IsNeurowareHost(local))
         {
-            foreach (var (profile, level) in comp.Levels)
+            if (_system.DominantHigh(comp) is { } high)
             {
-                if (!_proto.TryIndex(profile, out var proto))
-                    continue;
-
-                var tier = proto.TierAt(level);
-                var tierPhase = proto.PhaseOf(tier);
-                if (tierPhase == WFDrugPhase.None || proto.Tiers[tier].Overlay <= 0f)
-                    continue;
-
-                var intensity = Strength(proto, tier, level);
-                if (tierPhase < phase || tierPhase == phase && intensity <= targetIntensity)
-                    continue;
-
-                phase = tierPhase;
-                targetIntensity = intensity;
-                _family = proto.Family;
-                _pulseRate = 1.2f + 0.6f * tier;
+                phase = high.Phase;
+                targetIntensity = high.Strength;
+                _family = high.Family;
+                _pulseRate = 1.2f + 0.6f * high.Tier;
             }
 
             foreach (var profile in _system.ActiveCrashes(comp))
@@ -140,26 +125,6 @@ public sealed class WFIntoxicationOverlay : Overlay
         if (Trails.TryGetValue(_family, out var trail))
             targetTrail = (trail.Heavy * _heavy + (trail.Overdose - trail.Heavy) * _overdose) * (0.5f + 0.5f * _intensity);
         _trail += (targetTrail - _trail) * phaseStep;
-    }
-
-    /// <summary>The look's strength at a level: from this tier's overlay towards the next tier's as the level climbs.</summary>
-    private static float Strength(WFDrugProfilePrototype proto, int tier, float level)
-    {
-        var current = proto.Tiers[tier];
-        float next, span;
-        if (tier + 1 < proto.Tiers.Count)
-        {
-            next = proto.Tiers[tier + 1].Overlay;
-            span = proto.Tiers[tier + 1].Min - current.Min;
-        }
-        else
-        {
-            next = 1f;
-            span = current.Min * OverdoseRamp;
-        }
-
-        var progress = span > 0f ? Math.Clamp((level - current.Min) / span, 0f, 1f) : 1f;
-        return Math.Clamp(current.Overlay + (Math.Max(next, current.Overlay) - current.Overlay) * progress, 0f, 1f);
     }
 
     protected override bool BeforeDraw(in OverlayDrawArgs args)

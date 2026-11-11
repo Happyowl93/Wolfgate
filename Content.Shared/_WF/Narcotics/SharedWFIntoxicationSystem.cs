@@ -150,6 +150,23 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
         return false;
     }
 
+    /// <summary>The furthest phase any profile of a family is in.</summary>
+    public WFDrugPhase FamilyPhase(WFIntoxicationComponent comp, WFDrugFamily family)
+    {
+        var phase = WFDrugPhase.None;
+        foreach (var (profile, level) in comp.Levels)
+        {
+            if (!Proto.TryIndex(profile, out var proto) || proto.Family != family)
+                continue;
+
+            var reached = proto.PhaseOf(proto.TierAt(level));
+            if (reached > phase)
+                phase = reached;
+        }
+
+        return phase;
+    }
+
     /// <summary>True while any active tier has the trait.</summary>
     public bool HasTrait(EntityUid uid, WFDrugTrait trait)
     {

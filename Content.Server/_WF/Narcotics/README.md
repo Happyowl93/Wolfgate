@@ -15,7 +15,8 @@ overdose one). Other upstream status effects from reagents (rainbows, muting, dr
 where a reagent's old length must stay (mute toxin, chloral hydrate, fentanyl); the recreational ones clear slower
 so they last as long as they used to.
 `WFDependenceSystem` builds a per-family habit with tolerance and withdrawal; three traits start a character
-dependent. The client draws one overlay per family. `WFAnalyzerConditionsSystem` fills the health analyzer's
+dependent. The client draws one overlay per family and tints incoming chat (`WFDrugChatSystem`);
+`WFDrugSpeechSystem` rushes stimulant speech and trails opioid speech off. `WFAnalyzerConditionsSystem` fills the health analyzer's
 Conditions tab: each drug level, held status effect, crash and habit, with the reagents behind it, their clearance
 time from the organs' rates, the reagents that remove them (`AdjustReagent`) and family antidotes
 (`WFClearIntoxication`).
@@ -43,6 +44,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.Server/_WF/Narcotics/WFAnalyzerConditionsSystem.cs`](WFAnalyzerConditionsSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFDeliverySystem.cs`](WFDeliverySystem.cs)
 - [`Content.Server/_WF/Narcotics/WFDependenceSystem.cs`](WFDependenceSystem.cs)
+- [`Content.Server/_WF/Narcotics/WFDrugSpeechSystem.cs`](WFDrugSpeechSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.Blood.cs`](WFIntoxicationSystem.Blood.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.cs`](WFIntoxicationSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.Traits.cs`](WFIntoxicationSystem.Traits.cs)
@@ -63,6 +65,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 ### Client
 
+- [`Content.Client/_WF/Narcotics/WFDrugChatSystem.cs`](../../../Content.Client/_WF/Narcotics/WFDrugChatSystem.cs)
 - [`Content.Client/_WF/Narcotics/WFIntoxicationOverlay.cs`](../../../Content.Client/_WF/Narcotics/WFIntoxicationOverlay.cs)
 - [`Content.Client/_WF/Narcotics/WFIntoxicationSystem.cs`](../../../Content.Client/_WF/Narcotics/WFIntoxicationSystem.cs)
 - [`Content.Client/_WF/Narcotics/WolfmedDiagnosticPanel.Conditions.cs`](../../../Content.Client/_WF/Narcotics/WolfmedDiagnosticPanel.Conditions.cs)
@@ -73,6 +76,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/AnalyzerConditionsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/AnalyzerConditionsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/DeliveryTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DeliveryTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/DependenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DependenceTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Narcotics/DrugSpeechTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DrugSpeechTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/RadioProbeSystem.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/RadioProbeSystem.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/SecondhandSmokeTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/SecondhandSmokeTest.cs)
@@ -132,6 +136,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 ## Non-modular edits
 
+- [`Content.Client/UserInterface/Systems/Chat/ChatUIController.cs`](../../../Content.Client/UserInterface/Systems/Chat/ChatUIController.cs): chat seen through the local player's high, before tags split the message text
 - [`Content.IntegrationTests/Pair/TestPair.cs`](../../../Content.IntegrationTests/Pair/TestPair.cs): records radio sends for the sold-alert test
 - [`Content.Server/EntityEffects/Effects/Drunk.cs`](../../EntityEffects/Effects/Drunk.cs): drunkenness that follows the reagent in the blood
 - [`Content.Server/EntityEffects/Effects/StatusEffects/GenericStatusEffect.cs`](../../EntityEffects/Effects/StatusEffects/GenericStatusEffect.cs): status time that follows the reagent in the blood
