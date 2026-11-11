@@ -223,6 +223,22 @@ A body whose brain is a neuroware host gets none of these; see Neuroware.
   opioid high puts a pause after 12% of words (25% overdosed) and trails the end off. Chorus's top tier keeps its
   scrambled accent, and its `Mimic` hallucination already puts lines nobody said into local chat.
 
+### Sound (Client)
+
+`WFDrugAudioSystem` changes world sounds (not global ones: music, interface, announcements) for the local player's
+strongest high, every frame, so it wins over area echo and over network states that reset the pitch:
+
+| Family | Reverb (engine preset) | Pitch |
+|---|---|---|
+| Psychedelic | `Psychotic` | 1 |
+| Opioid | `Underwater` | 0.9 |
+| Cannabinoid | `Dizzy` | 0.96 |
+| Empathogen | `Drugged` | 1 |
+| Stimulant | none | 1.06 |
+
+A light high only gets half the pitch shift, a heavy one the table, an overdose double the shift. When the high
+ends, every changed sound gets its own pitch back and loses the reverb; area echo puts its own back on its next pass.
+
 ## Substances
 
 `perUnit`, tiers and durations are starting values. Level is in effective units.

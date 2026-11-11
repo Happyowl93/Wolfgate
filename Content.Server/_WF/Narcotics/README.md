@@ -15,7 +15,7 @@ overdose one). Other upstream status effects from reagents (rainbows, muting, dr
 where a reagent's old length must stay (mute toxin, chloral hydrate, fentanyl); the recreational ones clear slower
 so they last as long as they used to.
 `WFDependenceSystem` builds a per-family habit with tolerance and withdrawal; three traits start a character
-dependent. The client draws one overlay per family and tints incoming chat (`WFDrugChatSystem`);
+dependent. The client draws one overlay per family and tints incoming chat (`WFDrugChatSystem`) and changes world sounds (`WFDrugAudioSystem`);
 `WFDrugSpeechSystem` rushes stimulant speech and trails opioid speech off. `WFAnalyzerConditionsSystem` fills the health analyzer's
 Conditions tab: each drug level, held status effect, crash and habit, with the reagents behind it, their clearance
 time from the organs' rates, the reagents that remove them (`AdjustReagent`) and family antidotes
@@ -65,6 +65,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 ### Client
 
+- [`Content.Client/_WF/Narcotics/WFDrugAudioSystem.cs`](../../../Content.Client/_WF/Narcotics/WFDrugAudioSystem.cs)
 - [`Content.Client/_WF/Narcotics/WFDrugChatSystem.cs`](../../../Content.Client/_WF/Narcotics/WFDrugChatSystem.cs)
 - [`Content.Client/_WF/Narcotics/WFIntoxicationOverlay.cs`](../../../Content.Client/_WF/Narcotics/WFIntoxicationOverlay.cs)
 - [`Content.Client/_WF/Narcotics/WFIntoxicationSystem.cs`](../../../Content.Client/_WF/Narcotics/WFIntoxicationSystem.cs)
