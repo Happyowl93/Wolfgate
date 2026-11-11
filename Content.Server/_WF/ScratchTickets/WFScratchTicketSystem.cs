@@ -50,9 +50,9 @@ public sealed partial class WFScratchTicketSystem : EntitySystem
     private void OnMapInit(Entity<WFScratchTicketComponent> ent, ref MapInitEvent args)
     {
         // A ticket saved on a map keeps what it rolled.
-        if (ent.Comp.Cells.Count != WFScratchTicketRules.CellCount)
+        if (ent.Comp.Cells.Count != WFScratchTicketRules.CellCount(ent.Comp.Format))
         {
-            var winner = WFScratchTicketRules.Roll(ent.Comp.Symbols, ent.Comp.LoseWeight, new System.Random(_random.Next()), ent.Comp.Cells);
+            var winner = WFScratchTicketRules.Roll(ent.Comp.Format, ent.Comp.Symbols, ent.Comp.LoseWeight, new System.Random(_random.Next()), ent.Comp.Cells);
             ent.Comp.Prize = winner < 0 ? 0 : ent.Comp.Symbols[winner].Prize;
         }
 

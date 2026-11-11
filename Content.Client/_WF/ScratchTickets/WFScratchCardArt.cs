@@ -17,7 +17,7 @@ public static class WFScratchCardArt
 
     public static readonly UIBox2 Close = new(306, 10, 328, 32);
     public static readonly UIBox2 Ribbon = new(34, 74, 306, 100);
-    public static readonly UIBox2 Legend = new(22, 106, 318, 206);
+    public static readonly UIBox2 Legend = new(14, 106, 326, 206);
     public static readonly UIBox2 Frame = new(44, 232, 296, 484);
     public static readonly UIBox2 Foil = new(50, 238, 290, 478);
     public static readonly UIBox2 Barcode = new(20, 510, 128, 542);
@@ -30,20 +30,24 @@ public static class WFScratchCardArt
     private static readonly Vector3 Cream = Rgb(0xF6EFD8);
     private static readonly Vector3 Gold = Rgb(0xF0BE3C);
     private static readonly Vector3 GoldDark = Rgb(0xA8741A);
-    private static readonly Vector3 RayLight = Rgb(0x1F8062);
-    private static readonly Vector3 RayDark = Rgb(0x155C46);
-    private static readonly Vector3 Glow = Rgb(0x6FD9A4);
-    private static readonly Vector3 Halftone = Rgb(0x0C3A2C);
-    private static readonly Vector3 Red = Rgb(0xC4261C);
-    private static readonly Vector3 RedDark = Rgb(0x861610);
-    private static readonly Vector3 RedLight = Rgb(0xE8503E);
     private static readonly Vector3 Paper = Rgb(0xF4EBD0);
     private static readonly Vector3 Brown = Rgb(0x6E4410);
     private static readonly Vector3 White = Rgb(0xFFFFFF);
     private static readonly Vector3 Black = Rgb(0x101010);
 
+    /// <summary>The colours one kind of ticket is printed in.</summary>
+    public readonly record struct Palette(Vector3 RayLight, Vector3 RayDark, Vector3 Glow, Vector3 Ribbon)
+    {
+        public Palette(Color rayLight, Color rayDark, Color glow, Color ribbon)
+            : this(Rgb(rayLight), Rgb(rayDark), Rgb(glow), Rgb(ribbon))
+        {
+        }
+
+        public Vector3 Halftone => RayDark * 0.6f;
+    }
+
     /// <summary>Paints the card with nothing printed on it yet: stock, sunburst, ribbon, panels and barcode.</summary>
-    public static Rgba32[] Paint()
+    public static Rgba32[] Paint(Palette palette)
     {
         var pixels = new Rgba32[PixelWidth * PixelHeight];
 
@@ -59,8 +63,8 @@ public static class WFScratchCardArt
                 if (alpha <= 0)
                     continue;
 
-                var colour = Stock(x, y, edge);
-                Ribboned(ref colour, x, y);
+                var colour = Stock(palette, x, y, edge);
+                Ribboned(ref colour, palette.Ribbon, x, y);
                 Panels(ref colour, x, y);
                 Barcoded(ref colour, x, y);
 
@@ -72,7 +76,7 @@ public static class WFScratchCardArt
     }
 
     /// <summary>The border, the sunburst behind the title and the halftone that darkens the foot of the card.</summary>
-    private static Vector3 Stock(float x, float y, float edge)
+    private static Vector3 Stock(Palette palette, float x, float y, float edge)
     {
         if (edge > -3f)
             return Cream;
@@ -82,8 +86,8 @@ public static class WFScratchCardArt
 
         var offset = new Vector2(x, y) - BurstCentre;
         var turn = (MathF.Atan2(offset.Y, offset.X) + MathF.PI) / MathF.Tau;
-        var colour = (int) (turn * Rays) % 2 == 0 ? RayLight : RayDark;
-        colour = Vector3.Lerp(colour, Glow, MathF.Exp(-offset.Length() / 120f) * 0.6f);
+        var colour = (int) (turn * Rays) % 2 == 0 ? palette.RayLight : palette.RayDark;
+        colour = Vector3.Lerp(colour, palette.Glow, MathF.Exp(-offset.Length() / 120f) * 0.6f);
 
         // Dots on a staggered grid, growing toward the bottom edge.
         const float pitch = 9f;
@@ -91,10 +95,10 @@ public static class WFScratchCardArt
         var shifted = x + (row % 2 == 0 ? 0f : pitch / 2f);
         var dot = new Vector2(shifted - (MathF.Floor(shifted / pitch) + 0.5f) * pitch, y - (row + 0.5f) * pitch);
         var radius = Math.Clamp((y - 200f) / 380f, 0f, 1f) * 4.2f;
-        return Vector3.Lerp(colour, Halftone, Coverage(dot.Length() - radius) * 0.55f);
+        return Vector3.Lerp(colour, palette.Halftone, Coverage(dot.Length() - radius) * 0.55f);
     }
 
-    private static void Ribboned(ref Vector3 colour, float x, float y)
+    private static void Ribboned(ref Vector3 colour, Vector3 ribbon, float x, float y)
     {
         if (y < Ribbon.Top || y > Ribbon.Bottom || x < Ribbon.Left || x > Ribbon.Right)
             return;
@@ -105,9 +109,9 @@ public static class WFScratchCardArt
         if (x - Ribbon.Left < cut || Ribbon.Right - x < cut)
             return;
 
-        colour = y < Ribbon.Top + 2f ? RedLight
-            : y > Ribbon.Bottom - 3f ? RedDark
-            : Red;
+        colour = y < Ribbon.Top + 2f ? Vector3.Lerp(ribbon, White, 0.25f)
+            : y > Ribbon.Bottom - 3f ? ribbon * 0.68f
+            : ribbon;
     }
 
     private static void Panels(ref Vector3 colour, float x, float y)
@@ -148,6 +152,11 @@ public static class WFScratchCardArt
     private static float Coverage(float distance)
     {
         return Math.Clamp(0.5f - distance * Scale, 0f, 1f);
+    }
+
+    private static Vector3 Rgb(Color colour)
+    {
+        return new Vector3(colour.R, colour.G, colour.B);
     }
 
     private static Vector3 Rgb(int hex)

@@ -1,4 +1,4 @@
-# Scratches-to-Win, who sells Mother Lode tickets in the Caelestinus Central bar lounge.
+# Scratches-to-Win, who sells scratch tickets in the Caelestinus Central bar lounge.
 
 - type: humanoidProfile
   id: WFScratchTicketSellerProfile
@@ -94,8 +94,10 @@
   id: WFScratchTicketInventory
   startingInventory:
     WFScratchTicket: 50
+    WFScratchTicketFoundry: 50
+    WFScratchTicketTycoon: 50
 
-# Carries the seller's stock list and is never placed. The ticket's vendPrice is what it costs.
+# Carries the seller's stock list and is never placed. A ticket's vendPrice is what it costs.
 - type: entity
   id: WFScratchTicketStock
   parent: VendingMachineAmmo

@@ -28,10 +28,11 @@ public sealed partial class WFScratchTicketWindow : BaseWindow
     private const string PlainFontPath = "/Fonts/NotoSans/NotoSans-Regular.ttf";
     private const float ScratchSoundGap = 0.3f;
     private const float LegendRow = 32f;
+    private const float SpriteSize = 32f;
 
-    // Ore sprites fill under half of their canvas, so they are drawn enlarged and overhang their slot with empty margin.
-    private const float LegendIcon = 64f;
-    private const float CellIcon = 96f;
+    // The strip over the player's symbols that holds the winning one, and the strip beside each game that names it.
+    private const float KeyBand = 88f;
+    private const float GameLabel = 60f;
 
     private static readonly SoundSpecifier ScratchSound = new SoundCollectionSpecifier("PaperScribbles", AudioParams.Default.WithVolume(-8f));
 
@@ -41,7 +42,6 @@ public sealed partial class WFScratchTicketWindow : BaseWindow
     private static readonly Color Ink = Color.FromHex("#2A2418");
     private static readonly Color PrizeInk = Color.FromHex("#9C1A12");
     private static readonly Color CellEdge = Color.FromHex("#C8BA98");
-    private static readonly Color Shade = Color.FromHex("#0A2A20");
 
     [Dependency] private IClyde _clyde = default!;
     [Dependency] private IEntityManager _entMan = default!;
@@ -52,7 +52,9 @@ public sealed partial class WFScratchTicketWindow : BaseWindow
     private readonly Font _titleFont;
     private readonly Font _ribbonFont;
     private readonly Font _boldFont;
+    private readonly Font _legendFont;
     private readonly Font _prizeFont;
+    private readonly Font _taglineFont;
     private readonly Font _smallFont;
 
     private OwnedTexture? _art;
@@ -60,8 +62,17 @@ public sealed partial class WFScratchTicketWindow : BaseWindow
     private Texture[] _icons = Array.Empty<Texture>();
     private int[] _cells = Array.Empty<int>();
     private string _serial = string.Empty;
+    private string _title = string.Empty;
+    private string _tagline = string.Empty;
+    private string _dud = string.Empty;
+    private WFScratchCardArt.Palette _palette;
+    private Color _shade = Color.Black;
+
+    // Sprites are drawn at whole multiples of their size and may overhang their slot with their empty margin.
+    private float _legendIcon = SpriteSize;
+    private float _cellIcon = SpriteSize;
     private TimeSpan _nextScratchSound;
-    private int _winner = -1;
+    private WFScratchFormat _format;
     private int _prize;
     private bool _stateSeen;
     private bool _scratched;
@@ -74,9 +85,11 @@ public sealed partial class WFScratchTicketWindow : BaseWindow
         IoCManager.InjectDependencies(this);
 
         _titleFont = _resources.GetFont(TitleFontPath, 42);
-        _ribbonFont = _resources.GetFont(BoldFontPath, 15);
+        _ribbonFont = _resources.GetFont(BoldFontPath, 13);
         _boldFont = _resources.GetFont(BoldFontPath, 14);
+        _legendFont = _resources.GetFont(BoldFontPath, 13);
         _prizeFont = _resources.GetFont(BoldFontPath, 12);
+        _taglineFont = _resources.GetFont(BoldFontPath, 11);
         _smallFont = _resources.GetFont(PlainFontPath, 10);
 
         MouseFilter = MouseFilterMode.Stop;
@@ -93,13 +106,21 @@ public sealed partial class WFScratchTicketWindow : BaseWindow
         _symbols = ticket.Symbols;
         _icons = _symbols.Select(symbol => sprites.Frame0(symbol.Icon)).ToArray();
         _serial = ((uint) uid.Id * 2654435761u % 1000000u).ToString("D6");
+        _title = Loc.GetString(ticket.Title);
+        _tagline = Loc.GetString(ticket.Tagline);
+        _dud = Loc.GetString(ticket.Dud);
+        _format = ticket.Format;
+        _legendIcon = SpriteSize * ticket.LegendIconScale;
+        _cellIcon = SpriteSize * ticket.CellIconScale;
+        _palette = new WFScratchCardArt.Palette(ticket.CardLight, ticket.CardDark, ticket.CardGlow, ticket.Ribbon);
+        _shade = new Color(ticket.CardDark.R * 0.4f, ticket.CardDark.G * 0.4f, ticket.CardDark.B * 0.4f);
         _foil.SetAlpha(alpha);
+        PaintArt();
     }
 
     public void UpdateState(WFScratchTicketState state)
     {
         _cells = state.Cells;
-        _winner = WFScratchTicketRules.Winner(state.Cells);
 
         // A ticket opened already scratched shows no foil; one finished just now loses what is left of it.
         if (state.Scratched && !_stateSeen)
@@ -131,7 +152,14 @@ public sealed partial class WFScratchTicketWindow : BaseWindow
         var load = TextureLoadParameters.Default;
         load.SampleParameters = new TextureSampleParameters { Filter = true };
         _art = _clyde.CreateBlankTexture<Rgba32>((WFScratchCardArt.PixelWidth, WFScratchCardArt.PixelHeight), "wf-scratch-card", load);
-        _art.SetSubImage<Rgba32>(Vector2i.Zero, (WFScratchCardArt.PixelWidth, WFScratchCardArt.PixelHeight), WFScratchCardArt.Paint());
+        PaintArt();
+    }
+
+    private void PaintArt()
+    {
+        // Nothing to print until the ticket is known.
+        if (_symbols.Count > 0)
+            _art?.SetSubImage<Rgba32>(Vector2i.Zero, (WFScratchCardArt.PixelWidth, WFScratchCardArt.PixelHeight), WFScratchCardArt.Paint(_palette));
     }
 
     protected override void ExitedTree()
@@ -169,28 +197,27 @@ public sealed partial class WFScratchTicketWindow : BaseWindow
         DrawCloseMark(handle);
 
         // The title sits on its own shadow, as if stamped in foil.
-        var title = Loc.GetString("wf-scratch-ticket-card-title");
         var centre = WFScratchCardArt.Width / 2f;
-        DrawText(handle, _titleFont, title, centre, 15f, Shade, new TextOutline(3f * UIScale, Shade), 270f);
-        DrawText(handle, _titleFont, title, centre, 11f, Gold, new TextOutline(3f * UIScale, TitleEdge), 270f);
+        DrawText(handle, _titleFont, _title, centre, 15f, _shade, new TextOutline(3f * UIScale, _shade), 270f);
+        DrawText(handle, _titleFont, _title, centre, 11f, Gold, new TextOutline(3f * UIScale, TitleEdge), 270f);
 
         var top = _symbols.Count == 0 ? 0 : _symbols.Max(symbol => symbol.Prize);
         DrawText(handle, _ribbonFont, Loc.GetString("wf-scratch-ticket-card-top-prize", ("amount", BankSystemExtensions.ToSpesoString(top))),
-            centre, WFScratchCardArt.Ribbon.Top + 5f, Color.White, new TextOutline(1f * UIScale, TitleEdge), WFScratchCardArt.Ribbon.Width - 30f);
+            centre, WFScratchCardArt.Ribbon.Top + 1f, Color.White, new TextOutline(1f * UIScale, TitleEdge), WFScratchCardArt.Ribbon.Width - 30f);
 
         DrawLegend(handle);
-        DrawText(handle, _prizeFont, Loc.GetString("wf-scratch-ticket-card-tagline"), centre, WFScratchCardArt.Legend.Bottom + 5f,
-            Cream, new TextOutline(1f * UIScale, Shade), WFScratchCardArt.Width - 40f);
+        DrawText(handle, _taglineFont, _tagline, centre, WFScratchCardArt.Legend.Bottom + 6f,
+            Cream, new TextOutline(1f * UIScale, _shade), WFScratchCardArt.Width - 44f);
 
         DrawCells(handle);
 
         var bottom = WFScratchCardArt.Frame.Bottom;
-        DrawText(handle, _boldFont, Status(), centre, bottom + 3f, Gold, new TextOutline(1f * UIScale, Shade), WFScratchCardArt.Width - 30f);
+        DrawText(handle, _prizeFont, Status(), centre, bottom + 5f, Gold, new TextOutline(1f * UIScale, _shade), WFScratchCardArt.Width - 30f);
 
         var right = (WFScratchCardArt.Barcode.Right + WFScratchCardArt.Width - 14f) / 2f;
-        DrawText(handle, _prizeFont, Loc.GetString("wf-scratch-ticket-card-serial", ("serial", _serial)), right, bottom + 28f, Cream, null, 180f);
-        DrawText(handle, _smallFont, Loc.GetString("wf-scratch-ticket-card-small-print-redeem"), right, bottom + 49f, Cream, null, 180f);
-        DrawText(handle, _smallFont, Loc.GetString("wf-scratch-ticket-card-small-print-issuer"), centre, bottom + 66f, Cream.WithAlpha(0.8f), null, WFScratchCardArt.Width - 30f);
+        DrawText(handle, _prizeFont, Loc.GetString("wf-scratch-ticket-card-serial", ("serial", _serial)), right, bottom + 27f, Cream, null, 180f);
+        DrawText(handle, _smallFont, Loc.GetString("wf-scratch-ticket-card-small-print-issuer"), right, bottom + 44f, Cream, null, 180f);
+        DrawText(handle, _smallFont, Loc.GetString("wf-scratch-ticket-card-small-print-redeem"), centre, bottom + 66f, Cream.WithAlpha(0.8f), null, WFScratchCardArt.Width - 30f);
     }
 
     private void DrawCloseMark(DrawingHandleScreen handle)
@@ -219,41 +246,103 @@ public sealed partial class WFScratchTicketWindow : BaseWindow
         for (var i = 0; i < prizes.Count; i++)
         {
             var symbol = prizes[i];
-            var corner = new Vector2(box.Left + 10f + (i / rows) * box.Width / 2f, top + i % rows * LegendRow);
-            var overhang = new Vector2(LegendIcon - LegendRow, LegendIcon - LegendRow) / 2f;
-            handle.DrawTextureRect(_icons[symbol], UIBox2.FromDimensions((corner - overhang) * UIScale, new Vector2(LegendIcon, LegendIcon) * UIScale));
+            var corner = new Vector2(box.Left + 8f + (i / rows) * box.Width / 2f, top + i % rows * LegendRow);
+            var overhang = new Vector2(_legendIcon - LegendRow, _legendIcon - LegendRow) / 2f;
+            handle.DrawTextureRect(_icons[symbol], UIBox2.FromDimensions(Snap((corner - overhang) * UIScale), new Vector2(_legendIcon, _legendIcon) * UIScale));
 
-            var words = Loc.GetString("wf-scratch-ticket-card-match", ("count", WFScratchTicketRules.Match));
-            var at = (corner + new Vector2(LegendRow + 10f, 6f)) * UIScale;
-            var advance = handle.DrawString(_boldFont, at, words, UIScale, Ink);
-            handle.DrawString(_boldFont, at + new Vector2(advance.X + 5f * UIScale, 0f), BankSystemExtensions.ToSpesoString(_symbols[symbol].Prize), UIScale, PrizeInk);
+            // A ticket that wins on a single find prints the prize alone.
+            var at = Snap((corner + new Vector2(LegendRow + 8f, 7f)) * UIScale);
+            var count = WFScratchTicketRules.Match(_format);
+            if (count > 1)
+            {
+                var advance = handle.DrawString(_legendFont, at, Loc.GetString("wf-scratch-ticket-card-match", ("count", count)), UIScale, Ink);
+                at = Snap(at + new Vector2(advance.X + 4f * UIScale, 0f));
+            }
+
+            handle.DrawString(_legendFont, at, BankSystemExtensions.ToSpesoString(_symbols[symbol].Prize), UIScale, PrizeInk);
         }
     }
 
-    /// <summary>What the foil hides: each cell's ore over its prize, winners on gold.</summary>
+    /// <summary>What the foil hides: each cell's symbol over its prize, the winning match on gold.</summary>
     private void DrawCells(DrawingHandleScreen handle)
     {
-        var box = WFScratchCardArt.Foil;
-        var size = box.Width / WFScratchTicketRules.Columns;
+        DrawCellLabels(handle);
 
-        for (var i = 0; i < _cells.Length && i < WFScratchTicketRules.CellCount; i++)
+        for (var i = 0; i < _cells.Length && i < WFScratchTicketRules.CellCount(_format); i++)
         {
             var symbol = _cells[i];
             if (symbol < 0 || symbol >= _symbols.Count)
                 continue;
 
-            var corner = box.TopLeft + new Vector2(i % WFScratchTicketRules.Columns, i / WFScratchTicketRules.Columns) * size;
-            var cell = UIBox2.FromDimensions(corner * UIScale, new Vector2(size, size) * UIScale);
-            if (_scratched && symbol == _winner)
+            var box = CellBox(i);
+            var cell = UIBox2.FromDimensions(box.TopLeft * UIScale, box.Size * UIScale);
+            if (_scratched && WFScratchTicketRules.Wins(_format, _cells, i))
                 handle.DrawRect(cell, Gold);
+            else if (_format == WFScratchFormat.WinningSymbol && i == 0)
+                handle.DrawRect(cell, CellEdge.WithAlpha(0.45f));
 
             handle.DrawRect(cell, CellEdge, false);
             handle.DrawTextureRect(_icons[symbol],
-                UIBox2.FromDimensions((corner + new Vector2((size - CellIcon) / 2f, (size - CellIcon) / 2f - 6f)) * UIScale, new Vector2(CellIcon, CellIcon) * UIScale));
+                UIBox2.FromDimensions(Snap((box.TopLeft + new Vector2((box.Width - _cellIcon) / 2f, (box.Height - _cellIcon) / 2f - 7f)) * UIScale), new Vector2(_cellIcon, _cellIcon) * UIScale));
 
             var prize = _symbols[symbol].Prize;
-            DrawText(handle, _prizeFont, prize > 0 ? BankSystemExtensions.ToSpesoString(prize) : Loc.GetString("wf-scratch-ticket-card-dud"),
-                corner.X + size / 2f, corner.Y + size - 20f, prize > 0 ? PrizeInk : Ink, null, size - 6f);
+            DrawText(handle, _prizeFont, prize > 0 ? BankSystemExtensions.ToSpesoString(prize) : _dud,
+                box.Center.X, box.Bottom - 20f, prize > 0 ? PrizeInk : Ink, null, box.Width - 6f);
+        }
+    }
+
+    /// <summary>Where a cell sits on the card, for the ticket's format.</summary>
+    private UIBox2 CellBox(int index)
+    {
+        var foil = WFScratchCardArt.Foil;
+        switch (_format)
+        {
+            case WFScratchFormat.WinningSymbol:
+            {
+                var size = new Vector2(foil.Width / WFScratchTicketRules.Columns, KeyBand);
+                if (index == 0)
+                    return UIBox2.FromDimensions(foil.TopLeft + new Vector2((foil.Width - size.X) / 2f, 0f), size);
+
+                var own = index - 1;
+                size.Y = (foil.Height - KeyBand) / (WFScratchTicketRules.OwnSymbols / WFScratchTicketRules.Columns);
+                var at = new Vector2(own % WFScratchTicketRules.Columns * size.X, KeyBand + own / WFScratchTicketRules.Columns * size.Y);
+                return UIBox2.FromDimensions(foil.TopLeft + at, size);
+            }
+            case WFScratchFormat.Pairs:
+            {
+                var size = new Vector2((foil.Width - GameLabel) / 2f, foil.Height / WFScratchTicketRules.Games);
+                return UIBox2.FromDimensions(foil.TopLeft + new Vector2(GameLabel + index % 2 * size.X, index / 2 * size.Y), size);
+            }
+            default:
+            {
+                var size = new Vector2(foil.Width / WFScratchTicketRules.Columns, foil.Height / WFScratchTicketRules.Columns);
+                return UIBox2.FromDimensions(foil.TopLeft + new Vector2(index % WFScratchTicketRules.Columns, index / WFScratchTicketRules.Columns) * size, size);
+            }
+        }
+    }
+
+    /// <summary>The words printed between the cells: beside the winning symbol, or naming each game.</summary>
+    private void DrawCellLabels(DrawingHandleScreen handle)
+    {
+        var foil = WFScratchCardArt.Foil;
+        switch (_format)
+        {
+            case WFScratchFormat.WinningSymbol:
+                var side = foil.Width / WFScratchTicketRules.Columns;
+                var top = foil.Top + KeyBand / 2f - 10f;
+                DrawText(handle, _boldFont, Loc.GetString("wf-scratch-ticket-card-key-left"), foil.Left + side / 2f, top, Ink, null, side - 8f);
+                DrawText(handle, _boldFont, Loc.GetString("wf-scratch-ticket-card-key-right"), foil.Right - side / 2f, top, Ink, null, side - 8f);
+                break;
+
+            case WFScratchFormat.Pairs:
+                var row = foil.Height / WFScratchTicketRules.Games;
+                for (var game = 0; game < WFScratchTicketRules.Games; game++)
+                {
+                    DrawText(handle, _prizeFont, Loc.GetString("wf-scratch-ticket-card-game", ("number", game + 1)),
+                        foil.Left + GameLabel / 2f, foil.Top + game * row + row / 2f - 9f, Ink, null, GameLabel - 8f);
+                }
+
+                break;
         }
     }
 
@@ -268,7 +357,13 @@ public sealed partial class WFScratchTicketWindow : BaseWindow
             width = maxWidth * UIScale;
         }
 
-        handle.DrawString(font, new Vector2(centre * UIScale - width / 2f, top * UIScale), text, scale, colour, outline);
+        handle.DrawString(font, Snap(new Vector2(centre * UIScale - width / 2f, top * UIScale)), text, scale, colour, outline);
+    }
+
+    /// <summary>Whole pixels: text and pixel art drawn between pixels come out uneven.</summary>
+    private static Vector2 Snap(Vector2 position)
+    {
+        return new Vector2(MathF.Round(position.X), MathF.Round(position.Y));
     }
 
     private string Status()

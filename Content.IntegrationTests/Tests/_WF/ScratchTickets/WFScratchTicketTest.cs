@@ -1,8 +1,10 @@
 #nullable enable
+using System.Linq;
 using System.Threading.Tasks;
 using Content.Server._NF.Bank;
 using Content.Server._WF.ScratchTickets;
 using Content.Server._WF.Traders;
+using Content.Shared.Cargo.Components;
 using Content.Server.Preferences.Managers;
 using Content.Shared._NF.Bank.Components;
 using Content.Shared._WF.ScratchTickets;
@@ -26,6 +28,51 @@ public sealed class WFScratchTicketTest
     private const string TicketProto = "WFScratchTicket";
     private const int Balance = 3000;
 
+    private static readonly string[] Tickets = { TicketProto, "WFScratchTicketFoundry", "WFScratchTicketTycoon" };
+    private static readonly int[] Prices = { 500, 2500, 10000 };
+
+    /// <summary>
+    /// No tier pays back more than it costs on average, and each dearer tier wins less often for a bigger top prize.
+    /// </summary>
+    [Test]
+    public async Task DearerTiersRiskMoreForMore()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var map = await pair.CreateTestMap();
+
+        await server.WaitAssertion(() =>
+        {
+            var lastChance = 1f;
+            var lastTop = 0;
+
+            for (var i = 0; i < Tickets.Length; i++)
+            {
+                var uid = entMan.SpawnEntity(Tickets[i], map.GridCoords);
+                var ticket = entMan.GetComponent<WFScratchTicketComponent>(uid);
+                var total = ticket.LoseWeight + ticket.Symbols.Sum(symbol => symbol.Weight);
+                var chance = ticket.Symbols.Sum(symbol => symbol.Weight) / total;
+                var payback = ticket.Symbols.Sum(symbol => symbol.Weight * symbol.Prize) / total;
+                var top = ticket.Symbols.Max(symbol => symbol.Prize);
+
+                Assert.Multiple(() =>
+                {
+                    Assert.That(entMan.GetComponent<StaticPriceComponent>(uid).VendPrice, Is.EqualTo(Prices[i]));
+                    Assert.That(payback / Prices[i], Is.InRange(0.5f, 0.8f), $"{Tickets[i]} pays back the wrong share of its price.");
+                    Assert.That(chance, Is.LessThan(lastChance), $"{Tickets[i]} wins as often as a cheaper ticket.");
+                    Assert.That(top, Is.GreaterThan(lastTop), $"{Tickets[i]} has no bigger prize than a cheaper ticket.");
+                    Assert.That(ticket.Symbols, Has.Count.GreaterThanOrEqualTo(5), "Too few symbols to fill a losing ticket.");
+                });
+
+                lastChance = chance;
+                lastTop = top;
+            }
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     [Test]
     public async Task SpawnedTicketsAreRolled()
     {
@@ -36,14 +83,14 @@ public sealed class WFScratchTicketTest
 
         await server.WaitAssertion(() =>
         {
-            for (var i = 0; i < 200; i++)
+            for (var i = 0; i < 300; i++)
             {
-                var ticket = entMan.GetComponent<WFScratchTicketComponent>(entMan.SpawnEntity(TicketProto, map.GridCoords));
-                var winner = WFScratchTicketRules.Winner(ticket.Cells);
+                var ticket = entMan.GetComponent<WFScratchTicketComponent>(entMan.SpawnEntity(Tickets[i % Tickets.Length], map.GridCoords));
+                var winner = WFScratchTicketRules.Winner(ticket.Format, ticket.Cells);
 
                 Assert.Multiple(() =>
                 {
-                    Assert.That(ticket.Cells, Has.Count.EqualTo(WFScratchTicketRules.CellCount));
+                    Assert.That(ticket.Cells, Has.Count.EqualTo(WFScratchTicketRules.CellCount(ticket.Format)));
                     Assert.That(ticket.Scratched, Is.False);
                     Assert.That(ticket.Prize, Is.EqualTo(winner < 0 ? 0 : ticket.Symbols[winner].Prize));
                 });
@@ -68,11 +115,10 @@ public sealed class WFScratchTicketTest
         await server.WaitAssertion(() =>
         {
             var stock = entMan.System<TraderShopSystem>().GetStock((seller, entMan.GetComponent<TraderShopComponent>(seller)));
-            Assert.That(stock, Has.Count.EqualTo(1));
             Assert.Multiple(() =>
             {
-                Assert.That(stock[0].Item, Is.EqualTo(TicketProto));
-                Assert.That(stock[0].Price, Is.EqualTo(500));
+                Assert.That(stock.Select(entry => entry.Item), Is.EquivalentTo(Tickets));
+                Assert.That(stock.Select(entry => entry.Price), Is.EquivalentTo(Prices));
                 Assert.That(entMan.GetComponent<HumanoidAppearanceComponent>(seller).Species.Id, Is.EqualTo("Reptilian"));
             });
         });

@@ -7,8 +7,8 @@ using NUnit.Framework;
 namespace Content.Tests._WF.ScratchTickets;
 
 /// <summary>
-/// The scratch ticket roll: a winner shows exactly three times, nothing else ever shows three times, and wins come
-/// as often as the weights say.
+/// The scratch ticket roll, in every format: the cells show the rolled winner's match and no other, and wins come as
+/// often as the weights say.
 /// </summary>
 [TestFixture]
 public sealed class WFScratchTicketRulesTest
@@ -28,8 +28,14 @@ public sealed class WFScratchTicketRulesTest
         };
     }
 
+    /// <summary>Cells in a win: the match itself, plus the winning symbol it is matched against.</summary>
+    private static int Matched(WFScratchFormat format)
+    {
+        return WFScratchTicketRules.Match(format) + (format == WFScratchFormat.WinningSymbol ? 1 : 0);
+    }
+
     [Test]
-    public void RolledCellsMatchTheOutcome()
+    public void RolledCellsMatchTheOutcome([Values] WFScratchFormat format)
     {
         var symbols = Symbols();
         var random = new Random(4);
@@ -39,17 +45,14 @@ public sealed class WFScratchTicketRulesTest
 
         for (var i = 0; i < rolls; i++)
         {
-            var winner = WFScratchTicketRules.Roll(symbols, LoseWeight, random, cells);
+            var winner = WFScratchTicketRules.Roll(format, symbols, LoseWeight, random, cells);
 
-            Assert.That(cells, Has.Count.EqualTo(WFScratchTicketRules.CellCount));
-            Assert.That(WFScratchTicketRules.Winner(cells), Is.EqualTo(winner), "The cells show a different outcome from the roll.");
+            Assert.That(cells, Has.Count.EqualTo(WFScratchTicketRules.CellCount(format)));
+            Assert.That(WFScratchTicketRules.Winner(format, cells), Is.EqualTo(winner), "The cells show a different outcome from the roll.");
 
-            foreach (var group in cells.GroupBy(cell => cell))
-            {
-                Assert.That(group.Count(), group.Key == winner
-                    ? Is.EqualTo(WFScratchTicketRules.Match)
-                    : Is.LessThan(WFScratchTicketRules.Match));
-            }
+            var winning = Enumerable.Range(0, cells.Count).Where(index => WFScratchTicketRules.Wins(format, cells, index)).ToList();
+            Assert.That(winning, Has.Count.EqualTo(winner < 0 ? 0 : Matched(format)), "The wrong number of cells make up the win.");
+            Assert.That(winning.Select(index => cells[index]), Is.All.EqualTo(winner));
 
             if (winner >= 0)
                 wins[winner]++;
