@@ -9,7 +9,11 @@ retuned; only neuroware and a `WFDose` without `inBlood` feed the level directly
 and `halfLife`. `WFIntoxicationSystem` reads the
 blood, ticks the levels, announces phase changes, runs tier effects and crashes, and grants trait components (damage
 slowdown, stun resistance, pain numbness, Anvil's damper and its Poison repayment). `WFAlcoholSystem` does the same
-for ethanol: the `Drunk` effect's `perUnitInBlood` holds the drunk timer at the ethanol left.
+for ethanol: the `Drunk` effect's `perUnitInBlood` holds the drunk timer at the ethanol left (`inBloodAbove` for an
+overdose one). Other upstream status effects from reagents (rainbows, muting, drowsiness, forced sleep) are held with
+`refresh: true` the same way, and `perUnitInBlood` on `GenericStatusEffect` scales the held time by the units left
+where a reagent's old length must stay (mute toxin, chloral hydrate, fentanyl); the recreational ones clear slower
+so they last as long as they used to.
 `WFDependenceSystem` builds a per-family habit with tolerance and withdrawal; three traits start a character
 dependent. The client draws one overlay per family.
 
@@ -61,6 +65,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/RadioProbeSystem.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/RadioProbeSystem.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/SoldAlertTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/SoldAlertTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Narcotics/StatusInBloodTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/StatusInBloodTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/SubstanceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/SubstanceTest.cs)
 
 ### Prototypes
@@ -106,7 +111,18 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 - [`Content.IntegrationTests/Pair/TestPair.cs`](../../../Content.IntegrationTests/Pair/TestPair.cs): records radio sends for the sold-alert test
 - [`Content.Server/EntityEffects/Effects/Drunk.cs`](../../EntityEffects/Effects/Drunk.cs): drunkenness that follows the reagent in the blood
-- [`Resources/Prototypes/_Mono/Reagents/narcotics.yml`](../../../Resources/Prototypes/_Mono/Reagents/narcotics.yml): doses the Heroin profile at one and a half strength
+- [`Content.Server/EntityEffects/Effects/StatusEffects/GenericStatusEffect.cs`](../../EntityEffects/Effects/StatusEffects/GenericStatusEffect.cs): status time that follows the reagent in the blood
+- [`Resources/Prototypes/_Impstation/Reagents/biological.yml`](../../../Resources/Prototypes/_Impstation/Reagents/biological.yml): held while it is in the blood instead of piling up each tick
+- [`Resources/Prototypes/_Mono/Reagents/letoferol.yml`](../../../Resources/Prototypes/_Mono/Reagents/letoferol.yml): drunkenness follows the units in the blood
+- [`Resources/Prototypes/_Mono/Reagents/medicine.yml`](../../../Resources/Prototypes/_Mono/Reagents/medicine.yml)
+  - only in an overdose, like its jitter
+  - drunkenness follows the units in the blood
+- [`Resources/Prototypes/_Mono/Reagents/narcotics.yml`](../../../Resources/Prototypes/_Mono/Reagents/narcotics.yml)
+  - doses the Heroin profile at one and a half strength
+  - held while it is in the blood instead of piling up each tick
+  - held at the units left, as long as it used to pile up to
+  - drunkenness follows the units in the blood
+- [`Resources/Prototypes/_NF/Reagents/medicine.yml`](../../../Resources/Prototypes/_NF/Reagents/medicine.yml): held while it is in the blood instead of piling up each tick
 - [`Resources/Prototypes/_Onyx/Reagents/Medicine/medicine.yml`](../../../Resources/Prototypes/_Onyx/Reagents/Medicine/medicine.yml)
   - medical opioids build dependence slowly through the Opium profile
   - medical opioids build dependence slowly through the Heroin profile
@@ -114,11 +130,18 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Resources/Prototypes/Entities/Objects/Consumable/Smokeables/Cigarettes/cigarette.yml`](../../../Resources/Prototypes/Entities/Objects/Consumable/Smokeables/Cigarettes/cigarette.yml): the THC cigarette held plant fertiliser instead of THC
 - [`Resources/Prototypes/Guidebook/medical.yml`](../../../Resources/Prototypes/Guidebook/medical.yml): drugs, grades and neuroware
 - [`Resources/Prototypes/Hydroponics/seeds.yml`](../../../Resources/Prototypes/Hydroponics/seeds.yml): the opium poppy is a poppy mutation
+- [`Resources/Prototypes/Reagents/cleaning.yml`](../../../Resources/Prototypes/Reagents/cleaning.yml)
+  - held while it is in the blood instead of piling up each tick
+  - held while it is being digested instead of piling up each tick
 - [`Resources/Prototypes/Reagents/Consumable/Drink/alcohol.yml`](../../../Resources/Prototypes/Reagents/Consumable/Drink/alcohol.yml)
   - drunk lasts while ethanol does, so it clears at half speed to keep the old duration
   - halved since ethanol now stays twice as long above the threshold
   - drunkenness follows the ethanol left in the blood
-- [`Resources/Prototypes/Reagents/medicine.yml`](../../../Resources/Prototypes/Reagents/medicine.yml): Haloperidol brings down stimulant and psychedelic highs
+- [`Resources/Prototypes/Reagents/medicine.yml`](../../../Resources/Prototypes/Reagents/medicine.yml)
+  - drunkenness follows the units in the blood
+  - only in an overdose, like its jitter
+  - held while it is in the blood instead of piling up each tick
+  - Haloperidol brings down stimulant and psychedelic highs
 - [`Resources/Prototypes/Reagents/narcotics.yml`](../../../Resources/Prototypes/Reagents/narcotics.yml)
   - crystal sells by grade
   - crystal stays in the blood for minutes, so per-tick numbers below are cut to match
@@ -139,5 +162,14 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
   - doses the Nicotine profile, which is what builds the habit
   - was -0.2 a tick at 50x the clearance
   - was -0.1
+  - clears slower so the high lasts as long as before
+  - scaled to the slower clearance
+  - held while it is in the blood instead of piling up each tick
+  - drunkenness follows the units in the blood
+  - held at the units left, as long as it used to pile up to
+- [`Resources/Prototypes/Reagents/toxins.yml`](../../../Resources/Prototypes/Reagents/toxins.yml)
+  - held while it is in the blood instead of piling up each tick
+  - held at the units left, as long as it used to pile up to
+  - clears slower so the high lasts as long as before
 
 <!-- WOLFGATE-GENERATED END -->

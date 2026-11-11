@@ -25,6 +25,12 @@ public sealed partial class Drunk : EntityEffect
     /// </summary>
     [DataField]
     public float PerUnitInBlood;
+
+    /// <summary>
+    ///     With <see cref="PerUnitInBlood"/>, units in the blood up to this many don't count, for an overdose effect.
+    /// </summary>
+    [DataField]
+    public float InBloodAbove;
     // WOLFGATE END
 
     protected override string? ReagentEffectGuidebookText(IPrototypeManager prototype, IEntitySystemManager entSys)
@@ -37,7 +43,7 @@ public sealed partial class Drunk : EntityEffect
         // WOLFGATE(Narcotics) START: drunkenness that follows the reagent in the blood
         if (PerUnitInBlood > 0f && args is EntityEffectReagentArgs { Source: { } blood, Reagent: { } reagent })
         {
-            var units = blood.GetTotalPrototypeQuantity(reagent.ID).Float();
+            var units = Math.Max(0f, blood.GetTotalPrototypeQuantity(reagent.ID).Float() - InBloodAbove);
             args.EntityManager.System<Content.Server._WF.Narcotics.WFAlcoholSystem>()
                 .HoldDrunkenness(args.TargetEntity, BoozePower * PerUnitInBlood * units, SlurSpeech);
             return;

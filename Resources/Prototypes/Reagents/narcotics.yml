@@ -375,6 +375,7 @@
   color: "#215263"
   metabolisms:
     Narcotic:
+      metabolismRate: 0.05 # WOLFGATE(Narcotics): clears slower so the high lasts as long as before
       effects:
       - !type:HealthChange
         conditions:
@@ -382,12 +383,12 @@
           type: Yowie
         damage:
           groups:
-            Brute: -1
+            Brute: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
           types:
-            Heat: -0.5
-            Shock: -0.5
-            Cold: -0.5
-            Radiation: -0.5
+            Heat: -0.05 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Shock: -0.05 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Cold: -0.05 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Radiation: -0.05 # WOLFGATE(Narcotics): scaled to the slower clearance
       - !type:MovespeedModifier
         walkSpeedModifier: 0.65
         sprintSpeedModifier: 0.65
@@ -398,17 +399,18 @@
           shouldHave: false
         damage:
           types:
-            Poison: 2
+            Poison: 0.2 # WOLFGATE(Narcotics): scaled to the slower clearance
       - !type:GenericStatusEffect
         key: SeeingRainbows
         component: SeeingRainbows
         type: Add
         time: 10
-        refresh: false
+        refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
       - !type:ChemVomit # Vomiting is a symptom of brain damage
-        probability: 0.05
+        probability: 0.005 # WOLFGATE(Narcotics): scaled to the slower clearance
       - !type:Drunk # Headaches and slurring are major symptoms of brain damage, this is close enough
         boozePower: 5
+        perUnitInBlood: 1.6 # WOLFGATE(Narcotics): drunkenness follows the units in the blood
 
 - type: reagent
   id: SpaceDrugs
@@ -420,6 +422,7 @@
   color: "#63806e"
   metabolisms:
     Narcotic:
+      metabolismRate: 0.1 # WOLFGATE(Narcotics): clears slower so the high lasts as long as before
       effects:
       - !type:HealthChange
         conditions:
@@ -427,18 +430,18 @@
           type: Yowie
         damage:
           groups:
-            Brute: -1
+            Brute: -0.2 # WOLFGATE(Narcotics): scaled to the slower clearance
           types:
-            Heat: -0.5
-            Shock: -0.5
-            Cold: -0.5
-            Radiation: -0.5
+            Heat: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Shock: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Cold: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Radiation: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
       - !type:GenericStatusEffect
         key: SeeingRainbows
         component: SeeingRainbows
         type: Add
         time: 5
-        refresh: false
+        refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
 
 - type: reagent
   id: Bananadine
@@ -450,6 +453,7 @@
   color: "#ffff00"
   metabolisms:
     Narcotic:
+      metabolismRate: 0.1 # WOLFGATE(Narcotics): clears slower so the high lasts as long as before
       effects:
       - !type:HealthChange
         conditions:
@@ -457,18 +461,18 @@
           type: Yowie
         damage:
           groups:
-            Brute: -1
+            Brute: -0.2 # WOLFGATE(Narcotics): scaled to the slower clearance
           types:
-            Heat: -0.5
-            Shock: -0.5
-            Cold: -0.5
-            Radiation: -0.5
+            Heat: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Shock: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Cold: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Radiation: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
       - !type:GenericStatusEffect
         key: SeeingRainbows
         component: SeeingRainbows
         type: Add
         time: 5
-        refresh: false
+        refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
 
 # Probably replace this one with sleeping chem when putting someone in a comatose state is easier
 - type: reagent
@@ -493,7 +497,7 @@
           min: 18 # Mono
         key: ForcedSleep
         component: ForcedSleeping
-        refresh: false
+        refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
         type: Add
 
 - type: reagent
@@ -517,7 +521,8 @@
         component: Muted
         type: Add
         time: 10
-        refresh: false
+        refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
+        perUnitInBlood: 2 # WOLFGATE(Narcotics): held at the units left, as long as it used to pile up to
 
 - type: reagent
   id: NorepinephricAcid
@@ -619,6 +624,7 @@
   color: "#EE35FF"
   metabolisms:
     Narcotic:
+      metabolismRate: 0.1 # WOLFGATE(Narcotics): clears slower so the high lasts as long as before
       effects:
       # WOLFGATE(Wolfmed): PROTO J: Onyx's <Onyx-PartPain> block on Happiness. Group is Narcotic, not Onyx's
       # Bloodstream - Narcotic is Happiness's only metabolism group in Wolfgate.
@@ -633,30 +639,30 @@
           type: Yowie
         damage:
           groups:
-            Brute: -1
+            Brute: -0.2 # WOLFGATE(Narcotics): scaled to the slower clearance
           types:
-            Heat: -0.5
-            Shock: -0.5
-            Cold: -0.5
-            Radiation: -0.5
+            Heat: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Shock: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Cold: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
+            Radiation: -0.1 # WOLFGATE(Narcotics): scaled to the slower clearance
       - !type:Emote
         emote: Laugh
         showInChat: true
-        probability: 0.1
+        probability: 0.02 # WOLFGATE(Narcotics): scaled to the slower clearance
         conditions:
         - !type:ReagentThreshold
           max: 20
       - !type:Emote
         emote: Whistle
         showInChat: true
-        probability: 0.1
+        probability: 0.02 # WOLFGATE(Narcotics): scaled to the slower clearance
         conditions:
         - !type:ReagentThreshold
           max: 20
       - !type:Emote
         emote: Crying
         showInChat: true
-        probability: 0.1
+        probability: 0.02 # WOLFGATE(Narcotics): scaled to the slower clearance
         conditions:
         - !type:ReagentThreshold
           min: 20
@@ -667,7 +673,7 @@
         - "psicodine-effect-fearless"
         - "psicodine-effect-anxieties-wash-away"
         - "psicodine-effect-at-peace"
-        probability: 0.2
+        probability: 0.04 # WOLFGATE(Narcotics): scaled to the slower clearance
         conditions:
         - !type:ReagentThreshold
           max: 20
@@ -676,5 +682,5 @@
         component: SeeingRainbows
         type: Add
         time: 5
-        refresh: false
+        refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
  

@@ -59,4 +59,46 @@ public sealed class AlcoholTest
 
         await pair.CleanReturnAsync();
     }
+
+    /// <summary>An overdose drunkenness counts only the units above its threshold: Bicaridine from 16 u.</summary>
+    [Test]
+    public async Task DrunkAboveThresholdTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+
+        await server.WaitAssertion(() =>
+        {
+            var status = server.System<StatusEffectsSystem>();
+            var timing = server.ResolveDependency<IGameTiming>();
+            var bicaridine = server.ProtoMan.Index<ReagentPrototype>("Bicaridine");
+            var drunk = bicaridine.Metabolisms!["Medicine"].Effects.OfType<Drunk>().Single();
+            var mob = entMan.SpawnEntity("MobHuman", map.GridCoords);
+
+            double Left()
+            {
+                return status.TryGetTime(mob, SharedDrunkSystem.DrunkKey, out var time)
+                    ? (time.Value.Item2 - timing.CurTime).TotalSeconds
+                    : 0;
+            }
+
+            void Metabolise(float units)
+            {
+                var blood = new Solution();
+                blood.AddReagent(bicaridine.ID, FixedPoint2.New(units));
+                drunk.Effect(new EntityEffectReagentArgs(mob, entMan, null, blood, FixedPoint2.New(0.2), bicaridine,
+                    null, FixedPoint2.New(1)));
+            }
+
+            Metabolise(15f);
+            Assert.That(Left(), Is.EqualTo(0), "Below the threshold there is no drunkenness.");
+
+            Metabolise(20f);
+            Assert.That(Left(), Is.EqualTo(3 * drunk.PerUnitInBlood * 4).Within(0.5), "Only the 4 u above 16 count.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
 }
