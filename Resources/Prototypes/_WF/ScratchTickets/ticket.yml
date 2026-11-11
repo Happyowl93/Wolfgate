@@ -1,5 +1,6 @@
 # Three tiers of scratch ticket, each in its own format. Every tier returns about 65% of its price on average; a
-# dearer ticket wins less often and pays more when it does. Weights are a tier's symbols and loseWeight together, out of 10000.
+# dearer ticket wins less often and pays more when it does. Unscratched tickets stack to 20; a pile's own roll is
+# the last ticket left in it, and every ticket pulled off it rolls its own. Weights are a tier's symbols and loseWeight together, out of 10000.
 - type: entity
   id: WFScratchTicketBase
   parent: BaseItem
@@ -20,6 +21,9 @@
           Fresh: { state: icon }
           Lost: { state: lost }
           Won: { state: won }
+          Stack2: { state: stack_2 }
+          Stack10: { state: stack_10 }
+          Stack20: { state: stack_20 }
   - type: ActivatableUI
     key: enum.WFScratchTicketUiKey.Key
     inHandsOnly: true
@@ -36,6 +40,9 @@
   name: Mother Lode scratch ticket
   description: A Caelestinus Prospectors' Lottery ticket. Scratch off the foil, find three ores alike and an ATM pays you the vein.
   components:
+  - type: Stack
+    stackType: WFScratchTicket
+    count: 1
   - type: StaticPrice
     price: 25
     vendPrice: 500
@@ -74,6 +81,9 @@
   name: Foundry Gold scratch ticket
   description: A Caelestinus Prospectors' Lottery ticket for steadier nerves. Find the winning ingot among your six and an ATM pays you the cast.
   components:
+  - type: Stack
+    stackType: WFScratchTicketFoundry
+    count: 1
   - type: Sprite
     sprite: _WF/ScratchTickets/ticket_mid.rsi
   - type: StaticPrice
@@ -119,6 +129,9 @@
   name: Thaler Tycoon scratch ticket
   description: The Caelestinus Prospectors' Lottery's dearest ticket. Most pay nothing. Two alike in one game and an ATM makes you somebody.
   components:
+  - type: Stack
+    stackType: WFScratchTicketTycoon
+    count: 1
   - type: Sprite
     sprite: _WF/ScratchTickets/ticket_high.rsi
   - type: StaticPrice
@@ -153,3 +166,114 @@
     # Small change: fills cells, pays nothing.
     - icon: { sprite: Objects/Misc/coins.rsi, state: coin_iron }
     - icon: { sprite: Objects/Economy/cash.rsi, state: cash_10 }
+
+- type: stack
+  id: WFScratchTicket
+  name: Mother Lode scratch ticket
+  icon: { sprite: /Textures/_WF/ScratchTickets/ticket.rsi, state: icon }
+  spawn: WFScratchTicket
+  maxCount: 20
+
+- type: entity
+  id: WFScratchTicket10
+  parent: WFScratchTicket
+  name: Mother Lode scratch tickets, pack of 10
+  suffix: 10
+  components:
+  - type: Sprite
+    layers:
+    - state: stack_10
+      map: [ "enum.WFScratchTicketLayers.Base" ]
+  - type: Stack
+    count: 10
+  - type: StaticPrice
+    vendPrice: 5000
+
+- type: entity
+  id: WFScratchTicket20
+  parent: WFScratchTicket
+  name: Mother Lode scratch tickets, pack of 20
+  suffix: 20
+  components:
+  - type: Sprite
+    layers:
+    - state: stack_20
+      map: [ "enum.WFScratchTicketLayers.Base" ]
+  - type: Stack
+    count: 20
+  - type: StaticPrice
+    vendPrice: 10000
+
+- type: stack
+  id: WFScratchTicketFoundry
+  name: Foundry Gold scratch ticket
+  icon: { sprite: /Textures/_WF/ScratchTickets/ticket_mid.rsi, state: icon }
+  spawn: WFScratchTicketFoundry
+  maxCount: 20
+
+- type: entity
+  id: WFScratchTicketFoundry10
+  parent: WFScratchTicketFoundry
+  name: Foundry Gold scratch tickets, pack of 10
+  suffix: 10
+  components:
+  - type: Sprite
+    layers:
+    - state: stack_10
+      map: [ "enum.WFScratchTicketLayers.Base" ]
+  - type: Stack
+    count: 10
+  - type: StaticPrice
+    vendPrice: 25000
+
+- type: entity
+  id: WFScratchTicketFoundry20
+  parent: WFScratchTicketFoundry
+  name: Foundry Gold scratch tickets, pack of 20
+  suffix: 20
+  components:
+  - type: Sprite
+    layers:
+    - state: stack_20
+      map: [ "enum.WFScratchTicketLayers.Base" ]
+  - type: Stack
+    count: 20
+  - type: StaticPrice
+    vendPrice: 50000
+
+- type: stack
+  id: WFScratchTicketTycoon
+  name: Thaler Tycoon scratch ticket
+  icon: { sprite: /Textures/_WF/ScratchTickets/ticket_high.rsi, state: icon }
+  spawn: WFScratchTicketTycoon
+  maxCount: 20
+
+- type: entity
+  id: WFScratchTicketTycoon10
+  parent: WFScratchTicketTycoon
+  name: Thaler Tycoon scratch tickets, pack of 10
+  suffix: 10
+  components:
+  - type: Sprite
+    layers:
+    - state: stack_10
+      map: [ "enum.WFScratchTicketLayers.Base" ]
+  - type: Stack
+    count: 10
+  - type: StaticPrice
+    vendPrice: 100000
+
+- type: entity
+  id: WFScratchTicketTycoon20
+  parent: WFScratchTicketTycoon
+  name: Thaler Tycoon scratch tickets, pack of 20
+  suffix: 20
+  components:
+  - type: Sprite
+    layers:
+    - state: stack_20
+      map: [ "enum.WFScratchTicketLayers.Base" ]
+  - type: Stack
+    count: 20
+  - type: StaticPrice
+    vendPrice: 200000

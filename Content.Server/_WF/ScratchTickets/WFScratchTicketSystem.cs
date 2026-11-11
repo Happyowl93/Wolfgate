@@ -9,8 +9,11 @@ using Content.Shared._NF.Bank.Components;
 using Content.Shared._WF.ScratchTickets;
 using Content.Shared.Database;
 using Content.Shared.Examine;
+using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
+using Content.Shared.Interaction.Events;
 using Content.Shared.Stacks;
+using Content.Shared.UserInterface;
 using Robust.Server.GameObjects;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Prototypes;
@@ -18,7 +21,7 @@ using Robust.Shared.Random;
 
 namespace Content.Server._WF.ScratchTickets;
 
-/// <summary>Rolls scratch tickets, records the scratch and pays a winner out at an ATM.</summary>
+/// <summary>Rolls scratch tickets, deals them off a pile, records the scratch and pays a winner out at an ATM.</summary>
 public sealed partial class WFScratchTicketSystem : EntitySystem
 {
     private static readonly ProtoId<StackPrototype> CashStack = "Credit";
@@ -27,7 +30,11 @@ public sealed partial class WFScratchTicketSystem : EntitySystem
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private AppearanceSystem _appearance = default!;
     [Dependency] private BankSystem _bank = default!;
+    [Dependency] private IPrototypeManager _proto = default!;
+    [Dependency] private MetaDataSystem _meta = default!;
     [Dependency] private PopupSystem _popup = default!;
+    [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private StackSystem _stack = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
@@ -38,6 +45,8 @@ public sealed partial class WFScratchTicketSystem : EntitySystem
 
         SubscribeLocalEvent<WFScratchTicketComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<WFScratchTicketComponent, ExaminedEvent>(OnExamined);
+        SubscribeLocalEvent<WFScratchTicketComponent, StackCountChangedEvent>(OnCountChanged);
+        SubscribeLocalEvent<WFScratchTicketComponent, UseInHandEvent>(OnUseInHand, before: new[] { typeof(ActivatableUISystem) });
         SubscribeLocalEvent<BankATMComponent, InteractUsingEvent>(OnAtmInteractUsing);
 
         Subs.BuiEvents<WFScratchTicketComponent>(WFScratchTicketUiKey.Key, subs =>
@@ -61,7 +70,51 @@ public sealed partial class WFScratchTicketSystem : EntitySystem
 
     private void OnUiOpened(Entity<WFScratchTicketComponent> ent, ref BoundUIOpenedEvent args)
     {
+        Unstack(ent);
         UpdateUi(ent);
+    }
+
+    private void OnCountChanged(Entity<WFScratchTicketComponent> ent, ref StackCountChangedEvent args)
+    {
+        // A pack that has lost tickets is no longer a pack of ten.
+        if (TryComp<StackComponent>(ent, out var stack)
+            && _proto.TryIndex<StackPrototype>(stack.StackTypeId, out var type)
+            && _proto.TryIndex<EntityPrototype>(type.Spawn, out var single))
+        {
+            _meta.SetEntityName(ent, single.Name);
+        }
+
+        UpdateLook(ent);
+    }
+
+    /// <summary>Using a pile pulls one ticket into a free hand and opens that.</summary>
+    private void OnUseInHand(Entity<WFScratchTicketComponent> ent, ref UseInHandEvent args)
+    {
+        if (args.Handled || !TryComp<StackComponent>(ent, out var stack) || stack.Count <= 1)
+            return;
+
+        args.Handled = true;
+
+        if (!_hands.TryGetEmptyHand(args.User, out _))
+        {
+            _popup.PopupEntity(Loc.GetString("wf-scratch-ticket-pile-no-hand"), ent, args.User);
+            return;
+        }
+
+        if (_stack.Split(ent, 1, Transform(args.User).Coordinates, stack) is not { } pulled)
+            return;
+
+        if (_hands.TryPickupAnyHand(args.User, pulled, checkActionBlocker: false))
+            _interaction.UseInHandInteraction(args.User, pulled, checkUseDelay: false);
+    }
+
+    /// <summary>
+    /// A ticket that has been looked at no longer stacks: putting it back in a pile would swap a known ticket for a
+    /// fresh one.
+    /// </summary>
+    private void Unstack(EntityUid uid)
+    {
+        RemComp<StackComponent>(uid);
     }
 
     private void OnRevealed(Entity<WFScratchTicketComponent> ent, ref WFScratchTicketRevealedMessage args)
@@ -76,6 +129,7 @@ public sealed partial class WFScratchTicketSystem : EntitySystem
             return;
 
         ent.Comp.Scratched = true;
+        Unstack(ent);
         UpdateLook(ent);
         UpdateUi(ent);
 
@@ -133,9 +187,12 @@ public sealed partial class WFScratchTicketSystem : EntitySystem
 
     private void UpdateLook(Entity<WFScratchTicketComponent> ent)
     {
-        var look = !ent.Comp.Scratched ? WFScratchTicketLook.Fresh
-            : ent.Comp.Prize > 0 ? WFScratchTicketLook.Won
-            : WFScratchTicketLook.Lost;
+        var count = _stack.GetCount(ent);
+        var look = ent.Comp.Scratched ? ent.Comp.Prize > 0 ? WFScratchTicketLook.Won : WFScratchTicketLook.Lost
+            : count >= 20 ? WFScratchTicketLook.Stack20
+            : count >= 10 ? WFScratchTicketLook.Stack10
+            : count >= 2 ? WFScratchTicketLook.Stack2
+            : WFScratchTicketLook.Fresh;
         _appearance.SetData(ent, WFScratchTicketVisuals.State, look);
     }
 }

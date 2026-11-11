@@ -27,6 +27,11 @@ public enum WFScratchTicketLook : byte
     Fresh,
     Lost,
     Won,
+
+    // Banded piles of unscratched tickets: 2 or more, 10 or more, and a full 20.
+    Stack2,
+    Stack10,
+    Stack20,
 }
 
 /// <summary>The ticket's hidden cells, sent to whoever holds it open.</summary>

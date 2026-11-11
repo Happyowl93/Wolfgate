@@ -11,10 +11,14 @@ cash for an Ironman or anyone without an account) and takes the ticket.
 | Foundry Gold (`WFScratchTicketFoundry`) | 2,500 | 22% | 2,500 to 500,000 | `WinningSymbol`: find the winning symbol among six |
 | Thaler Tycoon (`WFScratchTicketTycoon`) | 10,000 | 12% | 25,000 to 5,000,000 | `Pairs`: three games of two, both alike |
 
-Tickets turn up in maintenance loot, the dearer ones less often, and Scratches-to-Win sells all three at the card
-table in the Caelestinus Central bar lounge. He is an ordinary trader (`Traders`), so payment is cash or an ID on his table.
+Unscratched tickets stack to 20 and show as a banded pile. Using a pile in hand pulls one ticket into a free hand and
+opens it. Each ticket is rolled when it leaves the pile, and one that has been opened no longer stacks, so a known
+ticket can't be swapped for a fresh one.
 
-Entry points: `WFScratchTicketSystem` (roll at map init, reveal, ATM payout), `WFScratchTicketComponent` (symbols,
+Tickets turn up in maintenance loot, the dearer ones less often, and Scratches-to-Win sells all three, singly and in
+packs of 10 and 20, at the card table in the Caelestinus Central bar lounge. He is an ordinary trader (`Traders`), so payment is cash or an ID on his table.
+
+Entry points: `WFScratchTicketSystem` (roll at map init, pulling from a pile, reveal, ATM payout), `WFScratchTicketComponent` (symbols,
 weights and the rolled cells), `WFScratchTicketRules` (the formats and the roll), `WFScratchTicketWindow` and `WFScratchFoil` (the
 card and its foil).
 
@@ -38,6 +42,7 @@ wins than the tier below and a bigger top prize.
 ### Shared
 
 - [`Content.Shared/_WF/ScratchTickets/WFScratchTicketComponent.cs`](../../../Content.Shared/_WF/ScratchTickets/WFScratchTicketComponent.cs)
+- [`Content.Shared/_WF/ScratchTickets/WFScratchTicketPileSystem.cs`](../../../Content.Shared/_WF/ScratchTickets/WFScratchTicketPileSystem.cs)
 - [`Content.Shared/_WF/ScratchTickets/WFScratchTicketRules.cs`](../../../Content.Shared/_WF/ScratchTickets/WFScratchTicketRules.cs)
 - [`Content.Shared/_WF/ScratchTickets/WFScratchTicketUi.cs`](../../../Content.Shared/_WF/ScratchTickets/WFScratchTicketUi.cs)
 

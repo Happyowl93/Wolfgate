@@ -9,11 +9,13 @@ using Content.Server.Preferences.Managers;
 using Content.Shared._NF.Bank.Components;
 using Content.Shared._WF.ScratchTickets;
 using Content.Shared._WF.Traders;
+using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Humanoid;
 using Content.Shared.Interaction;
 using Content.Shared.Mind;
 using Content.Shared.Power.EntitySystems;
 using Content.Shared.Preferences;
+using Content.Shared.Stacks;
 using Robust.Shared.GameObjects;
 
 namespace Content.IntegrationTests.Tests._WF.ScratchTickets;
@@ -117,10 +119,53 @@ public sealed class WFScratchTicketTest
             var stock = entMan.System<TraderShopSystem>().GetStock((seller, entMan.GetComponent<TraderShopComponent>(seller)));
             Assert.Multiple(() =>
             {
-                Assert.That(stock.Select(entry => entry.Item), Is.EquivalentTo(Tickets));
-                Assert.That(stock.Select(entry => entry.Price), Is.EquivalentTo(Prices));
+                // Each ticket singly and in packs of 10 and 20, at 10 and 20 times the price.
+                var packs = new[] { 1, 10, 20 };
+                Assert.That(stock.Select(entry => entry.Item),
+                    Is.EquivalentTo(Tickets.SelectMany(ticket => packs.Select(pack => pack == 1 ? ticket : ticket + pack))));
+                Assert.That(stock.Select(entry => entry.Price),
+                    Is.EquivalentTo(Prices.SelectMany(price => packs.Select(pack => price * pack))));
                 Assert.That(entMan.GetComponent<HumanoidAppearanceComponent>(seller).Species.Id, Is.EqualTo("Reptilian"));
             });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// Using a pack pulls one ticket into the other hand, and a ticket that has been scratched no longer stacks.
+    /// </summary>
+    [Test]
+    public async Task UsingAPilePullsOneTicket()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var hands = entMan.System<SharedHandsSystem>();
+        var stacks = entMan.System<SharedStackSystem>();
+        var body = EntityUid.Invalid;
+        var pile = EntityUid.Invalid;
+
+        await server.WaitPost(() =>
+        {
+            body = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            pile = entMan.SpawnEntity(TicketProto + "20", map.GridCoords);
+            Assert.That(hands.TryPickupAnyHand(body, pile, checkActionBlocker: false));
+            Assert.That(entMan.System<SharedInteractionSystem>().UseInHandInteraction(body, pile, checkCanUse: false, checkCanInteract: false));
+        });
+        await pair.RunTicksSync(2);
+
+        await server.WaitAssertion(() =>
+        {
+            var pulled = hands.EnumerateHeld(body).Where(held => held != pile).ToList();
+            Assert.That(stacks.GetCount(pile), Is.EqualTo(19));
+            Assert.That(pulled, Has.Count.EqualTo(1), "No ticket came out of the pile.");
+            Assert.That(stacks.GetCount(pulled[0]), Is.EqualTo(1));
+            Assert.That(entMan.GetComponent<WFScratchTicketComponent>(pulled[0]).Cells, Is.Not.Empty);
+
+            entMan.System<WFScratchTicketSystem>().Reveal((pulled[0], entMan.GetComponent<WFScratchTicketComponent>(pulled[0])), body);
+            Assert.That(entMan.HasComponent<StackComponent>(pulled[0]), Is.False, "A scratched ticket can go back in a pile.");
         });
 
         await pair.CleanReturnAsync();

@@ -94,8 +94,14 @@
   id: WFScratchTicketInventory
   startingInventory:
     WFScratchTicket: 50
+    WFScratchTicket10: 20
+    WFScratchTicket20: 20
     WFScratchTicketFoundry: 50
+    WFScratchTicketFoundry10: 20
+    WFScratchTicketFoundry20: 20
     WFScratchTicketTycoon: 50
+    WFScratchTicketTycoon10: 20
+    WFScratchTicketTycoon20: 20
 
 # Carries the seller's stock list and is never placed. A ticket's vendPrice is what it costs.
 - type: entity
