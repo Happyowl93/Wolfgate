@@ -24,6 +24,31 @@
           Stack2: { state: stack_2 }
           Stack10: { state: stack_10 }
           Stack20: { state: stack_20 }
+  # Burns like paper.
+  - type: Flammable
+    fireSpread: true
+    alwaysCombustible: true
+    damage:
+      types:
+        Heat: 1
+  - type: FireVisuals
+    sprite: Effects/fire.rsi
+    normalState: fire
+  - type: Damageable
+    damageModifierSet: Wood
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 15
+      behaviors:
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          Ash:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
   - type: ActivatableUI
     key: enum.WFScratchTicketUiKey.Key
     inHandsOnly: true
