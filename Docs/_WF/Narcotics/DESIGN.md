@@ -258,6 +258,13 @@ redosing only postpones and enlarges them.
   bloodstream and emits a small smoke puff. It works from the hand, unlike pipes, which only work in the mask
   slot (`Content.Server/Nutrition/EntitySystems/SmokingSystem.cs:118-175`).
 - **Smokable solids.** Crack rocks, crystal shards, opium and hash fit pipe and bong bowls.
+- **Second-hand smoke** (`WFSecondhandSmokeSystem`). Lit smokables and bong hits release `Gas.Smoke` (0.3 mol per
+  unit smoked) and move 15% of what was smoked into a reservoir at the source. Every 2 s, anyone breathing without
+  internals within 8 tiles inhales `0.05 u × smoke moles on their tile` per second from the reservoirs, split by each
+  reservoir's size over `1 + distance`. Atmos gives the room behaviour: smoke builds up in a closed room, thins in a
+  big one and is scrubbed or vented. Reservoirs halve every 90 s, and nobody can breathe more than was left, so fire
+  smoke carries nothing. Smoke is harmless below 0.25 u in the lungs (about 1 mol on a tile), so a haze doesn't
+  choke but a fire or a packed hotbox does.
 - **Tabs and pills** use the existing pill system. Injectables use existing syringes.
 
 ## Neuroware (module `Neuroware`)

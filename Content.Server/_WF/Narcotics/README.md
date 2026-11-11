@@ -21,7 +21,8 @@ time from the organs' rates, the reagents that remove them (`AdjustReagent`) and
 (`WFClearIntoxication`).
 
 Substances are grown (coca, the opium poppy, cannabis pressed into hash) or cooked through graded reactions, and the
-solids keep their grade. `WFDeliverySystem` adds powder lines from a baggie and the bong. Products are Class 3
+solids keep their grade. `WFDeliverySystem` adds powder lines from a baggie and the bong; `WFSecondhandSmokeSystem` puts smoke
+gas and a share of everything smoked into the air, and doses whoever breathes it nearby. Products are Class 3
 contraband with grade-scaled prices, a sale tax and a sold alert; the Strangers dealer sells cut stock, the Drydock
 fence sells full grade and takes drugs as payment, and the uplink chemicals tab lists a few. The Bench has three laws
 for it and the Medical guide a player page.
@@ -45,6 +46,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.Blood.cs`](WFIntoxicationSystem.Blood.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.cs`](WFIntoxicationSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.Traits.cs`](WFIntoxicationSystem.Traits.cs)
+- [`Content.Server/_WF/Narcotics/WFSecondhandSmokeSystem.cs`](WFSecondhandSmokeSystem.cs)
 
 ### Shared
 
@@ -73,6 +75,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/DependenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DependenceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/RadioProbeSystem.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/RadioProbeSystem.cs)
+- [`Content.IntegrationTests/Tests/_WF/Narcotics/SecondhandSmokeTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/SecondhandSmokeTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/SoldAlertTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/SoldAlertTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/StatusInBloodTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/StatusInBloodTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/SubstanceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/SubstanceTest.cs)
@@ -134,6 +137,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.Server/EntityEffects/Effects/StatusEffects/GenericStatusEffect.cs`](../../EntityEffects/Effects/StatusEffects/GenericStatusEffect.cs): status time that follows the reagent in the blood
 - [`Content.Server/Medical/HealthAnalyzerSystem.cs`](../../Medical/HealthAnalyzerSystem.cs): drug levels, held effects and dependence
 - [`Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs`](../../../Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs): drug levels, held effects and dependence
+- [`Resources/Prototypes/_ES/Reagents/gases.yml`](../../../Resources/Prototypes/_ES/Reagents/gases.yml): thin haze from smoking is harmless; fire-thick smoke still chokes
 - [`Resources/Prototypes/_Impstation/Reagents/biological.yml`](../../../Resources/Prototypes/_Impstation/Reagents/biological.yml): held while it is in the blood instead of piling up each tick
 - [`Resources/Prototypes/_Mono/Entities/Objects/Misc/solids.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Misc/solids.yml): fits a baggie
 - [`Resources/Prototypes/_Mono/Reagents/letoferol.yml`](../../../Resources/Prototypes/_Mono/Reagents/letoferol.yml): drunkenness follows the units in the blood

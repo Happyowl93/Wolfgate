@@ -53,10 +53,10 @@ public sealed class DeliveryTest
             Assert.That(slots.TryInsert(bong, bongComp.Bowl, rock, null), Is.True, "Crack rocks fit the bowl.");
             Assert.That(delivery.TryLight((bong, bongComp), smoker), Is.True);
             Assert.That(delivery.Hit((bong, bongComp), smoker), Is.True);
-            Assert.That(InBlood(smoker, "WFCrack"), Is.EqualTo(FixedPoint2.New(3)), "A hit draws 3 u.");
+            Assert.That(InBlood(smoker, "WFCrack"), Is.EqualTo(FixedPoint2.New(2.55)), "A hit draws 3 u and leaves 15% in the air.");
 
             Assert.That(delivery.Hit((bong, bongComp), smoker), Is.True);
-            Assert.That(InBlood(smoker, "WFCrack"), Is.EqualTo(FixedPoint2.New(5)), "The last hit takes what's left.");
+            Assert.That(InBlood(smoker, "WFCrack"), Is.EqualTo(FixedPoint2.New(4.25)), "The last hit takes what's left.");
             Assert.That(bongComp.Lit, Is.False, "A spent bowl goes out.");
         });
 

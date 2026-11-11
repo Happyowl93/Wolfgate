@@ -34,6 +34,7 @@ public sealed class WFDeliverySystem : EntitySystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SmokeSystem _smoke = default!;
+    [Dependency] private WFSecondhandSmokeSystem _secondhand = default!;
     [Dependency] private SolutionContainerSystem _solutions = default!;
 
     public override void Initialize()
@@ -206,7 +207,8 @@ public sealed class WFDeliverySystem : EntitySystem
         args.Handled = Hit(ent, args.User);
     }
 
-    /// <summary>Takes one hit from a lit bowl into the user's bloodstream and puffs out a little smoke.</summary>
+    /// <summary>Takes one hit from a lit bowl into the user's bloodstream, less the share left in the air, and puffs out
+    /// a little smoke.</summary>
     public bool Hit(Entity<WFBongComponent> ent, EntityUid user)
     {
         if (!CanHit(ent, user) || ent.Comp.Bowl.Item is not { } bowl)
@@ -233,6 +235,7 @@ public sealed class WFDeliverySystem : EntitySystem
         if (hit.Volume <= FixedPoint2.Zero)
             return false;
 
+        _secondhand.Exhale(ent, hit);
         _reactive.DoEntityReaction(user, hit, ReactionMethod.Ingestion);
         _bloodstream.TryAddToChemicals(user, hit);
         _popup.PopupEntity(Loc.GetString("wf-bong-hit"), user, user);
