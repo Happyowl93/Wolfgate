@@ -1,0 +1,58 @@
+# Mother Lode: three ores alike win. A 500 thaler ticket pays back about 65% on average and wins about one time in
+# three. The weights are out of 1000 with loseWeight.
+- type: entity
+  id: WFScratchTicket
+  parent: BaseItem
+  name: Mother Lode scratch ticket
+  description: A Caelestinus Prospectors' Lottery ticket. Scratch off the foil, find three ores alike and an ATM pays you the vein.
+  components:
+  - type: Sprite
+    sprite: _WF/ScratchTickets/ticket.rsi
+    layers:
+    - state: icon
+      map: [ "enum.WFScratchTicketLayers.Base" ]
+  - type: Item
+    size: Tiny
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.WFScratchTicketVisuals.State:
+        enum.WFScratchTicketLayers.Base:
+          Fresh: { state: icon }
+          Lost: { state: lost }
+          Won: { state: won }
+  - type: ActivatableUI
+    key: enum.WFScratchTicketUiKey.Key
+    inHandsOnly: true
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.WFScratchTicketUiKey.Key:
+        type: WFScratchTicketBoundUserInterface
+  - type: StaticPrice
+    price: 25
+    vendPrice: 500
+  - type: WFScratchTicket
+    loseWeight: 649
+    symbols:
+    - icon: { sprite: Objects/Materials/ore.rsi, state: diamond }
+      prize: 50000
+      weight: 1
+    - icon: { sprite: Objects/Materials/ore.rsi, state: gold }
+      prize: 10000
+      weight: 6
+    - icon: { sprite: Objects/Materials/ore.rsi, state: silver }
+      prize: 2500
+      weight: 24
+    - icon: { sprite: Objects/Materials/ore.rsi, state: plasma }
+      prize: 1000
+      weight: 60
+    - icon: { sprite: Objects/Materials/ore.rsi, state: uranium }
+      prize: 500
+      weight: 120
+    - icon: { sprite: Objects/Materials/ore.rsi, state: iron }
+      prize: 250
+      weight: 140
+    # Spoil: fills cells, pays nothing.
+    - icon: { sprite: Objects/Materials/ore.rsi, state: coal }
+    - icon: { sprite: Objects/Materials/ore.rsi, state: salt }
