@@ -210,6 +210,30 @@ public sealed class WFDependenceSystem : EntitySystem
             _vomit.Vomit(uid, -10f, -10f);
     }
 
+    /// <summary>Whether withdrawal from a family at a stage keeps a status effect going, as in <see cref="Withdraw"/>.</summary>
+    public static bool WithdrawalHolds(WFDrugFamily family, int stage, string key)
+    {
+        return key == "Jitter" && stage >= 2
+            || key == "Drowsiness" && stage >= 3 && family is WFDrugFamily.Opioid or WFDrugFamily.Stimulant;
+    }
+
+    /// <summary>The health analyzer's view of one family's dependence.</summary>
+    public static WFAnalyzerHabit Habit(WFDependenceComponent dep, WFDrugFamily family)
+    {
+        var meter = dep.Meter.GetValueOrDefault(family);
+        var floor = dep.Floor.GetValueOrDefault(family);
+        var stage = dep.Stage.GetValueOrDefault(family);
+        var withdrawalIn = stage == 0 && StageFor(meter) > 0
+            ? Math.Max(0f, WithdrawalDelay - dep.SinceUse.GetValueOrDefault(family))
+            : -1f;
+        var cleanIn = meter <= WithdrawalMeter ? -1f
+            : floor > WithdrawalMeter ? float.PositiveInfinity
+            : (meter - WithdrawalMeter) / DecayPerSecond;
+
+        return new WFAnalyzerHabit(family, meter, floor, dep.Tolerance.GetValueOrDefault(family), stage, withdrawalIn,
+            cleanIn);
+    }
+
     private string Prefix(EntityUid uid)
     {
         return _intoxication.IsNeurowareHost(uid) ? "wf-withdrawal-host-" : "wf-withdrawal-";

@@ -15,7 +15,10 @@ overdose one). Other upstream status effects from reagents (rainbows, muting, dr
 where a reagent's old length must stay (mute toxin, chloral hydrate, fentanyl); the recreational ones clear slower
 so they last as long as they used to.
 `WFDependenceSystem` builds a per-family habit with tolerance and withdrawal; three traits start a character
-dependent. The client draws one overlay per family.
+dependent. The client draws one overlay per family. `WFAnalyzerConditionsSystem` fills the health analyzer's
+Conditions tab: each drug level, held status effect, crash and habit, with the reagents behind it, their clearance
+time from the organs' rates, the reagents that remove them (`AdjustReagent`) and family antidotes
+(`WFClearIntoxication`).
 
 Substances are grown (coca, the opium poppy, cannabis pressed into hash) or cooked through graded reactions, and the
 solids keep their grade. `WFDeliverySystem` adds powder lines from a baggie and the bong. Products are Class 3
@@ -34,7 +37,9 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 ### Server
 
+- [`Content.Server/_WF/Narcotics/HealthAnalyzerSystem.Narcotics.cs`](HealthAnalyzerSystem.Narcotics.cs)
 - [`Content.Server/_WF/Narcotics/WFAlcoholSystem.cs`](WFAlcoholSystem.cs)
+- [`Content.Server/_WF/Narcotics/WFAnalyzerConditionsSystem.cs`](WFAnalyzerConditionsSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFDeliverySystem.cs`](WFDeliverySystem.cs)
 - [`Content.Server/_WF/Narcotics/WFDependenceSystem.cs`](WFDependenceSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.Blood.cs`](WFIntoxicationSystem.Blood.cs)
@@ -45,6 +50,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 - [`Content.Shared/_WF/Narcotics/Delivery/WFDeliveryComponents.cs`](../../../Content.Shared/_WF/Narcotics/Delivery/WFDeliveryComponents.cs)
 - [`Content.Shared/_WF/Narcotics/SharedWFIntoxicationSystem.cs`](../../../Content.Shared/_WF/Narcotics/SharedWFIntoxicationSystem.cs)
+- [`Content.Shared/_WF/Narcotics/WFAnalyzerConditions.cs`](../../../Content.Shared/_WF/Narcotics/WFAnalyzerConditions.cs)
 - [`Content.Shared/_WF/Narcotics/WFClearIntoxication.cs`](../../../Content.Shared/_WF/Narcotics/WFClearIntoxication.cs)
 - [`Content.Shared/_WF/Narcotics/WFDependenceComponent.cs`](../../../Content.Shared/_WF/Narcotics/WFDependenceComponent.cs)
 - [`Content.Shared/_WF/Narcotics/WFDose.cs`](../../../Content.Shared/_WF/Narcotics/WFDose.cs)
@@ -56,10 +62,12 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 - [`Content.Client/_WF/Narcotics/WFIntoxicationOverlay.cs`](../../../Content.Client/_WF/Narcotics/WFIntoxicationOverlay.cs)
 - [`Content.Client/_WF/Narcotics/WFIntoxicationSystem.cs`](../../../Content.Client/_WF/Narcotics/WFIntoxicationSystem.cs)
+- [`Content.Client/_WF/Narcotics/WolfmedDiagnosticPanel.Conditions.cs`](../../../Content.Client/_WF/Narcotics/WolfmedDiagnosticPanel.Conditions.cs)
 
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/AlcoholTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/AlcoholTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Narcotics/AnalyzerConditionsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/AnalyzerConditionsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/DeliveryTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DeliveryTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/DependenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DependenceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs)
@@ -87,6 +95,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 ### Localization
 
+- [`Resources/Locale/en-US/_WF/Narcotics/analyzer.ftl`](../../../Resources/Locale/en-US/_WF/Narcotics/analyzer.ftl)
 - [`Resources/Locale/en-US/_WF/Narcotics/delivery.ftl`](../../../Resources/Locale/en-US/_WF/Narcotics/delivery.ftl)
 - [`Resources/Locale/en-US/_WF/Narcotics/dependence.ftl`](../../../Resources/Locale/en-US/_WF/Narcotics/dependence.ftl)
 - [`Resources/Locale/en-US/_WF/Narcotics/guidebook.ftl`](../../../Resources/Locale/en-US/_WF/Narcotics/guidebook.ftl)
@@ -112,6 +121,8 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.IntegrationTests/Pair/TestPair.cs`](../../../Content.IntegrationTests/Pair/TestPair.cs): records radio sends for the sold-alert test
 - [`Content.Server/EntityEffects/Effects/Drunk.cs`](../../EntityEffects/Effects/Drunk.cs): drunkenness that follows the reagent in the blood
 - [`Content.Server/EntityEffects/Effects/StatusEffects/GenericStatusEffect.cs`](../../EntityEffects/Effects/StatusEffects/GenericStatusEffect.cs): status time that follows the reagent in the blood
+- [`Content.Server/Medical/HealthAnalyzerSystem.cs`](../../Medical/HealthAnalyzerSystem.cs): drug levels, held effects and dependence
+- [`Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs`](../../../Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs): drug levels, held effects and dependence
 - [`Resources/Prototypes/_Impstation/Reagents/biological.yml`](../../../Resources/Prototypes/_Impstation/Reagents/biological.yml): held while it is in the blood instead of piling up each tick
 - [`Resources/Prototypes/_Mono/Reagents/letoferol.yml`](../../../Resources/Prototypes/_Mono/Reagents/letoferol.yml): drunkenness follows the units in the blood
 - [`Resources/Prototypes/_Mono/Reagents/medicine.yml`](../../../Resources/Prototypes/_Mono/Reagents/medicine.yml)

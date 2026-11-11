@@ -259,7 +259,7 @@
     faults: [ wf-neuroware-null-loop-fault-1, wf-neuroware-null-loop-fault-2 ]
 
 # Crystal: Desoxyephedrine keeps its own effects; the profile adds the overlay, dependence and a long crash. Meth
-# clears at 0.01 a group over three groups, so a 5 u shard lasts about three minutes.
+# clears at 0.01 (the heart removes one group's amount), so a 5 u shard lasts about eight minutes.
 - type: wfDrugProfile
   id: WFCrystal
   family: Stimulant
