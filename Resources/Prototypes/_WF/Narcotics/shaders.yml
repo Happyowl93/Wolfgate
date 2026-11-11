@@ -1,0 +1,4 @@
+- type: shader
+  id: WFIntoxication
+  kind: source
+  path: "/Textures/_WF/Narcotics/Shaders/intoxication.swsl"

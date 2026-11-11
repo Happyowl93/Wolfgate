@@ -1,0 +1,31 @@
+# The Drydock fence's stock: full-grade product and pristine sticks, at twice their appraisal.
+
+- type: vendingMachineInventory
+  id: WFDrydockFenceInventory
+  startingInventory:
+    WFBaggieCocaine: 4
+    WFBaggieHeroin: 4
+    WFCrackRock: 6
+    WFCrystalShard: 6
+    WFBaggie: 10
+    WFBongFilled: 2
+    WFNeurowareStick: 6
+    WFNeurowareStickWhiteline: 2
+    WFNeurowareStickNullLoop: 2
+    WFNeurowareStickBurst: 2
+    WFNeurowareStickRedline: 1
+    WFNeurowareStickDamper: 1
+    WFNeurowareStickChoir: 1
+    WFNeurowareStickHalo: 1
+    WFNeurowareStickIdle: 2
+
+- type: entity
+  id: WFDrydockFenceStock
+  parent: VendingMachineAmmo
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: VendingMachine
+    pack: WFDrydockFenceInventory
+    requiresCash: true
+  - type: MarketModifier
+    mod: 2

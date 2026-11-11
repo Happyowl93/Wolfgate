@@ -81,6 +81,7 @@ namespace Content.Server.Chemistry.EntitySystems
             var state = new ChemMasterBoundUserInterfaceState(
                 chemMaster.Mode, chemMaster.SortingType, BuildInputContainerInfo(inputContainer), BuildOutputContainerInfo(outputContainer),
                 bufferReagents, bufferCurrentVolume, chemMaster.PillType, chemMaster.PillDosageLimit, updateLabel, chemMaster.DrawSource);
+            state.WFBufferPurity = bufferSolution.Purity; // WOLFGATE(Purity)
 
             _userInterfaceSystem.SetUiState(owner, ChemMasterUiKey.Key, state);
         }
@@ -415,6 +416,7 @@ namespace Content.Server.Chemistry.EntitySystems
         {
             return new ContainerInfo(name, solution.Volume, solution.MaxVolume)
             {
+                Purity = solution.Purity, // WOLFGATE(Purity)
                 Reagents = solution.Contents
             };
         }

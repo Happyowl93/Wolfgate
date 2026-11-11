@@ -1,0 +1,162 @@
+// One look per drug family in three phases, then the crash's grey on top. Light is a steady grade, heavy adds the
+// family's motion and distortion, and the overdose pushes the family to its own extreme. A kick punches the screen
+// when a phase steps up. Time is frozen under reduced motion, and the kick is only a faint tint.
+// Families: 0 stimulant, 1 opioid, 2 psychedelic, 3 empathogen, 4 cannabinoid, 5 combat, anything else none.
+
+uniform sampler2D SCREEN_TEXTURE;
+uniform highp float family;
+uniform highp float intensity;
+uniform highp float heavy;
+uniform highp float overdose;
+uniform highp float kick;
+uniform highp float crash;
+uniform highp float motion;
+uniform highp float pulseRate;
+
+highp vec4 sampleScreen(highp vec2 uv) {
+    return zTextureSpec(SCREEN_TEXTURE, clamp(uv, vec2(0.001), vec2(0.999)));
+}
+
+highp vec3 wfSaturate(highp vec3 rgb, highp float amount) {
+    highp float grey = zGrayscale(rgb);
+    return mix(vec3(grey), rgb, amount);
+}
+
+highp float wfHash(highp vec2 p) {
+    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+// A heartbeat: a sharp double thump each period, or a steady half under reduced motion.
+highp float wfBeat(highp float t, highp float rate) {
+    if (motion < 0.5)
+        return 0.5;
+    highp float phase = fract(t * rate * 0.5);
+    return max(pow(max(sin(phase * 6.28318), 0.0), 8.0), 0.6 * pow(max(sin(phase * 6.28318 - 0.9), 0.0), 8.0));
+}
+
+highp float wfEdge(highp vec2 uv) {
+    return min(min(uv.x, uv.y), min(1.0 - uv.x, 1.0 - uv.y));
+}
+
+void fragment() {
+    highp vec2 uv = FRAGCOORD.xy * SCREEN_PIXEL_SIZE.xy;
+    highp vec2 centre = vec2(0.5, 0.5);
+    highp float t = TIME * motion;
+    highp float i = clamp(intensity, 0.0, 1.0);
+    highp float h = clamp(heavy, 0.0, 1.0);
+    highp float o = clamp(overdose, 0.0, 1.0);
+    highp float k = clamp(kick, 0.0, 1.0);
+    int f = int(family + 0.5);
+
+    // The kick: a punch-in zoom that settles as it fades.
+    uv = centre + (uv - centre) * (1.0 - 0.04 * k * k * motion);
+    highp vec2 offset = uv - centre;
+    highp float dist = length(offset);
+    highp vec4 col = sampleScreen(uv);
+    highp vec3 flash = vec3(1.0);
+
+    if (f == 0) {
+        // Stimulant. Light: hard contrast and colour. Heavy: a red heartbeat at the edges and a split image.
+        // Overdose: the heart races, the whole screen flushes red with it and shakes.
+        flash = vec3(1.0, 0.35, 0.3);
+        highp float beat = wfBeat(t, pulseRate * (1.0 + o));
+        highp vec2 shake = vec2(sin(t * 47.0), cos(t * 39.0)) * 0.003 * o * motion;
+        highp vec2 split = vec2(0.002 * h + 0.004 * o, 0.0);
+        col.r = sampleScreen(uv + shake + split).r;
+        col.g = sampleScreen(uv + shake).g;
+        col.b = sampleScreen(uv + shake - split).b;
+        col.rgb = wfSaturate(col.rgb, 1.0 + 0.6 * i);
+        col.rgb = (col.rgb - 0.5) * (1.0 + 0.3 * i) + 0.5;
+        highp float rim = 1.0 - smoothstep(0.0, 0.08 + 0.12 * o, wfEdge(uv));
+        col.rgb = mix(col.rgb, vec3(1.0, 0.2, 0.15), rim * beat * (0.6 * h + 0.3 * o) * i);
+        col.rgb = mix(col.rgb, col.rgb * vec3(1.35, 0.6, 0.55), beat * 0.45 * o);
+        col.rgb *= 1.0 - smoothstep(0.3, 0.75, dist) * 0.5 * o;
+    } else if (f == 1) {
+        // Opioid. Light: warm, with dark edges. Heavy: soft focus and a slow breathing zoom.
+        // Overdose: the dark closes in, the colour drains cold, and the eyes keep closing.
+        flash = vec3(1.0, 0.85, 0.6);
+        highp float zoom = 1.0 - h * i * 0.015 * (0.5 + 0.5 * sin(t * 0.8));
+        highp vec2 zoomed = centre + offset * zoom;
+        highp vec4 soft = vec4(0.0);
+        for (int s = 0; s < 6; s++) {
+            soft += sampleScreen(zoomed - offset * float(s) * (0.004 + 0.004 * o) * i);
+        }
+        soft /= 6.0;
+        col = mix(col, soft, h);
+        col.rgb = mix(col.rgb, col.rgb * vec3(1.12, 0.98, 0.82), i * (1.0 - o));
+        col.rgb = mix(col.rgb, wfSaturate(col.rgb, 0.2) * vec3(0.75, 0.85, 1.05), o * 0.8);
+        highp float closing = smoothstep(0.55 - 0.3 * o, 0.8 - 0.25 * o, dist);
+        col.rgb *= 1.0 - closing * (0.5 * i + 0.45 * o);
+        highp float nod = motion > 0.5 ? smoothstep(0.55, 1.0, sin(t * 0.45)) : 0.35;
+        col.rgb *= 1.0 - nod * 0.85 * o;
+    } else if (f == 2) {
+        // Psychedelic. Light: colour pooling at the edges. Heavy: drifting colour, wobble and trails.
+        // Overdose: the image tears into bands, splits into colours and mirrors on itself.
+        flash = vec3(0.8, 0.5, 1.0);
+        highp vec2 wobble = vec2(sin(uv.y * 12.0 + t * 1.3), cos(uv.x * 10.0 + t * 1.1)) * 0.004 * i * h;
+        highp float band = floor(uv.y * 28.0);
+        highp float tear = (wfHash(vec2(band, floor(t * 6.0))) - 0.5) * 0.06 * o;
+        tear *= step(0.55, wfHash(vec2(band * 1.7, floor(t * 3.0) + 2.0)));
+        highp vec2 torn = uv + wobble + vec2(tear, 0.0);
+        highp vec2 mirrored = vec2(0.5 - abs(torn.x - 0.5), torn.y);
+        torn = mix(torn, mirrored, 0.35 * o);
+        highp float split = 0.006 * o;
+        col.r = sampleScreen(torn + vec2(split, 0.0)).r;
+        col.g = sampleScreen(torn).g;
+        col.b = sampleScreen(torn - vec2(split, split)).b;
+        highp vec4 trail = sampleScreen(torn - wobble * 3.0);
+        col.rgb = mix(col.rgb, trail.rgb, 0.35 * i * h);
+        highp float hue = t * (0.15 + 0.35 * o) + dist * (2.0 + 4.0 * o);
+        highp vec3 tint = 0.5 + 0.5 * cos(6.28318 * (hue + vec3(0.0, 0.33, 0.67)));
+        highp float pool = mix(smoothstep(0.2, 0.7, dist), 1.0, h);
+        col.rgb = mix(col.rgb, col.rgb * tint * 1.6, (0.25 + 0.15 * h + 0.25 * o) * i * pool);
+    } else if (f == 3) {
+        // Empathogen. Light: a rosy warmth. Heavy: a soft bloom round anything bright.
+        // Overdose: overheating; the bloom whites out, the colour runs orange and the air shimmers.
+        flash = vec3(1.0, 0.75, 0.9);
+        highp vec2 shimmer = vec2(sin(uv.y * 40.0 - t * 4.0), 0.0) * 0.003 * o;
+        col = sampleScreen(uv + shimmer);
+        highp vec3 glow = vec3(0.0);
+        for (int s = 0; s < 8; s++) {
+            highp float angle = float(s) * 0.785398;
+            glow += sampleScreen(uv + shimmer + vec2(cos(angle), sin(angle)) * (0.008 + 0.01 * o)).rgb;
+        }
+        glow = max(glow / 8.0 - (0.35 - 0.2 * o), 0.0) * 2.0;
+        col.rgb += glow * mix(vec3(1.0, 0.8, 0.95), vec3(1.0, 0.6, 0.3), o) * i * (0.3 + 0.7 * h);
+        col.rgb = mix(col.rgb, col.rgb * vec3(1.06, 0.97, 1.05), i);
+        col.rgb = mix(col.rgb, col.rgb * vec3(1.3, 0.85, 0.6) + vec3(0.08, 0.02, 0.0), o * 0.7);
+    } else if (f == 4) {
+        // Cannabinoid. Light: a mild warm haze. Heavy: a slow sway and a softer edge.
+        // Overdose: greening out; a sick green cast, double vision and a heavy sway.
+        flash = vec3(0.85, 1.0, 0.7);
+        highp vec2 sway = vec2(sin(t * 0.7), cos(t * 0.5)) * (0.003 * h + 0.008 * o);
+        col = sampleScreen(uv + sway);
+        highp vec2 ghost = vec2(0.012 + 0.006 * sin(t * 0.9), 0.004) * o;
+        col.rgb = mix(col.rgb, sampleScreen(uv + sway + ghost).rgb, 0.45 * o);
+        col.rgb = wfSaturate(col.rgb, 1.0 - 0.25 * i - 0.3 * o);
+        col.rgb = mix(col.rgb, col.rgb * vec3(1.05, 1.02, 0.9) + 0.03, i);
+        col.rgb = mix(col.rgb, col.rgb * vec3(0.8, 1.1, 0.75), o * 0.7);
+        col.rgb *= 1.0 - smoothstep(0.35 - 0.1 * h, 0.8, dist) * (0.35 * i + 0.25 * o);
+    } else if (f == 5) {
+        // Combat. Light: the edges drain to red. Heavy: tunnel vision that throbs with the pulse.
+        // Overdose: the tunnel shrinks to a point, black and static outside it.
+        flash = vec3(1.0, 0.25, 0.2);
+        highp float beat = wfBeat(t, pulseRate);
+        highp float radius = mix(0.18, 0.08, o) + 0.03 * beat * h;
+        highp float outer = smoothstep(radius, radius + 0.32 - 0.12 * o, dist) * i;
+        highp float grey = zGrayscale(col.rgb);
+        col.rgb = mix(col.rgb, vec3(grey) * vec3(1.0, 0.35, 0.3), outer * (0.5 + 0.3 * h));
+        col.rgb *= 1.0 - smoothstep(radius + 0.17, radius + 0.52 - 0.15 * o, dist) * (0.3 + 0.3 * h + 0.35 * o) * i;
+        highp float grain = wfHash(uv * 640.0 + vec2(floor(t * 24.0)));
+        col.rgb = mix(col.rgb, vec3(grain * 0.6), outer * 0.35 * o);
+    }
+
+    // The kick's flash, in the family's colour.
+    col.rgb = mix(col.rgb, col.rgb * flash * 1.5, k * mix(0.15, 0.5, motion));
+
+    // Crash: grey and a little darker.
+    highp float c = clamp(crash, 0.0, 1.0);
+    col.rgb = mix(col.rgb, vec3(zGrayscale(col.rgb)), c * 0.8) * (1.0 - 0.25 * c);
+
+    COLOR = vec4(col.rgb, 1.0);
+}

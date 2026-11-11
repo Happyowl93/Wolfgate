@@ -1,0 +1,79 @@
+# Ways in: powder lines laid from a baggie, and a bong that works from the hand. Placeholder sprites.
+
+- type: entity
+  id: WFPowderLine
+  components:
+  - type: Transform
+    noRot: true
+  - type: Sprite
+    drawdepth: SmallObjects
+    sprite: Objects/Misc/reagent_fillings.rsi
+    state: powderpile
+    color: "#f4f4f0"
+    scale: 0.7, 0.35
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Static
+    canCollide: false
+  - type: SolutionContainerManager
+    solutions:
+      line:
+        maxVol: 10
+  - type: ExaminableSolution
+    solution: line
+  - type: WFPowderLine
+  # Swept up or blown away like any spill.
+  - type: TimedDespawn
+    lifetime: 900
+
+- type: entity
+  parent: BaseItem
+  id: WFBong
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/beaker_large.rsi
+    state: beakerlarge
+    color: "#9fe0c0"
+  - type: Item
+    size: Small
+    sprite: Objects/Specific/Chemistry/beaker_large.rsi
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 30
+  - type: RefillableSolution
+    solution: water
+  - type: DrainableSolution
+    solution: water
+  - type: ExaminableSolution
+    solution: water
+  - type: ContainerContainer
+    containers:
+      bowl: !type:ContainerSlot
+  - type: ItemSlots
+  - type: WFBong
+    bowl:
+      name: wf-bong-bowl
+      whitelist:
+        tags:
+        - Smokable
+      insertSound:
+        path: /Audio/Weapons/Guns/Empty/empty.ogg
+      ejectSound:
+        path: /Audio/Weapons/Guns/Empty/empty.ogg
+  - type: StaticPrice
+    price: 40
+
+- type: entity
+  parent: WFBong
+  id: WFBongFilled
+  suffix: Water
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 30
+        reagents:
+        - ReagentId: Water
+          Quantity: 20

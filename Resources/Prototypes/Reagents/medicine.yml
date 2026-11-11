@@ -1696,6 +1696,14 @@
   metabolisms:
     Medicine:
       effects:
+      # WOLFGATE(Narcotics) START: Haloperidol brings down stimulant and psychedelic highs
+      - !type:WFClearIntoxication
+        family: Stimulant
+        amount: 2
+      - !type:WFClearIntoxication
+        family: Psychedelic
+        amount: 2
+      # WOLFGATE END
       - !type:Emote
         emote: Yawn
         showInChat: true

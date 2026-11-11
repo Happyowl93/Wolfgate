@@ -1,0 +1,30 @@
+# Start the round already dependent on a drug family. Drawbacks, so they refund points.
+
+- type: trait
+  id: WFDependentStimulant
+  name: trait-wf-dependent-stimulant-name
+  description: trait-wf-dependent-stimulant-desc
+  category: Physical
+  cost: -3
+  components:
+  - type: WFDependentStimulant
+
+- type: trait
+  id: WFDependentOpioid
+  name: trait-wf-dependent-opioid-name
+  description: trait-wf-dependent-opioid-desc
+  category: Physical
+  cost: -3
+  components:
+  - type: WFDependentOpioid
+
+- type: trait
+  id: WFDependentNicotine
+  name: trait-wf-dependent-nicotine-name
+  description: trait-wf-dependent-nicotine-desc
+  category: Physical
+  cost: -1
+  biotypeBlacklist:
+  - Synthetic
+  components:
+  - type: WFDependentNicotine

@@ -1,0 +1,197 @@
+# Solid drugs. Each keeps its solution's grade, carries Class 3 contraband, and can be ground back down.
+
+- type: entity
+  abstract: true
+  parent: BaseItem
+  id: WFBaseDrugSolid
+  components:
+  - type: Item
+    size: Tiny
+  - type: Food
+  - type: FlavorProfile
+    flavors:
+    - bitter
+  - type: Extractable
+    grindableSolutionName: food
+  - type: Contraband
+    severity: Class3Chem
+    turnInValues:
+      FederationMilitaryCredit: 5
+  - type: ExaminableSolution
+    solution: food
+  # Worth its contents at their grade; selling it moves money to the black market and tips off security.
+  - type: ItemTax
+    taxAccounts:
+      Medical: -0.05
+      nfsd: -0.1
+      BlackMarket: 0.25
+  - type: SoldAlert
+    groupId: WFNarcotics
+    maxPerSale: 100
+    channels:
+    - Security
+  # Fits pipe and bong bowls.
+  - type: Tag
+    tags:
+    - Smokable
+    - WFNarcotic
+
+- type: entity
+  parent: WFBaseDrugSolid
+  id: WFCrackRock
+  components:
+  - type: Sprite
+    sprite: _Mono/Objects/Misc/fentanyl.rsi
+    state: icon
+    color: "#efe3c4"
+    scale: 0.6, 0.6
+  - type: SolutionContainerManager
+    solutions:
+      food:
+        maxVol: 5
+        reagents:
+        - ReagentId: WFCrack
+          Quantity: 5
+
+- type: entity
+  parent: WFBaseDrugSolid
+  id: WFCrystalShard
+  components:
+  - type: Sprite
+    sprite: _Mono/Objects/Misc/fentanyl.rsi
+    state: icon
+    color: "#bfe8ff"
+    scale: 0.7, 0.7
+  - type: SolutionContainerManager
+    solutions:
+      food:
+        maxVol: 5
+        reagents:
+        - ReagentId: Desoxyephedrine
+          Quantity: 5
+
+# Filled from a scored poppy pod, so it starts empty.
+- type: entity
+  parent: WFBaseDrugSolid
+  id: WFOpiumResin
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/reagent_fillings.rsi
+    state: powderpile
+    color: "#4a2a14"
+  - type: SolutionContainerManager
+    solutions:
+      food:
+        maxVol: 15
+
+- type: entity
+  parent: WFBaseDrugSolid
+  id: WFHashBrick
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Hydroponics/tobacco.rsi
+    state: dried
+    color: "#6b4a26"
+  - type: SolutionContainerManager
+    solutions:
+      food:
+        maxVol: 30
+        reagents:
+        - ReagentId: THC
+          Quantity: 30
+  - type: Construction
+    graph: WFHash
+    node: brick
+  # THC carries no price of its own.
+  - type: StaticPrice
+    price: 120
+
+# Powder baggies. Pour into an empty one from any beaker; filled ones are dealer stock.
+- type: entity
+  parent: BaseItem
+  id: WFBaggie
+  components:
+  - type: Item
+    size: Tiny
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/chem_bag.rsi
+    state: icon
+    color: "#f0f0f0"
+    scale: 0.55, 0.55
+  - type: SolutionContainerManager
+    solutions:
+      baggie:
+        maxVol: 10
+  - type: RefillableSolution
+    solution: baggie
+  - type: DrainableSolution
+    solution: baggie
+  - type: ExaminableSolution
+    solution: baggie
+  - type: SolutionTransfer
+    transferAmount: 5
+    minTransferAmount: 1
+    maxTransferAmount: 10
+  - type: Extractable
+    grindableSolutionName: baggie
+  - type: WFBaggie
+
+- type: entity
+  parent: WFBaggie
+  id: WFBaggieCocaine
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      baggie:
+        maxVol: 10
+        reagents:
+        - ReagentId: WFCocaine
+          Quantity: 10
+  - type: Contraband
+    severity: Class3Chem
+    turnInValues:
+      FederationMilitaryCredit: 5
+  - type: ItemTax
+    taxAccounts:
+      Medical: -0.05
+      nfsd: -0.1
+      BlackMarket: 0.25
+  - type: SoldAlert
+    groupId: WFNarcotics
+    maxPerSale: 100
+    channels:
+    - Security
+  - type: Tag
+    tags:
+    - WFNarcotic
+
+- type: entity
+  parent: WFBaggie
+  id: WFBaggieHeroin
+  components:
+  - type: Sprite
+    color: "#e6dccb"
+  - type: SolutionContainerManager
+    solutions:
+      baggie:
+        maxVol: 10
+        reagents:
+        - ReagentId: WFHeroin
+          Quantity: 10
+  - type: Contraband
+    severity: Class3Chem
+    turnInValues:
+      FederationMilitaryCredit: 5
+  - type: ItemTax
+    taxAccounts:
+      Medical: -0.05
+      nfsd: -0.1
+      BlackMarket: 0.25
+  - type: SoldAlert
+    groupId: WFNarcotics
+    maxPerSale: 100
+    channels:
+    - Security
+  - type: Tag
+    tags:
+    - WFNarcotic

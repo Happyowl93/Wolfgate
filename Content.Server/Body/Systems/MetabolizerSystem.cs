@@ -28,6 +28,7 @@ namespace Content.Server.Body.Systems
         [Dependency] private ISharedAdminLogManager _adminLogger = default!;
         [Dependency] private MobStateSystem _mobStateSystem = default!;
         [Dependency] private SharedSolutionContainerSystem _solutionContainerSystem = default!;
+        [Dependency] private Content.Server._WF.Purity.WFPuritySystem _wfPurity = default!; // WOLFGATE(Purity): impurity damage
 
         private EntityQuery<OrganComponent> _organQuery;
         private EntityQuery<SolutionContainerManagerComponent> _solutionQuery;
@@ -193,6 +194,7 @@ namespace Content.Server.Body.Systems
                     mostToRemove = FixedPoint2.Clamp(rate, 0, quantity);
 
                     float scale = (float) mostToRemove / (float) rate;
+                    scale *= solution.GetPurity(reagent.Prototype); // WOLFGATE(Purity): a graded reagent works at its grade
 
                     // if it's possible for them to be dead, and they are,
                     // then we shouldn't process any effects, but should probably
@@ -236,6 +238,7 @@ namespace Content.Server.Body.Systems
                 // remove a certain amount of reagent
                 if (mostToRemove > FixedPoint2.Zero)
                 {
+                    _wfPurity.ApplyImpurity(ent.Comp2?.Body ?? solutionEntityUid.Value, mostToRemove, solution.GetPurity(reagent.Prototype)); // WOLFGATE(Purity): the impure fraction is mildly toxic
                     solution.RemoveReagent(reagent, mostToRemove);
                     // Frontier: do not count cryogenics chems against the reagent limit (to buff cryo meds)
                     if (!proto.Metabolisms.ContainsKey("Cryogenic"))

@@ -1,0 +1,112 @@
+# Drug crops. Seeds come from the exotic seeds crate and dealers, never the public seed vendor. Placeholder sprites
+# reuse tinted upstream plants until final art.
+
+- type: seed
+  id: WFCoca
+  name: wf-seeds-coca-name
+  noun: seeds-noun-seeds
+  displayName: wf-seeds-coca-display-name
+  plantRsi: Objects/Specific/Hydroponics/tobacco.rsi
+  packetPrototype: WFCocaSeeds
+  productPrototypes:
+  - WFLeavesCoca
+  harvestRepeat: Repeat
+  lifespan: 60
+  maturation: 9
+  production: 10
+  yield: 2
+  potency: 20
+  growthStages: 3
+  waterConsumption: 0.5
+  idealLight: 9
+  idealHeat: 300
+  chemicals:
+    WFCocaAlkaloid:
+      Min: 1
+      Max: 10
+      PotencyDivisor: 10
+
+- type: entity
+  parent: SeedBase
+  id: WFCocaSeeds
+  components:
+  - type: Seed
+    seedId: WFCoca
+  - type: Sprite
+    sprite: Objects/Specific/Hydroponics/tobacco.rsi
+    color: "#b8e08a"
+
+- type: entity
+  parent: ProduceBase
+  id: WFLeavesCoca
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Hydroponics/tobacco.rsi
+    color: "#9ccf6a"
+  - type: Produce
+    seedId: WFCoca
+  - type: SolutionContainerManager
+    solutions:
+      food:
+        reagents:
+        - ReagentId: WFCocaAlkaloid
+          Quantity: 10
+  - type: WFProducePurity
+
+- type: seed
+  id: WFOpiumPoppy
+  name: wf-seeds-opium-poppy-name
+  noun: seeds-noun-seeds
+  displayName: wf-seeds-opium-poppy-display-name
+  plantRsi: Objects/Specific/Hydroponics/poppy.rsi
+  packetPrototype: WFOpiumPoppySeeds
+  productPrototypes:
+  - WFOpiumPoppyPod
+  lifespan: 30
+  maturation: 12
+  production: 4
+  yield: 2
+  potency: 15
+  growthStages: 3
+  waterConsumption: 0.6
+  chemicals:
+    WFOpium:
+      Min: 2
+      Max: 10
+      PotencyDivisor: 10
+
+- type: entity
+  parent: SeedBase
+  id: WFOpiumPoppySeeds
+  components:
+  - type: Seed
+    seedId: WFOpiumPoppy
+  - type: Sprite
+    sprite: Objects/Specific/Hydroponics/poppy.rsi
+    color: "#d8a0ff"
+
+# Scoring the ripe pod with a knife gives its resin, at the pod's grade.
+- type: entity
+  parent: FoodProduceBase
+  id: WFOpiumPoppyPod
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Hydroponics/poppy.rsi
+    color: "#c890ff"
+  - type: FlavorProfile
+    flavors:
+    - bitter
+  - type: SolutionContainerManager
+    solutions:
+      food:
+        maxVol: 15
+        reagents:
+        - ReagentId: WFOpium
+          Quantity: 6
+  - type: Produce
+    seedId: WFOpiumPoppy
+  - type: SliceableFood
+    slice: WFOpiumResin
+    count: 1
+    sliceTime: 2
+  - type: WFProducePurity

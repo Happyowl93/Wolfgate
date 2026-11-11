@@ -1,3 +1,4 @@
+using Content.Shared._WF.Purity;
 using System.Linq;
 using System.Numerics;
 using Content.Client._Onyx.Medical.HealthAnalyzer;
@@ -277,6 +278,7 @@ public sealed partial class WolfmedDiagnosticPanel : BoxContainer
                     var name = _prototypes.TryIndex(reagent.Prototype, out ReagentPrototype? prototype)
                         ? prototype.LocalizedName
                         : Loc.GetString("chem-master-window-unknown-reagent-text");
+                    name = WFPurityText.Name(name, reagent.Purity);
                     group.AddChild(CreateDiagnosticItemLabel(
                         $" - {Loc.GetString("health-analyzer-window-solution-reagent", ("reagent", name), ("quantity", reagent.Quantity))}"));
                 }

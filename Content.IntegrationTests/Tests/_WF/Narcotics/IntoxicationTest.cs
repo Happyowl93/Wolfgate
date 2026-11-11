@@ -1,0 +1,274 @@
+using System.Collections.Generic;
+using Content.Server._WF.Narcotics;
+using Content.Server.Body.Components;
+using Content.Shared._WF.Narcotics;
+using Content.Shared.Body.Systems;
+using Content.Shared.Chemistry.Components;
+using Content.Shared.Chemistry.Reagent;
+using Content.Shared.Damage;
+using Content.Shared.Traits.Assorted;
+using Content.Shared.EntityEffects;
+using Content.Shared.FixedPoint;
+using Robust.Shared.GameObjects;
+using Robust.Shared.Prototypes;
+
+namespace Content.IntegrationTests.Tests._WF.Narcotics;
+
+/// <summary>
+/// Levels pick tiers and decay, a long enough high ends in a crash, and only organic brains take chemical doses.
+/// </summary>
+[TestFixture]
+[TestOf(typeof(WFIntoxicationSystem))]
+public sealed class IntoxicationTest
+{
+    [TestPrototypes]
+    private const string Prototypes = @"
+- type: wfDrugProfile
+  id: WFIntoxTestProfile
+  family: Stimulant
+  decay: 1
+  tiers:
+  - min: 2
+    speed: 1.2
+  - min: 6
+    speed: 0.5
+    effects:
+    - !type:HealthChange
+      damage:
+        types:
+          Poison: 1
+  crash:
+    after: 2
+    duration: 3
+    speed: 0.8
+
+- type: wfDrugProfile
+  id: WFIntoxTestDamper
+  family: Combat
+  decay: 1
+  tiers:
+  - min: 2
+    traits: [ Damper, HideDamage ]
+
+- type: wfDrugProfile
+  id: WFIntoxTestHalfLife
+  family: Opioid
+  decay: 0
+  halfLife: 10
+  tiers:
+  - min: 2
+  - min: 5
+  - min: 10
+
+- type: reagent
+  id: WFIntoxTestReagent
+  name: reagent-name-nothing
+  desc: reagent-desc-nothing
+  physicalDesc: reagent-physical-desc-nothing
+";
+
+    private const string Profile = "WFIntoxTestProfile";
+
+    [Test]
+    public async Task TierDecayCrashTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+
+        await server.WaitAssertion(() =>
+        {
+            var sys = server.System<WFIntoxicationSystem>();
+            var mob = entMan.SpawnEntity("MobHuman", map.GridCoords);
+
+            sys.AddLevel(mob, Profile, 4f);
+            var comp = entMan.GetComponent<WFIntoxicationComponent>(mob);
+            Assert.That(sys.GetTier(comp, Profile), Is.EqualTo(0));
+
+            sys.Tick(1f);
+            Assert.Multiple(() =>
+            {
+                Assert.That(comp.Levels[Profile], Is.EqualTo(3f).Within(0.001f), "Decay should take 1 a second.");
+                Assert.That(sys.GetSpeed(comp), Is.EqualTo(1.2f).Within(0.001f));
+            });
+
+            sys.Tick(1f);
+            sys.Tick(1f);
+            Assert.Multiple(() =>
+            {
+                Assert.That(sys.GetTier(comp, Profile), Is.EqualTo(-1));
+                Assert.That(comp.Crashes.ContainsKey(Profile), Is.True, "Two seconds high should end in a crash.");
+                Assert.That(sys.GetSpeed(comp), Is.EqualTo(0.8f).Within(0.001f));
+            });
+
+            sys.AddLevel(mob, Profile, 8f);
+            Assert.That(sys.GetTier(comp, Profile), Is.EqualTo(1), "The top tier is the overdose.");
+            Assert.That(sys.GetSpeed(comp), Is.EqualTo(0.5f).Within(0.001f), "A redose pauses the crash.");
+            var poisonBefore = entMan.GetComponent<DamageableComponent>(mob).Damage.DamageDict.GetValueOrDefault("Poison");
+            sys.Tick(1f);
+            var poisonAfter = entMan.GetComponent<DamageableComponent>(mob).Damage.DamageDict.GetValueOrDefault("Poison");
+            Assert.That(poisonAfter - poisonBefore, Is.EqualTo(FixedPoint2.New(1)), "Tier effects run each tick.");
+
+            for (var i = 0; i < 30; i++)
+            {
+                sys.Tick(1f);
+            }
+
+            Assert.That(comp.Levels, Is.Empty);
+            Assert.That(comp.Crashes, Is.Empty, "The crash should run out.");
+        });
+
+        await server.WaitRunTicks(1);
+        await server.WaitAssertion(() =>
+        {
+            var query = entMan.EntityQueryEnumerator<WFIntoxicationComponent>();
+            Assert.That(query.MoveNext(out _, out _), Is.False, "The component should go once everything wore off.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>A half-life halves the level, and the phase moves from overdose through heavy to light.</summary>
+    [Test]
+    public async Task HalfLifePhaseTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        const string profile = "WFIntoxTestHalfLife";
+
+        await server.WaitAssertion(() =>
+        {
+            var sys = server.System<WFIntoxicationSystem>();
+            var proto = server.ProtoMan.Index<WFDrugProfilePrototype>(profile);
+            var mob = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            sys.AddLevel(mob, profile, 12f);
+            var comp = entMan.GetComponent<WFIntoxicationComponent>(mob);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(proto.PhaseOf(-1), Is.EqualTo(WFDrugPhase.None));
+                Assert.That(proto.PhaseOf(0), Is.EqualTo(WFDrugPhase.Light));
+                Assert.That(proto.PhaseOf(1), Is.EqualTo(WFDrugPhase.Heavy));
+                Assert.That(proto.PhaseOf(2), Is.EqualTo(WFDrugPhase.Overdose));
+            });
+
+            sys.Tick(0f);
+            Assert.That(comp.Phases[profile], Is.EqualTo(WFDrugPhase.Overdose));
+
+            sys.Tick(10f);
+            Assert.Multiple(() =>
+            {
+                Assert.That(comp.Levels[profile], Is.EqualTo(6f).Within(0.001f), "One half-life halves the level.");
+                Assert.That(comp.Phases[profile], Is.EqualTo(WFDrugPhase.Heavy));
+            });
+
+            sys.Tick(10f);
+            Assert.Multiple(() =>
+            {
+                Assert.That(comp.Levels[profile], Is.EqualTo(3f).Within(0.001f));
+                Assert.That(comp.Phases[profile], Is.EqualTo(WFDrugPhase.Light));
+            });
+
+            sys.Tick(10f);
+            Assert.That(comp.Phases.ContainsKey(profile), Is.False, "Below the first tier there is no phase.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task TraitTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+
+        await server.WaitAssertion(() =>
+        {
+            var sys = server.System<WFIntoxicationSystem>();
+            var damageable = server.System<DamageableSystem>();
+            var mob = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            var control = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            const string damper = "WFIntoxTestDamper";
+
+            FixedPoint2 Damage(EntityUid uid, string type) => entMan.GetComponent<DamageableComponent>(uid).Damage.DamageDict.GetValueOrDefault(type);
+            var hit = new DamageSpecifier();
+            hit.DamageDict["Heat"] = FixedPoint2.New(10);
+
+            sys.AddLevel(mob, damper, 3f);
+            sys.Tick(0.01f);
+            Assert.That(entMan.HasComponent<PainNumbnessComponent>(mob), Is.True, "HideDamage should numb the user.");
+
+            damageable.TryChangeDamage(mob, hit);
+            damageable.TryChangeDamage(control, hit);
+            var comp = entMan.GetComponent<WFIntoxicationComponent>(mob);
+            var full = Damage(control, "Heat").Float();
+            Assert.Multiple(() =>
+            {
+                Assert.That(full, Is.GreaterThan(0f));
+                Assert.That(Damage(mob, "Heat").Float(), Is.EqualTo(full * 0.7f).Within(0.02f), "Damper holds off 30%.");
+                Assert.That(comp.Debt, Is.EqualTo(full * 0.3f * 0.4f).Within(0.02f), "40% of what was held off is owed.");
+            });
+
+            var debt = comp.Debt;
+            var poisonBefore = Damage(mob, "Poison");
+            for (var i = 0; i < 10; i++)
+            {
+                sys.Tick(1f);
+            }
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(comp.Debt, Is.EqualTo(0f));
+                Assert.That((Damage(mob, "Poison") - poisonBefore).Float(), Is.EqualTo(debt).Within(0.05f), "The debt comes back as Poison.");
+                Assert.That(entMan.HasComponent<PainNumbnessComponent>(mob), Is.False, "Granted components go with the tier.");
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task BrainCheckTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+
+        await server.WaitAssertion(() =>
+        {
+            var sys = server.System<WFIntoxicationSystem>();
+            var body = server.System<SharedBodySystem>();
+            var protos = server.ResolveDependency<IPrototypeManager>();
+            var reagent = protos.Index<ReagentPrototype>("WFIntoxTestReagent");
+            var dose = new WFDose { Profile = Profile, PerUnit = 1f };
+
+            void Dose(EntityUid target, float grade)
+            {
+                var solution = new Solution();
+                solution.AddReagent(reagent.ID, FixedPoint2.New(10), grade);
+                dose.Effect(new EntityEffectReagentArgs(target, entMan, null, solution, FixedPoint2.New(4), reagent, null, FixedPoint2.New(1)));
+            }
+
+            var organic = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            Assert.That(sys.IsNeurowareHost(organic), Is.False);
+            Dose(organic, 0.5f);
+            Assert.That(sys.GetLevel(organic, Profile), Is.EqualTo(2f).Within(0.001f), "4 u at 50% is 2 effective units.");
+
+            var host = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            var brain = body.GetBodyOrganEntityComps<BrainComponent>(host);
+            Assert.That(brain, Is.Not.Empty);
+            entMan.AddComponent<WFNeurowareHostComponent>(brain[0].Owner);
+            Assert.That(sys.IsNeurowareHost(host), Is.True, "A body with a host brain is a host.");
+            Dose(host, 1f);
+            Assert.That(sys.GetLevel(host, Profile), Is.EqualTo(0f), "Chemical doses don't register on a host.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+}

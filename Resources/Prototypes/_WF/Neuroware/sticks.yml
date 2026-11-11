@@ -1,0 +1,177 @@
+# Neuroware sticks. A blank takes copies; the named ones are pristine builds. Placeholder sprites. A stick's price
+# doesn't follow what is copied onto it, so copying doesn't print money.
+
+- type: entity
+  parent: BaseItem
+  id: WFNeurowareStick
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/module.rsi
+    state: datadisk_base
+  - type: Item
+    size: Tiny
+  - type: WFNeurowareStick
+    loads: 0
+  - type: StaticPrice
+    price: 20
+
+- type: entity
+  parent: WFNeurowareStick
+  id: WFNeurowareStickWhiteline
+  components:
+  - type: Sprite
+    state: datadisk_encrypted
+    color: "#f0f0f0"
+  - type: WFNeurowareStick
+    profile: WFCocaine
+    loads: 3
+  - type: Contraband
+    severity: Class3Chem
+  - type: StaticPrice
+    price: 300
+
+- type: entity
+  parent: WFNeurowareStick
+  id: WFNeurowareStickNullLoop
+  components:
+  - type: Sprite
+    state: datadisk_encrypted
+    color: "#8a6a4a"
+  - type: WFNeurowareStick
+    profile: WFHeroin
+    loads: 3
+  - type: Contraband
+    severity: Class3Chem
+  - type: StaticPrice
+    price: 300
+
+- type: entity
+  parent: WFNeurowareStick
+  id: WFNeurowareStickBurst
+  components:
+  - type: Sprite
+    state: datadisk_encrypted
+    color: "#9fdcff"
+  - type: WFNeurowareStick
+    profile: WFCrystal
+    loads: 3
+  - type: Contraband
+    severity: Class3Chem
+  - type: StaticPrice
+    price: 300
+
+- type: entity
+  parent: WFNeurowareStick
+  id: WFNeurowareStickRedline
+  components:
+  - type: Sprite
+    state: datadisk_encrypted
+    color: "#e0202a"
+  - type: WFNeurowareStick
+    profile: WFRedline
+    loads: 3
+  - type: Contraband
+    severity: Class3Chem
+  - type: StaticPrice
+    price: 300
+
+- type: entity
+  parent: WFNeurowareStick
+  id: WFNeurowareStickDamper
+  components:
+  - type: Sprite
+    state: datadisk_encrypted
+    color: "#5b6470"
+  - type: WFNeurowareStick
+    profile: WFAnvil
+    loads: 3
+  - type: Contraband
+    severity: Class3Chem
+  - type: StaticPrice
+    price: 300
+
+- type: entity
+  parent: WFNeurowareStick
+  id: WFNeurowareStickChoir
+  components:
+  - type: Sprite
+    state: datadisk_encrypted
+    color: "#c79cff"
+  - type: WFNeurowareStick
+    profile: WFChorus
+    loads: 3
+  - type: Contraband
+    severity: Class3Chem
+  - type: StaticPrice
+    price: 300
+
+- type: entity
+  parent: WFNeurowareStick
+  id: WFNeurowareStickHalo
+  components:
+  - type: Sprite
+    state: datadisk_encrypted
+    color: "#ffe28a"
+  - type: WFNeurowareStick
+    profile: WFHalo
+    loads: 3
+  - type: Contraband
+    severity: Class3Chem
+  - type: StaticPrice
+    price: 300
+
+- type: entity
+  parent: WFNeurowareStick
+  id: WFNeurowareStickIdle
+  components:
+  - type: Sprite
+    state: datadisk_encrypted
+    color: "#6fae5a"
+  - type: WFNeurowareStick
+    profile: WFCannabis
+    loads: 3
+  - type: Contraband
+    severity: Class3Chem
+  - type: StaticPrice
+    price: 300
+
+# Dealer copies: a generation or two off the original, one load each.
+- type: entity
+  parent: WFNeurowareStickWhiteline
+  id: WFNeurowareStickWhitelineCopy
+  components:
+  - type: WFNeurowareStick
+    integrity: 0.72
+    loads: 1
+  - type: StaticPrice
+    price: 100
+
+- type: entity
+  parent: WFNeurowareStickNullLoop
+  id: WFNeurowareStickNullLoopCopy
+  components:
+  - type: WFNeurowareStick
+    integrity: 0.72
+    loads: 1
+  - type: StaticPrice
+    price: 100
+
+- type: entity
+  parent: WFNeurowareStickBurst
+  id: WFNeurowareStickBurstCopy
+  components:
+  - type: WFNeurowareStick
+    integrity: 0.72
+    loads: 1
+  - type: StaticPrice
+    price: 100
+
+- type: entity
+  parent: WFNeurowareStickIdle
+  id: WFNeurowareStickIdleCopy
+  components:
+  - type: WFNeurowareStick
+    integrity: 0.72
+    loads: 1
+  - type: StaticPrice
+    price: 100

@@ -1,0 +1,66 @@
+<Document>
+
+# Narcotics and Neuroware
+
+Street drugs are cooked, grown and sold all over the sector, and every one of them is Class 3 contraband. This page covers what they do from the user's side: grades, highs and crashes, habits, and the synthetic version, neuroware.
+  <Box>
+    <GuideEntityEmbed Entity="WFBaggieCocaine"/>
+    <GuideEntityEmbed Entity="WFCrackRock"/>
+    <GuideEntityEmbed Entity="WFCrystalShard"/>
+    <GuideEntityEmbed Entity="WFBong"/>
+    <GuideEntityEmbed Entity="WFNeurowareStickWhiteline"/>
+  </Box>
+
+## Grades
+
+Any reagent can carry a [bold]grade[/bold], from 0 to 100%. Anything from a dispenser is standard grade and shows nothing. Reactions run off their ideal temperature, cheap plants and street cuts come out lower.
+
+A low grade does less and hurts more. A dose at 60% works like 60% of the amount, and the missing 40% is impurity that the body takes as Poison. Overdose limits count the working part only, so a weak batch won't overdose you sooner, it will just poison you.
+
+A ChemMaster shows the percentage beside any graded reagent, and so do health analyzers and chemical goggles. A [bold]purity tester[/bold] does the same for any container or item it touches.
+  <Box>
+    <GuideEntityEmbed Entity="WFPurityTester"/>
+  </Box>
+
+Grade sets the price as well. A rock at half grade sells for half.
+
+## Highs and crashes
+
+Each drug raises a level in the body, and a high has three phases. [bold]Light[/bold] is a steady tint in the family's colours. [bold]Heavy[/bold] brings the family's full look: stimulants throb at the edges, opioids blur and breathe, psychedelics wobble and trail. An [bold]overdose[/bold] pushes that look to an extreme, such as a racing red heartbeat, the eyes closing, or the world tearing apart, while the body takes real harm. The screen kicks and a line tells you each time you go deeper, and the look grows with the dose inside each phase.
+
+An ordinary dose lasts about ten minutes; opiates and Chorus run longer, and crack and the combat drugs are over in a few. A bigger dose lasts longer, but not twice as long.
+
+When the level falls back below its first threshold, the [bold]crash[/bold] begins. Taking more pauses a crash but doesn't cancel it. Combat drugs make you pay for what they give: Redline leaves you collapsed and slow, and the damage Anvil soaked up comes back as Poison once it wears off.
+
+Antagonists cut a high short. Naloxone ends an opioid high; haloperidol ends a stimulant or psychedelic one. The crash still comes.
+
+## Habits
+
+Regular use builds [bold]dependence[/bold], one meter for each family. A single binge fades within the shift. Steady use doesn't.
+
+Above the halfway mark, going without for five minutes starts [bold]withdrawal[/bold]: cravings first, then shakes, a stamina cap and aches, and for opioids and stimulants, nausea and drowsiness at the worst. A dose of the same family ends it at once. Withdrawal never kills.
+
+Use also builds tolerance, which makes each high shorter but not weaker.
+
+## Taking them
+
+[bold]Lines.[/bold] Use a baggie of powder on a table to lay out a line, then use the line to take it. A mask or helmet over your face blocks it.
+
+[bold]Bong.[/bold] Fill it with at least 5u of water, put a rock, shard, resin or brick in the bowl, light it with anything hot, and use it in hand for a hit. A bowl lasts a few hits.
+
+[bold]Everything else[/bold] goes the usual way: pills, syringes, pipes and joints.
+
+## Neuroware
+
+A synthetic's brain doesn't register chemicals, so its drugs are programs instead. A [bold]data stick[/bold] used on a synthetic loads its program: two seconds on yourself, four on someone else, and they get a warning. An organic brain has no port.
+
+The program feeds the same high, crash and habit as the drug it copies. Whiteline is cocaine, Null Loop is heroin, Burst is crystal, Damper is Anvil, Choir.sig is Chorus, Halo and Redline go by their own names, and Idle is cannabis. On a synthetic, Redline's speed costs charge and heat instead of the heart.
+
+Using a loaded stick on a blank copies it at 85% of the original's integrity, with one load. Integrity works like grade: a copy delivers less, and the missing part makes the program glitch with brief stuns, forced beeps, scrambled speech and fake faults. Street copies are several generations down.
+
+A synthetic with the Wolfmed HUD sees what is running as fault lines. A [bold]reboot[/bold] from the chassis panel kills every running program and ends the high, but not the habit.
+
+## The law
+
+Possession is a citation, trafficking an impound, and loading neuroware into someone who didn't agree to it is a crime against their person. Selling any of it through cargo tells security where it was sold. The street dealers and the Drydock fence don't ask.
+</Document>
