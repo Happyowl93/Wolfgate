@@ -99,20 +99,21 @@ void fragment() {
     highp vec3 flash = vec3(1.0);
 
     if (f == 0) {
-        // Stimulant. Light: hard contrast and colour. Heavy: a red heartbeat at the edges and a split image.
+        // Stimulant. Light: a little more contrast and colour. Heavy: a red heartbeat at the edges and a split image.
         // Overdose: the heart races, the whole screen flushes red with it and shakes.
         flash = vec3(1.0, 0.35, 0.3);
         highp float beat = wfBeat(t, pulseRate * (1.0 + o));
         highp vec2 shake = vec2(sin(t * 47.0), cos(t * 39.0)) * 0.005 * o * motion;
-        highp vec2 split = vec2(0.002 + 0.004 * h + 0.008 * o, 0.0) * (0.6 + 0.4 * beat);
+        highp vec2 split = vec2(0.0008 + 0.0012 * h + 0.005 * o, 0.0) * (0.6 + 0.4 * beat);
         col.r = sampleScreen(uv + shake + split).r;
         col.g = sampleScreen(uv + shake).g;
         col.b = sampleScreen(uv + shake - split).b;
-        col.rgb = wfSaturate(col.rgb, 1.0 + 1.1 * i);
-        col.rgb = (col.rgb - 0.5) * (1.0 + 0.55 * i) + 0.5;
+        col.rgb = wfSaturate(col.rgb, 1.0 + 0.45 * i);
+        // Contrast pivots low so dim, lit rooms don't sink to black.
+        col.rgb = max((col.rgb - 0.25) * (1.0 + 0.2 * i) + 0.25, 0.0);
         highp float rim = 1.0 - smoothstep(0.0, 0.12 + 0.18 * o, wfEdge(uv));
-        col.rgb = mix(col.rgb, vec3(1.0, 0.15, 0.1), rim * beat * (0.35 + 0.6 * h + 0.3 * o) * i);
-        col.rgb = mix(col.rgb, col.rgb * vec3(1.5, 0.5, 0.45), beat * (0.15 * h + 0.6 * o));
+        col.rgb = mix(col.rgb, vec3(1.0, 0.15, 0.1), rim * beat * (0.2 + 0.3 * h + 0.3 * o) * i);
+        col.rgb = mix(col.rgb, col.rgb * vec3(1.5, 0.5, 0.45), beat * 0.6 * o);
         col.rgb *= 1.0 - smoothstep(0.25, 0.75, dist) * 0.65 * o;
     } else if (f == 1) {
         // Opioid. Light: warm and golden, with dark edges. Heavy: soft focus and a slow breathing zoom.
