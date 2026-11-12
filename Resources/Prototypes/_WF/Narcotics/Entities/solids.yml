@@ -101,7 +101,7 @@
     node: brick
   # THC carries no price of its own.
   - type: StaticPrice
-    price: 120
+    price: 450
 
 # Baggies. Craft an empty one from plastic, pour powder in from a beaker or put solid drugs in; filled ones are dealer
 # stock.

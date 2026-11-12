@@ -27,12 +27,12 @@
         next: sold
         broke: broke
       - text: wf-stranger-dealer-buy-hard
-        cost: 350
+        cost: 1200
         items: [ WFBaggieCocaineCut, WFBaggieHeroinCut, WFCrackRockCut, WFCrystalShardCut ]
         next: sold
         broke: broke
       - text: wf-stranger-dealer-buy-stick
-        cost: 400
+        cost: 1350
         items: [ WFNeurowareStickWhitelineCopy, WFNeurowareStickNullLoopCopy, WFNeurowareStickBurstCopy, WFNeurowareStickIdleCopy ]
         next: sold
         broke: broke

@@ -14,7 +14,8 @@ namespace Content.Client._WF.Narcotics;
 /// Draws the local player's strongest high and any crash with one shader. Each phase has its own look: light is a
 /// steady grade with a slight bend, heavy adds the family's motion, warp and ghost trails, and the overdose pushes it
 /// to an extreme; strength builds with the level inside each phase, and stepping up a phase kicks the screen. Static
-/// and trail-free under reduced motion; nothing for a neuroware host, whose state shows on its HUD instead.
+/// and trail-free under reduced motion. A neuroware host sees its programs through a digital shader of its own,
+/// without trails.
 /// </summary>
 public sealed class WFIntoxicationOverlay : Overlay
 {
@@ -54,10 +55,12 @@ public sealed class WFIntoxicationOverlay : Overlay
     private const float PsychedelicSpread = 0.004f;
 
     private readonly ShaderInstance _shader;
+    private readonly ShaderInstance _neurowareShader;
     private readonly ShaderInstance _trailShader;
     private readonly WFIntoxicationSystem _system;
 
     private WFDrugFamily _family;
+    private bool _synthetic;
     private WFDrugPhase _phase;
     private float _intensity;
     private float _heavy;
@@ -78,6 +81,7 @@ public sealed class WFIntoxicationOverlay : Overlay
         IoCManager.InjectDependencies(this);
         _system = system;
         _shader = _proto.Index<ShaderPrototype>("WFIntoxication").InstanceUnique();
+        _neurowareShader = _proto.Index<ShaderPrototype>("WFNeuroware").InstanceUnique();
         _trailShader = _proto.Index<ShaderPrototype>("WFIntoxicationTrail").InstanceUnique();
     }
 
@@ -88,9 +92,9 @@ public sealed class WFIntoxicationOverlay : Overlay
         var phase = WFDrugPhase.None;
 
         if (_player.LocalEntity is { } local
-            && _entities.TryGetComponent(local, out WFIntoxicationComponent? comp)
-            && !_system.IsNeurowareHost(local))
+            && _entities.TryGetComponent(local, out WFIntoxicationComponent? comp))
         {
+            _synthetic = _system.IsNeurowareHost(local);
             if (_system.DominantHigh(comp) is { } high)
             {
                 phase = high.Phase;
@@ -122,7 +126,7 @@ public sealed class WFIntoxicationOverlay : Overlay
         _kick = Math.Max(0f, _kick - args.DeltaSeconds * KickFade);
 
         var targetTrail = 0f;
-        if (Trails.TryGetValue(_family, out var trail))
+        if (!_synthetic && Trails.TryGetValue(_family, out var trail))
             targetTrail = (trail.Heavy * _heavy + (trail.Overdose - trail.Heavy) * _overdose) * (0.5f + 0.5f * _intensity);
         _trail += (targetTrail - _trail) * phaseStep;
     }
@@ -151,16 +155,17 @@ public sealed class WFIntoxicationOverlay : Overlay
         else
             _trailValid = false;
 
-        _shader.SetParameter("SCREEN_TEXTURE", screen);
-        _shader.SetParameter("family", (float) _family);
-        _shader.SetParameter("intensity", _intensity);
-        _shader.SetParameter("heavy", _heavy);
-        _shader.SetParameter("overdose", _overdose);
-        _shader.SetParameter("kick", _kick);
-        _shader.SetParameter("crash", _crash);
-        _shader.SetParameter("motion", motion ? 1f : 0f);
-        _shader.SetParameter("pulseRate", _pulseRate);
-        handle.UseShader(_shader);
+        var shader = _synthetic ? _neurowareShader : _shader;
+        shader.SetParameter("SCREEN_TEXTURE", screen);
+        shader.SetParameter("family", (float) _family);
+        shader.SetParameter("intensity", _intensity);
+        shader.SetParameter("heavy", _heavy);
+        shader.SetParameter("overdose", _overdose);
+        shader.SetParameter("kick", _kick);
+        shader.SetParameter("crash", _crash);
+        shader.SetParameter("motion", motion ? 1f : 0f);
+        shader.SetParameter("pulseRate", _pulseRate);
+        handle.UseShader(shader);
         handle.DrawRect(args.WorldBounds, Color.White);
         handle.UseShader(null);
     }

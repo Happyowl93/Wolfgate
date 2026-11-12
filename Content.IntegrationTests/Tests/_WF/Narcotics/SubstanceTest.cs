@@ -171,7 +171,10 @@ public sealed class SubstanceTest
         "WFCrackRock", "WFCrystalShard", "WFOpiumResin", "WFHashBrick", "WFBaggieCocaine", "WFBaggieHeroin",
     };
 
-    /// <summary>Products are Class 3 contraband that tips off security when sold, and cut stock is worth less.</summary>
+    /// <summary>
+    /// Products and programmed sticks are Class 3 contraband that tips off security when sold, blanks are legal, and cut
+    /// stock is worth less.
+    /// </summary>
     [Test]
     public async Task ContrabandAndPriceTest()
     {
@@ -192,6 +195,19 @@ public sealed class SubstanceTest
                     Assert.That(entMan.HasComponent<SoldAlertComponent>(uid), Is.True, id);
                     Assert.That(entMan.HasComponent<ItemTaxComponent>(uid), Is.True, id);
                 }
+
+                foreach (var id in new[] { "WFNeurowareStickWhiteline", "WFNeurowareStickWhitelineCopy" })
+                {
+                    var uid = entMan.SpawnEntity(id, map.GridCoords);
+                    Assert.That(entMan.GetComponent<ContrabandComponent>(uid).Severity.Id, Is.EqualTo("Class3Chem"), id);
+                    Assert.That(entMan.HasComponent<SoldAlertComponent>(uid), Is.True, id);
+                    Assert.That(entMan.HasComponent<ItemTaxComponent>(uid), Is.True, id);
+                }
+
+                var blank = entMan.SpawnEntity("WFNeurowareStick", map.GridCoords);
+                Assert.That(entMan.HasComponent<ContrabandComponent>(blank), Is.False, "A blank stick is legal.");
+                Assert.That(pricing.GetPrice(entMan.SpawnEntity("WFNeurowareStickWhitelineCopy", map.GridCoords)),
+                    Is.GreaterThan(pricing.GetPrice(blank)), "A copy sells above a blank.");
 
                 var full = pricing.GetPrice(entMan.SpawnEntity("WFBaggieCocaine", map.GridCoords));
                 var cut = pricing.GetPrice(entMan.SpawnEntity("WFBaggieCocaineCut", map.GridCoords));

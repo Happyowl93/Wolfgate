@@ -57,7 +57,7 @@ neuroware program tick --(rate x integrity)---------------+              |
                                                                           v
                                              WFIntoxicationSystem: tiers, effects, crash, dependence
                                                                           |
-                                         organic brain: screen overlay    |    non-organic brain: HUD faults
+                         organic brain: drug shader    |    neuroware host: neuroware shader and HUD faults
 ```
 
 One system applies every drug's effects from one number per profile. Reagents and neuroware are only two ways of
@@ -355,8 +355,14 @@ stun, a forced Beep or Buzz emote, ten seconds of `ScrambledAccent`, or a false 
 
 ### Presentation
 
-A host gets no screen overlay. Its profile state is shown through the synthetic HUD
-(`Content.Server/_WF/Wolfmed/Hud/WolfmedSyntheticHudSystem.cs`, client in
+`WFIntoxicationOverlay` draws a host's strongest high with its own shader, `WFNeuroware`
+(`Resources/Textures/_WF/Neuroware/Shaders/neuroware.swsl`), and no trails: the program corrupts the optics feed
+instead of the senses. Stimulants trace edges in cyan under a racing refresh line, opioids drop resolution and
+colour depth into standby, psychedelics map brightness onto a cycling false-colour palette and smear blocks,
+empathogens bloom warm into a thermal view, cannabinoids fade to green phosphor with a ghost image, and combat
+programs leave a red targeting circle with traced edges outside it. Every program lays scanlines; an overdose slips
+rows of blocks and flickers dead pixels; a crash is a weak grey signal. Its profile state also shows through the
+synthetic HUD (`Content.Server/_WF/Wolfmed/Hud/WolfmedSyntheticHudSystem.cs`, client in
 `Content.Client/_WF/Wolfmed/Overlays/`):
 
 - The HUD system raises a collect event during `Refresh` so `Neuroware` can add fault lines from the profile's

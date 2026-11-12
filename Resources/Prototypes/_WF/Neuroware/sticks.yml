@@ -34,10 +34,34 @@
   - type: WFNeurowareStick
     loads: 0
   - type: StaticPrice
-    price: 20
+    price: 75
+
+# A stick with a program on it. It sells like any drug: contraband, and the sale moves money to the black market
+# and tips off security.
+- type: entity
+  abstract: true
+  parent: WFNeurowareStick
+  id: WFNeurowareStickProgramBase
+  components:
+  - type: WFNeurowareStick
+    loads: 3
+  - type: Contraband
+    severity: Class3Chem
+  - type: ItemTax
+    taxAccounts:
+      Medical: -0.05
+      nfsd: -0.1
+      BlackMarket: 0.25
+  - type: SoldAlert
+    groupId: WFNarcotics
+    maxPerSale: 100
+    channels:
+    - Security
+  - type: StaticPrice
+    price: 2200
 
 - type: entity
-  parent: WFNeurowareStick
+  parent: WFNeurowareStickProgramBase
   id: WFNeurowareStickWhiteline
   components:
   - type: Sprite
@@ -50,14 +74,9 @@
       shader: unshaded
   - type: WFNeurowareStick
     profile: WFCocaine
-    loads: 3
-  - type: Contraband
-    severity: Class3Chem
-  - type: StaticPrice
-    price: 300
 
 - type: entity
-  parent: WFNeurowareStick
+  parent: WFNeurowareStickProgramBase
   id: WFNeurowareStickNullLoop
   components:
   - type: Sprite
@@ -70,14 +89,9 @@
       shader: unshaded
   - type: WFNeurowareStick
     profile: WFHeroin
-    loads: 3
-  - type: Contraband
-    severity: Class3Chem
-  - type: StaticPrice
-    price: 300
 
 - type: entity
-  parent: WFNeurowareStick
+  parent: WFNeurowareStickProgramBase
   id: WFNeurowareStickBurst
   components:
   - type: Sprite
@@ -90,14 +104,9 @@
       shader: unshaded
   - type: WFNeurowareStick
     profile: WFCrystal
-    loads: 3
-  - type: Contraband
-    severity: Class3Chem
-  - type: StaticPrice
-    price: 300
 
 - type: entity
-  parent: WFNeurowareStick
+  parent: WFNeurowareStickProgramBase
   id: WFNeurowareStickRedline
   components:
   - type: Sprite
@@ -110,14 +119,9 @@
       shader: unshaded
   - type: WFNeurowareStick
     profile: WFRedline
-    loads: 3
-  - type: Contraband
-    severity: Class3Chem
-  - type: StaticPrice
-    price: 300
 
 - type: entity
-  parent: WFNeurowareStick
+  parent: WFNeurowareStickProgramBase
   id: WFNeurowareStickDamper
   components:
   - type: Sprite
@@ -130,14 +134,9 @@
       shader: unshaded
   - type: WFNeurowareStick
     profile: WFAnvil
-    loads: 3
-  - type: Contraband
-    severity: Class3Chem
-  - type: StaticPrice
-    price: 300
 
 - type: entity
-  parent: WFNeurowareStick
+  parent: WFNeurowareStickProgramBase
   id: WFNeurowareStickChoir
   components:
   - type: Sprite
@@ -150,14 +149,9 @@
       shader: unshaded
   - type: WFNeurowareStick
     profile: WFChorus
-    loads: 3
-  - type: Contraband
-    severity: Class3Chem
-  - type: StaticPrice
-    price: 300
 
 - type: entity
-  parent: WFNeurowareStick
+  parent: WFNeurowareStickProgramBase
   id: WFNeurowareStickHalo
   components:
   - type: Sprite
@@ -170,14 +164,9 @@
       shader: unshaded
   - type: WFNeurowareStick
     profile: WFHalo
-    loads: 3
-  - type: Contraband
-    severity: Class3Chem
-  - type: StaticPrice
-    price: 300
 
 - type: entity
-  parent: WFNeurowareStick
+  parent: WFNeurowareStickProgramBase
   id: WFNeurowareStickIdle
   components:
   - type: Sprite
@@ -190,11 +179,6 @@
       shader: unshaded
   - type: WFNeurowareStick
     profile: WFCannabis
-    loads: 3
-  - type: Contraband
-    severity: Class3Chem
-  - type: StaticPrice
-    price: 300
 
 # Dealer copies: a generation or two off the original, one load each.
 - type: entity
@@ -213,7 +197,7 @@
     integrity: 0.72
     loads: 1
   - type: StaticPrice
-    price: 100
+    price: 600
 
 - type: entity
   parent: WFNeurowareStickNullLoop
@@ -231,7 +215,7 @@
     integrity: 0.72
     loads: 1
   - type: StaticPrice
-    price: 100
+    price: 600
 
 - type: entity
   parent: WFNeurowareStickBurst
@@ -249,7 +233,7 @@
     integrity: 0.72
     loads: 1
   - type: StaticPrice
-    price: 100
+    price: 600
 
 - type: entity
   parent: WFNeurowareStickIdle
@@ -267,4 +251,4 @@
     integrity: 0.72
     loads: 1
   - type: StaticPrice
-    price: 100
+    price: 600

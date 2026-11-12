@@ -35,6 +35,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 ### Prototypes
 
 - [`Resources/Prototypes/_WF/Neuroware/loot.yml`](../../../Resources/Prototypes/_WF/Neuroware/loot.yml)
+- [`Resources/Prototypes/_WF/Neuroware/shaders.yml`](../../../Resources/Prototypes/_WF/Neuroware/shaders.yml)
 - [`Resources/Prototypes/_WF/Neuroware/sticks.yml`](../../../Resources/Prototypes/_WF/Neuroware/sticks.yml)
 
 ### Localization
@@ -44,6 +45,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 ### Textures
 
 - [`Resources/Textures/_WF/Neuroware/Objects/stick.rsi/`](../../../Resources/Textures/_WF/Neuroware/Objects/stick.rsi/)
+- [`Resources/Textures/_WF/Neuroware/Shaders/neuroware.swsl`](../../../Resources/Textures/_WF/Neuroware/Shaders/neuroware.swsl)
 
 ## Non-modular edits
 
