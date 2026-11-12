@@ -7,6 +7,7 @@ using Content.Shared.FixedPoint;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Nutrition.EntitySystems;
+using Content.Shared.Stacks;
 using Content.Shared.Storage;
 using Content.Shared.Storage.EntitySystems;
 using Robust.Shared.Containers;
@@ -62,6 +63,24 @@ public sealed class DeliveryTest
             Assert.That(delivery.Hit((bong, bongComp), smoker), Is.True);
             Assert.That(InBlood(smoker, "WFCrack"), Is.EqualTo(FixedPoint2.New(4.25)), "The last hit takes what's left.");
             Assert.That(bongComp.Lit, Is.False, "A spent bowl goes out.");
+
+            // Dried leaves burn too, one from the stack at a time, and the sprite follows the bowl.
+            var appearance = server.System<SharedAppearanceSystem>();
+            var leafBong = entMan.SpawnEntity("WFBongFilled", map.GridCoords);
+            var leafComp = entMan.GetComponent<WFBongComponent>(leafBong);
+            var leaves = entMan.SpawnEntity("LeavesCannabisDried", map.GridCoords);
+            server.System<SharedStackSystem>().SetCount(leaves, 3);
+            Assert.That(slots.TryInsert(leafBong, leafComp.Bowl, leaves, null), Is.True, "Dried leaves fit the bowl.");
+            Assert.That(entMan.GetComponent<StackComponent>(leaves).Count, Is.EqualTo(1), "Only one leaf is loaded.");
+            Assert.That(appearance.TryGetData<bool>(leafBong, WFBongVisuals.Loaded, out var loaded) && loaded, Is.True);
+            Assert.That(delivery.TryLight((leafBong, leafComp), smoker), Is.True);
+            Assert.That(appearance.TryGetData<bool>(leafBong, WFBongVisuals.Lit, out var lit) && lit, Is.True);
+            Assert.That(delivery.Hit((leafBong, leafComp), smoker), Is.True);
+            Assert.That(InBlood(smoker, "THC"), Is.GreaterThan(FixedPoint2.Zero));
+
+            var tobaccoBong = entMan.SpawnEntity("WFBong", map.GridCoords);
+            Assert.That(slots.TryInsert(tobaccoBong, entMan.GetComponent<WFBongComponent>(tobaccoBong).Bowl,
+                entMan.SpawnEntity("LeavesTobaccoDried", map.GridCoords), null), Is.True, "Dried tobacco fits too.");
         });
 
         await pair.CleanReturnAsync();

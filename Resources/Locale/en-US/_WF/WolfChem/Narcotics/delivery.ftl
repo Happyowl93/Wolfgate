@@ -14,7 +14,8 @@ wf-bong-bowl-empty = There's nothing in the bowl to light.
 wf-bong-lit = You light the bowl.
 wf-bong-not-lit = The bowl isn't lit.
 wf-bong-no-water = The bong needs water first.
-wf-bong-hit = You take a long, bubbling hit.
+wf-bong-examine-lit = [color=#e08a5c]The bowl is burning.[/color]
+wf-bong-hit =You take a long, bubbling hit.
 
 ent-WFPowderLine = line of powder
     .desc = A neat line of powder, ready to go.

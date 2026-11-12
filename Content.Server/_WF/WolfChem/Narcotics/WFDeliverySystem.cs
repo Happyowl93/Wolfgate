@@ -11,7 +11,11 @@ using Content.Shared.FixedPoint;
 using Content.Shared.Coordinates.Helpers;
 using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
+using Content.Server.Stack;
+using Content.Shared.Examine;
+using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Item;
+using Content.Shared.Stacks;
 using Content.Shared.Placeable;
 using Content.Shared.Popups;
 using Content.Shared.Storage;
@@ -33,7 +37,10 @@ public sealed class WFDeliverySystem : EntitySystem
     [Dependency] private ItemSlotsSystem _slots = default!;
     [Dependency] private ReactiveSystem _reactive = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
+    [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private SharedContainerSystem _container = default!;
+    [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private StackSystem _stack = default!;
     [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private SharedStorageSystem _storage = default!;
     [Dependency] private WFBaggieSystem _baggie = default!;
@@ -56,6 +63,8 @@ public sealed class WFDeliverySystem : EntitySystem
         SubscribeLocalEvent<WFBongComponent, UseInHandEvent>(OnBongUseInHand);
         SubscribeLocalEvent<WFBongComponent, WFBongHitDoAfterEvent>(OnBongDoAfter);
         SubscribeLocalEvent<WFBongComponent, EntRemovedFromContainerMessage>(OnBowlEmptied);
+        SubscribeLocalEvent<WFBongComponent, EntInsertedIntoContainerMessage>(OnBowlLoaded);
+        SubscribeLocalEvent<WFBongComponent, ExaminedEvent>(OnBongExamined);
     }
 
     private void OnBaggieAfterInteract(Entity<WFBaggieComponent> ent, ref AfterInteractEvent args)
@@ -161,6 +170,42 @@ public sealed class WFDeliverySystem : EntitySystem
     private void OnBongInit(Entity<WFBongComponent> ent, ref ComponentInit args)
     {
         _slots.AddItemSlot(ent, WFBongComponent.BowlSlotId, ent.Comp.Bowl);
+        UpdateBong(ent);
+    }
+
+    private void SetLit(Entity<WFBongComponent> ent, bool lit)
+    {
+        ent.Comp.Lit = lit;
+        UpdateBong(ent);
+    }
+
+    private void UpdateBong(Entity<WFBongComponent> ent)
+    {
+        _appearance.SetData(ent, WFBongVisuals.Loaded, ent.Comp.Bowl.Item != null);
+        _appearance.SetData(ent, WFBongVisuals.Lit, ent.Comp.Lit);
+    }
+
+    private void OnBongExamined(Entity<WFBongComponent> ent, ref ExaminedEvent args)
+    {
+        if (ent.Comp.Lit)
+            args.PushMarkup(Loc.GetString("wf-bong-examine-lit"));
+    }
+
+    /// <summary>A stack loads one piece; the rest goes back to whoever holds the bong, or lands beside it.</summary>
+    private void OnBowlLoaded(Entity<WFBongComponent> ent, ref EntInsertedIntoContainerMessage args)
+    {
+        if (args.Container.ID != WFBongComponent.BowlSlotId)
+            return;
+
+        UpdateBong(ent);
+        if (!TryComp<StackComponent>(args.Entity, out var stack) || stack.Count <= 1)
+            return;
+
+        if (_stack.Split(args.Entity, stack.Count - 1, Transform(ent).Coordinates, stack) is not { } rest)
+            return;
+
+        var holder = _container.TryGetContainingContainer((ent.Owner, null, null), out var held) ? held.Owner : (EntityUid?) null;
+        _hands.PickupOrDrop(holder, rest);
     }
 
     private void OnBongRemove(Entity<WFBongComponent> ent, ref ComponentRemove args)
@@ -192,7 +237,7 @@ public sealed class WFDeliverySystem : EntitySystem
             return false;
         }
 
-        ent.Comp.Lit = true;
+        SetLit(ent, true);
         if (user != null)
             _popup.PopupEntity(Loc.GetString("wf-bong-lit"), ent, user.Value);
         return true;
@@ -264,7 +309,7 @@ public sealed class WFDeliverySystem : EntitySystem
 
         if (!BowlHasContents(bowl))
         {
-            ent.Comp.Lit = false;
+            SetLit(ent, false);
             QueueDel(bowl);
         }
 
@@ -311,6 +356,6 @@ public sealed class WFDeliverySystem : EntitySystem
     private void OnBowlEmptied(Entity<WFBongComponent> ent, ref EntRemovedFromContainerMessage args)
     {
         if (args.Container.ID == WFBongComponent.BowlSlotId)
-            ent.Comp.Lit = false;
+            SetLit(ent, false);
     }
 }

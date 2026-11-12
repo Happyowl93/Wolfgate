@@ -44,10 +44,27 @@
     - state: fill-1
       map: [ "enum.SolutionContainerLayers.Fill" ]
       visible: false
+    - state: bowl
+      map: [ "bowl" ]
+      visible: false
+    - state: lit
+      map: [ "lit" ]
+      shader: unshaded
+      visible: false
   - type: Item
     size: Small
     sprite: _WF/WolfChem/Narcotics/Objects/bong.rsi
   - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.WFBongVisuals.Loaded:
+        bowl:
+          True: { visible: true }
+          False: { visible: false }
+      enum.WFBongVisuals.Lit:
+        lit:
+          True: { visible: true }
+          False: { visible: false }
   - type: SolutionContainerVisuals
     maxFillLevels: 2
     fillBaseName: fill-
@@ -68,9 +85,11 @@
   - type: WFBong
     bowl:
       name: wf-bong-bowl
+      # Anything a pipe takes, plus what fits a baggie: solid drugs and dried leaves.
       whitelist:
         tags:
         - Smokable
+        - WFBaggable
       insertSound:
         path: /Audio/Weapons/Guns/Empty/empty.ogg
       ejectSound:

@@ -17,6 +17,22 @@
             "name": "fill-2"
         },
         {
+            "name": "bowl"
+        },
+        {
+            "name": "lit",
+            "delays": [
+                [
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2
+                ]
+            ]
+        },
+        {
             "name": "inhand-left",
             "directions": 4
         },

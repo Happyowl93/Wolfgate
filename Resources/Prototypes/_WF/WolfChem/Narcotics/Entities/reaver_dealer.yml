@@ -1,23 +1,34 @@
-# The Reaver dealer: full-grade product and pristine sticks at twice their appraisal, out of a Reaver runner's hold.
-# He can be killed, the stock runs out, and drugs and neuroware on the counter pay at 60% of their graded appraisal.
+# The Reaver dealer: full-grade product, seeds, kit and pristine sticks at twice their appraisal, out of a Reaver
+# runner's hold. He can be killed and the stock runs out. He sells only; nothing on the counter pays the bill.
 - type: vendingMachineInventory
   id: WFReaverDealerInventory
   startingInventory:
-    WFBaggieCocaine: 4
-    WFBaggieHeroin: 4
-    WFCrackRock: 6
-    WFCrystalShard: 6
-    WFBaggie: 10
-    WFBongFilled: 2
-    WFNeurowareStick: 6
-    WFNeurowareStickWhiteline: 2
-    WFNeurowareStickNullLoop: 2
-    WFNeurowareStickBurst: 2
-    WFNeurowareStickRedline: 1
-    WFNeurowareStickDamper: 1
-    WFNeurowareStickChoir: 1
-    WFNeurowareStickHalo: 1
-    WFNeurowareStickIdle: 2
+    WFBaggieCocaine: 12
+    WFBaggieHeroin: 12
+    WFCrackRock: 16
+    WFCrystalShard: 16
+    WFOpiumResin: 12
+    WFHashBrick: 6
+    Joint: 12
+    WFVialRedline: 6
+    WFVialAnvil: 6
+    WFVialChorus: 6
+    WFVialHalo: 6
+    WFCocaSeeds: 8
+    WFOpiumPoppySeeds: 8
+    WFBaggie: 20
+    WFVial: 12
+    WFBongFilled: 4
+    WFPurityTester: 3
+    WFNeurowareStick: 12
+    WFNeurowareStickWhiteline: 6
+    WFNeurowareStickNullLoop: 6
+    WFNeurowareStickBurst: 6
+    WFNeurowareStickRedline: 4
+    WFNeurowareStickDamper: 4
+    WFNeurowareStickChoir: 4
+    WFNeurowareStickHalo: 4
+    WFNeurowareStickIdle: 6
 
 - type: entity
   id: WFReaverDealerStock
@@ -49,8 +60,6 @@
   - prompt: wf-reaver-dealer-prompt-shop
     response: wf-reaver-dealer-response-shop
     action: OpenShop
-  - prompt: wf-reaver-dealer-prompt-pay
-    response: wf-reaver-dealer-response-pay
   - prompt: wf-reaver-dealer-prompt-who
     response: wf-reaver-dealer-response-who
 
@@ -69,14 +78,7 @@
     killable: true
   - type: TraderShop
     vendors: [ WFReaverDealerStock ]
-    randomStock: 12
-    stockMin: 1
-    stockMax: 4
+    randomStock: 18
+    stockMin: 3
+    stockMax: 12
     lootItems: 5
-  - type: TraderGoodsPayment
-    whitelist:
-      tags:
-      - WFNarcotic
-      components:
-      - WFNeurowareStick
-    rate: 0.6

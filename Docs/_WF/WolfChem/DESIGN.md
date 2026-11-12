@@ -357,7 +357,10 @@ the first strains the heart by 0.1 a second.
 - **Bong.** A held item (`WFBong`) with a bowl slot that accepts the `Smokable` tag and solid drugs, and a water
   reservoir. Using it with a lit bowl takes one hit: a 2 s do-after that moves a fixed amount to the user's
   bloodstream and emits a small smoke puff. It works from the hand, unlike pipes, which only work in the mask
-  slot (`Content.Server/Nutrition/EntitySystems/SmokingSystem.cs:118-175`).
+  slot (`Content.Server/Nutrition/EntitySystems/SmokingSystem.cs:118-175`). The bowl also takes anything with
+  the `WFBaggable` tag, which adds dried cannabis, tobacco and shrooms; a stack loads one piece and hands back the
+  rest. The sprite shows the water level, a loaded bowl, and an animated ember and smoke while lit
+  (`WFBongVisuals`).
 - **Smokable solids.** Crack rocks, crystal shards, opium and hash fit pipe and bong bowls.
 - **Second-hand smoke** (`WFSecondhandSmokeSystem`). Lit smokables and bong hits release `Gas.Smoke` (0.3 mol per
   unit smoked) and move 15% of what was smoked into a reservoir at the source. Every 2 s, anyone breathing without
@@ -453,7 +456,7 @@ synthetic HUD (`Content.Server/_WF/Wolfmed/Hud/WolfmedSyntheticHudSystem.cs`, cl
   `FentanylSolidified` uses (`Resources/Prototypes/_Mono/Entities/Objects/Misc/solids.yml`).
 - The Strangers dealer (`Resources/Prototypes/_WF/Strangers/dialogues.yml:7`) sells low-grade product, seeds,
   the purity tester and neuroware copies. The Reaver runner (`WFEncounterReaverDealer`, a trader ship flying
-  Ashfall colours) sells higher grades and takes drugs as part payment; the Underground market tab buys and sells them
+  Ashfall colours) sells full grades, seeds, kit and pristine sticks, and buys nothing; the Underground market tab buys and sells them
   too. The bong is crafted from two glass and one plastic.
 - Bench laws (`Resources/Prototypes/_WF/Bench/laws.yml`): add narcotics possession and trafficking, and unlawful
   neuroware loading onto an unwilling host.

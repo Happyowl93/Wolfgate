@@ -45,7 +45,7 @@ Substances are grown (coca, the opium poppy, cannabis pressed into hash) or cook
 solids keep their grade. Flour cuts cocaine and heroin (`fillers` on `wfReactionPurity`). `WFDeliverySystem` adds powder lines from a baggie and the bong; `WFSecondhandSmokeSystem` puts smoke
 gas and a share of everything smoked into the air, and doses whoever breathes it nearby. Products are Class 3
 contraband with grade-scaled prices, a sale tax and a sold alert; the Strangers dealer sells cut stock, a Reaver
-runner (`WFEncounterReaverDealer`, a trader encounter) sells full grade and takes drugs as payment, the bong is
+runner (`WFEncounterReaverDealer`, a trader encounter) sells full grade and buys nothing, the bong is
 crafted from glass and plastic, and the uplink chemicals tab lists a few. The Bench has three laws
 for it and the Medical guide a player page.
 
@@ -309,7 +309,9 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Resources/Prototypes/Entities/Markers/Spawners/Random/maintenance.yml`](../../../Resources/Prototypes/Entities/Markers/Spawners/Random/maintenance.yml): neuroware sticks turn up in maintenance
 - [`Resources/Prototypes/Entities/Markers/Spawners/Random/Salvage/tables_loot.yml`](../../../Resources/Prototypes/Entities/Markers/Spawners/Random/Salvage/tables_loot.yml): neuroware sticks turn up in salvage treasure
 - [`Resources/Prototypes/Entities/Objects/Consumable/Smokeables/Cigarettes/cigarette.yml`](../../../Resources/Prototypes/Entities/Objects/Consumable/Smokeables/Cigarettes/cigarette.yml): the THC cigarette held plant fertiliser instead of THC
-- [`Resources/Prototypes/Entities/Objects/Specific/Hydroponics/leaves.yml`](../../../Resources/Prototypes/Entities/Objects/Specific/Hydroponics/leaves.yml): fits a baggie
+- [`Resources/Prototypes/Entities/Objects/Specific/Hydroponics/leaves.yml`](../../../Resources/Prototypes/Entities/Objects/Specific/Hydroponics/leaves.yml)
+  - fits a baggie
+  - fits a baggie and a bong bowl
 - [`Resources/Prototypes/Guidebook/medical.yml`](../../../Resources/Prototypes/Guidebook/medical.yml): drugs, grades and neuroware
 - [`Resources/Prototypes/Hydroponics/seeds.yml`](../../../Resources/Prototypes/Hydroponics/seeds.yml): the opium poppy is a poppy mutation
 - [`Resources/Prototypes/Reagents/cleaning.yml`](../../../Resources/Prototypes/Reagents/cleaning.yml)

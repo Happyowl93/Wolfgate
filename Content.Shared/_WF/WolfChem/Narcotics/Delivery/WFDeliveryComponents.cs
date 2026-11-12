@@ -73,6 +73,14 @@ public sealed partial class WFBongComponent : Component
     public bool Lit;
 }
 
+/// <summary>Appearance keys for the bong: whether the bowl is loaded, and whether it is burning.</summary>
+[Serializable, NetSerializable]
+public enum WFBongVisuals : byte
+{
+    Loaded,
+    Lit,
+}
+
 [Serializable, NetSerializable]
 public sealed partial class WFSnortLineDoAfterEvent : SimpleDoAfterEvent;
 
