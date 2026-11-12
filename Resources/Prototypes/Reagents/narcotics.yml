@@ -52,31 +52,25 @@
         profile: WFCrystal
         perUnit: 1
       # WOLFGATE END
-      - !type:MovespeedModifier
-        walkSpeedModifier: 1.25
-        sprintSpeedModifier: 1.25
+      # WOLFGATE(Narcotics) START: the speed is on the Crystal profile's tiers, so tolerance and the Burst twin get it
+      # - !type:MovespeedModifier
+      #   walkSpeedModifier: 1.25
+      #   sprintSpeedModifier: 1.25
+      # WOLFGATE END
       - !type:GenericStatusEffect
         key: Stutter
         component: StutteringAccent
       - !type:Jitter
-      - !type:GenericStatusEffect
-        # WOLFGATE(Narcotics) START: only a heavy dose shrugs off stuns, so Redline stays the combat drug
-        conditions:
-        - !type:ReagentThreshold
-          min: 8
-        # WOLFGATE END
-        key: Stun
-        time: 0.5 # WOLFGATE(Narcotics): was 3
-        type: Remove
-      - !type:GenericStatusEffect
-        # WOLFGATE(Narcotics) START: heavy dose only
-        conditions:
-        - !type:ReagentThreshold
-          min: 8
-        # WOLFGATE END
-        key: KnockedDown
-        time: 0.5 # WOLFGATE(Narcotics): was 3
-        type: Remove
+      # WOLFGATE(Narcotics) START: stun resistance is a trait of the Crystal profile's heavy tier
+      # - !type:GenericStatusEffect
+      #   key: Stun
+      #   time: 3
+      #   type: Remove
+      # - !type:GenericStatusEffect
+      #   key: KnockedDown
+      #   time: 3
+      #   type: Remove
+      # WOLFGATE END
       - !type:GenericStatusEffect
         conditions:
         - !type:ReagentThreshold
@@ -85,24 +79,16 @@
         key: Drowsiness
         time: 10
         type: Remove
-      - !type:GenericStatusEffect # goob edit
-        # WOLFGATE(Narcotics) START: heavy dose only
-        conditions:
-        - !type:ReagentThreshold
-          min: 8
-        # WOLFGATE END
-        key: Adrenaline
-        component: StamcritResist
-        time: 5
-      - !type:GenericStatusEffect # goob edit
-        # WOLFGATE(Narcotics) START: heavy dose only
-        conditions:
-        - !type:ReagentThreshold
-          min: 8
-        # WOLFGATE END
-        key: Adrenaline
-        component: IgnoreSlowOnDamage
-        time: 5
+      # WOLFGATE(Narcotics) START: stamina-crit resistance and no damage slowdown are traits of the Crystal profile's heavy tier
+      # - !type:GenericStatusEffect # goob edit
+      #   key: Adrenaline
+      #   component: StamcritResist
+      #   time: 5
+      # - !type:GenericStatusEffect # goob edit
+      #   key: Adrenaline
+      #   component: IgnoreSlowOnDamage
+      #   time: 5
+      # WOLFGATE END
       # WOLFGATE(Wolfmed): PROTO J: Onyx's <Onyx-PartPain> block on Desoxyephedrine. Group is Narcotic, not Onyx's
       # Bloodstream - Wolfgate splits this reagent across Poison/Narcotic/Medicine and the drug effects live here.
       - !type:SuppressPain
@@ -136,10 +122,11 @@
   metabolisms:
     Narcotic:
       effects:
-      # WOLFGATE(Narcotics) START: a weak dose of the Crystal profile
+      # WOLFGATE(Narcotics) START: builds the stimulant habit; it keeps its own speed, so it doesn't raise Crystal's level
       - !type:WFDose
         profile: WFCrystal
         perUnit: 0.25
+        dependenceOnly: true
       # WOLFGATE END
       - !type:HealthChange
         conditions:

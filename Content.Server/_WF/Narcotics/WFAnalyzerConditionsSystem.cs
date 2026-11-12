@@ -192,7 +192,7 @@ public sealed class WFAnalyzerConditionsSystem : EntitySystem
                 foreach (var group in metabolizer.MetabolismGroups)
                 {
                     if (proto.Metabolisms.TryGetValue(group.Id, out var entry))
-                        rate = (entry.MetabolismRate * group.MetabolismRateModifier).Float();
+                        rate = entry.MetabolismRate.Float() * group.MetabolismRateModifier.Float();
                 }
 
                 var key = (soln.Value.Owner, proto.ID);

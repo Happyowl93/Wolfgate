@@ -48,6 +48,14 @@ public sealed class DependenceTest
                 Assert.That(dep.Tolerance[WFDrugFamily.Opioid], Is.EqualTo(0.2f).Within(0.001f));
             });
 
+            var patient = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            intox.RegisterDose(patient, Profile, 4f, false);
+            Assert.Multiple(() =>
+            {
+                Assert.That(entMan.HasComponent<WFIntoxicationComponent>(patient), Is.False, "A dose that gives no level tracks no high.");
+                Assert.That(entMan.GetComponent<WFDependenceComponent>(patient).Meter[WFDrugFamily.Opioid], Is.EqualTo(0.4f).Within(0.001f));
+            });
+
             intox.Tick(1f);
             Assert.That(intox.GetLevel(mob, Profile), Is.EqualTo(2.8f).Within(0.001f), "Tolerance speeds up decay.");
 

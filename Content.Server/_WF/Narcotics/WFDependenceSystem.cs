@@ -63,7 +63,7 @@ public sealed class WFDependenceSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<WFIntoxicationComponent, WFDrugDosedEvent>(OnDosed);
+        SubscribeLocalEvent<WFDependenceComponent, WFDrugDosedEvent>(OnDosed);
         SubscribeLocalEvent<WFDependenceComponent, WFDrugDecayEvent>(OnDecay);
         SubscribeLocalEvent<WFDependentStimulantComponent, ComponentStartup>((uid, comp, _) => ApplyTrait(uid, comp));
         SubscribeLocalEvent<WFDependentOpioidComponent, ComponentStartup>((uid, comp, _) => ApplyTrait(uid, comp));
@@ -89,9 +89,9 @@ public sealed class WFDependenceSystem : EntitySystem
         dep.SinceUse.TryAdd(trait.Family, 0f);
     }
 
-    private void OnDosed(Entity<WFIntoxicationComponent> ent, ref WFDrugDosedEvent args)
+    private void OnDosed(Entity<WFDependenceComponent> ent, ref WFDrugDosedEvent args)
     {
-        var dep = EnsureComp<WFDependenceComponent>(ent);
+        var dep = ent.Comp;
         var family = args.Family;
         dep.Meter[family] = Math.Clamp(dep.Meter.GetValueOrDefault(family) + args.DependenceGain, 0f, 1f);
         dep.Tolerance[family] = Math.Clamp(dep.Tolerance.GetValueOrDefault(family) + args.DependenceGain * ToleranceRatio, 0f, 1f);

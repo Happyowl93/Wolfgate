@@ -37,6 +37,7 @@ public sealed partial class WFDose : EntityEffect
         }
 
         var grade = reagent.Source != null && reagent.Reagent != null ? reagent.Source.GetPurity(reagent.Reagent.ID) : 1f;
-        intoxication.RegisterDose(args.TargetEntity, Profile, PerUnit * reagent.Quantity.Float() * grade);
+        intoxication.RegisterDose(args.TargetEntity, Profile, PerUnit * reagent.Quantity.Float() * grade,
+            !DependenceOnly);
     }
 }

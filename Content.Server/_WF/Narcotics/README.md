@@ -206,11 +206,11 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
   - was 2
   - the crystal high and its effects last while it stays in the blood
   - doses the Crystal profile for its overlay, dependence and crash
-  - only a heavy dose shrugs off stuns, so Redline stays the combat drug
-  - was 3
-  - heavy dose only
+  - the speed is on the Crystal profile's tiers, so tolerance and the Burst twin get it
+  - stun resistance is a trait of the Crystal profile's heavy tier
+  - stamina-crit resistance and no damage slowdown are traits of the Crystal profile's heavy tier
   - clears with the rest of the crystal
-  - a weak dose of the Crystal profile
+  - builds the stimulant habit; it keeps its own speed, so it doesn't raise Crystal's level
   - a cannabis high lasts while the THC stays in the blood
   - doses the Cannabis profile
   - was -1 a tick at 25x the clearance

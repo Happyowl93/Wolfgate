@@ -85,14 +85,19 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
 
     /// <summary>
     /// Counts a dose towards dependence without raising the level, for a drug whose level follows the blood. Starts
-    /// tracking the body if it wasn't already.
+    /// tracking the body if it wasn't already, unless <paramref name="track"/> is false: a dose that gives no level
+    /// has nothing to track.
     /// </summary>
-    public void RegisterDose(EntityUid uid, ProtoId<WFDrugProfilePrototype> profile, float amount)
+    public void RegisterDose(EntityUid uid, ProtoId<WFDrugProfilePrototype> profile, float amount, bool track = true)
     {
         if (amount <= 0f || !Proto.TryIndex(profile, out var proto))
             return;
 
-        EnsureComp<WFIntoxicationComponent>(uid);
+        if (track)
+            EnsureComp<WFIntoxicationComponent>(uid);
+        if (proto.DependenceGain > 0f)
+            EnsureComp<WFDependenceComponent>(uid);
+
         var ev = new WFDrugDosedEvent(profile, proto.Family, amount, proto.DependenceGain * amount);
         RaiseLocalEvent(uid, ref ev);
     }

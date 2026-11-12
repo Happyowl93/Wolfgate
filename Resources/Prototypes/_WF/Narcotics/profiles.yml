@@ -252,8 +252,9 @@
     banner: wf-neuroware-null-loop-banner
     faults: [ wf-neuroware-null-loop-fault-1, wf-neuroware-null-loop-fault-2 ]
 
-# Crystal: Desoxyephedrine keeps its own effects; the profile adds the overlay, dependence and a long crash. Meth
-# clears at 0.01 (the heart removes one group's amount), so a 5 u shard lasts about eight minutes.
+# Crystal: the speed and the heavy dose's stun, stamina-crit and slowdown resistance are here, so tolerance blunts
+# them and the Burst twin has them; Desoxyephedrine keeps its damage, jitter and pain relief. Meth clears at 0.01
+# (the heart removes one group's amount), so a 5 u shard lasts about eight minutes.
 - type: wfDrugProfile
   id: WFCrystal
   family: Stimulant
@@ -262,11 +263,16 @@
   dependenceGain: 0.02
   tiers:
   - min: 1
+    speed: 1.25
     overlay: 0.4
   - min: 8
+    speed: 1.25
     overlay: 0.6
+    traits: [ StunResistance, StaminaCritResistance, IgnoreDamageSlowdown ]
   - min: 15
+    speed: 1.25
     overlay: 0.8
+    traits: [ StunResistance, StaminaCritResistance, IgnoreDamageSlowdown ]
   crash:
     after: 60
     duration: 120
