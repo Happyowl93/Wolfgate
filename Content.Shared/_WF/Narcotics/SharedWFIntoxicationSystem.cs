@@ -45,6 +45,14 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
         return false;
     }
 
+    /// <summary>How much a family's tolerance blunts its drugs in the blood: 1 with none, up to 2.</summary>
+    public float ToleranceFactor(EntityUid uid, WFDrugFamily family)
+    {
+        var ev = new WFDrugDecayEvent(family);
+        RaiseLocalEvent(uid, ref ev);
+        return ev.Multiplier;
+    }
+
     /// <summary>Raises a profile's fed level, as a metabolised dose or a neuroware program does.</summary>
     public void AddLevel(EntityUid uid, ProtoId<WFDrugProfilePrototype> profile, float amount)
     {

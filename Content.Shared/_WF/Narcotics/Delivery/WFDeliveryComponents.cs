@@ -16,7 +16,7 @@ public sealed partial class WFBaggieComponent : Component
 
     /// <summary>Units in one line.</summary>
     [DataField]
-    public FixedPoint2 LineAmount = FixedPoint2.New(5);
+    public FixedPoint2 LineAmount = FixedPoint2.New(2.5);
 
     [DataField]
     public EntProtoId Line = "WFPowderLine";

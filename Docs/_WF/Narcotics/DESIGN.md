@@ -182,8 +182,9 @@ Prototype kind `wfDrugProfile`:
 - `WFDependenceComponent`: a 0-1 meter per family, the last dose time per family, and tolerance per family.
 - Gain comes from `dependenceGain`. The meter decays slowly while clean (start: 0.02 per minute), so a single
   binge fades within the round and regular use doesn't.
-- Tolerance rises with use and shortens the high by speeding up `decay` (up to x2). It doesn't weaken effects, so
-  the pull is toward dosing more often.
+- Tolerance rises with use (half the dependence gained) and divides the blood level by `1 + tolerance` (up to x2),
+  and speeds a fed level's `decay` by as much. Every tier threshold, the overdose included, effectively rises with
+  it, as does heroin's sedation (`WFSedation`), so the pull is toward dosing more.
 - Withdrawal starts when a family's meter is above 0.5 and no profile of that family has been above its first
   tier for 5 minutes. Stages by meter: popups and cravings; then jitter, a stamina cap and pain; `Opioid` and
   `Stimulant` add vomiting and drowsiness at the top stage. A dose of the family ends it at once. Withdrawal
@@ -259,7 +260,7 @@ ends, every changed sound gets its own pitch back and loses the reverb; area ech
 | `WFCocaine` | Cocaine | Stimulant | Social | Speed x1.1, faster stamina recovery, light pain suppression, talkative popups. Short | Jitter and anxiety at the high tier; a crash of drowsiness and slowed stamina. Overdose: heart strain (`WFStrainHeart`), Asphyxiation | Snorted |
 | `WFCrack` | Crack | Stimulant | Cheap, fast | Cocaine's high, stronger and a third as long | Triple `dependenceGain`; harsher crash | Smoked |
 | `WFOpium` | Opium | Opioid | Social downer | Moderate pain relief, calm | Drowsiness | Smoked |
-| `WFHeroin` | Heroin | Opioid | Hard downer | Strong pain relief through `WolfmedPainRelief`, euphoria | Nodding off (brief forced sleep), slow movement. Overdose is the existing sedation airloss. Naloxone reverses it | Injected, smoked |
+| `WFHeroin` | Heroin | Opioid | Hard downer | Strong pain relief through `WolfmedPainRelief`, euphoria | Nodding off (brief forced sleep), slow movement. Overdose is Wolfmed's sedation airloss through `WFSedation`, graded and blunted by tolerance. Naloxone reverses it | Injected, smoked |
 | Desoxyephedrine (existing) | Crystal | Stimulant | Combat stimulant | Unchanged effects; gains `WFDose` for dependence and the overlay | Unchanged Poison; adds a long crash | Smoked as crystal, or as today |
 | `WFRedline` | Redline | Combat | Offence | Speed x1.3, stun and knockdown resistance, no slowdown from damage, pain immunity | Heart damage every tick; can't sprint-stop cleanly (jitter); when it ends, a 60 s collapse at speed x0.5 with a stamina cap. Overdose: cardiac arrest | Injected |
 | `WFAnvil` | Anvil | Combat | Endurance | Incoming Brute and Burn reduced 30%, pain immunity, stamina-crit resistance | Speed x0.85; the user's own damage readout is hidden while high; damage avoided is repaid at 40% as Poison over the crash. Overdose: organ damage | Injected |

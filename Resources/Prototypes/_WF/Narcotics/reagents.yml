@@ -1,7 +1,7 @@
 # Street drugs. Each one's high lives in its wfDrugProfile (profiles.yml); the reagent only doses it, so the
 # neuroware twin and the reagent stay identical. Effects that need reagent args, such as sedation, stay here.
 # The dose is inBlood: the high follows the units left in the blood, so metabolismRate sets how long it lasts. At
-# 0.01 a 5 u line stays about 8 minutes; crack and the combat drugs clear at 0.02.
+# 0.01 a 2.5 u line stays about 4 minutes; crack and the combat drugs clear at 0.02.
 # pricePerUnit is street value at full grade; pricing scales it by the solution's grade.
 
 - type: reagent
@@ -93,11 +93,11 @@
         perUnit: 1
         inBlood: true
       # Sedation follows the units in the blood, so the overdose is Wolfmed's sedation airloss and Naloxone reverses
-      # it. The relief itself is on the profile.
-      - !type:WolfmedPainRelief
-        tier: Strong
-        strength: 0
-        sedationPerUnit: 0.12
+      # it. 0.045 a graded, tolerance-blunted unit puts the airloss threshold (0.6) at level 13.3, just under the
+      # overdose tier. The relief itself is on the profile.
+      - !type:WFSedation
+        profile: WFHeroin
+        sedationPerUnit: 0.045
 
 - type: reagent
   id: WFRedlineBase

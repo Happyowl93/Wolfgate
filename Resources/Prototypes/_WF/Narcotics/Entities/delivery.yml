@@ -25,7 +25,7 @@
     solutions:
       # One baggie line (WFBaggie lineAmount).
       line:
-        maxVol: 5
+        maxVol: 2.5
   - type: ExaminableSolution
     solution: line
   - type: WFPowderLine

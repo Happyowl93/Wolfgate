@@ -43,7 +43,7 @@ public sealed class DeliveryTest
             var line = delivery.TryPlaceLine((baggie, entMan.GetComponent<WFBaggieComponent>(baggie)), user, map.GridCoords);
             Assert.That(line, Is.Not.Null);
             Assert.That(delivery.Snort((line!.Value, entMan.GetComponent<WFPowderLineComponent>(line.Value)), user), Is.True);
-            Assert.That(InBlood(user, "WFCocaine"), Is.EqualTo(FixedPoint2.New(5)), "A line is 5 u.");
+            Assert.That(InBlood(user, "WFCocaine"), Is.EqualTo(FixedPoint2.New(2.5)), "A line is 2.5 u.");
 
             var smoker = entMan.SpawnEntity("MobHuman", map.GridCoords);
             var bong = entMan.SpawnEntity("WFBongFilled", map.GridCoords);

@@ -3,6 +3,11 @@ reagent-effect-guidebook-wf-dose =
         [1] Gets
         *[other] get
     } the user high; purer product hits harder and builds dependence faster
+reagent-effect-guidebook-wf-sedation =
+    { $chance ->
+        [1] Sedates
+        *[other] sedate
+    } the user, and past the overdose slows their breathing; tolerance and a weaker grade blunt it
 reagent-effect-guidebook-wf-clear-intoxication =
     { $chance ->
         [1] Reverses

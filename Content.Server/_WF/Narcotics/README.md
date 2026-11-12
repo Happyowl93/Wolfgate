@@ -63,6 +63,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.Shared/_WF/Narcotics/WFDrugProfilePrototype.cs`](../../../Content.Shared/_WF/Narcotics/WFDrugProfilePrototype.cs)
 - [`Content.Shared/_WF/Narcotics/WFIntoxicationComponent.cs`](../../../Content.Shared/_WF/Narcotics/WFIntoxicationComponent.cs)
 - [`Content.Shared/_WF/Narcotics/WFNeurowareHostComponent.cs`](../../../Content.Shared/_WF/Narcotics/WFNeurowareHostComponent.cs)
+- [`Content.Shared/_WF/Narcotics/WFSedation.cs`](../../../Content.Shared/_WF/Narcotics/WFSedation.cs)
 
 ### Client
 
@@ -79,6 +80,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/DeliveryTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DeliveryTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/DependenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DependenceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/DrugSpeechTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DrugSpeechTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Narcotics/HeroinSedationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/HeroinSedationTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/RadioProbeSystem.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/RadioProbeSystem.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/SecondhandSmokeTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/SecondhandSmokeTest.cs)

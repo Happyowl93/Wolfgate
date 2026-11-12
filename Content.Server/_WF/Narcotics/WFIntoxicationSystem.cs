@@ -78,10 +78,9 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
             }
 
             // Tolerance speeds the fed level's decay and blunts the blood's.
-            var decay = new WFDrugDecayEvent(proto.Family);
-            RaiseLocalEvent(uid, ref decay);
-            var fed = Decayed(proto, comp.Fed.GetValueOrDefault(profile), decay.Multiplier * seconds);
-            var fromBlood = _blood.GetValueOrDefault(profile) / decay.Multiplier;
+            var tolerance = ToleranceFactor(uid, proto.Family);
+            var fed = Decayed(proto, comp.Fed.GetValueOrDefault(profile), tolerance * seconds);
+            var fromBlood = _blood.GetValueOrDefault(profile) / tolerance;
             var level = fed + fromBlood;
             var tier = proto.TierAt(level);
 
