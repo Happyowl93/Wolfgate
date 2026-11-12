@@ -325,7 +325,7 @@
     # - PsionicsDisabled
     # - PsionicallyInsulated
     - Flashed # Goobstation
-    # WOLFGATE(Neuroware) START: neuroware twins apply these to a synthetic's own body
+    # WOLFGATE(WolfChem) START: neuroware twins apply these to a synthetic's own body
     - Drunk
     - Drowsiness
     - ForcedSleep

@@ -81,7 +81,7 @@ namespace Content.Server.Chemistry.EntitySystems
             var state = new ChemMasterBoundUserInterfaceState(
                 chemMaster.Mode, chemMaster.SortingType, BuildInputContainerInfo(inputContainer), BuildOutputContainerInfo(outputContainer),
                 bufferReagents, bufferCurrentVolume, chemMaster.PillType, chemMaster.PillDosageLimit, updateLabel, chemMaster.DrawSource);
-            state.WFBufferPurity = bufferSolution.Purity; // WOLFGATE(Purity)
+            state.WFBufferPurity = bufferSolution.Purity; // WOLFGATE(WolfChem)
 
             _userInterfaceSystem.SetUiState(owner, ChemMasterUiKey.Key, state);
         }
@@ -164,9 +164,9 @@ namespace Content.Server.Chemistry.EntitySystems
             if (fromBuffer) // Buffer to container
             {
                 amount = FixedPoint2.Min(amount, containerSolution.AvailableVolume);
-                var wfGrade = bufferSolution.GetPurity(id.Prototype); // WOLFGATE(Purity): read before the removal prunes it
+                var wfGrade = bufferSolution.GetPurity(id.Prototype); // WOLFGATE(WolfChem): read before the removal prunes it
                 amount = bufferSolution.RemoveReagent(id, amount, preserveOrder: true);
-                // WOLFGATE(Purity) START: the reagent keeps its grade on the way out of the buffer
+                // WOLFGATE(WolfChem) START: the reagent keeps its grade on the way out of the buffer
                 // _solutionContainerSystem.TryAddReagent(containerSoln.Value, id, amount, out var _);
                 containerSolution.AddReagent(id, amount, wfGrade);
                 _solutionContainerSystem.UpdateChemicals(containerSoln.Value);
@@ -175,9 +175,9 @@ namespace Content.Server.Chemistry.EntitySystems
             else // Container to buffer
             {
                 amount = FixedPoint2.Min(amount, containerSolution.GetReagentQuantity(id));
-                var wfGrade = containerSolution.GetPurity(id.Prototype); // WOLFGATE(Purity): read before the removal prunes it
+                var wfGrade = containerSolution.GetPurity(id.Prototype); // WOLFGATE(WolfChem): read before the removal prunes it
                 _solutionContainerSystem.RemoveReagent(containerSoln.Value, id, amount);
-                // WOLFGATE(Purity) START: the reagent keeps its grade on the way into the buffer
+                // WOLFGATE(WolfChem) START: the reagent keeps its grade on the way into the buffer
                 // bufferSolution.AddReagent(id, amount);
                 bufferSolution.AddReagent(id, amount, wfGrade);
                 // WOLFGATE END
@@ -425,7 +425,7 @@ namespace Content.Server.Chemistry.EntitySystems
         {
             return new ContainerInfo(name, solution.Volume, solution.MaxVolume)
             {
-                Purity = solution.Purity, // WOLFGATE(Purity)
+                Purity = solution.Purity, // WOLFGATE(WolfChem)
                 Reagents = solution.Contents
             };
         }

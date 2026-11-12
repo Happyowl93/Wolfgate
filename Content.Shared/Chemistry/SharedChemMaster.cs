@@ -169,7 +169,7 @@ namespace Content.Shared.Chemistry
 
         public List<ReagentQuantity>? Reagents { get; init; }
 
-        public Dictionary<string, float>? Purity { get; init; } // WOLFGATE(Purity): grades of Reagents
+        public Dictionary<string, float>? Purity { get; init; } // WOLFGATE(WolfChem): grades of Reagents
 
         public ContainerInfo(string displayName, FixedPoint2 currentVolume, FixedPoint2 maxVolume)
         {
@@ -203,7 +203,7 @@ namespace Content.Shared.Chemistry
 
         public readonly ChemMasterDrawSource DrawSource;
 
-        public Dictionary<string, float>? WFBufferPurity { get; set; } // WOLFGATE(Purity): grades of BufferReagents
+        public Dictionary<string, float>? WFBufferPurity { get; set; } // WOLFGATE(WolfChem): grades of BufferReagents
 
         public ChemMasterBoundUserInterfaceState(
             ChemMasterMode mode, ChemMasterSortingType sortingType, ContainerInfo? inputContainerInfo, ContainerInfo? outputContainerInfo,

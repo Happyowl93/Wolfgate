@@ -117,7 +117,7 @@
       - id: BalloonCorgi
       - id: MysteryFigureBox
       - id: RubberChicken
-      # WOLFGATE(Neuroware) START: neuroware sticks turn up in maintenance
+      # WOLFGATE(WolfChem) START: neuroware sticks turn up in maintenance
       - !type:NestedSelector
         tableId: WFNeurowareStickLoot
       # WOLFGATE END

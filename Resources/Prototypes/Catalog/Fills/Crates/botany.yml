@@ -20,7 +20,7 @@
         amount: 2
       - id: BungoSeeds
         amount: 2
-      # WOLFGATE(Narcotics) START: drug crops come only from this crate and dealers
+      # WOLFGATE(WolfChem) START: drug crops come only from this crate and dealers
       - id: WFCocaSeeds
         amount: 2
       - id: WFOpiumPoppySeeds

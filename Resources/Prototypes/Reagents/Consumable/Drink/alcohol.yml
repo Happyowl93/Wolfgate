@@ -168,7 +168,7 @@
   meltingPoint: -114.1
   metabolisms:
     Alcohol:
-      metabolismRate: 0.25 # WOLFGATE(Narcotics): drunk lasts while ethanol does, so it clears at half speed to keep the old duration
+      metabolismRate: 0.25 # WOLFGATE(WolfChem): drunk lasts while ethanol does, so it clears at half speed to keep the old duration
       effects:
       - !type:HealthChange
         conditions:
@@ -182,7 +182,7 @@
           shouldHave: false
         damage:
           types:
-            Poison: 0.5 # WOLFGATE(Narcotics): halved since ethanol now stays twice as long above the threshold
+            Poison: 0.5 # WOLFGATE(WolfChem): halved since ethanol now stays twice as long above the threshold
       # dwarves take less toxin damage and heal a marginal amount of brute
       # - !type:HealthChange
       #   conditions:
@@ -201,7 +201,7 @@
           type: Dwarf
         damage:
           groups:
-            Brute: -0.5 # WOLFGATE(Narcotics): halved since ethanol now stays twice as long above the threshold
+            Brute: -0.5 # WOLFGATE(WolfChem): halved since ethanol now stays twice as long above the threshold
       - !type:HealthChange
         conditions:
         - !type:ReagentThreshold
@@ -210,9 +210,9 @@
           type: Yowie
         damage:
           groups:
-            Brute: -0.5 # WOLFGATE(Narcotics): halved since ethanol now stays twice as long above the threshold
+            Brute: -0.5 # WOLFGATE(WolfChem): halved since ethanol now stays twice as long above the threshold
       - !type:ChemVomit
-        probability: 0.02 # WOLFGATE(Narcotics): halved since ethanol now stays twice as long above the threshold
+        probability: 0.02 # WOLFGATE(WolfChem): halved since ethanol now stays twice as long above the threshold
         conditions:
         - !type:ReagentThreshold
           reagent: Ethanol
@@ -226,7 +226,7 @@
           shouldHave: false
       - !type:Drunk
         boozePower: 2
-        perUnitInBlood: 10 # WOLFGATE(Narcotics): drunkenness follows the ethanol left in the blood
+        perUnitInBlood: 10 # WOLFGATE(WolfChem): drunkenness follows the ethanol left in the blood
 
 - type: reagent
   id: Gin

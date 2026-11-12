@@ -28,7 +28,7 @@ namespace Content.Server.Body.Systems
         [Dependency] private ISharedAdminLogManager _adminLogger = default!;
         [Dependency] private MobStateSystem _mobStateSystem = default!;
         [Dependency] private SharedSolutionContainerSystem _solutionContainerSystem = default!;
-        [Dependency] private Content.Server._WF.Purity.WFPuritySystem _wfPurity = default!; // WOLFGATE(Purity): impurity damage
+        [Dependency] private Content.Server._WF.WolfChem.Purity.WFPuritySystem _wfPurity = default!; // WOLFGATE(WolfChem): impurity damage
 
         private EntityQuery<OrganComponent> _organQuery;
         private EntityQuery<SolutionContainerManagerComponent> _solutionQuery;
@@ -188,7 +188,7 @@ namespace Content.Server.Body.Systems
                     if (!proto.Metabolisms.TryGetValue(group.Id, out var entry))
                         continue;
 
-                    // WOLFGATE(Narcotics) START: a rate below 0.01 u a tick builds up instead of rounding to nothing
+                    // WOLFGATE(WolfChem) START: a rate below 0.01 u a tick builds up instead of rounding to nothing
                     // var rate = entry.MetabolismRate * group.MetabolismRateModifier;
                     //
                     // // Remove $rate, as long as there's enough reagent there to actually remove that much
@@ -197,7 +197,7 @@ namespace Content.Server.Body.Systems
                     // float scale = (float) mostToRemove / (float) rate;
                     mostToRemove = WFGranularRate(ent, reagent.Prototype, group.Id, entry.MetabolismRate, group.MetabolismRateModifier, quantity, out var scale);
                     // WOLFGATE END
-                    scale *= solution.GetPurity(reagent.Prototype); // WOLFGATE(Purity): a graded reagent works at its grade
+                    scale *= solution.GetPurity(reagent.Prototype); // WOLFGATE(WolfChem): a graded reagent works at its grade
 
                     // if it's possible for them to be dead, and they are,
                     // then we shouldn't process any effects, but should probably
@@ -241,14 +241,14 @@ namespace Content.Server.Body.Systems
                 // remove a certain amount of reagent
                 if (mostToRemove > FixedPoint2.Zero)
                 {
-                    _wfPurity.ApplyImpurity(ent.Comp2?.Body ?? solutionEntityUid.Value, mostToRemove, solution.GetPurity(reagent.Prototype), proto.Group); // WOLFGATE(Purity): the impure fraction is toxic
+                    _wfPurity.ApplyImpurity(ent.Comp2?.Body ?? solutionEntityUid.Value, mostToRemove, solution.GetPurity(reagent.Prototype), proto.Group); // WOLFGATE(WolfChem): the impure fraction is toxic
                     solution.RemoveReagent(reagent, mostToRemove);
                     // Frontier: do not count cryogenics chems against the reagent limit (to buff cryo meds)
                     if (!proto.Metabolisms.ContainsKey("Cryogenic"))
                         reagents++;
                     // End Frontier
                 }
-                // WOLFGATE(Narcotics) START: a tick that only carries a slow rate over still takes a slot
+                // WOLFGATE(WolfChem) START: a tick that only carries a slow rate over still takes a slot
                 else if (WFTakeCarried() && !proto.Metabolisms.ContainsKey("Cryogenic"))
                 {
                     reagents++;

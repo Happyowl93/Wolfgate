@@ -62,7 +62,7 @@
   - type: Construction
     graph: smokeableGroundTobaccoShrooms
     node: ground
-  # WOLFGATE(Narcotics) START: fits a baggie
+  # WOLFGATE(WolfChem) START: fits a baggie
   - type: Tag
     tags:
     - WFBaggable

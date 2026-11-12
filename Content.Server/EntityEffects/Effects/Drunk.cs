@@ -18,7 +18,7 @@ public sealed partial class Drunk : EntityEffect
     [DataField]
     public bool SlurSpeech = true;
 
-    // WOLFGATE(Narcotics) START: drunkenness that follows the reagent in the blood
+    // WOLFGATE(WolfChem) START: drunkenness that follows the reagent in the blood
     /// <summary>
     ///     When above zero, holds the drunk timer at BoozePower times this per unit left in the blood, instead of
     ///     adding BoozePower each cycle.
@@ -40,11 +40,11 @@ public sealed partial class Drunk : EntityEffect
     {
         var boozePower = BoozePower;
 
-        // WOLFGATE(Narcotics) START: drunkenness that follows the reagent in the blood
+        // WOLFGATE(WolfChem) START: drunkenness that follows the reagent in the blood
         if (PerUnitInBlood > 0f && args is EntityEffectReagentArgs { Source: { } blood, Reagent: { } reagent })
         {
             var units = Math.Max(0f, blood.GetTotalPrototypeQuantity(reagent.ID).Float() - InBloodAbove);
-            args.EntityManager.System<Content.Server._WF.Narcotics.WFAlcoholSystem>()
+            args.EntityManager.System<Content.Server._WF.WolfChem.Narcotics.WFAlcoholSystem>()
                 .HoldDrunkenness(args.TargetEntity, BoozePower * PerUnitInBlood * units, SlurSpeech);
             return;
         }

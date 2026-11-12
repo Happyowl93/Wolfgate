@@ -1,4 +1,4 @@
-using Content.Shared._WF.Purity;
+using Content.Shared._WF.WolfChem.Purity;
 using System.Linq;
 using System.Numerics;
 using Content.Client._Onyx.Medical.HealthAnalyzer;

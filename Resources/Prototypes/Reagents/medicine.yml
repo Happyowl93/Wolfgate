@@ -15,7 +15,7 @@
       - !type:Drunk
         slurSpeech: false
         boozePower: 20
-        perUnitInBlood: 1.9 # WOLFGATE(Narcotics): drunkenness follows the units in the blood
+        perUnitInBlood: 1.9 # WOLFGATE(WolfChem): drunkenness follows the units in the blood
 
 - type: reagent
   id: Dylovene
@@ -29,7 +29,7 @@
     Medicine:
       metabolismRate: 0.2 # Mono
       effects:
-      # WOLFGATE(Narcotics) START: Dylovene flushes combat drugs, Redline and Anvil
+      # WOLFGATE(WolfChem) START: Dylovene flushes combat drugs, Redline and Anvil
       - !type:WFClearIntoxication
         family: Combat
         amount: 2
@@ -72,8 +72,8 @@
         conditions:
         - !type:ReagentThreshold
           min: 15
-        perUnitInBlood: 3.33 # WOLFGATE(Narcotics): drunkenness follows the units in the blood
-        inBloodAbove: 15 # WOLFGATE(Narcotics): drunkenness follows the units in the blood
+        perUnitInBlood: 3.33 # WOLFGATE(WolfChem): drunkenness follows the units in the blood
+        inBloodAbove: 15 # WOLFGATE(WolfChem): drunkenness follows the units in the blood
   plantMetabolism:
   - !type:PlantAdjustToxins
     amount: -10
@@ -197,13 +197,13 @@
         - !type:ReagentThreshold
           min: 16 #Mono 15 >> 16
       - !type:Drunk
-        # WOLFGATE(Narcotics) START: only in an overdose, like its jitter
+        # WOLFGATE(WolfChem) START: only in an overdose, like its jitter
         conditions:
         - !type:ReagentThreshold
           min: 16
         # WOLFGATE END
-        perUnitInBlood: 3.33 # WOLFGATE(Narcotics): drunkenness follows the units in the blood
-        inBloodAbove: 16 # WOLFGATE(Narcotics): drunkenness follows the units in the blood
+        perUnitInBlood: 3.33 # WOLFGATE(WolfChem): drunkenness follows the units in the blood
+        inBloodAbove: 16 # WOLFGATE(WolfChem): drunkenness follows the units in the blood
 
 - type: reagent
   id: Cryoxadone
@@ -243,7 +243,7 @@
             max: 213.0
           key: ForcedSleep
           component: ForcedSleeping
-          refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
+          refresh: true # WOLFGATE(WolfChem): held while it is in the blood instead of piling up each tick
           type: Add
 
 - type: reagent
@@ -276,7 +276,7 @@
             max: 213.0
           key: ForcedSleep
           component: ForcedSleeping
-          refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
+          refresh: true # WOLFGATE(WolfChem): held while it is in the blood instead of piling up each tick
           type: Add
 
 - type: reagent
@@ -1559,7 +1559,7 @@
             max: 217.15
           key: ForcedSleep
           component: ForcedSleeping
-          refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
+          refresh: true # WOLFGATE(WolfChem): held while it is in the blood instead of piling up each tick
           type: Add
 
 
@@ -1601,7 +1601,7 @@
           max: 213.0
         key: ForcedSleep
         component: ForcedSleeping
-        refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
+        refresh: true # WOLFGATE(WolfChem): held while it is in the blood instead of piling up each tick
         type: Add
 
 - type: reagent
@@ -1654,8 +1654,8 @@
         component: SeeingRainbows
         type: Add
         time: 8
-        refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
-      # WOLFGATE(Narcotics) START: Psicodine calms empathogen and cannabis highs
+        refresh: true # WOLFGATE(WolfChem): held while it is in the blood instead of piling up each tick
+      # WOLFGATE(WolfChem) START: Psicodine calms empathogen and cannabis highs
       - !type:WFClearIntoxication
         family: Empathogen
         amount: 2
@@ -1719,7 +1719,7 @@
   metabolisms:
     Medicine:
       effects:
-      # WOLFGATE(Narcotics) START: Haloperidol brings down stimulant and psychedelic highs
+      # WOLFGATE(WolfChem) START: Haloperidol brings down stimulant and psychedelic highs
       - !type:WFClearIntoxication
         family: Stimulant
         amount: 2
@@ -1736,7 +1736,7 @@
         component: Drowsiness
         time: 4
         type: Add
-        refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
+        refresh: true # WOLFGATE(WolfChem): held while it is in the blood instead of piling up each tick
       - !type:GenericStatusEffect
         key: Jitter
         time: 4.0

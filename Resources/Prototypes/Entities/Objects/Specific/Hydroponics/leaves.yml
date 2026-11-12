@@ -37,7 +37,7 @@
   - type: Sprite
     sprite: Objects/Specific/Hydroponics/tobacco.rsi
     state: dried
-  # WOLFGATE(Narcotics) START: fits a baggie
+  # WOLFGATE(WolfChem) START: fits a baggie
   - type: Tag
     tags:
     - WFBaggable
@@ -68,7 +68,7 @@
   - type: Tag
     tags:
       - Smokable
-      - WFBaggable # WOLFGATE(Narcotics): fits a baggie
+      - WFBaggable # WOLFGATE(WolfChem): fits a baggie
   - type: Item
     size: Tiny
     

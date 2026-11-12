@@ -85,9 +85,9 @@ namespace Content.Server.Body.Systems
                             if (reagent.Quantity > delta.ReagentQuantity.Quantity)
                                 reagent = new(reagent.Reagent, delta.ReagentQuantity.Quantity);
 
-                            var wfGrade = stomachSolution.GetPurity(reagent.Reagent.Prototype); // WOLFGATE(Purity): read before the removal prunes it
+                            var wfGrade = stomachSolution.GetPurity(reagent.Reagent.Prototype); // WOLFGATE(WolfChem): read before the removal prunes it
                             stomachSolution.RemoveReagent(reagent);
-                            // WOLFGATE(Purity) START: a digested reagent keeps its grade
+                            // WOLFGATE(WolfChem) START: a digested reagent keeps its grade
                             // transferSolution.AddReagent(reagent);
                             transferSolution.AddReagent(reagent.Reagent, reagent.Quantity, wfGrade);
                             // WOLFGATE END

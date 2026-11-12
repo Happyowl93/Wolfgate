@@ -1,0 +1,255 @@
+# Neuroware sticks. A blank takes copies; the named ones are pristine builds. Copying leaves the source's loads
+# alone, so a build spreads as far as there are blanks, 15% worse each generation. A stick's price doesn't follow
+# what is copied onto it, so copying doesn't print money.
+
+- type: entity
+  parent: BaseItem
+  id: WFNeurowareStick
+  components:
+  - type: Sprite
+    sprite: _WF/WolfChem/Neuroware/Objects/stick.rsi
+    layers:
+    - state: body
+      color: "#8c8c90"
+    - state: plug
+    - state: tape
+      map: [ "tape" ]
+      visible: false
+    - state: led
+      shader: unshaded
+      map: [ "led" ]
+      visible: false
+  # A blank that takes a copy gets a strip of tape and lights up.
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.WFNeurowareStickVisuals.Copied:
+        tape:
+          True: { visible: true }
+          False: { visible: false }
+        led:
+          True: { visible: true }
+          False: { visible: false }
+  - type: Item
+    size: Tiny
+  - type: WFNeurowareStick
+    loads: 0
+  - type: StaticPrice
+    price: 75
+
+# A stick with a program on it. It sells like any drug: contraband, and the sale moves money to the black market
+# and tips off security.
+- type: entity
+  abstract: true
+  parent: WFNeurowareStick
+  id: WFNeurowareStickProgramBase
+  components:
+  - type: WFNeurowareStick
+    loads: 3
+  - type: Contraband
+    severity: Class3Chem
+  - type: ItemTax
+    taxAccounts:
+      Medical: -0.05
+      nfsd: -0.1
+      BlackMarket: 0.25
+  - type: SoldAlert
+    groupId: WFNarcotics
+    maxPerSale: 100
+    channels:
+    - Security
+  - type: StaticPrice
+    price: 2200
+
+- type: entity
+  parent: WFNeurowareStickProgramBase
+  id: WFNeurowareStickWhiteline
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#f0f0f0"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    profile: WFCocaine
+
+- type: entity
+  parent: WFNeurowareStickProgramBase
+  id: WFNeurowareStickNullLoop
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#8a6a4a"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    profile: WFHeroin
+
+- type: entity
+  parent: WFNeurowareStickProgramBase
+  id: WFNeurowareStickBurst
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#9fdcff"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    profile: WFCrystal
+
+- type: entity
+  parent: WFNeurowareStickProgramBase
+  id: WFNeurowareStickRedline
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#e0202a"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    profile: WFRedline
+
+- type: entity
+  parent: WFNeurowareStickProgramBase
+  id: WFNeurowareStickDamper
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#5b6470"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    profile: WFAnvil
+
+- type: entity
+  parent: WFNeurowareStickProgramBase
+  id: WFNeurowareStickChoir
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#c79cff"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    profile: WFChorus
+
+- type: entity
+  parent: WFNeurowareStickProgramBase
+  id: WFNeurowareStickHalo
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#ffe28a"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    profile: WFHalo
+
+- type: entity
+  parent: WFNeurowareStickProgramBase
+  id: WFNeurowareStickIdle
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#6fae5a"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    profile: WFCannabis
+
+# Dealer copies: a generation or two off the original, one load each.
+- type: entity
+  parent: WFNeurowareStickWhiteline
+  id: WFNeurowareStickWhitelineCopy
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#f0f0f0"
+    - state: plug
+    - state: tape
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    integrity: 0.72
+    loads: 1
+  - type: StaticPrice
+    price: 600
+
+- type: entity
+  parent: WFNeurowareStickNullLoop
+  id: WFNeurowareStickNullLoopCopy
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#8a6a4a"
+    - state: plug
+    - state: tape
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    integrity: 0.72
+    loads: 1
+  - type: StaticPrice
+    price: 600
+
+- type: entity
+  parent: WFNeurowareStickBurst
+  id: WFNeurowareStickBurstCopy
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#9fdcff"
+    - state: plug
+    - state: tape
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    integrity: 0.72
+    loads: 1
+  - type: StaticPrice
+    price: 600
+
+- type: entity
+  parent: WFNeurowareStickIdle
+  id: WFNeurowareStickIdleCopy
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#6fae5a"
+    - state: plug
+    - state: tape
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    integrity: 0.72
+    loads: 1
+  - type: StaticPrice
+    price: 600

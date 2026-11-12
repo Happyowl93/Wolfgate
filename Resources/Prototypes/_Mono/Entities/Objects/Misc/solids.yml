@@ -9,7 +9,7 @@
     state: icon
   - type: Item
     size: Tiny
-  # WOLFGATE(Narcotics) START: fits a baggie
+  # WOLFGATE(WolfChem) START: fits a baggie
   - type: Tag
     tags:
     - WFBaggable
