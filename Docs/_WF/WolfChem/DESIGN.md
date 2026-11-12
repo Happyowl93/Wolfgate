@@ -266,6 +266,43 @@ strongest high, every frame, so it wins over area echo and over network states t
 A light high only gets half the pitch shift, a heavy one the table, an overdose double the shift. When the high
 ends, every changed sound gets its own pitch back and loses the reverb; area echo puts its own back on its next pass.
 
+### Examine cues
+
+`WFDrugCuesSystem` shows a high to whoever examines the body, as symptoms and never as a drug's name, so a medic can
+tell pinpoint pupils (naloxone) from blown ones (haloperidol) without an analyzer. There are two lines, each the
+strongest thing going on:
+
+| Line | Seen when | From |
+|---|---|---|
+| Face (pupils, skin) | Within details range, with nothing covering the eyes (`IdentityBlocker` coverage) | A light high, drink, or withdrawal's last stage |
+| Body (how they move) | At any examine range, through any clothing; not on a body that is asleep or in crit | A heavy high or drink; a crash, up close; withdrawal from its second stage |
+
+An overdose has its own body line. A neuroware host shows flickering optics and stuttering servos instead.
+
+### Flying
+
+`WFDrugPilotingSystem` handles `GetShuttleInputsEvent` on the pilot, after the pilot's own handler. Light, heavy and
+overdose:
+
+| State | Effect |
+|---|---|
+| Stimulant | Turn x1.05, x1.1, x1.1 and thrust x1.03, x1.05, x1.05; an overdose jerks the turn input for 0.2 s every 2 to 5 s |
+| Stimulant crash | Turn x0.88, thrust x0.92: more than the high gave |
+| Opioid | The ship follows the stick with a lag of 0.25, 0.6, 1.2 s, and keeps going after it is let go; through a nod the stick stays where it was |
+| Cannabinoid | Brake input x0.85, x0.65, x0.5 and turn x0.95, x0.85, x0.75 |
+| Alcohol (40, 120, 240 s left on the drunk timer) | While flying, the turn input sways by up to 0.1, 0.25, 0.45 and the thrust is skewed by as many radians |
+
+With several pilots the game averages their inputs and multipliers. NPC pilots are untouched.
+
+### Exotic sense
+
+A tier with the `ExoticSense` trait, which every Chorus tier has, senses exotic matter. Every 2 s
+`WFExoticSenseSystem` finds the nearest asteroid rock on the map within 500, 1,000 or 1,500 m (by phase; rocks only load about that far from a ship) that would drop at
+least one shard when broken (`mass x band.exotic`, so only in the Coda) and networks its position to the owner, whose
+client draws a violet light over it or at the edge of the view towards it, brighter for a richer rock. The price is
+Drift: a carrier with a sensing mind aboard gains it x1.5 (`WFDriftGainEvent`, raised by the Lattice on everyone
+aboard).
+
 ## Substances
 
 `perUnit`, tiers and durations are starting values. Level is in effective units.
@@ -279,7 +316,7 @@ ends, every changed sound gets its own pitch back and loses the reverb; area ech
 | Desoxyephedrine (existing) | Crystal | Stimulant | Combat stimulant | Speed x1.25 from the profile; halved stuns and knockdowns, stamina-crit resistance and no slowdown from damage need a heavy dose (level 8), as profile traits, so tolerance blunts them and Burst has them; the reagent keeps its jitter and pain relief | Unchanged Poison; adds a long crash | Smoked as crystal, or as today |
 | `WFRedline` | Redline | Combat | Offence | Speed x1.3, stun and knockdown resistance, no slowdown from damage, pain immunity | Heart damage every tick; can't sprint-stop cleanly (jitter); when it ends, a 60 s collapse at speed x0.5 with a stamina cap. Overdose: cardiac arrest | Injected |
 | `WFAnvil` | Anvil | Combat | Endurance | Incoming Brute and Burn reduced 30%, pain immunity, stamina-crit resistance | Speed x0.85; the user's own damage readout is hidden while high; damage avoided is repaid at 40% as Poison over the crash. Overdose: organ damage | Injected |
-| `WFChorus` | Chorus | Psychedelic | Social | Lattice hallucinations scaling with tier: whispers and blips, then glimpses and phantoms, then mimics and doubles | Disorientation, scrambled speech at the top tier. No physical overdose; the top tier adds brief `Pacified` | Swallowed tab |
+| `WFChorus` | Chorus | Psychedelic | Social, prospecting | Lattice hallucinations scaling with tier: whispers and blips, then glimpses and phantoms, then mimics and doubles. A light on the screen points to the nearest rock holding exotic matter, at the cost of faster Drift | Disorientation, scrambled speech at the top tier. No physical overdose; the top tier adds brief `Pacified` | Swallowed tab |
 | `WFHalo` | Halo | Empathogen | Social | Glow overlay, light pain relief, warm popups, laugh and hug emotes | Rising body temperature while high; a crash of sadness popups and low stamina. Overdose: overheating | Pill |
 | `WFHash` | Hash | Cannabinoid | Social | Solid concentrate that delivers THC at a higher dose | THC's | Bong, pipe |
 | Nicotine (existing) | Nicotine | Nicotine | Habit | Gains a small effect: light stamina recovery | Dependence only | Smoked |

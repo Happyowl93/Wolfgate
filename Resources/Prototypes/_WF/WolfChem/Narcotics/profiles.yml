@@ -405,7 +405,7 @@
     banner: wf-neuroware-damper-banner
     faults: [ wf-neuroware-damper-fault-1, wf-neuroware-damper-fault-2 ]
 
-# Chorus: Lattice hallucinations that deepen with the tier.
+# Chorus: Lattice hallucinations that deepen with the tier, and a sense for exotic matter that reaches further with it.
 - type: wfDrugProfile
   id: WFChorus
   family: Psychedelic
@@ -418,14 +418,17 @@
     overlay: 0.4
     hallucinationChance: 0.05
     hallucinations: [ Whisper, Blip, Sound ]
+    traits: [ ExoticSense ]
   - min: 6
     overlay: 0.65
     hallucinationChance: 0.08
     hallucinations: [ Whisper, Blip, Sound, Glimpse, Phantom, Echo ]
+    traits: [ ExoticSense ]
   - min: 12
     overlay: 0.9
     hallucinationChance: 0.12
     hallucinations: [ Glimpse, Phantom, Mimic, Double, Vanish, Turn ]
+    traits: [ ExoticSense ]
     statusEffects:
     - key: Stutter
       component: ScrambledAccent

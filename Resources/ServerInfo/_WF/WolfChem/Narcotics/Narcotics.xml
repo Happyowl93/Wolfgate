@@ -21,7 +21,7 @@ Street drugs are cooked, grown and sold all over the sector, and every one of th
 - [bold]Fentanyl[/bold] (opioid): half again as strong as heroin and out of your blood in seconds. While it is in there you can barely walk, you slur, shake and pass out, and more than 6u poisons and chokes you. What is left afterwards is a few minutes of heroin high. Naloxone clears it like any opioid. Never mix it with dylovene.
 - [bold]Redline[/bold] (combat): speed, and wounds don't slow you. A heavy dose gives more speed and halves stuns and knockdowns. It strains your heart the whole time, and you collapse when it ends.
 - [bold]Anvil[/bold] (combat): you take less Brute and Burn damage and can't see your own damage readout, but you move slower. A heavy dose also keeps you out of stamina crit. The damage it held off comes back as Poison when it wears off.
-- [bold]Chorus[/bold] (psychedelic): the hallucinations of the Lattice without flying out to it. They get worse the deeper you go.
+- [bold]Chorus[/bold] (psychedelic): the hallucinations of the Lattice without flying out to it. They get worse the deeper you go. Out in the Coda it also lets you feel exotic matter: a violet light on your screen points to the nearest rock that holds some, from further away the deeper the high. Your ship gains Drift half again as fast while you do.
 - [bold]Halo[/bold] (empathogen): warmth, laughter and a little pain relief. It raises your body temperature, an overdose is a fever that can kill, and the come-down is sad.
 - [bold]Cannabis and hash[/bold]: THC, as it always was.
 - [bold]Nicotine[/bold]: a small stamina lift and a habit.
@@ -51,6 +51,19 @@ Heavy on opioids you [bold]nod off[/bold]: every so often your eyes shut for a f
 When the drug drops below a light dose, the [bold]crash[/bold] begins. Most crashes grow with the time you spent high. Taking more pauses a crash but doesn't cancel it. Being on Redline and Anvil at once damages the heart.
 
 A health analyzer's [bold]Conditions[/bold] tab lists every high, crash and habit, the reagents behind each, how long they take to clear and what clears them faster.
+
+## What others see
+
+Anyone who examines you can tell. Up close, with your eyes uncovered, even a light high shows in your face: pinpoint pupils on opioids, blown ones on stimulants, red eyes on cannabis, a flush on Halo or drink. Glasses, a mask or a helmet over the eyes hide that. A heavy high shows in the way you move, from any distance and through a sealed suit, and so does an overdose, a crash up close, and withdrawal once the shakes start. None of it names the drug.
+
+## Flying high
+
+What you are on changes how a ship answers you, more with each phase.
+
+- [bold]Stimulants[/bold]: the ship turns and accelerates a little better. In an overdose your hand jerks the stick. In the crash it handles worse than it ever handled well.
+- [bold]Opioids[/bold]: the ship answers late and keeps going after you let go. If you nod off, the stick stays where it was until you wake.
+- [bold]Cannabis[/bold]: soft brakes and a slow turn.
+- [bold]Alcohol[/bold]: your heading wanders while you fly.
 
 ## Ending a high
 

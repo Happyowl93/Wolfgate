@@ -30,6 +30,17 @@ Conditions tab: each drug level, held status effect, crash and habit, with the r
 time from the organs' rates, the reagents that remove them (`AdjustReagent`) and family antidotes
 (`WFClearIntoxication`).
 
+A high also shows from outside and at the helm. `WFDrugCuesSystem` adds examine lines that never name a drug: one for
+the face (pupils, skin), which needs uncovered eyes and a close look and shows from a light high, and one for how the
+body moves, which shows from a heavy high at any distance and through a sealed suit; drink, crashes and withdrawal
+from its second stage have their own, and a neuroware host shows optics and servo faults instead.
+`WFDrugPilotingSystem` changes the input a pilot gives a ship (`GetShuttleInputsEvent`): stimulants raise turn and
+thrust and twitch the stick in an overdose, and their crash lowers both by more; opioids make the ship trail the stick
+and hold it through a nod; cannabis softens the brakes and the turn; alcohol makes the heading wander.
+`WFExoticSenseSystem` gives a tier with the `ExoticSense` trait (Chorus) a light on the screen
+(`WFExoticSenseOverlay`) towards the nearest rock that would drop at least a shard of exotic matter, 500, 1,000 or
+1,500 m out by phase, and makes the carrier it rides gain Drift half again as fast (`WFDriftGainEvent`).
+
 Substances are grown (coca, the opium poppy, cannabis pressed into hash) or cooked through graded reactions, and the
 solids keep their grade. Flour cuts cocaine and heroin (`fillers` on `wfReactionPurity`). `WFDeliverySystem` adds powder lines from a baggie and the bong; `WFSecondhandSmokeSystem` puts smoke
 gas and a share of everything smoked into the air, and doses whoever breathes it nearby. Products are Class 3
@@ -39,7 +50,8 @@ crafted from glass and plastic, and the uplink chemicals tab lists a few. The Be
 for it and the Medical guide a player page.
 
 Entry points: `WFDose` and `WFClearIntoxication` (entity effects), `SharedWFIntoxicationSystem` (levels, tiers,
-`IsNeurowareHost`), `WFIntoxicationSystem.Tick`, `WFDependenceSystem.Tick`, `WFDeliverySystem`.
+`IsNeurowareHost`), `WFIntoxicationSystem.Tick`, `WFDependenceSystem.Tick`, `WFDeliverySystem`,
+`WFDrugCuesSystem.GetCues`, `WFDrugPilotingSystem.GetHandling`, `WFExoticSenseSystem.Tick`.
 
 ## Purity
 
@@ -88,12 +100,16 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Content.Server/_WF/WolfChem/Narcotics/WFAnalyzerConditionsSystem.cs`](Narcotics/WFAnalyzerConditionsSystem.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFDeliverySystem.cs`](Narcotics/WFDeliverySystem.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFDependenceSystem.cs`](Narcotics/WFDependenceSystem.cs)
+- [`Content.Server/_WF/WolfChem/Narcotics/WFDrugCuesSystem.cs`](Narcotics/WFDrugCuesSystem.cs)
+- [`Content.Server/_WF/WolfChem/Narcotics/WFDrugPilotingSystem.cs`](Narcotics/WFDrugPilotingSystem.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFDrugSpeechSystem.cs`](Narcotics/WFDrugSpeechSystem.cs)
+- [`Content.Server/_WF/WolfChem/Narcotics/WFExoticSenseSystem.cs`](Narcotics/WFExoticSenseSystem.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFIntoxicationSystem.Blood.cs`](Narcotics/WFIntoxicationSystem.Blood.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFIntoxicationSystem.cs`](Narcotics/WFIntoxicationSystem.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFIntoxicationSystem.Traits.cs`](Narcotics/WFIntoxicationSystem.Traits.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFMetabolismCarryComponent.cs`](Narcotics/WFMetabolismCarryComponent.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFNodSystem.cs`](Narcotics/WFNodSystem.cs)
+- [`Content.Server/_WF/WolfChem/Narcotics/WFPilotImpairmentComponent.cs`](Narcotics/WFPilotImpairmentComponent.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFSecondhandSmokeSystem.cs`](Narcotics/WFSecondhandSmokeSystem.cs)
 - [`Content.Server/_WF/WolfChem/Neuroware/WFNeurowareSystem.cs`](Neuroware/WFNeurowareSystem.cs)
 - [`Content.Server/_WF/WolfChem/Purity/BotanySystem.Purity.cs`](Purity/BotanySystem.Purity.cs)
@@ -116,6 +132,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Content.Shared/_WF/WolfChem/Narcotics/WFDependenceComponent.cs`](../../../Content.Shared/_WF/WolfChem/Narcotics/WFDependenceComponent.cs)
 - [`Content.Shared/_WF/WolfChem/Narcotics/WFDose.cs`](../../../Content.Shared/_WF/WolfChem/Narcotics/WFDose.cs)
 - [`Content.Shared/_WF/WolfChem/Narcotics/WFDrugProfilePrototype.cs`](../../../Content.Shared/_WF/WolfChem/Narcotics/WFDrugProfilePrototype.cs)
+- [`Content.Shared/_WF/WolfChem/Narcotics/WFExoticSenseComponent.cs`](../../../Content.Shared/_WF/WolfChem/Narcotics/WFExoticSenseComponent.cs)
 - [`Content.Shared/_WF/WolfChem/Narcotics/WFIntoxicationComponent.cs`](../../../Content.Shared/_WF/WolfChem/Narcotics/WFIntoxicationComponent.cs)
 - [`Content.Shared/_WF/WolfChem/Narcotics/WFNeurowareHostComponent.cs`](../../../Content.Shared/_WF/WolfChem/Narcotics/WFNeurowareHostComponent.cs)
 - [`Content.Shared/_WF/WolfChem/Narcotics/WFSedation.cs`](../../../Content.Shared/_WF/WolfChem/Narcotics/WFSedation.cs)
@@ -130,6 +147,8 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 
 - [`Content.Client/_WF/WolfChem/Narcotics/WFDrugAudioSystem.cs`](../../../Content.Client/_WF/WolfChem/Narcotics/WFDrugAudioSystem.cs)
 - [`Content.Client/_WF/WolfChem/Narcotics/WFDrugChatSystem.cs`](../../../Content.Client/_WF/WolfChem/Narcotics/WFDrugChatSystem.cs)
+- [`Content.Client/_WF/WolfChem/Narcotics/WFExoticSenseOverlay.cs`](../../../Content.Client/_WF/WolfChem/Narcotics/WFExoticSenseOverlay.cs)
+- [`Content.Client/_WF/WolfChem/Narcotics/WFExoticSenseSystem.cs`](../../../Content.Client/_WF/WolfChem/Narcotics/WFExoticSenseSystem.cs)
 - [`Content.Client/_WF/WolfChem/Narcotics/WFIntoxicationOverlay.cs`](../../../Content.Client/_WF/WolfChem/Narcotics/WFIntoxicationOverlay.cs)
 - [`Content.Client/_WF/WolfChem/Narcotics/WFIntoxicationSystem.cs`](../../../Content.Client/_WF/WolfChem/Narcotics/WFIntoxicationSystem.cs)
 - [`Content.Client/_WF/WolfChem/Narcotics/WFNodOverlay.cs`](../../../Content.Client/_WF/WolfChem/Narcotics/WFNodOverlay.cs)
@@ -142,7 +161,10 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/AnalyzerConditionsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/AnalyzerConditionsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/DeliveryTest.cs`](../../../Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/DeliveryTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/DependenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/DependenceTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/DrugCuesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/DrugCuesTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/DrugPilotingTest.cs`](../../../Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/DrugPilotingTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/DrugSpeechTest.cs`](../../../Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/DrugSpeechTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/ExoticSenseTest.cs`](../../../Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/ExoticSenseTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/HeroinSedationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/HeroinSedationTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/IntoxicationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/IntoxicationTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/NodTest.cs`](../../../Content.IntegrationTests/Tests/_WF/WolfChem/Narcotics/NodTest.cs)
@@ -187,6 +209,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 ### Localization
 
 - [`Resources/Locale/en-US/_WF/WolfChem/Narcotics/analyzer.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Narcotics/analyzer.ftl)
+- [`Resources/Locale/en-US/_WF/WolfChem/Narcotics/cues.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Narcotics/cues.ftl)
 - [`Resources/Locale/en-US/_WF/WolfChem/Narcotics/dealer.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Narcotics/dealer.ftl)
 - [`Resources/Locale/en-US/_WF/WolfChem/Narcotics/delivery.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Narcotics/delivery.ftl)
 - [`Resources/Locale/en-US/_WF/WolfChem/Narcotics/dependence.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Narcotics/dependence.ftl)

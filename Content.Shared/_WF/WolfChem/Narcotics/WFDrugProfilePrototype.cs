@@ -33,6 +33,8 @@ public enum WFDrugTrait : byte
     HideDamage,
     /// <summary>Incoming Brute and Burn is reduced and the avoided damage is repaid during the crash.</summary>
     Damper,
+    /// <summary>A light on the screen points to the nearest rock holding exotic matter, and Drift builds faster.</summary>
+    ExoticSense,
 }
 
 /// <summary>

@@ -202,6 +202,12 @@ public sealed partial class WFLatticeSystem : EntitySystem
         return BandOf(point, out _)?.Yield ?? 1f;
     }
 
+    /// <summary>Exotic matter shards per vein a rock broken at a point drops, on average. Zero outside the Coda.</summary>
+    public float ExoticAt(MapCoordinates point)
+    {
+        return BandOf(point, out _)?.Exotic ?? 0f;
+    }
+
     /// <summary>
     /// Drops the exotic matter a rock of this many veins holds, if the band where it broke has any: at the rock, or at
     /// <paramref name="dropAt"/> when the loot goes straight to a ship drill.
@@ -342,6 +348,8 @@ public sealed partial class WFLatticeSystem : EntitySystem
             var rate = WFLatticeMath.DriftRate(band, depth);
             if (rate > 0f && TryComp<WFLatticeShelterComponent>(carrier, out var shelter))
                 rate *= 1f - Math.Clamp(shelter.Shelter, 0f, 1f);
+            if (rate > 0f)
+                rate *= GainMultiplier(aboard);
 
             // Each band has its ceiling: only the Coda takes Drift to the top, and coming back in lets it ease down.
             var cap = band.MaxDrift >= 0f ? Math.Min(band.MaxDrift, profile.DriftMax) : profile.DriftMax;

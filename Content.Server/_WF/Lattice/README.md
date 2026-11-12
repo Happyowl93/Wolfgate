@@ -160,6 +160,8 @@ Coda, through `WFLatticeSystem.YieldAt` in `WFAsteroidSystem`) and, in the Coda 
 stabiliser flatpack (5 shards; 15 kW while running), which shelters the ship it is anchored on from 80% of Drift gain
 and stops the taking, and the anchor charm (1 shard), worn round the neck, which keeps half the Drift off its wearer.
 `WFLatticeShelterSystem` keeps the `WFLatticeShelterComponent` on ships and wearers.
+`WFDriftGainEvent` is raised on everyone aboard a carrier that is gaining Drift and the largest multiplier asked for
+scales the gain; the WolfChem exotic sense (Chorus) uses it.
 
 **Anchor stations and their defence.** Each station is loaded from `Resources/Maps/_WF/Lattice/anchor_station.yml`
 (the profile's `stationMap`; a plain deck is built in code if it fails), placed so its core sits on the hexagon's
@@ -298,6 +300,7 @@ open a breach. A carrier's band and Drift are on its `WFDriftComponent` in VV.
 - [`Content.Server/_WF/Lattice/WFLatticeSystem.Endgame.cs`](WFLatticeSystem.Endgame.cs)
 - [`Content.Server/_WF/Lattice/WFLatticeSystem.Felt.cs`](WFLatticeSystem.Felt.cs)
 - [`Content.Server/_WF/Lattice/WFLatticeSystem.Ftl.cs`](WFLatticeSystem.Ftl.cs)
+- [`Content.Server/_WF/Lattice/WFLatticeSystem.Gain.cs`](WFLatticeSystem.Gain.cs)
 - [`Content.Server/_WF/Lattice/WFLatticeSystem.Hex.cs`](WFLatticeSystem.Hex.cs)
 - [`Content.Server/_WF/Lattice/WFLatticeSystem.Implosion.cs`](WFLatticeSystem.Implosion.cs)
 - [`Content.Server/_WF/Lattice/WFLatticeSystem.LostShips.cs`](WFLatticeSystem.LostShips.cs)
