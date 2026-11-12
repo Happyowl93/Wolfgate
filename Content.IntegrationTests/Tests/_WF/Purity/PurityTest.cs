@@ -153,6 +153,15 @@ public sealed class PurityTest
 
             var floor = Mix(Graded("WFPurityTestC", 0.5f, 500f));
             Assert.That(floor.GetPurity("WFPurityTestTuned"), Is.EqualTo(0.2f).Within(0.01f));
+
+            var cut = Mix(Graded("WFCocaine", 0.8f), Graded("Flour", 1f));
+            Assert.Multiple(() =>
+            {
+                Assert.That(cut.GetTotalPrototypeQuantity("WFCocaine"), Is.EqualTo(FixedPoint2.New(20)));
+                Assert.That(cut.GetTotalPrototypeQuantity("Flour"), Is.EqualTo(FixedPoint2.Zero));
+                Assert.That(cut.GetPurity("WFCocaine"), Is.EqualTo(0.4f).Within(0.01f),
+                    "A filler should cut the grade by the volume it adds.");
+            });
         });
 
         await pair.CleanReturnAsync();

@@ -1,3 +1,4 @@
+using Content.Shared.Chemistry.Reagent;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._WF.Purity;
@@ -13,13 +14,19 @@ public sealed partial class WFReactionPurityPrototype : IPrototype
     [IdDataField]
     public string ID { get; private set; } = default!;
 
-    /// <summary>Temperature, in kelvin, at which the product keeps its full input grade.</summary>
-    [DataField(required: true)]
-    public float OptimalTemp;
+    /// <summary>
+    /// Temperature, in kelvin, at which the product keeps its full input grade. Null keeps it at any temperature.
+    /// </summary>
+    [DataField]
+    public float? OptimalTemp;
 
     /// <summary>Kelvin from the optimum at which the factor reaches <see cref="Floor"/>.</summary>
-    [DataField(required: true)]
+    [DataField]
     public float Tolerance;
+
+    /// <summary>Reactants that count as grade zero, so a filler cuts the product's grade by the volume it adds.</summary>
+    [DataField]
+    public HashSet<ProtoId<ReagentPrototype>> Fillers = new();
 
     /// <summary>The lowest process factor.</summary>
     [DataField]
@@ -28,10 +35,13 @@ public sealed partial class WFReactionPurityPrototype : IPrototype
     /// <summary>The process factor at a temperature, falling linearly from 1.0 at the optimum to the floor.</summary>
     public float Factor(float temperature)
     {
-        if (Tolerance <= 0f)
-            return MathF.Abs(temperature - OptimalTemp) < 0.01f ? 1f : Floor;
+        if (OptimalTemp is not { } optimal)
+            return 1f;
 
-        var off = Math.Min(MathF.Abs(temperature - OptimalTemp) / Tolerance, 1f);
+        if (Tolerance <= 0f)
+            return MathF.Abs(temperature - optimal) < 0.01f ? 1f : Floor;
+
+        var off = Math.Min(MathF.Abs(temperature - optimal) / Tolerance, 1f);
         return 1f - (1f - Floor) * off;
     }
 }

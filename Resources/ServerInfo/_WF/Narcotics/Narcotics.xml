@@ -17,6 +17,8 @@ Any reagent can carry a [bold]grade[/bold], from 0 to 100%. Anything from a disp
 
 A low grade does less and hurts more. A dose at 60% works like 60% of the amount, and the missing 40% is impurity that the body takes as Poison. Overdose limits count the working part only, so a weak batch won't overdose you sooner, it will just poison you.
 
+Flour cuts cocaine and heroin: mixed in a beaker it turns into more powder, a unit for a unit, at a grade that much lower. The batch holds the same drug in more doses, and nothing but a reading shows it.
+
 A ChemMaster shows the percentage beside any graded reagent, and so do health analyzers and chemical goggles. A [bold]purity tester[/bold] does the same for any container or item it touches.
   <Box>
     <GuideEntityEmbed Entity="WFPurityTester"/>
@@ -50,17 +52,17 @@ Deep on opioids you nod off: every so often your eyes fall shut for a few second
 
 So does what you hear. Opioids muffle and slow the world down, stimulants speed it up, and psychedelics, cannabis and empathogens each give it their own strange echo.
 
-A high lasts as long as the drug stays in your blood, and a health analyzer shows how much is left. A 2.5u line lasts about four minutes, and two last twice as long. Crack, cannabis and the combat drugs clear twice as fast, and a crystal shard lasts about as long as two lines. Medical painkillers clear at their usual pace, so any high they give is short. Above an overdose the body flushes the excess quickly, but not quickly enough to be safe. Anything that purges the blood ends the high early.
+A high lasts as long as the drug stays in your blood, and a health analyzer shows how much is left. A fresh dose of a street drug comes with a rush: for the first minute it hits well above its weight, then settles, so one line peaks hard and two keep you deep. The rush alone never overdoses you; only what is in your blood does. A 2.5u line lasts about four minutes, and two last twice as long. Crack, cannabis and the combat drugs clear twice as fast, and a crystal shard lasts about as long as two lines. Medical painkillers clear at their usual pace, so any high they give is short. Above an overdose the body flushes the excess quickly, but not quickly enough to be safe. Anything that purges the blood ends the high early.
 
 A health analyzer's [bold]Conditions[/bold] tab lists every high, held effect, crash and habit, the reagents behind each, how long they take to clear and what clears them faster.
 
-When the level falls back below its first threshold, the [bold]crash[/bold] begins. Taking more pauses a crash but doesn't cancel it. Combat drugs make you pay for what they give: Redline leaves you collapsed and slow, and the damage Anvil soaked up comes back as Poison once it wears off.
+When the level falls back below its first threshold, the [bold]crash[/bold] begins. Taking more pauses a crash but doesn't cancel it. Combat drugs make you pay for what they give. A light dose gives only part of it: Redline's full speed and its halved stuns, and Anvil's hold against stamina crits, need a heavy one. Redline leaves you collapsed and slow, the damage Anvil soaked up comes back as Poison once it wears off, and both crashes grow with the time you spent high. Running two combat drugs at once tears at the heart.
 
 Antagonists cut a high short by clearing the drug from the blood. Naloxone ends an opioid high; haloperidol ends a stimulant or psychedelic one; dylovene flushes Redline and Anvil; psicodine calms Halo and cannabis. The crash still comes, and so does what Redline and Anvil owe. Halo's fever also needs cooling, and charcoal purges any drug, along with every other medicine in the blood.
 
 ## Habits
 
-Regular use builds [bold]dependence[/bold], one meter for each family. A single binge fades within the shift. Steady use doesn't.
+Regular use builds [bold]dependence[/bold], one meter for each family. A light habit fades within the shift. Once the meter is past halfway it fades four times slower, so a real habit outlasts the shift unless you feed it.
 
 Above the halfway mark, going without for five minutes starts [bold]withdrawal[/bold]: cravings first, then shakes, a stamina cap and aches, and for opioids and stimulants, nausea and drowsiness at the worst. A dose of the same family ends it at once. Withdrawal never kills.
 

@@ -34,6 +34,9 @@ public sealed class WFDependenceSystem : EntitySystem
     /// <summary>Meter and tolerance lost a second while clean: 0.02 a minute.</summary>
     public const float DecayPerSecond = 0.02f / 60f;
 
+    /// <summary>Share of that decay a meter above <see cref="WithdrawalMeter"/> keeps: a habit doesn't wait out.</summary>
+    public const float DependentDecay = 0.25f;
+
     /// <summary>Tolerance gained per point of dependence gained.</summary>
     public const float ToleranceRatio = 0.5f;
 
@@ -138,7 +141,10 @@ public sealed class WFDependenceSystem : EntitySystem
         var meter = dep.Meter[family];
         if (!high)
         {
-            meter = Math.Max(floor, meter - DecayPerSecond * seconds);
+            var decay = DecayPerSecond * seconds;
+            if (meter > WithdrawalMeter)
+                decay = Math.Min(decay * DependentDecay, meter - WithdrawalMeter);
+            meter = Math.Max(floor, meter - decay);
             dep.Tolerance[family] = Math.Max(0f, dep.Tolerance.GetValueOrDefault(family) - DecayPerSecond * seconds);
         }
 
@@ -199,14 +205,14 @@ public sealed class WFDependenceSystem : EntitySystem
                 _stamina.TakeStaminaDamage(uid, floor - stamina.StaminaDamage, stamina, visual: false);
         }
 
-        if (_random.Prob(seconds / PainEvery) && _body.GetRootPartOrNull(uid) is { } root && TryComp<PainComponent>(root.Entity, out var pain))
+        if (_random.Prob(Math.Min(1f, seconds / PainEvery)) && _body.GetRootPartOrNull(uid) is { } root && TryComp<PainComponent>(root.Entity, out var pain))
             _pain.ChangePain((root.Entity, pain), 3);
 
         if (stage < 3 || family is not (WFDrugFamily.Opioid or WFDrugFamily.Stimulant))
             return;
 
         _status.TryAddStatusEffect(uid, "Drowsiness", StatusTime, true, "Drowsiness");
-        if (_random.Prob(VomitChance * seconds))
+        if (_random.Prob(Math.Min(1f, VomitChance * seconds)))
             _vomit.Vomit(uid, -10f, -10f);
     }
 
@@ -228,7 +234,7 @@ public sealed class WFDependenceSystem : EntitySystem
             : -1f;
         var cleanIn = meter <= WithdrawalMeter ? -1f
             : floor > WithdrawalMeter ? float.PositiveInfinity
-            : (meter - WithdrawalMeter) / DecayPerSecond;
+            : (meter - WithdrawalMeter) / (DecayPerSecond * DependentDecay);
 
         return new WFAnalyzerHabit(family, meter, floor, dep.Tolerance.GetValueOrDefault(family), stage, withdrawalIn,
             cleanIn);

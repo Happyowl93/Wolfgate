@@ -5,17 +5,19 @@ overlay, grouped into light, heavy and overdose phases; a crash; neuroware strin
 units left in the blood (`WFDose` with `inBlood`), so its metabolism rate sets the length of the high, the analyzer
 shows it and purging ends it; the excess above an overdose flushes at `overdoseHalfLife`. Upstream reagents that dose a
 profile (meth, ephedrine, THC, nicotine, the medical opioids) do the same, with their rates and per-tick effects
-retuned; only neuroware and a `WFDose` without `inBlood` feed the level directly, and that part decays by `decay`
-and `halfLife`. `WFIntoxicationSystem` reads the
+retuned; only neuroware and a `WFDose` without `inBlood` feed the level directly, and that part decays by `decay`,
+set to the drug's metabolism rate so a twin lasts as long. A fresh dose in the blood also gives a rush (`rushGain`),
+a short peak that can reach the heavy tier but never the overdose. `WFIntoxicationSystem` reads the
 blood, ticks the levels, announces phase changes, runs tier effects and crashes, and grants trait components (damage
-slowdown, stun resistance, pain numbness, Anvil's damper and its Poison repayment). `WFAlcoholSystem` does the same
+slowdown, halved stuns, pain numbness, Anvil's damper and its Poison repayment); a second combat drug strains the
+heart. `WFAlcoholSystem` does the same
 for ethanol: the `Drunk` effect's `perUnitInBlood` holds the drunk timer at the ethanol left (`inBloodAbove` for an
 overdose one). Other upstream status effects from reagents (rainbows, muting, drowsiness, forced sleep) are held with
 `refresh: true` the same way, and `perUnitInBlood` on `GenericStatusEffect` scales the held time by the units left
 where a reagent's old length must stay (mute toxin, chloral hydrate, fentanyl); the recreational ones clear slower
 so they last as long as they used to.
-`WFDependenceSystem` builds a per-family habit with tolerance and withdrawal; three traits start a character
-dependent. The client draws one overlay per family and tints incoming chat (`WFDrugChatSystem`) and changes world sounds (`WFDrugAudioSystem`);
+`WFDependenceSystem` builds a per-family habit with tolerance and withdrawal; a meter above the withdrawal mark
+fades at a quarter of the rate, and three traits start a character dependent with a first dose in hand. The client draws one overlay per family and tints incoming chat (`WFDrugChatSystem`) and changes world sounds (`WFDrugAudioSystem`);
 `WFDrugSpeechSystem` rushes stimulant speech and trails opioid speech off, and `WFNodSystem` makes a heavy opioid high
 nod off: the eyes shut and sound muffles for a few seconds while the body stays up and crawls (`WFNodOverlay`). `WFAnalyzerConditionsSystem` fills the health analyzer's
 Conditions tab: each drug level, held status effect, crash and habit, with the reagents behind it, their clearance
@@ -23,7 +25,7 @@ time from the organs' rates, the reagents that remove them (`AdjustReagent`) and
 (`WFClearIntoxication`).
 
 Substances are grown (coca, the opium poppy, cannabis pressed into hash) or cooked through graded reactions, and the
-solids keep their grade. `WFDeliverySystem` adds powder lines from a baggie and the bong; `WFSecondhandSmokeSystem` puts smoke
+solids keep their grade. Flour cuts cocaine and heroin (`fillers` on `wfReactionPurity`). `WFDeliverySystem` adds powder lines from a baggie and the bong; `WFSecondhandSmokeSystem` puts smoke
 gas and a share of everything smoked into the air, and doses whoever breathes it nearby. Products are Class 3
 contraband with grade-scaled prices, a sale tax and a sold alert; the Strangers dealer sells cut stock, a Reaver
 runner (`WFEncounterReaverDealer`, a trader encounter) sells full grade and takes drugs as payment, the bong is

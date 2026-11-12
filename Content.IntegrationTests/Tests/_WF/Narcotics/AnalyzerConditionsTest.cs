@@ -65,7 +65,7 @@ public sealed class AnalyzerConditionsTest
                 Assert.That(drunk.SecondsLeft, Is.EqualTo(60f).Within(1f));
                 Assert.That(habit.Stage, Is.EqualTo(2));
                 Assert.That(habit.Tolerance, Is.EqualTo(0.3f).Within(0.001f));
-                Assert.That(habit.CleanIn, Is.EqualTo((0.8f - WFDependenceSystem.WithdrawalMeter) / WFDependenceSystem.DecayPerSecond).Within(1f));
+                Assert.That(habit.CleanIn, Is.EqualTo((0.8f - WFDependenceSystem.WithdrawalMeter) / (WFDependenceSystem.DecayPerSecond * WFDependenceSystem.DependentDecay)).Within(1f));
             });
         });
 

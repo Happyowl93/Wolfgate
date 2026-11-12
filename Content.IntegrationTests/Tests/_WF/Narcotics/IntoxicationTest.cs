@@ -11,6 +11,7 @@ using Content.Shared.Damage;
 using Content.Shared.Traits.Assorted;
 using Content.Shared.EntityEffects;
 using Content.Shared.FixedPoint;
+using Content.Shared.Movement.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
 
@@ -87,6 +88,31 @@ public sealed class IntoxicationTest
         perUnit: 1
         inBlood: true
 
+- type: wfDrugProfile
+  id: WFIntoxTestRush
+  family: Opioid
+  decay: 0
+  rushGain: 2
+  rushHalfLife: 10
+  tiers:
+  - min: 1
+  - min: 5
+  - min: 8
+
+- type: reagent
+  id: WFIntoxTestRushDrug
+  name: reagent-name-nothing
+  desc: reagent-desc-nothing
+  physicalDesc: reagent-physical-desc-nothing
+  metabolisms:
+    Narcotic:
+      metabolismRate: 0.01
+      effects:
+      - !type:WFDose
+        profile: WFIntoxTestRush
+        perUnit: 1
+        inBlood: true
+
 - type: reagent
   id: WFIntoxTestReagent
   name: reagent-name-nothing
@@ -112,6 +138,8 @@ public sealed class IntoxicationTest
             sys.AddLevel(mob, Profile, 4f);
             var comp = entMan.GetComponent<WFIntoxicationComponent>(mob);
             Assert.That(sys.GetTier(comp, Profile), Is.EqualTo(0));
+            Assert.That(entMan.GetComponent<MovementSpeedModifierComponent>(mob).WalkSpeedModifier,
+                Is.EqualTo(1.2f).Within(0.001f), "A fed dose that reaches a tier applies its speed at once.");
 
             sys.Tick(1f);
             Assert.Multiple(() =>
@@ -201,6 +229,60 @@ public sealed class IntoxicationTest
 
             sys.Tick(10f);
             Assert.That(comp.Phases.ContainsKey(profile), Is.False, "Below the first tier there is no phase.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task RushTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        const string profile = "WFIntoxTestRush";
+
+        await server.WaitAssertion(() =>
+        {
+            var sys = server.System<WFIntoxicationSystem>();
+            var bloodstream = server.System<BloodstreamSystem>();
+            var mob = entMan.SpawnEntity("MobHuman", map.GridCoords);
+
+            void Inject(float units)
+            {
+                var dose = new Solution();
+                dose.AddReagent("WFIntoxTestRushDrug", FixedPoint2.New(units));
+                Assert.That(bloodstream.TryAddToChemicals(mob, dose), Is.True);
+            }
+
+            Inject(2f);
+            var comp = entMan.EnsureComponent<WFIntoxicationComponent>(mob);
+            sys.Tick(0f);
+            Assert.Multiple(() =>
+            {
+                Assert.That(comp.Levels[profile], Is.EqualTo(6f).Within(0.01f), "A fresh 2 rushes for twice as much again.");
+                Assert.That(comp.Phases[profile], Is.EqualTo(WFDrugPhase.Heavy));
+            });
+
+            sys.Tick(10f);
+            Assert.Multiple(() =>
+            {
+                Assert.That(comp.Levels[profile], Is.EqualTo(4f).Within(0.01f), "The rush halves in its half-life.");
+                Assert.That(comp.Phases[profile], Is.EqualTo(WFDrugPhase.Light));
+            });
+
+            Inject(4f);
+            sys.Tick(0f);
+            Assert.Multiple(() =>
+            {
+                Assert.That(comp.Levels[profile], Is.LessThan(8f), "A rush stops short of the overdose tier.");
+                Assert.That(comp.Phases[profile], Is.EqualTo(WFDrugPhase.Heavy));
+            });
+
+            Inject(4f);
+            sys.Tick(0f);
+            Assert.That(comp.Phases[profile], Is.EqualTo(WFDrugPhase.Overdose), "The blood alone still overdoses.");
         });
 
         await pair.CleanReturnAsync();

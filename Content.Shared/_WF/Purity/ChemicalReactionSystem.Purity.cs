@@ -10,13 +10,14 @@ public sealed partial class ChemicalReactionSystem
     public float WFLastReactionGrade { get; private set; } = 1f;
 
     /// <summary>
-    /// The grade of a reaction's product: the mean grade of the consumed reactants times the reaction's process factor
-    /// at the solution's temperature.
+    /// The grade of a reaction's product: the mean grade of the consumed reactants, fillers counting as zero, times
+    /// the reaction's process factor at the solution's temperature.
     /// </summary>
     public float WFReactionGrade(Solution solution, ReactionPrototype reaction)
     {
+        _prototypeManager.TryIndex<WFReactionPurityPrototype>(reaction.ID, out var purity);
         var input = 1f;
-        if (solution.Purity != null)
+        if (solution.Purity != null || purity is { Fillers.Count: > 0 })
         {
             var total = 0f;
             var weighted = 0f;
@@ -27,16 +28,15 @@ public sealed partial class ChemicalReactionSystem
 
                 var amount = reactant.Amount.Float();
                 total += amount;
-                weighted += amount * solution.GetPurity(reagent);
+                if (purity == null || !purity.Fillers.Contains(reagent))
+                    weighted += amount * solution.GetPurity(reagent);
             }
 
             if (total > 0f)
                 input = weighted / total;
         }
 
-        WFLastReactionGrade = _prototypeManager.TryIndex<WFReactionPurityPrototype>(reaction.ID, out var purity)
-            ? input * purity.Factor(solution.Temperature)
-            : input;
+        WFLastReactionGrade = purity != null ? input * purity.Factor(solution.Temperature) : input;
         return WFLastReactionGrade;
     }
 

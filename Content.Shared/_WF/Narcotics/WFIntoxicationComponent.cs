@@ -21,6 +21,14 @@ public sealed partial class WFIntoxicationComponent : Component
     [DataField]
     public Dictionary<ProtoId<WFDrugProfilePrototype>, float> Fed = new();
 
+    /// <summary>The rush of each profile: extra level a fresh dose in the blood gives, which fades fast.</summary>
+    [DataField]
+    public Dictionary<ProtoId<WFDrugProfilePrototype>, float> Rush = new();
+
+    /// <summary>Each profile's level from the blood on the last tick, to tell a fresh dose from what was there.</summary>
+    [DataField]
+    public Dictionary<ProtoId<WFDrugProfilePrototype>, float> BloodSeen = new();
+
     /// <summary>Seconds each profile has spent at or above its first tier this high.</summary>
     [DataField, AutoNetworkedField]
     public Dictionary<ProtoId<WFDrugProfilePrototype>, float> TimeAbove = new();

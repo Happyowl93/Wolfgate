@@ -74,6 +74,8 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
             {
                 comp.Levels.Remove(profile);
                 comp.Fed.Remove(profile);
+                comp.Rush.Remove(profile);
+                comp.BloodSeen.Remove(profile);
                 continue;
             }
 
@@ -82,6 +84,14 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
             var fed = Decayed(proto, comp.Fed.GetValueOrDefault(profile), tolerance * seconds);
             var fromBlood = _blood.GetValueOrDefault(profile) / tolerance;
             var level = fed + fromBlood;
+            var rush = Rush(comp, profile, proto, fromBlood, seconds);
+            if (rush > 0f)
+            {
+                // The rush deepens the high but never tips it into the overdose.
+                var peak = level + rush;
+                level = proto.Tiers.Count > 1 ? Math.Max(level, Math.Min(peak, proto.Tiers[^1].Min - 0.01f)) : peak;
+            }
+
             var tier = proto.TierAt(level);
 
             if (fed > 0f)
@@ -104,8 +114,6 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
                 // A redose paused any crash still running; the new one adds to it.
                 var duration = comp.Crashes.GetValueOrDefault(profile) + crash.Duration.TotalSeconds + crash.PerSecondAbove * above;
                 comp.Crashes[profile] = (float) Math.Min(duration, crash.MaxDuration.TotalSeconds);
-                var ev = new WFDrugCrashEvent(profile, true);
-                RaiseLocalEvent(uid, ref ev);
             }
 
             if (level <= 0f)
@@ -125,8 +133,6 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
             if (left <= 0f || !Proto.TryIndex(profile, out var proto) || proto.Crash == null)
             {
                 comp.Crashes.Remove(profile);
-                var ev = new WFDrugCrashEvent(profile, false);
-                RaiseLocalEvent(uid, ref ev);
                 continue;
             }
 
@@ -155,6 +161,36 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
             level *= MathF.Pow(2f, -seconds / proto.HalfLife);
 
         return Math.Max(0f, level - proto.Decay * seconds);
+    }
+
+    /// <summary>
+    /// Fades a profile's rush and adds to it for any rise in its level from the blood since the last tick, which is
+    /// a fresh dose. Returns the rush left.
+    /// </summary>
+    private static float Rush(WFIntoxicationComponent comp, ProtoId<WFDrugProfilePrototype> profile,
+        WFDrugProfilePrototype proto, float fromBlood, float seconds)
+    {
+        var rush = comp.Rush.GetValueOrDefault(profile);
+        if (proto.RushHalfLife > 0f)
+            rush *= MathF.Pow(2f, -seconds / proto.RushHalfLife);
+
+        var rise = fromBlood - comp.BloodSeen.GetValueOrDefault(profile);
+        if (rise > 0f)
+            rush += rise * proto.RushGain;
+
+        if (fromBlood > 0f)
+            comp.BloodSeen[profile] = fromBlood;
+        else
+            comp.BloodSeen.Remove(profile);
+
+        if (rush < 0.05f)
+        {
+            comp.Rush.Remove(profile);
+            return 0f;
+        }
+
+        comp.Rush[profile] = rush;
+        return rush;
     }
 
     /// <summary>Tells the user when a profile moves into a new phase: light, heavy or overdose.</summary>

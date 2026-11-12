@@ -1,3 +1,4 @@
+using Content.Shared._WF.BritishFood;
 using Content.Shared._WF.Narcotics;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
@@ -17,6 +18,12 @@ public sealed partial class WFIntoxicationSystem
 
     /// <summary>Share of held-off damage repaid as Poison.</summary>
     public const float DamperRepay = 0.4f;
+
+    /// <summary>Share of a stun or knockdown a <see cref="WFDrugTrait.StunResistance"/> tier leaves.</summary>
+    public const float StunResistance = 0.5f;
+
+    /// <summary>Heart health a second each combat drug past the first costs an organic body.</summary>
+    public const float CombatStackStrain = 0.1f;
 
     /// <summary>Shortest time debt is repaid over when no crash is running.</summary>
     private const float MinRepaySeconds = 5f;
@@ -38,20 +45,33 @@ public sealed partial class WFIntoxicationSystem
         InitializeBlood();
         SubscribeLocalEvent<WFIntoxicationComponent, DamageModifyEvent>(OnDamageModify);
         SubscribeLocalEvent<WFIntoxicationComponent, ComponentShutdown>(OnShutdown);
+        SubscribeLocalEvent<WFIntoxicationComponent, StunnedEvent>((EntityUid uid, WFIntoxicationComponent _, ref StunnedEvent _) => ResistStun(uid, "Stun"));
+        SubscribeLocalEvent<WFIntoxicationComponent, KnockedDownEvent>((EntityUid uid, WFIntoxicationComponent _, ref KnockedDownEvent _) => ResistStun(uid, "KnockedDown"));
     }
 
     private void UpdateTraits(Entity<WFIntoxicationComponent> ent, float seconds)
     {
         var (uid, comp) = ent;
         _activeTraits.Clear();
+        var combat = 0;
         foreach (var (profile, level) in comp.Levels)
         {
             if (!Proto.TryIndex(profile, out var proto))
                 continue;
 
             var tier = proto.TierAt(level);
-            if (tier >= 0)
-                _activeTraits.UnionWith(proto.Tiers[tier].Traits);
+            if (tier < 0)
+                continue;
+
+            _activeTraits.UnionWith(proto.Tiers[tier].Traits);
+            if (proto.Family == WFDrugFamily.Combat)
+                combat++;
+        }
+
+        if (combat > 1)
+        {
+            var strain = new WFStrainHeartEvent(FixedPoint2.New(CombatStackStrain * (combat - 1) * seconds));
+            RaiseLocalEvent(uid, ref strain);
         }
 
         foreach (var trait in ComponentTraits)
@@ -62,14 +82,19 @@ public sealed partial class WFIntoxicationSystem
                 RemoveTraitComponent(uid, trait);
         }
 
-        if (_activeTraits.Contains(WFDrugTrait.StunResistance))
-        {
-            _status.TryRemoveStatusEffect(uid, "Stun");
-            _status.TryRemoveStatusEffect(uid, "KnockedDown");
-        }
-
         if (comp.Debt > 0f && !_activeTraits.Contains(WFDrugTrait.Damper))
             Repay(ent, seconds);
+    }
+
+    /// <summary>Cuts what is left of a stun or knockdown that just landed on a stun-resistant body.</summary>
+    private void ResistStun(EntityUid uid, string key)
+    {
+        if (!HasTrait(uid, WFDrugTrait.StunResistance) || !_status.TryGetTime(uid, key, out var time))
+            return;
+
+        var left = time.Value.Item2 - _timing.CurTime;
+        if (left > TimeSpan.Zero)
+            _status.TryRemoveTime(uid, key, left * (1f - StunResistance));
     }
 
     private void Grant(Entity<WFIntoxicationComponent> ent, WFDrugTrait trait)

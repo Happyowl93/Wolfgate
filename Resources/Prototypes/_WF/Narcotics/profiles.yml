@@ -2,15 +2,18 @@
 # the overdose, and any between are heavy; the screen look and a popup mark each step.
 # A street drug's level follows the units in the blood (its reagent's WFDose is inBlood), so the reagent's
 # metabolismRate sets how long the high lasts, and overdoseHalfLife flushes the blood above the overdose tier faster.
-# Level fed directly, by an upstream reagent's metabolised dose or a neuroware program, decays by decay and halfLife.
+# Level fed directly, by a neuroware program, decays by decay, which matches the reagent's metabolismRate so the twin
+# lasts as long as the drug.
+# rushGain is the peak of a fresh dose: extra level per level added to the blood, halving every rushHalfLife (45 s),
+# so one line hits heavy for a moment and settles. It never reaches the overdose tier; only the blood does.
 # Numbers are starting values to tune in playtests.
 
 # Cocaine: a short social stimulant.
 - type: wfDrugProfile
   id: WFCocaine
   family: Stimulant
-  decay: 0.002
-  halfLife: 700
+  decay: 0.01
+  rushGain: 3
   overdoseHalfLife: 120
   dependenceGain: 0.015
   tiers:
@@ -74,8 +77,8 @@
 - type: wfDrugProfile
   id: WFCrack
   family: Stimulant
-  decay: 0.004
-  halfLife: 140
+  decay: 0.02
+  rushGain: 2
   overdoseHalfLife: 120
   dependenceGain: 0.045
   tiers:
@@ -136,8 +139,8 @@
 - type: wfDrugProfile
   id: WFOpium
   family: Opioid
-  decay: 0.002
-  halfLife: 950
+  decay: 0.01
+  rushGain: 1.5
   overdoseHalfLife: 120
   dependenceGain: 0.01
   tiers:
@@ -189,8 +192,8 @@
 - type: wfDrugProfile
   id: WFHeroin
   family: Opioid
-  decay: 0.002
-  halfLife: 1200
+  decay: 0.01
+  rushGain: 3
   overdoseHalfLife: 120
   dependenceGain: 0.03
   tiers:
@@ -254,8 +257,7 @@
 - type: wfDrugProfile
   id: WFCrystal
   family: Stimulant
-  decay: 0.002
-  halfLife: 700
+  decay: 0.01
   overdoseHalfLife: 120
   dependenceGain: 0.02
   tiers:
@@ -282,19 +284,19 @@
     banner: wf-neuroware-burst-banner
     faults: [ wf-neuroware-burst-fault-1, wf-neuroware-burst-fault-2 ]
 
-# Redline: offence. Every second high strains the heart, and when it ends the body collapses for a minute.
+# Redline: offence. A light dose gives part of the speed; the full speed and stun resistance need a heavy one. Every
+# second high strains the heart, and when it ends the body collapses for a minute plus half the time spent high.
 - type: wfDrugProfile
   id: WFRedline
   family: Combat
-  decay: 0.003
-  halfLife: 240
+  decay: 0.02
   overdoseHalfLife: 120
   dependenceGain: 0.02
   tiers:
   - min: 1
-    speed: 1.3
+    speed: 1.15
     overlay: 0.6
-    traits: [ StunResistance, IgnoreDamageSlowdown ]
+    traits: [ IgnoreDamageSlowdown ]
     effects:
     - !type:WolfmedPainRelief
       tier: Stimulant
@@ -337,6 +339,7 @@
   crash:
     after: 5
     duration: 60
+    perSecondAbove: 0.5
     maxDuration: 180
     speed: 0.5
     overlay: 0.8
@@ -348,19 +351,19 @@
     banner: wf-neuroware-redline-banner
     faults: [ wf-neuroware-redline-fault-1, wf-neuroware-redline-fault-2 ]
 
-# Anvil: endurance. It holds off damage and hides the user's own readout; the damage comes back during the crash.
+# Anvil: endurance. It holds off damage and hides the user's own readout; the damage comes back during the crash,
+# which grows with the time spent high. Stamina-crit resistance needs a heavy dose.
 - type: wfDrugProfile
   id: WFAnvil
   family: Combat
-  decay: 0.003
-  halfLife: 240
+  decay: 0.02
   overdoseHalfLife: 120
   dependenceGain: 0.02
   tiers:
   - min: 1
     speed: 0.85
     overlay: 0.5
-    traits: [ Damper, StaminaCritResistance, HideDamage ]
+    traits: [ Damper, HideDamage ]
     effects:
     - !type:WolfmedPainRelief
       tier: Stimulant
@@ -387,6 +390,8 @@
   crash:
     after: 5
     duration: 45
+    perSecondAbove: 0.25
+    maxDuration: 120
     speed: 0.9
     overlay: 0.6
   neuroware:
@@ -398,8 +403,8 @@
 - type: wfDrugProfile
   id: WFChorus
   family: Psychedelic
-  decay: 0.002
-  halfLife: 1200
+  decay: 0.01
+  rushGain: 2
   overdoseHalfLife: 120
   dependenceGain: 0.005
   tiers:
@@ -436,8 +441,8 @@
 - type: wfDrugProfile
   id: WFHalo
   family: Empathogen
-  decay: 0.002
-  halfLife: 700
+  decay: 0.01
+  rushGain: 2
   overdoseHalfLife: 120
   dependenceGain: 0.01
   tiers:
@@ -494,8 +499,7 @@
 - type: wfDrugProfile
   id: WFCannabis
   family: Cannabinoid
-  decay: 0.002
-  halfLife: 700
+  decay: 0.02
   overdoseHalfLife: 120
   dependenceGain: 0.003
   tiers:
@@ -515,8 +519,7 @@
 - type: wfDrugProfile
   id: WFNicotine
   family: Nicotine
-  decay: 0.002
-  halfLife: 700
+  decay: 0.01
   overdoseHalfLife: 120
   dependenceGain: 0.01
   tiers:

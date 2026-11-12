@@ -74,9 +74,12 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
             return;
 
         var comp = EnsureComp<WFIntoxicationComponent>(uid);
+        var speed = GetSpeed(comp);
         comp.Fed[profile] = comp.Fed.GetValueOrDefault(profile) + amount;
         comp.Levels[profile] = comp.Levels.GetValueOrDefault(profile) + amount;
         Dirty(uid, comp);
+        if (!MathHelper.CloseTo(GetSpeed(comp), speed))
+            Movement.RefreshMovementSpeedModifiers(uid);
         RegisterDose(uid, profile, amount);
     }
 
@@ -108,6 +111,8 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
             comp.Levels[profile] = Math.Max(0f, comp.Levels[profile] - amount);
             if (comp.Fed.TryGetValue(profile, out var fed))
                 comp.Fed[profile] = Math.Max(0f, fed - amount);
+            if (comp.Rush.TryGetValue(profile, out var rush))
+                comp.Rush[profile] = Math.Max(0f, rush - amount);
         }
 
         Dirty(uid, comp);
@@ -125,6 +130,7 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
         }
 
         comp.Fed.Clear();
+        comp.Rush.Clear();
         Dirty(uid, comp);
     }
 
@@ -243,7 +249,3 @@ public readonly record struct WFDrugDosedEvent(
 /// <summary>Raised on a body each tick per profile to scale how fast the level decays.</summary>
 [ByRefEvent]
 public record struct WFDrugDecayEvent(WFDrugFamily Family, float Multiplier = 1f);
-
-/// <summary>Raised on a body when a profile's crash starts or ends.</summary>
-[ByRefEvent]
-public readonly record struct WFDrugCrashEvent(ProtoId<WFDrugProfilePrototype> Profile, bool Started);

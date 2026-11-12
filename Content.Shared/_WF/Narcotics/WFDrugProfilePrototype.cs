@@ -25,7 +25,7 @@ public enum WFDrugTrait : byte
 {
     /// <summary>Damage doesn't slow movement.</summary>
     IgnoreDamageSlowdown,
-    /// <summary>Stuns and knockdowns are shortened.</summary>
+    /// <summary>Stuns and knockdowns last half as long.</summary>
     StunResistance,
     /// <summary>Stamina damage can't put the user into stamina crit.</summary>
     StaminaCritResistance,
@@ -66,6 +66,17 @@ public sealed partial class WFDrugProfilePrototype : IPrototype
     [DataField]
     public float OverdoseHalfLife;
 
+    /// <summary>
+    /// Extra level per level a fresh dose adds to the blood, which fades at <see cref="RushHalfLife"/>: the peak
+    /// before the high settles. It can deepen a high up to the overdose tier but never into it. Zero gives no rush.
+    /// </summary>
+    [DataField]
+    public float RushGain;
+
+    /// <summary>Seconds for the rush to halve.</summary>
+    [DataField]
+    public float RushHalfLife = 45f;
+
     /// <summary>Tiers in ascending <see cref="WFDrugTier.Min"/>. The last tier is the overdose.</summary>
     [DataField(required: true)]
     public List<WFDrugTier> Tiers = new();
@@ -93,9 +104,6 @@ public sealed partial class WFDrugProfilePrototype : IPrototype
 
         return -1;
     }
-
-    /// <summary>The level at which the first tier starts.</summary>
-    public float FirstTier => Tiers.Count > 0 ? Tiers[0].Min : float.MaxValue;
 
     /// <summary>The phase a tier belongs to: the first is light, the last is the overdose, any between are heavy.</summary>
     public WFDrugPhase PhaseOf(int tier)

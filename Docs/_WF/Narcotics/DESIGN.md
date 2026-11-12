@@ -157,6 +157,7 @@ Prototype kind `wfDrugProfile`:
 | `tiers` | Ordered list of `{ min, effects, speed, statusEffects, overlay }`. The highest tier whose `min` is at or below the level applies. The last tier is the overdose |
 | `crash` | `{ after, duration, effects, speed, overlay }`: applied when the level falls below the first tier after having spent `after` seconds above it |
 | `dependenceGain` | Dependence added per unit of level gained |
+| `rushGain`, `rushHalfLife` | The peak of a fresh dose: extra level per level added to the blood, halving every `rushHalfLife` seconds. It never reaches the overdose tier |
 | `neuroware` | Display strings for the twin: program name, HUD fault lines, banner |
 
 `effects` are ordinary `EntityEffect`s run with base args, so they must not use `ReagentThreshold` or `OrganType`
@@ -181,8 +182,8 @@ Prototype kind `wfDrugProfile`:
 ### Dependence
 
 - `WFDependenceComponent`: a 0-1 meter per family, the last dose time per family, and tolerance per family.
-- Gain comes from `dependenceGain`. The meter decays slowly while clean (start: 0.02 per minute), so a single
-  binge fades within the round and regular use doesn't.
+- Gain comes from `dependenceGain`. The meter decays slowly while clean (0.02 per minute, a quarter of that above
+  the withdrawal mark), so a light habit fades within the round and a real one doesn't.
 - Tolerance rises with use (half the dependence gained) and divides the blood level by `1 + tolerance` (up to x2),
   and speeds a fed level's `decay` by as much. Every tier threshold, the overdose included, effectively rises with
   it, as does heroin's sedation (`WFSedation`), so the pull is toward dosing more.
@@ -193,7 +194,7 @@ Prototype kind `wfDrugProfile`:
 - Round scope: the components live on the body. Cloning or a new body starts clean. Nothing is written to the
   database.
 - Traits `WFDependentStimulant`, `WFDependentOpioid`, `WFDependentNicotine`: start the round at 0.8 in that family
-  and stop the meter decaying below 0.6. Follow the cost and category conventions in
+  and stop the meter decaying below 0.7, and give a first dose as trait gear. Follow the cost and category conventions in
   `Resources/Prototypes/_Mono/Traits/physical.yml`; they are drawbacks and should refund points.
 
 ### Visuals (Client)
@@ -281,7 +282,9 @@ ends, every changed sound gets its own pitch back and loses the reverb; area ech
 
 Combat-drug rule: a tier that gives more must cost more in the same tier, and the cost must be something the user
 can't dose their way out of. Redline's collapse and Anvil's repayment both start when the level drops, so
-redosing only postpones and enlarges them.
+redosing only postpones and enlarges them. A light dose gives part of the benefit (Redline x1.15 with no stun
+resistance, Anvil without stamina-crit resistance), stuns are halved rather than removed, and each combat drug past
+the first strains the heart by 0.1 a second.
 
 ### Production
 
@@ -295,6 +298,8 @@ redosing only postpones and enlarges them.
   matters. Chorus needs a Lattice-flavoured input (exotic matter or a deep-band material; check
   `Docs/_WF/Lattice/DESIGN.md` for what exists) so it is rare and comes from the frontier.
 - **Hash**: press dried cannabis in a crafting graph.
+- **Cutting**: flour reacts with cocaine or heroin a unit for a unit into twice the powder at half the grade
+  (`fillers` on `wfReactionPurity` count as grade zero).
 - Seeds come from the exotic seeds crate and dealer stock, not the public seed vendor.
 - Solid products (rocks, shards, bricks, baggies of powder) keep their solution's grade and carry
   `Contraband` with `Class3Chem`.

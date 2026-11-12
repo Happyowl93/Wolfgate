@@ -44,7 +44,7 @@ public abstract partial class WFDependentTraitComponent : Component
 
     /// <summary>The meter never decays below this.</summary>
     [DataField]
-    public float Floor = 0.6f;
+    public float Floor = 0.7f;
 }
 
 [RegisterComponent]
