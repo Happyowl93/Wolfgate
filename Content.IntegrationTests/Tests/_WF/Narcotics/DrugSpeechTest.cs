@@ -1,10 +1,15 @@
 using Content.Server._WF.Narcotics;
+using Content.Server._WF.Voice;
+using Content.Shared._WF.Voice;
 using Content.Shared._WF.Narcotics;
 using Robust.Shared.GameObjects;
 
 namespace Content.IntegrationTests.Tests._WF.Narcotics;
 
-/// <summary>A heavy stimulant high rushes speech and a heavy opioid high trails it off; a light one changes nothing.</summary>
+/// <summary>
+/// A heavy stimulant high rushes speech and a heavy opioid high trails it off; the voice speeds up or slows down with
+/// the phase, and a sober speaker's voice is left alone.
+/// </summary>
 [TestFixture]
 [TestOf(typeof(WFDrugSpeechSystem))]
 public sealed class DrugSpeechTest
@@ -43,6 +48,25 @@ public sealed class DrugSpeechTest
             Assert.That(intoxication.FamilyPhase(comp, WFDrugFamily.Stimulant), Is.EqualTo(WFDrugPhase.Overdose),
                 "The furthest profile of the family sets the phase.");
             Assert.That(intoxication.FamilyPhase(comp, WFDrugFamily.Opioid), Is.EqualTo(WFDrugPhase.None));
+
+            SpeechVoiceModifyEvent Speak()
+            {
+                var ev = new SpeechVoiceModifyEvent(new SpeechVoice());
+                entMan.EventBus.RaiseLocalEvent(mob, ref ev);
+                return ev;
+            }
+
+            var normal = new SpeechVoice().Speed;
+            var fast = Speak();
+            Assert.That(fast.Changed, Is.True);
+            Assert.That(fast.Voice.Speed, Is.LessThan(normal), "An overdosed stimulant voice talks faster.");
+
+            comp.Levels.Clear();
+            comp.Levels["WFHeroin"] = 10f;
+            Assert.That(Speak().Voice.Speed, Is.GreaterThan(normal), "A heavy opioid voice drags.");
+
+            comp.Levels.Clear();
+            Assert.That(Speak().Changed, Is.False, "Sober, the voice is untouched.");
         });
 
         await pair.CleanReturnAsync();

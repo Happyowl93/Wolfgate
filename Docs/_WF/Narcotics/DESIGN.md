@@ -222,6 +222,17 @@ A body whose brain is a neuroware host gets none of these; see Neuroware.
   doubles 15% of words and turns full stops into exclamations; an overdose doubles 30% and shouts 30%. A heavy
   opioid high puts a pause after 12% of words (25% overdosed) and trails the end off. Chorus's top tier keeps its
   scrambled accent, and its `Mimic` hallucination already puts lines nobody said into local chat.
+- **Voice** (`WFDrugSpeechSystem` on the Voice module's `SpeechVoiceModifyEvent`). The character voice changes per
+  line, for everyone who hears it, by each family's phase; families stack and the result stays in the creator's
+  ranges. Syllable time is a multiplier, so lower is faster:
+
+  | Family | Light | Heavy | Overdose |
+  |---|---|---|---|
+  | Stimulant | syllables ×0.85 | ×0.7, pitch ×1.04 | ×0.55, pitch ×1.08, pitch variance +0.1 |
+  | Opioid | syllables ×1.15 | ×1.4, pitch ×0.94, intonation ×0.5 | ×1.7, pitch ×0.9, flat |
+  | Cannabinoid | — | syllables ×1.2, intonation ×0.7 | ×1.35, intonation ×0.5 |
+  | Psychedelic | — | pitch variance +0.15, vibrato 0.12 | +0.3, vibrato 0.25 |
+  | Empathogen | — | pitch ×1.03, intonation ×1.6 | pitch ×1.05, intonation ×2, tremolo 0.3 |
 
 ### Sound (Client)
 
