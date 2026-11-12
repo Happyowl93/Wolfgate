@@ -75,6 +75,9 @@
         path: /Audio/Weapons/Guns/Empty/empty.ogg
       ejectSound:
         path: /Audio/Weapons/Guns/Empty/empty.ogg
+  - type: Construction
+    graph: WFBong
+    node: bong
   - type: StaticPrice
     price: 40
 

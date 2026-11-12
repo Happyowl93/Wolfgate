@@ -21,5 +21,3 @@ drydock-fence-prompt-law = Is this legal?
 drydock-fence-response-law = Pirate hulks, derelicts, yer ain ship? Nae bother. Break a registered ship or a navy hull an' the warrant office hears aboot it. Ah dinnae ask whose it is. They dae.
 drydock-fence-prompt-who = Who are you?
 drydock-fence-response-who = Kord Blackanvil. Ah used tae swing cranes at Anvilhold, till they found oot whit Ah was swingin' them at.
-drydock-fence-prompt-goods = Got anything else under the counter?
-drydock-fence-response-goods = Clean product an' clean sticks, nae street cut. Leave yer ain on the counter an' Ah'll take it aff the bill. Better the grade, better the price.

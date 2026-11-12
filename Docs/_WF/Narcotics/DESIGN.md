@@ -382,8 +382,9 @@ A host gets no screen overlay. Its profile state is shown through the synthetic 
 - Solid products get a `StaticPrice` scaled by grade, and the `ItemTax` and `SoldAlert` setup that
   `FentanylSolidified` uses (`Resources/Prototypes/_Mono/Entities/Objects/Misc/solids.yml`).
 - The Strangers dealer (`Resources/Prototypes/_WF/Strangers/dialogues.yml:7`) sells low-grade product, seeds,
-  the purity tester and neuroware copies. The Fence vendor and the Underground market tab buy and sell higher
-  grades.
+  the purity tester and neuroware copies. The Reaver runner (`WFEncounterReaverDealer`, a trader ship flying
+  Ashfall colours) sells higher grades and takes drugs as part payment; the Underground market tab buys and sells them
+  too. The bong is crafted from two glass and one plastic.
 - Bench laws (`Resources/Prototypes/_WF/Bench/laws.yml`): add narcotics possession and trafficking, and unlawful
   neuroware loading onto an unwilling host.
 - A guidebook page under `Resources/ServerInfo/_WF/Narcotics` covers grades, dependence and neuroware from the

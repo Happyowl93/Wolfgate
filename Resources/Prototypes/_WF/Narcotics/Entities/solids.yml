@@ -148,6 +148,9 @@
     solution: baggie
   - type: SolutionTransfer
     transferAmount: 5
+  - type: Construction
+    graph: WFBaggie
+    node: baggie
     minTransferAmount: 1
     maxTransferAmount: 10
   - type: Extractable

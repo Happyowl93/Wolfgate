@@ -30,6 +30,9 @@
         maxVol: 10
   - type: SolutionTransfer
     maxTransferAmount: 10
+  - type: Construction
+    graph: WFVial
+    node: vial
   - type: Openable
     opened: true
     closeable: true

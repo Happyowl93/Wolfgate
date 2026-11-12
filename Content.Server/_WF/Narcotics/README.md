@@ -24,8 +24,9 @@ time from the organs' rates, the reagents that remove them (`AdjustReagent`) and
 Substances are grown (coca, the opium poppy, cannabis pressed into hash) or cooked through graded reactions, and the
 solids keep their grade. `WFDeliverySystem` adds powder lines from a baggie and the bong; `WFSecondhandSmokeSystem` puts smoke
 gas and a share of everything smoked into the air, and doses whoever breathes it nearby. Products are Class 3
-contraband with grade-scaled prices, a sale tax and a sold alert; the Strangers dealer sells cut stock, the Drydock
-fence sells full grade and takes drugs as payment, and the uplink chemicals tab lists a few. The Bench has three laws
+contraband with grade-scaled prices, a sale tax and a sold alert; the Strangers dealer sells cut stock, a Reaver
+runner (`WFEncounterReaverDealer`, a trader encounter) sells full grade and takes drugs as payment, the bong is
+crafted from glass and plastic, and the uplink chemicals tab lists a few. The Bench has three laws
 for it and the Medical guide a player page.
 
 Entry points: `WFDose` and `WFClearIntoxication` (entity effects), `SharedWFIntoxicationSystem` (levels, tiers,
@@ -87,10 +88,11 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 ### Prototypes
 
+- [`Resources/Prototypes/_WF/Narcotics/encounters.yml`](../../../Resources/Prototypes/_WF/Narcotics/encounters.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Entities/dealer.yml`](../../../Resources/Prototypes/_WF/Narcotics/Entities/dealer.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Entities/delivery.yml`](../../../Resources/Prototypes/_WF/Narcotics/Entities/delivery.yml)
-- [`Resources/Prototypes/_WF/Narcotics/Entities/fence.yml`](../../../Resources/Prototypes/_WF/Narcotics/Entities/fence.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Entities/produce.yml`](../../../Resources/Prototypes/_WF/Narcotics/Entities/produce.yml)
+- [`Resources/Prototypes/_WF/Narcotics/Entities/reaver_dealer.yml`](../../../Resources/Prototypes/_WF/Narcotics/Entities/reaver_dealer.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Entities/solids.yml`](../../../Resources/Prototypes/_WF/Narcotics/Entities/solids.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Entities/vials.yml`](../../../Resources/Prototypes/_WF/Narcotics/Entities/vials.yml)
 - [`Resources/Prototypes/_WF/Narcotics/guidebook.yml`](../../../Resources/Prototypes/_WF/Narcotics/guidebook.yml)
@@ -99,6 +101,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Resources/Prototypes/_WF/Narcotics/reactions.yml`](../../../Resources/Prototypes/_WF/Narcotics/reactions.yml)
 - [`Resources/Prototypes/_WF/Narcotics/reagents.yml`](../../../Resources/Prototypes/_WF/Narcotics/reagents.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Recipes/baggie.yml`](../../../Resources/Prototypes/_WF/Narcotics/Recipes/baggie.yml)
+- [`Resources/Prototypes/_WF/Narcotics/Recipes/bong.yml`](../../../Resources/Prototypes/_WF/Narcotics/Recipes/bong.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Recipes/hash.yml`](../../../Resources/Prototypes/_WF/Narcotics/Recipes/hash.yml)
 - [`Resources/Prototypes/_WF/Narcotics/Recipes/vial.yml`](../../../Resources/Prototypes/_WF/Narcotics/Recipes/vial.yml)
 - [`Resources/Prototypes/_WF/Narcotics/shaders.yml`](../../../Resources/Prototypes/_WF/Narcotics/shaders.yml)
@@ -108,6 +111,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 ### Localization
 
 - [`Resources/Locale/en-US/_WF/Narcotics/analyzer.ftl`](../../../Resources/Locale/en-US/_WF/Narcotics/analyzer.ftl)
+- [`Resources/Locale/en-US/_WF/Narcotics/dealer.ftl`](../../../Resources/Locale/en-US/_WF/Narcotics/dealer.ftl)
 - [`Resources/Locale/en-US/_WF/Narcotics/delivery.ftl`](../../../Resources/Locale/en-US/_WF/Narcotics/delivery.ftl)
 - [`Resources/Locale/en-US/_WF/Narcotics/dependence.ftl`](../../../Resources/Locale/en-US/_WF/Narcotics/dependence.ftl)
 - [`Resources/Locale/en-US/_WF/Narcotics/guidebook.ftl`](../../../Resources/Locale/en-US/_WF/Narcotics/guidebook.ftl)

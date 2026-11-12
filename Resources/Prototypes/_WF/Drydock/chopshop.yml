@@ -76,9 +76,6 @@
     response: drydock-fence-response-law
   - prompt: drydock-fence-prompt-who
     response: drydock-fence-response-who
-  - prompt: drydock-fence-prompt-goods
-    response: drydock-fence-response-goods
-    action: OpenShop
 
 # Dwarf parts over the human trader base, as on the Anvilhold dockmaster. Walk-in only: he answers hails but books
 # no berths.
@@ -109,16 +106,6 @@
     prototypes: [ WFDrydockFenceGear ]
   - type: Trader
     dialogue: WFDrydockFenceDialogue
-  # Narcotics: full-grade stock, and drugs and neuroware on the counter pay at 60% of their graded appraisal.
-  - type: TraderShop
-    vendors: [ WFDrydockFenceStock ]
-  - type: TraderGoodsPayment
-    whitelist:
-      tags:
-      - WFNarcotic
-      components:
-      - WFNeurowareStick
-    rate: 0.6
   - type: HailResponder
     greetings:
     - drydock-fence-hail-greeting-1

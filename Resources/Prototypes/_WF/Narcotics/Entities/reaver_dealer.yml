@@ -1,0 +1,82 @@
+# The Reaver dealer: full-grade product and pristine sticks at twice their appraisal, out of a Reaver runner's hold.
+# He can be killed, the stock runs out, and drugs and neuroware on the counter pay at 60% of their graded appraisal.
+- type: vendingMachineInventory
+  id: WFReaverDealerInventory
+  startingInventory:
+    WFBaggieCocaine: 4
+    WFBaggieHeroin: 4
+    WFCrackRock: 6
+    WFCrystalShard: 6
+    WFBaggie: 10
+    WFBongFilled: 2
+    WFNeurowareStick: 6
+    WFNeurowareStickWhiteline: 2
+    WFNeurowareStickNullLoop: 2
+    WFNeurowareStickBurst: 2
+    WFNeurowareStickRedline: 1
+    WFNeurowareStickDamper: 1
+    WFNeurowareStickChoir: 1
+    WFNeurowareStickHalo: 1
+    WFNeurowareStickIdle: 2
+
+- type: entity
+  id: WFReaverDealerStock
+  parent: VendingMachineAmmo
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: VendingMachine
+    pack: WFReaverDealerInventory
+    requiresCash: true
+  - type: MarketModifier
+    mod: 2
+
+- type: startingGear
+  id: WFReaverDealerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitColorBlack
+    outerClothing: ClothingOuterCoatPirate
+    head: ClothingHeadBandRed
+    eyes: ClothingEyesEyepatch
+    mask: ClothingMaskNeckGaiter
+    shoes: ClothingShoesBootsJack
+    gloves: ClothingHandsGlovesFingerless
+
+- type: traderDialogue
+  id: WFReaverDealerDialogue
+  greeting: wf-reaver-dealer-greeting
+  farewell: wf-reaver-dealer-farewell
+  options:
+  - prompt: wf-reaver-dealer-prompt-shop
+    response: wf-reaver-dealer-response-shop
+    action: OpenShop
+  - prompt: wf-reaver-dealer-prompt-pay
+    response: wf-reaver-dealer-response-pay
+  - prompt: wf-reaver-dealer-prompt-who
+    response: wf-reaver-dealer-response-who
+
+- type: entity
+  id: WFReaverDealer
+  parent: WFTraderWanderer
+  name: Reaver dealer
+  description: Sells clean product off an Ashfall runner. The red band says who he flies for.
+  suffix: Trader, Narcotics
+  components:
+  - type: PirateAccent
+  - type: Loadout
+    prototypes: [ WFReaverDealerGear ]
+  - type: Trader
+    dialogue: WFReaverDealerDialogue
+    killable: true
+  - type: TraderShop
+    vendors: [ WFReaverDealerStock ]
+    randomStock: 12
+    stockMin: 1
+    stockMax: 4
+    lootItems: 5
+  - type: TraderGoodsPayment
+    whitelist:
+      tags:
+      - WFNarcotic
+      components:
+      - WFNeurowareStick
+    rate: 0.6
