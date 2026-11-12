@@ -2,6 +2,7 @@ using Content.Server.Body.Components;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Chemistry.Reagent;
+using Content.Shared.Construction.Components;
 using Content.Shared.FixedPoint;
 using Content.Shared.Item;
 using Content.Shared.Tag;
@@ -10,10 +11,10 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._WF.WolfChem.Narcotics;
 
 /// <summary>
-/// The contraband is the drug, not what it comes in. Any item with a street drug in one of its solutions, a beaker,
-/// syringe, pill, baggie or vial, is marked the way the ready-made products are, with the <c>WFNarcotic</c> tag and
-/// the contraband, sale tax and sold alert of <c>WFNarcoticMarks</c>, and loses them once the drug is out. A blank
-/// stick that takes a copy is marked for good.
+/// The contraband is the drug, not what it comes in. Any item or movable structure with a street drug in one of its
+/// solutions, a beaker, syringe, pill, baggie, vial or storage tank, is marked the way the ready-made products are,
+/// with the <c>WFNarcotic</c> tag and the contraband, sale tax and sold alert of <c>WFNarcoticMarks</c>, and loses
+/// them once the drug is out. A blank stick that takes a copy is marked for good.
 /// </summary>
 public sealed class WFNarcoticGoodsSystem : EntitySystem
 {
@@ -32,17 +33,19 @@ public sealed class WFNarcoticGoodsSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<ItemComponent, SolutionContainerChangedEvent>(OnChanged);
+        // Items and what can be unbolted and hauled to a pallet; a thing that is both is simply checked twice.
+        SubscribeLocalEvent<ItemComponent, SolutionContainerChangedEvent>((Entity<ItemComponent> ent, ref SolutionContainerChangedEvent args) => OnChanged(ent, args.Solution));
+        SubscribeLocalEvent<AnchorableComponent, SolutionContainerChangedEvent>((Entity<AnchorableComponent> ent, ref SolutionContainerChangedEvent args) => OnChanged(ent, args.Solution));
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(_ => _marks = null);
     }
 
-    private void OnChanged(Entity<ItemComponent> ent, ref SolutionContainerChangedEvent args)
+    private void OnChanged(EntityUid ent, Solution changed)
     {
         // A creature small enough to carry is not a package.
         if (HasComp<BloodstreamComponent>(ent))
             return;
 
-        if (HoldsNarcotics(args.Solution))
+        if (HoldsNarcotics(changed))
         {
             SetNarcotic(ent, true);
             return;
@@ -52,7 +55,7 @@ public sealed class WFNarcoticGoodsSystem : EntitySystem
         if (!HasComp<WFNarcoticMarkedComponent>(ent))
             return;
 
-        foreach (var (_, solution) in _solutions.EnumerateSolutions(ent.Owner))
+        foreach (var (_, solution) in _solutions.EnumerateSolutions(ent))
         {
             if (HoldsNarcotics(solution.Comp.Solution))
                 return;

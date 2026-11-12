@@ -41,10 +41,10 @@
     closeSound:
       collection: bottleCloseSounds
 
-# Prefilled: sealed, full grade, Class 3 like the other street drugs.
+# Prefilled: sealed, full grade, a narcotic at the market like the other street drugs.
 - type: entity
   abstract: true
-  parent: WFVial
+  parent: [ WFVial, WFNarcoticMarks ]
   id: WFVialNarcoticBase
   components:
   - type: Openable
@@ -53,20 +53,6 @@
     tags:
     - CentrifugeCompatible
     - WFNarcotic
-  - type: Contraband
-    severity: Class3Chem
-    turnInValues:
-      FederationMilitaryCredit: 5
-  - type: ItemTax
-    taxAccounts:
-      Medical: -0.05
-      nfsd: -0.1
-      BlackMarket: 0.25
-  - type: SoldAlert
-    groupId: WFNarcotics
-    maxPerSale: 100
-    channels:
-    - Security
 
 - type: entity
   parent: WFVialNarcoticBase

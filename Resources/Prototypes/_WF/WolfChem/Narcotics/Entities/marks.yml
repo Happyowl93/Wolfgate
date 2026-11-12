@@ -1,5 +1,6 @@
-# What an item gains while it holds a street drug (WFNarcoticGoodsSystem): a beaker, syringe, pill, baggie or vial,
-# or a blank stick that took a copy. Never spawned; only its components are copied.
+# What makes a thing a narcotic at the market: Class 3 contraband, and a sale that moves money to the black market
+# and tips off security. The ready-made products inherit it, and WFNarcoticGoodsSystem copies it onto any item that
+# holds a street drug and onto a blank stick that takes a copy. Each also carries the WFNarcotic tag.
 - type: entity
   id: WFNarcoticMarks
   categories: [ HideSpawnMenu ]

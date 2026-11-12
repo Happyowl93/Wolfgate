@@ -1,7 +1,7 @@
 # Neuroware sticks. A blank takes copies; the named ones are pristine builds. Copying leaves the source's loads
 # alone, so a build spreads as far as there are blanks, 15% worse each generation. A stick's price doesn't follow
-# what is copied onto it, so copying doesn't print money. A blank that takes a copy gains the program base's
-# contraband, tax, sold alert and tag (WFNarcoticMarks).
+# what is copied onto it, so copying doesn't print money. A blank that takes a copy becomes a narcotic at the market
+# like the program base (WFNarcoticMarks).
 
 - type: entity
   parent: BaseItem
@@ -38,27 +38,14 @@
   - type: StaticPrice
     price: 75
 
-# A stick with a program on it. It sells like any drug: contraband, and the sale moves money to the black market
-# and tips off security.
+# A stick with a program on it. It sells like any drug.
 - type: entity
   abstract: true
-  parent: WFNeurowareStick
+  parent: [ WFNeurowareStick, WFNarcoticMarks ]
   id: WFNeurowareStickProgramBase
   components:
   - type: WFNeurowareStick
     loads: 3
-  - type: Contraband
-    severity: Class3Chem
-  - type: ItemTax
-    taxAccounts:
-      Medical: -0.05
-      nfsd: -0.1
-      BlackMarket: 0.25
-  - type: SoldAlert
-    groupId: WFNarcotics
-    maxPerSale: 100
-    channels:
-    - Security
   - type: Tag
     tags:
     - WFNarcotic

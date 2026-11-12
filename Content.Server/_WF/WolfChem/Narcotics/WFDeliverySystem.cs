@@ -2,22 +2,22 @@ using Content.Server.Body.Systems;
 using Content.Server.Chemistry.Containers.EntitySystems;
 using Content.Server.Fluids.EntitySystems;
 using Content.Server.Nutrition.EntitySystems;
+using Content.Server.Stack;
 using Content.Shared._WF.WolfChem.Narcotics.Delivery;
 using Content.Shared.Chemistry;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Containers.ItemSlots;
-using Content.Shared.DoAfter;
-using Content.Shared.FixedPoint;
 using Content.Shared.Coordinates.Helpers;
+using Content.Shared.DoAfter;
+using Content.Shared.Examine;
+using Content.Shared.FixedPoint;
+using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
-using Content.Server.Stack;
-using Content.Shared.Examine;
-using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Item;
-using Content.Shared.Stacks;
 using Content.Shared.Placeable;
 using Content.Shared.Popups;
+using Content.Shared.Stacks;
 using Content.Shared.Storage;
 using Content.Shared.Storage.EntitySystems;
 using Content.Shared.Temperature;
@@ -36,19 +36,19 @@ public sealed class WFDeliverySystem : EntitySystem
     [Dependency] private FoodSystem _food = default!;
     [Dependency] private ItemSlotsSystem _slots = default!;
     [Dependency] private ReactiveSystem _reactive = default!;
-    [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private SharedContainerSystem _container = default!;
+    [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
-    [Dependency] private StackSystem _stack = default!;
     [Dependency] private SharedMapSystem _map = default!;
-    [Dependency] private SharedStorageSystem _storage = default!;
-    [Dependency] private WFBaggieSystem _baggie = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
+    [Dependency] private SharedStorageSystem _storage = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SmokeSystem _smoke = default!;
-    [Dependency] private WFSecondhandSmokeSystem _secondhand = default!;
     [Dependency] private SolutionContainerSystem _solutions = default!;
+    [Dependency] private StackSystem _stack = default!;
+    [Dependency] private WFBaggieSystem _baggie = default!;
+    [Dependency] private WFSecondhandSmokeSystem _secondhand = default!;
 
     public override void Initialize()
     {
@@ -62,8 +62,8 @@ public sealed class WFDeliverySystem : EntitySystem
         SubscribeLocalEvent<WFBongComponent, InteractUsingEvent>(OnBongInteractUsing);
         SubscribeLocalEvent<WFBongComponent, UseInHandEvent>(OnBongUseInHand);
         SubscribeLocalEvent<WFBongComponent, WFBongHitDoAfterEvent>(OnBongDoAfter);
-        SubscribeLocalEvent<WFBongComponent, EntRemovedFromContainerMessage>(OnBowlEmptied);
         SubscribeLocalEvent<WFBongComponent, EntInsertedIntoContainerMessage>(OnBowlLoaded);
+        SubscribeLocalEvent<WFBongComponent, EntRemovedFromContainerMessage>(OnBowlEmptied);
         SubscribeLocalEvent<WFBongComponent, ExaminedEvent>(OnBongExamined);
     }
 
@@ -102,7 +102,7 @@ public sealed class WFDeliverySystem : EntitySystem
     private bool HasPowder(Entity<WFBaggieComponent> baggie)
     {
         return _solutions.TryGetSolution(baggie.Owner, baggie.Comp.Solution, out _, out var solution)
-            && solution.Volume > FixedPoint2.Zero;
+               && solution.Volume > FixedPoint2.Zero;
     }
 
     /// <summary>Lays out a line from a baggie at a spot. Returns the line, or null if the baggie is empty.</summary>
@@ -173,6 +173,11 @@ public sealed class WFDeliverySystem : EntitySystem
         UpdateBong(ent);
     }
 
+    private void OnBongRemove(Entity<WFBongComponent> ent, ref ComponentRemove args)
+    {
+        _slots.RemoveItemSlot(ent, ent.Comp.Bowl);
+    }
+
     private void SetLit(Entity<WFBongComponent> ent, bool lit)
     {
         ent.Comp.Lit = lit;
@@ -208,9 +213,10 @@ public sealed class WFDeliverySystem : EntitySystem
         _hands.PickupOrDrop(holder, rest);
     }
 
-    private void OnBongRemove(Entity<WFBongComponent> ent, ref ComponentRemove args)
+    private void OnBowlEmptied(Entity<WFBongComponent> ent, ref EntRemovedFromContainerMessage args)
     {
-        _slots.RemoveItemSlot(ent, ent.Comp.Bowl);
+        if (args.Container.ID == WFBongComponent.BowlSlotId)
+            SetLit(ent, false);
     }
 
     private void OnBongInteractUsing(Entity<WFBongComponent> ent, ref InteractUsingEvent args)
@@ -351,11 +357,5 @@ public sealed class WFDeliverySystem : EntitySystem
         var air = new Solution();
         air.AddReagent("Water", FixedPoint2.New(0.5));
         _smoke.StartSmoke(cloud, air, 2f, 0, smoke);
-    }
-
-    private void OnBowlEmptied(Entity<WFBongComponent> ent, ref EntRemovedFromContainerMessage args)
-    {
-        if (args.Container.ID == WFBongComponent.BowlSlotId)
-            SetLit(ent, false);
     }
 }

@@ -1,8 +1,9 @@
-# Solid drugs. Each keeps its solution's grade, carries Class 3 contraband, and can be ground back down.
+# Solid drugs. Each keeps its solution's grade, is a narcotic at the market (WFNarcoticMarks), and can be ground
+# back down.
 
 - type: entity
   abstract: true
-  parent: BaseItem
+  parent: [ BaseItem, WFNarcoticMarks ]
   id: WFBaseDrugSolid
   components:
   - type: Item
@@ -13,23 +14,8 @@
     - bitter
   - type: Extractable
     grindableSolutionName: food
-  - type: Contraband
-    severity: Class3Chem
-    turnInValues:
-      FederationMilitaryCredit: 5
   - type: ExaminableSolution
     solution: food
-  # Worth its contents at their grade; selling it moves money to the black market and tips off security.
-  - type: ItemTax
-    taxAccounts:
-      Medical: -0.05
-      nfsd: -0.1
-      BlackMarket: 0.25
-  - type: SoldAlert
-    groupId: WFNarcotics
-    maxPerSale: 100
-    channels:
-    - Security
   # Fits pipe and bong bowls, and baggies.
   - type: Tag
     tags:
@@ -167,7 +153,7 @@
     - Ephedrine
 
 - type: entity
-  parent: WFBaggie
+  parent: [ WFBaggie, WFNarcoticMarks ]
   id: WFBaggieCocaine
   components:
   - type: SolutionContainerManager
@@ -177,26 +163,12 @@
         reagents:
         - ReagentId: WFCocaine
           Quantity: 10
-  - type: Contraband
-    severity: Class3Chem
-    turnInValues:
-      FederationMilitaryCredit: 5
-  - type: ItemTax
-    taxAccounts:
-      Medical: -0.05
-      nfsd: -0.1
-      BlackMarket: 0.25
-  - type: SoldAlert
-    groupId: WFNarcotics
-    maxPerSale: 100
-    channels:
-    - Security
   - type: Tag
     tags:
     - WFNarcotic
 
 - type: entity
-  parent: WFBaggie
+  parent: [ WFBaggie, WFNarcoticMarks ]
   id: WFBaggieHeroin
   components:
   - type: SolutionContainerManager
@@ -206,20 +178,6 @@
         reagents:
         - ReagentId: WFHeroin
           Quantity: 10
-  - type: Contraband
-    severity: Class3Chem
-    turnInValues:
-      FederationMilitaryCredit: 5
-  - type: ItemTax
-    taxAccounts:
-      Medical: -0.05
-      nfsd: -0.1
-      BlackMarket: 0.25
-  - type: SoldAlert
-    groupId: WFNarcotics
-    maxPerSale: 100
-    channels:
-    - Security
   - type: Tag
     tags:
     - WFNarcotic

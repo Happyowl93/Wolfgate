@@ -2,9 +2,9 @@ using Content.Server._WF.CargoSales;
 using Content.Server._WF.ReaverCampaign.Components;
 using Content.Server._WF.TradeGoods;
 using Content.Server._WF.TradeGoods.Systems;
+using Content.Server.Cargo.Systems;
 using Content.Shared._WF.ReaverCampaign;
 using Content.Shared._WF.TradeGoods;
-using Content.Server.Cargo.Systems;
 using Content.Shared.Tag;
 using Robust.Shared.Containers;
 
@@ -64,7 +64,8 @@ public sealed partial class WFReaverCampaignSystem
 
         state.FundingGoods += value;
         var crates = (int) (state.FundingGoods / campaign.FundingGoodsValue);
-        state.FundingGoods -= crates * (double) campaign.FundingGoodsValue;
+        state.FundingGoods -= crates * campaign.FundingGoodsValue;
+        // A full chest takes no more; what is over is lost.
         if (state.Funding + crates >= campaign.FundingCrates)
             state.FundingGoods = 0;
 

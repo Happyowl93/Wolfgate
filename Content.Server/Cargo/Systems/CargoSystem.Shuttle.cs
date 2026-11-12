@@ -544,6 +544,10 @@ public sealed partial class CargoSystem
                         }
                     }
                 }
+                // WOLFGATE(CargoSales): taxed goods inside an untaxed crate or bag pay their tax too
+                else
+                    WfContentsTax(ent, gridUid, ref blackMarketTaxAmount, ref frontierTaxAmount, ref nfsdTaxAmount, ref medicalTaxAmount);
+
                 // Mono: Calculate if any factions need to receive currency
                 if (TryComp<CurrencyInjectionOnSellComponent>(ent, out var injection))
                 {

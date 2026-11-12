@@ -2,9 +2,12 @@ using Content.Server._Mono.Cargo;
 using Content.Server._WF.WolfChem.Narcotics;
 using Content.Server._WF.WolfChem.Neuroware;
 using Content.Server.Body.Components;
+using Content.Shared._Mono.ItemTax.Components;
 using Content.Shared._WF.WolfChem.Narcotics.Delivery;
+using Content.Shared._WF.WolfChem.Neuroware;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Containers.ItemSlots;
+using Content.Shared.Contraband;
 using Content.Shared.FixedPoint;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
@@ -12,18 +15,15 @@ using Content.Shared.Nutrition.EntitySystems;
 using Content.Shared.Stacks;
 using Content.Shared.Storage;
 using Content.Shared.Storage.EntitySystems;
-using Content.Shared.Contraband;
-using Content.Shared._Mono.ItemTax.Components;
 using Content.Shared.Tag;
-using Content.Shared._WF.WolfChem.Neuroware;
 using Robust.Shared.Containers;
 using Robust.Shared.GameObjects;
 
 namespace Content.IntegrationTests.Tests._WF.WolfChem.Narcotics;
 
 /// <summary>
-/// A snorted line and a bong hit each move their drug into the bloodstream, and a baggie takes only powder and
-/// solid drugs, and a sealed vial keeps its contents in.
+/// A snorted line and a bong hit each move their drug into the bloodstream, a baggie takes only powder and solid
+/// drugs, a sealed vial keeps its contents in, and whatever holds a street drug is a narcotic at the market.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFDeliverySystem))]
@@ -138,7 +138,7 @@ public sealed class DeliveryTest
     }
 
     /// <summary>
-    /// Anything holding a street drug, a beaker as much as a baggie, and a blank stick that takes a copy, is a
+    /// Anything holding a street drug, a beaker or a storage tank as much as a baggie, and a blank stick that takes a copy, is a
     /// narcotic like the ready-made ones: tagged, contraband and reported on sale. Emptied, or holding something
     /// harmless, it is not.
     /// </summary>
@@ -168,6 +168,7 @@ public sealed class DeliveryTest
                      {
                          ("WFBaggie", "baggie", "WFHeroin"), ("WFVial", "beaker", "WFRedline"),
                          ("Beaker", "beaker", "WFCocaine"), ("Syringe", "injector", "WFHeroin"),
+                         ("WaterTank", "tank", "WFHeroin"),
                      })
             {
                 var holder = entMan.SpawnEntity(proto, map.GridCoords);
@@ -209,6 +210,7 @@ public sealed class DeliveryTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>A baggie takes its listed powders and solid drugs and nothing else, and a sealed vial won't pour.</summary>
     [Test]
     public async Task BaggieWhitelistTest()
     {

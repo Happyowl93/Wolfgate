@@ -4,6 +4,8 @@ Fixes on top of the cargo pallet sale. `SoldAlertComponent.MaxPerSale` (Monolith
 too much of one item. Here the check runs apart from the radio alert, the console shows a payout of 0 and warns when a
 pallet would be refused, the popup names the item and limit, and a group uses its lowest limit. Pricing a pallet no
 longer adds to the first item's `CurrencyInjectionOnSellComponent.Amount`, which raised its payout on every appraisal.
+Goods with an `ItemTaxComponent` pay their tax inside an untaxed crate or bag too (`WfContentsTax`), not only loose on
+the pallet.
 
 `WFPalletSaleEvent` is raised when a pallet sale goes through, with everything sold and all it contained; unlike
 `EntitySoldEvent` it leaves out contraband turn-ins.
@@ -18,6 +20,7 @@ Entry points: `CargoSystem.WfRefuseOverLimit`, called from `SellPallets` and `Up
 
 ### Server
 
+- [`Content.Server/_WF/CargoSales/CargoSystem.ContentsTax.cs`](CargoSystem.ContentsTax.cs)
 - [`Content.Server/_WF/CargoSales/CargoSystem.PalletSale.cs`](CargoSystem.PalletSale.cs)
 - [`Content.Server/_WF/CargoSales/CargoSystem.SaleLimit.cs`](CargoSystem.SaleLimit.cs)
 - [`Content.Server/_WF/CargoSales/WFPalletSaleEvent.cs`](WFPalletSaleEvent.cs)
@@ -32,6 +35,7 @@ Entry points: `CargoSystem.WfRefuseOverLimit`, called from `SellPallets` and `Up
   - a pallet that would be refused pays nothing, so it shows nothing
   - the MaxPerSale check runs apart from the alert
   - a pallet sale event that leaves out contraband turn-ins
+  - taxed goods inside an untaxed crate or bag pay their tax too
   - adding to the component's own dictionary raised that item's payout on every appraisal
 - [`Resources/Locale/en-US/_Mono/cargo/sell-alert.ftl`](../../../Resources/Locale/en-US/_Mono/cargo/sell-alert.ftl): names the item and the limit
 

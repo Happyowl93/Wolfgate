@@ -454,8 +454,8 @@ synthetic HUD (`Content.Server/_WF/Wolfmed/Hud/WolfmedSyntheticHudSystem.cs`, cl
   work, since nothing uses it today.
 - Solid products get a `StaticPrice` scaled by grade, and the `ItemTax` and `SoldAlert` setup that
   `FentanylSolidified` uses (`Resources/Prototypes/_Mono/Entities/Objects/Misc/solids.yml`).
-- The contraband is the reagent, not the container: any item holding a priced narcotic in a solution (beaker, jug,
-  syringe, pill, baggie, vial) gains the same tag, contraband, tax and sold alert (`WFNarcoticGoodsSystem`,
+- The contraband is the reagent, not the container: any item or anchorable structure holding a priced narcotic in a
+  solution (beaker, jug, syringe, pill, baggie, vial, storage tank) gains the same tag, contraband, tax and sold alert (`WFNarcoticGoodsSystem`,
   `WFNarcoticMarks`) and loses them when emptied. A blank stick that takes a copy gains them for good.
   Narcotics sold on a cargo pallet fund the Reaver campaign by value (`fundingGoodsValue`).
 - The Strangers dealer (`Resources/Prototypes/_WF/Strangers/dialogues.yml:7`) sells low-grade product, seeds,
