@@ -93,7 +93,7 @@ A dose at 60% works like 60% of the amount, and the other 40% is impurity that t
 
 Grade sets the price as well. The price falls faster than the grade: a rock at half grade sells for a quarter, so cutting loses money at the market.
 
-A ChemMaster shows the percentage beside any graded reagent, and so do health analyzers and chemical goggles. A [bold]purity tester[/bold] does the same for any container or item it touches.
+A ChemMaster shows the percentage beside any graded reagent, and so do health analyzers and chemical goggles. A [bold]purity tester[/bold] does the same for any container or item it touches. It prints at a protolathe or medical techfab, and the dealers carry it too.
   <Box>
     <GuideEntityEmbed Entity="WFPurityTester"/>
   </Box>

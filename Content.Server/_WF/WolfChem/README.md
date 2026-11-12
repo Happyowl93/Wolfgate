@@ -209,6 +209,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Resources/Prototypes/_WF/WolfChem/Neuroware/shaders.yml`](../../../Resources/Prototypes/_WF/WolfChem/Neuroware/shaders.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Neuroware/sticks.yml`](../../../Resources/Prototypes/_WF/WolfChem/Neuroware/sticks.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Purity/Entities/Objects/purity_tester.yml`](../../../Resources/Prototypes/_WF/WolfChem/Purity/Entities/Objects/purity_tester.yml)
+- [`Resources/Prototypes/_WF/WolfChem/Purity/Recipes/lathe.yml`](../../../Resources/Prototypes/_WF/WolfChem/Purity/Recipes/lathe.yml)
 
 ### Localization
 
@@ -364,5 +365,6 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
   - held while it is in the blood instead of piling up each tick
   - held at the units left, as long as it used to pile up to
   - clears slower so the high lasts as long as before
+- [`Resources/Prototypes/Recipes/Lathes/Packs/medical.yml`](../../../Resources/Prototypes/Recipes/Lathes/Packs/medical.yml): purity testers print with the chemistry kit
 
 <!-- WOLFGATE-GENERATED END -->
