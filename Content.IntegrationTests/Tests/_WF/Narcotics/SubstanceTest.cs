@@ -110,10 +110,6 @@ public sealed class SubstanceTest
                 var stock = fill!.Contents.Select(e => e.PrototypeId?.Id).ToList();
                 Assert.That(stock, Does.Contain("WFCocaSeeds").And.Contain("WFOpiumPoppySeeds"));
 
-                var pod = server.EntMan.SpawnEntity("WFOpiumPoppyPod", map.GridCoords);
-                Assert.That(server.EntMan.GetComponent<SliceableFoodComponent>(pod).Slice?.Id, Is.EqualTo("WFOpiumResin"),
-                    "Scoring a pod should give resin.");
-
                 Assert.That(protos.Index<ConstructionGraphPrototype>("WFHash").TryPath("start", "brick", out _), Is.True);
                 Assert.That(lab.Contents("WFHashBrick", "food").ContainsPrototype("THC"), Is.True);
             });
@@ -145,9 +141,11 @@ public sealed class SubstanceTest
             cut.AddReagent("WFCocaine", FixedPoint2.New(10), 0.6f);
             lab.React(385f, cut, ("SodiumCarbonate", 2), ("Water", 2));
             lab.React(220f, null, ("Desoxyephedrine", 10));
+            lab.React(250f, null, ("WFOpium", 10));
 
             var rocks = lab.Spawned("WFCrackRock");
             var shards = lab.Spawned("WFCrystalShard");
+            var resin = lab.Spawned("WFOpiumResin");
             Assert.Multiple(() =>
             {
                 Assert.That(rocks, Has.Count.EqualTo(2), "10 u of cocaine should set into two rocks.");
@@ -155,6 +153,9 @@ public sealed class SubstanceTest
                     "A rock takes the mean grade of what went into it.");
                 Assert.That(shards, Has.Count.EqualTo(2));
                 Assert.That(shards.Select(s => s.GetPurity("Desoxyephedrine")), Has.All.EqualTo(1f).Within(0.01f));
+                Assert.That(resin, Has.Count.EqualTo(2), "10 u of chilled opium should set into two lumps of resin.");
+                Assert.That(resin.Select(r => r.GetTotalPrototypeQuantity("WFOpium")),
+                    Has.All.EqualTo(FixedPoint2.New(5)));
             });
         });
 

@@ -57,6 +57,22 @@
   optimalTemp: 350
   tolerance: 30
 
+# Chilled opium sets into resin, one lump per 5 u.
+- type: reaction
+  id: WFOpiumResin
+  maxTemp: 270
+  reactants:
+    WFOpium:
+      amount: 5
+  effects:
+  - !type:WFCreateGradedEntity
+    entity: WFOpiumResin
+
+- type: wfReactionPurity
+  id: WFOpiumResin
+  optimalTemp: 250
+  tolerance: 30
+
 # Chilled Desoxyephedrine sets into crystal shards, one per 5 u.
 - type: reaction
   id: WFCrystalShard

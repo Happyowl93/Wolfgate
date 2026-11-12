@@ -67,7 +67,6 @@
         - ReagentId: Desoxyephedrine
           Quantity: 5
 
-# Filled from a scored poppy pod, so it starts empty.
 - type: entity
   parent: WFBaseDrugSolid
   id: WFOpiumResin
@@ -78,7 +77,10 @@
   - type: SolutionContainerManager
     solutions:
       food:
-        maxVol: 15
+        maxVol: 5
+        reagents:
+        - ReagentId: WFOpium
+          Quantity: 5
 
 - type: entity
   parent: WFBaseDrugSolid

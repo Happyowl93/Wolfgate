@@ -81,7 +81,7 @@
   - type: Sprite
     sprite: _WF/Narcotics/Hydroponics/opium_poppy.rsi
 
-# Scoring the ripe pod with a knife gives its resin, at the pod's grade.
+# The pod holds opium; grind it and chill the opium to set it into resin.
 - type: entity
   parent: FoodProduceBase
   id: WFOpiumPoppyPod
@@ -100,8 +100,4 @@
           Quantity: 6
   - type: Produce
     seedId: WFOpiumPoppy
-  - type: SliceableFood
-    slice: WFOpiumResin
-    count: 1
-    sliceTime: 2
   - type: WFProducePurity

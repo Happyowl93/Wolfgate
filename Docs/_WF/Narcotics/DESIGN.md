@@ -287,8 +287,8 @@ redosing only postpones and enlarges them.
 - **Coca** (`WFCoca` seed, plant, leaf): leaves hold `WFCocaAlkaloid`. Grind the leaves, then react the alkaloid
   into `WFCocaine` with a `wfReactionPurity` entry. A second reaction turns Cocaine into crack rocks (a solid
   entity, as Fentanyl solidifies at `Resources/Prototypes/_Mono/Recipes/Reactions/fentanyl.yml`).
-- **Poppy**: check whether upstream's poppy seed exists here and reuse it; otherwise add `WFPoppy`. Scoring a ripe
-  pod with a sharp tool yields `WFOpium` resin. Opium reacts into `WFHeroin`.
+- **Poppy**: check whether upstream's poppy seed exists here and reuse it; otherwise add `WFPoppy`. The pod holds
+  `WFOpium`; chilled below 270 K, 5 u sets into a `WFOpiumResin` lump at the batch's grade. Opium reacts into `WFHeroin`.
 - **Crystal**: Desoxyephedrine solidifies into `WFCrystal` shards at a cold temperature band.
 - **Redline, Anvil, Halo, Chorus**: chemistry-only, each a two-step route with a narrow optimum so that grade
   matters. Chorus needs a Lattice-flavoured input (exotic matter or a deep-band material; check
