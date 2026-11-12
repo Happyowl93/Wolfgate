@@ -1,0 +1,20 @@
+# What an item gains while it holds a street drug (WFNarcoticGoodsSystem): a beaker, syringe, pill, baggie or vial,
+# or a blank stick that took a copy. Never spawned; only its components are copied.
+- type: entity
+  id: WFNarcoticMarks
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Contraband
+    severity: Class3Chem
+    turnInValues:
+      FederationMilitaryCredit: 5
+  - type: ItemTax
+    taxAccounts:
+      Medical: -0.05
+      nfsd: -0.1
+      BlackMarket: 0.25
+  - type: SoldAlert
+    groupId: WFNarcotics
+    maxPerSale: 100
+    channels:
+    - Security

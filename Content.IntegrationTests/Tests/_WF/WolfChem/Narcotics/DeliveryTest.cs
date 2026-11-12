@@ -1,4 +1,6 @@
+using Content.Server._Mono.Cargo;
 using Content.Server._WF.WolfChem.Narcotics;
+using Content.Server._WF.WolfChem.Neuroware;
 using Content.Server.Body.Components;
 using Content.Shared._WF.WolfChem.Narcotics.Delivery;
 using Content.Shared.Chemistry.EntitySystems;
@@ -10,6 +12,10 @@ using Content.Shared.Nutrition.EntitySystems;
 using Content.Shared.Stacks;
 using Content.Shared.Storage;
 using Content.Shared.Storage.EntitySystems;
+using Content.Shared.Contraband;
+using Content.Shared._Mono.ItemTax.Components;
+using Content.Shared.Tag;
+using Content.Shared._WF.WolfChem.Neuroware;
 using Robust.Shared.Containers;
 using Robust.Shared.GameObjects;
 
@@ -126,6 +132,78 @@ public sealed class DeliveryTest
             UseOn(table);
             Assert.That(container.IsEntityInContainer(resin), Is.False, "With no powder, a solid is set on the table.");
             Assert.That(hands.IsHolding(user, baggie), Is.True, "The baggie stays in hand.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// Anything holding a street drug, a beaker as much as a baggie, and a blank stick that takes a copy, is a
+    /// narcotic like the ready-made ones: tagged, contraband and reported on sale. Emptied, or holding something
+    /// harmless, it is not.
+    /// </summary>
+    [Test]
+    public async Task FilledContainersAreNarcoticsTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+
+        await server.WaitAssertion(() =>
+        {
+            var solutions = server.System<SharedSolutionContainerSystem>();
+            var tags = server.System<TagSystem>();
+
+            bool Marked(EntityUid uid)
+            {
+                var tagged = tags.HasTag(uid, WFNarcoticGoodsSystem.Tag);
+                Assert.That(entMan.HasComponent<SoldAlertComponent>(uid), Is.EqualTo(tagged));
+                Assert.That(entMan.HasComponent<ContrabandComponent>(uid), Is.EqualTo(tagged));
+                Assert.That(entMan.HasComponent<ItemTaxComponent>(uid), Is.EqualTo(tagged));
+                return tagged;
+            }
+
+            foreach (var (proto, solution, drug) in new[]
+                     {
+                         ("WFBaggie", "baggie", "WFHeroin"), ("WFVial", "beaker", "WFRedline"),
+                         ("Beaker", "beaker", "WFCocaine"), ("Syringe", "injector", "WFHeroin"),
+                     })
+            {
+                var holder = entMan.SpawnEntity(proto, map.GridCoords);
+                solutions.TryGetSolution(holder, solution, out var soln, out _);
+                Assert.That(Marked(holder), Is.False, $"An empty {proto} is no narcotic.");
+
+                solutions.TryAddReagent(soln!.Value, "Ephedrine", FixedPoint2.New(2));
+                Assert.That(Marked(holder), Is.False, "Ephedrine isn't a street drug.");
+
+                solutions.TryAddReagent(soln.Value, drug, FixedPoint2.New(5));
+                Assert.That(Marked(holder), Is.True, $"A {proto} of {drug} is a narcotic.");
+
+                solutions.RemoveAllSolution(soln.Value);
+                Assert.That(Marked(holder), Is.False, "Emptied, it is clean again.");
+            }
+
+            // Ready-made products keep their marks whatever happens to the contents.
+            var bought = entMan.SpawnEntity("WFBaggieCocaine", map.GridCoords);
+            Assert.That(Marked(bought), Is.True);
+            solutions.TryGetSolution(bought, "baggie", out var boughtSoln, out _);
+            solutions.RemoveAllSolution(boughtSoln!.Value);
+            Assert.That(Marked(bought), Is.True);
+
+            var brick = entMan.SpawnEntity("WFHashBrick", map.GridCoords);
+            solutions.TryGetSolution(brick, "food", out var brickSoln, out _);
+            solutions.SplitSolution(brickSoln!.Value, FixedPoint2.New(1));
+            Assert.That(Marked(brick), Is.True, "Hash stays a narcotic though THC has no price.");
+
+            var neuroware = server.System<WFNeurowareSystem>();
+            var source = entMan.SpawnEntity("WFNeurowareStickWhiteline", map.GridCoords);
+            var blank = entMan.SpawnEntity("WFNeurowareStick", map.GridCoords);
+            Assert.That(tags.HasTag(source, WFNarcoticGoodsSystem.Tag), Is.True);
+            Assert.That(Marked(blank), Is.False, "A blank stick is no narcotic.");
+            Assert.That(neuroware.TryCopy((source, entMan.GetComponent<WFNeurowareStickComponent>(source)),
+                (blank, entMan.GetComponent<WFNeurowareStickComponent>(blank)), null), Is.True);
+            Assert.That(Marked(blank), Is.True, "A copy is.");
         });
 
         await pair.CleanReturnAsync();

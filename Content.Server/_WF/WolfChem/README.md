@@ -44,7 +44,8 @@ and hold it through a nod; cannabis softens the brakes and the turn; alcohol mak
 Substances are grown (coca, the opium poppy, cannabis pressed into hash) or cooked through graded reactions, and the
 solids keep their grade. Flour cuts cocaine and heroin (`fillers` on `wfReactionPurity`). `WFDeliverySystem` adds powder lines from a baggie and the bong; `WFSecondhandSmokeSystem` puts smoke
 gas and a share of everything smoked into the air, and doses whoever breathes it nearby. Products are Class 3
-contraband with grade-scaled prices, a sale tax and a sold alert; the Strangers dealer sells cut stock, a Reaver
+contraband with grade-scaled prices, a sale tax and a sold alert, and `WFNarcoticGoodsSystem` gives the same marks
+(`WFNarcoticMarks`) to any item while one of its solutions holds a priced narcotic, a beaker or pill as much as a baggie, and to a blank stick that takes a copy; the Strangers dealer sells cut stock, a Reaver
 runner (`WFEncounterReaverDealer`, a trader encounter) sells full grade and buys nothing, the bong is
 crafted from glass and plastic, and the uplink chemicals tab lists a few. The Bench has three laws
 for it and the Medical guide a player page.
@@ -108,6 +109,8 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Content.Server/_WF/WolfChem/Narcotics/WFIntoxicationSystem.cs`](Narcotics/WFIntoxicationSystem.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFIntoxicationSystem.Traits.cs`](Narcotics/WFIntoxicationSystem.Traits.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFMetabolismCarryComponent.cs`](Narcotics/WFMetabolismCarryComponent.cs)
+- [`Content.Server/_WF/WolfChem/Narcotics/WFNarcoticGoodsSystem.cs`](Narcotics/WFNarcoticGoodsSystem.cs)
+- [`Content.Server/_WF/WolfChem/Narcotics/WFNarcoticMarkedComponent.cs`](Narcotics/WFNarcoticMarkedComponent.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFNodSystem.cs`](Narcotics/WFNodSystem.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFPilotImpairmentComponent.cs`](Narcotics/WFPilotImpairmentComponent.cs)
 - [`Content.Server/_WF/WolfChem/Narcotics/WFSecondhandSmokeSystem.cs`](Narcotics/WFSecondhandSmokeSystem.cs)
@@ -185,6 +188,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Resources/Prototypes/_WF/WolfChem/Narcotics/encounters.yml`](../../../Resources/Prototypes/_WF/WolfChem/Narcotics/encounters.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/dealer.yml`](../../../Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/dealer.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/delivery.yml`](../../../Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/delivery.yml)
+- [`Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/marks.yml`](../../../Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/marks.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/produce.yml`](../../../Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/produce.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/reaver_dealer.yml`](../../../Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/reaver_dealer.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/solids.yml`](../../../Resources/Prototypes/_WF/WolfChem/Narcotics/Entities/solids.yml)
