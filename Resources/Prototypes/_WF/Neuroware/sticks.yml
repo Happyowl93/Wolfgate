@@ -1,4 +1,4 @@
-# Neuroware sticks. A blank takes copies; the named ones are pristine builds. Placeholder sprites. A stick's price
+# Neuroware sticks. A blank takes copies; the named ones are pristine builds. A stick's price
 # doesn't follow what is copied onto it, so copying doesn't print money.
 
 - type: entity
@@ -6,8 +6,11 @@
   id: WFNeurowareStick
   components:
   - type: Sprite
-    sprite: Objects/Misc/module.rsi
-    state: datadisk_base
+    sprite: _WF/Neuroware/Objects/stick.rsi
+    layers:
+    - state: body
+      color: "#8c8c90"
+    - state: plug
   - type: Item
     size: Tiny
   - type: WFNeurowareStick
@@ -20,8 +23,13 @@
   id: WFNeurowareStickWhiteline
   components:
   - type: Sprite
-    state: datadisk_encrypted
-    color: "#f0f0f0"
+    layers:
+    - state: body
+      color: "#f0f0f0"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     profile: WFCocaine
     loads: 3
@@ -35,8 +43,13 @@
   id: WFNeurowareStickNullLoop
   components:
   - type: Sprite
-    state: datadisk_encrypted
-    color: "#8a6a4a"
+    layers:
+    - state: body
+      color: "#8a6a4a"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     profile: WFHeroin
     loads: 3
@@ -50,8 +63,13 @@
   id: WFNeurowareStickBurst
   components:
   - type: Sprite
-    state: datadisk_encrypted
-    color: "#9fdcff"
+    layers:
+    - state: body
+      color: "#9fdcff"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     profile: WFCrystal
     loads: 3
@@ -65,8 +83,13 @@
   id: WFNeurowareStickRedline
   components:
   - type: Sprite
-    state: datadisk_encrypted
-    color: "#e0202a"
+    layers:
+    - state: body
+      color: "#e0202a"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     profile: WFRedline
     loads: 3
@@ -80,8 +103,13 @@
   id: WFNeurowareStickDamper
   components:
   - type: Sprite
-    state: datadisk_encrypted
-    color: "#5b6470"
+    layers:
+    - state: body
+      color: "#5b6470"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     profile: WFAnvil
     loads: 3
@@ -95,8 +123,13 @@
   id: WFNeurowareStickChoir
   components:
   - type: Sprite
-    state: datadisk_encrypted
-    color: "#c79cff"
+    layers:
+    - state: body
+      color: "#c79cff"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     profile: WFChorus
     loads: 3
@@ -110,8 +143,13 @@
   id: WFNeurowareStickHalo
   components:
   - type: Sprite
-    state: datadisk_encrypted
-    color: "#ffe28a"
+    layers:
+    - state: body
+      color: "#ffe28a"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     profile: WFHalo
     loads: 3
@@ -125,8 +163,13 @@
   id: WFNeurowareStickIdle
   components:
   - type: Sprite
-    state: datadisk_encrypted
-    color: "#6fae5a"
+    layers:
+    - state: body
+      color: "#6fae5a"
+    - state: plug
+    - state: label
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     profile: WFCannabis
     loads: 3
@@ -140,6 +183,14 @@
   parent: WFNeurowareStickWhiteline
   id: WFNeurowareStickWhitelineCopy
   components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#f0f0f0"
+    - state: plug
+    - state: tape
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     integrity: 0.72
     loads: 1
@@ -150,6 +201,14 @@
   parent: WFNeurowareStickNullLoop
   id: WFNeurowareStickNullLoopCopy
   components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#8a6a4a"
+    - state: plug
+    - state: tape
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     integrity: 0.72
     loads: 1
@@ -160,6 +219,14 @@
   parent: WFNeurowareStickBurst
   id: WFNeurowareStickBurstCopy
   components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#9fdcff"
+    - state: plug
+    - state: tape
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     integrity: 0.72
     loads: 1
@@ -170,6 +237,14 @@
   parent: WFNeurowareStickIdle
   id: WFNeurowareStickIdleCopy
   components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#6fae5a"
+    - state: plug
+    - state: tape
+    - state: led
+      shader: unshaded
   - type: WFNeurowareStick
     integrity: 0.72
     loads: 1

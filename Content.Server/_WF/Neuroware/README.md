@@ -40,6 +40,10 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 
 - [`Resources/Locale/en-US/_WF/Neuroware/neuroware.ftl`](../../../Resources/Locale/en-US/_WF/Neuroware/neuroware.ftl)
 
+### Textures
+
+- [`Resources/Textures/_WF/Neuroware/Objects/stick.rsi/`](../../../Resources/Textures/_WF/Neuroware/Objects/stick.rsi/)
+
 ## Non-modular edits
 
 - [`Resources/Prototypes/_EinsteinEngines/Entities/Mobs/Player/silicon_base.yml`](../../../Resources/Prototypes/_EinsteinEngines/Entities/Mobs/Player/silicon_base.yml): neuroware twins apply these to a synthetic's own body

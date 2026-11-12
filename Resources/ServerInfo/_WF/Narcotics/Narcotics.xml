@@ -24,6 +24,22 @@ A ChemMaster shows the percentage beside any graded reagent, and so do health an
 
 Grade sets the price as well. A rock at half grade sells for half.
 
+## Cooking
+
+Grind coca leaves for coca alkaloid and opium poppy pods for opium. Press three dried cannabis leaves into a hash brick from the crafting menu. The liquid recipes are also listed in the Chemicals guide, under Narcotics.
+
+Each reaction has a temperature that gives full grade. The further off it runs, the lower the grade, down to 40% at the edge of its range, and the product keeps the grade of what went in. A reaction happens the moment its last condition is met, so bring the mix to temperature before the last ingredient goes in.
+
+- [bold]Cocaine:[/bold] 3 coca alkaloid, 1 sodium carbonate, 1 acetone. Above 310K, best at 330K.
+- [bold]Crack:[/bold] 5 cocaine, 1 sodium carbonate, 1 water. Above 370K, best at 385K. One rock per 5u of cocaine.
+- [bold]Heroin:[/bold] 2 opium, 1 vinegar, 1 ammonia. Above 330K, best at 350K.
+- [bold]Opium resin:[/bold] chill opium below 270K, best at 250K. One lump per 5u.
+- [bold]Crystal:[/bold] chill desoxyephedrine below 240K, best at 220K. One shard per 5u.
+- [bold]Redline:[/bold] ephedrine, phosphorus and plasma above 340K make the base, best at 360K. Then 2 base, 1 epinephrine and 1 iron, best at 300K.
+- [bold]Anvil:[/bold] bicaridine, silicon and lithium above 320K make the base, best at 340K. Then 2 base, 1 tramadol and 1 mercury, best at 290K.
+- [bold]Halo:[/bold] happiness, oil and potassium above 300K make the base, best at 310K. Then 2 base, 1 ammonia and 1 copper, best at 340K.
+- [bold]Chorus:[/bold] Lattice residue (ground exotic matter), space drugs and ethanol below 290K make the base, best at 270K. Then 2 base, 1 mindbreaker toxin and 1 iodine, best at 310K.
+
 ## Highs and crashes
 
 Each drug raises a level in the body, and a high has three phases. [bold]Light[/bold] is a steady tint in the family's colours. [bold]Heavy[/bold] brings the family's full look: stimulants make everything bright, sharp and glaring, opioids blur and breathe, psychedelics wobble and trail. An [bold]overdose[/bold] pushes that look to an extreme, such as a blown-out, trembling glare, the eyes closing, or the world tearing apart, while the body takes real harm. The screen kicks and a line tells you each time you go deeper, and the look grows with the dose inside each phase.
