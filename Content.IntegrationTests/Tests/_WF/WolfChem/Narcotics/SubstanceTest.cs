@@ -41,7 +41,7 @@ public sealed class SubstanceTest
         private readonly SharedSolutionContainerSystem _solutions = server.System<SharedSolutionContainerSystem>();
 
         /// <summary>Pours <paramref name="inputs"/> into a fresh beaker at <paramref name="temperature"/> and lets it react.</summary>
-        public Solution React(float temperature, Solution? start, params (string Reagent, float Units)[] inputs)
+        public Solution React(float temperature, Solution start, params (string Reagent, float Units)[] inputs)
         {
             var mix = start?.Clone() ?? new Solution();
             foreach (var (reagent, units) in inputs)
