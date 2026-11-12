@@ -38,6 +38,7 @@ public sealed class WFNeurowareSystem : EntitySystem
     [Dependency] private BatterySystem _battery = default!;
     [Dependency] private ChatSystem _chat = default!;
     [Dependency] private PowerCellSystem _powerCell = default!;
+    [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private StatusEffectsSystem _status = default!;
@@ -231,6 +232,7 @@ public sealed class WFNeurowareSystem : EntitySystem
         blank.Comp.Amount = source.Comp.Amount;
         blank.Comp.Rate = source.Comp.Rate;
         blank.Comp.Loads = 1;
+        _appearance.SetData(blank, WFNeurowareStickVisuals.Copied, true);
 
         if (user != null)
             _popup.PopupEntity(Loc.GetString("wf-neuroware-copy-done"), blank, user.Value);

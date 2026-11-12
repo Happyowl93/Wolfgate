@@ -5,6 +5,14 @@ using Robust.Shared.Serialization;
 
 namespace Content.Shared._WF.Neuroware;
 
+/// <summary>Appearance keys for a neuroware stick.</summary>
+[Serializable, NetSerializable]
+public enum WFNeurowareStickVisuals : byte
+{
+    /// <summary>A blank that has taken a copy.</summary>
+    Copied,
+}
+
 /// <summary>
 /// A data stick holding one drug profile's neuroware twin. Loading it into a host runs the program; using it on a
 /// blank stick copies it, a little worse each generation.

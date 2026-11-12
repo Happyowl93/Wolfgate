@@ -33,6 +33,7 @@ public sealed class NeurowareTest
             var neuro = server.System<WFNeurowareSystem>();
             var intox = server.System<WFIntoxicationSystem>();
             var body = server.System<SharedBodySystem>();
+            var appearance = server.System<SharedAppearanceSystem>();
 
             Entity<WFNeurowareStickComponent> Stick(string proto)
             {
@@ -62,6 +63,8 @@ public sealed class NeurowareTest
             {
                 Assert.That(copy.Comp.Integrity, Is.EqualTo(0.85f).Within(0.001f));
                 Assert.That(copyOfCopy.Comp.Integrity, Is.EqualTo(0.7225f).Within(0.001f), "Each generation loses 15%.");
+                Assert.That(appearance.TryGetData<bool>(copy, WFNeurowareStickVisuals.Copied, out var taped) && taped,
+                    Is.True, "A written blank shows its tape.");
             });
 
             server.System<WFChassisPanelSystem>().FinishReboot(host);

@@ -33,8 +33,8 @@ Each reaction has a temperature that gives full grade. The further off it runs, 
 - [bold]Cocaine:[/bold] 3 coca alkaloid, 1 sodium carbonate, 1 acetone. Above 310K, best at 330K.
 - [bold]Crack:[/bold] 5 cocaine, 1 sodium carbonate, 1 water. Above 370K, best at 385K. One rock per 5u of cocaine.
 - [bold]Heroin:[/bold] 2 opium, 1 vinegar, 1 ammonia. Above 330K, best at 350K.
-- [bold]Opium resin:[/bold] chill opium below 270K, best at 250K. One lump per 5u.
-- [bold]Crystal:[/bold] chill desoxyephedrine below 240K, best at 220K. One shard per 5u.
+- [bold]Opium resin:[/bold] chill opium below 270K, best at 250K, then add a splash of water to set it. One lump per 5u.
+- [bold]Crystal:[/bold] chill desoxyephedrine below 240K, best at 220K, then add a splash of acetone to set it. One shard per 5u.
 - [bold]Redline:[/bold] ephedrine, phosphorus and plasma above 340K make the base, best at 360K. Then 2 base, 1 epinephrine and 1 iron, best at 300K.
 - [bold]Anvil:[/bold] bicaridine, silicon and lithium above 320K make the base, best at 340K. Then 2 base, 1 tramadol and 1 mercury, best at 290K.
 - [bold]Halo:[/bold] happiness, oil and potassium above 300K make the base, best at 310K. Then 2 base, 1 ammonia and 1 copper, best at 340K.
@@ -82,7 +82,7 @@ A synthetic's brain doesn't register chemicals, so its drugs are programs instea
 
 The program feeds the same high, crash and habit as the drug it copies. Whiteline is cocaine, Null Loop is heroin, Burst is crystal, Damper is Anvil, Choir.sig is Chorus, Halo and Redline go by their own names, and Idle is cannabis. On a synthetic, Redline's speed costs charge and heat instead of the heart.
 
-Using a loaded stick on a blank copies it at 85% of the original's integrity, with one load. Integrity works like grade: a copy delivers less, and the missing part makes the program glitch with brief stuns, forced beeps, scrambled speech and fake faults. Street copies are several generations down.
+Using a loaded stick on a blank copies it at 85% of the original's integrity, with one load. Integrity works like grade: a copy delivers less, and the missing part makes the program glitch with brief stuns, forced beeps, scrambled speech and fake faults. Street copies are several generations down. Blank and loaded sticks turn up in maintenance and salvage, and the dealers sell both.
 
 A synthetic with the Wolfmed HUD sees what is running as fault lines. A [bold]reboot[/bold] from the chassis panel kills every running program and ends the high, but not the habit.
 

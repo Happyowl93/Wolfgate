@@ -289,8 +289,8 @@ redosing only postpones and enlarges them.
   into `WFCocaine` with a `wfReactionPurity` entry. A second reaction turns Cocaine into crack rocks (a solid
   entity, as Fentanyl solidifies at `Resources/Prototypes/_Mono/Recipes/Reactions/fentanyl.yml`).
 - **Poppy**: check whether upstream's poppy seed exists here and reuse it; otherwise add `WFPoppy`. The pod holds
-  `WFOpium`; chilled below 270 K, 5 u sets into a `WFOpiumResin` lump at the batch's grade. Opium reacts into `WFHeroin`.
-- **Crystal**: Desoxyephedrine solidifies into `WFCrystal` shards at a cold temperature band.
+  `WFOpium`; chilled below 270 K with water as a catalyst, 5 u sets into a `WFOpiumResin` lump at the batch's grade. Opium reacts into `WFHeroin`.
+- **Crystal**: Desoxyephedrine chilled below 240 K with acetone as a catalyst sets into `WFCrystalShard` shards.
 - **Redline, Anvil, Halo, Chorus**: chemistry-only, each a two-step route with a narrow optimum so that grade
   matters. Chorus needs a Lattice-flavoured input (exotic matter or a deep-band material; check
   `Docs/_WF/Lattice/DESIGN.md` for what exists) so it is rare and comes from the frontier.
@@ -339,10 +339,13 @@ redosing only postpones and enlarges them.
 - Loading adds a running program to `WFNeurowareComponent` on the body. Each second it adds
   `rate x integrity` to the profile's level until `amount` is delivered. Everything after that is
   `WFIntoxicationSystem`.
-- **Copying.** Using a stick on a blank stick copies it at `integrity x 0.85`. Pristine builds come only from
-  dealers, so a street copy is a few generations down.
-- Sprites: placeholder states exist in `Resources/Textures/Objects/Misc/module.rsi`; final sprites go through the
-  `ss14-sprites` skill.
+- **Copying.** Using a stick on a blank stick copies it at `integrity x 0.85`, and the blank shows a strip of tape.
+  Pristine builds come from dealers, the uplink and rare loot, so a street copy is a few generations down.
+- **Sources.** The Reaver dealer sells blanks and pristine builds, the planet dealer sells street copies, and
+  `WFNeurowareStickLoot` (mostly blanks, some copies, rarely a pristine build) rolls in maintenance fluff and
+  uncommon salvage treasure.
+- Sprites: `Resources/Textures/_WF/Neuroware/Objects/stick.rsi`, a USB stick with a tinted body, a printed label for
+  pristine builds and tape for copies.
 
 ### Integrity
 

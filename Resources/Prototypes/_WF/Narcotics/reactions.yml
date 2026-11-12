@@ -57,13 +57,17 @@
   optimalTemp: 350
   tolerance: 30
 
-# Chilled opium sets into resin, one lump per 5 u.
+# Chilled opium sets into resin, one lump per 5 u, once water touches it. The water is a catalyst, so it can go in
+# last at the right temperature and doesn't count towards the grade.
 - type: reaction
   id: WFOpiumResin
   maxTemp: 270
   reactants:
     WFOpium:
       amount: 5
+    Water:
+      amount: 1
+      catalyst: true
   effects:
   - !type:WFCreateGradedEntity
     entity: WFOpiumResin
@@ -73,13 +77,17 @@
   optimalTemp: 250
   tolerance: 30
 
-# Chilled Desoxyephedrine sets into crystal shards, one per 5 u.
+# Chilled Desoxyephedrine sets into crystal shards, one per 5 u, once acetone touches it. The acetone is a catalyst,
+# like the water for resin.
 - type: reaction
   id: WFCrystalShard
   maxTemp: 240
   reactants:
     Desoxyephedrine:
       amount: 5
+    Acetone:
+      amount: 1
+      catalyst: true
   effects:
   - !type:WFCreateGradedEntity
     entity: WFCrystalShard

@@ -34,6 +34,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 
 ### Prototypes
 
+- [`Resources/Prototypes/_WF/Neuroware/loot.yml`](../../../Resources/Prototypes/_WF/Neuroware/loot.yml)
 - [`Resources/Prototypes/_WF/Neuroware/sticks.yml`](../../../Resources/Prototypes/_WF/Neuroware/sticks.yml)
 
 ### Localization
@@ -47,5 +48,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 ## Non-modular edits
 
 - [`Resources/Prototypes/_EinsteinEngines/Entities/Mobs/Player/silicon_base.yml`](../../../Resources/Prototypes/_EinsteinEngines/Entities/Mobs/Player/silicon_base.yml): neuroware twins apply these to a synthetic's own body
+- [`Resources/Prototypes/Entities/Markers/Spawners/Random/maintenance.yml`](../../../Resources/Prototypes/Entities/Markers/Spawners/Random/maintenance.yml): neuroware sticks turn up in maintenance
+- [`Resources/Prototypes/Entities/Markers/Spawners/Random/Salvage/tables_loot.yml`](../../../Resources/Prototypes/Entities/Markers/Spawners/Random/Salvage/tables_loot.yml): neuroware sticks turn up in salvage treasure
 
 <!-- WOLFGATE-GENERATED END -->

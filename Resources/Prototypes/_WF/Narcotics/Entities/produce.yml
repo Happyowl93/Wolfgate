@@ -81,7 +81,7 @@
   - type: Sprite
     sprite: _WF/Narcotics/Hydroponics/opium_poppy.rsi
 
-# The pod holds opium; grind it and chill the opium to set it into resin.
+# The pod holds opium; grind it, chill the opium and add water to set it into resin.
 - type: entity
   parent: FoodProduceBase
   id: WFOpiumPoppyPod

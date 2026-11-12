@@ -140,8 +140,12 @@ public sealed class SubstanceTest
             var cut = new Solution();
             cut.AddReagent("WFCocaine", FixedPoint2.New(10), 0.6f);
             lab.React(385f, cut, ("SodiumCarbonate", 2), ("Water", 2));
-            lab.React(220f, null, ("Desoxyephedrine", 10));
-            lab.React(250f, null, ("WFOpium", 10));
+            var unset = lab.React(250f, null, ("WFOpium", 10));
+            Assert.That(lab.Spawned("WFOpiumResin"), Is.Empty, "Chilled opium waits for water, so the cook picks the moment.");
+            Assert.That(unset.GetTotalPrototypeQuantity("WFOpium"), Is.EqualTo(FixedPoint2.New(10)));
+
+            lab.React(220f, null, ("Desoxyephedrine", 10), ("Acetone", 1));
+            lab.React(250f, null, ("WFOpium", 10), ("Water", 1));
 
             var rocks = lab.Spawned("WFCrackRock");
             var shards = lab.Spawned("WFCrystalShard");

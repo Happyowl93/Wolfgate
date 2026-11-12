@@ -11,6 +11,24 @@
     - state: body
       color: "#8c8c90"
     - state: plug
+    - state: tape
+      map: [ "tape" ]
+      visible: false
+    - state: led
+      shader: unshaded
+      map: [ "led" ]
+      visible: false
+  # A blank that takes a copy gets a strip of tape and lights up.
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.WFNeurowareStickVisuals.Copied:
+        tape:
+          True: { visible: true }
+          False: { visible: false }
+        led:
+          True: { visible: true }
+          False: { visible: false }
   - type: Item
     size: Tiny
   - type: WFNeurowareStick
