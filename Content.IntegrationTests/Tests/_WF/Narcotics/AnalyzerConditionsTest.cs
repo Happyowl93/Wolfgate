@@ -59,6 +59,7 @@ public sealed class AnalyzerConditionsTest
                 Assert.That(cannabis.Causes[0].ClearSeconds, Is.GreaterThan(0f), "The heart clears THC.");
                 Assert.That(cocaine.Causes, Is.Empty, "A level with nothing in the blood has no cause.");
                 Assert.That(cocaine.Antidotes, Does.Contain("Haloperidol"), "Haloperidol brings stimulants down.");
+                Assert.That(cannabis.Antidotes, Does.Contain("Psicodine"), "Psicodine calms a cannabis high.");
                 Assert.That(drunk.Causes.Select(cause => cause.Reagent), Does.Contain("Ethanol"),
                     "Ethanol in the blood holds the drunkenness.");
                 Assert.That(drunk.SecondsLeft, Is.EqualTo(60f).Within(1f));

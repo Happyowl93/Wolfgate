@@ -184,8 +184,10 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
   - drunkenness follows the ethanol left in the blood
 - [`Resources/Prototypes/Reagents/medicine.yml`](../../../Resources/Prototypes/Reagents/medicine.yml)
   - drunkenness follows the units in the blood
+  - Dylovene flushes combat drugs, Redline and Anvil
   - only in an overdose, like its jitter
   - held while it is in the blood instead of piling up each tick
+  - Psicodine calms empathogen and cannabis highs
   - Haloperidol brings down stimulant and psychedelic highs
 - [`Resources/Prototypes/Reagents/narcotics.yml`](../../../Resources/Prototypes/Reagents/narcotics.yml)
   - crystal sells by grade

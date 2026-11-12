@@ -171,7 +171,8 @@ Prototype kind `wfDrugProfile`:
   it; integration tests sit in the lobby and round-gated updates never run.
 - Entity effects: `WFDose` (`profile`, `perUnit`; adds `metabolised units x grade x perUnit`; does nothing when the
   brain is a neuroware host) and `WFClearIntoxication` (`family`, `amount`) for antagonists. Naloxone clears
-  `Opioid`; Haloperidol clears `Stimulant` and `Psychedelic`.
+  `Opioid`; Haloperidol clears `Stimulant` and `Psychedelic`; Dylovene clears `Combat`; Psicodine clears `Empathogen`
+  and `Cannabinoid`. Nicotine has no overdose and no antagonist.
 - Brain check: one shared helper, `IsNeurowareHost(body)`, true when the body's brain organ has
   `WFNeurowareHostComponent`. It lives in `Narcotics` so `Neuroware` depends on `Narcotics` and not the reverse.
 - The human heart metabolises at most two Narcotic reagents at a time (`maxReagents: 2`). Leave that as the

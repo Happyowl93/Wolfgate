@@ -29,6 +29,11 @@
     Medicine:
       metabolismRate: 0.2 # Mono
       effects:
+      # WOLFGATE(Narcotics) START: Dylovene flushes combat drugs, Redline and Anvil
+      - !type:WFClearIntoxication
+        family: Combat
+        amount: 2
+      # WOLFGATE END
       - !type:HealthChange
         damage:
           types:
@@ -1650,6 +1655,14 @@
         type: Add
         time: 8
         refresh: true # WOLFGATE(Narcotics): held while it is in the blood instead of piling up each tick
+      # WOLFGATE(Narcotics) START: Psicodine calms empathogen and cannabis highs
+      - !type:WFClearIntoxication
+        family: Empathogen
+        amount: 2
+      - !type:WFClearIntoxication
+        family: Cannabinoid
+        amount: 2
+      # WOLFGATE END
       - !type:GenericStatusEffect
         key: Jitter
         time: 2.0
