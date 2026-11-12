@@ -2,7 +2,7 @@
 
 # Narcotics and Neuroware
 
-Street drugs are cooked, grown and sold all over the sector, and every one of them is Class 3 contraband. This page covers what they do from the user's side: grades, highs and crashes, habits, and the synthetic version, neuroware.
+Street drugs are cooked, grown and sold all over the sector, and every one of them is Class 3 contraband. Synthetics can't use them and run neuroware instead, which is at the bottom of this page.
   <Box>
     <GuideEntityEmbed Entity="WFBaggieCocaine"/>
     <GuideEntityEmbed Entity="WFCrackRock"/>
@@ -11,26 +11,86 @@ Street drugs are cooked, grown and sold all over the sector, and every one of th
     <GuideEntityEmbed Entity="WFNeurowareStickWhiteline"/>
   </Box>
 
+## The drugs
+
+- [bold]Cocaine[/bold] (stimulant): a little faster, stamina comes back quicker, and it takes the edge off pain. The crash is short and tired.
+- [bold]Crack[/bold] (stimulant): cocaine, stronger and half as long. It hooks you three times as fast and the crash is worse.
+- [bold]Crystal[/bold] (stimulant): desoxyephedrine in a shard you can smoke. It has the longest crash of the lot.
+- [bold]Opium[/bold] (opioid): mild pain relief, and it barely slows you.
+- [bold]Heroin[/bold] (opioid): a strong painkiller that slows you down, sedates you and makes you nod off. Too much stops your breathing.
+- [bold]Redline[/bold] (combat): speed, and wounds don't slow you. A heavy dose gives more speed and halves stuns and knockdowns. It strains your heart the whole time, and you collapse when it ends.
+- [bold]Anvil[/bold] (combat): you take less Brute and Burn damage and can't see your own damage readout, but you move slower. A heavy dose also keeps you out of stamina crit. The damage it held off comes back as Poison when it wears off.
+- [bold]Chorus[/bold] (psychedelic): the hallucinations of the Lattice without flying out to it. They get worse the deeper you go.
+- [bold]Halo[/bold] (empathogen): warmth, laughter and a little pain relief. It raises your body temperature, an overdose is a fever that can kill, and the come-down is sad.
+- [bold]Cannabis and hash[/bold]: THC, as it always was.
+- [bold]Nicotine[/bold]: a small stamina lift and a habit.
+
+## Taking them
+
+[bold]Lines.[/bold] Use a baggie of powder on a table to lay out a line, then use the line to take it. A mask or helmet over your face blocks it. An empty baggie is crafted from a sheet of plastic. It holds 10u, four lines, of cocaine, heroin, crystal or ephedrine powder, or a few solid drugs: rocks, shards, resin, hash, cannabis, dried shrooms or fentanyl crystals.
+
+[bold]Bong.[/bold] Craft one from two glass and one plastic. Fill it with at least 5u of water, put a rock, shard, resin or brick in the bowl, light it with anything hot, and use it in hand for a hit. A bowl lasts a few hits.
+
+[bold]Second-hand smoke.[/bold] Part of anything smoked, from a bong, joint, cigarette or pipe, stays in the air. Whoever breathes the haze nearby gets a little of it, more in a small closed room and next to the smoker, almost none in a big or well-scrubbed one. Internals keep it out.
+
+Everything else goes the usual way: pills, syringes, pipes and joints.
+
+## Highs and crashes
+
+A high has three phases: [bold]light[/bold], [bold]heavy[/bold] and [bold]overdose[/bold]. A popup tells you each time you go deeper or come back up. Your screen, your hearing, your voice and the way chat reads to you all change with the drug and get stronger with each phase. Others hear the difference in how you talk.
+
+A high lasts as long as the drug stays in your blood. A 2.5u line lasts about four minutes, and two last twice as long. Crack, cannabis and the combat drugs clear twice as fast. A crystal shard lasts about as long as two lines.
+
+A fresh dose of cocaine, crack, opium, heroin, Chorus or Halo comes with a [bold]rush[/bold]. For the first minute it hits well above its weight, then settles, so even one line takes you heavy for a moment. The rush never causes an overdose. Only what is in your blood does.
+
+An overdose does real harm, and the body clears the excess quickly, but not quickly enough to be safe.
+
+Heavy on opioids you [bold]nod off[/bold]: every so often your eyes shut for a few seconds. You stay on your feet and can still act, but you can't see and barely move, and people nearby may notice. In an overdose it happens more often and you can pass out.
+
+When the drug drops below a light dose, the [bold]crash[/bold] begins. Most crashes grow with the time you spent high. Taking more pauses a crash but doesn't cancel it. Being on Redline and Anvil at once damages the heart.
+
+A health analyzer's [bold]Conditions[/bold] tab lists every high, crash and habit, the reagents behind each, how long they take to clear and what clears them faster.
+
+## Ending a high
+
+These clear the drug from the blood. The crash still comes, and so does the Poison Anvil owes.
+
+- [bold]Naloxone[/bold]: opioids.
+- [bold]Haloperidol[/bold]: stimulants and psychedelics.
+- [bold]Dylovene[/bold]: Redline and Anvil.
+- [bold]Psicodine[/bold]: Halo and cannabis. Halo's fever also needs cooling.
+- [bold]Charcoal[/bold]: any drug, along with every other medicine in the blood.
+
+## Habits
+
+Regular use builds [bold]dependence[/bold], one meter for each family. A light habit fades within the shift. Past halfway it fades four times slower, so a real habit takes an hour or more clean to shake.
+
+Above the halfway mark, going without for five minutes starts [bold]withdrawal[/bold]: cravings first, then shakes, a stamina cap and aches, and for opioids and stimulants, nausea and drowsiness at the worst. A dose of the same family ends it at once. Withdrawal never kills.
+
+Use also builds [bold]tolerance[/bold], up to double. The same dose hits softer, so it takes more to get as high, or to overdose. Tolerance fades slowly while clean. Take your old dose after a long break and it can kill you.
+
+The [bold]Stimulant habit[/bold], [bold]Opioid habit[/bold] and [bold]Smoker[/bold] traits start you with a habit that never fades, and a cut baggie or a pack of cigarettes.
+
 ## Grades
 
 Any reagent can carry a [bold]grade[/bold], from 0 to 100%. Anything from a dispenser is standard grade and shows nothing. Reactions run off their ideal temperature, cheap plants and street cuts come out lower.
 
-A low grade does less and hurts more. A dose at 60% works like 60% of the amount, and the missing 40% is impurity that the body takes as Poison. Overdose limits count the working part only, so a weak batch won't overdose you sooner, it will just poison you.
+A dose at 60% works like 60% of the amount, and the other 40% is impurity that the body takes as Poison. Overdose limits count the working part only, so a weak batch won't overdose you sooner. It will just poison you.
 
-Flour cuts cocaine and heroin: mixed in a beaker it turns into more powder, a unit for a unit, at a grade that much lower. The batch holds the same drug in more doses, and nothing but a reading shows it.
+Grade sets the price as well. A rock at half grade sells for half.
 
 A ChemMaster shows the percentage beside any graded reagent, and so do health analyzers and chemical goggles. A [bold]purity tester[/bold] does the same for any container or item it touches.
   <Box>
     <GuideEntityEmbed Entity="WFPurityTester"/>
   </Box>
 
-Grade sets the price as well. A rock at half grade sells for half.
+[bold]Cutting.[/bold] Mix flour into cocaine or heroin in a beaker and it turns into more powder, a unit for a unit, at a lower grade: 10u at 80% and 10u of flour make 20u at 40%. Only a reading shows the difference.
 
 ## Cooking
 
 Grind coca leaves for coca alkaloid and opium poppy pods for opium. Press three dried cannabis leaves into a hash brick from the crafting menu. The liquid recipes are also listed in the Chemicals guide, under Narcotics.
 
-Each reaction has a temperature that gives full grade. The further off it runs, the lower the grade, down to 40% at the edge of its range, and the product keeps the grade of what went in. A reaction happens the moment its last condition is met, so bring the mix to temperature before the last ingredient goes in.
+Each reaction has a temperature that gives full grade. The further off it runs, the lower the grade, down to 40% at the edge of its range, and the product can't come out better than what went in. A reaction happens the moment its last condition is met, so bring the mix to temperature before the last ingredient goes in.
 
 - [bold]Cocaine:[/bold] 3 coca alkaloid, 1 sodium carbonate, 1 acetone. Above 310K, best at 330K.
 - [bold]Crack:[/bold] 5 cocaine, 1 sodium carbonate, 1 water. Above 370K, best at 385K. One rock per 5u of cocaine.
@@ -42,53 +102,29 @@ Each reaction has a temperature that gives full grade. The further off it runs, 
 - [bold]Halo:[/bold] happiness, oil and potassium above 300K make the base, best at 310K. Then 2 base, 1 ammonia and 1 copper, best at 340K.
 - [bold]Chorus:[/bold] Lattice residue (ground exotic matter), space drugs and ethanol below 290K make the base, best at 270K. Then 2 base, 1 mindbreaker toxin and 1 iodine, best at 310K.
 
-## Highs and crashes
-
-Each drug raises a level in the body, and a high has three phases. [bold]Light[/bold] is a steady tint in the family's colours. [bold]Heavy[/bold] brings the family's full look: stimulants make everything bright, sharp and glaring, opioids blur and breathe, psychedelics wobble and trail. An [bold]overdose[/bold] pushes that look to an extreme, such as a blown-out, trembling glare, the eyes closing, or the world tearing apart, while the body takes real harm. The screen kicks and a line tells you each time you go deeper, and the look grows with the dose inside each phase.
-
-Chat changes too. While you're high, what others say looks different to you: rainbow words that rearrange themselves on psychedelics, grey and faded on opioids, warm pink on empathogens, green on cannabis. Lines you read while high stay that way in your log. What you say changes for everyone: deep on stimulants you repeat yourself and exclaim, deep on opioids you trail off. Your voice follows: stimulants make you gabble fast and high, opioids slow and flatten it, cannabis drawls, psychedelics make it waver and empathogens make it sing-song.
-
-Deep on opioids you nod off: every so often your eyes fall shut for a few seconds and the world goes quiet. You stay on your feet and can still act, but you can't see and barely move, and people nearby may notice. In an overdose you nod more often and can pass out for real.
-
-So does what you hear. Opioids muffle and slow the world down, stimulants speed it up, and psychedelics, cannabis and empathogens each give it their own strange echo.
-
-A high lasts as long as the drug stays in your blood, and a health analyzer shows how much is left. A fresh dose of a street drug comes with a rush: for the first minute it hits well above its weight, then settles, so one line peaks hard and two keep you deep. The rush alone never overdoses you; only what is in your blood does. A 2.5u line lasts about four minutes, and two last twice as long. Crack, cannabis and the combat drugs clear twice as fast, and a crystal shard lasts about as long as two lines. Medical painkillers clear at their usual pace, so any high they give is short. Above an overdose the body flushes the excess quickly, but not quickly enough to be safe. Anything that purges the blood ends the high early.
-
-A health analyzer's [bold]Conditions[/bold] tab lists every high, held effect, crash and habit, the reagents behind each, how long they take to clear and what clears them faster.
-
-When the level falls back below its first threshold, the [bold]crash[/bold] begins. Taking more pauses a crash but doesn't cancel it. Combat drugs make you pay for what they give. A light dose gives only part of it: Redline's full speed and its halved stuns, and Anvil's hold against stamina crits, need a heavy one. Redline leaves you collapsed and slow, the damage Anvil soaked up comes back as Poison once it wears off, and both crashes grow with the time you spent high. Running two combat drugs at once tears at the heart.
-
-Antagonists cut a high short by clearing the drug from the blood. Naloxone ends an opioid high; haloperidol ends a stimulant or psychedelic one; dylovene flushes Redline and Anvil; psicodine calms Halo and cannabis. The crash still comes, and so does what Redline and Anvil owe. Halo's fever also needs cooling, and charcoal purges any drug, along with every other medicine in the blood.
-
-## Habits
-
-Regular use builds [bold]dependence[/bold], one meter for each family. A light habit fades within the shift. Once the meter is past halfway it fades four times slower, so a real habit outlasts the shift unless you feed it.
-
-Above the halfway mark, going without for five minutes starts [bold]withdrawal[/bold]: cravings first, then shakes, a stamina cap and aches, and for opioids and stimulants, nausea and drowsiness at the worst. A dose of the same family ends it at once. Withdrawal never kills.
-
-Use also builds [bold]tolerance[/bold], up to double: the same dose hits softer and fades sooner, so it takes more to get as high, or to overdose. Heroin's hold on your breathing eases with it. Tolerance fades slowly while clean, and taking your old dose after a long break is how people die.
-
-## Taking them
-
-[bold]Lines.[/bold] Use a baggie of powder on a table to lay out a line, then use the line to take it. A mask or helmet over your face blocks it. An empty baggie is crafted from a sheet of plastic. It holds 10u, four lines, of cocaine, heroin, crystal or ephedrine powder, and a few solid drugs: rocks, shards, resin, hash, cannabis, dried shrooms or fentanyl crystals.
-
-[bold]Bong.[/bold] Craft one from two glass and one plastic. Fill it with at least 5u of water, put a rock, shard, resin or brick in the bowl, light it with anything hot, and use it in hand for a hit. A bowl lasts a few hits.
-
-[bold]Second-hand smoke.[/bold] Part of anything smoked, from a bong, joint, cigarette or pipe, stays in the air. Whoever breathes the haze nearby gets a little of it, more in a small closed room and next to the smoker, almost none in a big or well-scrubbed one. Internals keep it out. Thick smoke still chokes.
-
-[bold]Everything else[/bold] goes the usual way: pills, syringes, pipes and joints.
-
 ## Neuroware
 
-A synthetic's brain doesn't register chemicals, so its drugs are programs instead. A [bold]data stick[/bold] used on a synthetic loads its program: two seconds on yourself, four on someone else, and they get a warning. An organic brain has no port.
+A synthetic's brain doesn't register chemicals, so its drugs are programs. Use a [bold]data stick[/bold] on a synthetic to load its program: two seconds on yourself, four on someone else, and they get a warning. An organic brain has no port.
 
-The program feeds the same high, crash and habit as the drug it copies. Whiteline is cocaine, Null Loop is heroin, Burst is crystal, Damper is Anvil, Choir.sig is Chorus, Halo and Redline go by their own names, and Idle is cannabis. On a synthetic, Redline's speed costs charge and heat instead of the heart.
+A program gives the same high, crash and habit as the drug it copies, shown on the optics as its own kind of glitch:
 
-Using a loaded stick on a blank copies it at 85% of the original's integrity, with one load. Integrity works like grade: a copy delivers less, and the missing part makes the program glitch with brief stuns, forced beeps, scrambled speech and fake faults. Street copies are several generations down. Blank and loaded sticks turn up in maintenance and salvage, and the dealers sell both.
+- [bold]Whiteline[/bold]: cocaine.
+- [bold]Null Loop[/bold]: heroin.
+- [bold]Burst[/bold]: crystal.
+- [bold]Damper[/bold]: Anvil.
+- [bold]Choir.sig[/bold]: Chorus.
+- [bold]Idle[/bold]: cannabis.
+- [bold]Halo[/bold] and [bold]Redline[/bold] go by their own names. On a synthetic, Redline costs charge and heat instead of the heart.
 
-A program plays on the optics instead of the senses: stimulants trace every edge and race a refresh line down the view, opioids drop the feed into power saving, psychedelics paint it in false colour, empathogens run it warm into a thermal view, cannabis turns it into an old green terminal, and combat programs lock it into a red targeting circle. An overdose corrupts the feed. A synthetic with the Wolfmed HUD sees what is running as fault lines. A [bold]reboot[/bold] from the chassis panel kills every running program and ends the high, but not the habit.
+Sticks have [bold]integrity[/bold], which works like grade. A weak stick delivers less, and the missing part makes the program glitch with brief stuns, forced beeps, scrambled speech and fake faults. Using a loaded stick on a blank copies it at 85% of the original's integrity, with one load. Street copies are several generations down.
+
+Blank and loaded sticks turn up in maintenance and salvage, and the dealers sell both.
+
+A synthetic with the Wolfmed HUD sees what is running as fault lines. A [bold]reboot[/bold] from the chassis panel kills every running program and ends the high, but not the habit.
 
 ## The law
 
-Street value is high: a baggie of cocaine sells for about fifteen hundred at full grade, and a pristine stick for more. Possession is a citation, trafficking an impound, and loading neuroware into someone who didn't agree to it is a crime against their person. Selling any of it through cargo tells security where it was sold. The street dealers and the Reaver runners don't ask.
+Possession is a citation and trafficking an impound. Loading neuroware into someone who didn't agree to it is a crime against their person.
+
+A baggie of cocaine sells for about fifteen hundred at full grade, and a pristine stick for more. Selling any of it through cargo tells security where it was sold. The street dealers and the Reaver runners don't ask.
 </Document>
