@@ -4,8 +4,12 @@ using Content.Shared._WF.WolfChem.Narcotics.Delivery;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.FixedPoint;
+using Content.Shared.Hands.EntitySystems;
+using Content.Shared.Interaction;
 using Content.Shared.Nutrition.EntitySystems;
+using Content.Shared.Storage;
 using Content.Shared.Storage.EntitySystems;
+using Robust.Shared.Containers;
 using Robust.Shared.GameObjects;
 
 namespace Content.IntegrationTests.Tests._WF.WolfChem.Narcotics;
@@ -58,6 +62,51 @@ public sealed class DeliveryTest
             Assert.That(delivery.Hit((bong, bongComp), smoker), Is.True);
             Assert.That(InBlood(smoker, "WFCrack"), Is.EqualTo(FixedPoint2.New(4.25)), "The last hit takes what's left.");
             Assert.That(bongComp.Lit, Is.False, "A spent bowl goes out.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>Solids are scooped in, come out to a free hand on use, and are set on a table when there's no powder.</summary>
+    [Test]
+    public async Task BaggieSolidsTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+
+        await server.WaitAssertion(() =>
+        {
+            var hands = server.System<SharedHandsSystem>();
+            var interaction = server.System<SharedInteractionSystem>();
+            var container = server.System<SharedContainerSystem>();
+
+            var user = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            var baggie = entMan.SpawnEntity("WFBaggie", map.GridCoords);
+            var resin = entMan.SpawnEntity("WFOpiumResin", map.GridCoords);
+            var storage = entMan.GetComponent<StorageComponent>(baggie);
+            Assert.That(hands.TryPickupAnyHand(user, baggie), Is.True);
+
+            void UseOn(EntityUid target)
+            {
+                var ev = new AfterInteractEvent(user, baggie, target, map.GridCoords, true);
+                entMan.EventBus.RaiseLocalEvent(baggie, ev);
+            }
+
+            UseOn(resin);
+            Assert.That(storage.Container.Contains(resin), Is.True, "A loose solid is scooped in.");
+
+            Assert.That(interaction.UseInHandInteraction(user, baggie), Is.True);
+            Assert.That(hands.IsHolding(user, resin), Is.True, "Using the baggie takes the solid out to the free hand.");
+            Assert.That(storage.Container.ContainedEntities, Is.Empty);
+
+            Assert.That(hands.TryDrop(user, resin), Is.True);
+            UseOn(resin);
+            var table = entMan.SpawnEntity("Table", map.GridCoords);
+            UseOn(table);
+            Assert.That(container.IsEntityInContainer(resin), Is.False, "With no powder, a solid is set on the table.");
+            Assert.That(hands.IsHolding(user, baggie), Is.True, "The baggie stays in hand.");
         });
 
         await pair.CleanReturnAsync();

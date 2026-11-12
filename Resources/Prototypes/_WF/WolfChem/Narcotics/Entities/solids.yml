@@ -125,10 +125,12 @@
   - type: SolutionContainerVisuals
     maxFillLevels: 2
     fillBaseName: fill-
+  # Solids go in with a click and come out one at a time on use (WFBaggieSystem); the window stays on the verb.
   - type: Storage
     grid:
     - 0,0,1,1
     maxItemSize: Small
+    openOnActivate: false
     whitelist:
       tags:
       - WFBaggable
@@ -145,7 +147,7 @@
     solution: baggie
   - type: ExaminableSolution
     solution: baggie
-  # The storage window only lists solids, so the held baggie shows its powder here.
+  # Examine lists the solids; the held baggie shows its powder here.
   - type: SolutionItemStatus
     solution: baggie
   - type: SolutionTransfer

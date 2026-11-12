@@ -350,6 +350,10 @@ the first strains the heart by 0.1 a second.
 - **Snorting.** Powder comes in a baggie item. Using a baggie on a table or other flat surface places a
   `WFPowderLine` entity holding a small solution. Activating a line starts a 1.5 s do-after and moves its solution
   into the user's bloodstream chemicals. Blocked by a worn mask or helmet that covers the face.
+- **Bagging solids.** A baggie is also a four-slot storage for solid drugs (`WFBaggable` tag). Clicking it with a
+  solid, or clicking a loose solid with it, puts the solid in with a popup. Using the baggie in hand takes the last
+  one out into a free hand, using it on a table with no powder inside sets one down, and examining it up close
+  lists them. The storage window is off the use key but stays on the verb.
 - **Bong.** A held item (`WFBong`) with a bowl slot that accepts the `Smokable` tag and solid drugs, and a water
   reservoir. Using it with a lit bowl takes one hit: a 2 s do-after that moves a fixed amount to the user's
   bloodstream and emits a small smoke puff. It works from the hand, unlike pipes, which only work in the mask

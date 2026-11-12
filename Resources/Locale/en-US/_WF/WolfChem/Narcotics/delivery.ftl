@@ -1,6 +1,11 @@
 wf-baggie-empty = The baggie is empty.
 wf-baggie-line-placed = You tip out a neat line.
 wf-baggie-refused = The baggie only takes powder. { $reagents } won't go in.
+wf-baggie-solid-in = You tuck { THE($item) } into the baggie.
+wf-baggie-solid-out = You take { THE($item) } out of the baggie.
+wf-baggie-solid-tipped = You tip { THE($item) } out of the baggie.
+wf-baggie-solid-count = { $count } × { $name }
+wf-baggie-holds = Tucked inside: [color=#d9b382]{ $solids }[/color].
 wf-line-snort-start = You lean in over the line.
 wf-line-snort-done = You snort the line. Your nose burns.
 

@@ -7,7 +7,10 @@ using Robust.Shared.Serialization;
 
 namespace Content.Shared._WF.WolfChem.Narcotics.Delivery;
 
-/// <summary>A powder baggie. Used on a table, it lays out a line. Takes only the listed reagents.</summary>
+/// <summary>
+/// A baggie for powder and solid drugs. Used on a table, it lays out a line of its powder, or sets down a solid if
+/// it has none. Takes only the listed reagents as powder; its storage whitelist says which solids fit.
+/// </summary>
 [RegisterComponent]
 public sealed partial class WFBaggieComponent : Component
 {

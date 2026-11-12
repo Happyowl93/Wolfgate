@@ -11,8 +11,11 @@ using Content.Shared.FixedPoint;
 using Content.Shared.Coordinates.Helpers;
 using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
+using Content.Shared.Item;
 using Content.Shared.Placeable;
 using Content.Shared.Popups;
+using Content.Shared.Storage;
+using Content.Shared.Storage.EntitySystems;
 using Content.Shared.Temperature;
 using Robust.Shared.Containers;
 using Robust.Shared.Map;
@@ -30,7 +33,10 @@ public sealed class WFDeliverySystem : EntitySystem
     [Dependency] private ItemSlotsSystem _slots = default!;
     [Dependency] private ReactiveSystem _reactive = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
+    [Dependency] private SharedContainerSystem _container = default!;
     [Dependency] private SharedMapSystem _map = default!;
+    [Dependency] private SharedStorageSystem _storage = default!;
+    [Dependency] private WFBaggieSystem _baggie = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SmokeSystem _smoke = default!;
@@ -54,10 +60,40 @@ public sealed class WFDeliverySystem : EntitySystem
 
     private void OnBaggieAfterInteract(Entity<WFBaggieComponent> ent, ref AfterInteractEvent args)
     {
-        if (args.Handled || !args.CanReach || args.Target is not { } target || !HasComp<PlaceableSurfaceComponent>(target))
+        if (args.Handled || !args.CanReach || args.Target is not { } target)
             return;
 
+        // A loose solid is scooped straight in.
+        if (TryComp<StorageComponent>(ent, out var storage)
+            && HasComp<ItemComponent>(target)
+            && !_container.IsEntityInContainer(target)
+            && _storage.CanInsert(ent, target, out _, storage))
+        {
+            args.Handled = true;
+            if (_storage.PlayerInsertEntityInWorld((ent, storage), args.User, target))
+                _popup.PopupEntity(Loc.GetString("wf-baggie-solid-in", ("item", target)), ent, args.User);
+            return;
+        }
+
+        if (!HasComp<PlaceableSurfaceComponent>(target))
+            return;
+
+        // With no powder to pour, a solid is set down instead.
+        if (!HasPowder(ent) && _baggie.TryTakeSolid(ent, out var solid))
+        {
+            _transform.SetCoordinates(solid, args.ClickLocation);
+            _popup.PopupEntity(Loc.GetString("wf-baggie-solid-tipped", ("item", solid)), solid, args.User);
+            args.Handled = true;
+            return;
+        }
+
         args.Handled = TryPlaceLine(ent, args.User, args.ClickLocation) != null;
+    }
+
+    private bool HasPowder(Entity<WFBaggieComponent> baggie)
+    {
+        return _solutions.TryGetSolution(baggie.Owner, baggie.Comp.Solution, out _, out var solution)
+            && solution.Volume > FixedPoint2.Zero;
     }
 
     /// <summary>Lays out a line from a baggie at a spot. Returns the line, or null if the baggie is empty.</summary>
