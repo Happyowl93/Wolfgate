@@ -202,7 +202,7 @@ Start from existing shaders rather than writing each look from nothing.
 
 | Family | Look | Starting point |
 |---|---|---|
-| Stimulant | Raised contrast and saturation; the screen edge pulses on a heartbeat that speeds up with the tier | `ColoredScreenBorder` |
+| Stimulant | Brighter, sharper and more vivid; heavy adds glare round lights and a faint brightness pulse on a heartbeat that speeds up with the tier; overdose blows out the highlights, blurs the edges into tunnel focus and trembles by a pixel. Nothing darkens | new |
 | Opioid | Warm tint, soft blur, heavy vignette, slow breathing zoom | `Drowsiness` radial blur, `Vignette` |
 | Psychedelic | Colour drift and trails, plus Lattice hallucinations from the server through `WFDriftEffectsSystem.Show` (`Content.Server/_WF/Lattice/WFDriftEffectsSystem.cs:128`) | `Rainbow` |
 | Empathogen | Bloom and a soft glow around other people | new |

@@ -64,9 +64,9 @@ void fragment() {
     highp float r = length(d);
 
     if (f == 0) {
-        // Stimulant: the world swells with each heartbeat.
+        // Stimulant: the world swells a touch with each heartbeat.
         highp float beat = wfBeat(t, pulseRate * (1.0 + o));
-        d *= 1.0 - 0.05 * beat * bend;
+        d *= 1.0 - 0.02 * beat * bend;
     } else if (f == 1) {
         // Opioid: a slow breathing fisheye, the centre swelling towards you.
         highp float breath = 0.75 + 0.25 * sin(t * 0.6);
@@ -99,22 +99,45 @@ void fragment() {
     highp vec3 flash = vec3(1.0);
 
     if (f == 0) {
-        // Stimulant. Light: a little more contrast and colour. Heavy: a red heartbeat at the edges and a split image.
-        // Overdose: the heart races, the whole screen flushes red with it and shakes.
-        flash = vec3(1.0, 0.35, 0.3);
+        // Stimulant: wide pupils, everything bright, sharp and vivid. Light: a lift and a crisper, richer image.
+        // Heavy: glare round the lights and a faint brightness pulse with the heartbeat. Overdose: overload; the
+        // highlights blow out, the colour goes harsh, the edges blur into tunnel focus, a warm flush races with the
+        // heart and the image trembles by a pixel.
         highp float beat = wfBeat(t, pulseRate * (1.0 + o));
-        highp vec2 shake = vec2(sin(t * 47.0), cos(t * 39.0)) * 0.005 * o * motion;
-        highp vec2 split = vec2(0.0008 + 0.0012 * h + 0.005 * o, 0.0) * (0.6 + 0.4 * beat);
-        col.r = sampleScreen(uv + shake + split).r;
-        col.g = sampleScreen(uv + shake).g;
-        col.b = sampleScreen(uv + shake - split).b;
-        col.rgb = wfSaturate(col.rgb, 1.0 + 0.45 * i);
-        // Contrast pivots low so dim, lit rooms don't sink to black.
-        col.rgb = max((col.rgb - 0.25) * (1.0 + 0.2 * i) + 0.25, 0.0);
-        highp float rim = 1.0 - smoothstep(0.0, 0.12 + 0.18 * o, wfEdge(uv));
-        col.rgb = mix(col.rgb, vec3(1.0, 0.15, 0.1), rim * beat * (0.2 + 0.3 * h + 0.3 * o) * i);
-        col.rgb = mix(col.rgb, col.rgb * vec3(1.5, 0.5, 0.45), beat * 0.6 * o);
-        col.rgb *= 1.0 - smoothstep(0.25, 0.75, dist) * 0.65 * o;
+        highp float tick = floor(t * 30.0);
+        highp vec2 tremor = (vec2(wfHash(vec2(tick, 1.0)), wfHash(vec2(tick, 2.0))) - 0.5)
+            * SCREEN_PIXEL_SIZE.xy * 2.0 * o * motion;
+        highp vec2 p = uv + tremor;
+        col = sampleScreen(p);
+
+        highp float tunnel = smoothstep(0.2, 0.6, dist) * o;
+        if (tunnel > 0.01) {
+            highp vec3 streak = vec3(0.0);
+            for (int s = 0; s < 6; s++) {
+                streak += sampleScreen(p - offset * float(s) * 0.012).rgb;
+            }
+            col.rgb = mix(col.rgb, streak / 6.0, tunnel);
+        }
+
+        highp vec2 px = SCREEN_PIXEL_SIZE.xy * 1.5;
+        highp vec3 near = (sampleScreen(p + vec2(px.x, 0.0)).rgb + sampleScreen(p - vec2(px.x, 0.0)).rgb
+            + sampleScreen(p + vec2(0.0, px.y)).rgb + sampleScreen(p - vec2(0.0, px.y)).rgb) * 0.25;
+        col.rgb += (col.rgb - near) * (0.4 + 0.4 * h) * i * (1.0 - tunnel);
+
+        highp vec3 glare = vec3(0.0);
+        for (int s = 0; s < 8; s++) {
+            highp float angle = float(s) * 0.785398;
+            glare += sampleScreen(p + vec2(cos(angle), sin(angle)) * (0.01 + 0.01 * o)).rgb;
+        }
+        glare = max(glare / 8.0 - (0.55 - 0.15 * o), 0.0) * 2.0;
+        col.rgb += glare * (0.3 * h + 0.5 * o) * i;
+
+        // Lifts the shadows more than the highlights, so dim rooms open up instead of sinking.
+        col.rgb = pow(max(col.rgb, vec3(0.0)), vec3(1.0 / (1.0 + (0.12 + 0.12 * h + 0.1 * o) * i)));
+        col.rgb *= 1.0 + 0.06 * beat * h * i;
+        col.rgb = wfSaturate(col.rgb, 1.0 + (0.2 + 0.15 * h + 0.4 * o) * i);
+        col.rgb = mix(col.rgb, col.rgb * 1.35 + 0.05, 0.6 * o);
+        col.rgb = mix(col.rgb, col.rgb * vec3(1.12, 0.97, 0.95), beat * 0.5 * o);
     } else if (f == 1) {
         // Opioid. Light: warm and golden, with dark edges. Heavy: soft focus and a slow breathing zoom.
         // Overdose: the dark closes in, the colour drains cold, and the eyes keep closing.

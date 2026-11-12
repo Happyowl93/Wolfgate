@@ -37,8 +37,6 @@
       tier: Weak
       strength: 10
       identifier: WFCocaine
-    - !type:Jitter
-      amplitude: 4
     - !type:PopupMessage
       probability: 0.08
       visualType: SmallCaution
@@ -46,7 +44,10 @@
   - min: 16
     overlay: 0.9
     effects:
+    # A fine, fast tremor: the engine's smallest jitter.
     - !type:Jitter
+      amplitude: 1
+      frequency: 10
     - !type:WFStrainHeart
       amount: 0.1
     - !type:HealthChange
@@ -97,8 +98,6 @@
     effects:
     - !type:TakeStaminaDamage
       amount: -3
-    - !type:Jitter
-      amplitude: 6
     - !type:PopupMessage
       probability: 0.1
       visualType: SmallCaution
@@ -106,7 +105,10 @@
   - min: 12
     overlay: 1
     effects:
+    # A fine, fast tremor: the engine's smallest jitter.
     - !type:Jitter
+      amplitude: 1
+      frequency: 10
     - !type:WFStrainHeart
       amount: 0.15
     - !type:HealthChange
