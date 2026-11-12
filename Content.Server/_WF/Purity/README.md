@@ -2,13 +2,14 @@
 
 A purity grade (0-100%) that any reagent in any solution can carry. A reagent with no grade is standard grade, so
 untouched chemistry looks and behaves exactly as before. A graded reagent works at its grade when metabolised (60%
-medicine heals 60%), its impure fraction deals mild Poison (`wf.purity.impurity_damage` per unit, default 1.0),
-overdose thresholds count effective units (units x grade), and it sells at its grade.
+medicine heals 60%), its impure fraction deals Poison (`wf.purity.impurity_damage` per unit, default 1.0;
+`wf.purity.narcotic_impurity_damage`, default 6.0, for the Narcotics group), overdose thresholds count effective units
+(units x grade), and it sells at its grade squared.
 
 Grades live in a side table on `Solution` (`Solution.Purity`, keyed by reagent prototype; see `Solution.Purity.cs`),
 which `Solution`'s add, split, transfer and remove methods keep in step. They come from:
 
-- Reactions: the product takes the mean grade of the consumed reactants times the reaction's process factor, set by a
+- Reactions: the product takes the mean grade of the graded reactants it consumes (standard-grade ones don't raise it) times the reaction's process factor, set by a
   `wfReactionPurity` prototype keyed by reaction ID (`optimalTemp`, `tolerance`, `floor`). No entry means factor 1.0.
   A reaction that sets into a solid uses the `WFCreateGradedEntity` effect, which passes the grade to the spawned item.
 - `WFProducePurity` on produce: grades by plant potency, 50% at 0 to 100% at 100.
@@ -64,10 +65,16 @@ Design: [`Docs/_WF/Narcotics/DESIGN.md`](../../../Docs/_WF/Narcotics/DESIGN.md).
 - [`Content.Server/Body/Systems/MetabolizerSystem.cs`](../../Body/Systems/MetabolizerSystem.cs)
   - impurity damage
   - a graded reagent works at its grade
-  - the impure fraction is mildly toxic
+  - the impure fraction is toxic
+- [`Content.Server/Body/Systems/StomachSystem.cs`](../../Body/Systems/StomachSystem.cs)
+  - read before the removal prunes it
+  - a digested reagent keeps its grade
 - [`Content.Server/Botany/Systems/BotanySystem.Produce.cs`](../../Botany/Systems/BotanySystem.Produce.cs): narcotic produce is graded by potency
-- [`Content.Server/Cargo/Systems/PricingSystem.cs`](../../Cargo/Systems/PricingSystem.cs): a reagent is worth its grade
+- [`Content.Server/Cargo/Systems/PricingSystem.cs`](../../Cargo/Systems/PricingSystem.cs): a reagent is worth its grade squared
 - [`Content.Server/Chemistry/EntitySystems/ChemMasterSystem.cs`](../../Chemistry/EntitySystems/ChemMasterSystem.cs)
+  - read before the removal prunes it
+  - the reagent keeps its grade on the way out of the buffer
+  - the reagent keeps its grade on the way into the buffer
 - [`Content.Server/EntityEffects/EffectConditions/ReagentThreshold.cs`](../../EntityEffects/EffectConditions/ReagentThreshold.cs): thresholds count effective units (units x grade)
 - [`Content.Shared/_Onyx/Medical/HealthAnalyzerChemicalInfo.cs`](../../../Content.Shared/_Onyx/Medical/HealthAnalyzerChemicalInfo.cs): the reagent's grade
 - [`Content.Shared/Chemistry/Components/Solution.cs`](../../../Content.Shared/Chemistry/Components/Solution.cs)

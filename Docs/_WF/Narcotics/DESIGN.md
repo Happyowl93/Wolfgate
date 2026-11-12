@@ -41,7 +41,7 @@ confirm each one before relying on it.
 |---|---|
 | Names | A mix. Real: cocaine, crack, opium, heroin, hash. Invented: Redline, Anvil, Chorus, Halo. Desoxyephedrine keeps its name; its solid form is "crystal" |
 | Purity | Reagent-wide. Any reagent in any solution can carry a grade; a reagent with none is standard grade (100%) |
-| Impure fraction | Mildly toxic, so a weak batch is worse than a small dose of a good one |
+| Impure fraction | Toxic, and several times more so in a narcotic, so a weak batch is worse than a small dose of a good one |
 | Overdose | Counted in effective units (units x purity), so pure product is the dangerous one |
 | Dependence | Lasts the round and is lost with the body. Traits let a character start each round already dependent |
 | Combat drugs | Strong, with downsides that scale with the benefit |
@@ -99,7 +99,8 @@ Check that `Solution`'s net serialisation carries the new field to clients; the 
 
 - **Reactions.** `ChemicalReactionSystem` removes reactants and adds products around
   `Content.Shared/Chemistry/Reaction/ChemicalReactionSystem.cs:123-184`. Before the removal, take the mean grade of
-  the non-catalyst reactants weighted by amount consumed. After the product is added, blend it in at
+  the graded non-catalyst reactants weighted by amount consumed; standard-grade reactants don't raise it, so the
+  product is as good as its precursor. A reaction with fillers is a cut and averages over every reactant. After the product is added, blend it in at
   `inputGrade x processFactor`.
 - **Process factor.** A new prototype kind `wfReactionPurity`, keyed by reaction ID, so no upstream reaction
   prototype is edited: `optimalTemp`, `tolerance` (kelvin from optimal at which the factor reaches the floor) and
@@ -117,12 +118,12 @@ Check that `Solution`'s net serialisation carries the new field to clients; the 
 - **Metabolism.** At `Content.Server/Body/Systems/MetabolizerSystem.cs:195`, multiply `scale` by the reagent's
   grade. Effects already honour `scale`, so medicine at 60% heals 60%.
 - **Impure fraction.** In the same block, deal Poison of `metabolisedUnits x (1 - grade) x purity.impurity_damage`
-  (cvar, start at 1.0 per unit).
+  (cvar, 1.0 per unit), or `x purity.narcotic_impurity_damage` (6.0) for a reagent in the Narcotics group.
 - **Thresholds.** `ReagentThreshold` (`Content.Server/EntityEffects/EffectConditions/ReagentThreshold.cs:37`)
   compares `GetTotalPrototypeQuantity`. Switch it to `GetEffectiveQuantity` under a marker. This shifts every
   existing overdose threshold for graded reagents only.
 - **Price.** `PricingSystem` prices solutions at `Content.Server/Cargo/Systems/PricingSystem.cs:113-150`; multiply
-  each reagent's value by its grade.
+  each reagent's value by its grade squared, so top grade earns a premium and cutting loses money at the market.
 - **Not scaled yet:** touch and ingestion reactions (`ReactiveSystem`), tile reactions, and reagents consumed as
   fuel. Leave them until someone needs them.
 
@@ -194,7 +195,7 @@ Prototype kind `wfDrugProfile`:
 - Round scope: the components live on the body. Cloning or a new body starts clean. Nothing is written to the
   database.
 - Traits `WFDependentStimulant`, `WFDependentOpioid`, `WFDependentNicotine`: start the round at 0.8 in that family
-  and stop the meter decaying below 0.7, and give a first dose as trait gear. Follow the cost and category conventions in
+  and stop the meter decaying below 0.55 (cravings only, once the starting 0.8 has eased), and give a first dose as trait gear. Follow the cost and category conventions in
   `Resources/Prototypes/_Mono/Traits/physical.yml`; they are drawbacks and should refund points.
 
 ### Visuals (Client)
@@ -272,7 +273,7 @@ ends, every changed sound gets its own pitch back and loses the reverb; area ech
 | `WFCrack` | Crack | Stimulant | Cheap, fast | Cocaine's high, stronger and a third as long | Triple `dependenceGain`; harsher crash | Smoked |
 | `WFOpium` | Opium | Opioid | Social downer | Moderate pain relief, calm | Drowsiness | Smoked |
 | `WFHeroin` | Heroin | Opioid | Hard downer | Strong pain relief through `WolfmedPainRelief`, euphoria | Slow movement; nodding off (eyes shut, still standing) when heavy, and brief forced sleep in an overdose. Overdose is Wolfmed's sedation airloss through `WFSedation`, graded and blunted by tolerance. Naloxone reverses it | Injected, smoked |
-| Desoxyephedrine (existing) | Crystal | Stimulant | Combat stimulant | Unchanged effects; gains `WFDose` for dependence and the overlay | Unchanged Poison; adds a long crash | Smoked as crystal, or as today |
+| Desoxyephedrine (existing) | Crystal | Stimulant | Combat stimulant | Speed as before; stun and knockdown removal (cut to 0.5 s a tick), stamina-crit resistance and no slowdown from damage need a heavy dose (8 u); gains `WFDose` for dependence and the overlay | Unchanged Poison; adds a long crash | Smoked as crystal, or as today |
 | `WFRedline` | Redline | Combat | Offence | Speed x1.3, stun and knockdown resistance, no slowdown from damage, pain immunity | Heart damage every tick; can't sprint-stop cleanly (jitter); when it ends, a 60 s collapse at speed x0.5 with a stamina cap. Overdose: cardiac arrest | Injected |
 | `WFAnvil` | Anvil | Combat | Endurance | Incoming Brute and Burn reduced 30%, pain immunity, stamina-crit resistance | Speed x0.85; the user's own damage readout is hidden while high; damage avoided is repaid at 40% as Poison over the crash. Overdose: organ damage | Injected |
 | `WFChorus` | Chorus | Psychedelic | Social | Lattice hallucinations scaling with tier: whispers and blips, then glimpses and phantoms, then mimics and doubles | Disorientation, scrambled speech at the top tier. No physical overdose; the top tier adds brief `Pacified` | Swallowed tab |
@@ -344,7 +345,7 @@ the first strains the heart by 0.1 a second.
 - Loading adds a running program to `WFNeurowareComponent` on the body. Each second it adds
   `rate x integrity` to the profile's level until `amount` is delivered. Everything after that is
   `WFIntoxicationSystem`.
-- **Copying.** Using a stick on a blank stick copies it at `integrity x 0.85`, and the blank shows a strip of tape.
+- **Copying.** Using a stick on a blank stick copies it at `integrity x 0.85` and spends one of the source's loads, and the blank shows a strip of tape.
   Pristine builds come from dealers, the uplink and rare loot, so a street copy is a few generations down.
 - **Sources.** The Reaver dealer sells blanks and pristine builds, the planet dealer sells street copies, and
   `WFNeurowareStickLoot` (mostly blanks, some copies, rarely a pristine build) rolls in maintenance fluff and

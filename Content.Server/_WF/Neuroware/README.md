@@ -3,7 +3,7 @@
 Drugs for synthetics. A body whose brain organ has `WFNeurowareHost` (the positronic brains) ignores chemical doses
 and takes data sticks instead: using a stick on a host loads its program (2 s on yourself, 4 s on someone else),
 which feeds the twin drug profile's level at the stick's integrity, so highs, crashes and dependence all come from
-`Narcotics`. Copying a stick onto a blank keeps 85% of its integrity; the missing share makes a running program
+`Narcotics`. Copying a stick onto a blank spends a load and keeps 85% of its integrity; the missing share makes a running program
 glitch (stun, a forced beep, scrambled speech, a false HUD fault). The Wolfmed synthetic HUD lists what is running as
 fault lines and its shader is driven by the tier, Redline's speed costs charge and heat, and a chassis panel reboot
 stops every program and clears the levels.

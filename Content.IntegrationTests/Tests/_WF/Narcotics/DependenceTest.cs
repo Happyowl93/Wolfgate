@@ -98,7 +98,8 @@ public sealed class DependenceTest
             });
 
             dependence.Tick(100000f);
-            Assert.That(dep.Meter[WFDrugFamily.Stimulant], Is.EqualTo(0.7f).Within(0.001f), "A trait keeps the meter at 0.7.");
+            Assert.That(dep.Meter[WFDrugFamily.Stimulant], Is.EqualTo(0.55f).Within(0.001f), "A trait keeps the meter at 0.55.");
+            Assert.That(WFDependenceSystem.StageFor(dep.Meter[WFDrugFamily.Stimulant]), Is.EqualTo(1), "A clean trait eases to cravings.");
         });
 
         await pair.CleanReturnAsync();

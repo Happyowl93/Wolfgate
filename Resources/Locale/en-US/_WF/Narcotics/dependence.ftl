@@ -53,8 +53,8 @@ wf-withdrawal-host-craving-nicotine-2 = HABIT LOOP: idle.
 wf-withdrawal-host-craving-nicotine-3 = HABIT LOOP: idle.
 
 trait-wf-dependent-stimulant-name = Stimulant habit
-trait-wf-dependent-stimulant-desc = You start every shift already hooked on stimulants, with one cut baggie to your name. Go more than a few minutes without and the shakes and exhaustion set in; the habit never fades.
+trait-wf-dependent-stimulant-desc = You start every shift already hooked on stimulants, with one cut baggie to your name. Go more than a few minutes without and the shakes and exhaustion set in. Stay clean long enough and they ease to cravings, but the habit never fades.
 trait-wf-dependent-opioid-name = Opioid habit
-trait-wf-dependent-opioid-desc = You start every shift already hooked on opioids, with one cut baggie to your name. Go more than a few minutes without and the shakes and exhaustion set in; the habit never fades.
+trait-wf-dependent-opioid-desc = You start every shift already hooked on opioids, with one cut baggie to your name. Go more than a few minutes without and the shakes and exhaustion set in. Stay clean long enough and they ease to cravings, but the habit never fades.
 trait-wf-dependent-nicotine-name = Smoker
 trait-wf-dependent-nicotine-desc = You start every shift craving nicotine. Go too long without a smoke and you get shaky and irritable.

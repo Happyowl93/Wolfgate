@@ -227,6 +227,14 @@ public sealed class WFNeurowareSystem : EntitySystem
             return false;
         }
 
+        if (source.Comp.Loads <= 0)
+        {
+            if (user != null)
+                _popup.PopupEntity(Loc.GetString("wf-neuroware-stick-spent"), source, user.Value);
+            return false;
+        }
+
+        source.Comp.Loads--;
         blank.Comp.Profile = source.Comp.Profile;
         blank.Comp.Integrity = source.Comp.Integrity * CopyIntegrity;
         blank.Comp.Amount = source.Comp.Amount;

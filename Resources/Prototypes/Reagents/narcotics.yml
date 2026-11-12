@@ -61,12 +61,22 @@
         component: StutteringAccent
       - !type:Jitter
       - !type:GenericStatusEffect
+        # WOLFGATE(Narcotics) START: only a heavy dose shrugs off stuns, so Redline stays the combat drug
+        conditions:
+        - !type:ReagentThreshold
+          min: 8
+        # WOLFGATE END
         key: Stun
-        time: 3
+        time: 0.5 # WOLFGATE(Narcotics): was 3
         type: Remove
       - !type:GenericStatusEffect
+        # WOLFGATE(Narcotics) START: heavy dose only
+        conditions:
+        - !type:ReagentThreshold
+          min: 8
+        # WOLFGATE END
         key: KnockedDown
-        time: 3
+        time: 0.5 # WOLFGATE(Narcotics): was 3
         type: Remove
       - !type:GenericStatusEffect
         conditions:
@@ -77,10 +87,20 @@
         time: 10
         type: Remove
       - !type:GenericStatusEffect # goob edit
+        # WOLFGATE(Narcotics) START: heavy dose only
+        conditions:
+        - !type:ReagentThreshold
+          min: 8
+        # WOLFGATE END
         key: Adrenaline
         component: StamcritResist
         time: 5
       - !type:GenericStatusEffect # goob edit
+        # WOLFGATE(Narcotics) START: heavy dose only
+        conditions:
+        - !type:ReagentThreshold
+          min: 8
+        # WOLFGATE END
         key: Adrenaline
         component: IgnoreSlowOnDamage
         time: 5

@@ -1,4 +1,5 @@
 using Content.Shared._WF.Purity;
+using Content.Shared.Chemistry.Components;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.FixedPoint;
@@ -17,18 +18,26 @@ public sealed class WFPuritySystem : EntitySystem
 
     private static readonly ProtoId<DamageTypePrototype> Poison = "Poison";
 
+    private const string NarcoticGroup = "Narcotics";
+
     private float _impurityDamage;
+    private float _narcoticImpurityDamage;
 
     public override void Initialize()
     {
         base.Initialize();
         Subs.CVar(_cfg, WFPurityCVars.ImpurityDamage, v => _impurityDamage = v, true);
+        Subs.CVar(_cfg, WFPurityCVars.NarcoticImpurityDamage, v => _narcoticImpurityDamage = v, true);
     }
 
-    /// <summary>Deals Poison for the impure fraction of a metabolised amount.</summary>
-    public void ApplyImpurity(EntityUid body, FixedPoint2 units, float purity)
+    /// <summary>Deals Poison for the impure fraction of a metabolised amount of a reagent in <paramref name="group"/>.</summary>
+    public void ApplyImpurity(EntityUid body, FixedPoint2 units, float purity, string group)
     {
-        var amount = units.Float() * (1f - purity) * _impurityDamage;
+        if (purity >= Solution.StandardPurityThreshold)
+            return;
+
+        var perUnit = group == NarcoticGroup ? _narcoticImpurityDamage : _impurityDamage;
+        var amount = units.Float() * (1f - purity) * perUnit;
         if (amount <= 0f)
             return;
 

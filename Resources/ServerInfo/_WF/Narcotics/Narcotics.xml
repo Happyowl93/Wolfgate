@@ -15,7 +15,7 @@ Street drugs are cooked, grown and sold all over the sector, and every one of th
 
 - [bold]Cocaine[/bold] (stimulant): a little faster, stamina comes back quicker, and it takes the edge off pain. The crash is short and tired.
 - [bold]Crack[/bold] (stimulant): cocaine, stronger and half as long. It hooks you three times as fast and the crash is worse.
-- [bold]Crystal[/bold] (stimulant): desoxyephedrine in a shard you can smoke. It has the longest crash of the lot.
+- [bold]Crystal[/bold] (stimulant): desoxyephedrine in a shard you can smoke. A heavy dose shakes off stuns faster. It has the longest crash of the lot.
 - [bold]Opium[/bold] (opioid): mild pain relief, and it barely slows you.
 - [bold]Heroin[/bold] (opioid): a strong painkiller that slows you down, sedates you and makes you nod off. Too much stops your breathing.
 - [bold]Fentanyl[/bold] (opioid): half again as strong as heroin and out of your blood in seconds. While it is in there you can barely walk, you slur, shake and pass out, and more than 6u poisons and chokes you. What is left afterwards is a few minutes of heroin high. Naloxone clears it like any opioid. Never mix it with dylovene.
@@ -70,7 +70,7 @@ Above the halfway mark, going without for five minutes starts [bold]withdrawal[/
 
 Use also builds [bold]tolerance[/bold], up to double. The same dose hits softer, so it takes more to get as high, or to overdose. Tolerance fades slowly while clean. Take your old dose after a long break and it can kill you.
 
-The [bold]Stimulant habit[/bold], [bold]Opioid habit[/bold] and [bold]Smoker[/bold] traits start you with a habit that never fades, and a cut baggie or a pack of cigarettes.
+The [bold]Stimulant habit[/bold], [bold]Opioid habit[/bold] and [bold]Smoker[/bold] traits start you with a habit that eases to cravings if you stay clean but never fades, and a cut baggie or a pack of cigarettes.
 
 ## Grades
 
@@ -78,7 +78,7 @@ Any reagent can carry a [bold]grade[/bold], from 0 to 100%. Anything from a disp
 
 A dose at 60% works like 60% of the amount, and the other 40% is impurity that the body takes as Poison. Overdose limits count the working part only, so a weak batch won't overdose you sooner. It will just poison you.
 
-Grade sets the price as well. A rock at half grade sells for half.
+Grade sets the price as well. The price falls faster than the grade: a rock at half grade sells for a quarter, so cutting loses money at the market.
 
 A ChemMaster shows the percentage beside any graded reagent, and so do health analyzers and chemical goggles. A [bold]purity tester[/bold] does the same for any container or item it touches.
   <Box>
@@ -117,7 +117,7 @@ A program gives the same high, crash and habit as the drug it copies, shown on t
 - [bold]Idle[/bold]: cannabis.
 - [bold]Halo[/bold] and [bold]Redline[/bold] go by their own names. On a synthetic, Redline costs charge and heat instead of the heart.
 
-Sticks have [bold]integrity[/bold], which works like grade. A weak stick delivers less, and the missing part makes the program glitch with brief stuns, forced beeps, scrambled speech and fake faults. Using a loaded stick on a blank copies it at 85% of the original's integrity, with one load. Street copies are several generations down.
+Sticks have [bold]integrity[/bold], which works like grade. A weak stick delivers less, and the missing part makes the program glitch with brief stuns, forced beeps, scrambled speech and fake faults. Using a loaded stick on a blank copies it at 85% of the original's integrity, with one load, and uses up one of the original's loads. Street copies are several generations down.
 
 Blank and loaded sticks turn up in maintenance and salvage, and the dealers sell both.
 

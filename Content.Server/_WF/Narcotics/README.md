@@ -201,6 +201,9 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
   - was 2
   - the crystal high and its effects last while it stays in the blood
   - doses the Crystal profile for its overlay, dependence and crash
+  - only a heavy dose shrugs off stuns, so Redline stays the combat drug
+  - was 3
+  - heavy dose only
   - clears with the rest of the crystal
   - a weak dose of the Crystal profile
   - a cannabis high lasts while the THC stays in the blood

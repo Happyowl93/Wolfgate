@@ -60,6 +60,13 @@ public sealed partial class Solution
         return Purity == null ? quantity : quantity * GetPurity(prototype);
     }
 
+    /// <summary>The share of its list price a reagent sells for: the square of its grade, so cutting loses money.</summary>
+    public float GetPriceFactor(string prototype)
+    {
+        var grade = GetPurity(prototype);
+        return grade * grade;
+    }
+
     /// <summary>Adds a reagent at the given grade.</summary>
     public void AddReagent(string prototype, FixedPoint2 quantity, float purity)
         => AddReagent(new ReagentId(prototype, null), quantity, purity);

@@ -1,9 +1,13 @@
 using System.Collections.Generic;
 using Content.Server._WF.Narcotics;
 using Content.Shared._WF.Purity;
+using Content.Server.Body.Components;
 using Content.Server.Body.Systems;
 using Content.Server.EntityEffects.EffectConditions;
+using Content.Shared.Body.Organ;
+using Content.Shared.Chemistry;
 using Content.Shared.Chemistry.Components;
+using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Chemistry.Reaction;
 using Content.Shared.Chemistry.Reagent;
@@ -141,8 +145,12 @@ public sealed class PurityTest
 
             var passed = Mix(Graded("WFPurityTestA", 0.5f), Graded("WFPurityTestB", 1f));
             Assert.That(passed.GetTotalPrototypeQuantity("WFPurityTestProduct"), Is.EqualTo(FixedPoint2.New(20)));
-            Assert.That(passed.GetPurity("WFPurityTestProduct"), Is.EqualTo(0.75f).Within(0.01f),
-                "A reaction with no wfReactionPurity should pass the mean input grade through.");
+            Assert.That(passed.GetPurity("WFPurityTestProduct"), Is.EqualTo(0.5f).Within(0.01f),
+                "A standard-grade reactant should not raise the product's grade.");
+
+            var both = Mix(Graded("WFPurityTestA", 0.5f), Graded("WFPurityTestB", 0.9f));
+            Assert.That(both.GetPurity("WFPurityTestProduct"), Is.EqualTo(0.7f).Within(0.01f),
+                "Graded reactants should pass their mean grade through.");
 
             var optimal = Mix(Graded("WFPurityTestC", 1f, 300f));
             Assert.That(optimal.GetPurity("WFPurityTestTuned"), Is.EqualTo(1f).Within(0.01f));
@@ -221,6 +229,97 @@ public sealed class PurityTest
         });
 
         await server.WaitPost(() => server.CfgMan.SetCVar(WFPurityCVars.ImpurityDamage, 1f));
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ChemMasterTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+
+        await server.WaitAssertion(() =>
+        {
+            var solutions = server.System<SharedSolutionContainerSystem>();
+            var master = entMan.SpawnEntity("ChemMaster", map.GridCoords);
+            var beaker = entMan.SpawnEntity("Beaker", map.GridCoords);
+            Assert.That(solutions.TryGetFitsInDispenser(beaker, out var beakerSoln, out var beakerSolution), Is.True);
+            beakerSolution!.AddReagent("WFPurityTestA", FixedPoint2.New(20), 0.6f);
+            Assert.That(server.System<ItemSlotsSystem>().TryInsert(master, SharedChemMaster.InputSlotName, beaker, null), Is.True);
+            Assert.That(solutions.TryGetSolution(master, SharedChemMaster.BufferSolutionName, out _, out var buffer), Is.True);
+
+            void Press(bool fromBuffer)
+            {
+                var message = new ChemMasterReagentAmountButtonMessage(new ReagentId("WFPurityTestA", null),
+                    ChemMasterReagentAmount.U10, fromBuffer);
+                entMan.EventBus.RaiseLocalEvent(master, (object) message);
+            }
+
+            Press(false);
+            Assert.Multiple(() =>
+            {
+                Assert.That(buffer!.GetTotalPrototypeQuantity("WFPurityTestA"), Is.EqualTo(FixedPoint2.New(10)));
+                Assert.That(buffer.GetPurity("WFPurityTestA"), Is.EqualTo(0.6f).Within(0.001f),
+                    "A reagent keeps its grade in the buffer.");
+            });
+
+            Press(false);
+            Assert.That(beakerSolution.Purity, Is.Null);
+            Press(true);
+            Assert.Multiple(() =>
+            {
+                Assert.That(beakerSolution.GetTotalPrototypeQuantity("WFPurityTestA"), Is.EqualTo(FixedPoint2.New(10)));
+                Assert.That(beakerSolution.GetPurity("WFPurityTestA"), Is.EqualTo(0.6f).Within(0.001f),
+                    "A reagent keeps its grade on the way back out.");
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task DigestionTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        EntityUid mob = default;
+
+        await server.WaitAssertion(() =>
+        {
+            mob = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            var swallowed = new Solution();
+            swallowed.AddReagent("WFPurityTestA", FixedPoint2.New(30), 0.4f);
+
+            var fed = false;
+            var query = entMan.EntityQueryEnumerator<StomachComponent, OrganComponent>();
+            while (query.MoveNext(out var uid, out var stomach, out var organ))
+            {
+                if (organ.Body == mob)
+                    fed = server.System<StomachSystem>().TryTransferSolution(uid, swallowed, stomach);
+            }
+
+            Assert.That(fed, Is.True);
+        });
+
+        // Digestion takes 20 s, then the body flushes a reagent with no metabolism at 1 u a second.
+        await pair.RunSeconds(25);
+
+        await server.WaitAssertion(() =>
+        {
+            var solutions = server.System<SharedSolutionContainerSystem>();
+            Assert.That(solutions.TryGetSolution(mob, BloodstreamComponent.DefaultChemicalsSolutionName, out _, out var blood), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(blood!.GetTotalPrototypeQuantity("WFPurityTestA"), Is.GreaterThan(FixedPoint2.New(10)));
+                Assert.That(blood.GetPurity("WFPurityTestA"), Is.EqualTo(0.4f).Within(0.001f),
+                    "A swallowed reagent keeps its grade in the blood.");
+            });
+        });
 
         await pair.CleanReturnAsync();
     }

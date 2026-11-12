@@ -238,7 +238,7 @@ namespace Content.Server.Body.Systems
                 // remove a certain amount of reagent
                 if (mostToRemove > FixedPoint2.Zero)
                 {
-                    _wfPurity.ApplyImpurity(ent.Comp2?.Body ?? solutionEntityUid.Value, mostToRemove, solution.GetPurity(reagent.Prototype)); // WOLFGATE(Purity): the impure fraction is mildly toxic
+                    _wfPurity.ApplyImpurity(ent.Comp2?.Body ?? solutionEntityUid.Value, mostToRemove, solution.GetPurity(reagent.Prototype), proto.Group); // WOLFGATE(Purity): the impure fraction is toxic
                     solution.RemoveReagent(reagent, mostToRemove);
                     // Frontier: do not count cryogenics chems against the reagent limit (to buff cryo meds)
                     if (!proto.Metabolisms.ContainsKey("Cryogenic"))

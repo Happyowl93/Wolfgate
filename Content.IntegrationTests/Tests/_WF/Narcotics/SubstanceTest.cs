@@ -153,8 +153,8 @@ public sealed class SubstanceTest
             Assert.Multiple(() =>
             {
                 Assert.That(rocks, Has.Count.EqualTo(2), "10 u of cocaine should set into two rocks.");
-                Assert.That(rocks.Select(r => r.GetPurity("WFCrack")), Has.All.EqualTo((5 * 0.6f + 2) / 7).Within(0.01f),
-                    "A rock takes the mean grade of what went into it.");
+                Assert.That(rocks.Select(r => r.GetPurity("WFCrack")), Has.All.EqualTo(0.6f).Within(0.01f),
+                    "A rock takes the grade of the cocaine; standard-grade reagents don't raise it.");
                 Assert.That(shards, Has.Count.EqualTo(2));
                 Assert.That(shards.Select(s => s.GetPurity("Desoxyephedrine")), Has.All.EqualTo(1f).Within(0.01f));
                 Assert.That(resin, Has.Count.EqualTo(2), "10 u of chilled opium should set into two lumps of resin.");
@@ -212,7 +212,7 @@ public sealed class SubstanceTest
                 var full = pricing.GetPrice(entMan.SpawnEntity("WFBaggieCocaine", map.GridCoords));
                 var cut = pricing.GetPrice(entMan.SpawnEntity("WFBaggieCocaineCut", map.GridCoords));
                 Assert.That(full, Is.GreaterThan(0));
-                Assert.That(cut, Is.EqualTo(full * 0.55).Within(1), "Cut stock sells at its grade.");
+                Assert.That(cut, Is.EqualTo(full * 0.55 * 0.55).Within(1), "Cut stock sells at its grade squared.");
             });
         });
 
