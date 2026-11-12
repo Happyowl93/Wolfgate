@@ -22,8 +22,8 @@
   - type: SolutionContainerVisuals
     maxFillLevels: 3
     fillBaseName: fill-
-    inHandsMaxFillLevels: 4
-    inHandsFillBaseName: -fill-
+    # The sprite has no in-hand fill states.
+    inHandsMaxFillLevels: 0
   - type: SolutionContainerManager
     solutions:
       beaker:
