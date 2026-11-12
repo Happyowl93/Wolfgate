@@ -248,6 +248,12 @@ namespace Content.Server.Body.Systems
                         reagents++;
                     // End Frontier
                 }
+                // WOLFGATE(Narcotics) START: a tick that only carries a slow rate over still takes a slot
+                else if (WFTakeCarried() && !proto.Metabolisms.ContainsKey("Cryogenic"))
+                {
+                    reagents++;
+                }
+                // WOLFGATE END
             }
 
             _solutionContainerSystem.UpdateChemicals(soln.Value);

@@ -7,6 +7,8 @@
   category: Physical
   cost: -3
   traitGear: WFBaggieCocaineCut
+  biotypeBlacklist:
+  - Synthetic
   components:
   - type: WFDependentStimulant
 
@@ -17,6 +19,8 @@
   category: Physical
   cost: -3
   traitGear: WFBaggieHeroinCut
+  biotypeBlacklist:
+  - Synthetic
   components:
   - type: WFDependentOpioid
 

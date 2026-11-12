@@ -1,6 +1,7 @@
 using Content.Server._WF.Lattice;
 using Content.Shared._WF.Narcotics;
 using Content.Shared.EntityEffects;
+using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
 using Content.Shared.StatusEffect;
 using Robust.Server.Player;
@@ -22,6 +23,7 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
     [Dependency] private StatusEffectsSystem _status = default!;
     [Dependency] private WFDriftEffectsSystem _drift = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
+    [Dependency] private MobStateSystem _mobState = default!;
 
     /// <summary>Seconds between ticks.</summary>
     public const float TickSeconds = 1f;
@@ -58,6 +60,8 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
         var (uid, comp) = ent;
         var speedBefore = GetSpeed(comp);
         var args = new EntityEffectBaseArgs(uid, EntityManager);
+        // A corpse's levels and crashes still run down, but nothing acts on it.
+        var alive = !_mobState.IsDead(uid);
 
         var blood = ReadBlood(uid);
         _profiles.Clear();
@@ -106,8 +110,11 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
             if (tier >= 0)
             {
                 comp.TimeAbove[profile] = comp.TimeAbove.GetValueOrDefault(profile) + seconds;
-                Apply(uid, args, proto.Tiers[tier].Effects, proto.Tiers[tier].StatusEffects);
-                Hallucinate(uid, proto.Tiers[tier]);
+                if (alive)
+                {
+                    Apply(uid, args, proto.Tiers[tier].Effects, proto.Tiers[tier].StatusEffects);
+                    Hallucinate(uid, proto.Tiers[tier]);
+                }
             }
             else if (comp.TimeAbove.Remove(profile, out var above) && proto.Crash is { } crash && above >= crash.After)
             {
@@ -137,10 +144,11 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
             }
 
             comp.Crashes[profile] = left;
-            Apply(uid, args, proto.Crash.Effects, proto.Crash.StatusEffects);
+            if (alive)
+                Apply(uid, args, proto.Crash.Effects, proto.Crash.StatusEffects);
         }
 
-        UpdateTraits(ent, seconds);
+        UpdateTraits(ent, seconds, alive);
 
         if (!MathHelper.CloseTo(GetSpeed(comp), speedBefore))
             Movement.RefreshMovementSpeedModifiers(uid);

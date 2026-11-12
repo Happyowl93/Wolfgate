@@ -49,7 +49,7 @@ public sealed partial class WFIntoxicationSystem
         SubscribeLocalEvent<WFIntoxicationComponent, KnockedDownEvent>((EntityUid uid, WFIntoxicationComponent _, ref KnockedDownEvent _) => ResistStun(uid, "KnockedDown"));
     }
 
-    private void UpdateTraits(Entity<WFIntoxicationComponent> ent, float seconds)
+    private void UpdateTraits(Entity<WFIntoxicationComponent> ent, float seconds, bool alive)
     {
         var (uid, comp) = ent;
         _activeTraits.Clear();
@@ -68,7 +68,7 @@ public sealed partial class WFIntoxicationSystem
                 combat++;
         }
 
-        if (combat > 1)
+        if (combat > 1 && alive)
         {
             var strain = new WFStrainHeartEvent(FixedPoint2.New(CombatStackStrain * (combat - 1) * seconds));
             RaiseLocalEvent(uid, ref strain);

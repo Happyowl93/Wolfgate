@@ -17,6 +17,10 @@ public sealed partial class WFDose : EntityEffect
     [DataField]
     public float PerUnit = 1f;
 
+    /// <summary>On a reagent, counts towards dependence without raising the level, for medicines that give no high.</summary>
+    [DataField]
+    public bool DependenceOnly;
+
     protected override string? ReagentEffectGuidebookText(IPrototypeManager prototype, IEntitySystemManager entSys)
         => Loc.GetString("reagent-effect-guidebook-wf-dose", ("chance", Probability));
 

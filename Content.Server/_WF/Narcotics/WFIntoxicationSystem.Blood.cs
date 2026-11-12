@@ -48,7 +48,7 @@ public sealed partial class WFIntoxicationSystem
             {
                 foreach (var effect in entry.Effects)
                 {
-                    if (effect is not WFDose dose)
+                    if (effect is not WFDose { DependenceOnly: false } dose)
                         continue;
 
                     if (!_bloodDrugs.TryGetValue(reagent.ID, out var doses))

@@ -11,6 +11,8 @@ using Content.Shared.Damage;
 using Content.Shared.Traits.Assorted;
 using Content.Shared.EntityEffects;
 using Content.Shared.FixedPoint;
+using Content.Shared.Mobs;
+using Content.Shared.Mobs.Systems;
 using Content.Shared.Movement.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
@@ -85,6 +87,20 @@ public sealed class IntoxicationTest
       - !type:WFDose
         profile: WFIntoxTestBlood
         perUnit: 1
+
+- type: reagent
+  id: WFIntoxTestMedicine
+  name: reagent-name-nothing
+  desc: reagent-desc-nothing
+  physicalDesc: reagent-physical-desc-nothing
+  metabolisms:
+    Narcotic:
+      metabolismRate: 0.01
+      effects:
+      - !type:WFDose
+        profile: WFIntoxTestBlood
+        perUnit: 1
+        dependenceOnly: true
 
 - type: wfDrugProfile
   id: WFIntoxTestRush
@@ -469,6 +485,45 @@ public sealed class IntoxicationTest
             sys.AddLevel(mob, Profile, 4f);
             entMan.RemoveComponent<WFIntoxicationComponent>(mob);
             Assert.That(speed.WalkSpeedModifier, Is.EqualTo(1f).Within(0.001f), "And losing the component.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>A dependence-only dose in the blood gives no level, and a corpse takes no tier effects.</summary>
+    [Test]
+    public async Task MedicineAndCorpseTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+
+        await server.WaitAssertion(() =>
+        {
+            var sys = server.System<WFIntoxicationSystem>();
+
+            var patient = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            var dose = new Solution();
+            dose.AddReagent("WFIntoxTestMedicine", FixedPoint2.New(6));
+            Assert.That(server.System<BloodstreamSystem>().TryAddToChemicals(patient, dose), Is.True);
+            var patientComp = entMan.EnsureComponent<WFIntoxicationComponent>(patient);
+            sys.Tick(0f);
+            Assert.That(patientComp.Levels, Is.Empty, "A dependence-only dose raises no level.");
+
+            var corpse = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            sys.AddLevel(corpse, Profile, 20f);
+            var comp = entMan.GetComponent<WFIntoxicationComponent>(corpse);
+            Assert.That(sys.GetTier(comp, Profile), Is.EqualTo(1));
+            server.System<MobStateSystem>().ChangeMobState(corpse, MobState.Dead);
+            var before = entMan.GetComponent<DamageableComponent>(corpse).Damage.DamageDict.GetValueOrDefault("Poison");
+            sys.Tick(1f);
+            var after = entMan.GetComponent<DamageableComponent>(corpse).Damage.DamageDict.GetValueOrDefault("Poison");
+            Assert.Multiple(() =>
+            {
+                Assert.That(after, Is.EqualTo(before), "Tier effects skip a corpse.");
+                Assert.That(comp.Levels[Profile], Is.EqualTo(19f).Within(0.001f), "Its level still decays.");
+            });
         });
 
         await pair.CleanReturnAsync();

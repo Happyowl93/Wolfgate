@@ -42,6 +42,7 @@
       - !type:WFDose
         profile: WFOpium
         perUnit: 0.5
+        dependenceOnly: true
       # Strong: enough to walk a patient off the field, at the price of the sedation meter. M2 (plan §3.4):
       # sedation aims for 0.22 per unit in the blood, so one 3 u pen levels off under the 0.6 breathing line and
       # two put the patient on the floor.

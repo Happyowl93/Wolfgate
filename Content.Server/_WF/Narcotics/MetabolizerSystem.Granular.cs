@@ -5,6 +5,8 @@ namespace Content.Server.Body.Systems;
 
 public sealed partial class MetabolizerSystem
 {
+    private bool _wfCarried;
+
     /// <summary>
     /// The amount of a reagent to remove this tick at a rate times an organ's modifier, worked out in
     /// ten-thousandths of a unit. What doesn't make a whole hundredth is carried on the organ to the next tick.
@@ -13,6 +15,7 @@ public sealed partial class MetabolizerSystem
     private FixedPoint2 WFGranularRate(EntityUid organ, string reagent, string group, FixedPoint2 rate,
         FixedPoint2 modifier, FixedPoint2 quantity, out float scale)
     {
+        _wfCarried = false;
         var product = (long) rate.Value * modifier.Value;
         if (product <= 0 || quantity <= FixedPoint2.Zero)
         {
@@ -34,6 +37,18 @@ public sealed partial class MetabolizerSystem
         }
 
         carry.Owed[key] = (int) (owed % 100);
+        _wfCarried = owed < 100;
         return FixedPoint2.FromCents((int) (owed / 100));
+    }
+
+    /// <summary>
+    /// True once after a <see cref="WFGranularRate"/> call that removed nothing and only carried its rate over, so the
+    /// reagent still counts towards the organ's limit on that tick.
+    /// </summary>
+    private bool WFTakeCarried()
+    {
+        var carried = _wfCarried;
+        _wfCarried = false;
+        return carried;
     }
 }
