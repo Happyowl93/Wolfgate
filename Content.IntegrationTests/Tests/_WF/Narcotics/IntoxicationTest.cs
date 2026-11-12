@@ -55,10 +55,9 @@ public sealed class IntoxicationTest
     traits: [ Damper, HideDamage ]
 
 - type: wfDrugProfile
-  id: WFIntoxTestHalfLife
+  id: WFIntoxTestPhases
   family: Opioid
-  decay: 0
-  halfLife: 10
+  decay: 0.5
   tiers:
   - min: 2
   - min: 5
@@ -86,7 +85,6 @@ public sealed class IntoxicationTest
       - !type:WFDose
         profile: WFIntoxTestBlood
         perUnit: 1
-        inBlood: true
 
 - type: wfDrugProfile
   id: WFIntoxTestRush
@@ -111,7 +109,6 @@ public sealed class IntoxicationTest
       - !type:WFDose
         profile: WFIntoxTestRush
         perUnit: 1
-        inBlood: true
 
 - type: reagent
   id: WFIntoxTestReagent
@@ -184,15 +181,15 @@ public sealed class IntoxicationTest
         await pair.CleanReturnAsync();
     }
 
-    /// <summary>A half-life halves the level, and the phase moves from overdose through heavy to light.</summary>
+    /// <summary>The phase moves from overdose through heavy to light as the level decays.</summary>
     [Test]
-    public async Task HalfLifePhaseTest()
+    public async Task PhaseTest()
     {
         await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
         var map = await pair.CreateTestMap();
         var entMan = server.EntMan;
-        const string profile = "WFIntoxTestHalfLife";
+        const string profile = "WFIntoxTestPhases";
 
         await server.WaitAssertion(() =>
         {
@@ -216,18 +213,18 @@ public sealed class IntoxicationTest
             sys.Tick(10f);
             Assert.Multiple(() =>
             {
-                Assert.That(comp.Levels[profile], Is.EqualTo(6f).Within(0.001f), "One half-life halves the level.");
+                Assert.That(comp.Levels[profile], Is.EqualTo(7f).Within(0.001f));
                 Assert.That(comp.Phases[profile], Is.EqualTo(WFDrugPhase.Heavy));
             });
 
-            sys.Tick(10f);
+            sys.Tick(6f);
             Assert.Multiple(() =>
             {
-                Assert.That(comp.Levels[profile], Is.EqualTo(3f).Within(0.001f));
+                Assert.That(comp.Levels[profile], Is.EqualTo(4f).Within(0.001f));
                 Assert.That(comp.Phases[profile], Is.EqualTo(WFDrugPhase.Light));
             });
 
-            sys.Tick(10f);
+            sys.Tick(6f);
             Assert.That(comp.Phases.ContainsKey(profile), Is.False, "Below the first tier there is no phase.");
         });
 
@@ -430,7 +427,8 @@ public sealed class IntoxicationTest
             var organic = entMan.SpawnEntity("MobHuman", map.GridCoords);
             Assert.That(sys.IsNeurowareHost(organic), Is.False);
             Dose(organic, 0.5f);
-            Assert.That(sys.GetLevel(organic, Profile), Is.EqualTo(2f).Within(0.001f), "4 u at 50% is 2 effective units.");
+            Assert.That(entMan.HasComponent<WFIntoxicationComponent>(organic), Is.True, "A metabolised dose starts tracking the body.");
+            Assert.That(sys.GetLevel(organic, Profile), Is.EqualTo(0f), "The level comes from the blood, not from the dose.");
 
             var host = entMan.SpawnEntity("MobHuman", map.GridCoords);
             var brain = body.GetBodyOrganEntityComps<BrainComponent>(host);
@@ -438,7 +436,84 @@ public sealed class IntoxicationTest
             entMan.AddComponent<WFNeurowareHostComponent>(brain[0].Owner);
             Assert.That(sys.IsNeurowareHost(host), Is.True, "A body with a host brain is a host.");
             Dose(host, 1f);
-            Assert.That(sys.GetLevel(host, Profile), Is.EqualTo(0f), "Chemical doses don't register on a host.");
+            Assert.That(entMan.HasComponent<WFIntoxicationComponent>(host), Is.False, "Chemical doses don't register on a host.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>An antagonist or a reboot that drops a level drops its speed with it.</summary>
+    [Test]
+    public async Task SpeedRefreshTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+
+        await server.WaitAssertion(() =>
+        {
+            var sys = server.System<WFIntoxicationSystem>();
+            var mob = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            var speed = entMan.GetComponent<MovementSpeedModifierComponent>(mob);
+
+            sys.AddLevel(mob, Profile, 4f);
+            Assert.That(speed.WalkSpeedModifier, Is.EqualTo(1.2f).Within(0.001f));
+            sys.ClearLevels(mob);
+            Assert.That(speed.WalkSpeedModifier, Is.EqualTo(1f).Within(0.001f), "Clearing the levels ends the speed at once.");
+
+            sys.AddLevel(mob, Profile, 4f);
+            sys.ReduceFamily(mob, WFDrugFamily.Stimulant, 4f);
+            Assert.That(speed.WalkSpeedModifier, Is.EqualTo(1f).Within(0.001f), "So does an antagonist.");
+
+            sys.AddLevel(mob, Profile, 4f);
+            entMan.RemoveComponent<WFIntoxicationComponent>(mob);
+            Assert.That(speed.WalkSpeedModifier, Is.EqualTo(1f).Within(0.001f), "And losing the component.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>An organ that slows a 0.01 u rate below a hundredth a tick still clears the reagent, at that rate.</summary>
+    [Test]
+    public async Task SlowOrganTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entMan = server.EntMan;
+        const string drug = "WFIntoxTestBloodDrug";
+        EntityUid mob = default;
+
+        await server.WaitAssertion(() =>
+        {
+            mob = entMan.SpawnEntity("MobHuman", map.GridCoords);
+            foreach (var organ in server.System<SharedBodySystem>().GetBodyOrganEntityComps<MetabolizerComponent>(mob))
+            {
+                foreach (var group in organ.Comp1.MetabolismGroups ?? new())
+                {
+                    if (group.Id == "Narcotic")
+                        group.MetabolismRateModifier = FixedPoint2.New(0.2);
+                }
+            }
+
+            var dose = new Solution();
+            dose.AddReagent(drug, FixedPoint2.New(0.1));
+            Assert.That(server.System<BloodstreamSystem>().TryAddToChemicals(mob, dose), Is.True);
+        });
+
+        await pair.RunSeconds(12);
+
+        await server.WaitAssertion(() =>
+        {
+            var solutions = server.System<SharedSolutionContainerSystem>();
+            Assert.That(solutions.TryGetSolution(mob, BloodstreamComponent.DefaultChemicalsSolutionName, out _, out var blood), Is.True);
+            var left = blood!.GetTotalPrototypeQuantity(drug);
+            Assert.Multiple(() =>
+            {
+                Assert.That(left, Is.LessThan(FixedPoint2.New(0.1)), "0.002 u a tick adds up to whole hundredths.");
+                Assert.That(left, Is.GreaterThanOrEqualTo(FixedPoint2.New(0.07)), "It clears no faster than its rate.");
+            });
         });
 
         await pair.CleanReturnAsync();

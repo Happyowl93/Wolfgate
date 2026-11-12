@@ -6,8 +6,8 @@ using Robust.Shared.GameObjects;
 namespace Content.IntegrationTests.Tests._WF.Narcotics;
 
 /// <summary>
-/// Doses build dependence and tolerance, the meter fades while clean, withdrawal starts after going without and a dose
-/// ends it, and the habit traits start the round dependent.
+/// Doses build dependence and tolerance, the meter fades while clean, withdrawal starts after going without and only
+/// a high ends it, and the habit traits start the round dependent.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFDependenceSystem))]
@@ -69,7 +69,16 @@ public sealed class DependenceTest
             Assert.That(dep.Stage[WFDrugFamily.Opioid], Is.EqualTo(3), "A meter of 0.9 is the top stage.");
 
             intox.AddLevel(mob, Profile, 0.5f);
-            Assert.That(dep.Stage[WFDrugFamily.Opioid], Is.EqualTo(0), "A dose ends withdrawal at once.");
+            dependence.Tick(1f);
+            Assert.That(dep.Stage[WFDrugFamily.Opioid], Is.EqualTo(3), "A taste below the first tier doesn't end withdrawal.");
+
+            intox.AddLevel(mob, Profile, 4f);
+            dependence.Tick(1f);
+            Assert.Multiple(() =>
+            {
+                Assert.That(dep.Stage[WFDrugFamily.Opioid], Is.EqualTo(0), "Reaching the first tier does.");
+                Assert.That(dep.Satisfied, Does.Contain(WFDrugFamily.Opioid), "A dependent body that is high is satisfied.");
+            });
         });
 
         await pair.CleanReturnAsync();
@@ -99,7 +108,12 @@ public sealed class DependenceTest
 
             dependence.Tick(100000f);
             Assert.That(dep.Meter[WFDrugFamily.Stimulant], Is.EqualTo(0.55f).Within(0.001f), "A trait keeps the meter at 0.55.");
-            Assert.That(WFDependenceSystem.StageFor(dep.Meter[WFDrugFamily.Stimulant]), Is.EqualTo(1), "A clean trait eases to cravings.");
+            Assert.That(WFDependenceSystem.StageFor(WFDrugFamily.Stimulant, dep.Meter[WFDrugFamily.Stimulant]), Is.EqualTo(1), "A clean trait eases to cravings.");
+            Assert.Multiple(() =>
+            {
+                Assert.That(WFDependenceSystem.StageFor(WFDrugFamily.Stimulant, 0.9f), Is.EqualTo(3));
+                Assert.That(WFDependenceSystem.StageFor(WFDrugFamily.Nicotine, 0.9f), Is.EqualTo(1), "Nicotine stops at cravings.");
+            });
         });
 
         await pair.CleanReturnAsync();

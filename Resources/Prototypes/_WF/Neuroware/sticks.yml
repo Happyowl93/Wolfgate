@@ -1,5 +1,6 @@
-# Neuroware sticks. A blank takes copies; the named ones are pristine builds. A stick's price
-# doesn't follow what is copied onto it, so copying doesn't print money.
+# Neuroware sticks. A blank takes copies; the named ones are pristine builds. Copying leaves the source's loads
+# alone, so a build spreads as far as there are blanks, 15% worse each generation. A stick's price doesn't follow
+# what is copied onto it, so copying doesn't print money.
 
 - type: entity
   parent: BaseItem

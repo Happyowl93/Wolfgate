@@ -67,7 +67,7 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
         return ev.Multiplier;
     }
 
-    /// <summary>Raises a profile's fed level, as a metabolised dose or a neuroware program does.</summary>
+    /// <summary>Raises a profile's fed level, as a neuroware program does.</summary>
     public void AddLevel(EntityUid uid, ProtoId<WFDrugProfilePrototype> profile, float amount)
     {
         if (amount <= 0f || !Proto.TryIndex(profile, out _))
@@ -103,6 +103,7 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
         if (!TryComp<WFIntoxicationComponent>(uid, out var comp))
             return;
 
+        var speed = GetSpeed(comp);
         foreach (var profile in new List<ProtoId<WFDrugProfilePrototype>>(comp.Levels.Keys))
         {
             if (!Proto.TryIndex(profile, out var proto) || proto.Family != family)
@@ -116,6 +117,8 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
         }
 
         Dirty(uid, comp);
+        if (!MathHelper.CloseTo(GetSpeed(comp), speed))
+            Movement.RefreshMovementSpeedModifiers(uid);
     }
 
     /// <summary>Drops every fed level to zero. Crashes still follow on the next tick, as they would when a high ends.</summary>
@@ -124,6 +127,7 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
         if (!TryComp<WFIntoxicationComponent>(uid, out var comp))
             return;
 
+        var speed = GetSpeed(comp);
         foreach (var profile in new List<ProtoId<WFDrugProfilePrototype>>(comp.Levels.Keys))
         {
             comp.Levels[profile] = 0f;
@@ -132,6 +136,8 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
         comp.Fed.Clear();
         comp.Rush.Clear();
         Dirty(uid, comp);
+        if (!MathHelper.CloseTo(GetSpeed(comp), speed))
+            Movement.RefreshMovementSpeedModifiers(uid);
     }
 
     public float GetLevel(EntityUid uid, ProtoId<WFDrugProfilePrototype> profile)

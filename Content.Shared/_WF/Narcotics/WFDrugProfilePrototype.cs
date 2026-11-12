@@ -48,16 +48,9 @@ public sealed partial class WFDrugProfilePrototype : IPrototype
     [DataField(required: true)]
     public WFDrugFamily Family;
 
-    /// <summary>Level lost per second, for level fed directly: a metabolised dose or a neuroware program.</summary>
+    /// <summary>Level lost per second, for level a neuroware program feeds. Level from the blood follows the blood.</summary>
     [DataField]
     public float Decay = 0.1f;
-
-    /// <summary>
-    /// Seconds for fed level to halve, on top of <see cref="Decay"/>, so a bigger dose lasts longer without lasting
-    /// proportionally longer. Zero leaves only the linear decay. Level from the blood follows the blood instead.
-    /// </summary>
-    [DataField]
-    public float HalfLife;
 
     /// <summary>
     /// Seconds for the drug in the blood above the overdose tier to halve, as the body flushes it, so a big overdose

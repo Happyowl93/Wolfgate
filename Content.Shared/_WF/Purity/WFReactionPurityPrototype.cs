@@ -32,11 +32,20 @@ public sealed partial class WFReactionPurityPrototype : IPrototype
     [DataField]
     public float Floor = 0.4f;
 
-    /// <summary>The process factor at a temperature, falling linearly from 1.0 at the optimum to the floor.</summary>
-    public float Factor(float temperature)
+    /// <summary>Most kelvin the optimum moves either way each round.</summary>
+    [DataField]
+    public float Drift;
+
+    /// <summary>
+    /// The process factor at a temperature, falling linearly from 1.0 at the optimum, moved by
+    /// <paramref name="shift"/> kelvin, to the floor.
+    /// </summary>
+    public float Factor(float temperature, float shift = 0f)
     {
         if (OptimalTemp is not { } optimal)
             return 1f;
+
+        optimal += shift;
 
         if (Tolerance <= 0f)
             return MathF.Abs(temperature - optimal) < 0.01f ? 1f : Floor;

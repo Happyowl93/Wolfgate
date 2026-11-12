@@ -28,7 +28,6 @@
       - !type:WFDose
         profile: WFHeroin
         perUnit: 1.5
-        inBlood: true
       # WOLFGATE END
       - !type:MovespeedModifier
         walkSpeedModifier: 0.40

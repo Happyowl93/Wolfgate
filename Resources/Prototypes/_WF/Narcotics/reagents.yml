@@ -1,6 +1,6 @@
 # Street drugs. Each one's high lives in its wfDrugProfile (profiles.yml); the reagent only doses it, so the
 # neuroware twin and the reagent stay identical. Effects that need reagent args, such as sedation, stay here.
-# The dose is inBlood: the high follows the units left in the blood, so metabolismRate sets how long it lasts. At
+# The high follows the units left in the blood, so metabolismRate sets how long it lasts. At
 # 0.01 a 2.5 u line stays about 4 minutes; crack and the combat drugs clear at 0.02.
 # pricePerUnit is street value at full grade; pricing scales it by the grade squared.
 
@@ -19,7 +19,6 @@
       - !type:WFDose
         profile: WFCocaine
         perUnit: 0.2
-        inBlood: true
 
 - type: reagent
   id: WFCocaine
@@ -37,7 +36,6 @@
       - !type:WFDose
         profile: WFCocaine
         perUnit: 1
-        inBlood: true
 
 - type: reagent
   id: WFCrack
@@ -55,7 +53,6 @@
       - !type:WFDose
         profile: WFCrack
         perUnit: 1
-        inBlood: true
 
 - type: reagent
   id: WFOpium
@@ -73,7 +70,6 @@
       - !type:WFDose
         profile: WFOpium
         perUnit: 1
-        inBlood: true
 
 - type: reagent
   id: WFHeroin
@@ -91,7 +87,6 @@
       - !type:WFDose
         profile: WFHeroin
         perUnit: 1
-        inBlood: true
       # Sedation follows the units in the blood, so the overdose is Wolfmed's sedation airloss and Naloxone reverses
       # it. 0.045 a graded, tolerance-blunted unit puts the airloss threshold (0.6) at level 13.3, just under the
       # overdose tier. The relief itself is on the profile.
@@ -125,7 +120,6 @@
       - !type:WFDose
         profile: WFRedline
         perUnit: 1
-        inBlood: true
 
 - type: reagent
   id: WFAnvilBase
@@ -153,7 +147,6 @@
       - !type:WFDose
         profile: WFAnvil
         perUnit: 1
-        inBlood: true
 
 - type: reagent
   id: WFLatticeResidue
@@ -197,7 +190,6 @@
       - !type:WFDose
         profile: WFChorus
         perUnit: 1
-        inBlood: true
 
 - type: reagent
   id: WFHaloBase
@@ -225,4 +217,3 @@
       - !type:WFDose
         profile: WFHalo
         perUnit: 1
-        inBlood: true

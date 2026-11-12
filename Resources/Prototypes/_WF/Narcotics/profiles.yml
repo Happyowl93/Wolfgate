@@ -1,6 +1,6 @@
 # Drug profiles. Level is in effective units (units x grade x perUnit). The first tier is the light phase, the last
 # the overdose, and any between are heavy; the screen look and a popup mark each step.
-# A street drug's level follows the units in the blood (its reagent's WFDose is inBlood), so the reagent's
+# A street drug's level follows the units in the blood (its reagent has a WFDose), so the reagent's
 # metabolismRate sets how long the high lasts, and overdoseHalfLife flushes the blood above the overdose tier faster.
 # Level fed directly, by a neuroware program, decays by decay, which matches the reagent's metabolismRate so the twin
 # lasts as long as the drug.

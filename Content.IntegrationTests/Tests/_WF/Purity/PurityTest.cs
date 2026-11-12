@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Content.Server._WF.Narcotics;
+using Content.Server._WF.Purity;
 using Content.Shared._WF.Purity;
 using Content.Server.Body.Components;
 using Content.Server.Body.Systems;
@@ -161,6 +162,31 @@ public sealed class PurityTest
 
             var floor = Mix(Graded("WFPurityTestC", 0.5f, 500f));
             Assert.That(floor.GetPurity("WFPurityTestTuned"), Is.EqualTo(0.2f).Within(0.01f));
+
+            var reactions = server.System<ChemicalReactionSystem>();
+            reactions.WFOptimumShift["WFPurityTestTunedReaction"] = 50f;
+            var shifted = Mix(Graded("WFPurityTestC", 1f, 350f));
+            reactions.WFOptimumShift.Remove("WFPurityTestTunedReaction");
+            Assert.That(shifted.GetPurity("WFPurityTestTuned"), Is.EqualTo(1f).Within(0.01f),
+                "A round's shift moves the optimum.");
+
+            server.System<WFPurityDriftSystem>().Roll();
+            var purities = server.ProtoMan.EnumeratePrototypes<WFReactionPurityPrototype>();
+            Assert.Multiple(() =>
+            {
+                Assert.That(reactions.WFOptimumShift, Is.Not.Empty, "The street reactions drift.");
+                foreach (var purity in purities)
+                {
+                    var shift = reactions.WFOptimumShift.GetValueOrDefault(purity.ID);
+                    Assert.That(MathF.Abs(shift), Is.LessThanOrEqualTo(purity.Drift), purity.ID);
+                    if (purity.OptimalTemp is not { } optimal || !server.ProtoMan.TryIndex<ReactionPrototype>(purity.ID, out var reaction))
+                        continue;
+
+                    Assert.That(optimal - purity.Drift, Is.GreaterThanOrEqualTo(reaction.MinimumTemperature), $"{purity.ID} can drift below its reaction's range.");
+                    Assert.That(optimal + purity.Drift, Is.LessThanOrEqualTo(reaction.MaximumTemperature), $"{purity.ID} can drift above its reaction's range.");
+                }
+            });
+            reactions.WFOptimumShift.Clear();
 
             var cut = Mix(Graded("WFCocaine", 0.8f), Graded("Flour", 1f));
             Assert.Multiple(() =>

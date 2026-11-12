@@ -2,6 +2,7 @@ wf-withdrawal-stage-1 = You can't stop thinking about { $family }.
 wf-withdrawal-stage-2 = Your hands won't keep still. You need { $family }, badly.
 wf-withdrawal-stage-3 = Everything aches. Without { $family } you're falling apart.
 wf-withdrawal-relief = The craving lets go of you.
+wf-withdrawal-satisfied = That's the { $family } you needed. You feel like yourself again.
 
 wf-withdrawal-craving-stimulant-1 = Just one line would sharpen everything up.
 wf-withdrawal-craving-stimulant-2 = You feel slow, heavy, dull.
@@ -29,6 +30,7 @@ wf-withdrawal-host-stage-1 = HABIT LOOP: process not found ({ $family }).
 wf-withdrawal-host-stage-2 = HABIT LOOP: scheduler stalling without { $family }.
 wf-withdrawal-host-stage-3 = HABIT LOOP: core threads degraded without { $family }.
 wf-withdrawal-host-relief = HABIT LOOP: process resumed.
+wf-withdrawal-host-satisfied = HABIT LOOP: { $family } running. Load nominal.
 
 wf-withdrawal-host-craving-stimulant-1 = SCHEDULER: clock throttled, request Whiteline.
 wf-withdrawal-host-craving-stimulant-2 = PROCESS WATCHDOG: whiteline.d missing.
@@ -57,4 +59,4 @@ trait-wf-dependent-stimulant-desc = You start every shift already hooked on stim
 trait-wf-dependent-opioid-name = Opioid habit
 trait-wf-dependent-opioid-desc = You start every shift already hooked on opioids, with one cut baggie to your name. Go more than a few minutes without and the shakes and exhaustion set in. Stay clean long enough and they ease to cravings, but the habit never fades.
 trait-wf-dependent-nicotine-name = Smoker
-trait-wf-dependent-nicotine-desc = You start every shift craving nicotine. Go too long without a smoke and you get shaky and irritable.
+trait-wf-dependent-nicotine-desc = You start every shift craving nicotine. Go too long without a smoke and the craving nags at you until you finish one.

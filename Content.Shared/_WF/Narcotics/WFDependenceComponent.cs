@@ -18,7 +18,7 @@ public sealed partial class WFDependenceComponent : Component
     [DataField]
     public Dictionary<WFDrugFamily, float> Tolerance = new();
 
-    /// <summary>Seconds since each family was last dosed or above its first tier.</summary>
+    /// <summary>Seconds since each family was last above its first tier.</summary>
     [DataField]
     public Dictionary<WFDrugFamily, float> SinceUse = new();
 
@@ -29,6 +29,10 @@ public sealed partial class WFDependenceComponent : Component
     /// <summary>Seconds until the next craving line per family.</summary>
     [DataField]
     public Dictionary<WFDrugFamily, float> NextCraving = new();
+
+    /// <summary>Families the body depends on and is high on now.</summary>
+    [DataField]
+    public HashSet<WFDrugFamily> Satisfied = new();
 }
 
 /// <summary>

@@ -4,23 +4,18 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._WF.Narcotics;
 
 /// <summary>
-/// Doses a drug profile. With <see cref="InBlood"/>, the level follows the reagent left in the blood, which the
-/// intoxication system reads each tick, and this only counts the metabolised units towards dependence. Without it,
-/// the metabolised units times their grade times <see cref="PerUnit"/> are fed to the level, which then decays on its
-/// own. Does nothing to a body whose brain is non-organic.
+/// Doses a drug profile. On a reagent the level follows the units left in the blood, which the intoxication system
+/// reads each tick, and this only counts the metabolised units towards dependence. Anywhere else it feeds
+/// <see cref="PerUnit"/> to the level. Does nothing to a body whose brain is non-organic.
 /// </summary>
 public sealed partial class WFDose : EntityEffect
 {
     [DataField(required: true)]
     public ProtoId<WFDrugProfilePrototype> Profile;
 
-    /// <summary>Level per effective unit; outside a reagent, the whole amount.</summary>
+    /// <summary>Level per effective unit in the blood; outside a reagent, the whole amount.</summary>
     [DataField]
     public float PerUnit = 1f;
-
-    /// <summary>The level follows the units in the blood, so the high lasts as long as the drug does.</summary>
-    [DataField]
-    public bool InBlood;
 
     protected override string? ReagentEffectGuidebookText(IPrototypeManager prototype, IEntitySystemManager entSys)
         => Loc.GetString("reagent-effect-guidebook-wf-dose", ("chance", Probability));
@@ -31,19 +26,13 @@ public sealed partial class WFDose : EntityEffect
         if (intoxication.IsNeurowareHost(args.TargetEntity))
             return;
 
-        var amount = PerUnit;
-        if (args is EntityEffectReagentArgs reagent)
+        if (args is not EntityEffectReagentArgs reagent)
         {
-            var grade = reagent.Source != null && reagent.Reagent != null ? reagent.Source.GetPurity(reagent.Reagent.ID) : 1f;
-            amount *= reagent.Quantity.Float() * grade;
-
-            if (InBlood)
-            {
-                intoxication.RegisterDose(args.TargetEntity, Profile, amount);
-                return;
-            }
+            intoxication.AddLevel(args.TargetEntity, Profile, PerUnit);
+            return;
         }
 
-        intoxication.AddLevel(args.TargetEntity, Profile, amount);
+        var grade = reagent.Source != null && reagent.Reagent != null ? reagent.Source.GetPurity(reagent.Reagent.ID) : 1f;
+        intoxication.RegisterDose(args.TargetEntity, Profile, PerUnit * reagent.Quantity.Float() * grade);
     }
 }

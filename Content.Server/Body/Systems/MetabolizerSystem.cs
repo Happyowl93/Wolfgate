@@ -188,12 +188,15 @@ namespace Content.Server.Body.Systems
                     if (!proto.Metabolisms.TryGetValue(group.Id, out var entry))
                         continue;
 
-                    var rate = entry.MetabolismRate * group.MetabolismRateModifier;
-
-                    // Remove $rate, as long as there's enough reagent there to actually remove that much
-                    mostToRemove = FixedPoint2.Clamp(rate, 0, quantity);
-
-                    float scale = (float) mostToRemove / (float) rate;
+                    // WOLFGATE(Narcotics) START: a rate below 0.01 u a tick builds up instead of rounding to nothing
+                    // var rate = entry.MetabolismRate * group.MetabolismRateModifier;
+                    //
+                    // // Remove $rate, as long as there's enough reagent there to actually remove that much
+                    // mostToRemove = FixedPoint2.Clamp(rate, 0, quantity);
+                    //
+                    // float scale = (float) mostToRemove / (float) rate;
+                    mostToRemove = WFGranularRate(ent, reagent.Prototype, group.Id, entry.MetabolismRate, group.MetabolismRateModifier, quantity, out var scale);
+                    // WOLFGATE END
                     scale *= solution.GetPurity(reagent.Prototype); // WOLFGATE(Purity): a graded reagent works at its grade
 
                     // if it's possible for them to be dead, and they are,

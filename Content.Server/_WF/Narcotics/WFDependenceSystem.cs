@@ -15,7 +15,7 @@ namespace Content.Server._WF.Narcotics;
 
 /// <summary>
 /// Round-long dependence: doses fill a meter per family, tolerance speeds up the come-down, and a dependent body that
-/// goes without for long enough falls into withdrawal until it doses again. Withdrawal never kills.
+/// goes without for long enough falls into withdrawal until it is high on the family again. Withdrawal never kills.
 /// </summary>
 public sealed class WFDependenceSystem : EntitySystem
 {
@@ -43,11 +43,14 @@ public sealed class WFDependenceSystem : EntitySystem
     /// <summary>Withdrawal needs a meter above this.</summary>
     public const float WithdrawalMeter = 0.5f;
 
-    /// <summary>Seconds without a dose or a high before withdrawal starts.</summary>
+    /// <summary>Seconds below the family's first tier before withdrawal starts.</summary>
     public const float WithdrawalDelay = 300f;
 
     /// <summary>Stamina damage withdrawal keeps a body at, as a share of its crit threshold.</summary>
     public const float StaminaFloor = 0.35f;
+
+    /// <summary>Stamina damage a second a dependent body sheds while its family is high.</summary>
+    public const float SatisfiedStamina = 1f;
 
     private const int CravingLines = 3;
     private const float PainEvery = 10f;
@@ -92,10 +95,6 @@ public sealed class WFDependenceSystem : EntitySystem
         var family = args.Family;
         dep.Meter[family] = Math.Clamp(dep.Meter.GetValueOrDefault(family) + args.DependenceGain, 0f, 1f);
         dep.Tolerance[family] = Math.Clamp(dep.Tolerance.GetValueOrDefault(family) + args.DependenceGain * ToleranceRatio, 0f, 1f);
-        dep.SinceUse[family] = 0f;
-
-        if (dep.Stage.GetValueOrDefault(family) > 0)
-            SetStage(ent, dep, family, 0);
     }
 
     private void OnDecay(Entity<WFDependenceComponent> ent, ref WFDrugDecayEvent args)
@@ -103,10 +102,11 @@ public sealed class WFDependenceSystem : EntitySystem
         args.Multiplier *= 1f + ent.Comp.Tolerance.GetValueOrDefault(args.Family);
     }
 
-    /// <summary>The withdrawal stage a meter gives once withdrawal has started.</summary>
-    public static int StageFor(float meter)
+    /// <summary>The withdrawal stage a meter gives once withdrawal has started. Nicotine stops at cravings.</summary>
+    public static int StageFor(WFDrugFamily family, float meter)
     {
-        return meter >= 0.85f ? 3 : meter >= 0.7f ? 2 : meter > WithdrawalMeter ? 1 : 0;
+        var stage = meter >= 0.85f ? 3 : meter >= 0.7f ? 2 : meter > WithdrawalMeter ? 1 : 0;
+        return family == WFDrugFamily.Nicotine ? Math.Min(stage, 1) : stage;
     }
 
     /// <summary>Advances every dependent body by <paramref name="seconds"/>.</summary>
@@ -149,8 +149,9 @@ public sealed class WFDependenceSystem : EntitySystem
         }
 
         dep.Meter[family] = meter;
+        Satisfy(ent, family, high && meter > WithdrawalMeter, seconds);
 
-        var stage = since >= WithdrawalDelay ? StageFor(meter) : 0;
+        var stage = since >= WithdrawalDelay ? StageFor(family, meter) : 0;
         if (stage != dep.Stage.GetValueOrDefault(family))
             SetStage(ent, dep, family, stage);
 
@@ -164,7 +165,28 @@ public sealed class WFDependenceSystem : EntitySystem
             dep.SinceUse.Remove(family);
             dep.Stage.Remove(family);
             dep.NextCraving.Remove(family);
+            dep.Satisfied.Remove(family);
         }
+    }
+
+    /// <summary>A dependent body that is high on its family sheds stamina damage, and is told so when it starts.</summary>
+    private void Satisfy(Entity<WFDependenceComponent> ent, WFDrugFamily family, bool satisfied, float seconds)
+    {
+        if (!satisfied)
+        {
+            ent.Comp.Satisfied.Remove(family);
+            return;
+        }
+
+        // Coming out of withdrawal has its own line.
+        if (ent.Comp.Satisfied.Add(family) && ent.Comp.Stage.GetValueOrDefault(family) == 0)
+        {
+            _popup.PopupEntity(Loc.GetString(Prefix(ent) + "satisfied", ("family", FamilyName(family))), ent, ent,
+                PopupType.Medium);
+        }
+
+        if (TryComp<StaminaComponent>(ent, out var stamina) && !stamina.Critical && stamina.StaminaDamage > 0f)
+            _stamina.TakeStaminaDamage(ent, -SatisfiedStamina * seconds, stamina, visual: false);
     }
 
     private void SetStage(EntityUid uid, WFDependenceComponent dep, WFDrugFamily family, int stage)
@@ -229,7 +251,7 @@ public sealed class WFDependenceSystem : EntitySystem
         var meter = dep.Meter.GetValueOrDefault(family);
         var floor = dep.Floor.GetValueOrDefault(family);
         var stage = dep.Stage.GetValueOrDefault(family);
-        var withdrawalIn = stage == 0 && StageFor(meter) > 0
+        var withdrawalIn = stage == 0 && StageFor(family, meter) > 0
             ? Math.Max(0f, WithdrawalDelay - dep.SinceUse.GetValueOrDefault(family))
             : -1f;
         var cleanIn = meter <= WithdrawalMeter ? -1f

@@ -9,8 +9,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._WF.Narcotics;
 
 /// <summary>
-/// Level from the blood: a reagent whose <see cref="WFDose"/> is <see cref="WFDose.InBlood"/> gives its profile the
-/// units left in the chemical stream times their grade times its level per unit, so the high lasts as long as the drug.
+/// Level from the blood: a reagent with a <see cref="WFDose"/> gives its profile the units left in the chemical stream times their grade times its level per unit, so the high lasts as long as the drug.
 /// </summary>
 public sealed partial class WFIntoxicationSystem
 {
@@ -49,7 +48,7 @@ public sealed partial class WFIntoxicationSystem
             {
                 foreach (var effect in entry.Effects)
                 {
-                    if (effect is not WFDose { InBlood: true } dose)
+                    if (effect is not WFDose dose)
                         continue;
 
                     if (!_bloodDrugs.TryGetValue(reagent.ID, out var doses))

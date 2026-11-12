@@ -2,10 +2,10 @@
 
 Street drugs and what they do to a body. Each drug doses a `wfDrugProfile` (tiers with speed, traits, popups and an
 overlay, grouped into light, heavy and overdose phases; a crash; neuroware strings). A street drug's level follows the
-units left in the blood (`WFDose` with `inBlood`), so its metabolism rate sets the length of the high, the analyzer
-shows it and purging ends it; the excess above an overdose flushes at `overdoseHalfLife`. Upstream reagents that dose a
+units left in the blood (`WFDose`), so its metabolism rate sets the length of the high, the analyzer
+shows it and purging ends it (rates finer than 0.01 u a tick carry over on the organ, `MetabolizerSystem.Granular.cs`, so a slow organ still clears it); the excess above an overdose flushes at `overdoseHalfLife`. Upstream reagents that dose a
 profile (meth, ephedrine, THC, nicotine, the medical opioids) do the same, with their rates and per-tick effects
-retuned; only neuroware and a `WFDose` without `inBlood` feed the level directly, and that part decays by `decay`,
+retuned; only neuroware feeds the level directly, and that part decays by `decay`,
 set to the drug's metabolism rate so a twin lasts as long. A fresh dose in the blood also gives a rush (`rushGain`),
 a short peak that can reach the heavy tier but never the overdose. `WFIntoxicationSystem` reads the
 blood, ticks the levels, announces phase changes, runs tier effects and crashes, and grants trait components (damage
@@ -16,7 +16,7 @@ overdose one). Other upstream status effects from reagents (rainbows, muting, dr
 `refresh: true` the same way, and `perUnitInBlood` on `GenericStatusEffect` scales the held time by the units left
 where a reagent's old length must stay (mute toxin, chloral hydrate, fentanyl); the recreational ones clear slower
 so they last as long as they used to.
-`WFDependenceSystem` builds a per-family habit with tolerance and withdrawal; a meter above the withdrawal mark
+`WFDependenceSystem` builds a per-family habit with tolerance and withdrawal, which only reaching the family's first tier ends; a meter above the withdrawal mark
 fades at a quarter of the rate, and three traits start a character dependent with a first dose in hand. The client draws one overlay per family and tints incoming chat (`WFDrugChatSystem`) and changes world sounds (`WFDrugAudioSystem`);
 `WFDrugSpeechSystem` rushes stimulant speech and trails opioid speech off, and `WFNodSystem` makes a heavy opioid high
 nod off: the eyes shut and sound muffles for a few seconds while the body stays up and crawls (`WFNodOverlay`). `WFAnalyzerConditionsSystem` fills the health analyzer's
@@ -44,6 +44,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 ### Server
 
 - [`Content.Server/_WF/Narcotics/HealthAnalyzerSystem.Narcotics.cs`](HealthAnalyzerSystem.Narcotics.cs)
+- [`Content.Server/_WF/Narcotics/MetabolizerSystem.Granular.cs`](MetabolizerSystem.Granular.cs)
 - [`Content.Server/_WF/Narcotics/WFAlcoholSystem.cs`](WFAlcoholSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFAnalyzerConditionsSystem.cs`](WFAnalyzerConditionsSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFDeliverySystem.cs`](WFDeliverySystem.cs)
@@ -52,6 +53,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.Blood.cs`](WFIntoxicationSystem.Blood.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.cs`](WFIntoxicationSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.Traits.cs`](WFIntoxicationSystem.Traits.cs)
+- [`Content.Server/_WF/Narcotics/WFMetabolismCarryComponent.cs`](WFMetabolismCarryComponent.cs)
 - [`Content.Server/_WF/Narcotics/WFNodSystem.cs`](WFNodSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFSecondhandSmokeSystem.cs`](WFSecondhandSmokeSystem.cs)
 
@@ -151,6 +153,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 
 - [`Content.Client/UserInterface/Systems/Chat/ChatUIController.cs`](../../../Content.Client/UserInterface/Systems/Chat/ChatUIController.cs): chat seen through the local player's high, before tags split the message text
 - [`Content.IntegrationTests/Pair/TestPair.cs`](../../../Content.IntegrationTests/Pair/TestPair.cs): records radio sends for the sold-alert test
+- [`Content.Server/Body/Systems/MetabolizerSystem.cs`](../../Body/Systems/MetabolizerSystem.cs): a rate below 0.01 u a tick builds up instead of rounding to nothing
 - [`Content.Server/EntityEffects/Effects/Drunk.cs`](../../EntityEffects/Effects/Drunk.cs): drunkenness that follows the reagent in the blood
 - [`Content.Server/EntityEffects/Effects/StatusEffects/GenericStatusEffect.cs`](../../EntityEffects/Effects/StatusEffects/GenericStatusEffect.cs): status time that follows the reagent in the blood
 - [`Content.Server/Medical/HealthAnalyzerSystem.cs`](../../Medical/HealthAnalyzerSystem.cs): drug levels, held effects and dependence

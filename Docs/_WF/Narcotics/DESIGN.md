@@ -104,7 +104,9 @@ Check that `Solution`'s net serialisation carries the new field to clients; the 
   `inputGrade x processFactor`.
 - **Process factor.** A new prototype kind `wfReactionPurity`, keyed by reaction ID, so no upstream reaction
   prototype is edited: `optimalTemp`, `tolerance` (kelvin from optimal at which the factor reaches the floor) and
-  `floor` (default 0.4). The factor falls linearly from 1.0 at the optimum to the floor. A reaction with no entry
+  `floor` (default 0.4). The factor falls linearly from 1.0 at the optimum to the floor. `drift` moves the optimum
+  by up to that many kelvin either way, rolled per reaction at round start, so a cook finds it again with the
+  tester each shift. A reaction with no entry
   has factor 1.0, so existing chemistry passes grades through unchanged.
 - **Botany.** A component `WFProducePurity` on produce sets the grade of its solution from the plant's potency
   (`lerp(0.5, 1.0, potency / 100)`). Opt-in per plant; only the narcotic plants get it at first. **Open:**
@@ -190,8 +192,9 @@ Prototype kind `wfDrugProfile`:
   it, as does heroin's sedation (`WFSedation`), so the pull is toward dosing more.
 - Withdrawal starts when a family's meter is above 0.5 and no profile of that family has been above its first
   tier for 5 minutes. Stages by meter: popups and cravings; then jitter, a stamina cap and pain; `Opioid` and
-  `Stimulant` add vomiting and drowsiness at the top stage. A dose of the family ends it at once. Withdrawal
-  never kills.
+  `Stimulant` add vomiting and drowsiness at the top stage, and `Nicotine` stops at cravings. Only reaching the
+  first tier again ends it, so a taste doesn't, and tolerance raises what it takes. A dependent body that is high
+  on its family sheds 1 stamina damage a second. Withdrawal never kills.
 - Round scope: the components live on the body. Cloning or a new body starts clean. Nothing is written to the
   database.
 - Traits `WFDependentStimulant`, `WFDependentOpioid`, `WFDependentNicotine`: start the round at 0.8 in that family
@@ -345,7 +348,7 @@ the first strains the heart by 0.1 a second.
 - Loading adds a running program to `WFNeurowareComponent` on the body. Each second it adds
   `rate x integrity` to the profile's level until `amount` is delivered. Everything after that is
   `WFIntoxicationSystem`.
-- **Copying.** Using a stick on a blank stick copies it at `integrity x 0.85` and spends one of the source's loads, and the blank shows a strip of tape.
+- **Copying.** Using a stick on a blank stick copies it at `integrity x 0.85` with one load and leaves the source's loads alone, and the blank shows a strip of tape.
   Pristine builds come from dealers, the uplink and rare loot, so a street copy is a few generations down.
 - **Sources.** The Reaver dealer sells blanks and pristine builds, the planet dealer sells street copies, and
   `WFNeurowareStickLoot` (mostly blanks, some copies, rarely a pristine build) rolls in maintenance fluff and

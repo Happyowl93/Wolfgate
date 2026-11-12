@@ -10,7 +10,7 @@ Grades live in a side table on `Solution` (`Solution.Purity`, keyed by reagent p
 which `Solution`'s add, split, transfer and remove methods keep in step. They come from:
 
 - Reactions: the product takes the mean grade of the graded reactants it consumes (standard-grade ones don't raise it) times the reaction's process factor, set by a
-  `wfReactionPurity` prototype keyed by reaction ID (`optimalTemp`, `tolerance`, `floor`). No entry means factor 1.0.
+  `wfReactionPurity` prototype keyed by reaction ID (`optimalTemp`, `tolerance`, `floor`, and `drift`, which `WFPurityDriftSystem` rolls into a per-round shift of the optimum). No entry means factor 1.0.
   A reaction that sets into a solid uses the `WFCreateGradedEntity` effect, which passes the grade to the spawned item.
 - `WFProducePurity` on produce: grades by plant potency, 50% at 0 to 100% at 100.
 - `WFSolutionPurity`: fixed grades at map init, for vendor, dealer and loot stock.
@@ -29,6 +29,7 @@ Design: [`Docs/_WF/Narcotics/DESIGN.md`](../../../Docs/_WF/Narcotics/DESIGN.md).
 - [`Content.Server/_WF/Purity/BotanySystem.Purity.cs`](BotanySystem.Purity.cs)
 - [`Content.Server/_WF/Purity/WFCreateGradedEntity.cs`](WFCreateGradedEntity.cs)
 - [`Content.Server/_WF/Purity/WFProducePurityComponent.cs`](WFProducePurityComponent.cs)
+- [`Content.Server/_WF/Purity/WFPurityDriftSystem.cs`](WFPurityDriftSystem.cs)
 - [`Content.Server/_WF/Purity/WFPuritySystem.cs`](WFPuritySystem.cs)
 - [`Content.Server/_WF/Purity/WFPurityTesterComponent.cs`](WFPurityTesterComponent.cs)
 - [`Content.Server/_WF/Purity/WFPurityTesterSystem.cs`](WFPurityTesterSystem.cs)

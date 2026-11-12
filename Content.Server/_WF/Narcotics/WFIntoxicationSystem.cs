@@ -154,12 +154,9 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
         Dirty(uid, comp);
     }
 
-    /// <summary>The level after <paramref name="seconds"/> of linear decay and half-life.</summary>
+    /// <summary>The fed level after <paramref name="seconds"/> of decay.</summary>
     public static float Decayed(WFDrugProfilePrototype proto, float level, float seconds)
     {
-        if (proto.HalfLife > 0f)
-            level *= MathF.Pow(2f, -seconds / proto.HalfLife);
-
         return Math.Max(0f, level - proto.Decay * seconds);
     }
 

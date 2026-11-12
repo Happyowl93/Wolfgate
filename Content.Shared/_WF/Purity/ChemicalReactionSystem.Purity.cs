@@ -9,6 +9,9 @@ public sealed partial class ChemicalReactionSystem
     /// <summary>The grade of the reaction being performed, for reaction effects that spawn graded solids.</summary>
     public float WFLastReactionGrade { get; private set; } = 1f;
 
+    /// <summary>Kelvin each reaction's optimum is moved by this round, which the server rolls.</summary>
+    public Dictionary<string, float> WFOptimumShift { get; } = new();
+
     /// <summary>
     /// The grade of a reaction's product: the mean grade of the graded reactants it consumes, times the reaction's
     /// process factor at the solution's temperature. Standard-grade reactants don't raise it. A reaction with fillers
@@ -41,7 +44,7 @@ public sealed partial class ChemicalReactionSystem
                 input = weighted / total;
         }
 
-        WFLastReactionGrade = purity != null ? input * purity.Factor(solution.Temperature) : input;
+        WFLastReactionGrade = purity != null ? input * purity.Factor(solution.Temperature, WFOptimumShift.GetValueOrDefault(reaction.ID)) : input;
         return WFLastReactionGrade;
     }
 

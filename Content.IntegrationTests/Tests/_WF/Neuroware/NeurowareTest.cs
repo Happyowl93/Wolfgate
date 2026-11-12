@@ -10,8 +10,8 @@ using Robust.Shared.GameObjects;
 namespace Content.IntegrationTests.Tests._WF.Neuroware;
 
 /// <summary>
-/// A stick loads only into a host and feeds its profile at the stick's integrity, copies lose integrity, and a panel
-/// reboot clears what is running.
+/// A stick loads only into a host and feeds its profile at the stick's integrity, copies lose integrity and leave
+/// their source's loads alone, and a panel reboot clears what is running.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFNeurowareSystem))]
@@ -59,8 +59,9 @@ public sealed class NeurowareTest
             Assert.That(neuro.TryCopy(stick, copy, null), Is.True);
             Assert.That(neuro.TryCopy(copy, copyOfCopy, null), Is.True);
             Assert.That(neuro.TryCopy(stick, copy, null), Is.False, "Only a blank takes a copy.");
-            Assert.That(stick.Comp.Loads, Is.EqualTo(1), "A copy spends a load of its source.");
-            Assert.That(copy.Comp.Loads, Is.EqualTo(0));
+            Assert.That(stick.Comp.Loads, Is.EqualTo(2), "A copy leaves its source's loads alone.");
+            Assert.That(copy.Comp.Loads, Is.EqualTo(1));
+            copy.Comp.Loads = 0;
             Assert.That(neuro.TryCopy(copy, Stick("WFNeurowareStick"), null), Is.False, "A spent stick has nothing to copy.");
             Assert.Multiple(() =>
             {

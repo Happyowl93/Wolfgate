@@ -18,6 +18,7 @@
   id: WFCocaine
   optimalTemp: 330
   tolerance: 40
+  drift: 8
 
 # Cooked cocaine sets into rocks, one per 5 u.
 - type: reaction
@@ -38,6 +39,7 @@
   id: WFCrackRock
   optimalTemp: 385
   tolerance: 30
+  drift: 8
 
 - type: reaction
   id: WFHeroin
@@ -56,6 +58,7 @@
   id: WFHeroin
   optimalTemp: 350
   tolerance: 30
+  drift: 8
 
 # Chilled opium sets into resin, one lump per 5 u, once water touches it. The water is a catalyst, so it can go in
 # last at the right temperature and doesn't count towards the grade.
@@ -76,6 +79,7 @@
   id: WFOpiumResin
   optimalTemp: 250
   tolerance: 30
+  drift: 8
 
 # Chilled Desoxyephedrine sets into crystal shards, one per 5 u, once acetone touches it. The acetone is a catalyst,
 # like the water for resin.
@@ -96,6 +100,7 @@
   id: WFCrystalShard
   optimalTemp: 220
   tolerance: 25
+  drift: 8
 
 - type: reaction
   id: WFRedlineBase
@@ -114,6 +119,7 @@
   id: WFRedlineBase
   optimalTemp: 360
   tolerance: 25
+  drift: 8
 
 - type: reaction
   id: WFRedline
@@ -131,6 +137,7 @@
   id: WFRedline
   optimalTemp: 300
   tolerance: 20
+  drift: 8
 
 - type: reaction
   id: WFAnvilBase
@@ -149,6 +156,7 @@
   id: WFAnvilBase
   optimalTemp: 340
   tolerance: 25
+  drift: 8
 
 - type: reaction
   id: WFAnvil
@@ -166,6 +174,7 @@
   id: WFAnvil
   optimalTemp: 290
   tolerance: 20
+  drift: 8
 
 - type: reaction
   id: WFHaloBase
@@ -184,6 +193,7 @@
   id: WFHaloBase
   optimalTemp: 310
   tolerance: 30
+  drift: 8
 
 - type: reaction
   id: WFHalo
@@ -201,6 +211,7 @@
   id: WFHalo
   optimalTemp: 340
   tolerance: 20
+  drift: 8
 
 # Chorus needs ground exotic matter, so it comes from past the Lattice's hold.
 - type: reaction
@@ -220,6 +231,7 @@
   id: WFChorusBase
   optimalTemp: 270
   tolerance: 25
+  drift: 8
 
 - type: reaction
   id: WFChorus
@@ -237,6 +249,7 @@
   id: WFChorus
   optimalTemp: 310
   tolerance: 20
+  drift: 8
 
 # Cutting: flour stretches a powder a unit for a unit, and the grade drops to match, so the batch holds the same drug
 # in more doses. Only a tester, an analyzer or the buyer's nose tells.

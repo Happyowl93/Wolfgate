@@ -51,7 +51,6 @@
       - !type:WFDose
         profile: WFCrystal
         perUnit: 1
-        inBlood: true
       # WOLFGATE END
       - !type:MovespeedModifier
         walkSpeedModifier: 1.25
@@ -141,7 +140,6 @@
       - !type:WFDose
         profile: WFCrystal
         perUnit: 0.25
-        inBlood: true
       # WOLFGATE END
       - !type:HealthChange
         conditions:
@@ -329,7 +327,6 @@
       - !type:WFDose
         profile: WFCannabis
         perUnit: 1
-        inBlood: true
       # WOLFGATE END
       - !type:HealthChange
         conditions:
@@ -369,7 +366,6 @@
       - !type:WFDose
         profile: WFNicotine
         perUnit: 1
-        inBlood: true
       # WOLFGATE END
       - !type:HealthChange
         conditions:

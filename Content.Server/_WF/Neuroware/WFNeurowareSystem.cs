@@ -217,7 +217,10 @@ public sealed class WFNeurowareSystem : EntitySystem
         return true;
     }
 
-    /// <summary>Copies a program onto a blank stick at <see cref="CopyIntegrity"/> of the source's integrity.</summary>
+    /// <summary>
+    /// Copies a program onto a blank stick at <see cref="CopyIntegrity"/> of the source's integrity. The source keeps
+    /// its loads, so the blanks and the loss per generation are what limit copies.
+    /// </summary>
     public bool TryCopy(Entity<WFNeurowareStickComponent> source, Entity<WFNeurowareStickComponent> blank, EntityUid? user)
     {
         if (source.Comp.Profile == null || blank.Comp.Profile != null)
@@ -234,7 +237,6 @@ public sealed class WFNeurowareSystem : EntitySystem
             return false;
         }
 
-        source.Comp.Loads--;
         blank.Comp.Profile = source.Comp.Profile;
         blank.Comp.Integrity = source.Comp.Integrity * CopyIntegrity;
         blank.Comp.Amount = source.Comp.Amount;

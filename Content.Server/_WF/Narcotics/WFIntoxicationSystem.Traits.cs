@@ -139,6 +139,10 @@ public sealed partial class WFIntoxicationSystem
         }
 
         ent.Comp.Granted.Clear();
+        ent.Comp.Levels.Clear();
+        ent.Comp.Crashes.Clear();
+        ent.Comp.NodEnd = default;
+        Movement.RefreshMovementSpeedModifiers(ent);
     }
 
     private void OnDamageModify(Entity<WFIntoxicationComponent> ent, ref DamageModifyEvent args)
