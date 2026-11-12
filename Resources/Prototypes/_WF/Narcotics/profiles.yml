@@ -153,9 +153,6 @@
   - min: 10
     speed: 0.9
     overlay: 0.6
-    statusEffects:
-    - key: Drowsiness
-      component: Drowsiness
     effects:
     - !type:WolfmedPainRelief
       tier: Weak
@@ -186,7 +183,7 @@
     faults: [ wf-neuroware-null-loop-fault-1, wf-neuroware-null-loop-fault-2 ]
 
 # Heroin: the hard downer. Its sedation sits on the reagent, since it follows the units in the blood; the relief and
-# the nod are on the profile, so they last the whole high.
+# the nod are on the profile, so they last the whole high. Only the overdose puts you to sleep.
 - type: wfDrugProfile
   id: WFHeroin
   family: Opioid
@@ -209,19 +206,11 @@
   - min: 8
     speed: 0.75
     overlay: 0.75
-    statusEffects:
-    - key: Drowsiness
-      component: Drowsiness
     effects:
     - !type:WolfmedPainRelief
       tier: Strong
       strength: 70
       identifier: WFHeroinHigh
-    - !type:GenericStatusEffect
-      probability: 0.05
-      key: ForcedSleep
-      component: ForcedSleeping
-      time: 3
   - min: 14
     speed: 0.7
     overlay: 1
