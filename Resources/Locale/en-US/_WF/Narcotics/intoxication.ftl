@@ -29,3 +29,10 @@ wf-drug-phase-heavy = It hits hard. You're well under now.
 wf-drug-phase-overdose = Too much. Something is badly wrong with you.
 wf-drug-phase-easing = The worst of it eases off.
 wf-drug-phase-fading = You're coming down.
+
+wf-nod-wake-1 = You jerk awake.
+wf-nod-wake-2 = Your head snaps back up. How long were you out?
+wf-nod-wake-3 = You blink hard. The world swims back.
+wf-nod-emote-1 = nods off for a moment.
+wf-nod-emote-2 = sways, eyes drooping shut.
+wf-nod-emote-3 = drifts off mid-thought, then catches themselves.

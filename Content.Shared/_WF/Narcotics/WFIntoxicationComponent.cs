@@ -1,5 +1,6 @@
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 
 namespace Content.Shared._WF.Narcotics;
 
@@ -39,4 +40,16 @@ public sealed partial class WFIntoxicationComponent : Component
     /// <summary>Tier traits whose components this component added, so it removes only those.</summary>
     [DataField]
     public HashSet<WFDrugTrait> Granted = new();
+
+    /// <summary>When the current opioid nod began; zero while awake.</summary>
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoNetworkedField]
+    public TimeSpan NodStart;
+
+    /// <summary>When the current nod ends; zero while awake.</summary>
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoNetworkedField]
+    public TimeSpan NodEnd;
+
+    /// <summary>When the next nod comes; zero while none is due.</summary>
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
+    public TimeSpan NextNod;
 }

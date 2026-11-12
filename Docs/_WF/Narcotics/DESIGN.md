@@ -211,6 +211,15 @@ Start from existing shaders rather than writing each look from nothing.
 
 A body whose brain is a neuroware host gets none of these; see Neuroware.
 
+### Nodding off
+
+A heavy opioid high nods every 30 to 90 s for 1.5 to 3 s, an overdose every 15 to 30 s for 2.5 to 4 s
+(`WFNodSystem`). The body stays standing and conscious and can still act, but moves at x0.2. The networked
+`NodStart`/`NodEnd` on the intoxication component drive the client: `WFNodOverlay` closes soft-edged lids over the
+view in 0.6 s and opens them at the end, and `WFDrugAudioSystem` occludes world sounds by up to 7. A third of nods
+show to others as an emote, and waking pops a line to the player. Nobody asleep, dead or running neuroware nods. The
+overdose keeps its real forced sleep on top.
+
 ### Chat and speech
 
 - **Reading** (`WFDrugChatSystem`, client). Incoming speech, radio and emotes are rewritten on the high player's
@@ -260,7 +269,7 @@ ends, every changed sound gets its own pitch back and loses the reverb; area ech
 | `WFCocaine` | Cocaine | Stimulant | Social | Speed x1.1, faster stamina recovery, light pain suppression, talkative popups. Short | Jitter and anxiety at the high tier; a crash of drowsiness and slowed stamina. Overdose: heart strain (`WFStrainHeart`), Asphyxiation | Snorted |
 | `WFCrack` | Crack | Stimulant | Cheap, fast | Cocaine's high, stronger and a third as long | Triple `dependenceGain`; harsher crash | Smoked |
 | `WFOpium` | Opium | Opioid | Social downer | Moderate pain relief, calm | Drowsiness | Smoked |
-| `WFHeroin` | Heroin | Opioid | Hard downer | Strong pain relief through `WolfmedPainRelief`, euphoria | Slow movement; nodding off (brief forced sleep) only in an overdose. Overdose is Wolfmed's sedation airloss through `WFSedation`, graded and blunted by tolerance. Naloxone reverses it | Injected, smoked |
+| `WFHeroin` | Heroin | Opioid | Hard downer | Strong pain relief through `WolfmedPainRelief`, euphoria | Slow movement; nodding off (eyes shut, still standing) when heavy, and brief forced sleep in an overdose. Overdose is Wolfmed's sedation airloss through `WFSedation`, graded and blunted by tolerance. Naloxone reverses it | Injected, smoked |
 | Desoxyephedrine (existing) | Crystal | Stimulant | Combat stimulant | Unchanged effects; gains `WFDose` for dependence and the overlay | Unchanged Poison; adds a long crash | Smoked as crystal, or as today |
 | `WFRedline` | Redline | Combat | Offence | Speed x1.3, stun and knockdown resistance, no slowdown from damage, pain immunity | Heart damage every tick; can't sprint-stop cleanly (jitter); when it ends, a 60 s collapse at speed x0.5 with a stamina cap. Overdose: cardiac arrest | Injected |
 | `WFAnvil` | Anvil | Combat | Endurance | Incoming Brute and Burn reduced 30%, pain immunity, stamina-crit resistance | Speed x0.85; the user's own damage readout is hidden while high; damage avoided is repaid at 40% as Poison over the crash. Overdose: organ damage | Injected |

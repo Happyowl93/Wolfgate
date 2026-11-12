@@ -1,5 +1,7 @@
 using Content.Shared._WF.Narcotics;
 using Robust.Client.Graphics;
+using Robust.Client.Player;
+using Robust.Shared.Timing;
 
 namespace Content.Client._WF.Narcotics;
 
@@ -10,14 +12,22 @@ namespace Content.Client._WF.Narcotics;
 public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
 {
     [Dependency] private IOverlayManager _overlays = default!;
+    [Dependency] private IPlayerManager _player = default!;
+    [Dependency] private IGameTiming _timing = default!;
+
+    /// <summary>Seconds a nod takes to shut the eyes.</summary>
+    private const float NodCloseSeconds = 0.6f;
 
     private WFIntoxicationOverlay _overlay = default!;
+    private WFNodOverlay _nodOverlay = default!;
 
     public override void Initialize()
     {
         base.Initialize();
         _overlay = new WFIntoxicationOverlay(this);
         _overlays.AddOverlay(_overlay);
+        _nodOverlay = new WFNodOverlay(this);
+        _overlays.AddOverlay(_nodOverlay);
         SubscribeLocalEvent<WFIntoxicationComponent, AfterAutoHandleStateEvent>(OnState);
         SubscribeLocalEvent<WFIntoxicationComponent, ComponentRemove>(OnRemove);
     }
@@ -26,6 +36,18 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
     {
         base.Shutdown();
         _overlays.RemoveOverlay(_overlay);
+        _overlays.RemoveOverlay(_nodOverlay);
+    }
+
+    /// <summary>How far a nod has shut the local player's eyes: 0 awake, 1 shut.</summary>
+    public float NodClosure()
+    {
+        if (_player.LocalEntity is not { } local
+            || !TryComp<WFIntoxicationComponent>(local, out var comp)
+            || !IsNodding(comp))
+            return 0f;
+
+        return Math.Clamp((float) (_timing.CurTime - comp.NodStart).TotalSeconds / NodCloseSeconds, 0f, 1f);
     }
 
     /// <summary>How far past its start the overdose tier ramps to full strength, as a share of its start level.</summary>

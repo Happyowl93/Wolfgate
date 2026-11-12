@@ -2,6 +2,7 @@ using Content.Shared.Body.Components;
 using Content.Shared.Body.Systems;
 using Content.Shared.Movement.Systems;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Shared._WF.Narcotics;
 
@@ -13,6 +14,10 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
     [Dependency] protected IPrototypeManager Proto = default!;
     [Dependency] private SharedBodySystem _body = default!;
     [Dependency] protected MovementSpeedModifierSystem Movement = default!;
+    [Dependency] private IGameTiming _gameTiming = default!;
+
+    /// <summary>Speed while nodding: a drift, not a fall.</summary>
+    public const float NodSpeed = 0.2f;
 
     public override void Initialize()
     {
@@ -23,8 +28,17 @@ public abstract class SharedWFIntoxicationSystem : EntitySystem
     private void OnRefreshSpeed(Entity<WFIntoxicationComponent> ent, ref RefreshMovementSpeedModifiersEvent args)
     {
         var speed = GetSpeed(ent.Comp);
+        if (IsNodding(ent.Comp))
+            speed *= NodSpeed;
+
         if (!MathHelper.CloseTo(speed, 1f))
             args.ModifySpeed(speed, speed);
+    }
+
+    /// <summary>Whether the body is in an opioid nod: eyes shut, still standing.</summary>
+    public bool IsNodding(WFIntoxicationComponent comp)
+    {
+        return comp.NodEnd > _gameTiming.CurTime;
     }
 
     /// <summary>True when the body's brain is non-organic, so chemical doses don't register and neuroware loads.</summary>

@@ -16,7 +16,8 @@ where a reagent's old length must stay (mute toxin, chloral hydrate, fentanyl); 
 so they last as long as they used to.
 `WFDependenceSystem` builds a per-family habit with tolerance and withdrawal; three traits start a character
 dependent. The client draws one overlay per family and tints incoming chat (`WFDrugChatSystem`) and changes world sounds (`WFDrugAudioSystem`);
-`WFDrugSpeechSystem` rushes stimulant speech and trails opioid speech off. `WFAnalyzerConditionsSystem` fills the health analyzer's
+`WFDrugSpeechSystem` rushes stimulant speech and trails opioid speech off, and `WFNodSystem` makes a heavy opioid high
+nod off: the eyes shut and sound muffles for a few seconds while the body stays up and crawls (`WFNodOverlay`). `WFAnalyzerConditionsSystem` fills the health analyzer's
 Conditions tab: each drug level, held status effect, crash and habit, with the reagents behind it, their clearance
 time from the organs' rates, the reagents that remove them (`AdjustReagent`) and family antidotes
 (`WFClearIntoxication`).
@@ -49,6 +50,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.Blood.cs`](WFIntoxicationSystem.Blood.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.cs`](WFIntoxicationSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFIntoxicationSystem.Traits.cs`](WFIntoxicationSystem.Traits.cs)
+- [`Content.Server/_WF/Narcotics/WFNodSystem.cs`](WFNodSystem.cs)
 - [`Content.Server/_WF/Narcotics/WFSecondhandSmokeSystem.cs`](WFSecondhandSmokeSystem.cs)
 
 ### Shared
@@ -71,6 +73,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.Client/_WF/Narcotics/WFDrugChatSystem.cs`](../../../Content.Client/_WF/Narcotics/WFDrugChatSystem.cs)
 - [`Content.Client/_WF/Narcotics/WFIntoxicationOverlay.cs`](../../../Content.Client/_WF/Narcotics/WFIntoxicationOverlay.cs)
 - [`Content.Client/_WF/Narcotics/WFIntoxicationSystem.cs`](../../../Content.Client/_WF/Narcotics/WFIntoxicationSystem.cs)
+- [`Content.Client/_WF/Narcotics/WFNodOverlay.cs`](../../../Content.Client/_WF/Narcotics/WFNodOverlay.cs)
 - [`Content.Client/_WF/Narcotics/WolfmedDiagnosticPanel.Conditions.cs`](../../../Content.Client/_WF/Narcotics/WolfmedDiagnosticPanel.Conditions.cs)
 
 ### Integration tests
@@ -82,6 +85,7 @@ also covers `Purity` and `Neuroware`, is [Docs/_WF/Narcotics/DESIGN.md](../../..
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/DrugSpeechTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/DrugSpeechTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/HeroinSedationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/HeroinSedationTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/IntoxicationTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Narcotics/NodTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/NodTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/RadioProbeSystem.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/RadioProbeSystem.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/SecondhandSmokeTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/SecondhandSmokeTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Narcotics/SoldAlertTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Narcotics/SoldAlertTest.cs)

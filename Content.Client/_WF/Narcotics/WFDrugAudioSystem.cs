@@ -11,7 +11,7 @@ namespace Content.Client._WF.Narcotics;
 /// The world heard through the local player's high: world sounds take the family's reverb and pitch. A light high only
 /// shifts the pitch a little, a heavy one adds the reverb, an overdose doubles the shift. Music, interface and other
 /// global sounds stay as they are. The reverb takes over from area echo while it lasts, and both come back off when
-/// the high ends.
+/// the high ends. While a nod shuts the eyes, world sounds are muffled as if through a wall.
 /// </summary>
 public sealed class WFDrugAudioSystem : EntitySystem
 {
@@ -33,6 +33,16 @@ public sealed class WFDrugAudioSystem : EntitySystem
 
     private ProtoId<AudioPresetPrototype>? _preset;
 
+    /// <summary>Occlusion at a fully shut nod: most of the treble gone and about half the volume.</summary>
+    private const float NodOcclusion = 7f;
+
+    public override void Initialize()
+    {
+        base.Initialize();
+        // The engine resets each sound's occlusion every frame, so the nod's muffling goes on after it.
+        UpdatesAfter.Add(typeof(Robust.Client.Audio.AudioSystem));
+    }
+
     public override void FrameUpdate(float frameTime)
     {
         base.FrameUpdate(frameTime);
@@ -44,6 +54,8 @@ public sealed class WFDrugAudioSystem : EntitySystem
 
         var presetChanged = preset != _preset;
         _preset = preset;
+
+        var nod = _intoxication.NodClosure() * NodOcclusion;
 
         EntityUid? auxiliary = null;
         if (preset is { } wanted && _effects.ResolveCachedEffect(wanted, out var resolved, out _))
@@ -63,6 +75,9 @@ public sealed class WFDrugAudioSystem : EntitySystem
             }
 
             _touched.Add(uid);
+            if (nod > 0f)
+                audio.Occlusion = MathF.Max(audio.Occlusion, nod);
+
             var shifted = audio.Params.Pitch * pitch;
             if (!MathHelper.CloseTo(audio.Pitch, shifted))
                 SetPitch(audio, shifted);
