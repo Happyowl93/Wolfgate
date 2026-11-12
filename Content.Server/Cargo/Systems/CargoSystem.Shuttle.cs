@@ -337,6 +337,7 @@ public sealed partial class CargoSystem
 
         var ev = new EntitySoldEvent(toSell, gridUid); // Mono: moved here so refused sales dont count as sold
         RaiseLocalEvent(ref ev);
+        WfRaisePalletSale(allEntsToDelete, gridUid); // WOLFGATE(CargoSales): a pallet sale event that leaves out contraband turn-ins
 
         foreach (var ent in allEntsToDelete)
         {
