@@ -1,4 +1,3 @@
-using Content.Server._Mono.VendingMachine;
 using Content.Server._WF.TradeGoods.Systems;
 using Content.Server.Popups;
 using Content.Shared._Crescent.Dispenser;
@@ -9,10 +8,8 @@ namespace Content.Server._Crescent.Dispenser;
 public sealed partial class DispenserSystem
 {
     [Dependency] private PopupSystem _popup = default!;
-    [Dependency] private VendingMachinePurchaseSystem _vendingPurchase = default!;
     [Dependency] private WFTradeMarketSystem _wfMarket = default!;
     [Dependency] private WFTradeSpecialCrateSystem _wfSpecialCrates = default!;
-    [Dependency] private WFTradeContrabandSystem _wfContraband = default!;
 
     /// <summary>
     /// Refuses goods bought from a vendor on the dispenser's own grid, or made too close to it, so trade goods only pay
@@ -24,15 +21,7 @@ public sealed partial class DispenserSystem
         if (WfAlreadySold(used))
             return true;
 
-        LocId? reason;
-        if (_wfMarket.Shunned(uid, user))
-            reason = "wf-trade-refuse-shunned";
-        else if (Transform(uid).GridUid is { } grid && _vendingPurchase.WasPurchasedOnGrid(used, grid))
-            reason = "wf-trade-chute-local-goods";
-        else
-            reason = _wfMarket.CheckSeal(uid, used) ?? _wfContraband.CheckDrop(uid, used);
-
-        if (reason is not { } refusal)
+        if (_wfMarket.Refusal(uid, used, user) is not { } refusal)
             return false;
 
         _audioSystem.PlayPvs(component.DenySound, uid);

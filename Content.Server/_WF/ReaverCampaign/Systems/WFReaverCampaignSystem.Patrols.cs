@@ -81,8 +81,11 @@ public sealed partial class WFReaverCampaignSystem
         return TryLaunchPatrol(stronghold, out _);
     }
 
-    /// <summary>Sends a patrol from a stronghold now, whatever the caps, through held cells and home; gives its encounter.</summary>
-    private bool TryLaunchPatrol(EntityUid stronghold, out EntityUid uid)
+    /// <summary>
+    /// Sends a patrol from a stronghold now, whatever the caps, through held cells and home; gives its encounter. Unless
+    /// <paramref name="reschedule"/> is false, the stronghold's next own patrol waits a full interval.
+    /// </summary>
+    private bool TryLaunchPatrol(EntityUid stronghold, out EntityUid uid, bool reschedule = true)
     {
         uid = default;
         if (Campaign is not { } campaign || State() is { Finished: true }
@@ -122,7 +125,9 @@ public sealed partial class WFReaverCampaignSystem
         patrol.Route = route;
         patrol.Home = home;
         patrol.LastSeen = home;
-        comp.NextPatrol = _timing.CurTime + campaign.PatrolInterval;
+        if (reschedule)
+            comp.NextPatrol = _timing.CurTime + campaign.PatrolInterval;
+
         return true;
     }
 
@@ -319,7 +324,7 @@ public sealed partial class WFReaverCampaignSystem
     private bool PatrolRoom(WFReaverCampaignPrototype campaign, WFReaverCampaignComponent state, EntityUid stronghold,
         List<Entity<WFReaverPatrolComponent, WFEncounterComponent>> patrols)
     {
-        return patrols.Count < Math.Clamp(Players() / PlayersPerPatrol, 1, MaxPatrols)
+        return patrols.Count < PatrolCap()
             && patrols.Count(patrol => patrol.Comp1.Stronghold == stronghold) < ByTier(campaign.Patrols, state.Tier, 0) + Bracket(campaign, state).Patrols;
     }
 

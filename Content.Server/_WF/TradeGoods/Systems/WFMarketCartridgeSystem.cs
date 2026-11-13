@@ -1,6 +1,5 @@
 using System.Linq;
 using Content.Server._Mono.AlertLevel;
-using Content.Server._Mono.VendingMachine;
 using Content.Server._NF.Market.Systems;
 using Content.Server._WF.CargoLoad;
 using Content.Server._WF.Encounters.Components;
@@ -53,7 +52,6 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
     [Dependency] private WFCargoLoadSystem _cargo = default!;
     [Dependency] private WarLevelSystem _war = default!;
     [Dependency] private PopupSystem _popup = default!;
-    [Dependency] private VendingMachinePurchaseSystem _vendingPurchase = default!;
     [Dependency] private MarketSystem _stock = default!;
     [Dependency] private StationSystem _station = default!;
 
@@ -111,7 +109,7 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
         interact.Handled = true;
         var message = BestSale(target, interact.User) is { } best
             ? Loc.GetString("wf-market-best-sale", ("item", target), ("station", best.Station), ("amount", best.Amount))
-            : DropHidden(target, interact.User)
+            : DropHidden(MetaData(target).EntityPrototype?.ID, SeesUnderground(interact.User))
                 ? Loc.GetString("wf-market-best-sale-drop", ("item", target))
                 : Loc.GetString("wf-market-best-sale-none", ("item", target));
         _popup.PopupEntity(message, target, interact.User);
@@ -123,19 +121,15 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
     /// </summary>
     public (string Station, int Amount)? BestSale(EntityUid crate, EntityUid seller)
     {
-        if (MetaData(crate).EntityPrototype?.ID is not { } good || DropHidden(crate, seller))
+        var underground = SeesUnderground(seller);
+        if (MetaData(crate).EntityPrototype?.ID is not { } good || DropHidden(good, underground))
             return null;
 
-        var underground = SeesUnderground(seller);
         var special = _special.IsSpecial(crate);
         (string Station, int Amount)? best = null;
-        foreach (var (chute, _, grid) in _market.Chutes())
+        foreach (var (chute, _, _) in _market.Chutes())
         {
-            if (!underground && _market.IsHiddenChute(chute)
-                || _market.Shunned(chute, seller)
-                || _vendingPurchase.WasPurchasedOnGrid(crate, grid)
-                || _market.CheckSeal(chute, crate) != null
-                || _contraband.CheckDrop(chute, crate) != null)
+            if (!underground && _market.IsHiddenChute(chute) || _market.Refusal(chute, crate, seller) != null)
                 continue;
 
             var amount = special ? _special.Price(chute, crate) : _market.Quote(chute, good, crate, seller)?.Amount;
@@ -146,10 +140,10 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
         return best;
     }
 
-    /// <summary>Whether a crate is contraband that sells at the drop alone, which only the Underground is told of, and the seller isn't one of them.</summary>
-    private bool DropHidden(EntityUid crate, EntityUid seller)
+    /// <summary>Whether a good is contraband that sells at the drop alone, which only the Underground is told of, and the seller isn't one of them.</summary>
+    private bool DropHidden(string? good, bool underground)
     {
-        return MetaData(crate).EntityPrototype?.ID is { } good && _contraband.AtDropOnly(good) && !SeesUnderground(seller);
+        return !underground && good != null && _contraband.AtDropOnly(good);
     }
 
     /// <summary>Whether someone belongs to an underground company, and so sees the hidden markets.</summary>
@@ -315,12 +309,12 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
         // An alert naming a hidden market is off the books too.
         var hiddenNames = stations.Values.Where(station => station.Underground).Select(station => station.Name).ToHashSet();
         var alerts = new List<(WFMarketAlert, bool)>();
-        void Add(WFMarketAlert alert, string? station = null, bool underground = false) =>
-            alerts.Add((alert, underground || station != null && hiddenNames.Contains(station)));
+        void Add(WFMarketAlert alert, string? station = null) =>
+            alerts.Add((alert, station != null && hiddenNames.Contains(station)));
 
         // The contraband drop is an open station, but only the Underground is told of it.
         if (_contraband.DropActive && _contraband.DropPoint is { } drop)
-            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-drop", ("station", Name(drop))), _contraband.DropEnds, true), Name(drop), true);
+            alerts.Add((new WFMarketAlert(Loc.GetString("wf-market-alert-drop", ("station", Name(drop))), _contraband.DropEnds, true), true));
 
         foreach (var rush in _rush.Active)
         {

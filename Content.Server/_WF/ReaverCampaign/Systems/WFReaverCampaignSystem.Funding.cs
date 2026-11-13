@@ -82,25 +82,19 @@ public sealed partial class WFReaverCampaignSystem
     /// Sends a patrol from the stronghold with the fewest out, while the patrols out stay within the usual cap plus
     /// <see cref="WFReaverCampaignPrototype.FundingPatrols"/>. It leaves the stronghold's own patrol schedule as it was.
     /// </summary>
-    private bool FundPatrol(WFReaverCampaignPrototype campaign)
+    private void FundPatrol(WFReaverCampaignPrototype campaign)
     {
         if (campaign.FundingPatrols <= 0)
-            return false;
+            return;
 
         var patrols = Patrols();
         if (patrols.Count >= PatrolCap() + campaign.FundingPatrols)
-            return false;
+            return;
 
         foreach (var stronghold in Strongholds().OrderBy(entry => patrols.Count(patrol => patrol.Comp1.Stronghold == entry.Owner)))
         {
-            var next = stronghold.Comp1.NextPatrol;
-            if (!TryLaunchPatrol(stronghold.Owner))
-                continue;
-
-            stronghold.Comp1.NextPatrol = next;
-            return true;
+            if (TryLaunchPatrol(stronghold.Owner, out _, reschedule: false))
+                return;
         }
-
-        return false;
     }
 }

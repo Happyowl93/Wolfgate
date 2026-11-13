@@ -4,7 +4,6 @@ using Content.Server._NF.SectorServices;
 using Content.Server._WF.TradeGoods.Systems;
 using Content.Shared._WF.TradeGoods;
 using Content.Shared.Contraband;
-using Content.Shared.Stacks;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Localization;
 using Robust.Shared.Map;
@@ -106,15 +105,7 @@ public sealed class TradeContrabandTest
             Assert.That(market.Quote(chute, Contraband)!.Value.Amount, Is.EqualTo(before.Amount), "Selling contraband lowered its price.");
 
             // Each sale also leaves the profile's telecrystals at the chute.
-            var crystals = 0;
-            var stacks = entMan.EntityQueryEnumerator<StackComponent, MetaDataComponent, TransformComponent>();
-            while (stacks.MoveNext(out var stack, out var meta, out var xform))
-            {
-                if (xform.MapID == map.MapId && meta.EntityPrototype?.ID == "Telecrystal")
-                    crystals += stack.Count;
-            }
-
-            Assert.That(crystals, Is.EqualTo(sales * market.Profile(map.Grid.Owner).ContrabandTelecrystals), "Contraband sales paid the wrong telecrystals.");
+            Assert.That(TradeTestHelpers.StackOnMap(entMan, map.MapId, "Telecrystal"), Is.EqualTo(sales * market.Profile(map.Grid.Owner).ContrabandTelecrystals), "Contraband sales paid the wrong telecrystals.");
         });
 
         await pair.CleanReturnAsync();

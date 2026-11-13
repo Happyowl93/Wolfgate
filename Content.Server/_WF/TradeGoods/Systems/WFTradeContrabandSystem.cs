@@ -5,6 +5,7 @@ using Content.Shared.GameTicking;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
+using Robust.Shared.Utility;
 
 namespace Content.Server._WF.TradeGoods.Systems;
 
@@ -36,7 +37,8 @@ public sealed partial class WFTradeContrabandSystem : EntitySystem
     private void OnCleanup(RoundRestartCleanupEvent args)
     {
         _warrants.Clear();
-        ClearDrop();
+        DropPoint = null;
+        DropLeaked = false;
         _nextDropCheck = TimeSpan.Zero;
     }
 
@@ -60,23 +62,24 @@ public sealed partial class WFTradeContrabandSystem : EntitySystem
     public BountyContract? Flag(EntityUid seller, EntityUid station, EntityUid? ship)
     {
         var profile = _market.Profile(station);
-        if (!_warrants.TryGetValue(seller, out var warrant))
-            _warrants[seller] = warrant = new SellerWarrant();
+        var warrant = _warrants.GetOrNew(seller);
 
         // A warrant taken off the board starts over; one that never got onto it keeps growing until it does.
         BountyContract? contract = null;
-        if (warrant.Contract is { } id && !_board.TryGetContract(id, out _))
+        if (warrant.Contract is { } id && !_board.TryGetContract(id, out contract))
         {
             warrant.Contract = null;
             warrant.Reward = 0;
         }
 
-        warrant.Reward = (int) Math.Min((long) warrant.Reward + profile.ContrabandWarrant, profile.ContrabandWarrantCap);
+        var reward = (int) Math.Min((long) warrant.Reward + profile.ContrabandWarrant, profile.ContrabandWarrantCap);
+        var raised = reward != warrant.Reward;
+        warrant.Reward = reward;
         var shipName = ship is { } shipUid && !TerminatingOrDeleted(shipUid) ? Name(shipUid) : null;
-        if (warrant.Contract is { } standing)
+        if (contract != null)
         {
-            _board.TrySetContractReward(standing, warrant.Reward);
-            _board.TryGetContract(standing, out contract);
+            if (raised && _board.TrySetContractReward(contract.ContractId, reward))
+                _board.TryGetContract(contract.ContractId, out contract);
         }
         else
         {
