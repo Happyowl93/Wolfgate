@@ -50,7 +50,7 @@ public sealed partial class WFReaverCampaignSystem
     {
         var now = _timing.CurTime;
         var patrols = Patrols();
-        var cap = Math.Clamp(Players() / PlayersPerPatrol, 1, MaxPatrols);
+        var cap = PatrolCap();
         var each = ByTier(campaign.Patrols, state.Tier, 0) + Bracket(campaign, state).Patrols;
         var active = patrols.Count;
         foreach (var stronghold in Strongholds().OrderBy(entry => entry.Comp1.NextPatrol))
@@ -67,6 +67,12 @@ public sealed partial class WFReaverCampaignSystem
             else
                 stronghold.Comp1.NextPatrol = now + PatrolRetry;
         }
+    }
+
+    /// <summary>How many patrols may be out campaign-wide: one per <see cref="PlayersPerPatrol"/> players, within the cap.</summary>
+    private int PatrolCap()
+    {
+        return Math.Clamp(Players() / PlayersPerPatrol, 1, MaxPatrols);
     }
 
     /// <summary>Sends a patrol from a stronghold now, whatever the caps, through held cells and home.</summary>

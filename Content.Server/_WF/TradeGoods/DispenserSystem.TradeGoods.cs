@@ -12,10 +12,12 @@ public sealed partial class DispenserSystem
     [Dependency] private VendingMachinePurchaseSystem _vendingPurchase = default!;
     [Dependency] private WFTradeMarketSystem _wfMarket = default!;
     [Dependency] private WFTradeSpecialCrateSystem _wfSpecialCrates = default!;
+    [Dependency] private WFTradeContrabandSystem _wfContraband = default!;
 
     /// <summary>
     /// Refuses goods bought from a vendor on the dispenser's own grid, or made too close to it, so trade goods only pay
-    /// once hauled elsewhere. A crate already sold this tick, still waiting to be deleted, is refused silently.
+    /// once hauled elsewhere, and contraband anywhere but the drop. A crate already sold this tick, still waiting to be
+    /// deleted, is refused silently.
     /// </summary>
     private bool RefuseLocalGoods(EntityUid uid, DispenserComponent component, EntityUid used, EntityUid user)
     {
@@ -28,7 +30,7 @@ public sealed partial class DispenserSystem
         else if (Transform(uid).GridUid is { } grid && _vendingPurchase.WasPurchasedOnGrid(used, grid))
             reason = "wf-trade-chute-local-goods";
         else
-            reason = _wfMarket.CheckSeal(uid, used);
+            reason = _wfMarket.CheckSeal(uid, used) ?? _wfContraband.CheckDrop(uid, used);
 
         if (reason is not { } refusal)
             return false;

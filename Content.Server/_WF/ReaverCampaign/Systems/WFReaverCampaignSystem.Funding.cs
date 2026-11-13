@@ -1,3 +1,4 @@
+using System.Linq;
 using Content.Server._WF.ReaverCampaign.Components;
 using Content.Server._WF.TradeGoods;
 using Content.Server._WF.TradeGoods.Systems;
@@ -19,8 +20,14 @@ public sealed partial class WFReaverCampaignSystem
             || State(true) is not { Finished: false } state)
             return;
 
-        state.Funding = Math.Min(state.Funding + 1, campaign.FundingCrates);
+        state.Funding = Math.Min(state.Funding + 1, FundingChest(campaign));
         TickFunding(campaign, state);
+    }
+
+    /// <summary>The most crates the war chest banks: <see cref="WFReaverCampaignPrototype.FundingBank"/> payouts' worth.</summary>
+    public static int FundingChest(WFReaverCampaignPrototype campaign)
+    {
+        return campaign.FundingCrates * Math.Max(1, campaign.FundingBank);
     }
 
     /// <summary>Whether a sale funds the Reavers: smuggling crates at open chutes, and freight taken off NPC haulers fenced at the Underground.</summary>
@@ -34,7 +41,7 @@ public sealed partial class WFReaverCampaignSystem
                && origin.Run != null;
     }
 
-    /// <summary>Pays out a full war chest once the campaign isn't held, a stronghold stands to spend it and the last payout has cooled down.</summary>
+    /// <summary>Spends one payout from the war chest once the campaign isn't held, a stronghold stands to spend it and the last payout has cooled down.</summary>
     private void TickFunding(WFReaverCampaignPrototype campaign, WFReaverCampaignComponent state)
     {
         if (campaign.FundingCrates <= 0 || state.Funding < campaign.FundingCrates || Held || state.Finished ||
@@ -44,14 +51,15 @@ public sealed partial class WFReaverCampaignSystem
         if (Strongholds().Count == 0)
             return;
 
-        state.Funding = 0;
+        state.Funding -= campaign.FundingCrates;
         state.NextFunding = _timing.CurTime + campaign.FundingCooldown;
         Fund(campaign, state);
     }
 
     /// <summary>
     /// Spends one payout: every stronghold's next reinforcement and the next spread come sooner by
-    /// <see cref="WFReaverCampaignPrototype.FundingShare"/> of their intervals, announced on the radio.
+    /// <see cref="WFReaverCampaignPrototype.FundingShare"/> of their intervals, an extra patrol goes out if one may, and
+    /// the sector hears of it on the radio.
     /// </summary>
     public void Fund(WFReaverCampaignPrototype campaign, WFReaverCampaignComponent state)
     {
@@ -65,6 +73,34 @@ public sealed partial class WFReaverCampaignSystem
         if (state.NextSpread is { } next)
             state.NextSpread = MaxTime(now, next - campaign.SpreadInterval * campaign.FundingShare);
 
+        FundPatrol(campaign);
         state.Funded++;
+        AnnounceRadio(Loc.GetString("wf-reaver-funded"));
+    }
+
+    /// <summary>
+    /// Sends a patrol from the stronghold with the fewest out, while the patrols out stay within the usual cap plus
+    /// <see cref="WFReaverCampaignPrototype.FundingPatrols"/>. It leaves the stronghold's own patrol schedule as it was.
+    /// </summary>
+    private bool FundPatrol(WFReaverCampaignPrototype campaign)
+    {
+        if (campaign.FundingPatrols <= 0)
+            return false;
+
+        var patrols = Patrols();
+        if (patrols.Count >= PatrolCap() + campaign.FundingPatrols)
+            return false;
+
+        foreach (var stronghold in Strongholds().OrderBy(entry => patrols.Count(patrol => patrol.Comp1.Stronghold == entry.Owner)))
+        {
+            var next = stronghold.Comp1.NextPatrol;
+            if (!TryLaunchPatrol(stronghold.Owner))
+                continue;
+
+            stronghold.Comp1.NextPatrol = next;
+            return true;
+        }
+
+        return false;
     }
 }

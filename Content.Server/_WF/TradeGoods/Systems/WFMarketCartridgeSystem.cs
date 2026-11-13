@@ -46,6 +46,7 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
     [Dependency] private WFTradeRushSystem _rush = default!;
     [Dependency] private WFTradeSectorSystem _sector = default!;
     [Dependency] private WFTradeSpecialCrateSystem _special = default!;
+    [Dependency] private WFTradeContrabandSystem _contraband = default!;
     [Dependency] private WFTradeFreightSystem _freight = default!;
     [Dependency] private WFTradeEconomySystem _economy = default!;
     [Dependency] private WFSectorTerritorySystem _territory = default!;
@@ -110,17 +111,19 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
         interact.Handled = true;
         var message = BestSale(target, interact.User) is { } best
             ? Loc.GetString("wf-market-best-sale", ("item", target), ("station", best.Station), ("amount", best.Amount))
-            : Loc.GetString("wf-market-best-sale-none", ("item", target));
+            : DropHidden(target, interact.User)
+                ? Loc.GetString("wf-market-best-sale-drop", ("item", target))
+                : Loc.GetString("wf-market-best-sale-none", ("item", target));
         _popup.PopupEntity(message, target, interact.User);
     }
 
     /// <summary>
-    /// The station paying a seller most for one crate now, skipping chutes that would refuse it. Hidden markets count only
-    /// for members of an underground company.
+    /// The station paying a seller most for one crate now, skipping chutes that would refuse it. Hidden markets, and the
+    /// contraband drop, count only for members of an underground company.
     /// </summary>
     public (string Station, int Amount)? BestSale(EntityUid crate, EntityUid seller)
     {
-        if (MetaData(crate).EntityPrototype?.ID is not { } good)
+        if (MetaData(crate).EntityPrototype?.ID is not { } good || DropHidden(crate, seller))
             return null;
 
         var underground = SeesUnderground(seller);
@@ -131,7 +134,8 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
             if (!underground && _market.IsHiddenChute(chute)
                 || _market.Shunned(chute, seller)
                 || _vendingPurchase.WasPurchasedOnGrid(crate, grid)
-                || _market.CheckSeal(chute, crate) != null)
+                || _market.CheckSeal(chute, crate) != null
+                || _contraband.CheckDrop(chute, crate) != null)
                 continue;
 
             var amount = special ? _special.Price(chute, crate) : _market.Quote(chute, good, crate, seller)?.Amount;
@@ -140,6 +144,12 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
         }
 
         return best;
+    }
+
+    /// <summary>Whether a crate is contraband that sells at the drop alone, which only the Underground is told of, and the seller isn't one of them.</summary>
+    private bool DropHidden(EntityUid crate, EntityUid seller)
+    {
+        return MetaData(crate).EntityPrototype?.ID is { } good && _contraband.AtDropOnly(good) && !SeesUnderground(seller);
     }
 
     /// <summary>Whether someone belongs to an underground company, and so sees the hidden markets.</summary>
@@ -305,7 +315,12 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
         // An alert naming a hidden market is off the books too.
         var hiddenNames = stations.Values.Where(station => station.Underground).Select(station => station.Name).ToHashSet();
         var alerts = new List<(WFMarketAlert, bool)>();
-        void Add(WFMarketAlert alert, string? station = null) => alerts.Add((alert, station != null && hiddenNames.Contains(station)));
+        void Add(WFMarketAlert alert, string? station = null, bool underground = false) =>
+            alerts.Add((alert, underground || station != null && hiddenNames.Contains(station)));
+
+        // The contraband drop is an open station, but only the Underground is told of it.
+        if (_contraband.DropActive && _contraband.DropPoint is { } drop)
+            Add(new WFMarketAlert(Loc.GetString("wf-market-alert-drop", ("station", Name(drop))), _contraband.DropEnds, true), Name(drop), true);
 
         foreach (var rush in _rush.Active)
         {
