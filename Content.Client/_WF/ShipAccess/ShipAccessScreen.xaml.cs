@@ -479,10 +479,13 @@ public sealed partial class ShipAccessScreen : BoxContainer
         DoorNameLabel.Text = DoorLabel(selected);
         DoorRuleLabel.Text = RuleName(selected.Rule);
         DoorRuleLabel.FontColorOverride = ShipAccessDoorMapControl.ColorFor(selected.Rule);
-        DoorRuleButton.Visible = isOwner;
-        DoorRuleButton.SelectId((int) selected.Rule);
-        SetHint(DoorRuleHint, Loc.GetString(RuleKey(selected.Rule, "desc")));
-        DoorRuleHint.Visible = !isOwner;
+        // A zone's door follows the zone's switch on the command console, so it gets no rule picker here.
+        var inZone = _entManager.TryGetComponent<WFDoorAccessRuleComponent>(selected.Uid, out var ruleComp) && ruleComp.Zone != null;
+        DoorRuleButton.Visible = isOwner && !inZone;
+        DoorRuleButton.TrySelectId((int) selected.Rule);
+        var ruleDesc = Loc.GetString(RuleKey(selected.Rule, "desc"));
+        SetHint(DoorRuleHint, inZone ? Loc.GetString("ship-access-door-zone-hint", ("desc", ruleDesc)) : ruleDesc);
+        DoorRuleHint.Visible = !isOwner || inZone;
         DoorRuleButton.ToolTip = DoorRuleHint.ToolTip;
         DoorRuleLabel.ToolTip = DoorRuleHint.ToolTip;
         DoorNameLabel.ToolTip = DoorNameLabel.Text;
@@ -676,6 +679,7 @@ public sealed partial class ShipAccessScreen : BoxContainer
             WFDoorAccessRule.PlayersOrCode => "players-or-code",
             WFDoorAccessRule.Public => "public",
             WFDoorAccessRule.Sealed => "sealed",
+            WFDoorAccessRule.Zone => "zone",
             _ => "default",
         };
         return $"ship-access-rule-{id}-{suffix}";

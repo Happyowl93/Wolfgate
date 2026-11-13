@@ -43,6 +43,7 @@ on board.
 
 ### Server
 
+- [`Content.Server/_WF/Cyborgs/BorgSystem.ChargeUi.cs`](BorgSystem.ChargeUi.cs)
 - [`Content.Server/_WF/Cyborgs/WFBorgIdCardServerSystem.cs`](WFBorgIdCardServerSystem.cs)
 - [`Content.Server/_WF/Cyborgs/WFBorgPowerSystem.cs`](WFBorgPowerSystem.cs)
 - [`Content.Server/_WF/Cyborgs/WFBorgStackRefillSystem.cs`](WFBorgStackRefillSystem.cs)
@@ -73,6 +74,9 @@ on board.
 
 ## Non-modular edits
 
+- [`Content.Server/Silicons/Borgs/BorgSystem.cs`](../../Silicons/Borgs/BorgSystem.cs)
+  - the charge changes every tick with the headlight on
+  - an empty cell raises this on every failed draw
 - [`Resources/Prototypes/_Mono/borg_types.yml`](../../../Resources/Prototypes/_Mono/borg_types.yml)
   - was 2, too few to fit a printed kit
   - the treatment module carries the defibrillator

@@ -3,6 +3,8 @@ using System.Linq;
 using Content.Server._NF.Bank;
 using Content.Server._NF.SectorServices;
 using Content.Server._NF.Shipyard.Systems;
+using Content.Server._WF.Traders;
+using Content.Shared._WF.Traders;
 using Content.Server.Silicons.Borgs;
 using Content.Server.Station.Systems;
 using Content.Server.StationRecords;
@@ -40,6 +42,11 @@ public sealed class BorgShipPurchaseTest
     private const string Card = "WFBorgIdCard";
     private const string Console = "ComputerShipyard";
     private const string Vessel = "Guppy";
+    private const string Dealer = "WFTraderShipyard";
+    private const string Table = "Table";
+
+    /// <summary>Index of the dealer's first BuyShip option.</summary>
+    private const int BuyShipOption = 0;
 
     [Test]
     public async Task BuysWithIssuedCardTest()
@@ -139,6 +146,94 @@ public sealed class BorgShipPurchaseTest
         });
 
         // A client still attached to a cyborg throws while the pair's cleanup deletes it.
+        await server.WaitPost(() => minds.WipeMind(session.ContentData()?.Mind));
+        await pair.RunTicksSync(5);
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>A ship dealer takes the card off its counter as the cyborg's own and opens its listing on it.</summary>
+    [Test]
+    public async Task TraderTakesIssuedCardTest()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+
+        var entMan = server.EntMan;
+        var borgs = entMan.System<BorgSystem>();
+        var hands = entMan.System<SharedHandsSystem>();
+        var containers = entMan.System<SharedContainerSystem>();
+        var minds = entMan.System<SharedMindSystem>();
+        var traders = entMan.System<TraderSystem>();
+
+        var session = server.PlayerMan.GetSessionById(pair.Client.Session!.UserId);
+        var gridUid = map.Grid.Owner;
+
+        var trader = EntityUid.Invalid;
+        var borg = EntityUid.Invalid;
+        var card = EntityUid.Invalid;
+
+        await server.WaitPost(() =>
+        {
+            var mapSys = entMan.System<SharedMapSystem>();
+            mapSys.SetTile(gridUid, map.Grid.Comp, new Vector2i(0, -1), map.Tile.Tile);
+            mapSys.SetTile(gridUid, map.Grid.Comp, new Vector2i(1, 0), map.Tile.Tile);
+
+            entMan.EnsureComponent<StationSectorServiceHostComponent>(entMan.Spawn());
+
+            trader = entMan.SpawnEntity(Dealer, new EntityCoordinates(gridUid, 0.5f, 0.5f));
+            entMan.SpawnEntity(Table, new EntityCoordinates(gridUid, 0.5f, -0.5f));
+            borg = entMan.SpawnEntity(Borg, new EntityCoordinates(gridUid, 1.5f, 0.5f));
+
+            var cell = entMan.SpawnEntity(Cell, new EntityCoordinates(gridUid, 1.5f, 0.5f));
+            containers.Insert(cell, containers.GetContainer(borg, "cell_slot"), force: true);
+
+            minds.WipeMind(session.ContentData()?.Mind);
+            minds.TransferTo(minds.CreateMind(session.UserId).Owner, borg);
+        });
+        await pair.RunTicksSync(5);
+
+        await server.WaitPost(() =>
+        {
+            string? Proto(EntityUid uid) => entMan.GetComponent<MetaDataComponent>(uid).EntityPrototype?.ID;
+
+            var modules = entMan.GetComponent<BorgChassisComponent>(borg).ModuleContainer.ContainedEntities;
+            borgs.InstallAllModules(borg);
+            borgs.UnselectModule(borg);
+            borgs.SelectModule(borg, modules.Single(m => Proto(m) == Tool));
+
+            card = hands.EnumerateHeld(borg).SingleOrDefault(held => Proto(held) == Card);
+            Assert.That(card.IsValid(), "The tool module issued no ID card.");
+
+            Assert.That(hands.TryDrop(borg, card), "The cyborg could not let go of its card.");
+            entMan.System<SharedTransformSystem>().SetCoordinates(card, new EntityCoordinates(gridUid, 0.5f, -0.5f));
+        });
+        await pair.RunTicksSync(5);
+
+        await server.WaitPost(() =>
+        {
+            var comp = entMan.GetComponent<TraderComponent>(trader);
+            traders.RefreshTable((trader, comp));
+            Assert.That(traders.TryStartConversation((trader, comp), borg), "The dealer should talk to a cyborg.");
+            entMan.EventBus.RaiseLocalEvent(trader, new TraderDialogueSelectMessage(BuyShipOption)
+            {
+                Actor = borg,
+                UiKey = TraderUiKey.Dialogue,
+            });
+        });
+        await pair.RunTicksSync(30);
+
+        await server.WaitAssertion(() =>
+        {
+            var comp = entMan.GetComponent<TraderComponent>(trader);
+            Assert.That(entMan.TryGetComponent<ShipyardConsoleComponent>(trader, out var console),
+                $"The dealer refused the cyborg's card; it said: {comp.CurrentLine}");
+            Assert.That(console!.TargetIdSlot.Item, Is.EqualTo(card), "The cyborg's card should be in the listing's slot.");
+
+            traders.EndConversation((trader, comp), farewell: false);
+        });
+
         await server.WaitPost(() => minds.WipeMind(session.ContentData()?.Mind));
         await pair.RunTicksSync(5);
 

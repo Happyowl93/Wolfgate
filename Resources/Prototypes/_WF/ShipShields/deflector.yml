@@ -93,3 +93,13 @@
     entity: WFShieldGeneratorDeflector
   - type: StaticPrice
     price: 8000
+    vendPrice: 30000
+
+# The systems broker's copy, priced off the static price like the rest of its stock.
+- type: entity
+  parent: WFFlatpackShieldDeflector
+  id: WFFlatpackShieldDeflectorBroker
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: StaticPrice
+    vendPrice: 0

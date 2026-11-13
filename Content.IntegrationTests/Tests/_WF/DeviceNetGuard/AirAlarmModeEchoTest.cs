@@ -1,4 +1,6 @@
 #nullable enable
+using System.Linq;
+using Content.IntegrationTests.Pair;
 using Content.Server.Atmos.Monitor.Components;
 using Content.Server.Atmos.Monitor.Systems;
 using Content.Server.DeviceNetwork.Systems;
@@ -44,7 +46,7 @@ public sealed class AirAlarmModeEchoTest
             lists.UpdateDeviceList(a, new[] { b });
             lists.UpdateDeviceList(b, new[] { a });
         });
-        await pair.RunTicksSync(10);
+        await WaitUntilPowered(pair, a, b);
 
         await server.WaitPost(() =>
         {
@@ -111,7 +113,7 @@ public sealed class AirAlarmModeEchoTest
             if (middleHasIt)
                 entities.GetComponent<AirAlarmComponent>(b).CurrentMode = AirAlarmMode.Panic;
         });
-        await pair.RunTicksSync(10);
+        await WaitUntilPowered(pair, a, b, c);
 
         await server.WaitPost(() =>
             alarms.SetMode(a, entities.GetComponent<DeviceNetworkComponent>(a).Address, AirAlarmMode.Panic, false));
@@ -128,5 +130,22 @@ public sealed class AirAlarmModeEchoTest
         });
 
         await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    ///     Alarms drop packets until the power net marks them powered, which it does every half second, not every tick.
+    /// </summary>
+    private static async Task WaitUntilPowered(TestPair pair, params EntityUid[] alarms)
+    {
+        var entities = pair.Server.EntMan;
+        for (var tick = 0; tick < 120; tick++)
+        {
+            if (alarms.All(alarm => entities.GetComponent<ApcPowerReceiverComponent>(alarm).Powered))
+                return;
+
+            await pair.RunTicksSync(1);
+        }
+
+        Assert.Fail("The air alarms never became powered.");
     }
 }

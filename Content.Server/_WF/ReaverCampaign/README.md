@@ -123,12 +123,13 @@ and counted for the round summary. `wf_reavers respond <q> <r>` sends one by han
 
 Smuggling funds the Reavers (`.Funding`). Each smuggling crate (the market's `contrabandGoods`) sold at an open chute,
 and each crate of NPC freight (a manifest seal) fenced at a `sealedOnlyChutes` chute (the Underground fence), banks
-toward a war chest; every `fundingCrates` (4) make a payout, bringing every stronghold's next reinforcement and the
-next spread forward by `fundingShare` (a quarter) of their intervals and sending a patrol from the stronghold with
-fewest out, up to `fundingPatrols` past the usual patrol cap and without moving that stronghold's own patrol clock. Each
-payout is announced on the common channel. The chest banks up to `fundingBank` (3) payouts, so a bulk run keeps paying,
-and spends one whenever a stronghold stands, the campaign isn't held and `fundingCooldown` (5 minutes) has passed since
-the last; `wf_reavers status` shows it.
+toward a war chest, and so does every `fundingGoodsValue` (5,000) of `fundingGoodsTag` goods (narcotics) sold on a
+cargo pallet (`WFPalletSaleEvent`); every `fundingCrates` (4) make a payout, bringing every stronghold's next
+reinforcement and the next spread forward by `fundingShare` (a quarter) of their intervals and sending a patrol from the
+stronghold with fewest out, up to `fundingPatrols` past the usual patrol cap and without moving that stronghold's own
+patrol clock. Each payout is announced on the common channel. The chest banks up to `fundingBank` (3) payouts, so a bulk
+run keeps paying, and spends one whenever a stronghold stands, the campaign isn't held and `fundingCooldown` (5 minutes)
+has passed since the last; `wf_reavers status` shows it.
 
 Ship raids favour laden ships (up to three times the weight for a hold worth 100,000, through
 `WFCargoValueQueryEvent`), and `RecentlyRaided` tells the market which stations a raid was just sent at.
