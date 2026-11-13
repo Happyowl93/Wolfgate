@@ -15,8 +15,12 @@ worlds block it through the usual radio send and receive events. A message that 
 
 Changes from Delta-V: no same-map rule (Wolfgate's radio has none), planet comms count as signal, a one-second limit
 between messages from one sender, 100 messages kept per chat, only the open chat is sent to the client, and the app
-updates only while someone is looking at it. The log probe scan, borg and AI support and the chat keybinds are left
-out. Microwaving a card still scrambles or wipes its messages.
+updates only while someone is looking at it. The log probe scan, AI support and the chat keybinds are left out.
+Microwaving a card still scrambles or wipes its messages.
+
+**Cyborgs.** A cyborg's built-in PDA (see the Cyborgs module) has no card in its ID slot; its NanoChat reads the ID
+card the cyborg was issued, held, stowed in a module or kept in its chassis (`NanoChatSystem.GetPda`/`TryGetCard`).
+A cyborg that spawns into a job keeps its character's number like anyone else.
 
 Entry points: `NanoChatCartridgeSystem` (the app, sending and delivery), `NanoChatSystem` (numbers, saved numbers,
 which PDA holds a card, microwaving) and `SharedNanoChatSystem` (every change to a card), with the client

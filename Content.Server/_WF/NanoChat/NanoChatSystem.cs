@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Content.Server._WF.Cyborgs;
 using Content.Server.Access.Systems;
 using Content.Server.Administration.Logs;
 using Content.Server.Database;
 using Content.Server.Preferences.Managers;
+using Content.Shared._WF.Cyborgs;
 using Content.Shared._WF.NanoChat;
 using Content.Shared.Access.Systems;
 using Content.Shared.Database;
@@ -17,7 +20,7 @@ namespace Content.Server._WF.NanoChat;
 
 /// <summary>
 /// Gives NanoChat cards their numbers, keeps a character's number from round to round, tracks which PDA a card is in
-/// and scrambles a microwaved card.
+/// and scrambles a microwaved card. A cyborg's built-in PDA reads the ID card the cyborg was issued.
 /// </summary>
 public sealed class NanoChatSystem : SharedNanoChatSystem
 {
@@ -25,8 +28,10 @@ public sealed class NanoChatSystem : SharedNanoChatSystem
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private IServerDbManager _db = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
+    [Dependency] private SharedContainerSystem _container = default!;
     [Dependency] private SharedIdCardSystem _idCard = default!;
     [Dependency] private NanoChatCartridgeSystem _cartridge = default!;
+    [Dependency] private WFBorgIdCardSystem _borgCards = default!;
 
     private const uint MinNumber = 1;
     private const uint MaxNumber = 9999;
@@ -42,9 +47,46 @@ public sealed class NanoChatSystem : SharedNanoChatSystem
         SubscribeLocalEvent<NanoChatCardComponent, EntGotInsertedIntoContainerMessage>(OnInserted);
         SubscribeLocalEvent<NanoChatCardComponent, EntGotRemovedFromContainerMessage>(OnRemoved);
         SubscribeLocalEvent<NanoChatCardComponent, BeingMicrowavedEvent>(OnMicrowaved, after: [typeof(IdCardSystem)]);
-        SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawn);
+        // After a spawned cyborg is issued its card.
+        SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawn, after: [typeof(WFBorgIdCardServerSystem)]);
 
         LoadReserved();
+    }
+
+    /// <summary>The PDA whose apps read this card: the one it sits in, or the cyborg that was issued it.</summary>
+    public EntityUid? GetPda(Entity<NanoChatCardComponent> card)
+    {
+        if (card.Comp.PdaUid is { } pda)
+            return pda;
+
+        if (!HasComp<WFBorgIdCardComponent>(card))
+            return null;
+
+        // In the cyborg's hand, its chassis, or a module fitted to it.
+        var uid = card.Owner;
+        for (var depth = 0; depth < 3 && _container.TryGetContainingContainer((uid, null, null), out var container); depth++)
+        {
+            uid = container.Owner;
+            if (HasComp<WFBorgPdaComponent>(uid))
+                return _borgCards.TryGetCard(uid, out var issued) && issued == card.Owner ? uid : null;
+        }
+
+        return null;
+    }
+
+    /// <summary>The card a PDA's apps read: the one in its ID slot, or a cyborg's issued card.</summary>
+    public bool TryGetCard(EntityUid pda, [NotNullWhen(true)] out Entity<NanoChatCardComponent>? card)
+    {
+        card = null;
+        var id = CompOrNull<PdaComponent>(pda)?.ContainedId;
+        if (id == null && HasComp<WFBorgPdaComponent>(pda) && _borgCards.TryGetCard(pda, out var issued))
+            id = issued;
+
+        if (!TryComp<NanoChatCardComponent>(id, out var comp))
+            return false;
+
+        card = (id.Value, comp);
+        return true;
     }
 
     private async void LoadReserved()
@@ -152,10 +194,14 @@ public sealed class NanoChatSystem : SharedNanoChatSystem
             return;
 
         _reserved.Add((uint) claimed);
-        if (!_idCard.TryFindIdCard(mob, out var id) || !TryComp<NanoChatCardComponent>(id, out var card))
+        EntityUid? id = _idCard.TryFindIdCard(mob, out var found) ? found.Owner : null;
+        if (id == null && _borgCards.TryGetCard(mob, out var issued))
+            id = issued;
+
+        if (!TryComp<NanoChatCardComponent>(id, out var card))
             return;
 
-        AssignNumber((id, card), (uint) claimed);
+        AssignNumber((id.Value, card), (uint) claimed);
     }
 
     /// <summary>Gives a card a number, moving any other card holding it onto a free one.</summary>

@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Server._WF.PlanetComms;
 using Content.Server._WF.TradeGoods.Systems;
@@ -73,7 +72,7 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
             return;
 
         var loader = GetEntity(args.LoaderUid);
-        if (!TryGetCard(loader, out var card))
+        if (!_nanoChat.TryGetCard(loader, out var card))
             return;
 
         switch (msg.Type)
@@ -109,19 +108,6 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
         }
 
         UpdateUI(ent, loader);
-    }
-
-    /// <summary>The NanoChat card in a PDA's ID slot.</summary>
-    private bool TryGetCard(EntityUid loader, [NotNullWhen(true)] out Entity<NanoChatCardComponent>? card)
-    {
-        card = null;
-        if (!TryComp<PdaComponent>(loader, out var pda)
-            || pda.ContainedId is not { } id
-            || !TryComp<NanoChatCardComponent>(id, out var comp))
-            return false;
-
-        card = (id, comp);
-        return true;
     }
 
     private static string? Clean(string? text, int maxLength)
@@ -229,7 +215,7 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
         while (query.MoveNext(out var uid, out var card))
         {
             if (card.Number != number
-                || card.PdaUid is not { } pda
+                || _nanoChat.GetPda((uid, card)) is not { } pda
                 || !_loader.TryGetProgram<NanoChatCartridgeComponent>(pda, out var receiver, out _))
                 continue;
 
@@ -284,7 +270,7 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
         if (recipient.Comp.CurrentChat != senderNumber)
             _nanoChat.SetRecipient(recipient, senderNumber, sender with { HasUnread = true });
 
-        if (recipient.Comp.PdaUid is not { } pda || !TryComp<CartridgeLoaderComponent>(pda, out var loader))
+        if (_nanoChat.GetPda(recipient) is not { } pda || !TryComp<CartridgeLoaderComponent>(pda, out var loader))
             return;
 
         var viewing = recipient.Comp.CurrentChat == senderNumber
@@ -335,7 +321,7 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
     /// <summary>Refreshes the app on the PDA a card sits in.</summary>
     public void UpdateUIForCard(Entity<NanoChatCardComponent> card)
     {
-        if (card.Comp.PdaUid is { } pda)
+        if (_nanoChat.GetPda(card) is { } pda)
             UpdateUIForPda(pda);
     }
 
@@ -355,7 +341,7 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
 
         var contacts = HasSignal(ent, ent.Comp.RadioChannel.Id) ? Directory() : null;
         NanoChatUiState state;
-        if (TryGetCard(loader, out var card))
+        if (_nanoChat.TryGetCard(loader, out var card))
         {
             var comp = card.Value.Comp;
             var messages = new Dictionary<uint, List<NanoChatMessage>>();
@@ -388,18 +374,18 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
         _loader.UpdateCartridgeUiState(loader, state, loader: loaderComp);
     }
 
-    /// <summary>Every listed number on a named ID card that sits in a PDA, by name.</summary>
+    /// <summary>Every listed number on a named ID card that a PDA reads, by name.</summary>
     private List<NanoChatRecipient> Directory()
     {
         var contacts = new List<NanoChatRecipient>();
         var seen = new HashSet<uint>();
         var query = EntityQueryEnumerator<NanoChatCardComponent, IdCardComponent>();
-        while (query.MoveNext(out var card, out var id))
+        while (query.MoveNext(out var uid, out var card, out var id))
         {
             if (card.ListNumber
-                && card.PdaUid != null
                 && card.Number is { } number
                 && !string.IsNullOrWhiteSpace(id.FullName)
+                && _nanoChat.GetPda((uid, card)) != null
                 && seen.Add(number))
                 contacts.Add(new NanoChatRecipient(number, id.FullName, id.LocalizedJobTitle));
         }
