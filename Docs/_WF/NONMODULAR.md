@@ -398,9 +398,10 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
 - [`Resources/Locale/en-US/_Everdream/accessories/hair.ftl`](../../Resources/Locale/en-US/_Everdream/accessories/hair.ftl): Everdream hair port
 - [`Resources/Locale/en-US/_Goobstation/guidebook/guides.ftl`](../../Resources/Locale/en-US/_Goobstation/guidebook/guides.ftl): restore the licence header removed by Kill Spdx
 - [`Resources/Locale/en-US/_Mono/guidebook/guides.ftl`](../../Resources/Locale/en-US/_Mono/guidebook/guides.ftl): was Monolith Rules
+- [`Resources/Locale/en-US/_Mono/job/job-description.ftl`](../../Resources/Locale/en-US/_Mono/job/job-description.ftl): fugitives are wanted for arrest, not kill on sight
 - [`Resources/Locale/en-US/_Mono/poi/stations.ftl`](../../Resources/Locale/en-US/_Mono/poi/stations.ftl)
   - keeps [bold]; upstream's [color=bold] tag is unbalanced
-  - the map has one UndergroundVend, not four
+  - the map has one UndergroundVend, not four; its roles are wanted, not kill on sight
 - [`Resources/Locale/en-US/_Mono/prototypes/access/accesses.ftl`](../../Resources/Locale/en-US/_Mono/prototypes/access/accesses.ftl): Monolith#4816 shipped the Underground access levels without names
 - [`Resources/Locale/en-US/_Mono/store/pdv-uplink-catalog.ftl`](../../Resources/Locale/en-US/_Mono/store/pdv-uplink-catalog.ftl): the uplink had no 5.56 for the Vympel it sells
 - [`Resources/Locale/en-US/_NF/advertisements/vending/fuelvend.ftl`](../../Resources/Locale/en-US/_NF/advertisements/vending/fuelvend.ftl): the engine is the IRE everywhere else in game, so these lines say IRE too
