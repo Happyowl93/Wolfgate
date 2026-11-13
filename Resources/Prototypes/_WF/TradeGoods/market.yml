@@ -123,7 +123,7 @@
   contrabandGoods: [ WFTradeGoodContraband ]
   contrabandWarrantChance: 0.25
   contrabandWarrant: 20000
-  contrabandWarrantCap: 100000
+  contrabandWarrantCap: 300000
   contrabandAlertCooldown: 300
   contrabandTelecrystals: 2
   contrabandAlertChannel: Nfsd

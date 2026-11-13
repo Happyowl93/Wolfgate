@@ -220,7 +220,7 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
 
     /// <summary>The most a seller's contraband warrant grows to.</summary>
     [DataField]
-    public int ContrabandWarrantCap = 100000;
+    public int ContrabandWarrantCap = 300000;
 
     /// <summary>After security hears of a seller, how long before a further flag on them is radioed again.</summary>
     [DataField]
