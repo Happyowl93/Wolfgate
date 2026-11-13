@@ -21,6 +21,9 @@ nano-chat-list-number = List my number in the directory
 nano-chat-no-card = No ID
 nano-chat-unknown-name = Unknown
 nano-chat-too-fast = You're sending messages too fast.
+nano-chat-subtle = Subtle: ghosts don't see what you send
+nano-chat-ghost-message = [color=#c49bff][NanoChat] [bold]{$sender}[/bold] to [bold]{$recipient}[/bold]:[/color] {$message}
+nano-chat-ghost-message-subtle = [color=#c49bff][NanoChat, subtle] [bold]{$sender}[/bold] to [bold]{$recipient}[/bold]:[/color] {$message}
 
 nano-chat-new-title = New chat
 nano-chat-number-label = Number

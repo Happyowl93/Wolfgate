@@ -32,6 +32,9 @@ public sealed partial class NanoChatUiFragment : BoxContainer
     /// <summary>An action for the server: type, number, text or name, job.</summary>
     public event Action<NanoChatUiMessageType, uint?, string?, string?>? OnMessageSent;
 
+    /// <summary>Whether messages are sent subtle, out of ghosts' sight. Stays on until toggled off.</summary>
+    public bool Subtle => SubtleButton.Pressed;
+
     public NanoChatUiFragment()
     {
         IoCManager.InjectDependencies(this);

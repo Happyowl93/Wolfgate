@@ -18,6 +18,10 @@ between messages from one sender, 100 messages kept per chat, only the open chat
 updates only while someone is looking at it. The log probe scan, AI support and the chat keybinds are left out.
 Microwaving a card still scrambles or wipes its messages.
 
+**Ghosts.** A delivered message also goes to every ghost's chat on the radio channel, naming both sides, with a
+follow link to the sender. The lock button by the message box sends subtle: ghosts don't see it, admin ghosts still do,
+marked subtle, and the admin log tags it. Undelivered messages reach no one.
+
 **Cyborgs.** A cyborg's built-in PDA (see the Cyborgs module) has no card in its ID slot; its NanoChat reads the ID
 card the cyborg was issued, held, stowed in a module or kept in its chassis (`NanoChatSystem.GetPda`/`TryGetCard`).
 A cyborg that spawns into a job keeps its character's number like anyone else.

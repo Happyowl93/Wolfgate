@@ -2,33 +2,42 @@ using System.Linq;
 using Content.Server._WF.PlanetComms;
 using Content.Server._WF.TradeGoods.Systems;
 using Content.Server.Administration.Logs;
+using Content.Server.Administration.Managers;
 using Content.Server.CartridgeLoader;
+using Content.Server.Chat.Managers;
 using Content.Server.Power.Components;
 using Content.Server.Radio;
 using Content.Shared._WF.NanoChat;
 using Content.Shared.Access.Components;
 using Content.Shared.CartridgeLoader;
+using Content.Shared.Chat;
 using Content.Shared.Database;
 using Content.Shared.GameTicking;
+using Content.Shared.Ghost;
 using Content.Shared.PDA;
 using Content.Shared.Popups;
 using Content.Shared.Radio;
 using Content.Shared.Radio.Components;
 using Robust.Shared.Map;
+using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
+using Robust.Shared.Utility;
 
 namespace Content.Server._WF.NanoChat;
 
 /// <summary>
 /// The NanoChat app: its window, and sending messages. A message rides the cartridge's radio channel, so it needs
 /// a telecom server (or a planet's mass transceiver) where it is sent from, and the receiving PDA must be able to
-/// hear that channel, as headsets do.
+/// hear that channel, as headsets do. Ghosts read delivered messages in chat unless they are sent subtle; admin
+/// ghosts read those too.
 /// </summary>
 public sealed class NanoChatCartridgeSystem : EntitySystem
 {
     [Dependency] private CartridgeLoaderSystem _loader = default!;
     [Dependency] private IAdminLogManager _adminLogger = default!;
+    [Dependency] private IAdminManager _admin = default!;
+    [Dependency] private IChatManager _chat = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototype = default!;
     [Dependency] private NanoChatSystem _nanoChat = default!;
@@ -195,12 +204,31 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
             ? string.Join(", ", recipients.Select(r => ToPrettyString(r.Owner)))
             : $"#{SharedNanoChatSystem.FormatNumber(number)}";
         _adminLogger.Add(LogType.Chat, LogImpact.Low,
-            $"{ToPrettyString(msg.Actor):user} sent NanoChat message to {names}: {content}{(recipients.Count == 0 ? " [DELIVERY FAILED]" : "")}");
+            $"{ToPrettyString(msg.Actor):user} sent NanoChat message to {names}: {content}{(recipients.Count == 0 ? " [DELIVERY FAILED]" : "")}{(msg.Subtle ? " [SUBTLE]" : "")}");
 
         foreach (var recipient in recipients)
         {
             Deliver(ownNumber, recipient, message);
         }
+
+        if (recipients.Count > 0)
+            ShowGhosts(msg.Actor, ownNumber, number, content, msg.Subtle);
+    }
+
+    /// <summary>Puts a delivered message in ghosts' chat, or only admin ghosts' if it was sent subtle.</summary>
+    private void ShowGhosts(EntityUid sender, uint senderNumber, uint recipientNumber, string content, bool subtle)
+    {
+        var filter = Filter.Empty().AddWhereAttachedEntity(uid => HasComp<GhostComponent>(uid));
+        if (subtle)
+            filter.RemoveWhere(session => !_admin.IsAdmin(session));
+
+        string NameOf(uint number) => FormattedMessage.EscapeText(GetCardInfo(number)?.Name ?? $"#{SharedNanoChatSystem.FormatNumber(number)}");
+        var wrapped = Loc.GetString(subtle ? "nano-chat-ghost-message-subtle" : "nano-chat-ghost-message",
+            ("sender", NameOf(senderNumber)),
+            ("recipient", NameOf(recipientNumber)),
+            ("message", FormattedMessage.EscapeText(content)));
+
+        _chat.ChatMessageToManyFiltered(filter, ChatChannel.Radio, content, wrapped, sender, false, !subtle, null);
     }
 
     /// <summary>The cards holding a number whose PDA this cartridge's message reaches.</summary>

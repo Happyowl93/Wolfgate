@@ -182,6 +182,16 @@
                                              MinSize="18 18" />
                             </Control>
                         </Button>
+                        <Button Name="SubtleButton"
+                                MaxSize="32 32"
+                                ToggleMode="True"
+                                StyleClasses="OpenBoth"
+                                Margin="0 0 4 0"
+                                ToolTip="{Loc nano-chat-subtle}">
+                            <TextureRect TexturePath="/Textures/Interface/VerbIcons/lock.svg.192dpi.png"
+                                         Stretch="KeepAspectCentered"
+                                         MinSize="18 18" />
+                        </Button>
                         <LineEdit Name="MessageInput"
                                   PlaceHolder="{Loc nano-chat-message-placeholder}"
                                   HorizontalExpand="True"

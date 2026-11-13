@@ -18,15 +18,20 @@ public sealed class NanoChatUiMessageEvent : CartridgeMessageEvent
     /// <summary>The contact's job title for a new or edited chat.</summary>
     public readonly string? RecipientJob;
 
+    /// <summary>A message ghosts don't see.</summary>
+    public readonly bool Subtle;
+
     public NanoChatUiMessageEvent(NanoChatUiMessageType type,
         uint? recipientNumber = null,
         string? content = null,
-        string? recipientJob = null)
+        string? recipientJob = null,
+        bool subtle = false)
     {
         Type = type;
         RecipientNumber = recipientNumber;
         Content = content;
         RecipientJob = recipientJob;
+        Subtle = subtle;
     }
 }
 

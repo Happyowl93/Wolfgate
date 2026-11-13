@@ -1,16 +1,27 @@
 #nullable enable
 using System.Linq;
+using Content.Client.UserInterface.Systems.Chat;
+using Content.IntegrationTests.Pair;
 using Content.Server._WF.NanoChat;
+using Content.Server.Administration.Managers;
 using Content.Server.CartridgeLoader;
+using Content.Server.GameTicking;
 using Content.Shared._WF.NanoChat;
 using Content.Shared.CartridgeLoader;
+using Content.Shared.Chat;
+using Content.Shared.Mind;
 using Content.Shared.PDA;
+using Content.Shared.Players;
 using Content.Shared.Power.EntitySystems;
+using Robust.Client.UserInterface;
 using Robust.Shared.GameObjects;
 
 namespace Content.IntegrationTests.Tests._WF.NanoChat;
 
-/// <summary>Cards get distinct numbers, messages reach another PDA while a telecom server is up, and sending is rate limited.</summary>
+/// <summary>
+/// Cards get distinct numbers, messages reach another PDA while a telecom server is up, sending is rate limited, and
+/// ghosts read messages unless they are sent subtle.
+/// </summary>
 [TestFixture]
 [TestOf(typeof(NanoChatCartridgeSystem))]
 public sealed class NanoChatTest
@@ -111,6 +122,107 @@ public sealed class NanoChatTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>A ghost reads a message in chat but not a subtle one, and an admin ghost reads the subtle one marked.</summary>
+    [Test]
+    public async Task GhostsSeeMessagesUnlessSubtle()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var server = pair.Server;
+        var client = pair.Client;
+        var entMan = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var minds = entMan.System<SharedMindSystem>();
+        var admins = server.ResolveDependency<IAdminManager>();
+        var session = server.PlayerMan.GetSessionById(client.Session!.UserId);
+        var chat = client.ResolveDependency<IUserInterfaceManager>().GetUIController<ChatUIController>();
+
+        var wasAdmin = false;
+        var pdas = new EntityUid[3];
+        await server.WaitPost(() =>
+        {
+            var telecom = entMan.SpawnEntity(Server, map.GridCoords);
+            entMan.System<SharedPowerReceiverSystem>().SetNeedsPower(telecom, false);
+            for (var i = 0; i < pdas.Length; i++)
+            {
+                pdas[i] = entMan.SpawnEntity(Pda, map.GridCoords);
+            }
+
+            var ghost = entMan.SpawnEntity(GameTicker.ObserverPrototypeName, map.GridCoords);
+            minds.WipeMind(session.ContentData()?.Mind);
+            minds.TransferTo(minds.CreateMind(session.UserId).Owner, ghost);
+
+            wasAdmin = admins.IsAdmin(session);
+            if (wasAdmin)
+                admins.DeAdmin(session);
+        });
+
+        // The power net updates twice a second.
+        await pair.RunTicksSync(90);
+
+        void SendBetween(int from, int to, string text, bool subtle)
+        {
+            var app = entMan.System<CartridgeLoaderSystem>().TryGetProgram<NanoChatCartridgeComponent>(pdas[from], out var program, out _)
+                ? program!.Value
+                : throw new AssertionException("PDA has no NanoChat app.");
+            Send(entMan, pdas[from], app, CardOf(entMan, pdas[to]).Comp.Number!.Value, text, subtle);
+        }
+
+        bool Seen(string text) => chat.History.Any(h => h.Msg.Message == text);
+
+        await server.WaitPost(() =>
+        {
+            SendBetween(0, 1, "for everyone", false);
+            SendBetween(1, 0, "between us", true);
+        });
+        await WaitFor(pair, () => Seen("for everyone"), "the ghost to read a message");
+        await pair.RunTicksSync(10);
+
+        await client.WaitAssertion(() =>
+        {
+            var seen = chat.History.Last(h => h.Msg.Message == "for everyone").Msg;
+            Assert.That(seen.Channel, Is.EqualTo(ChatChannel.Radio));
+            Assert.That(seen.WrappedMessage, Does.Contain("[NanoChat]"));
+            Assert.That(Seen("between us"), Is.False, "A ghost read a subtle message.");
+        });
+
+        await server.WaitPost(() =>
+        {
+            if (admins.IsAdmin(session, includeDeAdmin: true))
+                admins.ReAdmin(session);
+            else
+                admins.PromoteHost(session);
+        });
+        await pair.RunTicksSync(5);
+
+        await server.WaitPost(() => SendBetween(2, 0, "admins only", true));
+        await WaitFor(pair, () => Seen("admins only"), "an admin ghost to read a subtle message");
+        await client.WaitAssertion(() =>
+            Assert.That(chat.History.Last(h => h.Msg.Message == "admins only").Msg.WrappedMessage, Does.Contain("subtle")));
+
+        await server.WaitPost(() =>
+        {
+            if (!wasAdmin)
+                admins.DeAdmin(session);
+            minds.WipeMind(session.ContentData()?.Mind);
+        });
+        await pair.RunTicksSync(5);
+
+        await pair.CleanReturnAsync();
+    }
+
+    private static async Task WaitFor(TestPair pair, Func<bool> condition, string what)
+    {
+        for (var i = 0; i < 60; i++)
+        {
+            if (condition())
+                return;
+
+            await pair.RunTicksSync(1);
+        }
+
+        Assert.That(condition(), $"Timed out waiting for {what}.");
+    }
+
     private static Entity<NanoChatCardComponent> CardOf(IEntityManager entMan, EntityUid pda)
     {
         var id = entMan.GetComponent<PdaComponent>(pda).ContainedId;
@@ -118,9 +230,9 @@ public sealed class NanoChatTest
         return (id!.Value, entMan.GetComponent<NanoChatCardComponent>(id.Value));
     }
 
-    private static void Send(IEntityManager entMan, EntityUid pda, EntityUid cartridge, uint number, string text)
+    private static void Send(IEntityManager entMan, EntityUid pda, EntityUid cartridge, uint number, string text, bool subtle = false)
     {
-        var msg = new NanoChatUiMessageEvent(NanoChatUiMessageType.SendMessage, number, text)
+        var msg = new NanoChatUiMessageEvent(NanoChatUiMessageType.SendMessage, number, text, subtle: subtle)
         {
             LoaderUid = entMan.GetNetEntity(pda),
             Actor = pda,
