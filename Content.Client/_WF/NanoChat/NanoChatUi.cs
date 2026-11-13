@@ -1,0 +1,30 @@
+using Content.Client.UserInterface.Fragments;
+using Content.Shared._WF.NanoChat;
+using Content.Shared.CartridgeLoader;
+using Robust.Client.UserInterface;
+
+namespace Content.Client._WF.NanoChat;
+
+/// <summary>The NanoChat app's PDA fragment.</summary>
+public sealed partial class NanoChatUi : UIFragment
+{
+    private NanoChatUiFragment? _fragment;
+
+    public override Control GetUIFragmentRoot()
+    {
+        return _fragment!;
+    }
+
+    public override void Setup(BoundUserInterface userInterface, EntityUid? fragmentOwner)
+    {
+        _fragment = new NanoChatUiFragment();
+        _fragment.OnMessageSent += (type, number, content, job) =>
+            userInterface.SendMessage(new CartridgeUiMessage(new NanoChatUiMessageEvent(type, number, content, job)));
+    }
+
+    public override void UpdateState(BoundUserInterfaceState state)
+    {
+        if (state is NanoChatUiState cast)
+            _fragment?.UpdateState(cast);
+    }
+}
