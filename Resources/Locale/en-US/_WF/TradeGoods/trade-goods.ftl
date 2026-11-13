@@ -184,6 +184,7 @@ wf-market-faction-ussp = USSP
 wf-market-faction-pdv = Phaethon Dynasty
 wf-market-faction-underground = The Underground
 wf-market-faction-independent = Independent
+wf-market-faction-drop = Smuggling drop, moves in {$minutes} min
 wf-market-no-alerts = Nothing happening in the sector right now.
 wf-market-minutes-left = {$minutes} min left
 wf-market-alert-kind-deal = DEAL

@@ -120,10 +120,11 @@ Only the drop buys it (`WFTradeContrabandSystem.Drop`): one open station whose c
 wandering merchant, hidden market or blockaded station. Every other open chute refuses a smuggling crate with a popup.
 The drop moves every `contrabandDropInterval` (30 minutes, and never to the same station twice running when there is
 another), or at once if its station is gone. The underground companies are told where it went in chat and see it, with
-its countdown, in the Market app's alerts; a Market app hint on a smuggling crate names the drop only to them.
-Security is tipped off on `contrabandAlertChannel` `contrabandDropLeak` (10 minutes) after each move. Price listings
-don't change, so the Prices tab doesn't give it away. A `contrabandDropInterval` of zero lets every open chute buy
-contraband. The drop only moves in round; `Rotate`, `Leak` and `TickDrop` are public for tests.
+its countdown, in the Market app's alerts and as its own card at the top of the Underground tab
+(`WFMarketCartridgeSystem.DropCard`); a Market app hint on a smuggling crate names the drop only to them. The open
+station cards on the Prices tab leave contraband out while there is a drop, so lawful players see no price for it.
+Security is tipped off on `contrabandAlertChannel` `contrabandDropLeak` (10 minutes) after each move. A
+`contrabandDropInterval` of zero lets every open chute buy contraband, and the Prices tab lists it again. The drop only moves in round; `Rotate`, `Leak` and `TickDrop` are public for tests.
 
 Priority deliveries (consignments in code, `WFTradeSpecialCrateSystem`): a crate appears at one station's chute, bound
 for another station at least a haul away, never a wandering merchant or a hidden market, and pays well at that station's chute on time

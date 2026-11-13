@@ -4,6 +4,7 @@ using System.Numerics;
 using Content.Server._NF.SectorServices;
 using Content.Server._WF.TradeGoods.Systems;
 using Content.Shared._Mono.Company;
+using Content.Shared._WF.TradeGoods;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Localization;
 using Robust.Shared.Map;
@@ -67,14 +68,22 @@ public sealed class TradeContrabandDropTest
             Assert.That(cartridge.BestSale(crate, lawful), Is.Null, "A lawful holder was told where the drop is.");
             Assert.That(cartridge.BestSale(crate, underground)?.Station, Is.EqualTo(dropName), "The Underground was not told the drop.");
 
-            bool SeesDropAlert(EntityUid holder)
-            {
-                var loader = entMan.SpawnEntity(null, new EntityCoordinates(holder, 0f, 0f));
-                return cartridge.BuildState(loader).Alerts.Any(alert => alert.Text.Contains(dropName) && alert.Ends == contraband.DropEnds);
-            }
+            WFMarketUiState StateOf(EntityUid holder) => cartridge.BuildState(entMan.SpawnEntity(null, new EntityCoordinates(holder, 0f, 0f)));
+            bool SeesDropAlert(WFMarketUiState state) => state.Alerts.Any(alert => alert.Text.Contains(dropName) && alert.Ends == contraband.DropEnds);
 
-            Assert.That(SeesDropAlert(lawful), Is.False, "A lawful holder saw the drop alert.");
-            Assert.That(SeesDropAlert(underground), Is.True, "The Underground's app should show the drop.");
+            var lawfulState = StateOf(lawful);
+            var undergroundState = StateOf(underground);
+            Assert.That(SeesDropAlert(lawfulState), Is.False, "A lawful holder saw the drop alert.");
+            Assert.That(SeesDropAlert(undergroundState), Is.True, "The Underground's app should show the drop.");
+
+            // Contraband is priced only on the drop's own card under the Underground tab.
+            var goodName = entMan.System<WFTradeMarketSystem>().GoodName(Contraband);
+            bool Lists(WFMarketStation station) => station.Prices.Any(price => price.Good == goodName);
+            Assert.That(lawfulState.Stations.Any(Lists), Is.False, "A lawful holder saw a contraband price.");
+            Assert.That(undergroundState.Stations.Any(station => !station.Underground && Lists(station)), Is.False,
+                "An open station card listed contraband while there is a drop.");
+            Assert.That(undergroundState.Stations.Any(station => station.Underground && station.Name == dropName && Lists(station)), Is.True,
+                "The Underground tab should list the drop with its contraband price.");
 
             contraband.Leak();
             Assert.That(contraband.DropLeaked, Is.True, "Leaking the drop didn't tip off security.");

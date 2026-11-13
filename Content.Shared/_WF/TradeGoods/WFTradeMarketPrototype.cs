@@ -238,6 +238,10 @@ public sealed partial class WFTradeMarketPrototype : IPrototype
     [DataField]
     public TimeSpan ContrabandDropLeak = TimeSpan.FromMinutes(10);
 
+    /// <summary>The colour of the drop's card under the Market app's Underground tab.</summary>
+    [DataField]
+    public Color ContrabandDropColor = Color.FromHex("#d84a4a");
+
     /// <summary>The radio channel security hears a flagged sale on.</summary>
     [DataField]
     public ProtoId<RadioChannelPrototype> ContrabandAlertChannel = "Nfsd";
