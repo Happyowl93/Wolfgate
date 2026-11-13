@@ -239,6 +239,7 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
         var order = new Dictionary<EntityUid, int>();
         var hiddenChutes = new HashSet<EntityUid>();
         var chutes = _market.Chutes();
+        var dropCard = DropCard(profile);
         foreach (var (chute, dispenser, grid) in chutes)
         {
             var chuteId = MetaData(chute).EntityPrototype?.ID;
@@ -265,13 +266,20 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
             var restocking = _market.ScarceGoods(grid).Where(good => !dispenser.Inventory.ContainsKey(good)).ToList();
             foreach (var good in dispenser.Inventory.Keys.Concat(restocking))
             {
-                // Contraband that sells at the drop alone is listed on the drop's own card, not on the open stations'.
-                if (!hidden && _contraband.AtDropOnly(good)
-                    || _market.Quote(chute, good) is not { } quote
-                    || station.Prices.Any(price => price.Good == _market.GoodName(good)))
+                // Contraband that sells at the drop alone goes on the drop's own card, and on no open station's.
+                var card = station;
+                if (!hidden && _contraband.AtDropOnly(good))
+                {
+                    if (dropCard == null || grid != _contraband.DropPoint)
+                        continue;
+
+                    card = dropCard;
+                }
+
+                if (_market.Quote(chute, good) is not { } quote || card.Prices.Any(price => price.Good == _market.GoodName(good)))
                     continue;
 
-                station.Prices.Add(new WFMarketPrice(_market.GoodName(good), quote.Amount, quote.Factor,
+                card.Prices.Add(new WFMarketPrice(_market.GoodName(good), quote.Amount, quote.Factor,
                     Loc.GetString(quote.Reason), _cargo.GoodWeight(good), quote.Factor >= profile.Highlight, null, Shelf(grid, good, profile)));
             }
 
@@ -413,7 +421,7 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
             .ThenBy(entry => entry.Value.Name)
             .Select(entry => entry.Value)
             .ToList();
-        if (DropCard(chutes, hiddenChutes, profile) is { } dropCard)
+        if (dropCard is { Prices.Count: > 0 })
             sorted.Insert(0, dropCard);
 
         var quotes = _stock.WfQuotes();
@@ -426,42 +434,22 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
     }
 
     /// <summary>
-    /// The contraband drop's card, listed first under the Underground tab: the drop station and what its chutes pay for
-    /// contraband, which the open cards leave out. Null when there is no drop.
+    /// An empty card for the contraband drop, listed first under the Underground tab once the station loop fills it with
+    /// the contraband prices the open cards leave out. Null when there is no drop.
     /// </summary>
-    private WFMarketStation? DropCard(List<(EntityUid Chute, DispenserComponent Dispenser, EntityUid Grid)> chutes,
-        HashSet<EntityUid> hiddenChutes, WFTradeMarketPrototype profile)
+    private WFMarketStation? DropCard(WFTradeMarketPrototype profile)
     {
         if (!_contraband.DropActive || _contraband.DropPoint is not { } drop)
             return null;
 
         var minutes = Math.Max(1, (int) Math.Ceiling((_contraband.DropEnds - _timing.CurTime).TotalMinutes));
-        var card = new WFMarketStation
+        return new WFMarketStation
         {
             Name = Name(drop),
             Underground = true,
             Faction = Loc.GetString("wf-market-faction-drop", ("minutes", minutes)),
             FactionColor = profile.ContrabandDropColor,
         };
-
-        foreach (var (chute, dispenser, grid) in chutes)
-        {
-            if (grid != drop || hiddenChutes.Contains(chute))
-                continue;
-
-            foreach (var good in profile.ContrabandGoods)
-            {
-                if (!dispenser.Inventory.ContainsKey(good.Id)
-                    || _market.Quote(chute, good.Id) is not { } quote
-                    || card.Prices.Any(price => price.Good == _market.GoodName(good.Id)))
-                    continue;
-
-                card.Prices.Add(new WFMarketPrice(_market.GoodName(good.Id), quote.Amount, quote.Factor, Loc.GetString(quote.Reason),
-                    _cargo.GoodWeight(good.Id), false));
-            }
-        }
-
-        return card.Prices.Count > 0 ? card : null;
     }
 
     /// <summary>A good's shelf at a station for its row's bar, or null where the station stands outside the sector economy.</summary>
