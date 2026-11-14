@@ -1,0 +1,113 @@
+using Content.Shared.CartridgeLoader;
+using Robust.Shared.Serialization;
+
+namespace Content.Shared._WF.Banking;
+
+/// <summary>Whether the Bank app can open the account on the PDA's ID card, and why not.</summary>
+[Serializable, NetSerializable]
+public enum WFBankStatus : byte
+{
+    Ready,
+
+    /// <summary>The PDA holds no ID card.</summary>
+    NoId,
+
+    /// <summary>The card was never issued to an account holder, or their character is gone.</summary>
+    Unlinked,
+
+    /// <summary>The account holder isn't connected, so the bank can't reach their account.</summary>
+    Offline,
+
+    /// <summary>An Ironman account, which can't send money out.</summary>
+    Locked,
+}
+
+[Serializable, NetSerializable]
+public enum WFBankEntryKind : byte
+{
+    Withdrawal,
+    Deposit,
+    TransferOut,
+    TransferIn,
+    AtmWithdrawal,
+    AtmDeposit,
+
+    /// <summary>Paid from the account at a vendor or console, named in the entry's party.</summary>
+    Purchase,
+
+    /// <summary>Any other money taken from the account, such as a fine.</summary>
+    Charge,
+
+    /// <summary>Any other money paid into the account, such as wages or a sale.</summary>
+    Payment,
+}
+
+/// <summary>One line of an account's activity this round.</summary>
+[Serializable, NetSerializable]
+public sealed class WFBankEntry
+{
+    public WFBankEntryKind Kind;
+    public int Amount;
+
+    /// <summary>The other account of a transfer, or where a purchase was made.</summary>
+    public string Party = string.Empty;
+
+    /// <summary>Round time of the transaction.</summary>
+    public TimeSpan Time;
+}
+
+/// <summary>Everything the Bank app shows for the ID card in its PDA.</summary>
+[Serializable, NetSerializable]
+public sealed class WFBankUiState : BoundUserInterfaceState
+{
+    public WFBankStatus Status;
+    public string Holder = string.Empty;
+    public string Job = string.Empty;
+
+    /// <summary>The account number's last four digits.</summary>
+    public string Number = string.Empty;
+
+    public int Balance;
+
+    /// <summary>Most the account may send out this round, by withdrawal or transfer.</summary>
+    public int Limit;
+
+    /// <summary>What the account has sent out this round.</summary>
+    public int Withdrawn;
+
+    /// <summary>Thalers in the viewer's active hand, ready to deposit.</summary>
+    public int HandCash;
+
+    public bool DepositEnabled;
+
+    /// <summary>This round's activity, newest first.</summary>
+    public List<WFBankEntry> History = new();
+}
+
+[Serializable, NetSerializable]
+public abstract class WFBankAction;
+
+[Serializable, NetSerializable]
+public sealed class WFBankWithdrawAction : WFBankAction
+{
+    public int Amount;
+}
+
+[Serializable, NetSerializable]
+public sealed class WFBankTransferAction : WFBankAction
+{
+    /// <summary>The recipient character's full name, as typed.</summary>
+    public string Recipient = string.Empty;
+    public int Amount;
+}
+
+/// <summary>Deposits the thalers in the viewer's active hand.</summary>
+[Serializable, NetSerializable]
+public sealed class WFBankDepositAction : WFBankAction;
+
+/// <summary>A Bank app button press.</summary>
+[Serializable, NetSerializable]
+public sealed class WFBankCartridgeMessage(WFBankAction action) : CartridgeMessageEvent
+{
+    public WFBankAction Action = action;
+}

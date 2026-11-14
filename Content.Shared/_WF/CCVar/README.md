@@ -16,6 +16,7 @@ Bench's ticket range, debt deadline, debt cap, garnish share and outlaw bounty.
 
 ### Shared
 
+- [`Content.Shared/_WF/CCVar/BankingCVars.cs`](BankingCVars.cs)
 - [`Content.Shared/_WF/CCVar/BattleLoadCVars.cs`](BattleLoadCVars.cs)
 - [`Content.Shared/_WF/CCVar/BenchCVars.cs`](BenchCVars.cs)
 - [`Content.Shared/_WF/CCVar/CavernCVars.cs`](CavernCVars.cs)

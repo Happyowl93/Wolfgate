@@ -75,7 +75,7 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
     /// <summary>
     /// Adds the Market app, then any apps other modules add through <see cref="WFPdaProgramsEvent"/>, to every PDA's
     /// preinstalled programs just before they install at map init, since most PDA prototypes replace the base list.
-    /// Last in the list, so a full disk drops them rather than a job program.
+    /// The disk grows by a slot for each, so they never crowd out a job program or each other.
     /// </summary>
     private void OnPdaMapInit(Entity<PdaComponent> ent, ref MapInitEvent args)
     {
@@ -86,8 +86,11 @@ public sealed partial class WFMarketCartridgeSystem : EntitySystem
         RaiseLocalEvent(ref ev);
         foreach (var program in ev.Programs)
         {
-            if (!loader.PreinstalledPrograms.Contains(program))
-                loader.PreinstalledPrograms.Add(program);
+            if (loader.PreinstalledPrograms.Contains(program))
+                continue;
+
+            loader.PreinstalledPrograms.Add(program);
+            loader.DiskSpace++;
         }
     }
 
