@@ -319,7 +319,7 @@
 
 - type: xenobiologyBounty
   id: WFBountySandglassExtract
-  pointsAwarded: 15000
+  pointsAwarded: 7500
   entries:
   - name: bounty-item-wf-sandglass-extract
     amount: 1
@@ -329,7 +329,7 @@
 
 - type: xenobiologyBounty
   id: WFBountyAmberExtract
-  pointsAwarded: 40000
+  pointsAwarded: 20000
   entries:
   - name: bounty-item-wf-amber-extract
     amount: 1

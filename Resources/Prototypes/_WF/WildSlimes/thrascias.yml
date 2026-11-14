@@ -280,7 +280,7 @@
 
 - type: xenobiologyBounty
   id: WFBountyRimeExtract
-  pointsAwarded: 15000
+  pointsAwarded: 7500
   entries:
   - name: bounty-item-wf-rime-extract
     amount: 1
@@ -290,7 +290,7 @@
 
 - type: xenobiologyBounty
   id: WFBountyAuroraExtract
-  pointsAwarded: 40000
+  pointsAwarded: 20000
   entries:
   - name: bounty-item-wf-aurora-extract
     amount: 1

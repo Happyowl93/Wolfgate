@@ -127,7 +127,7 @@
 
 - type: xenobiologyBounty
   id: WFBountyCarcinomaExtract
-  pointsAwarded: 15000
+  pointsAwarded: 7500
   entries:
   - name: bounty-item-wf-carcinoma-extract
     amount: 1
@@ -137,7 +137,7 @@
 
 - type: xenobiologyBounty
   id: WFBountyMetastaticExtract
-  pointsAwarded: 40000
+  pointsAwarded: 20000
   entries:
   - name: bounty-item-wf-metastatic-extract
     amount: 1

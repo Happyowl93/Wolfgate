@@ -267,7 +267,7 @@
 
 - type: xenobiologyBounty
   id: WFBountyDewExtract
-  pointsAwarded: 15000
+  pointsAwarded: 7500
   entries:
   - name: bounty-item-wf-dew-extract
     amount: 1
@@ -277,7 +277,7 @@
 
 - type: xenobiologyBounty
   id: WFBountyBloomExtract
-  pointsAwarded: 40000
+  pointsAwarded: 20000
   entries:
   - name: bounty-item-wf-bloom-extract
     amount: 1

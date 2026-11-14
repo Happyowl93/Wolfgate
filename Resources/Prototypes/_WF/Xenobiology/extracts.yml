@@ -309,7 +309,7 @@
         effects:
         - !type:XenobioAdjustSolution
           reagent: Omnizine
-          amount: 15
+          amount: 5
   - type: Tag
     tags:
     - XenobiologyPurpleExtract
