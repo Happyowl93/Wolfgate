@@ -147,7 +147,7 @@ public sealed class DependenceTest
             var body = server.System<SharedBodySystem>();
             var hands = server.System<SharedHandsSystem>();
 
-            List<string?> Held(EntityUid mob)
+            List<string> Held(EntityUid mob)
             {
                 return hands.EnumerateHeld(mob).Select(item => entMan.GetComponent<MetaDataComponent>(item).EntityPrototype?.ID).ToList();
             }
