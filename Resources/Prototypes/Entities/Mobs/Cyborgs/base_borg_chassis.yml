@@ -150,7 +150,7 @@
   - type: Buckle
   - type: Climbing
   # WOLFGATE END
-  # WOLFGATE(Cyborgs) START: a built-in PDA with every app, opened from an action
+  # WOLFGATE(Cyborgs) START: a built-in PDA with a vagrant's apps, opened from an action
   # Its slots stay locked: the apps read the cyborg's issued ID card wherever it carries it.
   - type: Pda
     idSlot:
@@ -163,24 +163,13 @@
   - type: Ringer
   - type: CartridgeLoader
     uiKey: enum.PdaUiKey.Key
-    diskSpace: 24
-    # The Market, Contracts and NanoChat apps are added to every PDA in code.
+    # The same apps as a vagrant's PDA (BasePDA); Market, Contracts and NanoChat are added to every PDA in code.
     preinstalled:
     - CrewManifestCartridge
     - NotekeeperCartridge
     - NewsReaderCartridge
     - BountyContractsCartridge
     - AstroNavCartridge
-    - WantedListCartridge
-    - LedgerCartridge
-    - LogProbeCartridge
-    - NetProbeCartridge
-    - MedTekCartridge
-    - AppraisalCartridge
-    - MailMetricsCartridge
-    - WFBenchCartridge
-    - WFGameHubCartridge
-    - WFLatticeStatusCartridge
     cartridgeSlot:
       locked: true
       priority: -1

@@ -33,11 +33,10 @@ on board.
   doors open for a cyborg in the crew. A cyborg that spawns into a job has no tool module until it picks a type, so
   it is issued the card in its chassis at spawn; the tool module then carries that card in place of its own.
 
-- **PDA** (`pda.yml`): every chassis is its own PDA, with every app installed and its slots locked, opened from the
-  Open PDA action. Apps that read an ID card (NanoChat) read the cyborg's issued card; `WFBorgPdaSystem` names the
-  PDA after the cyborg and sends app notifications to the cyborg's chat, since the stock path only tells whoever
-  carries a PDA. Apps that work by using the PDA on something (Appraisal, MedTek, the probes) can't be pointed at
-  anything from a chassis. A marked edit on `BaseBorgChassis`.
+- **PDA** (`pda.yml`): every chassis is its own PDA, with a vagrant's apps (those of `BasePDA` plus the ones every
+  PDA gets in code) and its slots locked, opened from the Open PDA action. Apps that read an ID card (NanoChat) read
+  the cyborg's issued card; `WFBorgPdaSystem` names the PDA after the cyborg and sends app notifications to the
+  cyborg's chat, since the stock path only tells whoever carries a PDA. A marked edit on `BaseBorgChassis`.
 
 `BorgPdaTest` covers the apps, the action and a cyborg's NanoChat, `BorgStackRefillTest` the issued kit and the
 cell-paid refill, `BorgPowerTest` the drinker lookup, `BorgShipPurchaseTest` a cyborg buying a ship with its card,
@@ -98,7 +97,7 @@ and `BorgShipAccessTest` a crew door admitting it.
   - the built-in PDA's installed apps
   - recharge from APCs and loose cells, and a bank account for ATMs and pay
   - buckle into seats and climb onto tables
-  - a built-in PDA with every app, opened from an action
+  - a built-in PDA with a vagrant's apps, opened from an action
   - the headlight Monolith commented out, back as a toggle
   - the action that opens the built-in PDA
 - [`Resources/Prototypes/Entities/Mobs/Player/silicon.yml`](../../../Resources/Prototypes/Entities/Mobs/Player/silicon.yml): was PowerCellMedium, half an hour of work per charge

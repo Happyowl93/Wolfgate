@@ -19,7 +19,7 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WF.Cyborgs;
 
 /// <summary>
-/// A cyborg's built-in PDA has every app and an action to open it, and its NanoChat reads the cyborg's issued ID
+/// A cyborg's built-in PDA has a vagrant's apps and an action to open it, and its NanoChat reads the cyborg's issued ID
 /// card, held or stowed, so it can message a PDA and be messaged back. Its player can open it on the client.
 /// </summary>
 [TestFixture]
@@ -29,16 +29,15 @@ public sealed class BorgPdaTest
     private const string Cell = "PowerCellHigh";
     private const string Tool = "BorgModuleTool";
     private const string Card = "WFBorgIdCard";
-    private const string Pda = "PassengerPDA";
+    private const string Pda = "ContractorPDA";
     private const string Server = "TelecomServerFilledCommon";
 
     [Test]
-    public async Task BorgPdaHasEveryAppAndChatsTest()
+    public async Task BorgPdaHasVagrantAppsAndChatsTest()
     {
         await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
         var entMan = server.EntMan;
-        var protoMan = server.ProtoMan;
         var map = await pair.CreateTestMap();
 
         EntityUid borg = default;
@@ -60,14 +59,11 @@ public sealed class BorgPdaTest
             var loader = entMan.System<CartridgeLoaderSystem>();
             var nanoChat = entMan.System<NanoChatSystem>();
 
-            // Every app there is, so a new one has to be added to the cyborg's list.
+            // The same apps as a vagrant's PDA.
             var installed = loader.GetInstalled(borg).Select(Proto).ToHashSet();
-            var apps = protoMan.EnumeratePrototypes<EntityPrototype>()
-                .Where(p => !p.Abstract && p.TryGetComponent<CartridgeComponent>(out _, entMan.ComponentFactory))
-                .Select(p => p.ID)
-                .ToList();
-            Assert.That(apps, Is.Not.Empty);
-            Assert.That(installed, Is.SupersetOf(apps), "A cyborg's PDA is missing an app; add it to BaseBorgChassis.");
+            var vagrant = loader.GetInstalled(pda).Select(Proto).ToHashSet();
+            Assert.That(vagrant, Is.Not.Empty);
+            Assert.That(installed, Is.EquivalentTo(vagrant), "A cyborg's PDA apps differ from a vagrant's; match BaseBorgChassis to BasePDA.");
 
             var intrinsic = entMan.GetComponent<IntrinsicUIComponent>(borg);
             Assert.That(intrinsic.UIs.TryGetValue(PdaUiKey.Key, out var entry) && entry.ToggleActionEntity is { Valid: true },
