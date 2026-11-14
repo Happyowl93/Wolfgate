@@ -310,8 +310,7 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
     {
         if (tier.Hallucinations.Count == 0
             || !_random.Prob(tier.HallucinationChance)
-            || !_players.TryGetSessionByEntity(uid, out var session)
-            || IsNeurowareHost(uid))
+            || !_players.TryGetSessionByEntity(uid, out var session))
             return;
 
         _drift.Show(session, uid, _random.Pick(tier.Hallucinations));

@@ -41,7 +41,6 @@ public sealed class WFDrugChatSystem : EntitySystem
             || string.IsNullOrEmpty(msg.Message)
             || _player.LocalEntity is not { } local
             || !TryComp<WFIntoxicationComponent>(local, out var comp)
-            || _intoxication.IsNeurowareHost(local)
             || _intoxication.DominantHigh(comp) is not { } high)
             return;
 

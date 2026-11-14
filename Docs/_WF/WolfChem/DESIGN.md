@@ -224,10 +224,14 @@ A heavy opioid high nods every 30 to 90 s for 1.5 to 3 s, an overdose every 15 t
 (`WFNodSystem`). The body stays standing and conscious and can still act, but moves at x0.2. The networked
 `NodStart`/`NodEnd` on the intoxication component drive the client: `WFNodOverlay` closes soft-edged lids over the
 view in 0.6 s and opens them at the end, and `WFDrugAudioSystem` occludes world sounds by up to 7. A third of nods
-show to others as an emote, and waking pops a line to the player. Nobody asleep, dead or running neuroware nods. The
-overdose keeps its real forced sleep on top.
+show to others as an emote, and waking pops a line to the player. Nobody asleep or dead nods. A neuroware host on an
+opioid program nods too, as a stall in standby with its own emote and wake lines. The overdose keeps its real forced
+sleep on top.
 
 ### Chat and speech
+
+A neuroware host gets all of this, the sound below and Chorus's hallucinations from its programs, as an organic
+does from the drug.
 
 - **Reading** (`WFDrugChatSystem`, client). Incoming speech, radio and emotes are rewritten on the high player's
   screen only, from the same strongest high the overlay draws (`WFIntoxicationSystem.DominantHigh`): psychedelics
