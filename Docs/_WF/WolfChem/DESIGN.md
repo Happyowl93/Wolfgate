@@ -420,12 +420,13 @@ stun, a forced Beep or Buzz emote, ten seconds of `ScrambledAccent`, or a false 
 ### Presentation
 
 `WFIntoxicationOverlay` draws a host's strongest high with its own shader, `WFNeuroware`
-(`Resources/Textures/_WF/WolfChem/Neuroware/Shaders/neuroware.swsl`), and no trails: the program corrupts the optics feed
-instead of the senses. Stimulants trace edges in cyan under a racing refresh line, opioids drop resolution and
+(`Resources/Textures/_WF/WolfChem/Neuroware/Shaders/neuroware.swsl`), over the same ghost trails: the program corrupts the
+optics feed instead of the senses. Stimulants trace edges in cyan under a racing refresh line, opioids drop resolution and
 colour depth into standby, psychedelics map brightness onto a cycling false-colour palette and smear blocks,
 empathogens bloom warm into a thermal view, cannabinoids fade to green phosphor with a ghost image, and combat
 programs leave a red targeting circle with traced edges outside it. Every program lays scanlines; an overdose slips
-rows of blocks and flickers dead pixels; a crash is a weak grey signal. Its profile state also shows through the
+rows of blocks and flickers dead pixels; a crash is a weak grey signal. The world bends and the phase kick zooms as
+they do for an organic high, and the stimulant feed lifts the shadows rather than crushing them. Its profile state also shows through the
 synthetic HUD (`Content.Server/_WF/Wolfmed/Hud/WolfmedSyntheticHudSystem.cs`, client in
 `Content.Client/_WF/Wolfmed/Overlays/`):
 
