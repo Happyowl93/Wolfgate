@@ -160,10 +160,12 @@
     paiSlot:
       locked: true
   - type: WFBorgPda
+  - type: WFGameHubInstaller
   - type: Ringer
   - type: CartridgeLoader
     uiKey: enum.PdaUiKey.Key
-    # The same apps as a vagrant's PDA (BasePDA); Market, Contracts and NanoChat are added to every PDA in code.
+    # The same apps as a vagrant's PDA (BasePDA): GameHub comes from WFGameHubInstaller, and Market, Contracts and
+    # NanoChat are added to every PDA in code.
     preinstalled:
     - CrewManifestCartridge
     - NotekeeperCartridge
