@@ -27,7 +27,7 @@
         next: sold
         broke: broke
       - text: wf-stranger-dealer-buy-hard
-        cost: 1200
+        cost: 7000
         items: [ WFBaggieCocaineCut, WFBaggieHeroinCut, WFCrackRockCut, WFCrystalShardCut ]
         next: sold
         broke: broke

@@ -125,7 +125,7 @@ Check that `Solution`'s net serialisation carries the new field to clients; the 
   compares `GetTotalPrototypeQuantity`. Switch it to `GetEffectiveQuantity` under a marker. This shifts every
   existing overdose threshold for graded reagents only.
 - **Price.** `PricingSystem` prices solutions at `Content.Server/Cargo/Systems/PricingSystem.cs:113-150`; multiply
-  each reagent's value by its grade squared, so top grade earns a premium and cutting loses money at the market.
+  each reagent's value by its grade, so cutting stretches a batch without changing what it is worth.
 - **Not scaled yet:** touch and ingestion reactions (`ReactiveSystem`), tile reactions, and reagents consumed as
   fuel. Leave them until someone needs them.
 

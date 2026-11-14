@@ -219,7 +219,7 @@ public sealed class SubstanceTest
                 var full = pricing.GetPrice(entMan.SpawnEntity("WFBaggieCocaine", map.GridCoords));
                 var cut = pricing.GetPrice(entMan.SpawnEntity("WFBaggieCocaineCut", map.GridCoords));
                 Assert.That(full, Is.GreaterThan(0));
-                Assert.That(cut, Is.EqualTo(full * 0.55 * 0.55).Within(1), "Cut stock sells at its grade squared.");
+                Assert.That(cut, Is.EqualTo(full * 0.55).Within(1), "Cut stock sells at its grade.");
             });
         });
 

@@ -60,7 +60,7 @@ A purity grade (0-100%) that any reagent in any solution can carry. A reagent wi
 untouched chemistry looks and behaves exactly as before. A graded reagent works at its grade when metabolised (60%
 medicine heals 60%), its impure fraction deals Poison (`wf.purity.impurity_damage` per unit, default 1.0;
 `wf.purity.narcotic_impurity_damage`, default 6.0, for the Narcotics reagent group), overdose thresholds count
-effective units (units x grade), and it sells at its grade squared.
+effective units (units x grade), and it sells at its grade.
 
 Grades live in a side table on `Solution` (`Solution.Purity`, keyed by reagent prototype; see `Solution.Purity.cs`),
 which `Solution`'s add, split, transfer and remove methods keep in step. They come from:
@@ -266,7 +266,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
   - read before the removal prunes it
   - a digested reagent keeps its grade
 - [`Content.Server/Botany/Systems/BotanySystem.Produce.cs`](../../Botany/Systems/BotanySystem.Produce.cs): narcotic produce is graded by potency
-- [`Content.Server/Cargo/Systems/PricingSystem.cs`](../../Cargo/Systems/PricingSystem.cs): a reagent is worth its grade squared
+- [`Content.Server/Cargo/Systems/PricingSystem.cs`](../../Cargo/Systems/PricingSystem.cs): a reagent is worth its grade
 - [`Content.Server/Chemistry/EntitySystems/ChemMasterSystem.cs`](../../Chemistry/EntitySystems/ChemMasterSystem.cs)
   - read before the removal prunes it
   - the reagent keeps its grade on the way out of the buffer
