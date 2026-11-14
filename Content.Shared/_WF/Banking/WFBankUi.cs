@@ -15,7 +15,7 @@ public enum WFBankStatus : byte
     /// <summary>The card was never issued to an account holder, or their character is gone.</summary>
     Unlinked,
 
-    /// <summary>The account holder isn't connected, so the bank can't reach their account.</summary>
+    /// <summary>The account holder isn't connected, or is playing another character.</summary>
     Offline,
 
     /// <summary>An Ironman account, which can't send money out.</summary>

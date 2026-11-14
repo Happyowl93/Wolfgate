@@ -7,6 +7,9 @@ using Content.Server._NF.Bank;
 using Content.Server._WF.Banking;
 using Content.Server.CartridgeLoader;
 using Content.Server.Preferences.Managers;
+using Content.Server.Stack;
+using Content.Shared._Mono.CCVar;
+using Content.Shared._Mono.Traits.Physical;
 using Content.Shared._NF.Bank.Components;
 using Content.Shared._WF.Banking;
 using Content.Shared.CartridgeLoader;
@@ -129,6 +132,113 @@ public sealed class WFBankTest : InteractionTest
             Assert.That(state.History[0].Kind, Is.EqualTo(WFBankEntryKind.Deposit));
             Assert.That(state.History[1].Kind, Is.EqualTo(WFBankEntryKind.Payment), "The app's deposit isn't noted twice.");
         });
+    }
+
+    /// <summary>
+    /// Away from the holder's body the app saves the profile itself: it never reaches a slot the holder isn't playing,
+    /// since saving would select it, it locks an Ironman character, and it takes the deposit tax.
+    /// </summary>
+    [Test]
+    public async Task ProfileAccountTest()
+    {
+        var banking = SEntMan.System<WFBankSystem>();
+        var bank = SEntMan.System<BankSystem>();
+        var hands = SEntMan.System<SharedHandsSystem>();
+        var stacks = SEntMan.System<StackSystem>();
+        var prefs = Server.ResolveDependency<IServerPreferencesManager>();
+        var user = ServerSession.UserId;
+
+        var slot = 0;
+        var other = 0;
+        HumanoidCharacterProfile profile = default!;
+        var save = Task.CompletedTask;
+        await Server.WaitPost(() =>
+        {
+            var p = prefs.GetPreferences(user);
+            slot = p.SelectedCharacterIndex;
+            other = slot == 0 ? 1 : 0;
+            profile = ((HumanoidCharacterProfile) p.SelectedCharacter).WithBankBalance(3_000_000);
+            // Saving a slot selects it, so the played character is saved last.
+            save = Task.WhenAll(
+                prefs.SetProfile(user, other, profile.WithName("Other Spacer").WithBankBalance(1_000)),
+                prefs.SetProfile(user, slot, profile));
+        });
+        await PoolManager.WaitUntil(Server, () => save.IsCompleted, maxTicks: 300);
+
+        EntityUid mine = default;
+        EntityUid theirs = default;
+        await Server.WaitPost(() =>
+        {
+            mine = SEntMan.SpawnEntity("PassengerIDCard", SEntMan.GetCoordinates(PlayerCoords));
+            theirs = SEntMan.SpawnEntity("PassengerIDCard", SEntMan.GetCoordinates(PlayerCoords));
+            banking.Link(mine, user, slot, profile.Name, 3_000_000);
+            banking.Link(theirs, user, other, "Other Spacer", 1_000);
+            // Without a bank account on the body, the app goes through the profile.
+            SEntMan.RemoveComponent<BankAccountComponent>(SPlayer);
+        });
+
+        int SlotBalance(int index)
+        {
+            return ((HumanoidCharacterProfile) prefs.GetPreferences(user).Characters[index]).BankBalance;
+        }
+
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(banking.State(SPlayer, theirs).Status, Is.EqualTo(WFBankStatus.Offline));
+            Assert.That(banking.Withdraw(SPlayer, theirs, 100), Is.Not.Null);
+            Assert.That(prefs.GetPreferences(user).SelectedCharacterIndex, Is.EqualTo(slot), "Another slot's card doesn't change the played character.");
+            Assert.That(SlotBalance(other), Is.EqualTo(1_000));
+            Assert.That(banking.State(SPlayer, mine).Status, Is.EqualTo(WFBankStatus.Ready));
+        });
+
+        var cfg = Server.CfgMan;
+        var threshold = cfg.GetCVar(MonoCVars.DepositThreshold);
+        var exponent = cfg.GetCVar(MonoCVars.DepositHighExp);
+        try
+        {
+            await Server.WaitAssertion(() =>
+            {
+                cfg.SetCVar(MonoCVars.DepositThreshold, 1_000_000f);
+                cfg.SetCVar(MonoCVars.DepositHighExp, 1f);
+                bank.GetTaxedDepositAmount(500_000, 3_000_000, out var kept, out var taxed);
+                Assert.That(taxed, Is.GreaterThan(0));
+
+                var cash = stacks.Spawn(500_000, "Credit", SEntMan.GetCoordinates(PlayerCoords));
+                Assert.That(hands.TryPickup(SPlayer, cash), Is.True);
+                Assert.That(banking.Deposit(SPlayer, mine, out var deposited), Is.Null);
+                Assert.That(deposited, Is.EqualTo(500_000));
+                Assert.That(SlotBalance(slot), Is.EqualTo(3_000_000 + kept), "A deposit through the profile is taxed like one through the body.");
+            });
+        }
+        finally
+        {
+            await Server.WaitPost(() =>
+            {
+                cfg.SetCVar(MonoCVars.DepositThreshold, threshold);
+                cfg.SetCVar(MonoCVars.DepositHighExp, exponent);
+            });
+        }
+
+        await Server.WaitPost(() =>
+        {
+            var current = (HumanoidCharacterProfile) prefs.GetPreferences(user).Characters[slot];
+            save = prefs.SetProfile(user, slot, current.WithTraitPreference("Ironman", ProtoMan));
+        });
+        await PoolManager.WaitUntil(Server, () => save.IsCompleted, maxTicks: 300);
+
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(SEntMan.HasComponent<IronmanComponent>(SPlayer), Is.False);
+            Assert.That(banking.State(SPlayer, mine).Status, Is.EqualTo(WFBankStatus.Locked), "An Ironman character is locked without its body.");
+            Assert.That(banking.Withdraw(SPlayer, mine, 100), Is.Not.Null);
+        });
+
+        await Server.WaitPost(() =>
+        {
+            var current = (HumanoidCharacterProfile) prefs.GetPreferences(user).Characters[slot];
+            save = prefs.SetProfile(user, slot, current.WithoutTraitPreference("Ironman", ProtoMan));
+        });
+        await PoolManager.WaitUntil(Server, () => save.IsCompleted, maxTicks: 300);
     }
 
     [Test]

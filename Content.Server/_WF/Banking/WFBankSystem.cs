@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Linq;
+using Content.Server._Mono.MonoCoins;
 using Content.Server._NF.Bank;
 using Content.Server._WF.TradeGoods.Systems;
 using Content.Server.Administration.Logs;
@@ -24,6 +25,7 @@ using Content.Shared.Hands.EntitySystems;
 using Content.Shared.PDA;
 using Content.Shared.Preferences;
 using Content.Shared.Stacks;
+using Content.Shared.Traits;
 using Robust.Server.GameObjects;
 using Robust.Server.Player;
 using Robust.Shared.Audio;
@@ -50,6 +52,7 @@ public sealed partial class WFBankSystem : EntitySystem
     [Dependency] private IPlayerManager _players = default!;
     [Dependency] private IPrototypeManager _proto = default!;
     [Dependency] private IServerPreferencesManager _prefs = default!;
+    [Dependency] private MonoCoinsManager _coins = default!;
     [Dependency] private BankSystem _bank = default!;
     [Dependency] private CartridgeLoaderSystem _cartridgeLoader = default!;
     [Dependency] private GameTicker _ticker = default!;
@@ -63,6 +66,7 @@ public sealed partial class WFBankSystem : EntitySystem
     public static readonly EntProtoId BankCartridge = "WFBankCartridge";
 
     private static readonly ProtoId<StackPrototype> Cash = "Credit";
+    private static readonly ProtoId<TraitPrototype> Ironman = "Ironman";
     private static readonly SoundSpecifier ConfirmSound = new SoundPathSpecifier("/Audio/Effects/Cargo/ping.ogg");
     private static readonly SoundSpecifier ErrorSound = new SoundPathSpecifier("/Audio/Effects/Cargo/buzz_sigh.ogg");
     private static readonly TimeSpan RefreshInterval = TimeSpan.FromSeconds(2);
@@ -219,8 +223,14 @@ public sealed partial class WFBankSystem : EntitySystem
             || profile.Name != link.Name)
             return WFBankStatus.Unlinked;
 
+        // Saving a balance selects its slot, so only the character the holder is playing can be reached.
+        if (prefs.SelectedCharacterIndex != link.Slot)
+            return WFBankStatus.Offline;
+
         account = new Account(link, session, prefs, profile);
-        return Body(account) is { } body && HasComp<IronmanComponent>(body) ? WFBankStatus.Locked : WFBankStatus.Ready;
+        return profile.TraitPreferences.Contains(Ironman) || Body(account) is { } body && HasComp<IronmanComponent>(body)
+            ? WFBankStatus.Locked
+            : WFBankStatus.Ready;
     }
 
     /// <summary>The account holder's body, when it carries this account, so its balance updates at once.</summary>
@@ -242,9 +252,20 @@ public sealed partial class WFBankSystem : EntitySystem
 
     private bool Give(Account account, int amount, bool tax)
     {
-        return Own(() => Body(account) is { } body
-            ? _bank.TryBankDeposit(body, amount, tax)
-            : _bank.TryBankDeposit(account.Session, account.Prefs, account.Profile, amount, out _));
+        if (Body(account) is { } body)
+            return Own(() => _bank.TryBankDeposit(body, amount, tax));
+
+        // The profile deposit has no tax of its own, so it's taken here as the body deposit takes it.
+        var taxed = 0;
+        if (tax)
+            _bank.GetTaxedDepositAmount(amount, account.Profile.BankBalance, out amount, out taxed);
+
+        if (amount > 0 && !Own(() => _bank.TryBankDeposit(account.Session, account.Prefs, account.Profile, amount, out _)))
+            return false;
+
+        if (taxed > 0)
+            _ = _coins.AddMonoCoinsAsync(account.Session.UserId, taxed);
+        return true;
     }
 
     private EntityUid? CardIn(EntityUid loader)
