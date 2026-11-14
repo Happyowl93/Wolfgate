@@ -154,9 +154,9 @@ public sealed class DependenceTest
 
             var traits = new (string Trait, string Gear, string HostGear, WFDrugFamily Family)[]
             {
-                ("WFDependentStimulant", "WFBaggieCocaineDose", "WFNeurowareStickWhitelineCopy", WFDrugFamily.Stimulant),
-                ("WFDependentOpioid", "WFBaggieHeroinDose", "WFNeurowareStickNullLoopCopy", WFDrugFamily.Opioid),
-                ("WFDependentEmpathogen", "WFVialHaloDose", "WFNeurowareStickHaloCopy", WFDrugFamily.Empathogen),
+                ("WFDependentStimulant", "WFBaggieCocaineCut", "WFNeurowareStickWhitelineCopy", WFDrugFamily.Stimulant),
+                ("WFDependentOpioid", "WFBaggieHeroinCut", "WFNeurowareStickNullLoopCopy", WFDrugFamily.Opioid),
+                ("WFDependentEmpathogen", "WFVialHaloCut", "WFNeurowareStickHaloCopy", WFDrugFamily.Empathogen),
                 ("WFDependentCannabinoid", "Joint", "WFNeurowareStickIdleCopy", WFDrugFamily.Cannabinoid),
             };
 

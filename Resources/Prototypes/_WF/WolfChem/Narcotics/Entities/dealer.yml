@@ -36,45 +36,11 @@
     reagents:
       Desoxyephedrine: 0.5
 
-# A habit trait's first fix: one cut dose, enough to reach the light tier once.
-- type: entity
-  parent: WFBaggieCocaineCut
-  id: WFBaggieCocaineDose
-  suffix: Dose
-  components:
-  - type: SolutionContainerManager
-    solutions:
-      baggie:
-        maxVol: 10
-        reagents:
-        - ReagentId: WFCocaine
-          Quantity: 3
-
-- type: entity
-  parent: WFBaggieHeroinCut
-  id: WFBaggieHeroinDose
-  suffix: Dose
-  components:
-  - type: SolutionContainerManager
-    solutions:
-      baggie:
-        maxVol: 10
-        reagents:
-        - ReagentId: WFHeroin
-          Quantity: 3
-
+# Only a habit trait hands this out; the dealers sell Halo at full grade.
 - type: entity
   parent: WFVialHalo
-  id: WFVialHaloDose
-  suffix: Halo, Dose
+  id: WFVialHaloCut
   components:
-  - type: SolutionContainerManager
-    solutions:
-      beaker:
-        maxVol: 10
-        reagents:
-        - ReagentId: WFHalo
-          Quantity: 3
   - type: WFSolutionPurity
     solution: beaker
     reagents:

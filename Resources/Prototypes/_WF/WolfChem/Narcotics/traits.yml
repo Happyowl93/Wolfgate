@@ -9,7 +9,7 @@
   cost: -3
   components:
   - type: WFDependentStimulant
-    gear: WFBaggieCocaineDose
+    gear: WFBaggieCocaineCut
     hostGear: WFNeurowareStickWhitelineCopy
 
 - type: trait
@@ -20,7 +20,7 @@
   cost: -3
   components:
   - type: WFDependentOpioid
-    gear: WFBaggieHeroinDose
+    gear: WFBaggieHeroinCut
     hostGear: WFNeurowareStickNullLoopCopy
 
 - type: trait
@@ -31,7 +31,7 @@
   cost: -2
   components:
   - type: WFDependentEmpathogen
-    gear: WFVialHaloDose
+    gear: WFVialHaloCut
     hostGear: WFNeurowareStickHaloCopy
 
 # Cannabis withdrawal stops at cravings, like nicotine.
