@@ -14,7 +14,7 @@
                              VerticalExpand="False">
             <BoxContainer Orientation="Horizontal"
                           HorizontalExpand="True">
-                <TextureRect TexturePath="/Textures/Interface/Nano/ntlogo.svg.png"
+                <TextureRect TexturePath="/Textures/_WF/NanoChat/Icons/colotalk_logo.png"
                              Stretch="KeepAspectCentered"
                              VerticalAlignment="Center"
                              MinSize="32 32"
@@ -53,22 +53,21 @@
                         Margin="0 0 4 0"
                         StyleClasses="OpenBoth"
                         ToolTip="{Loc nano-chat-new-chat}" />
+                <Button Name="NewGroupButton"
+                        MaxSize="32 32"
+                        StyleClasses="OpenBoth"
+                        Margin="0 0 4 0"
+                        ToolTip="{Loc nano-chat-new-group}">
+                    <TextureRect TexturePath="/Textures/Interface/VerbIcons/group.svg.192dpi.png"
+                                 Stretch="KeepAspectCentered"
+                                 MinSize="18 18" />
+                </Button>
                 <Button Name="LookupButton"
                         MaxSize="32 32"
                         StyleClasses="OpenBoth"
                         Margin="0 0 4 0"
                         ToolTip="{Loc nano-chat-look-up}">
                     <TextureRect TexturePath="/Textures/Interface/VerbIcons/examine.svg.192dpi.png"
-                                 Stretch="KeepAspectCentered"
-                                 MinSize="18 18" />
-                </Button>
-                <Button Name="ListNumberButton"
-                        MaxSize="32 32"
-                        StyleClasses="OpenBoth"
-                        Margin="0 0 4 0"
-                        ToolTip="{Loc nano-chat-list-number}"
-                        ToggleMode="True">
-                    <TextureRect TexturePath="/Textures/_WF/NanoChat/Icons/hamburger_icon.svg.png"
                                  Stretch="KeepAspectCentered"
                                  MinSize="18 18" />
                 </Button>
@@ -120,7 +119,7 @@
                                VerticalExpand="True" />
                         <Label Name="ChatHeaderLabel"
                                StyleClasses="LabelHeading"
-                               HorizontalAlignment="Center"
+                               Align="Center"
                                ClipText="True"
                                Margin="4 2"
                                Visible="False" />
@@ -145,6 +144,16 @@
                                   HorizontalExpand="True"
                                   Margin="0 4 0 0"
                                   Visible="False">
+                        <Button Name="MembersButton"
+                                MaxSize="32 32"
+                                Visible="False"
+                                StyleClasses="OpenBoth"
+                                Margin="0 0 4 0"
+                                ToolTip="{Loc nano-chat-group-members}">
+                            <TextureRect TexturePath="/Textures/Interface/VerbIcons/group.svg.192dpi.png"
+                                         Stretch="KeepAspectCentered"
+                                         MinSize="18 18" />
+                        </Button>
                         <Button Name="EditChatButton"
                                 MaxSize="32 32"
                                 Visible="False"

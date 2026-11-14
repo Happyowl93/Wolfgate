@@ -8,7 +8,7 @@ using Robust.Client.UserInterface.XAML;
 
 namespace Content.Client._WF.NanoChat;
 
-/// <summary>The directory: every listed number, with a button to start a chat.</summary>
+/// <summary>The directory: every listed number, with a button to start a chat, and whether to list one's own.</summary>
 [GenerateTypedNameReferences]
 public sealed partial class NanoChatLookupView : PanelContainer
 {
@@ -18,13 +18,19 @@ public sealed partial class NanoChatLookupView : PanelContainer
     /// <summary>Raised with the contact whose chat button was pressed.</summary>
     public event Action<NanoChatRecipient>? OnStartChat;
 
+    /// <summary>Raised when the player lists or unlists their number.</summary>
+    public event Action? OnListNumberToggled;
+
     public NanoChatLookupView()
     {
         RobustXamlLoader.Load(this);
+        ListNumberCheck.OnToggled += _ => OnListNumberToggled?.Invoke();
     }
 
     public void UpdateContactList(NanoChatUiState state)
     {
+        ListNumberCheck.Pressed = state.ListNumber;
+        ListNumberCheck.Disabled = state.OwnNumber == 0;
         ContactsList.RemoveAllChildren();
         if (state.Contacts is not { } contacts)
         {

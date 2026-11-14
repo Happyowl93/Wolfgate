@@ -21,6 +21,15 @@ public abstract class SharedNanoChatSystem : EntitySystem
             : Loc.GetString("nanochat-card-examine-no-number"));
     }
 
+    /// <summary>The highest card number; chat IDs above it are groups.</summary>
+    public const uint MaxNumber = 9999;
+
+    /// <summary>The first group chat ID.</summary>
+    public const uint FirstGroupId = 10000;
+
+    /// <summary>Whether a chat ID is a group rather than a card's number.</summary>
+    public static bool IsGroup(uint chat) => chat >= FirstGroupId;
+
     /// <summary>A number as players see it, four digits.</summary>
     public static string FormatNumber(uint number) => $"{number:D4}";
 

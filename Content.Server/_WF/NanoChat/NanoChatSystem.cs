@@ -20,7 +20,7 @@ namespace Content.Server._WF.NanoChat;
 
 /// <summary>
 /// Gives NanoChat cards their numbers, keeps a character's number from round to round, tracks which PDA a card is in
-/// and scrambles a microwaved card. A cyborg's built-in PDA reads the ID card the cyborg was issued.
+/// and scrambles a microwaved card. A spawned character's number joins its company's group. A cyborg's built-in PDA reads the ID card the cyborg was issued.
 /// </summary>
 public sealed class NanoChatSystem : SharedNanoChatSystem
 {
@@ -31,10 +31,10 @@ public sealed class NanoChatSystem : SharedNanoChatSystem
     [Dependency] private SharedContainerSystem _container = default!;
     [Dependency] private SharedIdCardSystem _idCard = default!;
     [Dependency] private NanoChatCartridgeSystem _cartridge = default!;
+    [Dependency] private NanoChatGroupSystem _groups = default!;
     [Dependency] private WFBorgIdCardSystem _borgCards = default!;
 
     private const uint MinNumber = 1;
-    private const uint MaxNumber = 9999;
 
     /// <summary>Numbers saved for characters, kept off the cards that are not theirs.</summary>
     private readonly HashSet<uint> _reserved = new();
@@ -171,10 +171,11 @@ public sealed class NanoChatSystem : SharedNanoChatSystem
             return;
 
         int? number = null;
+        int profileId;
         try
         {
             var profileIds = await _db.GetProfileIdsAsync(user.UserId);
-            if (!profileIds.TryGetValue(slot, out var profileId))
+            if (!profileIds.TryGetValue(slot, out profileId))
                 return;
 
             for (var attempt = 0; attempt < 5 && number == null; attempt++)
@@ -202,6 +203,7 @@ public sealed class NanoChatSystem : SharedNanoChatSystem
             return;
 
         AssignNumber((id.Value, card), (uint) claimed);
+        _groups.RegisterCharacter((uint) claimed, profileId);
     }
 
     /// <summary>Gives a card a number, moving any other card holding it onto a free one.</summary>

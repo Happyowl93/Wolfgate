@@ -9,10 +9,13 @@ public sealed class NanoChatUiMessageEvent : CartridgeMessageEvent
 {
     public readonly NanoChatUiMessageType Type;
 
-    /// <summary>The other party's number, where the action has one.</summary>
+    /// <summary>The other party's number or the group's ID, where the action has one.</summary>
     public readonly uint? RecipientNumber;
 
-    /// <summary>The message text, or the contact name for a new or edited chat.</summary>
+    /// <summary>The numbers a group action adds or removes.</summary>
+    public readonly List<uint>? Numbers;
+
+    /// <summary>The message text, or the contact or group name for a new or edited chat.</summary>
     public readonly string? Content;
 
     /// <summary>The contact's job title for a new or edited chat.</summary>
@@ -25,13 +28,15 @@ public sealed class NanoChatUiMessageEvent : CartridgeMessageEvent
         uint? recipientNumber = null,
         string? content = null,
         string? recipientJob = null,
-        bool subtle = false)
+        bool subtle = false,
+        List<uint>? numbers = null)
     {
         Type = type;
         RecipientNumber = recipientNumber;
         Content = content;
         RecipientJob = recipientJob;
         Subtle = subtle;
+        Numbers = numbers;
     }
 }
 
@@ -47,6 +52,11 @@ public enum NanoChatUiMessageType : byte
     ToggleMute,
     ToggleMuteChat,
     ToggleListNumber,
+    CreateGroup,
+    AddMembers,
+    KickMember,
+    LeaveGroup,
+    RenameGroup,
 }
 
 /// <summary>A contact on a card.</summary>
@@ -87,11 +97,18 @@ public partial struct NanoChatMessage
     /// <summary>Whether it reached nobody: no signal at either end, or no PDA holds the number.</summary>
     public bool DeliveryFailed;
 
-    public NanoChatMessage(TimeSpan timestamp, string content, uint senderId, bool deliveryFailed = false)
+    /// <summary>Sent out of ghosts' sight.</summary>
+    public bool Subtle;
+
+    /// <summary>The sender's name, shown on group messages.</summary>
+    public string? SenderName;
+
+    public NanoChatMessage(TimeSpan timestamp, string content, uint senderId, bool deliveryFailed = false, bool subtle = false)
     {
         Timestamp = timestamp;
         Content = content;
         SenderId = senderId;
         DeliveryFailed = deliveryFailed;
+        Subtle = subtle;
     }
 }

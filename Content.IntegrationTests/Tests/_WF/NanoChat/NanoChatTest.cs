@@ -181,8 +181,18 @@ public sealed class NanoChatTest
         {
             var seen = chat.History.Last(h => h.Msg.Message == "for everyone").Msg;
             Assert.That(seen.Channel, Is.EqualTo(ChatChannel.Radio));
-            Assert.That(seen.WrappedMessage, Does.Contain("[NanoChat]"));
+            Assert.That(seen.WrappedMessage, Does.Contain("[ColoTalk]"));
             Assert.That(Seen("between us"), Is.False, "A ghost read a subtle message.");
+        });
+
+        await server.WaitAssertion(() =>
+        {
+            // Both ends keep the subtle mark, which paints the message purple.
+            var a = CardOf(entMan, pdas[0]).Comp;
+            var b = CardOf(entMan, pdas[1]).Comp;
+            Assert.That(a.Messages[b.Number!.Value].Last().Subtle, Is.True);
+            Assert.That(b.Messages[a.Number!.Value].Last().Subtle, Is.True);
+            Assert.That(b.Messages[a.Number!.Value].First().Subtle, Is.False);
         });
 
         await server.WaitPost(() =>

@@ -1,9 +1,11 @@
 # NanoChat
 
-A PDA messenger, ported from Delta-V. Every PDA gets the NanoChat app; every ID card has a four-digit number
+A PDA messenger, ported from Delta-V, that players see as **ColoTalk** (the code keeps the NanoChat name). Every PDA
+gets the app; every ID card has a four-digit number
 (`NanoChatCardComponent`) and carries its contacts and messages, so whoever holds the card reads them. A player starts a
-chat by typing a number or picking one from the directory (cards whose holder lists their number), and gets a PDA
-notification for each message unless notifications or that chat are muted. Every message is in the admin log.
+chat by typing a number or picking one from the public directory, and gets a PDA notification for each message unless
+notifications or that chat are muted. The directory lists every card whose holder ticks "List my number" on it (on by
+default), and every open directory refreshes when someone ticks or unticks it. Every message is in the admin log.
 
 **Numbers stay with the character.** A character's first spawn claims a free number, saved in
 `wolfgate_nano_chat_number` (`ServerDbBase.NanoChat.cs`); every later spawn puts it on that character's ID card, so
@@ -20,14 +22,21 @@ Microwaving a card still scrambles or wipes its messages.
 
 **Ghosts.** A delivered message also goes to every ghost's chat on the radio channel, naming both sides, with a
 follow link to the sender. The lock button by the message box sends subtle: ghosts don't see it, admin ghosts still do,
-marked subtle, and the admin log tags it. Undelivered messages reach no one.
+marked subtle, and the admin log tags it. Both ends show a subtle message in purple. Undelivered messages reach no one.
+
+**Groups** (`NanoChatGroupSystem`). A room is made from the group button with a name and any of the maker's contacts
+(20 members at most). Its owner adds contacts, kicks members and renames it from the members window; anyone can leave,
+and when the owner leaves the next member takes over, while the last one out ends the room. Each employed character is
+also put in their company's group, synced every 5 seconds from the character's company: it follows joins, leaves and
+renames, can be muted but not left. Groups use chat ids from 10000 up in the card's own chat list; members are card
+numbers, a joining card gets the last 100 messages, and group messages name their sender. Groups last for the round.
 
 **Cyborgs.** A cyborg's built-in PDA (see the Cyborgs module) has no card in its ID slot; its NanoChat reads the ID
 card the cyborg was issued, held, stowed in a module or kept in its chassis (`NanoChatSystem.GetPda`/`TryGetCard`).
 A cyborg that spawns into a job keeps its character's number like anyone else.
 
 Entry points: `NanoChatCartridgeSystem` (the app, sending and delivery), `NanoChatSystem` (numbers, saved numbers,
-which PDA holds a card, microwaving) and `SharedNanoChatSystem` (every change to a card), with the client
+which PDA holds a card, microwaving), `NanoChatGroupSystem` (rooms and company groups) and `SharedNanoChatSystem` (every change to a card), with the client
 `NanoChatUiFragment`.
 
 Ported code is AGPL-3.0 from Delta-V (`Content.*/_DV/NanoChat`, `_DV/CartridgeLoader/Cartridges/NanoChat*`). Icon
@@ -42,6 +51,7 @@ sources and licences are in `Resources/Textures/_WF/NanoChat/Icons/ATTRIBUTION.t
 
 - [`Content.Server/_WF/NanoChat/NanoChatCartridgeComponent.cs`](NanoChatCartridgeComponent.cs)
 - [`Content.Server/_WF/NanoChat/NanoChatCartridgeSystem.cs`](NanoChatCartridgeSystem.cs)
+- [`Content.Server/_WF/NanoChat/NanoChatGroupSystem.cs`](NanoChatGroupSystem.cs)
 - [`Content.Server/_WF/NanoChat/NanoChatSystem.cs`](NanoChatSystem.cs)
 - [`Content.Server/_WF/NanoChat/ServerDbBase.NanoChat.cs`](ServerDbBase.NanoChat.cs)
 - [`Content.Server/_WF/NanoChat/ServerDbManager.NanoChat.cs`](ServerDbManager.NanoChat.cs)
@@ -57,6 +67,8 @@ sources and licences are in `Resources/Textures/_WF/NanoChat/Icons/ATTRIBUTION.t
 
 - [`Content.Client/_WF/NanoChat/EditChatPopup.xaml`](../../../Content.Client/_WF/NanoChat/EditChatPopup.xaml)
 - [`Content.Client/_WF/NanoChat/EditChatPopup.xaml.cs`](../../../Content.Client/_WF/NanoChat/EditChatPopup.xaml.cs)
+- [`Content.Client/_WF/NanoChat/GroupMembersPopup.xaml`](../../../Content.Client/_WF/NanoChat/GroupMembersPopup.xaml)
+- [`Content.Client/_WF/NanoChat/GroupMembersPopup.xaml.cs`](../../../Content.Client/_WF/NanoChat/GroupMembersPopup.xaml.cs)
 - [`Content.Client/_WF/NanoChat/NanoChatEntry.xaml`](../../../Content.Client/_WF/NanoChat/NanoChatEntry.xaml)
 - [`Content.Client/_WF/NanoChat/NanoChatEntry.xaml.cs`](../../../Content.Client/_WF/NanoChat/NanoChatEntry.xaml.cs)
 - [`Content.Client/_WF/NanoChat/NanoChatLookupView.xaml`](../../../Content.Client/_WF/NanoChat/NanoChatLookupView.xaml)
@@ -69,9 +81,12 @@ sources and licences are in `Resources/Textures/_WF/NanoChat/Icons/ATTRIBUTION.t
 - [`Content.Client/_WF/NanoChat/NanoChatUiFragment.xaml.cs`](../../../Content.Client/_WF/NanoChat/NanoChatUiFragment.xaml.cs)
 - [`Content.Client/_WF/NanoChat/NewChatPopup.xaml`](../../../Content.Client/_WF/NanoChat/NewChatPopup.xaml)
 - [`Content.Client/_WF/NanoChat/NewChatPopup.xaml.cs`](../../../Content.Client/_WF/NanoChat/NewChatPopup.xaml.cs)
+- [`Content.Client/_WF/NanoChat/NewGroupPopup.xaml`](../../../Content.Client/_WF/NanoChat/NewGroupPopup.xaml)
+- [`Content.Client/_WF/NanoChat/NewGroupPopup.xaml.cs`](../../../Content.Client/_WF/NanoChat/NewGroupPopup.xaml.cs)
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/NanoChat/NanoChatGroupTest.cs`](../../../Content.IntegrationTests/Tests/_WF/NanoChat/NanoChatGroupTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/NanoChat/NanoChatTest.cs`](../../../Content.IntegrationTests/Tests/_WF/NanoChat/NanoChatTest.cs)
 
 ### Prototypes
@@ -88,8 +103,8 @@ sources and licences are in `Resources/Textures/_WF/NanoChat/Icons/ATTRIBUTION.t
 - [`Resources/Textures/_WF/NanoChat/Icons/ATTRIBUTION.txt`](../../../Resources/Textures/_WF/NanoChat/Icons/ATTRIBUTION.txt)
 - [`Resources/Textures/_WF/NanoChat/Icons/bell.svg.png`](../../../Resources/Textures/_WF/NanoChat/Icons/bell.svg.png)
 - [`Resources/Textures/_WF/NanoChat/Icons/bell_muted.png`](../../../Resources/Textures/_WF/NanoChat/Icons/bell_muted.png)
+- [`Resources/Textures/_WF/NanoChat/Icons/colotalk_logo.png`](../../../Resources/Textures/_WF/NanoChat/Icons/colotalk_logo.png)
 - [`Resources/Textures/_WF/NanoChat/Icons/edit.svg.png`](../../../Resources/Textures/_WF/NanoChat/Icons/edit.svg.png)
-- [`Resources/Textures/_WF/NanoChat/Icons/hamburger_icon.svg.png`](../../../Resources/Textures/_WF/NanoChat/Icons/hamburger_icon.svg.png)
 - [`Resources/Textures/_WF/NanoChat/program_icon.rsi/`](../../../Resources/Textures/_WF/NanoChat/program_icon.rsi/)
 
 ## Non-modular edits

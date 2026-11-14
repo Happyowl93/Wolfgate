@@ -31,12 +31,12 @@
                 <Label Name="NameLabel"
                        StyleClasses="LabelHeading"
                        HorizontalExpand="True"
-                       HorizontalAlignment="Center"
+                       Align="Center"
                        ClipText="True" />
                 <Label Name="JobLabel"
                        StyleClasses="LabelSubText"
                        HorizontalExpand="True"
-                       HorizontalAlignment="Center"
+                       Align="Center"
                        ClipText="True" />
             </BoxContainer>
         </BoxContainer>

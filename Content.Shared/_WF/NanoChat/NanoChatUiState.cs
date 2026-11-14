@@ -19,6 +19,9 @@ public sealed class NanoChatUiState : BoundUserInterfaceState
     public readonly bool NotificationsMuted;
     public readonly bool ListNumber;
 
+    /// <summary>The open chat's group, when it is one.</summary>
+    public readonly NanoChatGroupInfo? Group;
+
     public NanoChatUiState(
         Dictionary<uint, NanoChatRecipient> recipients,
         Dictionary<uint, List<NanoChatMessage>> messages,
@@ -28,7 +31,8 @@ public sealed class NanoChatUiState : BoundUserInterfaceState
         uint ownNumber,
         int maxRecipients,
         bool notificationsMuted,
-        bool listNumber)
+        bool listNumber,
+        NanoChatGroupInfo? group = null)
     {
         Recipients = recipients;
         Messages = messages;
@@ -39,5 +43,32 @@ public sealed class NanoChatUiState : BoundUserInterfaceState
         MaxRecipients = maxRecipients;
         NotificationsMuted = notificationsMuted;
         ListNumber = listNumber;
+        Group = group;
+    }
+}
+
+/// <summary>A group chat's name and members, for the open chat.</summary>
+[Serializable, NetSerializable]
+public sealed class NanoChatGroupInfo
+{
+    public readonly uint Id;
+    public readonly string Name;
+
+    /// <summary>Whether it is a company's group, whose members the company decides.</summary>
+    public readonly bool IsCompany;
+
+    /// <summary>The number that manages a room; null for a company group.</summary>
+    public readonly uint? Owner;
+
+    /// <summary>Members by name, in the order they joined.</summary>
+    public readonly List<NanoChatRecipient> Members;
+
+    public NanoChatGroupInfo(uint id, string name, bool isCompany, uint? owner, List<NanoChatRecipient> members)
+    {
+        Id = id;
+        Name = name;
+        IsCompany = isCompany;
+        Owner = owner;
+        Members = members;
     }
 }

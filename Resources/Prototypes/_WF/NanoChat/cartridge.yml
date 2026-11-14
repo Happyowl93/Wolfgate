@@ -2,7 +2,7 @@
 - type: entity
   parent: NFBasePDACartridge
   id: NanoChatCartridge
-  name: NanoChat cartridge
+  name: ColoTalk cartridge
   description: A PDA messenger. Messages go to the number on another ID card, wherever there is signal.
   components:
   - type: Sprite

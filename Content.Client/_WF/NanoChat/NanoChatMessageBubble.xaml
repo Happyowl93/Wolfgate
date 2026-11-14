@@ -12,6 +12,11 @@
                       Orientation="Vertical"
                       MaxWidth="320"
                       HorizontalExpand="True">
+            <Label Name="SenderLabel"
+                   StyleClasses="LabelSmall"
+                   ClipText="True"
+                   Margin="10 0 10 1"
+                   Visible="False" />
             <PanelContainer Name="MessagePanel"
                             MaxWidth="320"
                             HorizontalExpand="True">

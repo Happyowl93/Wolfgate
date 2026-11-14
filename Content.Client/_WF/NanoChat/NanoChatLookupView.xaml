@@ -4,11 +4,18 @@
     HorizontalExpand="True"
     VerticalExpand="True"
     StyleClasses="AngleRect">
-    <ScrollContainer VerticalExpand="True"
-                     HorizontalExpand="True">
-        <BoxContainer Name="ContactsList"
-                      Orientation="Vertical"
-                      VerticalExpand="True"
-                      HorizontalExpand="True" />
-    </ScrollContainer>
+    <BoxContainer Orientation="Vertical"
+                  HorizontalExpand="True"
+                  VerticalExpand="True">
+        <CheckBox Name="ListNumberCheck"
+                  Text="{Loc nano-chat-list-number}"
+                  Margin="4" />
+        <ScrollContainer VerticalExpand="True"
+                         HorizontalExpand="True">
+            <BoxContainer Name="ContactsList"
+                          Orientation="Vertical"
+                          VerticalExpand="True"
+                          HorizontalExpand="True" />
+        </ScrollContainer>
+    </BoxContainer>
 </nanoChat:NanoChatLookupView>

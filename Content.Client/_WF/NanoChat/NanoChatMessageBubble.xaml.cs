@@ -7,12 +7,15 @@ using Robust.Shared.Utility;
 
 namespace Content.Client._WF.NanoChat;
 
-/// <summary>One message: own messages on the right in green, others on the left in grey.</summary>
+/// <summary>One message: own messages on the right in green, others on the left in grey, subtle ones in purple.</summary>
 [GenerateTypedNameReferences]
 public sealed partial class NanoChatMessageBubble : BoxContainer
 {
     public static readonly Color OwnMessageColor = Color.FromHex("#173717d9");
     public static readonly Color OtherMessageColor = Color.FromHex("#252525d9");
+    public static readonly Color OwnSubtleColor = Color.FromHex("#3f1f5ed9");
+    public static readonly Color OtherSubtleColor = Color.FromHex("#2d2140d9");
+    public static readonly Color SubtleBorderColor = Color.FromHex("#8a5cc480");
     public static readonly Color BorderColor = Color.FromHex("#40404066");
     public static readonly Color TextColor = Color.FromHex("#dcdcdc");
     public static readonly Color ErrorColor = Color.FromHex("#cc3333");
@@ -22,13 +25,23 @@ public sealed partial class NanoChatMessageBubble : BoxContainer
         RobustXamlLoader.Load(this);
     }
 
-    public void SetMessage(NanoChatMessage message, bool isOwnMessage)
+    /// <summary>Shows a message; a group chat names the sender above others' messages.</summary>
+    public void SetMessage(NanoChatMessage message, bool isOwnMessage, bool showSender = false)
     {
+        SenderLabel.Visible = showSender && !isOwnMessage && !string.IsNullOrEmpty(message.SenderName);
+        SenderLabel.Text = message.SenderName;
+
         if (MessagePanel.PanelOverride is not StyleBoxFlat style)
             return;
 
-        style.BackgroundColor = isOwnMessage ? OwnMessageColor : OtherMessageColor;
-        style.BorderColor = BorderColor;
+        style.BackgroundColor = (isOwnMessage, message.Subtle) switch
+        {
+            (true, true) => OwnSubtleColor,
+            (false, true) => OtherSubtleColor,
+            (true, false) => OwnMessageColor,
+            (false, false) => OtherMessageColor,
+        };
+        style.BorderColor = message.Subtle ? SubtleBorderColor : BorderColor;
 
         MessageText.SetMessage(FormattedMessage.FromUnformatted(message.Content));
         MessageText.Modulate = TextColor;

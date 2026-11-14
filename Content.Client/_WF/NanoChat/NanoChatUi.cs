@@ -21,6 +21,8 @@ public sealed partial class NanoChatUi : UIFragment
         fragment.OnMessageSent += (type, number, content, job) =>
             userInterface.SendMessage(new CartridgeUiMessage(new NanoChatUiMessageEvent(type, number, content, job,
                 type == NanoChatUiMessageType.SendMessage && fragment.Subtle)));
+        fragment.OnGroupAction += (type, group, name, numbers) =>
+            userInterface.SendMessage(new CartridgeUiMessage(new NanoChatUiMessageEvent(type, group, name, numbers: numbers)));
     }
 
     public override void UpdateState(BoundUserInterfaceState state)
