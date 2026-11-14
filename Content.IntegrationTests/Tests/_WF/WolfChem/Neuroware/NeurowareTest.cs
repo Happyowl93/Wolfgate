@@ -156,6 +156,18 @@ public sealed class NeurowareTest
                 Assert.That(glass.Value.Comp.Solution.Volume, Is.EqualTo(FixedPoint2.New(20)));
             });
 
+            // Hash reads in as Idle, which is legal like hash, and so are its copies.
+            var hash = Blank();
+            Assert.That(neuro.Encode(hash, entMan.SpawnEntity("WFHashBrick", map.GridCoords), null), Is.True);
+            var hashCopy = Blank();
+            Assert.That(neuro.TryCopy(hash, hashCopy, null), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(hash.Comp.Profile?.Id, Is.EqualTo("WFCannabis"));
+                Assert.That(tags.HasTag(hash, WFNarcoticGoodsSystem.Tag), Is.False, "An Idle stick is legal.");
+                Assert.That(tags.HasTag(hashCopy, WFNarcoticGoodsSystem.Tag), Is.False, "So is a copy of one.");
+            });
+
             var water = entMan.SpawnEntity("Beaker", map.GridCoords);
             solutions.TryGetSolution(water, "beaker", out var wet, out _);
             solutions.TryAddReagent(wet!.Value, "Water", FixedPoint2.New(30));

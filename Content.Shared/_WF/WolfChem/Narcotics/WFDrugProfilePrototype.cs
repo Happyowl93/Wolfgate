@@ -84,6 +84,10 @@ public sealed partial class WFDrugProfilePrototype : IPrototype
     [DataField]
     public float DependenceGain;
 
+    /// <summary>The drug is legal, so a stick written with its twin carries no narcotic marks.</summary>
+    [DataField]
+    public bool Legal;
+
     /// <summary>The neuroware twin of this drug: its display strings and the size of a load.</summary>
     [DataField]
     public WFNeurowareStrings? Neuroware;

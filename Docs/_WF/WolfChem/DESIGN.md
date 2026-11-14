@@ -460,13 +460,14 @@ synthetic HUD (`Content.Server/_WF/Wolfmed/Hud/WolfmedSyntheticHudSystem.cs`, cl
 
 ## Economy and law
 
-- Every product carries `Contraband` with `Class3Chem`. Confirm the severity's examine text and turn-in values
-  work, since nothing uses it today.
+- Every product carries `Contraband` with `Class3Chem`, except hash: it is legal like the cannabis it is pressed
+  from, and THC has no price, so nothing holding it is marked either.
 - Solid products get a `StaticPrice` scaled by grade, and the `ItemTax` and `SoldAlert` setup that
   `FentanylSolidified` uses (`Resources/Prototypes/_Mono/Entities/Objects/Misc/solids.yml`).
 - The contraband is the reagent, not the container: any item or anchorable structure holding a priced narcotic in a
   solution (beaker, jug, syringe, pill, baggie, vial, storage tank) gains the same tag, contraband, tax and sold alert (`WFNarcoticGoodsSystem`,
-  `WFNarcoticMarks`) and loses them when emptied. A blank stick that takes a copy gains them for good.
+  `WFNarcoticMarks`) and loses them when emptied. A blank stick that takes a copy gains them for good, unless the
+  program's profile is `legal` (cannabis, whose twin is Idle).
   Narcotics sold on a cargo pallet fund the Reaver campaign by value (`fundingGoodsValue`).
 - The Strangers dealer (`Resources/Prototypes/_WF/Strangers/dialogues.yml:7`) sells low-grade product, seeds,
   the purity tester and neuroware copies. The Reaver runner (`WFEncounterReaverDealer`, a trader ship flying

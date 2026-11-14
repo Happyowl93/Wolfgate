@@ -43,8 +43,8 @@ and hold it through a nod; cannabis softens the brakes and the turn; alcohol mak
 
 Substances are grown (coca, the opium poppy, cannabis pressed into hash) or cooked through graded reactions, and the
 solids keep their grade. Flour cuts cocaine and heroin (`fillers` on `wfReactionPurity`). `WFDeliverySystem` adds powder lines from a baggie and the bong; `WFSecondhandSmokeSystem` puts smoke
-gas and a share of everything smoked into the air, and doses whoever breathes it nearby. Products are Class 3
-contraband with grade-scaled prices, a sale tax and a sold alert, and `WFNarcoticGoodsSystem` gives the same marks
+gas and a share of everything smoked into the air, and doses whoever breathes it nearby. Products other than hash,
+which is legal like cannabis, are Class 3 contraband with grade-scaled prices, a sale tax and a sold alert, and `WFNarcoticGoodsSystem` gives the same marks
 (`WFNarcoticMarks`) to any item or movable structure while one of its solutions holds a priced narcotic, a beaker, pill or storage tank as much as a baggie, and to a blank stick that takes a copy; the Strangers dealer sells cut stock, a Reaver
 runner (`WFEncounterReaverDealer`, a trader encounter) sells full grade and buys nothing, the bong is
 crafted from glass and plastic, and the uplink chemicals tab lists a few. The Bench has three laws
@@ -84,7 +84,8 @@ dependence all come from the Narcotics part. A full load is the profile's `neuro
 blank gives the copy one load at 85% of the source's integrity and costs the source a tenth of its own; the missing
 share makes a running program glitch (stun, a forced beep, scrambled speech, a false HUD fault). A blank used on
 anything that holds a drug with a twin (3 s) reads it in and uses it up: the stick's integrity is the drug's grade,
-and it takes up to three loads, none larger than a full one. Blanks print at the autolathe. The Wolfmed synthetic HUD lists what is running as fault lines and its shader is driven by the tier,
+and it takes up to three loads, none larger than a full one. Blanks print at the autolathe. A written stick is a
+narcotic at the market unless its profile is `legal`, as cannabis and its twin Idle are. The Wolfmed synthetic HUD lists what is running as fault lines and its shader is driven by the tier,
 Redline's speed costs charge and heat, and a chassis panel reboot stops every program and clears the levels.
 
 Entry points: `WFNeurowareSystem` (`TryStartLoad`, `Load`, `TryCopy`, `TryStartEncode`, `Encode`, `Tick`), `WFNeurowareStickComponent`, and the

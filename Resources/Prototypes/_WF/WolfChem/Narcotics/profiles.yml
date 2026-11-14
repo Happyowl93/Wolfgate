@@ -511,10 +511,12 @@
     banner: wf-neuroware-halo-banner
     faults: [ wf-neuroware-halo-fault-1, wf-neuroware-halo-fault-2 ]
 
-# Cannabis (THC and hash): the reagent keeps its own effects; the profile adds the overlay and the twin.
+# Cannabis (THC and hash): the reagent keeps its own effects; the profile adds the overlay and the twin. It is legal,
+# and so is its twin, Idle.
 - type: wfDrugProfile
   id: WFCannabis
   family: Cannabinoid
+  legal: true
   decay: 0.02
   overdoseHalfLife: 120
   dependenceGain: 0.003

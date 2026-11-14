@@ -269,11 +269,20 @@ public sealed class WFNeurowareSystem : EntitySystem
         blank.Comp.Loads = 1;
         source.Comp.Integrity *= CopyWear;
         _appearance.SetData(blank, WFNeurowareStickVisuals.Copied, true);
-        _goods.SetNarcotic(blank, true);
+        MarkWritten(blank);
 
         if (user != null)
             _popup.PopupEntity(Loc.GetString("wf-neuroware-copy-done"), blank, user.Value);
         return true;
+    }
+
+    /// <summary>Marks a written blank as a narcotic at the market, unless its program's drug is legal.</summary>
+    private void MarkWritten(Entity<WFNeurowareStickComponent> blank)
+    {
+        if (blank.Comp.Profile is { } profile && _proto.TryIndex(profile, out var proto) && proto.Legal)
+            return;
+
+        _goods.SetNarcotic(blank, true);
     }
 
     /// <summary>Starts a blank reading in the drug a thing holds. False when it holds none with a twin.</summary>
@@ -329,7 +338,7 @@ public sealed class WFNeurowareSystem : EntitySystem
         blank.Comp.Amount = taken / loads;
         blank.Comp.Loads = loads;
         _appearance.SetData(blank, WFNeurowareStickVisuals.Copied, true);
-        _goods.SetNarcotic(blank, true);
+        MarkWritten(blank);
 
         if (user != null)
         {

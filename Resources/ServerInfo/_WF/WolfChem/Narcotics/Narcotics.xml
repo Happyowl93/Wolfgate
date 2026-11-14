@@ -2,7 +2,7 @@
 
 # Narcotics and Neuroware
 
-Street drugs are cooked, grown and sold all over the sector, and every one of them is Class 3 contraband. Synthetics can't use them and run neuroware instead, which is at the bottom of this page.
+Street drugs are cooked, grown and sold all over the sector, and every one of them is Class 3 contraband except cannabis and hash, which are legal. Synthetics can't use them and run neuroware instead, which is at the bottom of this page.
   <Box>
     <GuideEntityEmbed Entity="WFBaggieCocaine"/>
     <GuideEntityEmbed Entity="WFCrackRock"/>
@@ -127,7 +127,7 @@ A program gives the same high, crash and habit as the drug it copies, shown on t
 - [bold]Burst[/bold]: crystal.
 - [bold]Damper[/bold]: Anvil.
 - [bold]Choir.sig[/bold]: Chorus.
-- [bold]Idle[/bold]: cannabis.
+- [bold]Idle[/bold]: cannabis, and legal like it.
 - [bold]Halo[/bold] and [bold]Redline[/bold] go by their own names. On a synthetic, Redline costs charge and heat instead of the heart.
 
 Sticks have [bold]integrity[/bold], which works like grade. A weak stick delivers less, and the missing part makes the program glitch with brief stuns, forced beeps, scrambled speech and fake faults. Using a loaded stick on a blank copies it at 85% of the original's integrity, with one load. The original keeps its loads but loses a tenth of its integrity each time, so a build only copies so far. Street copies are several generations down.
