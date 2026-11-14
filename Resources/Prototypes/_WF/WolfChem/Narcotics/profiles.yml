@@ -67,9 +67,7 @@
     statusEffects:
     - key: Drowsiness
       component: Drowsiness
-    effects:
-    - !type:TakeStaminaDamage
-      amount: 1
+    stamina: 1
   neuroware:
     program: wf-neuroware-whiteline
     banner: wf-neuroware-whiteline-banner
@@ -129,9 +127,7 @@
     statusEffects:
     - key: Drowsiness
       component: Drowsiness
-    effects:
-    - !type:TakeStaminaDamage
-      amount: 2
+    stamina: 2
   neuroware:
     program: wf-neuroware-whiteline
     banner: wf-neuroware-whiteline-banner
@@ -243,9 +239,8 @@
     duration: 90
     perSecondAbove: 0.3
     speed: 0.9
+    stamina: 1
     effects:
-    - !type:TakeStaminaDamage
-      amount: 1
     - !type:PopupMessage
       probability: 0.04
       messages: [ wf-drug-popup-comedown-1, wf-drug-popup-comedown-2 ]
@@ -284,9 +279,7 @@
     statusEffects:
     - key: Drowsiness
       component: Drowsiness
-    effects:
-    - !type:TakeStaminaDamage
-      amount: 2
+    stamina: 2
   neuroware:
     amount: 10
     program: wf-neuroware-burst
@@ -294,7 +287,7 @@
     faults: [ wf-neuroware-burst-fault-1, wf-neuroware-burst-fault-2 ]
 
 # Redline: offence. A light dose gives part of the speed; the full speed and stun resistance need a heavy one. Every
-# second high strains the heart, and when it ends the body collapses for a minute plus half the time spent high.
+# second high strains the heart; when it ends the body collapses once, then drags for a minute plus half the time high.
 - type: wfDrugProfile
   id: WFRedline
   family: Combat
@@ -352,9 +345,9 @@
     maxDuration: 180
     speed: 0.5
     overlay: 0.8
-    effects:
-    - !type:TakeStaminaDamage
-      amount: 5
+    collapse: 10
+    stamina: 5
+    staminaCap: 0.8
   neuroware:
     amount: 10
     program: wf-neuroware-redline
@@ -499,9 +492,8 @@
     duration: 60
     perSecondAbove: 0.2
     overlay: 0.6
+    stamina: 1
     effects:
-    - !type:TakeStaminaDamage
-      amount: 1
     - !type:PopupMessage
       probability: 0.06
       messages: [ wf-drug-popup-halo-crash-1, wf-drug-popup-halo-crash-2, wf-drug-popup-halo-crash-3 ]

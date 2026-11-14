@@ -158,7 +158,7 @@ Prototype kind `wfDrugProfile`:
 | `family` | `Stimulant`, `Opioid`, `Psychedelic`, `Empathogen`, `Cannabinoid`, `Combat`, `Nicotine`. Dependence and overlays key on it |
 | `decay` | Level lost per second |
 | `tiers` | Ordered list of `{ min, effects, speed, statusEffects, overlay }`. The highest tier whose `min` is at or below the level applies. The last tier is the overdose |
-| `crash` | `{ after, duration, effects, speed, overlay }`: applied when the level falls below the first tier after having spent `after` seconds above it |
+| `crash` | `{ after, duration, effects, speed, overlay, stamina, staminaCap, collapse }`: applied when the level falls below the first tier after having spent `after` seconds above it. `stamina` drains per second but stops at `staminaCap` of the crit threshold (0.45), since every hit resets regen and an uncapped drain stun-locks; `collapse` is one knockdown as it starts. A crash's `Drowsiness` nods 1-2 s every 1-2 minutes |
 | `dependenceGain` | Dependence added per unit of level gained |
 | `rushGain`, `rushHalfLife` | The peak of a fresh dose: extra level per level added to the blood, halving every `rushHalfLife` seconds. It never reaches the overdose tier |
 | `neuroware` | The twin: program name, HUD fault lines, banner, and `amount`, the level a full load delivers (8 unless set) |
@@ -192,7 +192,8 @@ Prototype kind `wfDrugProfile`:
   it, as does heroin's sedation (`WFSedation`), so the pull is toward dosing more.
 - Withdrawal starts when a family's meter is above 0.5 and no profile of that family has been above its first
   tier for 5 minutes. Stages by meter: popups and cravings; then jitter, a stamina cap and pain; `Opioid` and
-  `Stimulant` add vomiting and drowsiness at the top stage, and `Nicotine` stops at cravings. Only reaching the
+  `Stimulant` add vomiting and a 1-2 s nod every 1-2 minutes at the top stage, and `Nicotine` and
+  `Cannabinoid` stop at cravings. Only reaching the
   first tier again ends it, so a taste doesn't, and tolerance raises what it takes. A dependent body that is high
   on its family sheds 1 stamina damage a second. Withdrawal never kills.
 - Round scope: the components live on the body. Cloning or a new body starts clean. Nothing is written to the
@@ -314,7 +315,7 @@ aboard).
 | `WFOpium` | Opium | Opioid | Social downer | Moderate pain relief, calm | Drowsiness | Smoked |
 | `WFHeroin` | Heroin | Opioid | Hard downer | Strong pain relief through `WolfmedPainRelief`, euphoria | Slow movement; nodding off (eyes shut, still standing) when heavy, and brief forced sleep in an overdose. Overdose is Wolfmed's sedation airloss through `WFSedation`, graded and blunted by tolerance. Naloxone reverses it | Injected, smoked |
 | Desoxyephedrine (existing) | Crystal | Stimulant | Combat stimulant | Speed x1.25 from the profile; halved stuns and knockdowns, stamina-crit resistance and no slowdown from damage need a heavy dose (level 8), as profile traits, so tolerance blunts them and Burst has them; the reagent keeps its jitter and pain relief | Unchanged Poison; adds a long crash | Smoked as crystal, or as today |
-| `WFRedline` | Redline | Combat | Offence | Speed x1.3, stun and knockdown resistance, no slowdown from damage, pain immunity | Heart damage every tick; can't sprint-stop cleanly (jitter); when it ends, a 60 s collapse at speed x0.5 with a stamina cap. Overdose: cardiac arrest | Injected |
+| `WFRedline` | Redline | Combat | Offence | Speed x1.3, stun and knockdown resistance, no slowdown from damage, pain immunity | Heart damage every tick; can't sprint-stop cleanly (jitter); when it ends, a 10 s knockdown, then 60 s or more at speed x0.5 with stamina held at 80%. Overdose: cardiac arrest | Injected |
 | `WFAnvil` | Anvil | Combat | Endurance | Incoming Brute and Burn reduced 30%, pain immunity, stamina-crit resistance | Speed x0.85; the user's own damage readout is hidden while high; damage avoided is repaid at 40% as Poison over the crash. Overdose: organ damage | Injected |
 | `WFChorus` | Chorus | Psychedelic | Social, prospecting | Lattice hallucinations scaling with tier: whispers and blips, then glimpses and phantoms, then mimics and doubles. A light on the screen points to the nearest rock holding exotic matter, at the cost of faster Drift | Disorientation, scrambled speech at the top tier. No physical overdose; the top tier adds brief `Pacified` | Swallowed tab |
 | `WFHalo` | Halo | Empathogen | Social | Glow overlay, light pain relief, warm popups, laugh and hug emotes | Rising body temperature while high; a crash of sadness popups and low stamina. Overdose: overheating | Pill |

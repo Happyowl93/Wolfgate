@@ -185,6 +185,18 @@ public sealed partial class WFDrugCrash
     [DataField(serverOnly: true)]
     public List<EntityEffect> Effects = new();
 
+    /// <summary>Stamina damage a second, held at <see cref="StaminaCap"/> so the crash wears the body down without knocking it over.</summary>
+    [DataField]
+    public float Stamina;
+
+    /// <summary>Share of the crit threshold the crash's stamina damage stops at; below half it doesn't jitter.</summary>
+    [DataField]
+    public float StaminaCap = 0.45f;
+
+    /// <summary>A single knockdown as the crash starts.</summary>
+    [DataField]
+    public TimeSpan Collapse;
+
     [DataField]
     public float Speed = 1f;
 

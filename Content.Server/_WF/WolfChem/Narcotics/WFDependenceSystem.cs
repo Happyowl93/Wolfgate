@@ -244,7 +244,9 @@ public sealed class WFDependenceSystem : EntitySystem
         if (stage < 3 || family is not (WFDrugFamily.Opioid or WFDrugFamily.Stimulant))
             return;
 
-        _status.TryAddStatusEffect(uid, "Drowsiness", StatusTime, true, "Drowsiness");
+        if (_status.TryAddStatusEffect(uid, "Drowsiness", StatusTime, true, "Drowsiness"))
+            _intoxication.TameDrowsiness(uid);
+
         if (_random.Prob(Math.Min(1f, VomitChance * seconds)))
             _vomit.Vomit(uid, -10f, -10f);
     }
