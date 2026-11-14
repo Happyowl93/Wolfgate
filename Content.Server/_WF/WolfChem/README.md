@@ -79,13 +79,15 @@ Dispensers give standard grade. Touch reactions, tile reactions and fuel ignore 
 
 Drugs for synthetics. A body whose brain organ has `WFNeurowareHost` (the positronic brains) ignores chemical doses
 and takes data sticks instead: using a stick on a host loads its program (2 s on yourself, 4 s on someone else),
-which feeds the twin drug profile's level at the stick's integrity, so highs, crashes and dependence all come from
-the Narcotics part. Copying a stick onto a blank leaves the source as it was and gives the copy one load at 85% of
-its integrity; the missing share makes a running program glitch (stun, a forced beep, scrambled speech, a false HUD
-fault). The Wolfmed synthetic HUD lists what is running as fault lines and its shader is driven by the tier,
+which feeds the twin drug profile's level at the stick's integrity and gives the drug's rush, so highs, crashes and
+dependence all come from the Narcotics part. A full load is the profile's `neuroware.amount`. Copying a stick onto a
+blank gives the copy one load at 85% of the source's integrity and costs the source a tenth of its own; the missing
+share makes a running program glitch (stun, a forced beep, scrambled speech, a false HUD fault). A blank used on
+anything that holds a drug with a twin (3 s) reads it in and uses it up: the stick's integrity is the drug's grade,
+and it takes up to three loads, none larger than a full one. Blanks print at the autolathe. The Wolfmed synthetic HUD lists what is running as fault lines and its shader is driven by the tier,
 Redline's speed costs charge and heat, and a chassis panel reboot stops every program and clears the levels.
 
-Entry points: `WFNeurowareSystem` (`TryStartLoad`, `Load`, `TryCopy`, `Tick`), `WFNeurowareStickComponent`, and the
+Entry points: `WFNeurowareSystem` (`TryStartLoad`, `Load`, `TryCopy`, `TryStartEncode`, `Encode`, `Tick`), `WFNeurowareStickComponent`, and the
 client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/Prototypes/_WF/WolfChem/Neuroware`.
 
 <!-- WOLFGATE-GENERATED START -->
@@ -205,6 +207,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Resources/Prototypes/_WF/WolfChem/Narcotics/shaders.yml`](../../../Resources/Prototypes/_WF/WolfChem/Narcotics/shaders.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Narcotics/tags.yml`](../../../Resources/Prototypes/_WF/WolfChem/Narcotics/tags.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Narcotics/traits.yml`](../../../Resources/Prototypes/_WF/WolfChem/Narcotics/traits.yml)
+- [`Resources/Prototypes/_WF/WolfChem/Neuroware/lathe.yml`](../../../Resources/Prototypes/_WF/WolfChem/Neuroware/lathe.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Neuroware/loot.yml`](../../../Resources/Prototypes/_WF/WolfChem/Neuroware/loot.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Neuroware/shaders.yml`](../../../Resources/Prototypes/_WF/WolfChem/Neuroware/shaders.yml)
 - [`Resources/Prototypes/_WF/WolfChem/Neuroware/sticks.yml`](../../../Resources/Prototypes/_WF/WolfChem/Neuroware/sticks.yml)
@@ -295,6 +298,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Resources/Prototypes/_EinsteinEngines/Entities/Mobs/Player/silicon_base.yml`](../../../Resources/Prototypes/_EinsteinEngines/Entities/Mobs/Player/silicon_base.yml): neuroware twins apply these to a synthetic's own body
 - [`Resources/Prototypes/_ES/Reagents/gases.yml`](../../../Resources/Prototypes/_ES/Reagents/gases.yml): thin haze from smoking is harmless; fire-thick smoke still chokes
 - [`Resources/Prototypes/_Impstation/Reagents/biological.yml`](../../../Resources/Prototypes/_Impstation/Reagents/biological.yml): held while it is in the blood instead of piling up each tick
+- [`Resources/Prototypes/_Mono/Catalogs/Fills/Lockers/salvmaint_locker.yml`](../../../Resources/Prototypes/_Mono/Catalogs/Fills/Lockers/salvmaint_locker.yml): neuroware sticks turn up in maintenance lockers
 - [`Resources/Prototypes/_Mono/Entities/Objects/Misc/solids.yml`](../../../Resources/Prototypes/_Mono/Entities/Objects/Misc/solids.yml): fits a baggie
 - [`Resources/Prototypes/_Mono/Reagents/letoferol.yml`](../../../Resources/Prototypes/_Mono/Reagents/letoferol.yml): drunkenness follows the units in the blood
 - [`Resources/Prototypes/_Mono/Reagents/medicine.yml`](../../../Resources/Prototypes/_Mono/Reagents/medicine.yml)
@@ -365,6 +369,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
   - held while it is in the blood instead of piling up each tick
   - held at the units left, as long as it used to pile up to
   - clears slower so the high lasts as long as before
+- [`Resources/Prototypes/Recipes/Lathes/Packs/engineering.yml`](../../../Resources/Prototypes/Recipes/Lathes/Packs/engineering.yml): blank data sticks print at the autolathe
 - [`Resources/Prototypes/Recipes/Lathes/Packs/medical.yml`](../../../Resources/Prototypes/Recipes/Lathes/Packs/medical.yml): purity testers print with the chemistry kit
 
 <!-- WOLFGATE-GENERATED END -->

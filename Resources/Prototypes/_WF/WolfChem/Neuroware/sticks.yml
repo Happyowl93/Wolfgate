@@ -1,6 +1,7 @@
-# Neuroware sticks. A blank takes copies; the named ones are pristine builds. Copying leaves the source's loads
-# alone, so a build spreads as far as there are blanks, 15% worse each generation. A stick's price doesn't follow
-# what is copied onto it, so copying doesn't print money. A blank that takes a copy becomes a narcotic at the market
+# Neuroware sticks. A blank takes copies or reads a drug in; the named ones are pristine builds. Copying leaves the
+# source's loads alone and costs it a tenth of its integrity, and the copy is 15% worse than the source was. A blank
+# prints at the autolathe (lathe.yml) and is priced under its materials, and a stick's price doesn't follow what is
+# written onto it, so neither printing nor copying prints money. A written blank becomes a narcotic at the market
 # like the program base (WFNarcoticMarks).
 
 - type: entity
@@ -36,7 +37,7 @@
   - type: WFNeurowareStick
     loads: 0
   - type: StaticPrice
-    price: 75
+    price: 15
 
 # A stick with a program on it. It sells like any drug.
 - type: entity

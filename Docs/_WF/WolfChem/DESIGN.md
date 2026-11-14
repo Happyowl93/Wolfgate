@@ -161,7 +161,7 @@ Prototype kind `wfDrugProfile`:
 | `crash` | `{ after, duration, effects, speed, overlay }`: applied when the level falls below the first tier after having spent `after` seconds above it |
 | `dependenceGain` | Dependence added per unit of level gained |
 | `rushGain`, `rushHalfLife` | The peak of a fresh dose: extra level per level added to the blood, halving every `rushHalfLife` seconds. It never reaches the overdose tier |
-| `neuroware` | Display strings for the twin: program name, HUD fault lines, banner |
+| `neuroware` | The twin: program name, HUD fault lines, banner, and `amount`, the level a full load delivers (8 unless set) |
 
 `effects` are ordinary `EntityEffect`s run with base args, so they must not use `ReagentThreshold` or `OrganType`
 (both throw outside a reagent context). Tiers replace thresholds.
@@ -384,19 +384,29 @@ the first strains the heart by 0.1 a second.
 
 ### Items
 
-- `WFNeurowareStick`: `profile`, `integrity` (0-1), `loads` remaining, `amount` (level added per load), `rate`
-  (level per second while loading).
+- `WFNeurowareStick`: `profile`, `integrity` (0-1), `loads` remaining, `amount` (level added per load; unset takes
+  the profile's `neuroware.amount`), `rate` (level per second while loading).
 - Using a stick on a host starts a do-after: 2 s on yourself, 4 s on someone else, with a popup to the target, as
   `WolfmedFluidPackSystem` does (`Content.Server/_WF/Wolfmed/Medical/WolfmedFluidPackSystem.cs`). A non-host gets
   a "no port" popup.
 - Loading adds a running program to `WFNeurowareComponent` on the body. Each second it adds
-  `rate x integrity` to the profile's level until `amount` is delivered. Everything after that is
+  `rate x integrity` to the profile's level until `amount` is delivered, and the same to its rush
+  (`WFIntoxicationSystem.AddRush`), so a load peaks the way a dose in the blood does. Everything after that is
   `WFIntoxicationSystem`.
+- **Load size.** A full load is 8, as much as a heavy line or two; 10 for the drugs that come in a 10 u vial and for
+  Crystal, and 14 for Idle, which have no rush to carry a load into the heavy tier.
 - **Copying.** Using a stick on a blank stick copies it at `integrity x 0.85` with one load and leaves the source's loads alone, and the blank shows a strip of tape.
-  Pristine builds come from dealers, the uplink and rare loot, so a street copy is a few generations down.
-- **Sources.** The Reaver dealer sells blanks and pristine builds, the planet dealer sells street copies, and
-  `WFNeurowareStickLoot` (mostly blanks, some copies, rarely a pristine build) rolls in maintenance fluff and
-  uncommon salvage treasure.
+  Each copy also costs the source a tenth of its integrity, so one build yields about eight loads' worth of copies
+  before it is noise. Pristine builds come from dealers, the uplink and rare loot, so a street copy is a few generations down.
+- **Encoding.** Using a blank on anything that holds a drug with a twin, other than a body, starts a 3 s do-after
+  that reads the drug in and uses it up: integrity is the drug's grade, the level taken is `units x perUnit` up to
+  three full loads, split into the fewest loads that are no larger than a full one. A solid goes with its drug and a
+  vessel is left with the rest. This is the synthetic's supply line: whoever grows or cooks for organics can supply
+  a synthetic at the same grade.
+- **Sources.** Blanks print at the autolathe for a sheet of steel and one of plastic and are priced under that. The
+  Reaver dealer sells blanks and pristine builds, the planet dealer sells a street copy of the buyer's choice, and
+  `WFNeurowareStickLoot` (mostly blanks, some copies, rarely a pristine build) rolls in maintenance fluff, both the
+  upstream table and the Mono locker one, and uncommon salvage treasure.
 - Sprites: `Resources/Textures/_WF/WolfChem/Neuroware/Objects/stick.rsi`, a USB stick with a tinted body, a printed label for
   pristine builds and tape for copies.
 

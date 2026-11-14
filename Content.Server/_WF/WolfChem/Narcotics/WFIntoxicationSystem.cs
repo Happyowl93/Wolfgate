@@ -168,6 +168,18 @@ public sealed partial class WFIntoxicationSystem : SharedWFIntoxicationSystem
         return Math.Max(0f, level - proto.Decay * seconds);
     }
 
+    /// <summary>Gives a fresh dose's rush for level fed without the blood, as a neuroware program feeds it.</summary>
+    public void AddRush(EntityUid uid, ProtoId<WFDrugProfilePrototype> profile, float level)
+    {
+        if (level <= 0f
+            || !Proto.TryIndex(profile, out var proto)
+            || proto.RushGain <= 0f
+            || !TryComp<WFIntoxicationComponent>(uid, out var comp))
+            return;
+
+        comp.Rush[profile] = comp.Rush.GetValueOrDefault(profile) + level * proto.RushGain;
+    }
+
     /// <summary>
     /// Fades a profile's rush and adds to it for any rise in its level from the blood since the last tick, which is
     /// a fresh dose. Returns the rush left.
