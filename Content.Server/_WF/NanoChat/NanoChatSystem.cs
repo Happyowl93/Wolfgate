@@ -182,7 +182,9 @@ public sealed class NanoChatSystem : SharedNanoChatSystem
             {
                 var candidate = PickFreeNumber();
                 number = await _db.ClaimNanoChatNumberAsync(profileId, (int) candidate);
-                _reserved.Add(candidate);
+                // A refused candidate is someone else's; a character with a saved number leaves the candidate free.
+                if (number == null)
+                    _reserved.Add(candidate);
             }
         }
         catch (Exception e)

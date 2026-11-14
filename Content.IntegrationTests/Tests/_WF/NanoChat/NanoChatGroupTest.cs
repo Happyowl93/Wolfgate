@@ -142,6 +142,38 @@ public sealed class NanoChatGroupTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>A company group holds every member, past a room's member limit.</summary>
+    [Test]
+    public async Task CompanyGroupHasNoMemberLimit()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var pdas = await Spawn(pair, 1);
+
+        await server.WaitAssertion(() =>
+        {
+            var a = CardOf(entMan, pdas[0]);
+            var groups = entMan.System<NanoChatGroupSystem>();
+            var own = a.Comp.Number!.Value;
+            groups.SetCompany(own, (2, "Bigco"));
+            var groupId = a.Comp.Recipients.Keys.Single(SharedNanoChatSystem.IsGroup);
+
+            var others = Enumerable.Range(1, NanoChatGroupSystem.MaxMembers + 10)
+                .Select(n => (uint) n)
+                .Where(n => n != own)
+                .ToList();
+            foreach (var number in others)
+            {
+                groups.SetCompany(number, (2, "Bigco"));
+            }
+
+            Assert.That(groups.Get(groupId)!.Members, Has.Count.EqualTo(others.Count + 1));
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     private static async Task<EntityUid[]> Spawn(TestPair pair, int count)
     {
         var entMan = pair.Server.EntMan;

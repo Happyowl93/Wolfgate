@@ -107,10 +107,12 @@ public sealed class NanoChatGroupSystem : EntitySystem
         return group;
     }
 
-    /// <summary>Puts a number in a group and gives the group to the cards holding it. False when it can't join.</summary>
+    /// <summary>Puts a number in a group and gives the group to the cards holding it. False when it can't join; only rooms have a member limit.</summary>
     public bool Add(NanoChatGroup group, uint number, bool notify)
     {
-        if (SharedNanoChatSystem.IsGroup(number) || group.Members.Contains(number) || group.Members.Count >= MaxMembers)
+        if (SharedNanoChatSystem.IsGroup(number)
+            || group.Members.Contains(number)
+            || group.CompanyId == null && group.Members.Count >= MaxMembers)
             return false;
 
         group.Members.Add(number);
