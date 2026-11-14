@@ -225,7 +225,7 @@
 
 - type: xenobiologyBounty
   id: WFBountyUmbralExtract
-  pointsAwarded: 7500
+  pointsAwarded: 15000
   entries:
   - name: bounty-item-wf-umbral-extract
     amount: 1
@@ -235,7 +235,7 @@
 
 - type: xenobiologyBounty
   id: WFBountyLumenExtract
-  pointsAwarded: 20000
+  pointsAwarded: 40000
   entries:
   - name: bounty-item-wf-lumen-extract
     amount: 1

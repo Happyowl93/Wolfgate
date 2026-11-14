@@ -223,6 +223,33 @@ public sealed class XenobiologyTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>The adamantine extract's plasteel stays below what mining makes.</summary>
+    [Test]
+    public async Task AdamantineExtractMakesTwoPlasteel()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.ResolveDependency<IEntityManager>();
+
+        await server.WaitPost(() =>
+        {
+            var extract = entities.SpawnEntity("AdamantineSlimeExtract", map.GridCoords);
+            entities.System<ReactiveSystem>().DoEntityReaction(extract, new Solution("Plasma", FixedPoint2.New(5)), ReactionMethod.Injection);
+        });
+
+        await server.WaitRunTicks(2);
+        await server.WaitAssertion(() =>
+        {
+            var sheets = entities.EntityQuery<Content.Shared.Stacks.StackComponent>()
+                .Where(s => s.StackTypeId == "Plasteel" && OnMap(entities, s.Owner, map.MapId))
+                .Sum(s => s.Count);
+            Assert.That(sheets, Is.EqualTo(2));
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     [Test]
     public async Task GrinderTurnsDeadSlimesIntoExtracts()
     {

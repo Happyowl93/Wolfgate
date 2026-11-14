@@ -2,7 +2,7 @@
 
 - type: xenobiologyBounty
   id: BountyExtractAnyThree
-  pointsAwarded: 1250
+  pointsAwarded: 2500
   entries:
   - name: bounty-item-extract-any-three
     amount: 3
@@ -12,7 +12,7 @@
 
 - type: xenobiologyBounty
   id: BountyExtractAnyThreeTier1
-  pointsAwarded: 5000
+  pointsAwarded: 10000
   entries:
   - name: bounty-item-extract-any-three-tier1
     amount: 3
@@ -25,7 +25,7 @@
 
 - type: xenobiologyBounty
   id: BountyExtractAnyThreeTier2
-  pointsAwarded: 11250
+  pointsAwarded: 22500
   entries:
   - name: bounty-item-extract-any-three-tier2
     amount: 3
@@ -41,7 +41,7 @@
 
 - type: xenobiologyBounty
   id: BountyExtractAnyThreeTier3
-  pointsAwarded: 23750
+  pointsAwarded: 47500
   entries:
   - name: bounty-item-extract-any-three-tier3
     amount: 3
@@ -54,7 +54,7 @@
 
 - type: xenobiologyBounty
   id: BountyExtractAnyThreeTier4
-  pointsAwarded: 32500
+  pointsAwarded: 65000
   entries:
   - name: bounty-item-extract-any-three-tier4
     amount: 3
@@ -67,7 +67,7 @@
 
 - type: xenobiologyBounty
   id: BountyGreyExtract
-  pointsAwarded: 625
+  pointsAwarded: 1250
   entries:
   - name: bounty-item-grey-extract
     amount: 1
@@ -77,7 +77,7 @@
 
 - type: xenobiologyBounty
   id: BountyGreyExtractBulk
-  pointsAwarded: 3500
+  pointsAwarded: 7000
   entries:
   - name: bounty-item-grey-extract
     amount: 5
@@ -87,7 +87,7 @@
 
 - type: xenobiologyBounty
   id: BountyOrangeExtract
-  pointsAwarded: 1250
+  pointsAwarded: 2500
   entries:
   - name: bounty-item-orange-extract
     amount: 1
@@ -97,7 +97,7 @@
 
 - type: xenobiologyBounty
   id: BountyPurpleExtract
-  pointsAwarded: 1250
+  pointsAwarded: 2500
   entries:
   - name: bounty-item-purple-extract
     amount: 1
@@ -107,7 +107,7 @@
 
 - type: xenobiologyBounty
   id: BountyBlueExtract
-  pointsAwarded: 1250
+  pointsAwarded: 2500
   entries:
   - name: bounty-item-blue-extract
     amount: 1
@@ -117,7 +117,7 @@
 
 - type: xenobiologyBounty
   id: BountyMetalExtract
-  pointsAwarded: 1250
+  pointsAwarded: 2500
   entries:
   - name: bounty-item-metal-extract
     amount: 1
@@ -127,7 +127,7 @@
 
 - type: xenobiologyBounty
   id: BountyYellowExtract
-  pointsAwarded: 2500
+  pointsAwarded: 5000
   entries:
   - name: bounty-item-yellow-extract
     amount: 1
@@ -137,7 +137,7 @@
 
 - type: xenobiologyBounty
   id: BountyDarkPurpleExtract
-  pointsAwarded: 2500
+  pointsAwarded: 5000
   entries:
   - name: bounty-item-dark-purple-extract
     amount: 1
@@ -147,7 +147,7 @@
 
 - type: xenobiologyBounty
   id: BountyDarkBlueExtract
-  pointsAwarded: 2500
+  pointsAwarded: 5000
   entries:
   - name: bounty-item-dark-blue-extract
     amount: 1
@@ -157,7 +157,7 @@
 
 - type: xenobiologyBounty
   id: BountySilverExtract
-  pointsAwarded: 2500
+  pointsAwarded: 5000
   entries:
   - name: bounty-item-silver-extract
     amount: 1
@@ -167,7 +167,7 @@
 
 - type: xenobiologyBounty
   id: BountyBluespaceExtract
-  pointsAwarded: 5000
+  pointsAwarded: 10000
   entries:
   - name: bounty-item-bluespace-extract
     amount: 1
@@ -177,7 +177,7 @@
 
 - type: xenobiologyBounty
   id: BountySepiaExtract
-  pointsAwarded: 5000
+  pointsAwarded: 10000
   entries:
   - name: bounty-item-sepia-extract
     amount: 1
@@ -187,7 +187,7 @@
 
 - type: xenobiologyBounty
   id: BountyCeruleanExtract
-  pointsAwarded: 5000
+  pointsAwarded: 10000
   entries:
   - name: bounty-item-cerulean-extract
     amount: 1
@@ -197,7 +197,7 @@
 
 - type: xenobiologyBounty
   id: BountyPyriteExtract
-  pointsAwarded: 5000
+  pointsAwarded: 10000
   entries:
   - name: bounty-item-pyrite-extract
     amount: 1
@@ -207,7 +207,7 @@
 
 - type: xenobiologyBounty
   id: BountyRedExtract
-  pointsAwarded: 7500
+  pointsAwarded: 15000
   entries:
   - name: bounty-item-red-extract
     amount: 1
@@ -217,7 +217,7 @@
 
 - type: xenobiologyBounty
   id: BountyGreenExtract
-  pointsAwarded: 7500
+  pointsAwarded: 15000
   entries:
   - name: bounty-item-green-extract
     amount: 1
@@ -227,7 +227,7 @@
 
 - type: xenobiologyBounty
   id: BountyPinkExtract
-  pointsAwarded: 7500
+  pointsAwarded: 15000
   entries:
   - name: bounty-item-pink-extract
     amount: 1
@@ -237,7 +237,7 @@
 
 - type: xenobiologyBounty
   id: BountyGoldExtract
-  pointsAwarded: 7500
+  pointsAwarded: 15000
   entries:
   - name: bounty-item-gold-extract
     amount: 1
@@ -247,7 +247,7 @@
 
 - type: xenobiologyBounty
   id: BountyOilExtract
-  pointsAwarded: 10000
+  pointsAwarded: 20000
   entries:
   - name: bounty-item-oil-extract
     amount: 1
@@ -257,7 +257,7 @@
 
 - type: xenobiologyBounty
   id: BountyLightPinkExtract
-  pointsAwarded: 10000
+  pointsAwarded: 20000
   entries:
   - name: bounty-item-light-pink-extract
     amount: 1
@@ -267,7 +267,7 @@
 
 - type: xenobiologyBounty
   id: BountyBlackExtract
-  pointsAwarded: 10000
+  pointsAwarded: 20000
   entries:
   - name: bounty-item-black-extract
     amount: 1
@@ -277,7 +277,7 @@
 
 - type: xenobiologyBounty
   id: BountyAdamantineExtract
-  pointsAwarded: 10000
+  pointsAwarded: 20000
   entries:
   - name: bounty-item-adamantine-extract
     amount: 1

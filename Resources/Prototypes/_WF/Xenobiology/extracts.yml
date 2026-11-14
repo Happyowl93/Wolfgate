@@ -958,7 +958,8 @@
         base: XenobioExtractReaction
         effects:
         - !type:XenobioSpawnEntity
-          entity: SheetPlasteel10 # PDV composite is the PDV's currency
+          entity: SheetPlasteel1 # PDV composite is the PDV's currency
+          number: 2
     - reagents:
       - Blood
       methods:
