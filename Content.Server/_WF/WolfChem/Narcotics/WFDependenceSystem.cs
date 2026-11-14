@@ -54,8 +54,13 @@ public sealed class WFDependenceSystem : EntitySystem
     /// <summary>Stamina damage a second a dependent body sheds while its family is high.</summary>
     public const float SatisfiedStamina = 1f;
 
+    /// <summary>Torso pain the second stage holds, of the 135 soft cap; Downed is at 128.</summary>
+    public const float Ache = 40f;
+
+    /// <summary>Torso pain the top stage holds.</summary>
+    public const float AcheTop = 75f;
+
     private const int CravingLines = 3;
-    private const float PainEvery = 10f;
     private const float VomitChance = 1f / 90f;
     private static readonly TimeSpan StatusTime = TimeSpan.FromSeconds(2.5);
 
@@ -238,8 +243,13 @@ public sealed class WFDependenceSystem : EntitySystem
                 _stamina.TakeStaminaDamage(uid, floor - stamina.StaminaDamage, stamina, visual: false);
         }
 
-        if (_random.Prob(Math.Min(1f, seconds / PainEvery)) && _body.GetRootPartOrNull(uid) is { } root && TryComp<PainComponent>(root.Entity, out var pain))
-            _pain.ChangePain((root.Entity, pain), 3);
+        // Pain no wound backs fades in seconds, so the ache is topped back up every tick; painkillers relieve it.
+        if (_body.GetRootPartOrNull(uid) is { } root && TryComp<PainComponent>(root.Entity, out var pain))
+        {
+            var ache = (stage >= 3 ? AcheTop : Ache) - _pain.GetRawPain((root.Entity, pain)).Float();
+            if (ache > 0f)
+                _pain.ChangePain((root.Entity, pain), ache);
+        }
 
         if (stage < 3 || family is not (WFDrugFamily.Opioid or WFDrugFamily.Stimulant))
             return;

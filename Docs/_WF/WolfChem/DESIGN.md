@@ -191,9 +191,9 @@ Prototype kind `wfDrugProfile`:
   and speeds a fed level's `decay` by as much. Every tier threshold, the overdose included, effectively rises with
   it, as does heroin's sedation (`WFSedation`), so the pull is toward dosing more.
 - Withdrawal starts when a family's meter is above 0.5 and no profile of that family has been above its first
-  tier for 5 minutes. Stages by meter: popups and cravings; then jitter, a stamina cap and pain; `Opioid` and
-  `Stimulant` add vomiting and a 1-2 s nod every 1-2 minutes at the top stage, and `Nicotine` and
-  `Cannabinoid` stop at cravings. Only reaching the
+  tier for 5 minutes. Stages by meter: popups and cravings; then jitter, a stamina cap and torso pain held at 40
+  (75 at the top stage; Downed is 128, and painkillers relieve it); `Opioid` and `Stimulant` add vomiting and a
+  1-2 s nod every 1-2 minutes at the top stage, and `Nicotine` and `Cannabinoid` stop at cravings. Only reaching the
   first tier again ends it, so a taste doesn't, and tolerance raises what it takes. A dependent body that is high
   on its family sheds 1 stamina damage a second. Withdrawal never kills.
 - Round scope: the components live on the body. Cloning or a new body starts clean. Nothing is written to the
