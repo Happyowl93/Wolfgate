@@ -125,15 +125,17 @@ void fragment() {
         col += vec3(0.5, 0.9, 1.0) * line * (0.2 * h + 0.2 * o) * i * motion;
         col = mix(col, min(col * 1.5, vec3(1.0)), 0.5 * o);
     } else if (f == 1) {
-        // Opioid: power saving. Light: the feed dims, cools and loses colour depth. Heavy: it drops resolution and
-        // interlaces. Overdose: it falls into standby, the frame going dark for seconds at a time.
-        flash = vec3(0.6, 0.7, 1.0);
+        // Opioid: power saving, in the organic high's muted brown. Light: the feed loses colour depth and settles
+        // into amber. Heavy: it drops resolution and interlaces. Overdose: the colour drains cold and it falls into
+        // standby, the frame going dark for seconds at a time.
+        flash = vec3(1.0, 0.85, 0.6);
         highp float block = 1.0 + floor((2.0 * h + 4.0 * o) * i);
         col = sampleScreen(wfPixelate(p, block));
         col = mix(col, wfPosterize(col, mix(24.0, 5.0, (0.2 + 0.3 * h + 0.5 * o) * i)), i);
-        col = mix(col, vec3(zGrayscale(col)) * vec3(0.8, 0.9, 1.1), (0.3 + 0.3 * h + 0.3 * o) * i);
-        col *= 1.0 - 0.12 * i - 0.1 * h;
-        col *= 1.0 - mod(floor(FRAGCOORD.y), 2.0) * 0.25 * h;
+        highp vec3 amber = mix(vec3(zGrayscale(col)), col, 0.6) * vec3(1.2, 1.0, 0.72) + vec3(0.04, 0.02, 0.0);
+        col = mix(col, amber, i * (1.0 - o));
+        col = mix(col, vec3(zGrayscale(col)) * vec3(0.8, 0.9, 1.1), 0.9 * o);
+        col *= 1.0 - mod(floor(FRAGCOORD.y), 2.0) * 0.12 * h;
         highp float standby = motion > 0.5 ? smoothstep(0.55, 1.0, sin(t * 0.5)) : 0.3;
         col *= 1.0 - standby * 0.85 * o;
     } else if (f == 2) {
