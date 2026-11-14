@@ -237,6 +237,24 @@
     price: 600
 
 - type: entity
+  parent: WFNeurowareStickHalo
+  id: WFNeurowareStickHaloCopy
+  components:
+  - type: Sprite
+    layers:
+    - state: body
+      color: "#d9b85e"
+    - state: plug
+    - state: tape
+    - state: led
+      shader: unshaded
+  - type: WFNeurowareStick
+    integrity: 0.72
+    loads: 1
+  - type: StaticPrice
+    price: 600
+
+- type: entity
   parent: WFNeurowareStickIdle
   id: WFNeurowareStickIdleCopy
   components:

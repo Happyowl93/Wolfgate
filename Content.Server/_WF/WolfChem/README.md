@@ -23,7 +23,7 @@ overdose one). Other upstream status effects from reagents (rainbows, muting, dr
 where a reagent's old length must stay (mute toxin, chloral hydrate, fentanyl); the recreational ones clear slower
 so they last as long as they used to.
 `WFDependenceSystem` builds a per-family habit with tolerance and withdrawal, which only reaching the family's first tier ends; a meter above the withdrawal mark
-fades at a quarter of the rate, and three traits start a character dependent with a first dose in hand. The client draws one overlay per family and tints incoming chat (`WFDrugChatSystem`) and changes world sounds (`WFDrugAudioSystem`);
+fades at a quarter of the rate, and five habit traits (stimulant, opioid, Halo, cannabis, nicotine) start a character dependent with a first fix in hand, a copied program stick for a neuroware host; cannabis and nicotine withdrawal stop at cravings. The client draws one overlay per family and tints incoming chat (`WFDrugChatSystem`) and changes world sounds (`WFDrugAudioSystem`);
 `WFDrugSpeechSystem` rushes stimulant speech and trails opioid speech off, and `WFNodSystem` makes a heavy opioid high
 nod off: the eyes shut and sound muffles for a few seconds while the body stays up and crawls (`WFNodOverlay`). `WFAnalyzerConditionsSystem` fills the health analyzer's
 Conditions tab: each drug level, held status effect, crash and habit, with the reagents behind it, their clearance

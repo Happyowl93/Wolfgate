@@ -4,6 +4,7 @@ using Content.Shared._WF.WolfChem.Narcotics;
 using Content.Shared.Body.Systems;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
+using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Jittering;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
@@ -24,6 +25,7 @@ public sealed class WFDependenceSystem : EntitySystem
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private PainSystem _pain = default!;
     [Dependency] private SharedBodySystem _body = default!;
+    [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedJitteringSystem _jitter = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private StaminaSystem _stamina = default!;
@@ -68,6 +70,8 @@ public sealed class WFDependenceSystem : EntitySystem
         SubscribeLocalEvent<WFDependentStimulantComponent, ComponentStartup>((uid, comp, _) => ApplyTrait(uid, comp));
         SubscribeLocalEvent<WFDependentOpioidComponent, ComponentStartup>((uid, comp, _) => ApplyTrait(uid, comp));
         SubscribeLocalEvent<WFDependentNicotineComponent, ComponentStartup>((uid, comp, _) => ApplyTrait(uid, comp));
+        SubscribeLocalEvent<WFDependentEmpathogenComponent, ComponentStartup>((uid, comp, _) => ApplyTrait(uid, comp));
+        SubscribeLocalEvent<WFDependentCannabinoidComponent, ComponentStartup>((uid, comp, _) => ApplyTrait(uid, comp));
     }
 
     public override void Update(float frameTime)
@@ -87,6 +91,13 @@ public sealed class WFDependenceSystem : EntitySystem
         dep.Meter[trait.Family] = Math.Max(dep.Meter.GetValueOrDefault(trait.Family), trait.Start);
         dep.Floor[trait.Family] = trait.Floor;
         dep.SinceUse.TryAdd(trait.Family, 0f);
+
+        var gear = _intoxication.IsNeurowareHost(uid) ? trait.HostGear : trait.Gear;
+        if (gear == null)
+            return;
+
+        var item = Spawn(gear, Transform(uid).Coordinates);
+        _hands.TryPickupAnyHand(uid, item, checkActionBlocker: false);
     }
 
     private void OnDosed(Entity<WFDependenceComponent> ent, ref WFDrugDosedEvent args)
@@ -102,11 +113,11 @@ public sealed class WFDependenceSystem : EntitySystem
         args.Multiplier *= 1f + ent.Comp.Tolerance.GetValueOrDefault(args.Family);
     }
 
-    /// <summary>The withdrawal stage a meter gives once withdrawal has started. Nicotine stops at cravings.</summary>
+    /// <summary>The withdrawal stage a meter gives once withdrawal has started. Nicotine and cannabis stop at cravings.</summary>
     public static int StageFor(WFDrugFamily family, float meter)
     {
         var stage = meter >= 0.85f ? 3 : meter >= 0.7f ? 2 : meter > WithdrawalMeter ? 1 : 0;
-        return family == WFDrugFamily.Nicotine ? Math.Min(stage, 1) : stage;
+        return family is WFDrugFamily.Nicotine or WFDrugFamily.Cannabinoid ? Math.Min(stage, 1) : stage;
     }
 
     /// <summary>Advances every dependent body by <paramref name="seconds"/>.</summary>
