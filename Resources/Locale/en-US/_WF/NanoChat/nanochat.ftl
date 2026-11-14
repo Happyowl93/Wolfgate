@@ -23,6 +23,13 @@ nano-chat-unknown-name = Unknown
 nano-chat-too-fast = You're sending messages too fast.
 nano-chat-subtle = Subtle: ghosts don't see what you send
 nano-chat-subtle-placeholder = Subtle message...
+nano-chat-effect = Message effect
+nano-chat-effect-none = Normal
+nano-chat-effect-loud = Loud
+nano-chat-effect-whisper = Whisper
+nano-chat-effect-shake = Shake
+nano-chat-effect-wave = Wave
+nano-chat-effect-rainbow = Rainbow
 
 nano-chat-new-group = New group
 nano-chat-new-group-title = New group

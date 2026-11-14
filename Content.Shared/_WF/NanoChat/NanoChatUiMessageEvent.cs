@@ -24,12 +24,16 @@ public sealed class NanoChatUiMessageEvent : CartridgeMessageEvent
     /// <summary>A message ghosts don't see.</summary>
     public readonly bool Subtle;
 
+    /// <summary>How a sent message is drawn.</summary>
+    public readonly NanoChatEffect Effect;
+
     public NanoChatUiMessageEvent(NanoChatUiMessageType type,
         uint? recipientNumber = null,
         string? content = null,
         string? recipientJob = null,
         bool subtle = false,
-        List<uint>? numbers = null)
+        List<uint>? numbers = null,
+        NanoChatEffect effect = NanoChatEffect.None)
     {
         Type = type;
         RecipientNumber = recipientNumber;
@@ -37,6 +41,7 @@ public sealed class NanoChatUiMessageEvent : CartridgeMessageEvent
         RecipientJob = recipientJob;
         Subtle = subtle;
         Numbers = numbers;
+        Effect = effect;
     }
 }
 
@@ -57,6 +62,18 @@ public enum NanoChatUiMessageType : byte
     KickMember,
     LeaveGroup,
     RenameGroup,
+}
+
+/// <summary>How a message is drawn in the bubble.</summary>
+[Serializable, NetSerializable]
+public enum NanoChatEffect : byte
+{
+    None,
+    Loud,
+    Whisper,
+    Shake,
+    Wave,
+    Rainbow,
 }
 
 /// <summary>A contact on a card.</summary>
@@ -102,6 +119,8 @@ public partial struct NanoChatMessage
 
     /// <summary>The sender's name, shown on group messages.</summary>
     public string? SenderName;
+
+    public NanoChatEffect Effect;
 
     public NanoChatMessage(TimeSpan timestamp, string content, uint senderId, bool deliveryFailed = false, bool subtle = false)
     {

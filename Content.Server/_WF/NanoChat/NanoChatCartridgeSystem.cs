@@ -41,6 +41,7 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototype = default!;
     [Dependency] private NanoChatGroupSystem _groups = default!;
+    [Dependency] private NanoChatTypingSystem _typing = default!;
     [Dependency] private NanoChatSystem _nanoChat = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
@@ -219,6 +220,8 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
             return;
         }
 
+        content = Clean(_typing.Impair(msg.Actor, content), NanoChatMessage.MaxContentLength) ?? content;
+
         if (SharedNanoChatSystem.IsGroup(number))
         {
             SendToGroup(cartridge, card, msg, number, ownNumber, content);
@@ -230,7 +233,10 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
 
         _lastSent[msg.Actor] = now;
         var recipients = FindReachable(cartridge, number);
-        var message = new NanoChatMessage(now, content, ownNumber, recipients.Count == 0, msg.Subtle);
+        var message = new NanoChatMessage(now, content, ownNumber, recipients.Count == 0, msg.Subtle)
+        {
+            Effect = EffectOf(msg),
+        };
         _nanoChat.AddMessage(card, number, message);
 
         var names = recipients.Count > 0
@@ -246,6 +252,11 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
 
         if (recipients.Count > 0)
             ShowGhosts(msg.Actor, NameOf(ownNumber), NameOf(number), content, msg.Subtle);
+    }
+
+    private static NanoChatEffect EffectOf(NanoChatUiMessageEvent msg)
+    {
+        return Enum.IsDefined(msg.Effect) ? msg.Effect : NanoChatEffect.None;
     }
 
     private string NameOf(uint number) => GetCardInfo(number)?.Name ?? $"#{SharedNanoChatSystem.FormatNumber(number)}";
@@ -277,6 +288,7 @@ public sealed class NanoChatCartridgeSystem : EntitySystem
         var message = new NanoChatMessage(_timing.CurTime, content, ownNumber, !canSend, msg.Subtle)
         {
             SenderName = InfoOf(card, ownNumber).Name,
+            Effect = EffectOf(msg),
         };
         _groups.JoinCard(card, group);
         _nanoChat.AddMessage(card, group.Id, message);

@@ -31,6 +31,12 @@ also put in their company's group, synced every 5 seconds from the character's c
 renames, can be muted but not left. Groups use chat ids from 10000 up in the card's own chat list; members are card
 numbers, a joining card gets the last 100 messages, and group messages name their sender. Groups last for the round.
 
+**Effects and intoxication.** The picker by the message box sends the next message Loud, Whisper, Shake, Wave or
+Rainbow (`NanoChatEffect`; the last three are drawn by `NanoChatEffectText` and hold still under reduced motion).
+`NanoChatTypingSystem` changes what an intoxicated sender types: drink and heavy WolfChem highs add typos, and heavy
+stimulants and opioids rush or trail the text as in speech. A reader who is high sees bubbles through
+`WFDrugChatSystem.DistortMarkup`, as they see chat.
+
 **Cyborgs.** A cyborg's built-in PDA (see the Cyborgs module) has no card in its ID slot; its NanoChat reads the ID
 card the cyborg was issued, held, stowed in a module or kept in its chassis (`NanoChatSystem.GetPda`/`TryGetCard`).
 A cyborg that spawns into a job keeps its character's number like anyone else.
@@ -53,6 +59,7 @@ sources and licences are in `Resources/Textures/_WF/NanoChat/Icons/ATTRIBUTION.t
 - [`Content.Server/_WF/NanoChat/NanoChatCartridgeSystem.cs`](NanoChatCartridgeSystem.cs)
 - [`Content.Server/_WF/NanoChat/NanoChatGroupSystem.cs`](NanoChatGroupSystem.cs)
 - [`Content.Server/_WF/NanoChat/NanoChatSystem.cs`](NanoChatSystem.cs)
+- [`Content.Server/_WF/NanoChat/NanoChatTypingSystem.cs`](NanoChatTypingSystem.cs)
 - [`Content.Server/_WF/NanoChat/ServerDbBase.NanoChat.cs`](ServerDbBase.NanoChat.cs)
 - [`Content.Server/_WF/NanoChat/ServerDbManager.NanoChat.cs`](ServerDbManager.NanoChat.cs)
 
@@ -69,6 +76,7 @@ sources and licences are in `Resources/Textures/_WF/NanoChat/Icons/ATTRIBUTION.t
 - [`Content.Client/_WF/NanoChat/EditChatPopup.xaml.cs`](../../../Content.Client/_WF/NanoChat/EditChatPopup.xaml.cs)
 - [`Content.Client/_WF/NanoChat/GroupMembersPopup.xaml`](../../../Content.Client/_WF/NanoChat/GroupMembersPopup.xaml)
 - [`Content.Client/_WF/NanoChat/GroupMembersPopup.xaml.cs`](../../../Content.Client/_WF/NanoChat/GroupMembersPopup.xaml.cs)
+- [`Content.Client/_WF/NanoChat/NanoChatEffectText.cs`](../../../Content.Client/_WF/NanoChat/NanoChatEffectText.cs)
 - [`Content.Client/_WF/NanoChat/NanoChatEntry.xaml`](../../../Content.Client/_WF/NanoChat/NanoChatEntry.xaml)
 - [`Content.Client/_WF/NanoChat/NanoChatEntry.xaml.cs`](../../../Content.Client/_WF/NanoChat/NanoChatEntry.xaml.cs)
 - [`Content.Client/_WF/NanoChat/NanoChatLookupView.xaml`](../../../Content.Client/_WF/NanoChat/NanoChatLookupView.xaml)
@@ -86,6 +94,7 @@ sources and licences are in `Resources/Textures/_WF/NanoChat/Icons/ATTRIBUTION.t
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/NanoChat/NanoChatEffectTest.cs`](../../../Content.IntegrationTests/Tests/_WF/NanoChat/NanoChatEffectTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/NanoChat/NanoChatGroupTest.cs`](../../../Content.IntegrationTests/Tests/_WF/NanoChat/NanoChatGroupTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/NanoChat/NanoChatTest.cs`](../../../Content.IntegrationTests/Tests/_WF/NanoChat/NanoChatTest.cs)
 

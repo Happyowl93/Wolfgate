@@ -191,6 +191,10 @@
                                              MinSize="18 18" />
                             </Control>
                         </Button>
+                        <OptionButton Name="EffectButton"
+                                      StyleClasses="OpenBoth"
+                                      Margin="0 0 4 0"
+                                      ToolTip="{Loc nano-chat-effect}" />
                         <Button Name="SubtleButton"
                                 MaxSize="32 32"
                                 ToggleMode="True"

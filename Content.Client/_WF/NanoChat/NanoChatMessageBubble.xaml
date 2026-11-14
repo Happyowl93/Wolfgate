@@ -28,8 +28,14 @@
                         ContentMarginBottomOverride="6"
                         BorderThickness="1" />
                 </PanelContainer.PanelOverride>
-                <RichTextLabel Name="MessageText"
-                               HorizontalExpand="True" />
+                <BoxContainer Orientation="Vertical"
+                              HorizontalExpand="True">
+                    <RichTextLabel Name="MessageText"
+                                   HorizontalExpand="True" />
+                    <nanoChat:NanoChatEffectText Name="EffectText"
+                                                 HorizontalExpand="True"
+                                                 Visible="False" />
+                </BoxContainer>
             </PanelContainer>
             <Label Name="DeliveryFailedLabel"
                    Text="{Loc nano-chat-delivery-failed}"

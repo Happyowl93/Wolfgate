@@ -20,7 +20,8 @@ public sealed partial class NanoChatUi : UIFragment
         var fragment = _fragment = new NanoChatUiFragment();
         fragment.OnMessageSent += (type, number, content, job) =>
             userInterface.SendMessage(new CartridgeUiMessage(new NanoChatUiMessageEvent(type, number, content, job,
-                type == NanoChatUiMessageType.SendMessage && fragment.Subtle)));
+                type == NanoChatUiMessageType.SendMessage && fragment.Subtle,
+                effect: type == NanoChatUiMessageType.SendMessage ? fragment.Effect : NanoChatEffect.None)));
         fragment.OnGroupAction += (type, group, name, numbers) =>
             userInterface.SendMessage(new CartridgeUiMessage(new NanoChatUiMessageEvent(type, group, name, numbers: numbers)));
     }

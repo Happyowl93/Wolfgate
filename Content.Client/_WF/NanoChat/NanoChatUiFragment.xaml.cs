@@ -43,6 +43,9 @@ public sealed partial class NanoChatUiFragment : BoxContainer
     /// <summary>Whether messages are sent subtle, out of ghosts' sight. Stays on until toggled off.</summary>
     public bool Subtle => SubtleButton.Pressed;
 
+    /// <summary>The effect for the next message; it goes back to none once sent.</summary>
+    public NanoChatEffect Effect => (NanoChatEffect) EffectButton.SelectedId;
+
     public NanoChatUiFragment()
     {
         IoCManager.InjectDependencies(this);
@@ -133,6 +136,13 @@ public sealed partial class NanoChatUiFragment : BoxContainer
         LookupView.OnListNumberToggled += () =>
             OnMessageSent?.Invoke(NanoChatUiMessageType.ToggleListNumber, null, null, null);
 
+        foreach (var effect in Enum.GetValues<NanoChatEffect>())
+        {
+            EffectButton.AddItem(Loc.GetString($"nano-chat-effect-{effect.ToString().ToLowerInvariant()}"), (int) effect);
+        }
+
+        EffectButton.OnItemSelected += args => EffectButton.SelectId(args.Id);
+
         SubtleButton.OnToggled += args => MessageInput.PlaceHolder =
             Loc.GetString(args.Pressed ? "nano-chat-subtle-placeholder" : "nano-chat-message-placeholder");
 
@@ -178,10 +188,11 @@ public sealed partial class NanoChatUiFragment : BoxContainer
             _messages[chat] = messages;
         }
 
-        messages.Add(new NanoChatMessage(_timing.CurTime, content, _ownNumber, subtle: Subtle));
+        messages.Add(new NanoChatMessage(_timing.CurTime, content, _ownNumber, subtle: Subtle) { Effect = Effect });
         UpdateMessages(_messages);
 
         OnMessageSent?.Invoke(NanoChatUiMessageType.SendMessage, chat, content, null);
+        EffectButton.SelectId((int) NanoChatEffect.None);
         MessageInput.Text = string.Empty;
         SendButton.Disabled = true;
     }
