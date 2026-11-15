@@ -81,7 +81,8 @@ Drugs for synthetics. A body whose brain organ has `WFNeurowareHost` (the positr
 and takes data sticks instead: using a stick on a host loads its program (2 s on yourself, 4 s on someone else),
 which feeds the twin drug profile's level at the stick's integrity and gives the drug's rush, so highs, crashes and
 dependence all come from the Narcotics part. A full load is the profile's `neuroware.amount`. Copying a stick onto a
-blank gives the copy one load at 85% of the source's integrity and costs the source a tenth of its own; the missing
+blank gives the copy one load at 85% of the source's integrity and costs the source a load and a tenth of its
+integrity, so a stick yields at most as many sticks as it has loads; the missing
 share makes a running program glitch (stun, a forced beep, scrambled speech, a false HUD fault). A blank used on
 anything that holds a drug with a twin (3 s) reads it in and uses it up: the stick's integrity is the drug's grade,
 and it takes up to three loads, none larger than a full one. Blanks print at the autolathe. A written stick is a

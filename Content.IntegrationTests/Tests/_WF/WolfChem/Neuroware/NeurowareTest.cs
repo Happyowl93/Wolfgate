@@ -65,9 +65,9 @@ public sealed class NeurowareTest
             Assert.That(neuro.TryCopy(stick, copy, null), Is.True);
             Assert.That(neuro.TryCopy(copy, copyOfCopy, null), Is.True);
             Assert.That(neuro.TryCopy(stick, copy, null), Is.False, "Only a blank takes a copy.");
-            Assert.That(stick.Comp.Loads, Is.EqualTo(2), "A copy leaves its source's loads alone.");
-            Assert.That(copy.Comp.Loads, Is.EqualTo(1));
-            copy.Comp.Loads = 0;
+            Assert.That(stick.Comp.Loads, Is.EqualTo(1), "A copy spends a load of its source.");
+            Assert.That(copyOfCopy.Comp.Loads, Is.EqualTo(1));
+            Assert.That(copy.Comp.Loads, Is.EqualTo(0), "A copy's one load goes into its own copy.");
             Assert.That(neuro.TryCopy(copy, Stick("WFNeurowareStick"), null), Is.False, "A spent stick has nothing to copy.");
             Assert.Multiple(() =>
             {

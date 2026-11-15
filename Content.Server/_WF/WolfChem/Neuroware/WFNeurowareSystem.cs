@@ -243,8 +243,8 @@ public sealed class WFNeurowareSystem : EntitySystem
     }
 
     /// <summary>
-    /// Copies a program onto a blank stick at <see cref="CopyIntegrity"/> of the source's integrity. The source keeps
-    /// its loads and loses integrity by <see cref="CopyWear"/>, so a build can only be copied so many times.
+    /// Copies a program onto a blank stick at <see cref="CopyIntegrity"/> of the source's integrity. The source spends
+    /// a load and loses integrity by <see cref="CopyWear"/>, so a stick yields at most as many sticks as it has loads.
     /// </summary>
     public bool TryCopy(Entity<WFNeurowareStickComponent> source, Entity<WFNeurowareStickComponent> blank, EntityUid? user)
     {
@@ -267,6 +267,7 @@ public sealed class WFNeurowareSystem : EntitySystem
         blank.Comp.Amount = source.Comp.Amount;
         blank.Comp.Rate = source.Comp.Rate;
         blank.Comp.Loads = 1;
+        source.Comp.Loads--;
         source.Comp.Integrity *= CopyWear;
         _appearance.SetData(blank, WFNeurowareStickVisuals.Copied, true);
         MarkWritten(blank);

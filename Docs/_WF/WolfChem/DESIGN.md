@@ -410,9 +410,10 @@ the first strains the heart by 0.1 a second.
   `WFIntoxicationSystem`.
 - **Load size.** A full load is 8, as much as a heavy line or two; 10 for the drugs that come in a 10 u vial and for
   Crystal, and 14 for Idle, which have no rush to carry a load into the heavy tier.
-- **Copying.** Using a stick on a blank stick copies it at `integrity x 0.85` with one load and leaves the source's loads alone, and the blank shows a strip of tape.
-  Each copy also costs the source a tenth of its integrity, so one build yields about eight loads' worth of copies
-  before it is noise. Pristine builds come from dealers, the uplink and rare loot, so a street copy is a few generations down.
+- **Copying.** Using a stick on a blank stick copies it at `integrity x 0.85` with one load, and the blank shows a strip of tape.
+  Each copy spends one of the source's loads and a tenth of its integrity, so a stick yields at most as many sticks
+  as it has loads, run or copied, and a one-load copy is either run or copied once. Pristine builds come from
+  dealers, the uplink and rare loot, so a street copy is a few generations down.
 - **Encoding.** Using a blank on anything that holds a drug with a twin, other than a body, starts a 3 s do-after
   that reads the drug in and uses it up: integrity is the drug's grade, the level taken is `units x perUnit` up to
   three full loads, split into the fewest loads that are no larger than a full one. A solid goes with its drug and a
