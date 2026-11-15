@@ -550,28 +550,15 @@ public sealed partial class WFCrewWeaponSystem
             return AmmoCount(gun) > 0;
         }
 
-        Unwield(uid, gun);
         if (FindMagazine(uid, gun, out var magazine, out var equipmentSlot)
-            && TakeMagazine(uid, magazine, equipmentSlot))
+            && SwapMagazine(uid, gun, magazine, equipmentSlot))
         {
-            _hands.TrySelect(uid, magazine);
-            if (_slots.TryGetSlot(gun, MagazineSlot, out var slot)
-                && (!slot.HasItem || _slots.TryEject(gun, slot, uid, out _)))
-            {
-                _interaction.InteractUsing(uid, magazine, gun, Transform(uid).Coordinates);
-                if (slot.Item == magazine)
-                {
-                    EntityManager.System<WFCrewSpeechSystem>().Say(uid, "reload");
-                    ReadyChamber(uid, gun);
-                    _hands.TrySelect(uid, gun);
-                    Wield(uid, gun);
-                    return AmmoCount(gun) > 0;
-                }
-            }
-            _inventory.TryEquip(uid, magazine, equipmentSlot, silent: true);
-            _hands.TrySelect(uid, gun);
+            EntityManager.System<WFCrewSpeechSystem>().Say(uid, "reload");
+            ReadyChamber(uid, gun);
+            return AmmoCount(gun) > 0;
         }
 
+        Unwield(uid, gun);
         RemCompDeferred<NPCRangedCombatComponent>(uid);
         if (TryComp<HTNComponent>(uid, out var htn))
             EntityManager.System<HTNSystem>().Replan(htn);
@@ -604,15 +591,28 @@ public sealed partial class WFCrewWeaponSystem
             && HasComp<BallisticAmmoProviderComponent>(magazine) ? magazine : null;
     }
 
-    private bool TakeMagazine(EntityUid uid, EntityUid magazine, string slot)
+    /// <summary>
+    /// Loads a spare magazine straight from its equipment slot into the gun, without hands, so a wielded gun stays
+    /// wielded. The spent magazine takes the spare's slot, or falls at his feet if it doesn't fit.
+    /// </summary>
+    private bool SwapMagazine(EntityUid uid, EntityUid gun, EntityUid magazine, string equipmentSlot)
     {
-        if (_hands.TryPickupAnyHand(uid, magazine, animateUser: false))
-            return true;
-        if (!_inventory.TryUnequip(uid, slot, silent: true))
+        if (!_slots.TryGetSlot(gun, MagazineSlot, out var slot)
+            || !_inventory.TryUnequip(uid, equipmentSlot, silent: true, force: true))
             return false;
-        if (_hands.TryPickupAnyHand(uid, magazine, animateUser: false))
-            return true;
-        _inventory.TryEquip(uid, magazine, slot, silent: true);
-        return false;
+
+        EntityUid? spent = null;
+        if (slot.HasItem && !_slots.TryEject(gun, slot, uid, out spent)
+            || !_slots.TryInsert(gun, slot, magazine, uid))
+        {
+            if (spent != null)
+                _slots.TryInsert(gun, slot, spent.Value, null);
+            _inventory.TryEquip(uid, magazine, equipmentSlot, silent: true, force: true);
+            return false;
+        }
+
+        if (spent != null)
+            _inventory.TryEquip(uid, spent.Value, equipmentSlot, silent: true);
+        return true;
     }
 }

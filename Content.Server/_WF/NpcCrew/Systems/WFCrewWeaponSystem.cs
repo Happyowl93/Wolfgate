@@ -4,6 +4,7 @@ using Content.Server.NPC.Components;
 using Content.Shared.GameTicking;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Inventory;
+using Content.Shared.Inventory.VirtualItem;
 using Content.Shared.Explosion.Components;
 using Content.Shared.Weapons.Melee;
 using Content.Shared.Weapons.Ranged.Components;
@@ -99,11 +100,24 @@ public sealed partial class WFCrewWeaponSystem : EntitySystem
             _wieldable.TryWield(item, wield, uid);
     }
 
-    /// <summary>Frees the second hand, for a reload.</summary>
+    /// <summary>
+    /// Frees the second hand at once. Unwielding only queues the grip's placeholder for deletion, which would keep
+    /// the hand full for the rest of the tick.
+    /// </summary>
     public void Unwield(EntityUid uid, EntityUid item)
     {
-        if (TryComp<WieldableComponent>(item, out var wield) && wield.Wielded)
-            _wieldable.TryUnwield(item, wield, uid, force: true);
+        if (!TryComp<WieldableComponent>(item, out var wield) || !wield.Wielded)
+            return;
+
+        _wieldable.TryUnwield(item, wield, uid, force: true);
+        var grips = new List<EntityUid>();
+        foreach (var held in _hands.EnumerateHeld(uid))
+        {
+            if (TryComp<VirtualItemComponent>(held, out var virt) && virt.BlockingEntity == item)
+                grips.Add(held);
+        }
+        foreach (var grip in grips)
+            Del(grip);
     }
 
     /// <summary>Whether the crewman has in hand, or would draw, a gun he can fire.</summary>

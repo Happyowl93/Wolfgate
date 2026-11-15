@@ -11,6 +11,7 @@ using Content.Shared.Explosion.Components;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Inventory;
 using Content.Shared.Weapons.Ranged.Components;
+using Content.Shared.Wieldable.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 
@@ -272,6 +273,38 @@ public sealed partial class WFCrewTest
             Assert.That(Effective(spawned[0]), Is.EqualTo(WFCrewSkill.Green));
             Assert.That(Effective(spawned[1]), Is.EqualTo(WFCrewSkill.Veteran));
             Assert.That(Effective(spawned[2]), Is.EqualTo(WFCrewSkill.Regular));
+        });
+    }
+
+    /// <summary>A rifleman with his rifle wielded frees a hand and readies his grenade, and gets his grip back after.</summary>
+    [Test]
+    public async Task WieldingRiflemanReadiesHisGrenade()
+    {
+        var deck = await CreateDeck(new Vector2(6, 0), 11, gravity: true);
+        await Server.WaitAssertion(() =>
+        {
+            var posts = new List<WFCrewSetupPost> { new() { Position = new Vector2(1.5f), Loadout = "WFCrewPirateRifle" } };
+            var mission = new WFCrewMission { Profile = "WFCrewProfilePirate", Group = "wielding", Skill = WFCrewSkill.Regular };
+            Assert.That(Server.System<WFCrewSetupSystem>().TrySpawn(deck, posts, mission, false, out var spawned), Is.True);
+            var rifleman = spawned[0];
+            SEntMan.GetComponent<HTNComponent>(rifleman).Enabled = false;
+            var weapons = Server.System<WFCrewWeaponSystem>();
+            var hands = Server.System<SharedHandsSystem>();
+            Assert.That(weapons.TryDraw(rifleman), Is.True);
+            var rifle = SEntMan.GetComponent<WFCrewWeaponComponent>(rifleman).Drawn!.Value;
+            Assert.That(SEntMan.GetComponent<WieldableComponent>(rifle).Wielded, Is.True, "Precondition: the rifle is wielded.");
+            Assert.That(Server.System<InventorySystem>().TryGetSlotEntity(rifleman, "belt", out var grenade), Is.True);
+
+            var hostile = SEntMan.SpawnAtPosition(Hostile, new EntityCoordinates(deck, new Vector2(8.5f, 1.5f)));
+            var at = new EntityCoordinates(deck, new Vector2(8.5f, 1.5f));
+            Assert.That(Server.System<WFCrewGrenadeSystem>().Ready(rifleman, grenade!.Value, hostile, at, GrenadeRules), Is.True,
+                "Wielding never keeps him from taking the grenade in hand.");
+            Assert.That(hands.IsHolding(rifleman, grenade.Value, out _), Is.True);
+            Assert.That(hands.IsHolding(rifleman, rifle, out _), Is.True, "He keeps the rifle in his other hand.");
+
+            Server.System<WFCrewGrenadeSystem>().Release(rifleman);
+            Assert.That(SEntMan.GetComponent<WieldableComponent>(rifle).Wielded, Is.True, "He takes his grip again.");
+            SEntMan.DeleteEntity(grenade.Value);
         });
     }
 }
