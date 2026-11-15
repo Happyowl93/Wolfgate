@@ -224,6 +224,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Resources/Locale/en-US/_WF/WolfChem/Narcotics/dependence.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Narcotics/dependence.ftl)
 - [`Resources/Locale/en-US/_WF/WolfChem/Narcotics/guidebook.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Narcotics/guidebook.ftl)
 - [`Resources/Locale/en-US/_WF/WolfChem/Narcotics/intoxication.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Narcotics/intoxication.ftl)
+- [`Resources/Locale/en-US/_WF/WolfChem/Narcotics/speech.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Narcotics/speech.ftl)
 - [`Resources/Locale/en-US/_WF/WolfChem/Narcotics/substances.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Narcotics/substances.ftl)
 - [`Resources/Locale/en-US/_WF/WolfChem/Narcotics/twins.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Narcotics/twins.ftl)
 - [`Resources/Locale/en-US/_WF/WolfChem/Neuroware/neuroware.ftl`](../../../Resources/Locale/en-US/_WF/WolfChem/Neuroware/neuroware.ftl)

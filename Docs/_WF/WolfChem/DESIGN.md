@@ -240,10 +240,19 @@ does from the drug.
   opioids grey the text, empathogens tint it pink and cannabinoids green, stronger with the look. The change is
   made as the message arrives, so lines read while high stay that way in the log. Hooked from
   `ChatUIController.ProcessChatMessage` before codewords and highlights, which would split the message text.
-- **Speaking** (`WFDrugSpeechSystem`, server, an accent on `WFIntoxicationComponent`). A heavy stimulant high
-  doubles 15% of words and turns full stops into exclamations; an overdose doubles 30% and shouts 30%. A heavy
-  opioid high puts a pause after 12% of words (25% overdosed) and trails the end off. Chorus's top tier keeps its
-  scrambled accent, and its `Mimic` hallucination already puts lines nobody said into local chat.
+- **Speaking** (`WFDrugSpeechSystem`, server, an accent on `WFIntoxicationComponent`). Light highs only change
+  the voice; from heavy on, each family changes the words, and families stack:
+  - Stimulant: doubles 25% of words, stutters 15% on the first letter ("g-g-go") and turns full stops into
+    exclamations. Overdosed: 45% doubled, 40% shouted, 20% stuttered and commas dropped so it runs on.
+  - Opioid: a drunk-style slur (o→u, s→sh, a→ah, u→oo, c→k, dragged letters), a pause after 25% of words, and
+    the end trails off. Overdosed: twice the slur, pauses after 40%, and 12% of mid-sentence words drop out.
+  - Cannabinoid: a filler ("uh", "like", ...) before 10% of words and a 40% chance the end drifts off ("...,
+    man..."). Overdosed: 20% fillers, and a 35% chance the sentence stops halfway ("so the thing is... yeah.").
+  - Empathogen: draws out the last vowel of 15% of words ("sooo") and softens full stops into "~". Overdosed: 30%
+    stretched and a 40% chance of a gushing line on the end.
+  - Psychedelic: at heavy, swaps 15% of neighbouring word pairs; Chorus's top tier scrambles every word through
+    its `ScrambledAccent` status instead. Its `Mimic` hallucination already puts lines nobody said into local chat.
+  - Combat (Redline, Anvil) leaves speech alone. Filler, tail and gush lines are in `speech.ftl`.
 - **Voice** (`WFDrugSpeechSystem` on the Voice module's `SpeechVoiceModifyEvent`). The character voice changes per
   line, for everyone who hears it, by each family's phase; families stack and the result stays in the creator's
   ranges. Syllable time is a multiplier, so lower is faster:
