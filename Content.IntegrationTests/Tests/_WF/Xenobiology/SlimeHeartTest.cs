@@ -3,6 +3,7 @@ using System.Numerics;
 using Content.IntegrationTests.Pair;
 using System.Linq;
 using Content.Server._WF.Xenobiology;
+using Content.Server.Destructible;
 using Content.Shared._WF.Xenobiology;
 using Content.Shared.Chemistry;
 using Content.Shared.Chemistry.Components;
@@ -99,7 +100,8 @@ public sealed class SlimeHeartTest
             // Not just armor: windows and thrusters regrow too.
             var others = new[] { entMan.SpawnEntity("Window", At(hull, 3, 0)), entMan.SpawnEntity("Thruster", At(hull, 0, 3)) };
 
-            damageable.TryChangeDamage(wall, new DamageSpecifier(protos.Index(Structural), 100), true);
+            // Far more than one beat heals, so the share healed is not a round two-decimal ratio of it.
+            damageable.TryChangeDamage(wall, new DamageSpecifier(protos.Index(Structural), 700), true);
             var hurt = damage.TotalDamage;
             Assert.That(hurt, Is.GreaterThan(FixedPoint2.Zero));
             var othersHurt = new FixedPoint2[others.Length];
@@ -134,7 +136,9 @@ public sealed class SlimeHeartTest
             comp.QuietDelay = TimeSpan.Zero;
             hearts.Tick((heart, comp));
             var mended = damage.TotalDamage;
-            Assert.That(mended, Is.LessThan(hurt));
+            var beat = server.System<DestructibleSystem>().DestroyedAt(wall) * comp.RegrowFraction;
+            Assert.That(beat, Is.LessThan(hurt));
+            Assert.That(hurt - mended, Is.EqualTo(beat), "A beat heals its full share.");
             Assert.That(State(pair, heart), Is.EqualTo(WFSlimeHeartState.Mending));
             for (var i = 0; i < others.Length; i++)
             {

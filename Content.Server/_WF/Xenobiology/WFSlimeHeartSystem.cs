@@ -177,7 +177,7 @@ public sealed partial class WFSlimeHeartSystem : EntitySystem
             return total;
 
         var heal = FixedPoint2.Min(total, max * ent.Comp.RegrowFraction);
-        _damageable.TryChangeDamage(part, part.Comp1.Damage * -(heal / total).Float(), true, false);
+        _damageable.TryChangeDamage(part, part.Comp1.Damage * -(heal.Float() / total.Float()), true, false);
         return part.Comp1.TotalDamage;
     }
 
