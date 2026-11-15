@@ -6,7 +6,8 @@ around its own ship as before; a wrench refuses to bolt it down on any other hul
 names the ship it is bonded to.
 
 A fitting takes the bond by having `WFHullBond` on its prototype: every ship shield generator
-(`ShieldGeneratorBase`), the CTLA bluespace drives (`MachineFTLDrive`), and the mobile drydock crane and console.
+(`ShieldGeneratorBase`), the CTLA bluespace drives (`MachineFTLDrive`), the ammo loaders (`AmmoLoader`,
+`AmmoLoaderSmall`), and the mobile drydock crane and console.
 Adding it to another machine is all a new fitting needs.
 
 `WFHullBondSystem` holds the rules:
@@ -43,6 +44,7 @@ bolted to. The refusal is server-side, so the client may show the wrench startin
 
 ## Non-modular edits
 
+- [`Resources/Prototypes/_Mono/Entities/Clothing/AmmoLoader/ammo_loader.yml`](../../../Resources/Prototypes/_Mono/Entities/Clothing/AmmoLoader/ammo_loader.yml): an ammo loader only bolts down on its first hull
 - [`Resources/Prototypes/_Mono/Entities/Structures/Machines/ftldrive.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/Machines/ftldrive.yml): a bluespace drive only bolts down on its first hull
 - [`Resources/Prototypes/_Mono/Entities/Structures/Machines/shield_generator.yml`](../../../Resources/Prototypes/_Mono/Entities/Structures/Machines/shield_generator.yml): a shield generator only bolts down on its first hull
 
