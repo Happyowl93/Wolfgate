@@ -112,3 +112,20 @@ bounty-item-black-extract = Black Slime Extract
 bounty-item-adamantine-extract = Adamantine Slime Extract
 
 guide-entry-wf-xenobiology = Xenobiology
+
+## Slime heart
+
+wf-slime-heart-examine-beating = It is [color=lime]beating[/color], and will go hungry in about { $minutes } { $minutes ->
+    [one] minute
+   *[other] minutes
+}.
+wf-slime-heart-examine-loose = It is fed for about { $minutes } { $minutes ->
+    [one] minute
+   *[other] minutes
+}, but does nothing until it is [color=yellow]bolted to a hull[/color].
+wf-slime-heart-examine-outbeaten = It lies [color=yellow]idle[/color]: another slime heart already beats in this hull.
+wf-slime-heart-examine-dormant = It is [color=red]dormant[/color]. Feed it an extract of its own breed.
+wf-slime-heart-feed = The heart swallows the extract and beats harder.
+wf-slime-heart-feed-full = The heart is too full to eat that yet.
+wf-slime-heart-feed-spent = The heart ignores the dried-out extract.
+wf-slime-heart-anchor-second = Another slime heart already beats in this hull.

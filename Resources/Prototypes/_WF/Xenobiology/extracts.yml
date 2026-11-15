@@ -968,7 +968,11 @@
       - Injection
       effects:
       - !type:XenobioReaction
-        base: XenobioExtractFail
+        base: XenobioExtractReaction
+        effects:
+        - !type:XenobioSpawnEntity
+          entity: WFSlimeHeartAdamantineFlatpack
+          offset: 0
   - type: Tag
     tags:
     - XenobiologyAdamantineExtract
