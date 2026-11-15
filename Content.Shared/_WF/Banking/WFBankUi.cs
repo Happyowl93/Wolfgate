@@ -75,6 +75,12 @@ public sealed class WFBankUiState : BoundUserInterfaceState
     /// <summary>What the account has sent out this round.</summary>
     public int Withdrawn;
 
+    /// <summary>Most cash the account may take in through the app this round.</summary>
+    public int DepositLimit;
+
+    /// <summary>Cash the account has taken in through the app this round.</summary>
+    public int Deposited;
+
     /// <summary>Thalers in the viewer's active hand, ready to deposit.</summary>
     public int HandCash;
 

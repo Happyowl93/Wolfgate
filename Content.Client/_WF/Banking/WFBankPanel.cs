@@ -80,7 +80,7 @@ public sealed class WFBankPanel : BoxContainer
 
     // Deposit.
     private readonly Label _handCash = new() { HorizontalAlignment = HAlignment.Center };
-    private readonly Label _depositHint = new() { HorizontalAlignment = HAlignment.Center };
+    private readonly Label _depositHint = new() { HorizontalAlignment = HAlignment.Center, Align = Label.AlignMode.Center };
     private readonly ConfirmButton _deposit = new();
 
     // Activity.
@@ -444,11 +444,17 @@ public sealed class WFBankPanel : BoxContainer
 
         _handCash.Text = state.HandCash > 0 ? Money(state.HandCash) : Loc.GetString("wf-bank-deposit-none");
         _handCash.FontColorOverride = state.HandCash > 0 ? Good : Dim;
-        _depositHint.Text = Loc.GetString(!state.DepositEnabled ? "wf-bank-error-deposits-off" : "wf-bank-deposit-hint");
-        _deposit.Set(state.HandCash > 0
-                ? Loc.GetString("wf-bank-deposit-button", ("amount", Format(state.HandCash)))
+        var depositLeft = Math.Max(0, state.DepositLimit - state.Deposited);
+        var deposit = Math.Min(state.HandCash, depositLeft);
+        _depositHint.Text = !state.DepositEnabled
+            ? Loc.GetString("wf-bank-error-deposits-off")
+            : depositLeft == 0
+                ? Loc.GetString("wf-bank-error-deposit-limit")
+                : Loc.GetString("wf-bank-deposit-hint", ("left", Format(depositLeft)), ("limit", Format(state.DepositLimit)));
+        _deposit.Set(deposit > 0
+                ? Loc.GetString("wf-bank-deposit-button", ("amount", Format(deposit)))
                 : Loc.GetString("wf-bank-deposit-button-empty"),
-            ready && state.DepositEnabled && state.HandCash > 0);
+            ready && state.DepositEnabled && deposit > 0);
     }
 
     private static string? ProblemText(int? amount, WFBankUiState state, int left)

@@ -41,7 +41,7 @@ namespace Content.Server._WF.Banking;
 /// <summary>
 /// The Bank PDA app: signs into the account of the ID card in the PDA, whoever holds it, to withdraw cash, transfer and
 /// deposit. Each account may send out at most the floor or a share of its round-start balance per round, whichever is
-/// higher.
+/// higher, and take in at most a fixed amount of cash.
 /// </summary>
 public sealed partial class WFBankSystem : EntitySystem
 {
@@ -78,11 +78,12 @@ public sealed partial class WFBankSystem : EntitySystem
     /// <summary>Set while the app moves money itself, which notes its own activity.</summary>
     private bool _own;
 
-    /// <summary>An account's round: its opening balance, what it has sent out and its activity.</summary>
+    /// <summary>An account's round: its opening balance, what it has sent out and taken in, and its activity.</summary>
     private sealed class AccountRound
     {
         public int Opening;
         public int Withdrawn;
+        public int Deposited;
 
         /// <summary>The balance at the last change seen, to tell what the next one moved.</summary>
         public int Seen;
@@ -373,7 +374,10 @@ public sealed partial class WFBankSystem : EntitySystem
         return null;
     }
 
-    /// <summary>Deposits the thalers in the actor's active hand into a card's account. Returns why it failed, or null.</summary>
+    /// <summary>
+    /// Deposits the thalers in the actor's active hand into a card's account, up to what is left of the round's deposit
+    /// limit; the rest stays in hand. Returns why it failed, or null.
+    /// </summary>
     public string? Deposit(EntityUid actor, EntityUid? card, out int amount)
     {
         amount = 0;
@@ -387,12 +391,25 @@ public sealed partial class WFBankSystem : EntitySystem
         if (HandCash(actor) is not { } cash)
             return Loc.GetString("wf-bank-error-no-cash");
 
-        amount = cash.Comp.Count;
         var round = Round(account.Key, account.Profile.BankBalance);
-        if (!Give(account, amount, tax: true))
-            return Loc.GetString("wf-bank-error-declined");
+        var left = Math.Max(0, _cfg.GetCVar(BankingCVars.DepositLimit) - round.Deposited);
+        if (left == 0)
+            return Loc.GetString("wf-bank-error-deposit-limit");
 
-        Del(cash);
+        var count = cash.Comp.Count;
+        amount = Math.Min(count, left);
+        if (!Give(account, amount, tax: true))
+        {
+            amount = 0;
+            return Loc.GetString("wf-bank-error-declined");
+        }
+
+        if (amount == count)
+            Del(cash);
+        else
+            _stack.SetCount(cash, count - amount, cash.Comp);
+
+        round.Deposited += amount;
         Note(round, WFBankEntryKind.Deposit, amount);
         _adminLog.Add(LogType.ATMUsage, LogImpact.Low,
             $"{ToPrettyString(actor):actor} deposited {amount} into {account.Card.Name}'s account with the Bank app");
@@ -486,6 +503,8 @@ public sealed partial class WFBankSystem : EntitySystem
         state.Balance = account.Profile.BankBalance;
         state.Limit = Limit(round);
         state.Withdrawn = round.Withdrawn;
+        state.DepositLimit = _cfg.GetCVar(BankingCVars.DepositLimit);
+        state.Deposited = round.Deposited;
         state.History = round.History.ToList();
         return state;
     }

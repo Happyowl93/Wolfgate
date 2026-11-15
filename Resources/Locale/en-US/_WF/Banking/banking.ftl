@@ -41,6 +41,7 @@ wf-bank-transfer-button-empty = Enter a name and amount
 wf-bank-deposit-in-hand = IN YOUR ACTIVE HAND
 wf-bank-deposit-none = no thalers
 wf-bank-deposit-hint = Hold thalers in your active hand to deposit them.
+    {$left} of {$limit} th left.
 wf-bank-deposit-button = Deposit {$amount} th
 wf-bank-deposit-button-empty = Nothing to deposit
 
@@ -80,6 +81,7 @@ wf-bank-error-recipient-ambiguous = More than one account holder has that name.
 wf-bank-error-no-cash = Hold thalers in your active hand.
 wf-bank-error-transfers-off = Transfers are switched off.
 wf-bank-error-deposits-off = Deposits are switched off.
+wf-bank-error-deposit-limit = Deposit limit is reached; use an ATM.
 
 wf-bank-done-withdrawal = Withdrew {$amount} thalers.
 wf-bank-done-transfer = Sent {$amount} thalers to {$to}.

@@ -3,7 +3,8 @@
 ThalerLink (`WFBankCartridge`), a banking app every PDA gets through `WFPdaProgramsEvent`. It signs into the account
 of the ID card slotted in the PDA, whoever is holding it: withdraw cash into your hands, transfer to a connected
 account holder by their character's full name (the app never lists who is online), deposit the thalers in your active
-hand, and read the account's activity this round. Activity lists every change to the balance, not only the app's: ATM
+hand (up to `wf.bank.deposit_limit`, 50,000, per account per round; the rest stays in hand), and read the account's
+activity this round. Activity lists every change to the balance, not only the app's: ATM
 use and purchases (named from the vendor or console its holder has open, through `BalanceChangedEvent`), wages and fines.
 
 **Cards.** On `PlayerSpawnCompleteEvent`, `WFBankSystem` puts a `WFBankCardComponent` on the ID card a player spawns
@@ -19,7 +20,7 @@ aren't limited. The allowance resets at round end. When someone else moves money
 chat notice; every transaction is admin-logged under `ATMUsage`.
 
 `WFBankMath` (Shared) holds the limit and amount parsing and is unit-tested. `WFBankTest` covers withdrawals against the
-allowance, deposits, accounts reached through the profile (other slots, Ironman, the deposit tax), and the app shipping
+allowance, deposits against their limit, accounts reached through the profile (other slots, Ironman, the deposit tax), and the app shipping
 on every PDA. The client fragment is `Content.Client/_WF/Banking/WFBankPanel`.
 
 <!-- WOLFGATE-GENERATED START -->

@@ -116,21 +116,31 @@ public sealed class WFBankTest : InteractionTest
             Assert.That(state.Withdrawn, Is.EqualTo(300_000));
         });
 
-        // Depositing the cash in the active hand puts it back, though the allowance stays spent.
+        // Depositing the cash in the active hand puts it back up to the round's deposit limit, and the allowance stays spent.
         await Server.WaitAssertion(() =>
         {
             var before = Balance();
+            var cashBefore = HeldCash();
             var held = hands.GetActiveItem(SPlayer);
             Assert.That(held, Is.Not.Null, "A withdrawal lands in the active hand first.");
+            Assert.That(SEntMan.GetComponent<StackComponent>(held!.Value).Count, Is.GreaterThan(50_000));
             Assert.That(banking.Deposit(SPlayer, card, out var deposited), Is.Null);
-            Assert.That(deposited, Is.GreaterThan(0));
-            Assert.That(SEntMan.Deleted(held), Is.True, "The deposited cash is taken.");
+            Assert.That(deposited, Is.EqualTo(50_000), "A deposit takes no more than the round's limit.");
+            Assert.That(SEntMan.Deleted(held), Is.False, "The cash over the limit stays in hand.");
+            Assert.That(HeldCash(), Is.EqualTo(cashBefore - 50_000));
             Assert.That(Balance(), Is.GreaterThan(before));
             Assert.That(Balance(), Is.LessThanOrEqualTo(before + deposited));
             var state = banking.State(SPlayer, card);
             Assert.That(state.Withdrawn, Is.EqualTo(300_000));
+            Assert.That(state.Deposited, Is.EqualTo(50_000));
+            Assert.That(state.DepositLimit, Is.EqualTo(50_000));
             Assert.That(state.History[0].Kind, Is.EqualTo(WFBankEntryKind.Deposit));
             Assert.That(state.History[1].Kind, Is.EqualTo(WFBankEntryKind.Payment), "The app's deposit isn't noted twice.");
+
+            var after = Balance();
+            Assert.That(banking.Deposit(SPlayer, card, out _), Is.Not.Null, "The deposit limit is spent for the round.");
+            Assert.That(Balance(), Is.EqualTo(after));
+            Assert.That(HeldCash(), Is.EqualTo(cashBefore - 50_000), "A refused deposit takes nothing.");
         });
     }
 
@@ -200,13 +210,13 @@ public sealed class WFBankTest : InteractionTest
             {
                 cfg.SetCVar(MonoCVars.DepositThreshold, 1_000_000f);
                 cfg.SetCVar(MonoCVars.DepositHighExp, 1f);
-                bank.GetTaxedDepositAmount(500_000, 3_000_000, out var kept, out var taxed);
+                bank.GetTaxedDepositAmount(50_000, 3_000_000, out var kept, out var taxed);
                 Assert.That(taxed, Is.GreaterThan(0));
 
                 var cash = stacks.Spawn(500_000, "Credit", SEntMan.GetCoordinates(PlayerCoords));
                 Assert.That(hands.TryPickup(SPlayer, cash), Is.True);
                 Assert.That(banking.Deposit(SPlayer, mine, out var deposited), Is.Null);
-                Assert.That(deposited, Is.EqualTo(500_000));
+                Assert.That(deposited, Is.EqualTo(50_000), "Only the round's deposit limit is taken.");
                 Assert.That(SlotBalance(slot), Is.EqualTo(3_000_000 + kept), "A deposit through the profile is taxed like one through the body.");
             });
         }
