@@ -41,12 +41,19 @@ public sealed partial class ProjectileSystem
 
         foreach (var grid in _wfSweepGrids)
         {
-            var local = Vector2.Transform(from.Position, _transformSystem.GetInvWorldMatrix(grid));
-            var gridVelocity = _physics.GetLinearVelocity(grid, local);
+            if (!_physQuery.TryComp(grid, out var body))
+                continue;
+
+            // Translational only: a spinning grid's speed at the round is not the speed of the hull it will meet.
+            var gridVelocity = _physics.GetMapLinearVelocity(grid, body);
             if ((gridVelocity - frameVelocity).Length() < WfMovingGridSpeed)
                 continue;
 
-            _wfMovingGrids.Add(grid.Owner);
+            // A spinning grid keeps its hits on the frame's ray too, so its turn cannot hide a wall from both rays.
+            var spin = MathF.Abs(body.AngularVelocity) * (from.Position - _transformSystem.GetWorldPosition(grid)).Length();
+            if (spin < WfMovingGridSpeed)
+                _wfMovingGrids.Add(grid.Owner);
+
             WfCast(uid, from, world - gridVelocity, frameTime, mask, grid.Owner);
         }
 
@@ -54,7 +61,7 @@ public sealed partial class ProjectileSystem
         return _wfSweepHits;
     }
 
-    /// <summary>Casts one ray, keeping hits on <paramref name="grid"/>, or with no grid, hits off every moving grid.</summary>
+    /// <summary>Casts one ray, keeping hits on <paramref name="grid"/>, or with no grid, hits off every grid swept on its own.</summary>
     private void WfCast(EntityUid uid, MapCoordinates from, Vector2 velocity, float frameTime, int mask, EntityUid? grid)
     {
         var speed = velocity.Length();
