@@ -4,6 +4,7 @@ using Content.Server.NPC.Components;
 using Content.Shared.GameTicking;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Inventory;
+using Content.Shared.Explosion.Components;
 using Content.Shared.Weapons.Melee;
 using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Wieldable;
@@ -21,8 +22,8 @@ public sealed partial class WFCrewWeaponSystem : EntitySystem
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedWieldableSystem _wieldable = default!;
 
-    /// <summary>Slots searched for a weapon, in the order ties are broken.</summary>
-    private static readonly string[] WeaponSlots = { "back", "suitstorage", "belt", "pocket1", "pocket2" };
+    /// <summary>Slots searched for a weapon, in the order ties are broken. Grenades are carried in the same slots.</summary>
+    public static readonly string[] WeaponSlots = { "back", "suitstorage", "belt", "pocket1", "pocket2" };
 
     public override void Initialize()
     {
@@ -32,6 +33,8 @@ public sealed partial class WFCrewWeaponSystem : EntitySystem
         {
             _advancing.Clear();
             _threats.Clear();
+            _blastHolds.Clear();
+            _braces.Clear();
         });
     }
 
@@ -39,7 +42,7 @@ public sealed partial class WFCrewWeaponSystem : EntitySystem
     private void OnRangedInit(EntityUid uid, NPCRangedCombatComponent component, ComponentInit args)
     {
         if (TryComp<WFCrewComponent>(uid, out var crew))
-            component.ShootDelay = WFCrewSkills.Of(crew.Skill).ShootDelay;
+            component.ShootDelay = WFCrewSkills.Of(crew).ShootDelay;
     }
 
     /// <summary>Whether the drawn weapon is still in hand.</summary>
@@ -158,10 +161,10 @@ public sealed partial class WFCrewWeaponSystem : EntitySystem
         return item != null;
     }
 
-    /// <summary>Longarms over sidearms over anything that swings; everything else is not a weapon.</summary>
+    /// <summary>Longarms over sidearms over anything that swings; everything else, grenades included, is not a weapon.</summary>
     private int Score(EntityUid item, string slot)
     {
-        if (HasComp<Content.Shared.Atmos.Components.GasTankComponent>(item))
+        if (HasComp<Content.Shared.Atmos.Components.GasTankComponent>(item) || HasComp<OnUseTimerTriggerComponent>(item))
             return 0;
         if (HasComp<GunComponent>(item))
             return AmmoCount(item) > 0 || FindMagazineForOwner(item) ? (slot == "back" ? 3 : 2) : 0;
