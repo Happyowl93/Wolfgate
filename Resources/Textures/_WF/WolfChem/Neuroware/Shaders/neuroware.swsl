@@ -170,7 +170,7 @@ void fragment() {
         highp float heat = zGrayscale(col);
         highp vec3 thermal = mix(vec3(0.25, 0.0, 0.2), vec3(1.0, 0.45, 0.1), smoothstep(0.1, 0.6, heat));
         thermal = mix(thermal, vec3(1.0, 0.95, 0.8), smoothstep(0.6, 0.95, heat));
-        col = mix(col, thermal, 0.75 * o);
+        col = mix(col, thermal, 0.62 * o);
     } else if (f == 4) {
         // Cannabinoid: green phosphor. Light: the feed fades towards an old green terminal. Heavy: a soft ghost
         // image and a bright band rolling slowly up. Overdose: monochrome green, the ghost wide and heavy.
