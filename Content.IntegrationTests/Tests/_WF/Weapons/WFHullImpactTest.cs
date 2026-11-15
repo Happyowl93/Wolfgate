@@ -190,7 +190,7 @@ public sealed class WFHullImpactTest
     }
 
     /// <summary>Why the shell failed to stop at the wall, or null when it detonated on it.</summary>
-    private static string? HullFailure(IEntityManager entities, EntityUid shell, EntityUid wall, EntityUid inside)
+    private static string HullFailure(IEntityManager entities, EntityUid shell, EntityUid wall, EntityUid inside)
     {
         if (entities.EntityExists(shell))
             return "the shell never detonated";
