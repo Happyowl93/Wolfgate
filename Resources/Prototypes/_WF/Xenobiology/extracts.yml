@@ -310,7 +310,7 @@
         effects:
         - !type:XenobioAdjustSolution
           reagent: Omnizine
-          amount: 15
+          amount: 5
   - type: Tag
     tags:
     - XenobiologyPurpleExtract
@@ -959,7 +959,8 @@
         base: XenobioExtractReaction
         effects:
         - !type:XenobioSpawnEntity
-          entity: SheetPlasteel10 # PDV composite is the PDV's currency
+          entity: SheetPlasteel1 # PDV composite is the PDV's currency
+          number: 2
     - reagents:
       - Blood
       methods:
