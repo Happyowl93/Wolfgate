@@ -10,6 +10,7 @@ using Content.Server.Construction.Components;
 using Content.Server.Materials;
 using Content.Shared._Crescent.Hardpoints;
 using Content.Shared._Mono.Company;
+using Content.Shared._WF.Companies;
 using Content.Shared._Mono.ShipRepair.Components;
 using Content.Shared._NF.Shipyard.Components;
 using Content.Shared._WF.Drydock;
@@ -110,8 +111,8 @@ public sealed partial class WFDrydockSystem
         if (BreakRefusal(console, comp, ship) is { } refusal)
             return Deny(console, comp, actor, refusal);
 
-        if (VoucherBreakRefusal(ship, actor) is { } voucherRefusal)
-            return Deny(console, comp, actor, voucherRefusal);
+        if (FactionBreakRefusal(ship, actor) is { } factionRefusal)
+            return Deny(console, comp, actor, factionRefusal);
 
         if (!CranesReady(console, comp, actor, out var cranes))
             return false;
@@ -201,17 +202,26 @@ public sealed partial class WFDrydockSystem
     }
 
     /// <summary>
-    /// Why a breaker can't break a ship bought with a faction voucher, or null: its own faction would get a free hull's
-    /// materials, so only other factions can break it.
+    /// Why a breaker can't break a ship of their own faction, or null: a faction can't strip its own hulls for their
+    /// materials, so only other factions can break them.
     /// </summary>
-    public string? VoucherBreakRefusal(EntityUid ship, EntityUid breaker)
+    public string? FactionBreakRefusal(EntityUid ship, EntityUid breaker)
     {
-        if (!TryComp<ShuttleDeedComponent>(ship, out var deed) || !deed.PurchasedWithVoucher
-            || !TryComp<CompanyComponent>(ship, out var shipFaction) || shipFaction.CompanyName == NoFaction
-            || !TryComp<CompanyComponent>(breaker, out var faction) || faction.CompanyName != shipFaction.CompanyName)
+        if (ShipFaction(ship) is not { } shipFaction
+            || !TryComp<CompanyComponent>(breaker, out var faction) || faction.CompanyName != shipFaction)
             return null;
 
-        return Loc.GetString("drydock-console-break-own-voucher");
+        return Loc.GetString("drydock-console-break-own-faction");
+    }
+
+    /// <summary>The faction a ship flies for, including one a player company's flag hides, or null.</summary>
+    private string? ShipFaction(EntityUid ship)
+    {
+        var faction = CompOrNull<CompanyComponent>(ship)?.CompanyName.Id;
+        if (string.IsNullOrEmpty(faction))
+            faction = CompOrNull<WFCompanyShipComponent>(ship)?.PreviousFaction;
+
+        return string.IsNullOrEmpty(faction) || faction == NoFaction ? null : faction;
     }
 
     /// <summary>

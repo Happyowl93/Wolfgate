@@ -10,6 +10,7 @@ using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared.Station.Components;
 using Content.Shared._Mono.Company;
 using Content.Shared._Mono.Ships.Components;
+using Content.Shared._WF.Companies;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Cargo.Components;
 using Content.Shared.Materials;
@@ -266,11 +267,11 @@ public sealed class ChopShopTest
     }
 
     /// <summary>
-    /// A ship bought with a faction voucher can't be broken by its own faction, so a free hull isn't stripped for its
-    /// materials, but another faction or a factionless breaker can break it, and so can its faction once it was paid for.
+    /// A faction's ship can't be broken by its own faction, so a faction can't strip its own hulls for their materials,
+    /// even under a player company's flag, but another faction or a factionless breaker can break it.
     /// </summary>
     [Test]
-    public async Task OwnFactionCantBreakVoucherHull()
+    public async Task OwnFactionCantBreakFactionHull()
     {
         await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
@@ -281,11 +282,8 @@ public sealed class ChopShopTest
         await server.WaitAssertion(() =>
         {
             var ship = DrydockTest.CreateShip(pair, map.MapId, new Vector2(100f, 0f));
-            var deed = em.AddComponent<ShuttleDeedComponent>(ship);
-#pragma warning disable RA0002
-            deed.PurchasedWithVoucher = true;
-#pragma warning restore RA0002
-            em.AddComponent<CompanyComponent>(ship).CompanyName = "TSF";
+            var shipFaction = em.AddComponent<CompanyComponent>(ship);
+            shipFaction.CompanyName = "TSF";
 
             EntityUid Breaker(string faction)
             {
@@ -300,15 +298,19 @@ public sealed class ChopShopTest
 
             Assert.Multiple(() =>
             {
-                Assert.That(drydock.VoucherBreakRefusal(ship, own), Is.Not.Null, "Its own faction can't break a voucher hull.");
-                Assert.That(drydock.VoucherBreakRefusal(ship, rival), Is.Null, "Another faction can break a voucher hull.");
-                Assert.That(drydock.VoucherBreakRefusal(ship, none), Is.Null, "A factionless breaker can break a voucher hull.");
+                Assert.That(drydock.FactionBreakRefusal(ship, own), Is.Not.Null, "Its own faction can't break a faction hull.");
+                Assert.That(drydock.FactionBreakRefusal(ship, rival), Is.Null, "Another faction can break a faction hull.");
+                Assert.That(drydock.FactionBreakRefusal(ship, none), Is.Null, "A factionless breaker can break a faction hull.");
             });
 
-#pragma warning disable RA0002
-            deed.PurchasedWithVoucher = false;
-#pragma warning restore RA0002
-            Assert.That(drydock.VoucherBreakRefusal(ship, own), Is.Null, "A faction can break a hull it paid for.");
+            // A player company's flag clears the ship's faction and keeps it aside.
+            shipFaction.CompanyName = string.Empty;
+            em.AddComponent<WFCompanyShipComponent>(ship).PreviousFaction = "TSF";
+            Assert.That(drydock.FactionBreakRefusal(ship, own), Is.Not.Null, "A company flag doesn't hide the hull's faction.");
+
+            var factionless = DrydockTest.CreateShip(pair, map.MapId, new Vector2(-100f, 0f));
+            em.AddComponent<CompanyComponent>(factionless).CompanyName = "None";
+            Assert.That(drydock.FactionBreakRefusal(factionless, own), Is.Null, "A factionless hull is anyone's to break.");
         });
 
         await pair.CleanReturnAsync();
