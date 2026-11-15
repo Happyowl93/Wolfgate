@@ -437,8 +437,9 @@ synthetic HUD (`Content.Server/_WF/Wolfmed/Hud/WolfmedSyntheticHudSystem.cs`, cl
 
 - The HUD system raises a collect event during `Refresh` so `Neuroware` can add fault lines from the profile's
   `neuroware` strings ("UNSIGNED PROCESS: whiteline.d", "THERMAL GOVERNOR OVERRIDDEN").
-- The screen shader's `tint`, `glitch` and `slice` are driven from the active tier, and the HUD shows even on an
-  undamaged chassis while a program runs. Today glitch motion runs only at the Heavy strain tier.
+- The screen shader's `glitch` and `slice` are driven from the active tier (a strong program tears the screen), and
+  the HUD shows even on an undamaged chassis while a program runs. The red `tint` rim is left to damage; the
+  program's own shader carries its colour.
 - Withdrawal shows as recurring faults ("HABIT LOOP: process not found") with the same gameplay penalties.
 - Synthetics without the Wolfmed HUD still get popups and speech effects.
 
