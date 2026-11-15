@@ -8,6 +8,7 @@ using Content.Server._WF.Encounters.Components;
 using Content.Shared._NF.Shipyard.Components;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared.Station.Components;
+using Content.Shared._Mono.Company;
 using Content.Shared._Mono.Ships.Components;
 using Content.Shared._WF.Drydock;
 using Content.Shared.Cargo.Components;
@@ -259,6 +260,55 @@ public sealed class ChopShopTest
             deed.ShuttleOwner = "Jo Breaker";
 #pragma warning restore RA0002
             Assert.That(drydock.IsLawfulProperty(chop, deeded, breaker), Is.False, "The breaker's own ship is theirs to break.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// A ship bought with a faction voucher can't be broken by its own faction, so a free hull isn't stripped for its
+    /// materials, but another faction or a factionless breaker can break it, and so can its faction once it was paid for.
+    /// </summary>
+    [Test]
+    public async Task OwnFactionCantBreakVoucherHull()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var drydock = server.System<WFDrydockSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var ship = DrydockTest.CreateShip(pair, map.MapId, new Vector2(100f, 0f));
+            var deed = em.AddComponent<ShuttleDeedComponent>(ship);
+#pragma warning disable RA0002
+            deed.PurchasedWithVoucher = true;
+#pragma warning restore RA0002
+            em.AddComponent<CompanyComponent>(ship).CompanyName = "TSF";
+
+            EntityUid Breaker(string faction)
+            {
+                var mob = em.SpawnEntity("MobHuman", new MapCoordinates(0, 0, map.MapId));
+                em.EnsureComponent<CompanyComponent>(mob).CompanyName = faction;
+                return mob;
+            }
+
+            var own = Breaker("TSF");
+            var rival = Breaker("PDV");
+            var none = Breaker("None");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(drydock.VoucherBreakRefusal(ship, own), Is.Not.Null, "Its own faction can't break a voucher hull.");
+                Assert.That(drydock.VoucherBreakRefusal(ship, rival), Is.Null, "Another faction can break a voucher hull.");
+                Assert.That(drydock.VoucherBreakRefusal(ship, none), Is.Null, "A factionless breaker can break a voucher hull.");
+            });
+
+#pragma warning disable RA0002
+            deed.PurchasedWithVoucher = false;
+#pragma warning restore RA0002
+            Assert.That(drydock.VoucherBreakRefusal(ship, own), Is.Null, "A faction can break a hull it paid for.");
         });
 
         await pair.CleanReturnAsync();
