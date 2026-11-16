@@ -19,6 +19,8 @@ public static class WFAugmentRules
     private const char EntrySeparator = ';';
     private const char FieldSeparator = ':';
     private const string ImplantEntry = "Implant";
+    private const string FoundEntry = "Found";
+    private const string FoundSuffix = ":" + FoundEntry;
 
     /// <summary>Slots implants were stored under before a part could hold several.</summary>
     private static readonly string[] LegacyImplantSlots = ["LeftArmImplant", "RightArmImplant", "Dermal", "Muscles"];
@@ -41,8 +43,14 @@ public static class WFAugmentRules
     /// <summary>The share of its price, in percent, an augment taken off in the creator pays back.</summary>
     public const int RefundPercent = 50;
 
-    /// <summary>What an augment taken off in the creator pays back.</summary>
+    /// <summary>What a paid-for augment taken off in the creator pays back.</summary>
     public static int Refund(WFAugmentPrototype augment) => augment.Price * RefundPercent / 100;
+
+    /// <summary>What an augment the profile owns pays back when taken off: nothing for one kept from a round.</summary>
+    public static int Refund(HumanoidCharacterProfile profile, WFAugmentPrototype augment)
+    {
+        return profile.AugmentFound.Contains(augment.ID) ? 0 : Refund(augment);
+    }
 
     /// <summary>Implants a part the species was born with holds: two in the torso, one in any other part.</summary>
     public static int NaturalImplantSlots(WFAugmentSlot slot) => slot == WFAugmentSlot.Chest ? 2 : 1;
@@ -429,7 +437,7 @@ public static class WFAugmentRules
         return due;
     }
 
-    /// <summary>The unlocked augments the profile no longer picks, which are sold back when it is saved.</summary>
+    /// <summary>The unlocked augments the profile no longer picks, which are sold back or scrapped when it is saved.</summary>
     public static List<WFAugmentPrototype> Sold(HumanoidCharacterProfile profile, IPrototypeManager proto)
     {
         var picked = Picked(profile).ToHashSet();
@@ -501,21 +509,38 @@ public static class WFAugmentRules
         return implants;
     }
 
-    /// <summary>Unlocked augments as stored in the database, separated by semicolons.</summary>
-    public static string ToStored(IEnumerable<ProtoId<WFAugmentPrototype>> unlocks)
+    /// <summary>Unlocked augments as stored in the database: augment or augment:Found entries.</summary>
+    public static string ToStored(IEnumerable<ProtoId<WFAugmentPrototype>> unlocks, HashSet<ProtoId<WFAugmentPrototype>> found)
     {
-        return string.Join(EntrySeparator, unlocks.Select(u => u.Id).Order());
+        return string.Join(EntrySeparator,
+            unlocks.Select(u => found.Contains(u) ? u.Id + FoundSuffix : u.Id).Order());
     }
 
-    /// <summary>Reads stored unlocks.</summary>
+    /// <summary>Reads stored unlocks, paid for and found.</summary>
     public static HashSet<ProtoId<WFAugmentPrototype>> UnlocksFromStored(string? stored)
+    {
+        return UnlocksFromStored(stored, false);
+    }
+
+    /// <summary>Reads the stored unlocks that were found. One stored before this was tracked was paid for.</summary>
+    public static HashSet<ProtoId<WFAugmentPrototype>> FoundFromStored(string? stored)
+    {
+        return UnlocksFromStored(stored, true);
+    }
+
+    private static HashSet<ProtoId<WFAugmentPrototype>> UnlocksFromStored(string? stored, bool foundOnly)
     {
         var unlocks = new HashSet<ProtoId<WFAugmentPrototype>>();
         if (string.IsNullOrEmpty(stored))
             return unlocks;
 
-        foreach (var id in stored.Split(EntrySeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            unlocks.Add(id);
+        foreach (var entry in stored.Split(EntrySeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var fields = entry.Split(FieldSeparator);
+            if (!foundOnly || fields.Length > 1 && fields[1] == FoundEntry)
+                unlocks.Add(fields[0]);
+        }
+
         return unlocks;
     }
 }

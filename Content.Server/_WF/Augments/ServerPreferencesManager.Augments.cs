@@ -12,28 +12,36 @@ public sealed partial class ServerPreferencesManager
 
     /// <summary>
     /// Settles the augments of a profile a client saved. Unlocks only come from the stored profile. An unlocked augment
-    /// it no longer picks is sold back for <see cref="WFAugmentRules.RefundPercent"/> of its price first; then a priced
-    /// augment it hasn't unlocked is bought from the character's bank if the balance covers it, and dropped otherwise.
+    /// it no longer picks is given up first, sold back for <see cref="WFAugmentRules.RefundPercent"/> of its price if it
+    /// was paid for and for nothing if it was kept from a round; then a priced augment it hasn't unlocked is bought from
+    /// the character's bank if the balance covers it, and dropped otherwise.
     /// </summary>
     /// <returns>Whether anything was bought, sold or dropped, so the client's copy is out of date.</returns>
     private bool SettleAugments(NetUserId userId, ref HumanoidCharacterProfile profile, HumanoidCharacterProfile? stored)
     {
         var owned = new HashSet<ProtoId<WFAugmentPrototype>>(stored?.AugmentUnlocks ?? new());
+        var found = new HashSet<ProtoId<WFAugmentPrototype>>(stored?.AugmentFound ?? new());
         var unlocks = new HashSet<ProtoId<WFAugmentPrototype>>();
         var balance = profile.BankBalance;
         var name = profile.Name;
         var changed = false;
 
+        // Sells an owned augment back; one kept from a round pays nothing.
+        void Sell(ProtoId<WFAugmentPrototype> id)
+        {
+            if (!_protos.TryIndex(id, out var sold))
+                return;
+
+            var refund = found.Contains(id) ? 0 : WFAugmentRules.Refund(sold);
+            balance += refund;
+            _sawmill.Info($"User {userId} sold augment {id} off {name} for {refund}.");
+        }
+
         var picked = WFAugmentRules.Picked(profile).ToHashSet();
         foreach (var id in owned.Where(o => !picked.Contains(o)).OrderBy(o => o.Id))
         {
             changed = true;
-            if (!_protos.TryIndex(id, out var sold))
-                continue;
-
-            var refund = WFAugmentRules.Refund(sold);
-            balance += refund;
-            _sawmill.Info($"User {userId} sold augment {id} off {profile.Name} for {refund}.");
+            Sell(id);
         }
 
         // Buys a priced augment the character doesn't own yet; false if the bank can't cover it.
@@ -81,16 +89,12 @@ public sealed partial class ServerPreferencesManager
         // An owned implant that lost its part with that limb is sold too.
         foreach (var id in owned.Where(o => picked.Contains(o) && !unlocks.Contains(o)).OrderBy(o => o.Id))
         {
-            if (!_protos.TryIndex(id, out var sold))
-                continue;
-
-            var refund = WFAugmentRules.Refund(sold);
-            balance += refund;
-            _sawmill.Info($"User {userId} sold augment {id} off {profile.Name} for {refund}.");
+            Sell(id);
         }
 
         profile = profile.WithBankBalance(balance)
             .WithAugmentUnlocks(unlocks)
+            .WithAugmentFound(found)
             .WithAugments(choices)
             .WithAugmentImplants(implants);
         return changed;

@@ -59,7 +59,8 @@ public sealed partial class WFAugmentPrototype : IPrototype
     /// <summary>
     /// One-time price in spesos, taken from the character's bank the first time it is saved with this augment.
     /// Zero for augments that give no advantage. Taking it off in the creator refunds
-    /// <see cref="WFAugmentRules.RefundPercent"/> of it. Scavenged loot is weighted by its inverse; free ones never drop.
+    /// <see cref="WFAugmentRules.RefundPercent"/> of it if it was paid for. Scavenged loot is weighted by its inverse;
+    /// free ones never drop.
     /// </summary>
     [DataField]
     public int Price;

@@ -138,8 +138,13 @@ public sealed partial class WFAugmentSystem
             && unlocks.SetEquals(profile.AugmentUnlocks))
             return null;
 
+        // What the round added wasn't paid for in the creator, so it sells back for nothing.
+        var unpaid = profile.AugmentFound.Concat(unlocks.Where(u => !profile.AugmentUnlocks.Contains(u)));
         return Save(session, played.Slot,
-            profile.WithAugments(augments).WithAugmentImplants(implants).WithAugmentUnlocks(unlocks));
+            profile.WithAugments(augments)
+                .WithAugmentImplants(implants)
+                .WithAugmentUnlocks(unlocks)
+                .WithAugmentFound(unpaid));
     }
 
     /// <summary>

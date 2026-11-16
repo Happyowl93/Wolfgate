@@ -290,8 +290,11 @@ public sealed partial class WFAugmentEditor : BoxContainer
             }
         }
 
-        foreach (var sold in WFAugmentRules.Sold(_profile, _proto))
+        var given = WFAugmentRules.Sold(_profile, _proto);
+        foreach (var sold in given)
         {
+            // One kept from a round was never paid for, so it is scrapped for nothing.
+            var back = WFAugmentRules.Refund(_profile, sold);
             _loadout.AddChild(new PanelContainer
             {
                 PanelOverride = _theme.Row,
@@ -299,10 +302,10 @@ public sealed partial class WFAugmentEditor : BoxContainer
                 {
                     LoadoutEntry(_icons.Of(sold),
                         true,
-                        Loc.GetString("wf-augments-sold", ("name", Named(sold))),
+                        Loc.GetString(back > 0 ? "wf-augments-sold" : "wf-augments-scrapped", ("name", Named(sold))),
                         SlotName(sold.Slot),
-                        "+" + BankSystemExtensions.ToSpesoString(WFAugmentRules.Refund(sold)),
-                        _theme.Good),
+                        back > 0 ? "+" + BankSystemExtensions.ToSpesoString(back) : Loc.GetString("wf-augments-no-refund"),
+                        back > 0 ? _theme.Good : _theme.Bad),
                 },
             });
             any = true;
@@ -312,7 +315,7 @@ public sealed partial class WFAugmentEditor : BoxContainer
             _loadout.AddChild(_theme.Label(Loc.GetString("wf-augments-loadout-empty"), _theme.Faint));
 
         var due = WFAugmentRules.Due(_profile, _proto);
-        var refund = WFAugmentRules.Sold(_profile, _proto).Sum(WFAugmentRules.Refund);
+        var refund = given.Sum(sold => WFAugmentRules.Refund(_profile, sold));
         var net = due - refund;
         var after = _profile.BankBalance - net;
         _buying.Text = BankSystemExtensions.ToSpesoString(due);
@@ -324,7 +327,7 @@ public sealed partial class WFAugmentEditor : BoxContainer
         _after.Text = Signed(after);
         _after.FontColorOverride = after < 0 ? _theme.Bad : _theme.Muted;
         _short.Visible = net > _profile.BankBalance;
-        _confirm.Disabled = due == 0 && refund == 0;
+        _confirm.Disabled = due == 0 && given.Count == 0;
     }
 
     /// <summary>An augment in the loadout; clicking it opens its part.</summary>

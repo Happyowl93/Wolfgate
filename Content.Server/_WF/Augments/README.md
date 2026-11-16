@@ -16,9 +16,10 @@ A character gets an augment three ways:
   buys and pays back. The tab takes its colors and fonts from the player's Wolfgate skin (`WFAugmentTheme`) and
   folds from three columns to two where it is narrow. A `price` is taken once from the character's bank
   when it is saved with the augment (`ServerPreferencesManager.SettleAugments`), and the character owns it
-  (`AugmentUnlocks`); one it no longer picks is sold back for `WFAugmentRules.RefundPercent` (half) of its price,
-  however it was obtained. Only the server adds unlocks. Nothing is gated by faction: any character can buy the
-  faction hearts and implants here.
+  (`AugmentUnlocks`); one it no longer picks is sold back for `WFAugmentRules.RefundPercent` (half) of its price
+  if it was paid for here. One kept from a round (`AugmentFound`) is scrapped for nothing, so cheap in-round
+  cyberware can't be turned into bank money. Only the server adds unlocks or marks them found. Nothing is gated by
+  faction: any character can buy the faction hearts and implants here.
 - **Buying it in a round** from the faction lathes, uplinks or loadouts, as before, and installing it.
 - **Scavenging.** `WFAugmentSelector` (the `WFAugmentScavengeTable`) drops a priced augment's bare part or organ,
   which a surgeon puts in, or an upgrade's autosurgeon. It turns up only on the floors of wrecks
@@ -64,7 +65,7 @@ A health analyzer scan carries the cyberware in the body (`WFAugmentSystem.ReadI
 Installed cyberware is written back to the profile (`WFAugmentSystem.Persistence`). When the character goes into
 cryo, or the round ends with the player still in it (dead or alive), `ReadBody` lists the augments in the body:
 each slot's part or organ matched by prototype, and `ReadImplants` the upgrades by the components their autosurgeon
-adds (`AutoSurgeonSystem.WfHasUpgrade`). Those are kept and owned; what the character spawned with and lost is gone
+adds (`AutoSurgeonSystem.WfHasUpgrade`). Those are kept and owned, the new ones as found; what the character spawned with and lost is gone
 along with its unlock, refunding nothing. A slot or the implants changed in the creator mid-round keep the new pick.
 An implant put in a part it doesn't fit (a mantis blade in a flesh arm) works for the round but isn't kept. When a player uses `ghostrespawn`
 with no body in cryo, the character loses every augment and unlock (`ForfeitAugments`); the admin `respawn`

@@ -120,10 +120,12 @@ public sealed class AugmentPersistenceTest
             Assert.That(task.IsCompletedSuccessfully, $"The save failed: {task.Exception}");
         }
 
-        // Spawned with a cybernetic left leg and owned dermal armor, and bought a right leg in the creator mid-round.
+        // Spawned with a cybernetic left leg, paid-for cyber eyes and dermal armor, and bought a right leg in the
+        // creator mid-round.
         var spawned = new Dictionary<WFAugmentSlot, WFAugmentChoice>
         {
             [WFAugmentSlot.LeftLeg] = new("WFAugmentCyberLeftLeg", "WFAugmentStyleCyborg"),
+            [WFAugmentSlot.Eyes] = new("WFAugmentCyberEyes", null),
         };
         var spawnedImplants = new HashSet<ProtoId<WFAugmentPrototype>> { "WFAugmentDermalArmor" };
         var edited = new Dictionary<WFAugmentSlot, WFAugmentChoice>(spawned)
@@ -133,9 +135,9 @@ public sealed class AugmentPersistenceTest
         await Run(() => prefs.SetProfile(userId, slot, HumanoidCharacterProfile.DefaultWithSpecies("Human")
             .WithAugments(edited)
             .WithAugmentImplants(spawnedImplants)
-            .WithAugmentUnlocks(spawnedImplants)));
+            .WithAugmentUnlocks(new ProtoId<WFAugmentPrototype>[] { "WFAugmentDermalArmor", "WFAugmentCyberEyes" })));
 
-        // In the round the left leg and the armor were lost, and a Sandevistan and muscle fibers put in.
+        // In the round the left leg and the armor were lost, the eyes kept, and a Sandevistan and muscle fibers put in.
         EntityUid mob = default;
         await server.WaitPost(() =>
         {
@@ -143,6 +145,7 @@ public sealed class AugmentPersistenceTest
             Apply(entities, mob, new Dictionary<WFAugmentSlot, WFAugmentChoice>
             {
                 [WFAugmentSlot.Heart] = new("WFAugmentLotusSandevistan", null),
+                [WFAugmentSlot.Eyes] = new("WFAugmentCyberEyes", null),
             }, new HashSet<ProtoId<WFAugmentPrototype>> { "WFAugmentMuscleFibers" });
         });
 
@@ -150,9 +153,14 @@ public sealed class AugmentPersistenceTest
         await Run(() => augments.SaveBody(userId, played, mob));
         await server.WaitAssertion(() =>
         {
-            Assert.That(Stored().Augments.Keys, Is.EquivalentTo(new[] { WFAugmentSlot.RightLeg, WFAugmentSlot.Heart }));
+            Assert.That(Stored().Augments.Keys,
+                Is.EquivalentTo(new[] { WFAugmentSlot.RightLeg, WFAugmentSlot.Heart, WFAugmentSlot.Eyes }));
             Assert.That(Stored().AugmentImplants.Select(i => i.Id), Is.EquivalentTo(new[] { "WFAugmentMuscleFibers" }));
             Assert.That(Stored().AugmentUnlocks.Select(u => u.Id),
+                Is.EquivalentTo(new[] { "WFAugmentLotusSandevistan", "WFAugmentMuscleFibers", "WFAugmentCyberEyes" }));
+
+            // What the round added was never paid for; the eyes bought in the creator still were.
+            Assert.That(Stored().AugmentFound.Select(u => u.Id),
                 Is.EquivalentTo(new[] { "WFAugmentLotusSandevistan", "WFAugmentMuscleFibers" }));
         });
 
@@ -164,6 +172,7 @@ public sealed class AugmentPersistenceTest
             Assert.That(Stored().Augments, Is.Empty);
             Assert.That(Stored().AugmentImplants, Is.Empty);
             Assert.That(Stored().AugmentUnlocks, Is.Empty);
+            Assert.That(Stored().AugmentFound, Is.Empty);
             entities.DeleteEntity(mob);
         });
 

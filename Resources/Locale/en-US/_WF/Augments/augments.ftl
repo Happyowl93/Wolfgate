@@ -1,5 +1,5 @@
 wf-augments-tab = Augments
-wf-augments-intro = Cyberware this character starts with. Hover over the body and click a part to change it. Priced pieces are bought once from the bank; taking one off sells it back for {$percent}% of its price. Cyberware installed during a round stays if the character ends it in cryo or in their body; respawning without cryo loses all of it.
+wf-augments-intro = Cyberware this character starts with. Hover over the body and click a part to change it. Priced pieces are bought once from the bank; taking one off sells it back for {$percent}% of its price. Cyberware installed during a round stays if the character ends it in cryo or in their body, but it was never bought here, so taking it off scraps it for nothing; respawning without cryo loses all of it.
 wf-augments-none = Natural
 wf-augments-style = Style
 wf-augments-free = Free
@@ -16,6 +16,8 @@ wf-augments-no-room = No free implant slot.
 wf-augments-loadout = Loadout
 wf-augments-loadout-empty = No cyberware.
 wf-augments-sold = Sold: {$name}
+wf-augments-scrapped = Scrapped: {$name}
+wf-augments-no-refund = No refund
 wf-augments-bill-buying = Buying
 wf-augments-bill-refund = Refund
 wf-augments-bill-total = Total

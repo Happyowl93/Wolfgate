@@ -40,6 +40,15 @@ public sealed class AugmentRulesTest
                 Is.EquivalentTo(new[] { "WFAugmentLeftMantisBlade", "WFAugmentMuscleFibers" }));
             Assert.That(WFAugmentRules.FromStored(legacy), Is.Empty);
 
+            // Unlocks round-trip with which of them were found; one stored before that was tracked was paid for.
+            var unlocks = new HashSet<ProtoId<WFAugmentPrototype>> { "WFAugmentDermalArmor", "WFAugmentCyberEyes" };
+            var found = new HashSet<ProtoId<WFAugmentPrototype>> { "WFAugmentCyberEyes" };
+            var storedUnlocks = WFAugmentRules.ToStored(unlocks, found);
+            Assert.That(WFAugmentRules.UnlocksFromStored(storedUnlocks), Is.EquivalentTo(unlocks));
+            Assert.That(WFAugmentRules.FoundFromStored(storedUnlocks), Is.EquivalentTo(found));
+            Assert.That(WFAugmentRules.UnlocksFromStored("WFAugmentDermalArmor;WFAugmentCyberEyes"), Is.EquivalentTo(unlocks));
+            Assert.That(WFAugmentRules.FoundFromStored("WFAugmentDermalArmor;WFAugmentCyberEyes"), Is.Empty);
+
             var valid = WFAugmentRules.Validate("Human", new Dictionary<WFAugmentSlot, WFAugmentChoice>
             {
                 // Wrong slot for the augment.

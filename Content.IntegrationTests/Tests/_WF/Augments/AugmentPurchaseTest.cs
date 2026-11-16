@@ -14,7 +14,8 @@ namespace Content.IntegrationTests.Tests._WF.Augments;
 
 /// <summary>
 /// A client save buys a priced augment once from the character's bank and keeps it unlocked; one the bank can't cover
-/// is dropped, unlocks a client sends are ignored, and one taken off is sold back for half its price.
+/// is dropped, unlocks a client sends are ignored, and one taken off is sold back for half its price, or for nothing
+/// if it was kept from a round.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(ServerPreferencesManager))]
@@ -118,6 +119,21 @@ public sealed class AugmentPurchaseTest
             Assert.That(Stored().BankBalance, Is.EqualTo(12500));
             Assert.That(Stored().AugmentUnlocks, Is.Empty);
             Assert.That(Stored().Augments, Is.Empty);
+        });
+
+        // A leg kept from a round was never paid for: taking it off pays nothing, whatever the client says of it.
+        var left = new ProtoId<WFAugmentPrototype>[] { "WFTestPricedLeftLeg" };
+        await Save(() => prefs.SetProfile(userId, slot,
+            Stored().WithAugments(Legs(false)).WithAugmentUnlocks(left).WithAugmentFound(left)));
+        await server.WaitAssertion(() => Assert.That(Stored().AugmentFound.Select(u => u.Id), Is.EquivalentTo(new[] { "WFTestPricedLeftLeg" })));
+        await Save(() => prefs.SetProfile(userId, slot,
+            Stored().WithAugmentFound(new ProtoId<WFAugmentPrototype>[0]).WithAugments(new Dictionary<WFAugmentSlot, WFAugmentChoice>()),
+            authoritative: false));
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored().BankBalance, Is.EqualTo(12500));
+            Assert.That(Stored().AugmentUnlocks, Is.Empty);
+            Assert.That(Stored().AugmentFound, Is.Empty);
         });
 
         await pair.CleanReturnAsync();

@@ -21,6 +21,10 @@ public sealed partial class HumanoidCharacterProfile
     [DataField]
     public HashSet<ProtoId<WFAugmentPrototype>> AugmentUnlocks { get; set; } = new();
 
+    /// <summary>The unlocks kept from a round instead of paid for, which sell back for nothing. Only the server adds to it.</summary>
+    [DataField]
+    public HashSet<ProtoId<WFAugmentPrototype>> AugmentFound { get; set; } = new();
+
     /// <summary>Copy of this profile with the given augment choices.</summary>
     public HumanoidCharacterProfile WithAugments(Dictionary<WFAugmentSlot, WFAugmentChoice> augments)
     {
@@ -33,10 +37,17 @@ public sealed partial class HumanoidCharacterProfile
         return new(this) { AugmentImplants = new(implants) };
     }
 
-    /// <summary>Copy of this profile with the given unlocks.</summary>
+    /// <summary>Copy of this profile with the given unlocks; found ones no longer among them are dropped.</summary>
     public HumanoidCharacterProfile WithAugmentUnlocks(IEnumerable<ProtoId<WFAugmentPrototype>> unlocks)
     {
-        return new(this) { AugmentUnlocks = new(unlocks) };
+        var kept = new HashSet<ProtoId<WFAugmentPrototype>>(unlocks);
+        return new(this) { AugmentUnlocks = kept, AugmentFound = new(AugmentFound.Where(kept.Contains)) };
+    }
+
+    /// <summary>Copy of this profile with those of its unlocks marked as found, not paid for.</summary>
+    public HumanoidCharacterProfile WithAugmentFound(IEnumerable<ProtoId<WFAugmentPrototype>> found)
+    {
+        return new(this) { AugmentFound = new(found.Where(AugmentUnlocks.Contains)) };
     }
 
     private bool AugmentsEqual(HumanoidCharacterProfile other)
@@ -44,7 +55,8 @@ public sealed partial class HumanoidCharacterProfile
         return Augments.Count == other.Augments.Count
                && Augments.All(a => other.Augments.TryGetValue(a.Key, out var o) && o == a.Value)
                && AugmentImplants.SetEquals(other.AugmentImplants)
-               && AugmentUnlocks.SetEquals(other.AugmentUnlocks);
+               && AugmentUnlocks.SetEquals(other.AugmentUnlocks)
+               && AugmentFound.SetEquals(other.AugmentFound);
     }
 
     private void EnsureAugmentsValid(IPrototypeManager proto, IComponentFactory factory)
@@ -53,5 +65,6 @@ public sealed partial class HumanoidCharacterProfile
         Augments = WFAugmentRules.Validate(Species, Augments, TraitPreferences, proto, factory);
         AugmentImplants = WFAugmentRules.ValidateImplants(Species, Augments, AugmentImplants, TraitPreferences, proto, factory);
         AugmentUnlocks = new((AugmentUnlocks ?? new()).Where(u => proto.HasIndex(u)));
+        AugmentFound = new((AugmentFound ?? new()).Where(AugmentUnlocks.Contains));
     }
 }
