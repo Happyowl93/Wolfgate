@@ -22,8 +22,8 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WF.Augments;
 
 /// <summary>
-/// Cyberware of every kind, implants included, is applied to a body and read back from it; a body's cyberware is
-/// written to the profile it belongs to, keeping creator edits; paid-for cyberware taken from another character is
+/// Cyberware of every kind, implants included, is applied to a body and read back from it; a body's paid-for
+/// cyberware is written to the profile it belongs to, keeping creator edits; paid-for cyberware taken from another character is
 /// the taker's to sell; every augment names real cyberware in the right part; scavenging finds the priced ones only.
 /// </summary>
 [TestFixture]
@@ -150,19 +150,15 @@ public sealed class AugmentPersistenceTest
             }, new HashSet<ProtoId<WFAugmentPrototype>> { "WFAugmentMuscleFibers" });
         });
 
-        var played = new WFAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, spawned, spawnedImplants);
+        var played = new WFAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, mob, spawned, spawnedImplants);
         await Run(() => augments.SaveBody(userId, played, mob));
         await server.WaitAssertion(() =>
         {
-            Assert.That(Stored().Augments.Keys,
-                Is.EquivalentTo(new[] { WFAugmentSlot.RightLeg, WFAugmentSlot.Heart, WFAugmentSlot.Eyes }));
-            Assert.That(Stored().AugmentImplants.Select(i => i.Id), Is.EquivalentTo(new[] { "WFAugmentMuscleFibers" }));
-            Assert.That(Stored().AugmentUnlocks.Select(u => u.Id),
-                Is.EquivalentTo(new[] { "WFAugmentLotusSandevistan", "WFAugmentMuscleFibers", "WFAugmentCyberEyes" }));
-
-            // What the round added was never paid for; the eyes bought in the creator still were.
-            Assert.That(Stored().AugmentFound.Select(u => u.Id),
-                Is.EquivalentTo(new[] { "WFAugmentLotusSandevistan", "WFAugmentMuscleFibers" }));
+            // What the round put in was never paid for, so it ends with the round; the eyes bought in the creator stay.
+            Assert.That(Stored().Augments.Keys, Is.EquivalentTo(new[] { WFAugmentSlot.RightLeg, WFAugmentSlot.Eyes }));
+            Assert.That(Stored().AugmentImplants, Is.Empty);
+            Assert.That(Stored().AugmentUnlocks.Select(u => u.Id), Is.EquivalentTo(new[] { "WFAugmentCyberEyes" }));
+            Assert.That(Stored().AugmentFound, Is.Empty);
         });
 
         // Respawning without cryo takes it all.
@@ -229,7 +225,7 @@ public sealed class AugmentPersistenceTest
             .WithBankBalance(balance)
             .WithAugments(picked)
             .WithAugmentUnlocks(new[] { eyes });
-        var thiefPlayed = new WFAugmentSystem.PlayedCharacter(thief, EntityUid.Invalid, none, new HashSet<ProtoId<WFAugmentPrototype>>());
+        var thiefPlayed = new WFAugmentSystem.PlayedCharacter(thief, EntityUid.Invalid, EntityUid.Invalid, none, new HashSet<ProtoId<WFAugmentPrototype>>());
 
         // A body with the bought eyes, marked as the victim's when it spawns.
         EntityUid Victim()
@@ -287,7 +283,8 @@ public sealed class AugmentPersistenceTest
         await Run(() => augments.SaveBody(userId, thiefPlayed, robber));
         await server.WaitAssertion(() =>
         {
-            Assert.That(Stored(thief).AugmentFound, Is.EquivalentTo(new[] { eyes }), "Eyes already sold can be sold again.");
+            Assert.That(Stored(thief).AugmentUnlocks, Is.Empty, "Eyes already sold can be sold again.");
+            Assert.That(Stored(thief).Augments, Is.Empty, "Eyes already sold are kept though nobody paid for them.");
             entities.DeleteEntity(robbed);
             entities.DeleteEntity(robber);
         });
@@ -407,7 +404,7 @@ public sealed class AugmentPersistenceTest
         await pair.RunTicksSync(2);
 
         await server.WaitPost(() => save = augments.SaveBody(userId,
-            new WFAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, new(), new()), mob));
+            new WFAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, mob, new(), new()), mob));
         Assert.That(save, Is.Not.Null, "Nothing was kept from the body.");
         await PoolManager.WaitUntil(server, () => save!.IsCompleted, maxTicks: 300);
         await server.WaitAssertion(() =>

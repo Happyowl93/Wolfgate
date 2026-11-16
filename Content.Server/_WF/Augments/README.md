@@ -17,8 +17,7 @@ A character gets an augment three ways:
   folds from three columns to two where it is narrow. A `price` is taken once from the character's bank
   when it is saved with the augment (`ServerPreferencesManager.SettleAugments`), and the character owns it
   (`AugmentUnlocks`); one it no longer picks is sold back for `WFAugmentRules.RefundPercent` (half) of its price
-  if it was paid for here. One kept from a round (`AugmentFound`) is scrapped for nothing, so cheap in-round
-  cyberware can't be turned into bank money. Only the server adds unlocks or marks them found. Nothing is gated by
+  if it was paid for here. Only the server adds unlocks. Nothing is gated by
   faction: any character can buy the faction hearts and implants here.
 
   The value follows the bought hardware, so it can be stolen and sold (`WFAugmentSystem.Paid.cs`). A part a
@@ -28,17 +27,19 @@ A character gets an augment three ways:
   so a corpse has to be cut open first. Whoever's body holds the marked part when it is saved instead owns the
   augment as paid for. Either way the character it was taken from loses the unlock and the pick, online or not,
   and is told in chat: when the part is sold or destroyed during the round, or when the taker's body is saved.
-  A purchase has one mark: a printed or cloned copy has none, is priced like any part and reads as found; selling
+  A purchase has one mark: a printed or cloned copy has none, is priced like any part and ends with the round; selling
   in the creator removes the mark from the part still in the body; and a character can't sell a part that has left
   its body. A body left behind by `ghostrespawn` keeps its marks for whoever loots it.
-- **Buying it in a round** from the faction lathes, uplinks or loadouts, as before, and installing it.
+- **Buying it in a round** from the faction lathes, uplinks or loadouts, as before, and installing it. That
+  hardware is unmarked, so it works for the round and is gone at its end: only paid-for hardware persists, so a
+  printed J.W.L arm or an uplink Sandevistan can't stand in for the creator's price.
 - **Scavenging.** `WFAugmentSelector` (the `WFAugmentScavengeTable`) drops a priced augment's bare part or organ,
   which a surgeon puts in, or an upgrade's autosurgeon. It turns up only on the floors of wrecks
   (`WFAugmentScavengeSpawner` in the wreck debris floor list, `wrecks.yml`). The weight is the inverse of the price, so a Sandevistan is about 33 times rarer than cyber eyes.
   A find is as good as a bought piece: the spawner (`WFAugmentScavengeSpawnerComponent`) gives it a mark that
   belongs to nobody, so it sells as loot for what the augment sells back for, and kept through the end of a round
   it is owned as paid for. A marked autosurgeon passes its mark to the part it upgrades. That value is why finds
-  are rare: roughly one per 13 enormous wrecks or 55 small ones, worth about 80,000 on average.
+  are rare: roughly one per 13 enormous wrecks or 55 small ones, worth about 115,000 on average.
 
 Implants (`kind: Upgrade`) are a set of their own (`AugmentImplants`), not slot choices: an implant's `slot` is the
 part it goes in, matching its autosurgeon's target. A part holds `implantSlots` of them (a J.W.L arm or S.P.E.E.D leg
@@ -77,14 +78,19 @@ is the analyzer, and being held by the body is what keeps the window in range.
 A health analyzer scan carries the cyberware in the body (`WFAugmentSystem.ReadInstalled`, sent as
 `HealthAnalyzerScannedUserMessage.Augments`), and the organs tab lists it under the organs (`WFAugmentScanList`).
 
-Installed cyberware is written back to the profile (`WFAugmentSystem.Persistence`). When the character goes into
-cryo, or the round ends with the player still in it (dead or alive), `ReadBody` lists the augments in the body:
-each slot's part or organ matched by prototype, and `ReadImplants` the upgrades by the components their autosurgeon
-adds (`AutoSurgeonSystem.WfHasUpgrade`). Those are kept and owned, the new ones as found; what the character spawned with and lost is gone
-along with its unlock, refunding nothing. A slot or the implants changed in the creator mid-round keep the new pick.
-An implant put in a part it doesn't fit (a mantis blade in a flesh arm) works for the round but isn't kept. When a player uses `ghostrespawn`
-with no body in cryo, the character loses every augment and unlock (`ForfeitAugments`); the admin `respawn`
-command and cloning take nothing. A body the player left for a ghost role or another character isn't read.
+Installed cyberware is written back to the profile (`WFAugmentSystem.Persistence`), only when the character goes
+into cryo or the round ends with it alive (not brain-dead) in the body it spawned in. `ReadBody` lists the augments in
+the body: each slot's part or organ matched by prototype, and `ReadImplants` the upgrades by the components their
+autosurgeon adds (`AutoSurgeonSystem.WfHasUpgrade`). Of those, only paid-for hardware is kept and owned: a marked
+part, or one the profile already paid for. What the round put in unpaid ends with it, and what the character spawned
+with and lost is gone along with its unlock, refunding nothing. A slot or the implants changed in the creator
+mid-round keep the new pick. An implant put in a part it doesn't fit (a mantis blade in a flesh arm) works for the
+round but isn't kept.
+
+A character that doesn't make it through the round in its own body loses every augment and unlock (`Forfeit`), online
+or not: a player who uses `ghostrespawn` with no body in cryo (`ForfeitAugments`), one dead at the end of the round,
+one that was cloned or moved to another body, and one who left it for a ghost role. Its marks stay on the body it
+left for whoever loots it. The admin `respawn` command takes nothing.
 
 The limbs are real Shitmed cybernetic parts: they take EMPs, repair with a welder and cable, and come off and go
 back on like any chassis limb. A hand or foot a limb generates (`GenerateChildPart`) belongs to that limb, not to

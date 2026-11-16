@@ -10,7 +10,7 @@ using Content.Shared.Body.Components;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
 using Content.Shared.GameTicking;
-using Content.Shared.Humanoid;
+using Content.Shared.Mobs.Systems;
 using Content.Shared.Preferences;
 using Robust.Server.Player;
 using Robust.Shared.Network;
@@ -20,10 +20,11 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._WF.Augments;
 
 /// <summary>
-/// Keeps a character's augments in step with its body. When it goes into cryo or the round ends with the player
-/// still in it, the cyberware still in the body is written to its profile, so what was installed in the round stays
-/// and what was lost is gone. Respawning without cryo leaves the character behind and takes all of it. Which of it
-/// sells back in the creator is in <c>WFAugmentSystem.Paid.cs</c>.
+/// Keeps a character's augments in step with its body. When it goes into cryo or the round ends with it alive in the
+/// body it spawned in, the paid-for cyberware still in that body is written to its profile, so what was lost is gone
+/// and what the round put in without being paid for ends with the round. A character that respawns, is dead at the
+/// end or ends up in another body loses all of it. Which of it sells back in the creator is in
+/// <c>WFAugmentSystem.Paid.cs</c>.
 /// </summary>
 public sealed partial class WFAugmentSystem
 {
@@ -32,10 +33,12 @@ public sealed partial class WFAugmentSystem
     [Dependency] private IPlayerManager _players = default!;
     [Dependency] private CryoSleepSystem _cryoSleep = default!;
     [Dependency] private MindSystem _mind = default!;
+    [Dependency] private MobStateSystem _mobState = default!;
 
-    /// <summary>The character a player spawned as this round: its slot, its mind and the augments it spawned with.</summary>
+    /// <summary>The character a player spawned as this round: its slot, its mind, its body and the augments it spawned with.</summary>
     internal sealed record PlayedCharacter(int Slot,
         EntityUid Mind,
+        EntityUid Body,
         Dictionary<WFAugmentSlot, WFAugmentChoice> Spawned,
         HashSet<ProtoId<WFAugmentPrototype>> SpawnedImplants);
 
@@ -58,6 +61,7 @@ public sealed partial class WFAugmentSystem
         {
             Track(args.Player.UserId, new PlayedCharacter(prefs.SelectedCharacterIndex,
                 mind,
+                args.Mob,
                 new(args.Profile.Augments),
                 new(args.Profile.AugmentImplants)));
             MarkPaid(args.Mob, selected, new WFAugmentOwner(args.Player.UserId, prefs.SelectedCharacterIndex));
@@ -75,21 +79,36 @@ public sealed partial class WFAugmentSystem
             && _played.TryGetValue(user, out var played)
             && _mind.TryGetMind(uid, out var mind, out _)
             && mind == played.Mind)
-            SaveBody(user, played, uid);
+        {
+            // A clone going to sleep is not the body the augments were in.
+            if (uid == played.Body)
+                SaveBody(user, played, uid);
+            else
+                Forfeit(user, played, "wf-augments-forfeit-dead");
+        }
     }
 
     private void OnRoundEnded(RoundEndedEvent args)
     {
-        foreach (var (user, played) in _played)
+        foreach (var (user, played) in _played.ToList())
         {
-            // A player who took a ghost role or a new character is no longer in this one.
-            if (_mind.TryGetMind(user, out var mind)
-                && mind.Value.Owner == played.Mind
-                && mind.Value.Comp.OwnedEntity is { } body
-                && HasComp<BodyComponent>(body)
-                && HasComp<HumanoidAppearanceComponent>(body))
-                SaveBody(user, played, body);
+            SaveAtRoundEnd(user, played);
         }
+    }
+
+    /// <summary>
+    /// Keeps a character's paid-for augments if it ends the round alive in its own body, and takes them all if it is
+    /// a corpse, a clone, a ghost role or a new character. One in cryo kept them going in.
+    /// </summary>
+    internal Task? SaveAtRoundEnd(NetUserId user, PlayedCharacter played)
+    {
+        if (_mind.TryGetMind(user, out var mind)
+            && mind.Value.Owner == played.Mind
+            && mind.Value.Comp.OwnedEntity == played.Body
+            && !_mobState.IsDead(played.Body))
+            return SaveBody(user, played, played.Body);
+
+        return _cryoSleep.HasCryosleepingBody(user) ? null : Forfeit(user, played, "wf-augments-forfeit-dead");
     }
 
     /// <summary>Writes the cyberware in a body to the profile of the character it belongs to.</summary>
@@ -136,12 +155,22 @@ public sealed partial class WFAugmentSystem
         unlocks.UnionWith(augments.Values.Select(c => c.Augment).Concat(implants)
             .Where(a => owned.Contains(a) && _proto.TryIndex(a, out var augment) && augment.Price > 0));
 
-        // Hardware paid for in the creator stays paid for, whoever bought it; the rest sells back for nothing.
+        // Only paid-for hardware outlasts the round, whoever paid for it; what the round put in unpaid ends with it.
         var owner = new WFAugmentOwner(user, played.Slot);
         var inBody = installed.Values.Select(c => c.Augment).Concat(carried).ToHashSet();
         var taken = new Dictionary<WFAugmentOwner, HashSet<ProtoId<WFAugmentPrototype>>>();
-        var unpaid = unlocks.Where(u => !ClaimPaid(body, u, inBody.Contains(u), owner, profile, taken)).ToHashSet();
+        unlocks.RemoveWhere(u => !ClaimPaid(body, u, inBody.Contains(u), owner, profile, taken));
         ReleasePaid(body, owner);
+
+        bool Kept(ProtoId<WFAugmentPrototype> id) => unlocks.Contains(id) || _proto.TryIndex(id, out var a) && a.Price == 0;
+        foreach (var slot in augments.Where(a => !Kept(a.Value.Augment)).Select(a => a.Key).ToList())
+            augments.Remove(slot);
+        implants = WFAugmentRules.ValidateImplants(profile.Species,
+            augments,
+            implants.Where(Kept).ToHashSet(),
+            profile.TraitPreferences,
+            _proto,
+            _factory);
 
         // A character it was taken from no longer owns it.
         var saves = taken.Select(t => Revoke(t.Key, t.Value)).ToList();
@@ -149,13 +178,13 @@ public sealed partial class WFAugmentSystem
             || augments.Any(a => !profile.Augments.TryGetValue(a.Key, out var c) || c != a.Value)
             || !implants.SetEquals(profile.AugmentImplants)
             || !unlocks.SetEquals(profile.AugmentUnlocks)
-            || !unpaid.SetEquals(profile.AugmentFound))
+            || profile.AugmentFound.Count > 0)
         {
             saves.Add(Save(session, played.Slot,
                 profile.WithAugments(augments)
                     .WithAugmentImplants(implants)
                     .WithAugmentUnlocks(unlocks)
-                    .WithAugmentFound(unpaid)));
+                    .WithAugmentFound(new HashSet<ProtoId<WFAugmentPrototype>>())));
         }
 
         return saves.Count == 0 ? null : Task.WhenAll(saves);
@@ -263,28 +292,65 @@ public sealed partial class WFAugmentSystem
     }
 
     /// <summary>
-    /// A player respawning with <c>ghostrespawn</c> instead of cryo leaves their character behind: it loses its
-    /// augments and their unlocks, so priced ones have to be bought again.
+    /// A player respawning with <c>ghostrespawn</c> instead of cryo leaves their character behind, as if cloned: it
+    /// loses its augments and their unlocks, so priced ones have to be bought again.
     /// </summary>
     /// <returns>The profile save, or null if nothing was taken.</returns>
     public Task? ForfeitAugments(ICommonSession session)
     {
-        var user = session.UserId;
-        if (_cryoSleep.HasCryosleepingBody(user) || !_played.Remove(user, out var played))
+        if (_cryoSleep.HasCryosleepingBody(session.UserId) || !_played.TryGetValue(session.UserId, out var played))
             return null;
 
-        // Whoever takes its hardware off the body it left owns it.
+        return Forfeit(session.UserId, played, "wf-augments-forfeit");
+    }
+
+    /// <summary>
+    /// Takes every augment and unlock off a character, online or not. Whoever takes its hardware off the body it left
+    /// owns it.
+    /// </summary>
+    /// <returns>The profile save, or null if nothing was taken.</returns>
+    internal Task? Forfeit(NetUserId user, PlayedCharacter played, string message)
+    {
+        _played.Remove(user);
         ReleasePaid(null, new WFAugmentOwner(user, played.Slot));
+        if (!_players.TryGetSessionById(user, out var session))
+            return ForfeitOffline(user, played.Slot);
+
         if (_preferences.GetPreferencesOrNull(user)?.Characters.GetValueOrDefault(played.Slot) is not HumanoidCharacterProfile profile
-            || profile.Augments.Count == 0 && profile.AugmentImplants.Count == 0 && profile.AugmentUnlocks.Count == 0)
+            || Stripped(profile) is not { } stripped)
             return null;
 
-        _chat.DispatchServerMessage(session, Loc.GetString("wf-augments-forfeit", ("name", profile.Name)));
-        Log.Info($"User {user} respawned without cryo; {profile.Name} lost their augments.");
-        return Save(session, played.Slot,
-            profile.WithAugments(new Dictionary<WFAugmentSlot, WFAugmentChoice>())
-                .WithAugmentImplants([])
-                .WithAugmentUnlocks([]));
+        _chat.DispatchServerMessage(session, Loc.GetString(message, ("name", profile.Name)));
+        Log.Info($"User {user}'s {profile.Name} lost their augments ({message}).");
+        return Save(session, played.Slot, stripped);
+    }
+
+    private async Task ForfeitOffline(NetUserId user, int slot)
+    {
+        try
+        {
+            var stored = await _db.GetPlayerPreferencesAsync(user, default);
+            if (stored?.Characters.GetValueOrDefault(slot) is HumanoidCharacterProfile profile && Stripped(profile) is { } stripped)
+            {
+                await _db.SaveCharacterSlotAsync(user, stripped, slot);
+                Log.Info($"Offline user {user}'s {profile.Name} lost their augments.");
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Failed to take the augments off offline user {user}'s character {slot}: {e}");
+        }
+    }
+
+    /// <summary>The profile with no augments, implants or unlocks; null if it has none to lose.</summary>
+    private static HumanoidCharacterProfile? Stripped(HumanoidCharacterProfile profile)
+    {
+        if (profile.Augments.Count == 0 && profile.AugmentImplants.Count == 0 && profile.AugmentUnlocks.Count == 0)
+            return null;
+
+        return profile.WithAugments(new Dictionary<WFAugmentSlot, WFAugmentChoice>())
+            .WithAugmentImplants([])
+            .WithAugmentUnlocks([]);
     }
 
     private async Task Save(ICommonSession session, int slot, HumanoidCharacterProfile profile)
