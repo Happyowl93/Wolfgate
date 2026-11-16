@@ -236,6 +236,69 @@ public sealed partial class WFCrewTest
         });
     }
 
+    /// <summary>
+    /// Two crewmen who planned together throw only one grenade, and a crewmate who steps into the blast during the
+    /// cook is never thrown at.
+    /// </summary>
+    [Test]
+    public async Task GrenadeChecksAgainBeforeItLeavesTheHand()
+    {
+        var deck = await CreateDeck(new Vector2(6, 0), 13, gravity: true);
+        await Server.WaitAssertion(() =>
+        {
+            var grenades = Server.System<WFCrewGrenadeSystem>();
+            var inventory = Server.System<InventorySystem>();
+            var hands = Server.System<SharedHandsSystem>();
+            var xform = Server.System<SharedTransformSystem>();
+
+            for (var x = 5; x < 13; x++)
+                SEntMan.SpawnAtPosition("WallSolid", new EntityCoordinates(deck, new Vector2(x + 0.5f, 4.5f)));
+            var hostile = SEntMan.SpawnAtPosition(Hostile, new EntityCoordinates(deck, new Vector2(8.5f, 6.5f)));
+
+            EntityUid Thrower(Vector2 at)
+            {
+                var member = ConvoyCrew(deck, "WFCrewDeckhand", "twin", at);
+                var crew = SEntMan.GetComponent<WFCrewComponent>(member);
+                crew.Skill = WFCrewSkill.Elite;
+                crew.RadioSightings[hostile] = STiming.CurTime + TimeSpan.FromSeconds(60);
+                var weapon = SEntMan.EnsureComponent<WFCrewWeaponComponent>(member);
+                weapon.Noticed[hostile] = STiming.CurTime - TimeSpan.FromSeconds(5);
+                inventory.TryUnequip(member, "pocket2", silent: true, force: true);
+                var grenade = SEntMan.SpawnAtPosition("ExGrenade", new EntityCoordinates(deck, at));
+                Assert.That(inventory.TryEquip(member, grenade, "pocket2", silent: true, force: true), Is.True);
+                return member;
+            }
+
+            var first = Thrower(new Vector2(1.5f, 1.5f));
+            // Off to one side, so his throw does not pass over the first.
+            var second = Thrower(new Vector2(2.5f, 0.5f));
+            Assert.That(grenades.TryPlan(first, hostile, GrenadeRules, out var grenade, out var target, out var at), Is.True,
+                $"The first should find somewhere to throw. {Describe(first)}");
+            Assert.That(grenades.TryPlan(second, hostile, GrenadeRules, out var other, out var otherTarget, out var otherAt), Is.True,
+                "Planned in the same moment, the second sees no cooldown yet.");
+            Assert.That(grenades.Ready(first, grenade, target, at, GrenadeRules), Is.True);
+            Assert.That(grenades.Ready(second, other, otherTarget, otherAt, GrenadeRules), Is.False,
+                "The second must not arm inside the cooldown the first just started.");
+            Assert.That(hands.IsHolding(second, other, out _), Is.False);
+
+            // A crewmate steps up beside the hostile while the grenade cooks: every spot that reaches it is now in
+            // the crewmate's blast, and the fuse has time to spare, so he keeps hold.
+            var mate = ConvoyCrew(deck, "WFCrewDeckhand", "twin", new Vector2(9.5f, 6.5f));
+            grenades.Release(first);
+            Assert.That(SEntMan.HasComponent<WFCrewArmedGrenadeComponent>(first), Is.True,
+                "A grenade must not be thrown with a crewmate in its blast while the fuse can wait.");
+            Assert.That(hands.IsHolding(first, grenade, out _), Is.True, "Held back, it stays in his hand.");
+
+            // The crewmate moves off and the throw goes.
+            SEntMan.DeleteEntity(mate);
+            grenades.Release(first);
+            Assert.That(SEntMan.HasComponent<WFCrewArmedGrenadeComponent>(first), Is.False);
+            Assert.That(hands.IsHolding(first, grenade, out _), Is.False, "Once the way is clear he throws.");
+
+            SEntMan.DeleteEntity(grenade);
+        });
+    }
+
     /// <summary>A reaver hand stands a tier below his crew and an officer a tier above; a settings round trip keeps both.</summary>
     [Test]
     public async Task ReaverSkillOffsetsSurviveASettingsRoundTrip()

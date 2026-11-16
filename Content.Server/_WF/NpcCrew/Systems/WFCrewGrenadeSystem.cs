@@ -147,13 +147,16 @@ public sealed partial class WFCrewGrenadeSystem : EntitySystem
     /// blast reaches round the corner the throw cannot. It must lie outside his own blast and spare everyone who is
     /// not his enemy, and leave at least <see cref="WFCrewGrenadeRules.MinFuse"/> on the fuse when it lands.
     /// </summary>
-    private bool TryFindLanding(EntityUid uid, EntityUid hostile, EntityUid grenade, WFCrewGrenadeRules rules, out EntityCoordinates at)
+    private bool TryFindLanding(EntityUid uid, EntityUid hostile, EntityUid grenade, WFCrewGrenadeRules rules, out EntityCoordinates at,
+        float? fuse = null)
     {
         at = default;
-        var hostileXform = Transform(hostile);
-        if (hostileXform.GridUid is not { } grid || !TryComp<MapGridComponent>(grid, out var gridComp)
+        if (TerminatingOrDeleted(hostile) || Transform(hostile).GridUid is not { } grid
+            || !TryComp<MapGridComponent>(grid, out var gridComp)
             || !TryComp<OnUseTimerTriggerComponent>(grenade, out var timer))
             return false;
+
+        var fuseLeft = fuse ?? timer.Delay;
 
         var from = _xform.GetMapCoordinates(uid);
         var there = _xform.GetMapCoordinates(hostile);
@@ -176,7 +179,7 @@ public sealed partial class WFCrewGrenadeSystem : EntitySystem
 
                 var distance = Vector2.Distance(spot.Position, from.Position);
                 if (distance > rules.ThrowRange || distance <= rules.BlastRadius
-                    || timer.Delay - distance / speed < rules.MinFuse
+                    || fuseLeft - distance / speed < rules.MinFuse
                     || !_maps.TryGetTileRef(grid, gridComp, tile, out var tileRef) || tileRef.Tile.IsEmpty
                     || _turf.IsTileBlocked(tileRef, CollisionGroup.Impassable)
                     || !Clear(uid, from, spot) || !Clear(uid, spot, there)
@@ -272,6 +275,11 @@ public sealed partial class WFCrewGrenadeSystem : EntitySystem
             || !FindGrenade(uid, out var carried, out var slot) || carried != grenade)
             return false;
 
+        // A crewmate who planned in the same moment may have thrown first.
+        var now = _timing.CurTime;
+        if (_cooldowns.TryGetValue((grid, crew.Group), out var ready) && now < ready)
+            return false;
+
         if (weapon.Drawn is { } gun)
             _weapons.Unwield(uid, gun);
         if (!TakeInHand(uid, grenade, slot))
@@ -280,9 +288,8 @@ public sealed partial class WFCrewGrenadeSystem : EntitySystem
             return false;
         }
 
-        var now = _timing.CurTime;
         var speed = CompOrNull<HandsComponent>(uid)?.BaseThrowspeed ?? 10f;
-        var flight = Vector2.Distance(_xform.GetWorldPosition(uid), _xform.ToMapCoordinates(at).Position) / speed;
+        var flight =Vector2.Distance(_xform.GetWorldPosition(uid), _xform.ToMapCoordinates(at).Position) / speed;
         var cook = Math.Clamp(WFCrewSkills.Of(crew).CookTime, 0f, MathF.Max(0f, timer.Delay - rules.MinFuse - flight));
 
         Shout(uid, grenade);
@@ -290,6 +297,8 @@ public sealed partial class WFCrewGrenadeSystem : EntitySystem
         var armed = EnsureComp<WFCrewArmedGrenadeComponent>(uid);
         armed.Grenade = grenade;
         armed.At = at;
+        armed.Target = target;
+        armed.Rules = rules;
         armed.ThrowTime = now + TimeSpan.FromSeconds(cook);
         _cooldowns[(grid, crew.Group)] = now + TimeSpan.FromSeconds(rules.CrewCooldown);
         _weapons.HoldHunt(target, now + TimeSpan.FromSeconds(timer.Delay + 0.5f));
@@ -326,20 +335,63 @@ public sealed partial class WFCrewGrenadeSystem : EntitySystem
         if (_timing.CurTime < armed.ThrowTime)
             return false;
 
-        Throw((uid, armed));
-        return true;
+        return TryThrowSafely((uid, armed));
     }
 
-    /// <summary>Gets an armed grenade out of the crewman's hand now: thrown where it was meant to go if he can, else dropped.</summary>
+    /// <summary>
+    /// Gets an armed grenade out of the crewman's hand as his task ends: thrown if it is safe to, else left to
+    /// <see cref="Update"/> while the fuse allows; dropped if he can no longer throw.
+    /// </summary>
     public void Release(EntityUid uid)
     {
         if (!TryComp<WFCrewArmedGrenadeComponent>(uid, out var armed))
             return;
 
         if (_mobs.IsAlive(uid) && _npcCombat.CanNpcShoot(uid))
-            Throw((uid, armed));
+            TryThrowSafely((uid, armed));
         else
             Drop((uid, armed));
+    }
+
+    /// <summary>
+    /// Throws where it was aimed if that still spares everyone, or to a new spot that does. With no safe spot he
+    /// keeps hold while the fuse allows, then throws as aimed: a blast in his hand is worse. True once thrown.
+    /// </summary>
+    private bool TryThrowSafely(Entity<WFCrewArmedGrenadeComponent> ent)
+    {
+        var (uid, armed) = ent;
+        if (!TryComp<ActiveTimerTriggerComponent>(armed.Grenade, out var timer))
+        {
+            Throw(ent);
+            return true;
+        }
+
+        var from = _xform.GetMapCoordinates(uid);
+        var aimed = _xform.ToMapCoordinates(armed.At);
+        var rules = armed.Rules;
+        Spared(uid, armed.Target, from, rules);
+        if (Vector2.Distance(from.Position, aimed.Position) > rules.BlastRadius
+            && SparesEveryone(from.Position, aimed.Position, rules.BlastRadius))
+        {
+            Throw(ent);
+            return true;
+        }
+
+        if (TryFindLanding(uid, armed.Target, armed.Grenade, rules, out var landing, timer.TimeRemaining))
+        {
+            armed.At = landing;
+            Throw(ent);
+            return true;
+        }
+
+        var speed = CompOrNull<HandsComponent>(uid)?.BaseThrowspeed ?? 10f;
+        var flight = Vector2.Distance(from.Position, aimed.Position) / speed;
+        // Wait a tick for the way to clear, while a later throw still lands with its least fuse.
+        if (timer.TimeRemaining - flight - (float) _timing.TickPeriod.TotalSeconds > rules.MinFuse)
+            return false;
+
+        Throw(ent);
+        return true;
     }
 
     private void Throw(Entity<WFCrewArmedGrenadeComponent> ent)
@@ -399,7 +451,7 @@ public sealed partial class WFCrewGrenadeSystem : EntitySystem
             else if (!_mobs.IsAlive(uid) || !_npcCombat.CanNpcShoot(uid))
                 Drop((uid, armed));
             else if (now >= armed.ThrowTime + ThrowGrace)
-                Throw((uid, armed));
+                TryThrowSafely((uid, armed));
         }
 
         foreach (var (uid, until) in _nextTry)
