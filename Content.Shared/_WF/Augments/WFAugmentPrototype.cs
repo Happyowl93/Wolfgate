@@ -3,18 +3,23 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Shared._WF.Augments;
 
-/// <summary>One choice in the creator's Augments tab for a body slot.</summary>
+/// <summary>
+/// A piece of cyberware a character can carry from round to round: picked or bought in the creator, or installed in
+/// a round and kept. Every cybernetic part, organ and autosurgeon upgrade the game has is listed as one.
+/// </summary>
 [Prototype("wfAugment")]
 public sealed partial class WFAugmentPrototype : IPrototype
 {
     [IdDataField]
     public string ID { get; private set; } = default!;
 
-    [DataField(required: true)]
-    public LocId Name;
+    /// <summary>The name in the creator; the installed entity's name if left out.</summary>
+    [DataField]
+    public LocId? Name;
 
-    [DataField(required: true)]
-    public LocId Description;
+    /// <summary>The creator's tooltip; the installed entity's description if left out.</summary>
+    [DataField]
+    public LocId? Description;
 
     [DataField(required: true)]
     public WFAugmentSlot Slot;
@@ -30,13 +35,17 @@ public sealed partial class WFAugmentPrototype : IPrototype
     [DataField]
     public EntProtoId? Organ;
 
+    /// <summary>The upgrading autosurgeon whose components it adds, for <see cref="WFAugmentKind.Upgrade"/>.</summary>
+    [DataField]
+    public EntProtoId? Autosurgeon;
+
     /// <summary>Whether the player picks a style for it. Limbs and plating are styled.</summary>
     [DataField]
     public bool Styled;
 
     /// <summary>
     /// One-time price in spesos, taken from the character's bank the first time it is saved with this augment.
-    /// Zero for augments that give no advantage.
+    /// Zero for augments that give no advantage. Scavenged loot is weighted by its inverse; free ones never drop.
     /// </summary>
     [DataField]
     public int Price;

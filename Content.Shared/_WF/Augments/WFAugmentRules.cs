@@ -21,12 +21,57 @@ public static class WFAugmentRules
     public static string PartSlot(WFAugmentSlot slot) => slot switch
     {
         WFAugmentSlot.Head or WFAugmentSlot.Eyes => "head",
-        WFAugmentSlot.LeftArm => "left arm",
-        WFAugmentSlot.RightArm => "right arm",
+        WFAugmentSlot.LeftArm or WFAugmentSlot.LeftArmImplant => "left arm",
+        WFAugmentSlot.RightArm or WFAugmentSlot.RightArmImplant => "right arm",
         WFAugmentSlot.LeftLeg => "left leg",
         WFAugmentSlot.RightLeg => "right leg",
+        WFAugmentSlot.LeftHand => "left hand",
+        WFAugmentSlot.RightHand => "right hand",
+        WFAugmentSlot.LeftFoot => "left foot",
+        WFAugmentSlot.RightFoot => "right foot",
         _ => "torso",
     };
+
+    /// <summary>The order the creator lists slots in: each hand and foot after its limb, implants last.</summary>
+    public static readonly WFAugmentSlot[] DisplayOrder =
+    [
+        WFAugmentSlot.Head, WFAugmentSlot.Eyes, WFAugmentSlot.Chest,
+        WFAugmentSlot.LeftArm, WFAugmentSlot.LeftHand, WFAugmentSlot.RightArm, WFAugmentSlot.RightHand,
+        WFAugmentSlot.LeftLeg, WFAugmentSlot.LeftFoot, WFAugmentSlot.RightLeg, WFAugmentSlot.RightFoot,
+        WFAugmentSlot.Heart, WFAugmentSlot.Lungs, WFAugmentSlot.Liver, WFAugmentSlot.Stomach,
+        WFAugmentSlot.LeftArmImplant, WFAugmentSlot.RightArmImplant, WFAugmentSlot.Dermal, WFAugmentSlot.Muscles,
+    ];
+
+    /// <summary>The entity an augment puts in the body, which is also what scavengers find of it.</summary>
+    public static EntProtoId? Installed(WFAugmentPrototype augment) => augment.Kind switch
+    {
+        WFAugmentKind.Limb => augment.Part,
+        WFAugmentKind.Organ => augment.Organ,
+        WFAugmentKind.Upgrade => augment.Autosurgeon,
+        _ => null,
+    };
+
+    /// <summary>The augment's name: its own, else the installed entity's.</summary>
+    public static string Name(WFAugmentPrototype augment, IPrototypeManager proto)
+    {
+        if (augment.Name is { } name)
+            return Loc.GetString(name);
+        return Installed(augment) is { } id && proto.TryIndex(id, out var entity) ? entity.Name : augment.ID;
+    }
+
+    /// <summary>The augment's description: its own, else the installed entity's.</summary>
+    public static string Description(WFAugmentPrototype augment, IPrototypeManager proto)
+    {
+        if (augment.Description is { } description)
+            return Loc.GetString(description);
+        return Installed(augment) is { } id && proto.TryIndex(id, out var entity) ? entity.Description : string.Empty;
+    }
+
+    /// <summary>How often scavengers find an augment, against the others: the inverse of its price.</summary>
+    public static float ScavengeWeight(WFAugmentPrototype augment)
+    {
+        return augment.Price > 0 && Installed(augment) != null ? 100_000f / augment.Price : 0f;
+    }
 
     /// <summary>The organ slot an organ augment fills, or null for a part.</summary>
     public static string? OrganSlot(WFAugmentSlot slot) => slot switch
@@ -48,6 +93,10 @@ public static class WFAugmentRules
         WFAugmentSlot.RightArm => [HumanoidVisualLayers.RArm, HumanoidVisualLayers.RHand],
         WFAugmentSlot.LeftLeg => [HumanoidVisualLayers.LLeg, HumanoidVisualLayers.LFoot],
         WFAugmentSlot.RightLeg => [HumanoidVisualLayers.RLeg, HumanoidVisualLayers.RFoot],
+        WFAugmentSlot.LeftHand => [HumanoidVisualLayers.LHand],
+        WFAugmentSlot.RightHand => [HumanoidVisualLayers.RHand],
+        WFAugmentSlot.LeftFoot => [HumanoidVisualLayers.LFoot],
+        WFAugmentSlot.RightFoot => [HumanoidVisualLayers.RFoot],
         _ => [],
     };
 

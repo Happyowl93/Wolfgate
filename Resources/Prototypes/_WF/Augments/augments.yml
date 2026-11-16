@@ -1,5 +1,5 @@
-# The choices in the creator's Augments tab. Only the base cybernetic limbs for now; more kinds (plating, missing
-# limbs, organs) and priced augments, which are bought once from the character's bank, can be added here.
+# Every piece of cyberware a character can carry between rounds, and the choices in the creator's Augments tab.
+# A new cybernetic part, organ or upgrading autosurgeon belongs here too, or it is lost at the end of each round.
 
 - type: wfAugment
   id: WFAugmentCyberLeftArm
@@ -36,3 +36,203 @@
   kind: Limb
   part: WFAugmentRightLeg
   styled: true
+
+# Plain cybernetic hands and feet: cosmetic, so free and never scavenged.
+
+- type: wfAugment
+  id: WFAugmentCyberLeftHand
+  slot: LeftHand
+  kind: Limb
+  part: LeftHandCybernetic
+  styled: true
+
+- type: wfAugment
+  id: WFAugmentCyberRightHand
+  slot: RightHand
+  kind: Limb
+  part: RightHandCybernetic
+  styled: true
+
+- type: wfAugment
+  id: WFAugmentCyberLeftFoot
+  slot: LeftFoot
+  kind: Limb
+  part: LeftFootCybernetic
+  styled: true
+
+- type: wfAugment
+  id: WFAugmentCyberRightFoot
+  slot: RightFoot
+  kind: Limb
+  part: RightFootCybernetic
+  styled: true
+
+# The cyberware found, bought and installed in rounds. Each is bought once in the creator or kept from a round
+# it was installed in; scavengers find the part, organ or autosurgeon, rarer the dearer it is.
+
+- type: wfAugment
+  id: WFAugmentJawsOfLifeLeftArm
+  slot: LeftArm
+  kind: Limb
+  part: JawsOfLifeLeftArm
+  styled: true
+  price: 60000
+  order: 10
+
+- type: wfAugment
+  id: WFAugmentJawsOfLifeRightArm
+  slot: RightArm
+  kind: Limb
+  part: JawsOfLifeRightArm
+  styled: true
+  price: 60000
+  order: 10
+
+- type: wfAugment
+  id: WFAugmentSpeedLeftLeg
+  slot: LeftLeg
+  kind: Limb
+  part: SpeedLeftLeg
+  styled: true
+  price: 50000
+  order: 10
+
+- type: wfAugment
+  id: WFAugmentSpeedRightLeg
+  slot: RightLeg
+  kind: Limb
+  part: SpeedRightLeg
+  styled: true
+  price: 50000
+  order: 10
+
+- type: wfAugment
+  id: WFAugmentDexLeftHand
+  slot: LeftHand
+  kind: Limb
+  part: DexLeftHand
+  styled: true
+  price: 25000
+  order: 10
+
+- type: wfAugment
+  id: WFAugmentDexRightHand
+  slot: RightHand
+  kind: Limb
+  part: DexRightHand
+  styled: true
+  price: 25000
+  order: 10
+
+- type: wfAugment
+  id: WFAugmentCyberEyes
+  slot: Eyes
+  kind: Organ
+  organ: BasicCyberneticEyes
+  price: 15000
+
+- type: wfAugment
+  id: WFAugmentSecurityEyes
+  slot: Eyes
+  kind: Organ
+  organ: SecurityCyberneticEyes
+  price: 40000
+  order: 10
+
+- type: wfAugment
+  id: WFAugmentMedicalEyes
+  slot: Eyes
+  kind: Organ
+  organ: MedicalCyberneticEyes
+  price: 40000
+  order: 10
+
+- type: wfAugment
+  id: WFAugmentInternalAirSystem
+  slot: Lungs
+  kind: Organ
+  organ: OrganInternalAirSystem
+  price: 50000
+
+- type: wfAugment
+  id: WFAugmentPDVHeart
+  slot: Heart
+  kind: Organ
+  organ: OrganPDVAdvancedHeart
+  price: 120000
+
+- type: wfAugment
+  id: WFAugmentSakimotoHeart
+  slot: Heart
+  kind: Organ
+  organ: OrganHeartMMCSakimoto
+  price: 500000
+  order: 10
+
+- type: wfAugment
+  id: WFAugmentShuntHeart
+  slot: Heart
+  kind: Organ
+  organ: OrganHeartTSFShunt
+  price: 750000
+  order: 10
+
+- type: wfAugment
+  id: WFAugmentLeukoSandevistan
+  slot: Heart
+  kind: Organ
+  organ: OrganHeartTSFSandevistan
+  price: 1500000
+  order: 20
+
+- type: wfAugment
+  id: WFAugmentLotusSandevistan
+  slot: Heart
+  kind: Organ
+  organ: OrganHeartMMCSandevistan
+  price: 2500000
+  order: 20
+
+- type: wfAugment
+  id: WFAugmentSandevistan
+  slot: Heart
+  kind: Organ
+  organ: OrganHeartSandevistan
+  price: 2500000
+  order: 20
+
+- type: wfAugment
+  id: WFAugmentLeftMantisBlade
+  name: wf-augment-mantis-blade-left
+  description: wf-augment-mantis-blade-desc
+  slot: LeftArmImplant
+  kind: Upgrade
+  autosurgeon: AutosurgeonLeftMantisBladeMieyo
+  price: 200000
+
+- type: wfAugment
+  id: WFAugmentRightMantisBlade
+  name: wf-augment-mantis-blade-right
+  description: wf-augment-mantis-blade-desc
+  slot: RightArmImplant
+  kind: Upgrade
+  autosurgeon: AutosurgeonRightMantisBladeMieyo
+  price: 200000
+
+- type: wfAugment
+  id: WFAugmentDermalArmor
+  name: wf-augment-dermal-armor
+  description: wf-augment-dermal-armor-desc
+  slot: Dermal
+  kind: Upgrade
+  autosurgeon: AutosurgeonDermalArmorPDV
+  price: 150000
+
+- type: wfAugment
+  id: WFAugmentMuscleFibers
+  name: wf-augment-muscle-fibers
+  description: wf-augment-muscle-fibers-desc
+  slot: Muscles
+  kind: Upgrade
+  autosurgeon: AutosurgeonMuscleFibersMieyo
+  price: 100000

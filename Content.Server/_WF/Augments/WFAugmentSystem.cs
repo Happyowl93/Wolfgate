@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Numerics;
+using Content.Shared._Goobstation.Autosurgeon;
 using Content.Shared._Shitmed.Body.Part;
 using Content.Shared._WF.Augments;
 using Content.Shared.Body.Components;
@@ -23,12 +24,14 @@ public sealed partial class WFAugmentSystem : EntitySystem
     [Dependency] private SharedBodySystem _body = default!;
     [Dependency] private SharedContainerSystem _containers = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private AutoSurgeonSystem _autoSurgeon = default!;
+    [Dependency] private IComponentFactory _factory = default!;
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<BodyComponent, WFApplyAugmentsEvent>(OnApplyAugments);
-        InitializeRespawn();
+        InitializePersistence();
     }
 
     private void OnApplyAugments(Entity<BodyComponent> ent, ref WFApplyAugmentsEvent args)
@@ -37,7 +40,7 @@ public sealed partial class WFAugmentSystem : EntitySystem
             return;
 
         var digitigrade = WFAugmentRules.Digitigrade(args.Profile, _proto);
-        foreach (var (slot, choice) in args.Profile.Augments)
+        foreach (var (slot, choice) in args.Profile.Augments.OrderBy(a => a.Key))
         {
             if (!_proto.TryIndex(choice.Augment, out var augment))
                 continue;
@@ -55,6 +58,9 @@ public sealed partial class WFAugmentSystem : EntitySystem
                 case WFAugmentKind.Organ when augment.Organ is { } organ:
                     ReplaceOrgan(ent, slot, organ);
                     break;
+                case WFAugmentKind.Upgrade when Surgeon(augment) is { } surgeon:
+                    _autoSurgeon.WfApplyUpgrade(ent, surgeon);
+                    break;
             }
         }
     }
@@ -67,6 +73,10 @@ public sealed partial class WFAugmentSystem : EntitySystem
             WFAugmentSlot.RightArm => (BodyPartType.Arm, BodyPartSymmetry.Right),
             WFAugmentSlot.LeftLeg => (BodyPartType.Leg, BodyPartSymmetry.Left),
             WFAugmentSlot.RightLeg => (BodyPartType.Leg, BodyPartSymmetry.Right),
+            WFAugmentSlot.LeftHand => (BodyPartType.Hand, BodyPartSymmetry.Left),
+            WFAugmentSlot.RightHand => (BodyPartType.Hand, BodyPartSymmetry.Right),
+            WFAugmentSlot.LeftFoot => (BodyPartType.Foot, BodyPartSymmetry.Left),
+            WFAugmentSlot.RightFoot => (BodyPartType.Foot, BodyPartSymmetry.Right),
             _ => (BodyPartType.Other, BodyPartSymmetry.None),
         };
         if (type == BodyPartType.Other)
@@ -75,6 +85,34 @@ public sealed partial class WFAugmentSystem : EntitySystem
         foreach (var part in _body.GetBodyChildrenOfType(body, type, body.Comp, symmetry))
             return part;
         return null;
+    }
+
+    /// <summary>The part a missing limb in the slot would hang from: the torso, or the arm or leg for a hand or foot.</summary>
+    private EntityUid? LimbParent(Entity<BodyComponent> body, WFAugmentSlot slot)
+    {
+        var limb = slot switch
+        {
+            WFAugmentSlot.LeftHand => WFAugmentSlot.LeftArm,
+            WFAugmentSlot.RightHand => WFAugmentSlot.RightArm,
+            WFAugmentSlot.LeftFoot => WFAugmentSlot.LeftLeg,
+            WFAugmentSlot.RightFoot => WFAugmentSlot.RightLeg,
+            _ => (WFAugmentSlot?) null,
+        };
+        if (limb != null)
+            return FindLimb(body, limb.Value)?.Id;
+
+        var torso = _body.GetBodyChildrenOfType(body, BodyPartType.Torso, body.Comp).FirstOrDefault().Id;
+        return torso.Valid ? torso : null;
+    }
+
+    /// <summary>The autosurgeon component an upgrade augment installs from.</summary>
+    private AutoSurgeonComponent? Surgeon(WFAugmentPrototype augment)
+    {
+        return augment.Autosurgeon is { } id
+               && _proto.TryIndex(id, out var entity)
+               && entity.TryComp(out AutoSurgeonComponent? surgeon, _factory)
+            ? surgeon
+            : null;
     }
 
     /// <summary>Replaces the slot's limb with a fresh one of the given prototype; the new limb, or null if it failed.</summary>
@@ -93,7 +131,7 @@ public sealed partial class WFAugmentSystem : EntitySystem
         }
         else
         {
-            parent = _body.GetBodyChildrenOfType(body, BodyPartType.Torso, body.Comp).FirstOrDefault().Id;
+            parent = LimbParent(body, slot);
         }
 
         if (parent is not { Valid: true } parentUid || !TryComp(parentUid, out BodyPartComponent? parentPart))

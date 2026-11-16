@@ -1,23 +1,35 @@
 # Augments
 
-Cybernetic limbs picked in the character creator, after the augments panel on Meridian Rift (Nova Sector). The
-creator's Augments tab lists the arms and legs the species has, each Natural or a cybernetic limb in a style, shown
-on the preview doll as it is picked. A slot left Natural keeps the species' own part.
+Cyberware a character carries from round to round, after the augments panel on Meridian Rift (Nova Sector). Every
+cybernetic part, organ and upgrading autosurgeon in the game is a `wfAugment` in `augments.yml`: plain styled limbs,
+hands and feet (free), J.W.L arms, S.P.E.E.D legs, D.E.X hands, cyber eyes, IAS lungs, the faction hearts and
+Sandevistans, mantis blades, dermal armor and muscle fibers. A piece of cyberware missing from it is lost at the
+end of every round.
 
-The limbs are real Shitmed cybernetic parts (`WFAugmentLeftArm` and the rest, `parts.yml`): they take EMPs, repair
-with a welder and cable, and come off and go back on like any chassis limb. Markings from the Markings tab are
-drawn for flesh and stay off an augmented layer (its base sprites set `allowsMarkings: false`); custom markings draw
-over augments like anywhere else, so players decorate them that way.
+A character gets an augment three ways:
 
-Only these base limbs ship. The system also handles head and chest plating, missing limbs and organs (`kind`), and
-priced augments: a `price` is taken once from the character's bank the first time it is saved with the augment
-(`ServerPreferencesManager.SettleAugments`), and the unlock stays on that character (`AugmentUnlocks`). Only the
-server adds unlocks. The integration tests use test-only prototypes for each kind; add the real ones to
-`augments.yml`.
+- **The creator.** The Augments tab lists every slot the species has (`WFAugmentRules.DisplayOrder`), each Natural
+  or an augment, styled limbs drawn on the preview doll. A `price` is taken once from the character's bank the first
+  time it is saved with the augment (`ServerPreferencesManager.SettleAugments`), and the unlock stays on that
+  character (`AugmentUnlocks`). Only the server adds unlocks.
+- **Buying it in a round** from the faction lathes, uplinks or loadouts, as before, and installing it.
+- **Scavenging.** `WFAugmentSelector` (the `WFAugmentScavengeTable`, nested into the rare tiers of the Mono
+  maintenance tables) drops a priced augment's bare part or organ, which a surgeon puts in, or an upgrade's
+  autosurgeon. The weight is the inverse of the price, so a Sandevistan is about 170 times rarer than cyber eyes.
 
-Augments last from round to round, but a character left behind loses them. When a player uses `ghostrespawn` with
-no body in cryo, the character they last spawned as this round loses its augments and unlocks, so priced ones must
-be bought again (`WFAugmentSystem.ForfeitAugments`). Cryo, cloning and the admin `respawn` command keep them.
+Installed cyberware is written back to the profile (`WFAugmentSystem.Persistence`). When the character goes into
+cryo, or the round ends with the player still in it (dead or alive), `ReadBody` lists the augments in the body:
+each slot's part or organ matched by prototype, and upgrades by the components their autosurgeon adds
+(`AutoSurgeonSystem.WfHasUpgrade`). Those are kept and unlocked; what the character spawned with and lost is gone
+along with its unlock. A slot changed in the creator mid-round keeps the new pick. When a player uses `ghostrespawn`
+with no body in cryo, the character loses every augment and unlock (`ForfeitAugments`); the admin `respawn`
+command and cloning take nothing. A body the player left for a ghost role or another character isn't read.
+
+The limbs are real Shitmed cybernetic parts: they take EMPs, repair with a welder and cable, and come off and go
+back on like any chassis limb. A hand or foot a limb generates (`GenerateChildPart`) belongs to that limb, not to
+a slot of its own. Markings from the Markings tab are drawn for flesh and stay off an augmented layer (its base
+sprites set `allowsMarkings: false`); custom markings draw over augments like anywhere else. Head and chest
+plating and missing limbs have no content yet; the integration tests use test-only prototypes for them.
 
 Traits that fit their own limbs at spawn (Prybar Prosthetics, Bionic Legs) claim those slots in `trait_slots.yml`.
 A character with one can't take augments there: validation drops them and the tab names the trait instead. A new
@@ -27,7 +39,8 @@ prosthetics keep the Avali outline.
 
 Entry points: `augments.yml`, `WFAugmentRules` (slots, validation, storage), `SharedHumanoidAppearanceSystem.ApplyAugments`,
 run from `LoadProfile` after the biotype (the client's doll calls `ApplyAugmentVisuals` from its own `LoadProfile`),
-and `WFAugmentSystem`, which swaps the parts. The old part is cut loose without the events that read as an injury
+and `WFAugmentSystem`, which swaps the parts in slot order (a limb before its hand, before an implant in it) and
+reapplies upgrades through `AutoSurgeonSystem.WfApplyUpgrade`. The old part is cut loose without the events that read as an injury
 (`SharedBodySystem.WfCutLoose`), so a hand keeps what it holds and Wolfmed sees no amputation.
 
 ## Styles and art
@@ -66,11 +79,12 @@ scratch, so an unpicked augment comes off it.
 
 - [`Content.Server/_WF/Augments/ServerPreferencesManager.Augments.cs`](ServerPreferencesManager.Augments.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.cs`](WFAugmentSystem.cs)
-- [`Content.Server/_WF/Augments/WFAugmentSystem.Respawn.cs`](WFAugmentSystem.Respawn.cs)
+- [`Content.Server/_WF/Augments/WFAugmentSystem.Persistence.cs`](WFAugmentSystem.Persistence.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Traits.cs`](WFAugmentSystem.Traits.cs)
 
 ### Shared
 
+- [`Content.Shared/_WF/Augments/AutoSurgeonSystem.Augments.cs`](../../../Content.Shared/_WF/Augments/AutoSurgeonSystem.Augments.cs)
 - [`Content.Shared/_WF/Augments/HumanoidAppearanceComponent.Augments.cs`](../../../Content.Shared/_WF/Augments/HumanoidAppearanceComponent.Augments.cs)
 - [`Content.Shared/_WF/Augments/HumanoidCharacterProfile.Augments.cs`](../../../Content.Shared/_WF/Augments/HumanoidCharacterProfile.Augments.cs)
 - [`Content.Shared/_WF/Augments/SharedBodySystem.Augments.cs`](../../../Content.Shared/_WF/Augments/SharedBodySystem.Augments.cs)
@@ -79,6 +93,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WF/Augments/WFAugmentChoice.cs`](../../../Content.Shared/_WF/Augments/WFAugmentChoice.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentPrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentPrototype.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentRules.cs`](../../../Content.Shared/_WF/Augments/WFAugmentRules.cs)
+- [`Content.Shared/_WF/Augments/WFAugmentSelector.cs`](../../../Content.Shared/_WF/Augments/WFAugmentSelector.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentShapePrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentShapePrototype.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentSlot.cs`](../../../Content.Shared/_WF/Augments/WFAugmentSlot.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentStylePrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentStylePrototype.cs)
@@ -93,6 +108,7 @@ scratch, so an unpicked augment comes off it.
 
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPurchaseTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPurchaseTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentRespawnTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentRespawnTest.cs)
@@ -103,6 +119,7 @@ scratch, so an unpicked augment comes off it.
 
 - [`Resources/Prototypes/_WF/Augments/augments.yml`](../../../Resources/Prototypes/_WF/Augments/augments.yml)
 - [`Resources/Prototypes/_WF/Augments/base_sprites.yml`](../../../Resources/Prototypes/_WF/Augments/base_sprites.yml)
+- [`Resources/Prototypes/_WF/Augments/loot.yml`](../../../Resources/Prototypes/_WF/Augments/loot.yml)
 - [`Resources/Prototypes/_WF/Augments/parts.yml`](../../../Resources/Prototypes/_WF/Augments/parts.yml)
 - [`Resources/Prototypes/_WF/Augments/shapes.yml`](../../../Resources/Prototypes/_WF/Augments/shapes.yml)
 - [`Resources/Prototypes/_WF/Augments/styles.yml`](../../../Resources/Prototypes/_WF/Augments/styles.yml)
@@ -173,8 +190,10 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Server/Preferences/Managers/ServerPreferencesManager.cs`](../../Preferences/Managers/ServerPreferencesManager.cs)
   - a client save can't unlock augments; new priced ones are bought from the bank here
   - the creator shows the balance, unlocks and dropped augments the save left
+- [`Content.Shared/_Goobstation/Autosurgeon/AutoSurgeonSystem.cs`](../../../Content.Shared/_Goobstation/Autosurgeon/AutoSurgeonSystem.cs): augments reapply and detect upgrades
 - [`Content.Shared/Body/Systems/SharedBodySystem.Parts.cs`](../../../Content.Shared/Body/Systems/SharedBodySystem.Parts.cs): a part cut loose for an augment isn't lost
 - [`Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs`](../../../Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs): swaps in the augmented parts and draws their styles
 - [`Content.Shared/Preferences/HumanoidCharacterProfile.cs`](../../../Content.Shared/Preferences/HumanoidCharacterProfile.cs): augments the species can't take are dropped
+- [`Resources/Prototypes/_Mono/Catalogs/Fills/Lockers/salvmaint_locker.yml`](../../../Resources/Prototypes/_Mono/Catalogs/Fills/Lockers/salvmaint_locker.yml): scavenged cyberware, the dearer the rarer
 
 <!-- WOLFGATE-GENERATED END -->

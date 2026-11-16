@@ -8,6 +8,7 @@ using Content.Shared._WF.Augments;
 using Content.Shared.Preferences;
 using Robust.Client.State;
 using Robust.Server.Player;
+using Robust.Shared.GameObjects;
 using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
 
@@ -63,7 +64,8 @@ public sealed class AugmentRespawnTest
         await Run(() => augments.ForfeitAugments(session));
         await server.WaitAssertion(() => Assert.That(Stored().Augments, Is.Not.Empty));
 
-        await server.WaitPost(() => augments.TrackSpawn(userId, slot));
+        await server.WaitPost(() => augments.Track(userId,
+            new WFAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, new Dictionary<WFAugmentSlot, WFAugmentChoice>())));
         await Run(() => augments.ForfeitAugments(session));
         await server.WaitAssertion(() =>
         {

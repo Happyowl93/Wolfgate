@@ -1,5 +1,5 @@
 wf-augments-tab = Augments
-wf-augments-intro = Cybernetic limbs this character starts with. Pick a style for each; custom markings draw over them.
+wf-augments-intro = Cyberware this character starts with. Priced pieces are bought once from the bank. Cyberware installed during a round stays if the character ends it in cryo or in their body; respawning without cryo loses all of it.
 wf-augments-none = Natural
 wf-augments-style = Style
 wf-augments-free = Free
@@ -21,8 +21,24 @@ wf-augment-slot-heart = Heart
 wf-augment-slot-lungs = Lungs
 wf-augment-slot-liver = Liver
 wf-augment-slot-stomach = Stomach
+wf-augment-slot-left-hand = Left hand
+wf-augment-slot-right-hand = Right hand
+wf-augment-slot-left-foot = Left foot
+wf-augment-slot-right-foot = Right foot
+wf-augment-slot-left-arm-implant = Left arm implant
+wf-augment-slot-right-arm-implant = Right arm implant
+wf-augment-slot-dermal = Dermal
+wf-augment-slot-muscles = Muscles
 
 wf-augment-cyber-arm = Cybernetic arm
 wf-augment-cyber-arm-desc = A plain cybernetic arm and hand. Works like flesh, repairs with a welder and cable, and an EMP upsets it.
 wf-augment-cyber-leg = Cybernetic leg
 wf-augment-cyber-leg-desc = A plain cybernetic leg and foot. Works like flesh, repairs with a welder and cable, and an EMP upsets it.
+
+wf-augment-mantis-blade-left = Mantis blade (left arm)
+wf-augment-mantis-blade-right = Mantis blade (right arm)
+wf-augment-mantis-blade-desc = A blade folded into the forearm that snaps out on command.
+wf-augment-dermal-armor = E-SAPI dermal armor
+wf-augment-dermal-armor-desc = Armor plates under the skin. Bullets and blades do less; heat and shock do more.
+wf-augment-muscle-fibers = Muscle fiber suite
+wf-augment-muscle-fibers-desc = Reinforced muscle fibers that let you dash a short way.

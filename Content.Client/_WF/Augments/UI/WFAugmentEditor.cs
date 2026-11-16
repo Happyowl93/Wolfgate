@@ -43,7 +43,7 @@ public sealed partial class WFAugmentEditor : BoxContainer
         _rows.RemoveAllChildren();
 
         var claimed = WFAugmentRules.ClaimedSlots(profile.TraitPreferences, _proto);
-        foreach (WFAugmentSlot slot in Enum.GetValues(typeof(WFAugmentSlot)))
+        foreach (var slot in WFAugmentRules.DisplayOrder)
         {
             var augments = WFAugmentRules.AugmentsFor(profile.Species, slot, _proto, _factory);
             if (augments.Count == 0)
@@ -99,11 +99,11 @@ public sealed partial class WFAugmentEditor : BoxContainer
         augmentButton.AddItem(Loc.GetString("wf-augments-none"), 0);
         for (var i = 0; i < augments.Count; i++)
         {
-            augmentButton.AddItem(Loc.GetString(augments[i].Name), i + 1);
+            augmentButton.AddItem(WFAugmentRules.Name(augments[i], _proto), i + 1);
             if (augments[i] == picked)
                 augmentButton.SelectId(i + 1);
         }
-        augmentButton.ToolTip = picked != null ? Loc.GetString(picked.Description) : null;
+        augmentButton.ToolTip = picked != null ? WFAugmentRules.Description(picked, _proto) : null;
         augmentButton.OnItemSelected += args =>
         {
             if (args.Id == 0)
@@ -155,12 +155,18 @@ public sealed partial class WFAugmentEditor : BoxContainer
         return Loc.GetString("wf-augments-price", ("price", BankSystemExtensions.ToSpesoString(augment.Price)));
     }
 
-    private static string SlotKey(WFAugmentSlot slot) => slot switch
+    /// <summary>The slot's name in kebab case, as its Fluent key ends: LeftArmImplant is left-arm-implant.</summary>
+    private static string SlotKey(WFAugmentSlot slot)
     {
-        WFAugmentSlot.LeftArm => "left-arm",
-        WFAugmentSlot.RightArm => "right-arm",
-        WFAugmentSlot.LeftLeg => "left-leg",
-        WFAugmentSlot.RightLeg => "right-leg",
-        _ => slot.ToString().ToLowerInvariant(),
-    };
+        var name = slot.ToString();
+        var key = new System.Text.StringBuilder();
+        for (var i = 0; i < name.Length; i++)
+        {
+            if (i > 0 && char.IsUpper(name[i]))
+                key.Append('-');
+            key.Append(char.ToLowerInvariant(name[i]));
+        }
+
+        return key.ToString();
+    }
 }
