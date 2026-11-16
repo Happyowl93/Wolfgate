@@ -445,6 +445,9 @@ public sealed partial class WFDrydockSystem : EntitySystem
 
         var entity = Spawn(data.EntityPalette[spec.ProtoIndex].Id, new EntityCoordinates(ship, spec.LocalPosition));
         _transform.SetLocalRotation(entity, spec.Rotation);
+        // The snapshot only holds anchored entities, but some prototypes, such as the mobile drydock crane, spawn loose.
+        if (!Transform(entity).Anchored)
+            _transform.AnchorEntity(entity);
         spec.OriginalEntity = GetNetEntity(entity);
         Dirty(ship, data);
         // Rebuilds spawn stock; reapply the ship's owned refits, which the quote charged for. A refit that replaces the
