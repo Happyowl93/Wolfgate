@@ -341,6 +341,86 @@ public sealed class AugmentPersistenceTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>
+    /// A wreck find is marked hardware nobody owns: it is priced at what its augment sells back for, and a character
+    /// who ends a round with it installed owns it as paid for. A marked autosurgeon passes its mark to the part.
+    /// </summary>
+    [Test]
+    public async Task ScavengeTest()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { InLobby = true });
+        var server = pair.Server;
+        var client = pair.Client;
+        var entities = server.EntMan;
+        var prefs = server.ResolveDependency<IServerPreferencesManager>();
+        var augments = server.System<WFAugmentSystem>();
+        var body = server.System<SharedBodySystem>();
+        var pricing = server.System<PricingSystem>();
+        var surgeons = server.System<AutoSurgeonSystem>();
+        var clientNet = client.ResolveDependency<IClientNetManager>();
+        var states = client.ResolveDependency<IStateManager>();
+        var map = await pair.CreateTestMap();
+
+        await pair.RunTicksSync(1);
+        await PoolManager.WaitUntil(client, () => states.CurrentState is LobbyState, 600);
+        var userId = clientNet.ServerChannel!.UserId;
+        const int slot = 0;
+        ProtoId<WFAugmentPrototype> eyes = "WFAugmentCyberEyes";
+        ProtoId<WFAugmentPrototype> armor = "WFAugmentDermalArmor";
+
+        // The spawner leaves one marked find that nobody owns, worth at least what its augment sells back for.
+        await server.WaitPost(() => entities.SpawnEntity("WFAugmentScavengeSpawner", map.GridCoords));
+        await pair.RunTicksSync(2);
+        await server.WaitAssertion(() =>
+        {
+            var finds = entities.AllEntities<WFAugmentPaidComponent>().ToList();
+            Assert.That(finds, Has.Count.EqualTo(1), "The scavenge spawner didn't leave one marked find.");
+            var (id, mark) = finds[0].Comp.Augments.Single();
+            Assert.That(mark.Owner, Is.Null);
+            Assert.That(pricing.GetPrice(finds[0]), Is.GreaterThanOrEqualTo(WFAugmentRules.Refund(server.ProtoMan.Index(id))));
+            entities.DeleteEntity(finds[0]);
+        });
+
+        Task? save = null;
+        await server.WaitPost(() => save = prefs.SetProfile(userId, slot, HumanoidCharacterProfile.DefaultWithSpecies("Human")));
+        await PoolManager.WaitUntil(server, () => save!.IsCompleted, maxTicks: 300);
+
+        // Found eyes and a found dermal armor autosurgeon, installed and kept to the end of the round.
+        EntityUid mob = default;
+        await server.WaitAssertion(() =>
+        {
+            mob = entities.SpawnEntity("MobHuman", map.GridCoords);
+            var found = entities.SpawnEntity("BasicCyberneticEyes", map.GridCoords);
+            Assert.That(augments.MarkLoot(found), "Cyber eyes aren't a priced augment's hardware.");
+            var own = body.GetBodyOrgans(mob).First(o => o.Component.SlotId == "eyes").Id;
+            var head = entities.GetComponent<TransformComponent>(own).ParentUid;
+            body.RemoveOrgan(own);
+            entities.DeleteEntity(own);
+            Assert.That(body.InsertOrgan(head, found, "eyes"));
+
+            var surgeon = entities.SpawnEntity("AutosurgeonDermalArmorPDV", map.GridCoords);
+            Assert.That(augments.MarkLoot(surgeon));
+            Assert.That(pricing.GetPrice(surgeon), Is.GreaterThanOrEqualTo(WFAugmentRules.Refund(server.ProtoMan.Index(armor))));
+            Assert.That(surgeons.WfApplyUpgrade(mob, entities.GetComponent<AutoSurgeonComponent>(surgeon)));
+            augments.PassMark((surgeon, entities.GetComponent<WFAugmentPaidComponent>(surgeon)), mob);
+        });
+        await pair.RunTicksSync(2);
+
+        await server.WaitPost(() => save = augments.SaveBody(userId,
+            new WFAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, new(), new()), mob));
+        Assert.That(save, Is.Not.Null, "Nothing was kept from the body.");
+        await PoolManager.WaitUntil(server, () => save!.IsCompleted, maxTicks: 300);
+        await server.WaitAssertion(() =>
+        {
+            var stored = (HumanoidCharacterProfile) prefs.GetPreferences(userId).Characters[slot];
+            Assert.That(stored.AugmentUnlocks, Is.EquivalentTo(new[] { eyes, armor }));
+            Assert.That(stored.AugmentFound, Is.Empty, "Scavenged cyberware kept through the round sells for nothing.");
+            entities.DeleteEntity(mob);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     [Test]
     public async Task RegistryTest()
     {

@@ -35,6 +35,10 @@ A character gets an augment three ways:
 - **Scavenging.** `WFAugmentSelector` (the `WFAugmentScavengeTable`) drops a priced augment's bare part or organ,
   which a surgeon puts in, or an upgrade's autosurgeon. It turns up only on the floors of wrecks
   (`WFAugmentScavengeSpawner` in the wreck debris floor list, `wrecks.yml`). The weight is the inverse of the price, so a Sandevistan is about 33 times rarer than cyber eyes.
+  A find is as good as a bought piece: the spawner (`WFAugmentScavengeSpawnerComponent`) gives it a mark that
+  belongs to nobody, so it sells as loot for what the augment sells back for, and kept through the end of a round
+  it is owned as paid for. A marked autosurgeon passes its mark to the part it upgrades. That value is why finds
+  are rare: roughly one per 13 enormous wrecks or 55 small ones, worth about 80,000 on average.
 
 Implants (`kind: Upgrade`) are a set of their own (`AugmentImplants`), not slot choices: an implant's `slot` is the
 part it goes in, matching its autosurgeon's target. A part holds `implantSlots` of them (a J.W.L arm or S.P.E.E.D leg
@@ -137,9 +141,11 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Server/_WF/Augments/HealthAnalyzerSystem.Augments.cs`](HealthAnalyzerSystem.Augments.cs)
 - [`Content.Server/_WF/Augments/ServerPreferencesManager.Augments.cs`](ServerPreferencesManager.Augments.cs)
 - [`Content.Server/_WF/Augments/WFAugmentPaidComponent.cs`](WFAugmentPaidComponent.cs)
+- [`Content.Server/_WF/Augments/WFAugmentScavengeSpawnerComponent.cs`](WFAugmentScavengeSpawnerComponent.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.cs`](WFAugmentSystem.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Paid.cs`](WFAugmentSystem.Paid.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Persistence.cs`](WFAugmentSystem.Persistence.cs)
+- [`Content.Server/_WF/Augments/WFAugmentSystem.Scavenge.cs`](WFAugmentSystem.Scavenge.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Traits.cs`](WFAugmentSystem.Traits.cs)
 - [`Content.Server/_WF/Augments/WFDeployableImplantSystem.cs`](WFDeployableImplantSystem.cs)
 - [`Content.Server/_WF/Augments/WFIatricMonitorSystem.cs`](WFIatricMonitorSystem.cs)
