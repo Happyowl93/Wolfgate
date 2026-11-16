@@ -24,12 +24,100 @@
 
 # Deployed items
 
+# The tool arm's heads. Each is the hand tool it stands in for, a fifth faster like the omnitool, with its own sprite;
+# the inhand sprites stay the hand tool's.
+
 - type: entity
   categories: [ DoNotMap, HideSpawnMenu ]
-  parent: Omnitool
-  id: WFAugmentToolArmTool
-  name: integrated omnitool
-  description: A powered tool head on the end of a cybernetic forearm.
+  parent: Screwdriver
+  id: WFAugmentToolArmScrewdriver
+  name: integrated screwdriver
+  description: A powered screwdriver head on the end of a cybernetic forearm.
+  components:
+  - type: Sprite
+    sprite: _WF/Augments/tool_arm.rsi
+    layers:
+    - state: screwdriver
+  - type: RandomSprite
+    available: []
+  - type: Tool
+    speedModifier: 1.2
+
+- type: entity
+  categories: [ DoNotMap, HideSpawnMenu ]
+  parent: Wrench
+  id: WFAugmentToolArmWrench
+  name: integrated wrench
+  description: A powered wrench head on the end of a cybernetic forearm.
+  components:
+  - type: Sprite
+    sprite: _WF/Augments/tool_arm.rsi
+    state: wrench
+  - type: Tool
+    speedModifier: 1.2
+
+- type: entity
+  categories: [ DoNotMap, HideSpawnMenu ]
+  parent: Crowbar
+  id: WFAugmentToolArmCrowbar
+  name: integrated crowbar
+  description: A hydraulic pry bar on the end of a cybernetic forearm.
+  components:
+  - type: Sprite
+    sprite: _WF/Augments/tool_arm.rsi
+    state: crowbar
+  - type: Tool
+    speedModifier: 1.2
+
+- type: entity
+  categories: [ DoNotMap, HideSpawnMenu ]
+  parent: Wirecutter
+  id: WFAugmentToolArmWirecutter
+  name: integrated wirecutters
+  description: Powered cutting jaws on the end of a cybernetic forearm.
+  components:
+  - type: Sprite
+    sprite: _WF/Augments/tool_arm.rsi
+    layers:
+    - state: wirecutter
+  - type: RandomSprite
+    available: []
+  - type: Tool
+    speedModifier: 1.2
+
+- type: entity
+  categories: [ DoNotMap, HideSpawnMenu ]
+  parent: Multitool
+  id: WFAugmentToolArmMultitool
+  name: integrated multitool
+  description: A multitool probe on the end of a cybernetic forearm.
+  components:
+  - type: Sprite
+    sprite: _WF/Augments/tool_arm.rsi
+    layers:
+    - state: multitool
+  - type: Item
+    sprite: _NF/Objects/Tools/multitool.rsi
+  - type: Tool
+    speedModifier: 1.2
+
+- type: entity
+  categories: [ DoNotMap, HideSpawnMenu ]
+  parent: WelderIndustrial
+  id: WFAugmentToolArmWelder
+  name: integrated welding tool
+  description: A welding torch on the end of a cybernetic forearm, fed from a tank in the arm that is full each time it folds out.
+  components:
+  - type: Sprite
+    sprite: _WF/Augments/tool_arm.rsi
+    layers:
+    - state: welder
+    - state: welder-flame
+      visible: false
+      shader: unshaded
+      map: ["enum.ToggleableVisuals.Layer"]
+  - type: Tool
+    speedModifier: 1.2
 
 - type: entity
   categories: [ DoNotMap, HideSpawnMenu ]
@@ -42,21 +130,21 @@
 
 - type: entity
   id: WFActionToggleLeftToolArm
-  name: Toggle Left Tool Arm
-  description: Fold the omnitool out of your left arm, or back in.
+  name: Left Tool Arm
+  description: Pick a tool to fold out of your left arm, or the one that is out to fold it back in.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
-    useDelay: 2
-    icon: { sprite: Objects/Tools/omnitool.rsi, state: omnitool-screwing }
+    useDelay: 1
+    icon: { sprite: _WF/Augments/tool_arm.rsi, state: implant }
     itemIconStyle: NoItem
     event: !type:WFToggleDeployableImplantEvent
 
 - type: entity
   parent: WFActionToggleLeftToolArm
   id: WFActionToggleRightToolArm
-  name: Toggle Right Tool Arm
-  description: Fold the omnitool out of your right arm, or back in.
+  name: Right Tool Arm
+  description: Pick a tool to fold out of your right arm, or the one that is out to fold it back in.
   categories: [ HideSpawnMenu ]
 
 - type: entity
@@ -84,14 +172,20 @@
   parent: BaseAutosurgeon
   id: WFAutosurgeonLeftToolArm
   name: autosurgeon (left tool arm)
-  description: Builds an omnitool into the left forearm, to fold out on command.
+  description: Builds a set of tools into the left forearm, to fold out one at a time on command.
   components:
   - type: AutoSurgeon
     targetBodyPart: Arm
     targetBodyPartSymmetry: Left
     componentsToPart:
     - type: WFToolArm
-      item: WFAugmentToolArmTool
+      items:
+      - WFAugmentToolArmScrewdriver
+      - WFAugmentToolArmWrench
+      - WFAugmentToolArmWelder
+      - WFAugmentToolArmCrowbar
+      - WFAugmentToolArmWirecutter
+      - WFAugmentToolArmMultitool
       action: WFActionToggleLeftToolArm
       deploySound: /Audio/Items/change_drill.ogg
       retractSound: /Audio/Items/change_drill.ogg
@@ -100,14 +194,20 @@
   parent: BaseAutosurgeon
   id: WFAutosurgeonRightToolArm
   name: autosurgeon (right tool arm)
-  description: Builds an omnitool into the right forearm, to fold out on command.
+  description: Builds a set of tools into the right forearm, to fold out one at a time on command.
   components:
   - type: AutoSurgeon
     targetBodyPart: Arm
     targetBodyPartSymmetry: Right
     componentsToPart:
     - type: WFToolArm
-      item: WFAugmentToolArmTool
+      items:
+      - WFAugmentToolArmScrewdriver
+      - WFAugmentToolArmWrench
+      - WFAugmentToolArmWelder
+      - WFAugmentToolArmCrowbar
+      - WFAugmentToolArmWirecutter
+      - WFAugmentToolArmMultitool
       action: WFActionToggleRightToolArm
       deploySound: /Audio/Items/change_drill.ogg
       retractSound: /Audio/Items/change_drill.ogg
@@ -147,7 +247,7 @@
     targetBodyPartSymmetry: Left
     componentsToPart:
     - type: WFFingerLighter
-      item: WFAugmentFingerLighterFlame
+      items: [ WFAugmentFingerLighterFlame ]
       action: WFActionToggleLeftFingerLighter
 
 - type: entity
@@ -161,7 +261,7 @@
     targetBodyPartSymmetry: Right
     componentsToPart:
     - type: WFFingerLighter
-      item: WFAugmentFingerLighterFlame
+      items: [ WFAugmentFingerLighterFlame ]
       action: WFActionToggleRightFingerLighter
 
 - type: entity

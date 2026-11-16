@@ -1,21 +1,25 @@
 using Content.Server._Goobstation.PairedExtendable;
 using Content.Shared._Shitmed.Body.Events;
 using Content.Shared._WF.Augments;
+using Content.Shared.ActionBlocker;
 using Content.Shared.Actions;
 using Content.Shared.Body.Part;
 using Content.Shared.Emp;
 using Content.Shared.Hands.Components;
 using Content.Shared.Popups;
 using Robust.Shared.Audio.Systems;
+using Robust.Shared.Player;
 
 namespace Content.Server._WF.Augments;
 
 /// <summary>
 /// Gives a body the action of each deployable implant in its parts, and folds the implant's item out into that
-/// side's hand and back. An EMP folds it in and locks it until it wears off.
+/// side's hand and back. An implant with several items opens a wheel for its owner to pick one from. An EMP folds
+/// the item in and locks the implant until it wears off.
 /// </summary>
 public sealed class WFDeployableImplantSystem : EntitySystem
 {
+    [Dependency] private ActionBlockerSystem _blocker = default!;
     [Dependency] private SharedActionsSystem _actions = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
@@ -26,6 +30,7 @@ public sealed class WFDeployableImplantSystem : EntitySystem
         base.Initialize();
         Subscribe<WFToolArmComponent>();
         Subscribe<WFFingerLighterComponent>();
+        SubscribeNetworkEvent<WFDeployableWheelPickEvent>(OnPick);
     }
 
     private void Subscribe<T>() where T : WFDeployableImplantComponent
@@ -71,25 +76,112 @@ public sealed class WFDeployableImplantSystem : EntitySystem
     private void Toggle(EntityUid part, WFDeployableImplantComponent implant, WFToggleDeployableImplantEvent args)
     {
         // Every deployable in the part hears the event; only the one whose action it was answers.
-        if (args.Action.Owner != implant.ActionEntity
-            || !TryComp<BodyPartComponent>(part, out var partComp)
-            || partComp.Body is not { } body)
+        if (args.Action.Owner != implant.ActionEntity || !Usable(part, out var body, out var side))
             return;
 
-        if (HasComp<EmpDisabledComponent>(part))
+        if (implant.Items.Count > 1)
         {
-            _popup.PopupEntity(Loc.GetString("wf-augment-deployable-emp"), body, body);
+            // The wheel's pick starts the action's delay, not opening it.
+            if (TryComp<ActorComponent>(body, out var actor))
+            {
+                RaiseNetworkEvent(new WFDeployableWheelOpenEvent
+                {
+                    Action = GetNetEntity(args.Action.Owner),
+                    Items = implant.Items,
+                    Deployed = DeployedIndex(implant),
+                }, actor.PlayerSession);
+            }
+
             return;
         }
 
-        var side = partComp.Symmetry switch
+        if (implant.Items.Count == 0)
+            return;
+
+        args.Handled = _extendable.ToggleExtendable(body, implant.Items[0], side, out implant.Deployed, implant.Deployed);
+        if (args.Handled)
+            _audio.PlayPvs(implant.Deployed == null ? implant.RetractSound : implant.DeploySound, part);
+    }
+
+    private void OnPick(WFDeployableWheelPickEvent msg, EntitySessionEventArgs args)
+    {
+        if (args.SenderSession.AttachedEntity is { } user && TryGetEntity(msg.Action, out var action))
+            Pick(user, action.Value, msg.Item);
+    }
+
+    /// <summary>
+    /// Folds out the item a body picked on the wheel of its implant's action, in place of the one that was out, or
+    /// folds that one back in if it is the one picked.
+    /// </summary>
+    public bool Pick(EntityUid user, EntityUid action, int index)
+    {
+        if (!_actions.TryGetActionData(action, out var data, false)
+            || data.AttachedEntity != user
+            || data.Container is not { } part
+            || !_actions.ValidAction(data)
+            || data.CheckConsciousness && !_blocker.CanConsciouslyPerformAction(user)
+            || data.CheckCanInteract && !_blocker.CanInteract(user, null))
+            return false;
+
+        WFDeployableImplantComponent? implant = null;
+        foreach (var candidate in EntityManager.GetComponents<WFDeployableImplantComponent>(part))
+        {
+            if (candidate.ActionEntity == action)
+                implant = candidate;
+        }
+
+        if (implant == null
+            || index < 0
+            || index >= implant.Items.Count
+            || !Usable(part, out var body, out var side)
+            || body != user)
+            return false;
+
+        var stow = DeployedIndex(implant) == index;
+        // Deleted now, not queued, so the hand is free for the next item.
+        if (Exists(implant.Deployed))
+            Del(implant.Deployed);
+        implant.Deployed = null;
+
+        if (!stow && !_extendable.ToggleExtendable(body, implant.Items[index], side, out implant.Deployed))
+            return false;
+
+        _audio.PlayPvs(stow ? implant.RetractSound : implant.DeploySound, part);
+        _actions.StartUseDelay(action);
+        return true;
+    }
+
+    /// <summary>The body a part's implants answer to and the hand they fold into, unless an EMP has them locked.</summary>
+    private bool Usable(EntityUid part, out EntityUid body, out HandLocation side)
+    {
+        body = default;
+        side = default;
+        if (!TryComp<BodyPartComponent>(part, out var partComp) || partComp.Body is not { } owner)
+            return false;
+
+        body = owner;
+        if (HasComp<EmpDisabledComponent>(part))
+        {
+            _popup.PopupEntity(Loc.GetString("wf-augment-deployable-emp"), body, body);
+            return false;
+        }
+
+        side = partComp.Symmetry switch
         {
             BodyPartSymmetry.Left => HandLocation.Left,
             BodyPartSymmetry.Right => HandLocation.Right,
             _ => HandLocation.Middle,
         };
-        args.Handled = _extendable.ToggleExtendable(body, implant.Item, side, out implant.Deployed, implant.Deployed);
-        if (args.Handled)
-            _audio.PlayPvs(implant.Deployed == null ? implant.RetractSound : implant.DeploySound, part);
+        return true;
+    }
+
+    /// <summary>Which of the implant's items is out, if any.</summary>
+    private int? DeployedIndex(WFDeployableImplantComponent implant)
+    {
+        if (!Exists(implant.Deployed) || MetaData(implant.Deployed.Value).EntityPrototype is not { } proto)
+            return null;
+
+        var index = implant.Items.FindIndex(item => item.Id == proto.ID);
+        return index < 0 ? null : index;
     }
 }

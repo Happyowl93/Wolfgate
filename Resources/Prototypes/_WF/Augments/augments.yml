@@ -260,7 +260,7 @@
   id: WFAugmentLeftToolArm
   name: wf-augment-tool-arm
   description: wf-augment-tool-arm-desc
-  icon: { sprite: Objects/Tools/omnitool.rsi, state: omnitool-screwing }
+  icon: { sprite: _WF/Augments/tool_arm.rsi, state: implant }
   slot: LeftArm
   kind: Upgrade
   host: Synthetic
@@ -271,7 +271,7 @@
   id: WFAugmentRightToolArm
   name: wf-augment-tool-arm
   description: wf-augment-tool-arm-desc
-  icon: { sprite: Objects/Tools/omnitool.rsi, state: omnitool-screwing }
+  icon: { sprite: _WF/Augments/tool_arm.rsi, state: implant }
   slot: RightArm
   kind: Upgrade
   host: Synthetic

@@ -34,7 +34,10 @@ entries; the old one-per-slot entries (`LeftArmImplant`, `Dermal`, ...) still lo
 
 Wolfgate's own cyberware is in `implants.yml`. The tool arm and the finger lighter are deployables
 (`WFDeployableImplantComponent`, one subclass each so a part can hold both): `WFDeployableImplantSystem` gives the body
-an action that folds the implant's item into that side's hand and back, and an EMP folds it in and locks it. The
+an action that folds the implant's item into that side's hand and back, and an EMP folds it in and locks it. The tool
+arm lists six tools, so its action opens a wheel under the mouse instead (`WFDeployableWheel`, sent and answered by
+network events): picking a tool folds it out in place of the one that was out, and picking that one folds it back in.
+A tool is spawned as it folds out and deleted as it folds in, so the welder comes out full each time. The
 smartlink (`WFSmartlinkSystem`) tightens the spread of a gun held in its hand, and widens it past unlinked while an
 EMP has it scrambled. The scrubber liver metabolises alcohol, poison and narcotics four times as fast and clears
 Wolfmed toxin load three times as fast (`WolfmedOrganComponent.ClearanceFactor`).
@@ -148,6 +151,8 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Client/_WF/Augments/UI/WFAugmentScanList.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentScanList.cs)
 - [`Content.Client/_WF/Augments/UI/WFAugmentStylePicker.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentStylePicker.cs)
 - [`Content.Client/_WF/Augments/UI/WFAugmentTheme.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentTheme.cs)
+- [`Content.Client/_WF/Augments/UI/WFDeployableWheel.cs`](../../../Content.Client/_WF/Augments/UI/WFDeployableWheel.cs)
+- [`Content.Client/_WF/Augments/WFDeployableWheelSystem.cs`](../../../Content.Client/_WF/Augments/WFDeployableWheelSystem.cs)
 
 ### Integration tests
 
@@ -203,6 +208,7 @@ scratch, so an unpicked augment comes off it.
 - [`Resources/Textures/_WF/Augments/security.rsi/`](../../../Resources/Textures/_WF/Augments/security.rsi/)
 - [`Resources/Textures/_WF/Augments/shellguard.rsi/`](../../../Resources/Textures/_WF/Augments/shellguard.rsi/)
 - [`Resources/Textures/_WF/Augments/surplus.rsi/`](../../../Resources/Textures/_WF/Augments/surplus.rsi/)
+- [`Resources/Textures/_WF/Augments/tool_arm.rsi/`](../../../Resources/Textures/_WF/Augments/tool_arm.rsi/)
 - [`Resources/Textures/_WF/Augments/wardtakahashi.rsi/`](../../../Resources/Textures/_WF/Augments/wardtakahashi.rsi/)
 - [`Resources/Textures/_WF/Augments/xion.rsi/`](../../../Resources/Textures/_WF/Augments/xion.rsi/)
 - [`Resources/Textures/_WF/Augments/xion2.rsi/`](../../../Resources/Textures/_WF/Augments/xion2.rsi/)

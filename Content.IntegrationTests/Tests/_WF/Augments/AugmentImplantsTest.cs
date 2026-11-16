@@ -65,6 +65,7 @@ public sealed class AugmentImplantsTest
         var humanoids = server.System<SharedHumanoidAppearanceSystem>();
         var surgeons = server.System<AutoSurgeonSystem>();
         var emp = server.System<SharedEmpSystem>();
+        var deployables = server.System<WFDeployableImplantSystem>();
         var toxins = server.System<WolfmedToxinSystem>();
         var map = await pair.CreateTestMap();
 
@@ -117,7 +118,8 @@ public sealed class AugmentImplantsTest
             }));
             Assert.That(augments.ReadInstalled(plain), Is.Empty);
 
-            // The tool arm folds its omnitool out into that side's hand, and back.
+            // The tool arm's action only opens its wheel. A pick folds that tool out into that side's hand, another
+            // swaps it and the same one again folds it back in.
             var tool = entities.GetComponent<WFToolArmComponent>(arm);
             Assert.That(tool.ActionEntity, Is.Not.Null, "The tool arm gave its body no action.");
             void Toggle(EntityUid action)
@@ -126,10 +128,25 @@ public sealed class AugmentImplantsTest
                 actions.PerformAction(mob, null, action, comp, comp.BaseEvent, timing.CurTime, false);
             }
 
-            Toggle(tool.ActionEntity.Value);
-            Assert.That(Proto(HandOf(mob, HandLocation.Right).HeldEntity), Is.EqualTo("WFAugmentToolArmTool"));
-            Assert.That(HandOf(mob, HandLocation.Left).HeldEntity, Is.Null, "The lighter in the other hand answered the tool arm's action.");
-            Toggle(tool.ActionEntity.Value);
+            var wheel = tool.ActionEntity.Value;
+            Toggle(wheel);
+            Assert.That(HandOf(mob, HandLocation.Right).HeldEntity, Is.Null, "The wheel's action folded a tool out by itself.");
+            Assert.That(tool.Items, Has.Count.EqualTo(6));
+
+            for (var i = 0; i < tool.Items.Count; i++)
+            {
+                var before = HandOf(mob, HandLocation.Right).HeldEntity;
+                Assert.That(deployables.Pick(mob, wheel, i), $"{tool.Items[i]} didn't fold out.");
+                Assert.That(Proto(HandOf(mob, HandLocation.Right).HeldEntity), Is.EqualTo(tool.Items[i].Id));
+                Assert.That(before == null || entities.Deleted(before.Value), "The tool that was out is still there.");
+                Assert.That(deployables.Pick(mob, wheel, 0), Is.False, "A pick went through during the action's delay.");
+                actions.ClearCooldown(wheel);
+            }
+
+            Assert.That(HandOf(mob, HandLocation.Left).HeldEntity, Is.Null, "The lighter in the other hand answered the tool arm's wheel.");
+            Assert.That(deployables.Pick(plain, wheel, 0), Is.False, "Another body picked on this one's wheel.");
+            Assert.That(deployables.Pick(mob, wheel, tool.Items.Count), Is.False);
+            Assert.That(deployables.Pick(mob, wheel, tool.Items.Count - 1), "The tool that is out didn't fold back in.");
             Assert.That(HandOf(mob, HandLocation.Right).HeldEntity, Is.Null);
 
             var lighter = entities.GetComponent<WFFingerLighterComponent>(leftHand);
