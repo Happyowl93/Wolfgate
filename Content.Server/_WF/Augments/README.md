@@ -39,6 +39,9 @@ Three implants bring back the combat traits Monolith removed (#5023), paid for a
 adds Monolith's `Vigor`, the threat-sense sole its `TrapAvoider`, and the pain editor (`WFPainEditorSystem`) scales pain
 gain down in place of Tenacity, whose crit threshold Wolfmed doesn't read.
 
+A health analyzer scan carries the cyberware in the body (`WFAugmentSystem.ReadInstalled`, sent as
+`HealthAnalyzerScannedUserMessage.Augments`), and the organs tab lists it under the organs (`WFAugmentScanList`).
+
 Installed cyberware is written back to the profile (`WFAugmentSystem.Persistence`). When the character goes into
 cryo, or the round ends with the player still in it (dead or alive), `ReadBody` lists the augments in the body:
 each slot's part or organ matched by prototype, and `ReadImplants` the upgrades by the components their autosurgeon
@@ -100,6 +103,7 @@ scratch, so an unpicked augment comes off it.
 
 ### Server
 
+- [`Content.Server/_WF/Augments/HealthAnalyzerSystem.Augments.cs`](HealthAnalyzerSystem.Augments.cs)
 - [`Content.Server/_WF/Augments/ServerPreferencesManager.Augments.cs`](ServerPreferencesManager.Augments.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.cs`](WFAugmentSystem.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Persistence.cs`](WFAugmentSystem.Persistence.cs)
@@ -133,6 +137,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Client/_WF/Augments/HumanoidProfileEditor.Augments.cs`](../../../Content.Client/_WF/Augments/HumanoidProfileEditor.Augments.cs)
 - [`Content.Client/_WF/Augments/UI/WFAugmentDoll.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentDoll.cs)
 - [`Content.Client/_WF/Augments/UI/WFAugmentEditor.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentEditor.cs)
+- [`Content.Client/_WF/Augments/UI/WFAugmentScanList.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentScanList.cs)
 
 ### Integration tests
 
@@ -219,12 +224,14 @@ scratch, so an unpicked augment comes off it.
   - cut the old arm loose like an augment swap, so the body keeps its arm markings
 - [`Content.Server/_NF/Commands/GhostRespawnCommand.cs`](../../_NF/Commands/GhostRespawnCommand.cs): respawning instead of cryo loses the character's augments
 - [`Content.Server/Database/ServerDbBase.cs`](../../Database/ServerDbBase.cs)
+- [`Content.Server/Medical/HealthAnalyzerSystem.cs`](../../Medical/HealthAnalyzerSystem.cs): the cyberware in the body
 - [`Content.Server/Preferences/Managers/ServerPreferencesManager.cs`](../../Preferences/Managers/ServerPreferencesManager.cs)
   - a client save can't unlock augments; new priced ones are bought from the bank here
   - the creator shows the balance, unlocks and dropped augments the save left
 - [`Content.Shared/_Goobstation/Autosurgeon/AutoSurgeonSystem.cs`](../../../Content.Shared/_Goobstation/Autosurgeon/AutoSurgeonSystem.cs): augments reapply and detect upgrades
 - [`Content.Shared/Body/Systems/SharedBodySystem.Parts.cs`](../../../Content.Shared/Body/Systems/SharedBodySystem.Parts.cs): a part cut loose for an augment isn't lost
 - [`Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs`](../../../Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs): swaps in the augmented parts and draws their styles
+- [`Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs`](../../../Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs): the cyberware in the body, for the organs tab
 - [`Content.Shared/Preferences/HumanoidCharacterProfile.cs`](../../../Content.Shared/Preferences/HumanoidCharacterProfile.cs): augments the species can't take are dropped
 - [`Resources/Prototypes/_NF/Entities/World/Debris/wrecks.yml`](../../../Resources/Prototypes/_NF/Entities/World/Debris/wrecks.yml): scavenged cyberware, the dearer the rarer
 

@@ -198,6 +198,20 @@ public sealed partial class WFAugmentSystem
         return found;
     }
 
+    /// <summary>Every augment in a body, in slot order with a part's implants after it: what a scan shows.</summary>
+    public List<ProtoId<WFAugmentPrototype>> ReadInstalled(EntityUid uid)
+    {
+        var none = new Dictionary<WFAugmentSlot, WFAugmentChoice>();
+        return ReadBody(uid, none, none).Values.Select(choice => choice.Augment)
+            .Concat(ReadImplants(uid))
+            .Select(id => _proto.Index(id))
+            .OrderBy(augment => augment.Slot)
+            .ThenBy(augment => augment.Kind == WFAugmentKind.Upgrade)
+            .ThenBy(augment => augment.ID)
+            .Select(augment => new ProtoId<WFAugmentPrototype>(augment.ID))
+            .ToList();
+    }
+
     private static WFAugmentChoice? Picked(IReadOnlyDictionary<WFAugmentSlot, WFAugmentChoice> choices,
         WFAugmentSlot slot,
         WFAugmentPrototype augment)

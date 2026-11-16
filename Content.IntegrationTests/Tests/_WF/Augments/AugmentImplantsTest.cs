@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
+using Content.Client._WF.Augments.UI;
+using Content.Client._WF.Wolfmed.Medical;
 using Content.Server._WF.Augments;
 using Content.Server._WF.Wolfmed.Life;
 using Content.Shared._Goobstation.Autosurgeon;
 using Content.Shared._Mono.Traits.Physical;
+using Content.Shared._Onyx.Medical;
 using Content.Shared._Onyx.Wounds;
 using Content.Shared._WF.Augments;
 using Content.Shared.Actions;
@@ -14,10 +17,12 @@ using Content.Shared.Emp;
 using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Humanoid;
+using Content.Shared.MedicalScanner;
 using Content.Shared.Preferences;
 using Content.Shared.StepTrigger.Systems;
 using Content.Shared.Traits;
 using Content.Shared.Weapons.Ranged.Components;
+using Robust.Client.UserInterface;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
@@ -39,10 +44,15 @@ public sealed class AugmentImplantsTest
     private static readonly ProtoId<WFAugmentPrototype>[] Revived =
         ["WFAugmentAdrenalBooster", "WFAugmentPainEditor", "WFAugmentLeftThreatSole"];
 
+    private static IEnumerable<Control> Descendants(Control control)
+    {
+        return control.Children.SelectMany(child => new[] { child }.Concat(Descendants(child)));
+    }
+
     [Test]
     public async Task ImplantsTest()
     {
-        await using var pair = await PoolManager.GetServerClient();
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true }); // the analyzer panel needs client systems
         var server = pair.Server;
         var entities = server.EntMan;
         var proto = server.ResolveDependency<IPrototypeManager>();
@@ -98,6 +108,14 @@ public sealed class AugmentImplantsTest
             Assert.That(bodies.GetBodyOrgans(mob).Any(o => Proto(o.Id) == "WFAugmentScrubberLiver"));
             Assert.That(augments.ReadImplants(mob), Is.EquivalentTo(Implants), "The implants put in don't read back.");
             Assert.That(augments.ReadImplants(plain), Is.Empty);
+
+            // A scan lists all of it, each part's implants after the part.
+            Assert.That(augments.ReadInstalled(mob).Select(id => id.Id), Is.EqualTo(new[]
+            {
+                "WFAugmentCyberRightArm", "WFAugmentRightToolArm", "WFAugmentScrubberLiver",
+                "WFAugmentLeftFingerLighter", "WFAugmentRightSmartlink",
+            }));
+            Assert.That(augments.ReadInstalled(plain), Is.Empty);
 
             // The tool arm folds its omnitool out into that side's hand, and back.
             var tool = entities.GetComponent<WFToolArmComponent>(arm);
@@ -160,6 +178,25 @@ public sealed class AugmentImplantsTest
             entities.DeleteEntity(gun);
             entities.DeleteEntity(mob);
             entities.DeleteEntity(plain);
+        });
+
+        // The analyzer's organs tab lists the cyberware a scan carries, and drops the list when there is none.
+        await pair.Client.WaitAssertion(() =>
+        {
+            var message = new HealthAnalyzerScannedUserMessage(null, 0f, 0f, true, false, false, false, null)
+            {
+                Organs = new List<HealthAnalyzerOrganInfo>(),
+                Augments = new List<ProtoId<WFAugmentPrototype>>(Implants),
+            };
+            var panel = new WolfmedDiagnosticPanel();
+            panel.Populate(message);
+            var list = Descendants(panel).OfType<WFAugmentScanList>().Single();
+            Assert.That(list.Visible);
+            Assert.That(list.ChildCount, Is.EqualTo(2 + Implants.Length), "A heading, a divider and a row for each augment.");
+
+            message.Augments = null;
+            panel.Populate(message);
+            Assert.That(list.Visible, Is.False);
         });
 
         await pair.CleanReturnAsync();

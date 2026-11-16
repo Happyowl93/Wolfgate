@@ -444,7 +444,8 @@ public sealed partial class WFAugmentEditor : BoxContainer
             : SlotName(WFAugmentRegions.Host(region));
     }
 
-    private static string SlotName(WFAugmentSlot slot)
+    /// <summary>The slot's name as players read it.</summary>
+    internal static string SlotName(WFAugmentSlot slot)
     {
         return Loc.GetString("wf-augment-slot-" + SlotKey(slot));
     }

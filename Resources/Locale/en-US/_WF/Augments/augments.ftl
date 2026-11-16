@@ -64,3 +64,5 @@ wf-augment-pain-editor = Pain editor
 wf-augment-pain-editor-desc = A filter on the brainstem that dulls the pain of every wound, so it takes more to put you down.
 wf-augment-threat-sole = Threat-sense sole
 wf-augment-threat-sole-desc = Sensors in the sole that keep you from setting off land mines, tripwires and other floor traps. One sole is enough; in a cybernetic foot an EMP switches it off with the foot.
+
+wf-analyzer-cyberware = Cyberware
