@@ -4,8 +4,8 @@ using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 namespace Content.Shared._WF.Augments;
 
 /// <summary>
-/// A reviver in the torso: a defibrillator that shocks its own body when the heart stops, on the same rules and the
-/// same odds as a medic's paddles, and then has to recharge.
+/// A reviver in the torso: when the heart stops it holds the body's bleeding, runs a reserve of blood in and shocks,
+/// on the same rules and the same odds as a medic's paddles, and then has to recharge.
 /// </summary>
 [RegisterComponent, AutoGenerateComponentPause]
 public sealed partial class WFReviverComponent : Component
@@ -30,6 +30,18 @@ public sealed partial class WFReviverComponent : Component
     [DataField]
     public TimeSpan EmpLockout = TimeSpan.FromMinutes(2);
 
+    /// <summary>How long the bleeding stays held after the shock it is charging.</summary>
+    [DataField]
+    public TimeSpan HoldTime = TimeSpan.FromSeconds(60);
+
+    /// <summary>The blood it carries, which it has back when it has recharged.</summary>
+    [DataField]
+    public float Reserve = 60f;
+
+    /// <summary>The blood it runs in each second it is charging, up to what keeps a restarted heart going.</summary>
+    [DataField]
+    public float InfuseRate = 3f;
+
     [DataField]
     public SoundSpecifier? ChargeSound = new SoundPathSpecifier("/Audio/Items/Defib/defib_charge.ogg");
 
@@ -49,6 +61,10 @@ public sealed partial class WFReviverComponent : Component
     /// <summary>The shocks given since the heart stopped.</summary>
     [DataField]
     public int ShocksGiven;
+
+    /// <summary>The blood run in since it last recharged.</summary>
+    [DataField]
+    public float Infused;
 
     /// <summary>When it can fire again.</summary>
     [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoPausedField]

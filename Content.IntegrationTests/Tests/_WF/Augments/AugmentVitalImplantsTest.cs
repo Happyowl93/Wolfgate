@@ -1,11 +1,19 @@
 using System.Collections.Generic;
+using System.Linq;
 using Content.IntegrationTests.Tests._WF.Wolfmed;
 using Content.Server._WF.Augments;
 using Content.Server._WF.Wolfmed.Life;
+using Content.Server._WF.Wolfmed.Stasis;
+using Content.Server.Body.Systems;
 using Content.Server.Medical.Components;
+using Content.Shared._Onyx.Body.Systems;
+using Content.Shared._Shitmed.Body.Organ;
 using Content.Shared._WF.Augments;
+using Content.Shared._WF.Wolfmed.Body;
 using Content.Shared.Actions;
+using Content.Shared.Body.Systems;
 using Content.Shared.Emp;
+using Content.Shared.FixedPoint;
 using Content.Shared.Humanoid;
 using Content.Shared.MedicalScanner;
 using Content.Shared.Mobs.Systems;
@@ -51,6 +59,9 @@ public sealed class AugmentVitalImplantsTest
         var revival = server.System<WolfmedRevivalSystem>();
         var mobState = server.System<MobStateSystem>();
         var emp = server.System<SharedEmpSystem>();
+        var bloodstream = server.System<BloodstreamSystem>();
+        var bodies = server.System<SharedBodySystem>();
+        var organs = server.System<OrganHealthSystem>();
         var map = await WolfmedGameTest.CreateTestMap(pair);
 
         var mob = EntityUid.Invalid;
@@ -110,13 +121,17 @@ public sealed class AugmentVitalImplantsTest
             Assert.That(ui.IsUiOpen(scanner, HealthAnalyzerUiKey.Key, mob), Is.False);
             Assert.That(analyzer.ScannedEntity, Is.Null, "The scan went on after its window closed.");
 
-            // The reviver charges when the heart stops, and an EMP knocks the charge out and locks it.
+            // The reviver charges when the heart stops and holds the bleeding from then on, and an EMP knocks the
+            // charge out and locks it.
             var reviver = entities.GetComponent<WFReviverComponent>(mob);
             revivers.Tick((mob, reviver));
             Assert.That(reviver.NextShock, Is.Null, "The reviver charged for a beating heart.");
             Assert.That(life.StartArrest(mob, "test"));
             revivers.Tick((mob, reviver));
             Assert.That(reviver.NextShock, Is.EqualTo(timing.CurTime + reviver.ChargeTime));
+            Assert.That(entities.GetComponent<WolfmedStasisHoldComponent>(mob).HeldUntil,
+                Is.EqualTo(reviver.NextShock + reviver.HoldTime), "The reviver didn't hold the bleeding.");
+            Assert.That(reviver.Infused, Is.Zero, "The reviver ran blood into a body that had enough.");
 
             emp.DoEmpEffects(mob, 0f, System.TimeSpan.FromSeconds(30));
             Assert.That(reviver.NextShock, Is.Null);
@@ -124,10 +139,34 @@ public sealed class AugmentVitalImplantsTest
             revivers.Tick((mob, reviver));
             Assert.That(reviver.NextShock, Is.Null, "The reviver charged while an EMP had it locked.");
 
-            // Three shocks that don't take, and it has to recharge.
+            // Short of the blood the paddles ask for, it runs its reserve in and the charge waits for it.
+            for (var i = 0; i < 100 && life.GetBlood(mob) > 0.2f; i++)
+            {
+                bloodstream.TryModifyBloodLevel(mob, -10);
+            }
+
+            Assert.That(revival.GetRefusal(mob), Is.EqualTo(WolfmedRevivalSystem.NoBlood));
+            var drained = life.GetBlood(mob);
             reviver.ReadyAt = System.TimeSpan.Zero;
             revival.ForcedRoll = 1f;
-            for (var i = 0; i < reviver.Shocks; i++)
+            revivers.Tick((mob, reviver));
+            Assert.That(reviver.NextShock, Is.Not.Null, "The reviver gave up on a body its reserve could help.");
+            Assert.That(reviver.Infused, Is.EqualTo(reviver.InfuseRate).Within(0.01f));
+            Assert.That(life.GetBlood(mob), Is.GreaterThan(drained));
+            reviver.NextShock = timing.CurTime;
+            revivers.Tick((mob, reviver));
+            Assert.That(reviver.ShocksGiven, Is.Zero, "The reviver shocked a body the paddles refuse.");
+            for (var i = 0; i < 40 && reviver.ShocksGiven == 0; i++)
+            {
+                revivers.Tick((mob, reviver));
+            }
+
+            Assert.That(reviver.ShocksGiven, Is.EqualTo(1));
+            Assert.That(revival.GetRefusal(mob), Is.Null);
+            Assert.That(reviver.Infused, Is.LessThanOrEqualTo(reviver.Reserve));
+
+            // That shock and two more don't take, and it has to recharge.
+            for (var i = 1; i < reviver.Shocks; i++)
             {
                 Assert.That(reviver.ReadyAt, Is.EqualTo(System.TimeSpan.Zero));
                 revivers.Tick((mob, reviver));
@@ -138,6 +177,7 @@ public sealed class AugmentVitalImplantsTest
 
             Assert.That(life.InArrest(mob));
             Assert.That(reviver.ReadyAt, Is.EqualTo(timing.CurTime + reviver.Recharge));
+            Assert.That(reviver.Infused, Is.Zero);
             revivers.Tick((mob, reviver));
             Assert.That(reviver.NextShock, Is.Null, "The reviver charged while it was recharging.");
 
@@ -151,6 +191,15 @@ public sealed class AugmentVitalImplantsTest
             Assert.That(life.InArrest(mob), Is.False, "The reviver's shock did not restart the heart.");
             Assert.That(mobState.IsDead(mob), Is.False);
             Assert.That(reviver.ReadyAt, Is.EqualTo(timing.CurTime + reviver.Recharge));
+
+            // It doesn't spend a charge on a heart that is destroyed.
+            var heart = bodies.GetBodyOrgans(mob).First(organ => entities.HasComponent<HeartComponent>(organ.Id)).Id;
+            organs.SetHealth((heart, entities.GetComponent<WolfmedOrganComponent>(heart)), FixedPoint2.Zero);
+            life.Tick(mob, 1f);
+            Assert.That(life.InArrest(mob) || mobState.IsDead(mob));
+            reviver.ReadyAt = System.TimeSpan.Zero;
+            revivers.Tick((mob, reviver));
+            Assert.That(reviver.NextShock, Is.Null, "The reviver charged for a destroyed heart.");
         });
 
         await pair.CleanReturnAsync();

@@ -50,8 +50,11 @@ Three more look after the body, each a component the autosurgeon puts on it. The
 (`WFNutrimentPumpSystem`) feeds its owner a little whenever they reach starving, which leaves them peckish and food
 still worth eating. The reviver (`WFReviverSystem`) is a defibrillator of its own: when the heart stops it charges
 for ten seconds and shocks through `WolfmedRevivalSystem`, so it is refused for what a medic's paddles are refused
-for and restarts the heart on their odds, and it heals nothing. It has three shocks, fifteen seconds apart, then
-recharges for ten minutes; an EMP knocks the charge out and locks it for two. The iatric monitor
+for and restarts the heart on their odds, and it heals no wound. While it charges it holds every bleed the way a
+stasis weave does (`WolfmedStasisHoldComponent`, until a minute after the shock) and runs up to 60u of blood in,
+towards Wolfmed's post-shock target, so a body that bled out is over the paddles' blood line when the charge is up
+and over the arrest line after it. It doesn't charge for a destroyed heart. It has three shocks, fifteen seconds
+apart, then recharges for ten minutes; an EMP knocks the charge out and locks it for two. The iatric monitor
 (`WFIatricMonitorSystem`) gives an action that opens the health analyzer's window on its own body; the action entity
 is the analyzer, and being held by the body is what keeps the window in range.
 

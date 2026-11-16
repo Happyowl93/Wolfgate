@@ -1,6 +1,10 @@
 using Content.Server._WF.Wolfmed.Life;
+using Content.Server._WF.Wolfmed.Stasis;
+using Content.Server.Body.Systems;
+using Content.Shared._Onyx.Wounds;
 using Content.Shared._WF.Augments;
 using Content.Shared.Emp;
+using Content.Shared.FixedPoint;
 using Content.Shared.IdentityManagement;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
@@ -11,16 +15,19 @@ namespace Content.Server._WF.Augments;
 
 /// <summary>
 /// Shocks a body with a reviver when its heart has stopped. Every shock is one of Wolfmed's: it is refused for what
-/// the paddles are refused for, and restarts the heart on the paddles' odds.
+/// the paddles are refused for, and restarts the heart on the paddles' odds. While it charges it holds the body's
+/// bleeding and runs its reserve of blood in, so the heart it restarts has something to pump.
 /// </summary>
 public sealed class WFReviverSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private BloodstreamSystem _bloodstream = default!;
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private WolfmedLifeSystem _life = default!;
     [Dependency] private WolfmedRevivalSystem _revival = default!;
+    [Dependency] private WolfmedStasisSystem _stasis = default!;
 
     private static readonly TimeSpan Interval = TimeSpan.FromSeconds(1);
 
@@ -55,7 +62,10 @@ public sealed class WFReviverSystem : EntitySystem
         }
     }
 
-    /// <summary>One look at the body: starts charging when its heart has stopped, and shocks when the charge is up.</summary>
+    /// <summary>
+    /// One look at the body: starts charging when its heart has stopped, holds the bleeding and runs blood in while
+    /// it charges, and shocks when the charge is up.
+    /// </summary>
     public void Tick(Entity<WFReviverComponent> ent)
     {
         var reviver = ent.Comp;
@@ -67,8 +77,7 @@ public sealed class WFReviverSystem : EntitySystem
             return;
         }
 
-        // It doesn't charge for a body no shock would help: no blood to move, too cold, rotten.
-        if (now < reviver.ReadyAt || _revival.GetRefusal(ent) != null)
+        if (now < reviver.ReadyAt || !CanHelp(ent))
         {
             reviver.NextShock = null;
             return;
@@ -82,11 +91,13 @@ public sealed class WFReviverSystem : EntitySystem
                 _audio.PlayPvs(reviver.ChargeSound, ent);
                 _popup.PopupEntity(Loc.GetString("wf-augment-reviver-charging"), ent, ent, PopupType.Medium);
             }
-
-            return;
         }
 
-        if (now < reviver.NextShock)
+        HoldBleeding(ent, reviver.NextShock.Value + reviver.HoldTime);
+        Infuse(ent);
+
+        // A charge that is up waits for the blood the paddles ask for.
+        if (now < reviver.NextShock || _revival.GetRefusal(ent) != null)
             return;
 
         reviver.NextShock = null;
@@ -102,7 +113,51 @@ public sealed class WFReviverSystem : EntitySystem
         if (revived || reviver.ShocksGiven >= reviver.Shocks)
         {
             reviver.ShocksGiven = 0;
+            reviver.Infused = 0f;
             reviver.ReadyAt = now + reviver.Recharge;
         }
+    }
+
+    /// <summary>
+    /// Whether a shock could do this body any good: a heart left to restart, and nothing the paddles refuse for
+    /// except blood the reserve can still put back.
+    /// </summary>
+    private bool CanHelp(Entity<WFReviverComponent> ent)
+    {
+        // A destroyed heart stops again on the tick it restarts.
+        if (_life.GetHeartHealth(ent) is { } heart && heart <= FixedPoint2.Zero)
+            return false;
+
+        var refusal = _revival.GetRefusal(ent);
+        return refusal == null || refusal == WolfmedRevivalSystem.NoBlood && ent.Comp.Infused < ent.Comp.Reserve;
+    }
+
+    /// <summary>Holds every bleed on the body until then, as a stasis weave does; the weave's pass lifts it.</summary>
+    private void HoldBleeding(EntityUid body, TimeSpan until)
+    {
+        if (TryComp(body, out WolfmedStasisHoldComponent? hold))
+        {
+            // An Avali's own stasis has no end to move.
+            if (hold.HeldUntil < until)
+                hold.HeldUntil = until;
+
+            return;
+        }
+
+        if (!HasComp<WoundHostComponent>(body))
+            return;
+
+        AddComp<WolfmedStasisHoldComponent>(body).HeldUntil = until;
+        _stasis.RefreshBleeding(body);
+    }
+
+    /// <summary>A second of the reserve, up to the blood Wolfmed wants in a body after a shock.</summary>
+    private void Infuse(Entity<WFReviverComponent> ent)
+    {
+        var reviver = ent.Comp;
+        var amount = MathF.Min(reviver.InfuseRate * (float) Interval.TotalSeconds, reviver.Reserve - reviver.Infused);
+        amount = MathF.Min(amount, _life.GetTransfusionGuidance(ent).ToTarget);
+        if (amount > 0f && _bloodstream.TryModifyBloodLevel(ent, amount))
+            reviver.Infused += amount;
     }
 }
