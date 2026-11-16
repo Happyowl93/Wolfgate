@@ -28,9 +28,17 @@ public sealed class AugmentRulesTest
                 [WFAugmentSlot.LeftArm] = new("WFAugmentCyberLeftArm", "WFAugmentStyleXion"),
                 [WFAugmentSlot.Heart] = new("WFAugmentCyberHeart", null),
             };
-            var read = WFAugmentRules.FromStored(WFAugmentRules.ToStored(choices));
-            Assert.That(read, Is.EquivalentTo(choices));
+            var implants = new HashSet<ProtoId<WFAugmentPrototype>> { "WFAugmentDermalArmor" };
+            var stored = WFAugmentRules.ToStored(choices, implants);
+            Assert.That(WFAugmentRules.FromStored(stored), Is.EquivalentTo(choices));
+            Assert.That(WFAugmentRules.ImplantsFromStored(stored), Is.EquivalentTo(implants));
             Assert.That(WFAugmentRules.FromStored("garbage;Nope:Thing;LeftArm"), Is.Empty);
+
+            // Implants saved one per slot before a part held several still read, and not as slot choices.
+            const string legacy = "LeftArmImplant:WFAugmentLeftMantisBlade;Muscles:WFAugmentMuscleFibers";
+            Assert.That(WFAugmentRules.ImplantsFromStored(legacy).Select(i => i.Id),
+                Is.EquivalentTo(new[] { "WFAugmentLeftMantisBlade", "WFAugmentMuscleFibers" }));
+            Assert.That(WFAugmentRules.FromStored(legacy), Is.Empty);
 
             var valid = WFAugmentRules.Validate("Human", new Dictionary<WFAugmentSlot, WFAugmentChoice>
             {
@@ -54,6 +62,34 @@ public sealed class AugmentRulesTest
                 Is.EquivalentTo(new[] { WFAugmentSlot.RightLeg }));
             Assert.That(WFAugmentRules.Validate("Human", all, new ProtoId<TraitPrototype>[] { "BionicLegs" }, proto, factory).Keys,
                 Is.EquivalentTo(new[] { WFAugmentSlot.LeftArm }));
+
+            // A mantis blade needs a synthetic arm: a cybernetic one, a trait's, or an IPC's own.
+            var none = new ProtoId<TraitPrototype>[0];
+            var unclaimed = new Dictionary<WFAugmentSlot, ProtoId<TraitPrototype>>();
+            var natural = new Dictionary<WFAugmentSlot, WFAugmentChoice>();
+            var cyberArm = new Dictionary<WFAugmentSlot, WFAugmentChoice>
+            {
+                [WFAugmentSlot.LeftArm] = new("WFAugmentCyberLeftArm", "WFAugmentStyleCyborg"),
+            };
+            var jawsArm = new Dictionary<WFAugmentSlot, WFAugmentChoice>
+            {
+                [WFAugmentSlot.LeftArm] = new("WFAugmentJawsOfLifeLeftArm", "WFAugmentStyleCyborg"),
+            };
+            var wanted = new ProtoId<WFAugmentPrototype>[] { "WFAugmentLeftMantisBlade", "WFAugmentDermalArmor", "WFAugmentMuscleFibers" };
+            Assert.That(WFAugmentRules.ValidateImplants("Human", natural, wanted, none, proto, factory).Select(i => i.Id),
+                Is.EquivalentTo(new[] { "WFAugmentDermalArmor", "WFAugmentMuscleFibers" }));
+            Assert.That(WFAugmentRules.ValidateImplants("Human", cyberArm, wanted, none, proto, factory), Has.Count.EqualTo(3));
+            Assert.That(WFAugmentRules.Synthetic("Human", WFAugmentSlot.LeftArm, natural, unclaimed, proto, factory), Is.False);
+            Assert.That(WFAugmentRules.Synthetic("Human", WFAugmentSlot.LeftArm, natural,
+                WFAugmentRules.ClaimedSlots(new ProtoId<TraitPrototype>[] { "PrybarProsthetics" }, proto), proto, factory));
+            Assert.That(WFAugmentRules.Synthetic("IPC", WFAugmentSlot.LeftArm, natural, unclaimed, proto, factory));
+
+            // Better arms hold more implants; a missing one none.
+            Assert.That(WFAugmentRules.ImplantSlots(WFAugmentSlot.LeftArm, natural, unclaimed, proto), Is.EqualTo(1));
+            Assert.That(WFAugmentRules.ImplantSlots(WFAugmentSlot.LeftArm, cyberArm, unclaimed, proto), Is.EqualTo(1));
+            Assert.That(WFAugmentRules.ImplantSlots(WFAugmentSlot.LeftArm, jawsArm, unclaimed, proto), Is.EqualTo(2));
+            Assert.That(WFAugmentRules.ImplantSlots(WFAugmentSlot.Chest, natural, unclaimed, proto), Is.EqualTo(2));
+
             foreach (var claim in proto.EnumeratePrototypes<WFAugmentTraitSlotsPrototype>())
                 Assert.That(proto.HasIndex<TraitPrototype>(claim.ID), $"{claim.ID} claims slots for a trait that doesn't exist.");
 

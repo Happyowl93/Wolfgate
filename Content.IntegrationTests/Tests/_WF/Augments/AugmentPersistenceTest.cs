@@ -21,8 +21,9 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WF.Augments;
 
 /// <summary>
-/// Cyberware of every kind is applied to a body and read back from it; a body's cyberware is written to the profile
-/// it belongs to, keeping creator edits; every augment names real cyberware; scavenging finds the priced ones only.
+/// Cyberware of every kind, implants included, is applied to a body and read back from it; a body's cyberware is
+/// written to the profile it belongs to, keeping creator edits; every augment names real cyberware in the right part;
+/// scavenging finds the priced ones only.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFAugmentSystem))]
@@ -33,13 +34,23 @@ public sealed class AugmentPersistenceTest
         [WFAugmentSlot.RightArm] = new("WFAugmentJawsOfLifeRightArm", "WFAugmentStyleCyborg"),
         [WFAugmentSlot.LeftHand] = new("WFAugmentDexLeftHand", "WFAugmentStyleCyborg"),
         [WFAugmentSlot.Heart] = new("WFAugmentLotusSandevistan", null),
-        [WFAugmentSlot.LeftArmImplant] = new("WFAugmentLeftMantisBlade", null),
-        [WFAugmentSlot.Dermal] = new("WFAugmentDermalArmor", null),
     };
 
-    private static void Apply(IEntityManager entities, EntityUid mob, Dictionary<WFAugmentSlot, WFAugmentChoice> augments)
+    private static readonly HashSet<ProtoId<WFAugmentPrototype>> Implants = new()
     {
-        var ev = new WFApplyAugmentsEvent(HumanoidCharacterProfile.DefaultWithSpecies("Human").WithAugments(augments));
+        "WFAugmentRightMantisBlade",
+        "WFAugmentDermalArmor",
+    };
+
+    private static void Apply(IEntityManager entities,
+        EntityUid mob,
+        Dictionary<WFAugmentSlot, WFAugmentChoice> augments,
+        HashSet<ProtoId<WFAugmentPrototype>>? implants = null)
+    {
+        var profile = HumanoidCharacterProfile.DefaultWithSpecies("Human")
+            .WithAugments(augments)
+            .WithAugmentImplants(implants ?? new HashSet<ProtoId<WFAugmentPrototype>>());
+        var ev = new WFApplyAugmentsEvent(profile);
         entities.EventBus.RaiseLocalEvent(mob, ref ev);
     }
 
@@ -56,11 +67,12 @@ public sealed class AugmentPersistenceTest
         await server.WaitAssertion(() =>
         {
             var mob = entities.SpawnEntity("MobHuman", map.GridCoords);
-            Apply(entities, mob, Cyberware);
+            Apply(entities, mob, Cyberware, Implants);
 
             var read = augments.ReadBody(mob, new Dictionary<WFAugmentSlot, WFAugmentChoice>(), Cyberware);
             Assert.That(read.Keys, Is.EquivalentTo(Cyberware.Keys), "The J.W.L arm's own hand reads as an augment, or one is missing.");
             Assert.That(read[WFAugmentSlot.RightArm].Style?.Id, Is.EqualTo("WFAugmentStyleCyborg"));
+            Assert.That(augments.ReadImplants(mob), Is.EquivalentTo(Implants), "The implants put in don't read back.");
 
             // Nothing picked it, so it wears the trait limbs' style.
             var unpicked = augments.ReadBody(mob, new Dictionary<WFAugmentSlot, WFAugmentChoice>(), new Dictionary<WFAugmentSlot, WFAugmentChoice>());
@@ -108,18 +120,22 @@ public sealed class AugmentPersistenceTest
             Assert.That(task.IsCompletedSuccessfully, $"The save failed: {task.Exception}");
         }
 
-        // Spawned with a cybernetic left leg, and bought a right one in the creator mid-round.
+        // Spawned with a cybernetic left leg and owned dermal armor, and bought a right leg in the creator mid-round.
         var spawned = new Dictionary<WFAugmentSlot, WFAugmentChoice>
         {
             [WFAugmentSlot.LeftLeg] = new("WFAugmentCyberLeftLeg", "WFAugmentStyleCyborg"),
         };
+        var spawnedImplants = new HashSet<ProtoId<WFAugmentPrototype>> { "WFAugmentDermalArmor" };
         var edited = new Dictionary<WFAugmentSlot, WFAugmentChoice>(spawned)
         {
             [WFAugmentSlot.RightLeg] = new("WFAugmentCyberRightLeg", "WFAugmentStyleCyborg"),
         };
-        await Run(() => prefs.SetProfile(userId, slot, HumanoidCharacterProfile.DefaultWithSpecies("Human").WithAugments(edited)));
+        await Run(() => prefs.SetProfile(userId, slot, HumanoidCharacterProfile.DefaultWithSpecies("Human")
+            .WithAugments(edited)
+            .WithAugmentImplants(spawnedImplants)
+            .WithAugmentUnlocks(spawnedImplants)));
 
-        // In the round the left leg was lost and a Sandevistan put in.
+        // In the round the left leg and the armor were lost, and a Sandevistan and muscle fibers put in.
         EntityUid mob = default;
         await server.WaitPost(() =>
         {
@@ -127,15 +143,17 @@ public sealed class AugmentPersistenceTest
             Apply(entities, mob, new Dictionary<WFAugmentSlot, WFAugmentChoice>
             {
                 [WFAugmentSlot.Heart] = new("WFAugmentLotusSandevistan", null),
-            });
+            }, new HashSet<ProtoId<WFAugmentPrototype>> { "WFAugmentMuscleFibers" });
         });
 
-        var played = new WFAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, spawned);
+        var played = new WFAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, spawned, spawnedImplants);
         await Run(() => augments.SaveBody(userId, played, mob));
         await server.WaitAssertion(() =>
         {
             Assert.That(Stored().Augments.Keys, Is.EquivalentTo(new[] { WFAugmentSlot.RightLeg, WFAugmentSlot.Heart }));
-            Assert.That(Stored().AugmentUnlocks.Select(u => u.Id), Is.EquivalentTo(new[] { "WFAugmentLotusSandevistan" }));
+            Assert.That(Stored().AugmentImplants.Select(i => i.Id), Is.EquivalentTo(new[] { "WFAugmentMuscleFibers" }));
+            Assert.That(Stored().AugmentUnlocks.Select(u => u.Id),
+                Is.EquivalentTo(new[] { "WFAugmentLotusSandevistan", "WFAugmentMuscleFibers" }));
         });
 
         // Respawning without cryo takes it all.
@@ -144,6 +162,7 @@ public sealed class AugmentPersistenceTest
         await server.WaitAssertion(() =>
         {
             Assert.That(Stored().Augments, Is.Empty);
+            Assert.That(Stored().AugmentImplants, Is.Empty);
             Assert.That(Stored().AugmentUnlocks, Is.Empty);
             entities.DeleteEntity(mob);
         });
@@ -173,6 +192,12 @@ public sealed class AugmentPersistenceTest
                 {
                     Assert.That(entity!.TryComp(out AutoSurgeonComponent? surgeon, factory) && surgeon.NewPartProto == null,
                         $"{augment.ID} names {id}, which is not an upgrading autosurgeon.");
+
+                    // An implant's slot is the part its autosurgeon works on.
+                    var target = surgeon!.TargetBodyPart == BodyPartType.Torso
+                        ? WFAugmentSlot.Chest
+                        : Enum.Parse<WFAugmentSlot>($"{surgeon.TargetBodyPartSymmetry}{surgeon.TargetBodyPart}");
+                    Assert.That(augment.Slot, Is.EqualTo(target), $"{augment.ID} goes in the wrong part for {id}.");
                 }
             }
 

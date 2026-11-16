@@ -8,21 +8,31 @@ end of every round.
 
 A character gets an augment three ways:
 
-- **The creator.** The Augments tab lists every slot the species has (`WFAugmentRules.DisplayOrder`), each Natural
-  or an augment, styled limbs drawn on the preview doll. A `price` is taken once from the character's bank the first
-  time it is saved with the augment (`ServerPreferencesManager.SettleAugments`), and the unlock stays on that
-  character (`AugmentUnlocks`). Only the server adds unlocks. Nothing is gated by faction: any character can buy the
+- **The creator.** The Augments tab draws the character as a doll (`WFAugmentDoll`); hovering a part outlines it
+  and clicking it lists that part's limb, organs and implants, each with its price, greyed out where it can't go. The
+  loadout beside it totals what confirming buys and pays back. A `price` is taken once from the character's bank
+  when it is saved with the augment (`ServerPreferencesManager.SettleAugments`), and the character owns it
+  (`AugmentUnlocks`); one it no longer picks is sold back for `WFAugmentRules.RefundPercent` (half) of its price,
+  however it was obtained. Only the server adds unlocks. Nothing is gated by faction: any character can buy the
   faction hearts and implants here.
 - **Buying it in a round** from the faction lathes, uplinks or loadouts, as before, and installing it.
 - **Scavenging.** `WFAugmentSelector` (the `WFAugmentScavengeTable`, nested into the rare tiers of the Mono
   maintenance tables) drops a priced augment's bare part or organ, which a surgeon puts in, or an upgrade's
   autosurgeon. The weight is the inverse of the price, so a Sandevistan is about 170 times rarer than cyber eyes.
 
+Implants (`kind: Upgrade`) are a set of their own (`AugmentImplants`), not slot choices: an implant's `slot` is the
+part it goes in, matching its autosurgeon's target. A part holds `implantSlots` of them (a J.W.L arm or S.P.E.E.D leg
+two, other limbs and natural parts one, the torso two, a missing limb none), and `host` says whether that part must be
+synthetic: a cybernetic or trait limb, or a natural part not built of flesh (an IPC's). Mantis blades need one. An
+implant that no longer fits after a limb changes is dropped. They are stored in the augments column as `Implant:`
+entries; the old one-per-slot entries (`LeftArmImplant`, `Dermal`, ...) still load.
+
 Installed cyberware is written back to the profile (`WFAugmentSystem.Persistence`). When the character goes into
 cryo, or the round ends with the player still in it (dead or alive), `ReadBody` lists the augments in the body:
-each slot's part or organ matched by prototype, and upgrades by the components their autosurgeon adds
-(`AutoSurgeonSystem.WfHasUpgrade`). Those are kept and unlocked; what the character spawned with and lost is gone
-along with its unlock. A slot changed in the creator mid-round keeps the new pick. When a player uses `ghostrespawn`
+each slot's part or organ matched by prototype, and `ReadImplants` the upgrades by the components their autosurgeon
+adds (`AutoSurgeonSystem.WfHasUpgrade`). Those are kept and owned; what the character spawned with and lost is gone
+along with its unlock, refunding nothing. A slot or the implants changed in the creator mid-round keep the new pick.
+An implant put in a part it doesn't fit (a mantis blade in a flesh arm) works for the round but isn't kept. When a player uses `ghostrespawn`
 with no body in cryo, the character loses every augment and unlock (`ForfeitAugments`); the admin `respawn`
 command and cloning take nothing. A body the player left for a ghost role or another character isn't read.
 
@@ -40,8 +50,8 @@ prosthetics keep the Avali outline.
 
 Entry points: `augments.yml`, `WFAugmentRules` (slots, validation, storage), `SharedHumanoidAppearanceSystem.ApplyAugments`,
 run from `LoadProfile` after the biotype (the client's doll calls `ApplyAugmentVisuals` from its own `LoadProfile`),
-and `WFAugmentSystem`, which swaps the parts in slot order (a limb before its hand, before an implant in it) and
-reapplies upgrades through `AutoSurgeonSystem.WfApplyUpgrade`. The old part is cut loose without the events that read as an injury
+and `WFAugmentSystem`, which swaps the parts in slot order (a limb before its hand) and then puts the implants in
+through `AutoSurgeonSystem.WfApplyUpgrade`. The old part is cut loose without the events that read as an injury
 (`SharedBodySystem.WfCutLoose`), so a hand keeps what it holds and Wolfmed sees no amputation.
 
 ## Styles and art
@@ -103,6 +113,7 @@ scratch, so an unpicked augment comes off it.
 ### Client
 
 - [`Content.Client/_WF/Augments/HumanoidProfileEditor.Augments.cs`](../../../Content.Client/_WF/Augments/HumanoidProfileEditor.Augments.cs)
+- [`Content.Client/_WF/Augments/UI/WFAugmentDoll.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentDoll.cs)
 - [`Content.Client/_WF/Augments/UI/WFAugmentEditor.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentEditor.cs)
 
 ### Integration tests

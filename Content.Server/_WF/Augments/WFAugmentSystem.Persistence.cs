@@ -15,6 +15,7 @@ using Content.Shared.Preferences;
 using Robust.Server.Player;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._WF.Augments;
 
@@ -32,7 +33,10 @@ public sealed partial class WFAugmentSystem
     [Dependency] private MindSystem _mind = default!;
 
     /// <summary>The character a player spawned as this round: its slot, its mind and the augments it spawned with.</summary>
-    internal sealed record PlayedCharacter(int Slot, EntityUid Mind, Dictionary<WFAugmentSlot, WFAugmentChoice> Spawned);
+    internal sealed record PlayedCharacter(int Slot,
+        EntityUid Mind,
+        Dictionary<WFAugmentSlot, WFAugmentChoice> Spawned,
+        HashSet<ProtoId<WFAugmentPrototype>> SpawnedImplants);
 
     private readonly Dictionary<NetUserId, PlayedCharacter> _played = new();
 
@@ -50,7 +54,10 @@ public sealed partial class WFAugmentSystem
         if (_preferences.GetPreferencesOrNull(args.Player.UserId) is { SelectedCharacter: HumanoidCharacterProfile selected } prefs
             && selected.Name == args.Profile.Name
             && _mind.TryGetMind(args.Mob, out var mind, out _))
-            Track(args.Player.UserId, new PlayedCharacter(prefs.SelectedCharacterIndex, mind, new(args.Profile.Augments)));
+            Track(args.Player.UserId, new PlayedCharacter(prefs.SelectedCharacterIndex,
+                mind,
+                new(args.Profile.Augments),
+                new(args.Profile.AugmentImplants)));
     }
 
     internal void Track(NetUserId user, PlayedCharacter character)
@@ -109,23 +116,35 @@ public sealed partial class WFAugmentSystem
             }
         }
 
-        // What the body carried in the round is owned now; what it lost is not.
+        // Implants changed in the creator since the spawn are kept as picked; else the body's are.
+        var carried = ReadImplants(body);
+        var implants = WFAugmentRules.ValidateImplants(profile.Species,
+            augments,
+            profile.AugmentImplants.SetEquals(played.SpawnedImplants) ? carried : profile.AugmentImplants,
+            profile.TraitPreferences,
+            _proto,
+            _factory);
+
+        // What the body carried and the character keeps is owned now; what it spawned with and lost is not.
+        var owned = profile.AugmentUnlocks.Concat(installed.Values.Select(c => c.Augment)).Concat(carried).ToHashSet();
         var unlocks = profile.AugmentUnlocks.ToHashSet();
-        unlocks.ExceptWith(played.Spawned.Values.Select(c => c.Augment));
-        unlocks.UnionWith(installed.Values.Select(c => c.Augment)
-            .Where(a => _proto.TryIndex(a, out var augment) && augment.Price > 0));
+        unlocks.ExceptWith(played.Spawned.Values.Select(c => c.Augment).Concat(played.SpawnedImplants));
+        unlocks.UnionWith(augments.Values.Select(c => c.Augment).Concat(implants)
+            .Where(a => owned.Contains(a) && _proto.TryIndex(a, out var augment) && augment.Price > 0));
 
         if (augments.Count == profile.Augments.Count
             && augments.All(a => profile.Augments.TryGetValue(a.Key, out var c) && c == a.Value)
+            && implants.SetEquals(profile.AugmentImplants)
             && unlocks.SetEquals(profile.AugmentUnlocks))
             return null;
 
-        return Save(session, played.Slot, profile.WithAugments(augments).WithAugmentUnlocks(unlocks));
+        return Save(session, played.Slot,
+            profile.WithAugments(augments).WithAugmentImplants(implants).WithAugmentUnlocks(unlocks));
     }
 
     /// <summary>
-    /// The augments a body carries: each slot's part or organ that is one, and the upgrades in it. A limb keeps the
-    /// style it was picked with, else gets the one trait limbs wear. Missing limbs and plating are kept as picked.
+    /// The augments a body carries in its slots: each slot's part or organ that is one. A limb keeps the style it was
+    /// picked with, else gets the one trait limbs wear. Missing limbs and plating are kept as picked.
     /// </summary>
     internal Dictionary<WFAugmentSlot, WFAugmentChoice> ReadBody(EntityUid uid,
         IReadOnlyDictionary<WFAugmentSlot, WFAugmentChoice> spawned,
@@ -139,7 +158,7 @@ public sealed partial class WFAugmentSystem
         foreach (var augment in _proto.EnumeratePrototypes<WFAugmentPrototype>().OrderBy(a => a.Order).ThenBy(a => a.ID))
         {
             var slot = augment.Slot;
-            if (found.ContainsKey(slot))
+            if (augment.Kind == WFAugmentKind.Upgrade || found.ContainsKey(slot))
                 continue;
 
             var present = augment.Kind switch
@@ -148,7 +167,6 @@ public sealed partial class WFAugmentSystem
                                       && Prototype(limb.Id) == augment.Part?.Id
                                       && !IsStockChild(limb.Id),
                 WFAugmentKind.Organ => OrganIn(body, slot) is { } organ && Prototype(organ) == augment.Organ?.Id,
-                WFAugmentKind.Upgrade => Surgeon(augment) is { } surgeon && _autoSurgeon.WfHasUpgrade(uid, surgeon),
                 WFAugmentKind.Missing => FindLimb(body, slot) == null && Picked(spawned, slot, augment) != null,
                 _ => Picked(spawned, slot, augment) != null,
             };
@@ -160,6 +178,21 @@ public sealed partial class WFAugmentSystem
                 && WFAugmentRules.StyleFits(traitStyle, slot))
                 style = TraitLimbStyle;
             found[slot] = new WFAugmentChoice(augment.ID, style);
+        }
+
+        return found;
+    }
+
+    /// <summary>The implants a body carries: every upgrade whose components its part or organ has.</summary>
+    internal HashSet<ProtoId<WFAugmentPrototype>> ReadImplants(EntityUid uid)
+    {
+        var found = new HashSet<ProtoId<WFAugmentPrototype>>();
+        foreach (var augment in _proto.EnumeratePrototypes<WFAugmentPrototype>())
+        {
+            if (augment.Kind == WFAugmentKind.Upgrade
+                && Surgeon(augment) is { } surgeon
+                && _autoSurgeon.WfHasUpgrade(uid, surgeon))
+                found.Add(augment.ID);
         }
 
         return found;
@@ -208,13 +241,15 @@ public sealed partial class WFAugmentSystem
             return null;
 
         if (_preferences.GetPreferencesOrNull(user)?.Characters.GetValueOrDefault(played.Slot) is not HumanoidCharacterProfile profile
-            || profile.Augments.Count == 0 && profile.AugmentUnlocks.Count == 0)
+            || profile.Augments.Count == 0 && profile.AugmentImplants.Count == 0 && profile.AugmentUnlocks.Count == 0)
             return null;
 
         _chat.DispatchServerMessage(session, Loc.GetString("wf-augments-forfeit", ("name", profile.Name)));
         Log.Info($"User {user} respawned without cryo; {profile.Name} lost their augments.");
         return Save(session, played.Slot,
-            profile.WithAugments(new Dictionary<WFAugmentSlot, WFAugmentChoice>()).WithAugmentUnlocks([]));
+            profile.WithAugments(new Dictionary<WFAugmentSlot, WFAugmentChoice>())
+                .WithAugmentImplants([])
+                .WithAugmentUnlocks([]));
     }
 
     private async Task Save(ICommonSession session, int slot, HumanoidCharacterProfile profile)

@@ -8,44 +8,91 @@ namespace Content.Server.Preferences.Managers;
 
 public sealed partial class ServerPreferencesManager
 {
+    [Dependency] private IComponentFactory _wfFactory = default!;
+
     /// <summary>
-    /// Settles the augments of a profile a client saved. Unlocks only come from the stored profile. A priced augment
-    /// it hasn't unlocked is bought from the character's bank if the balance covers it, and dropped otherwise.
+    /// Settles the augments of a profile a client saved. Unlocks only come from the stored profile. An unlocked augment
+    /// it no longer picks is sold back for <see cref="WFAugmentRules.RefundPercent"/> of its price first; then a priced
+    /// augment it hasn't unlocked is bought from the character's bank if the balance covers it, and dropped otherwise.
     /// </summary>
-    /// <returns>Whether anything was bought or dropped, so the client's copy is out of date.</returns>
+    /// <returns>Whether anything was bought, sold or dropped, so the client's copy is out of date.</returns>
     private bool SettleAugments(NetUserId userId, ref HumanoidCharacterProfile profile, HumanoidCharacterProfile? stored)
     {
-        var unlocks = new HashSet<ProtoId<WFAugmentPrototype>>(stored?.AugmentUnlocks ?? new());
-        var choices = new Dictionary<WFAugmentSlot, WFAugmentChoice>();
+        var owned = new HashSet<ProtoId<WFAugmentPrototype>>(stored?.AugmentUnlocks ?? new());
+        var unlocks = new HashSet<ProtoId<WFAugmentPrototype>>();
         var balance = profile.BankBalance;
+        var name = profile.Name;
         var changed = false;
 
+        var picked = WFAugmentRules.Picked(profile).ToHashSet();
+        foreach (var id in owned.Where(o => !picked.Contains(o)).OrderBy(o => o.Id))
+        {
+            changed = true;
+            if (!_protos.TryIndex(id, out var sold))
+                continue;
+
+            var refund = WFAugmentRules.Refund(sold);
+            balance += refund;
+            _sawmill.Info($"User {userId} sold augment {id} off {profile.Name} for {refund}.");
+        }
+
+        // Buys a priced augment the character doesn't own yet; false if the bank can't cover it.
+        bool Buy(WFAugmentPrototype augment)
+        {
+            if (augment.Price <= 0)
+                return true;
+            if (owned.Contains(augment.ID))
+            {
+                unlocks.Add(augment.ID);
+                return true;
+            }
+
+            changed = true;
+            if (balance < augment.Price)
+                return false;
+
+            balance -= augment.Price;
+            unlocks.Add(augment.ID);
+            _sawmill.Info($"User {userId} unlocked augment {augment.ID} on {name} for {augment.Price}.");
+            return true;
+        }
+
+        var choices = new Dictionary<WFAugmentSlot, WFAugmentChoice>();
         foreach (var (slot, choice) in profile.Augments.OrderBy(c => c.Key))
         {
             if (!_protos.TryIndex(choice.Augment, out var augment))
-            {
                 changed = true;
-                continue;
-            }
-
-            if (augment.Price > 0 && !unlocks.Contains(augment.ID))
-            {
-                if (balance < augment.Price)
-                {
-                    changed = true;
-                    continue;
-                }
-
-                balance -= augment.Price;
-                unlocks.Add(augment.ID);
-                changed = true;
-                _sawmill.Info($"User {userId} unlocked augment {augment.ID} on {profile.Name} for {augment.Price}.");
-            }
-
-            choices[slot] = choice;
+            else if (Buy(augment))
+                choices[slot] = choice;
         }
 
-        profile = profile.WithBankBalance(balance).WithAugmentUnlocks(unlocks).WithAugments(choices);
+        // A limb dropped for want of money takes the implants it had room for.
+        var fitting = WFAugmentRules.ValidateImplants(profile.Species, choices, profile.AugmentImplants,
+            profile.TraitPreferences, _protos, _wfFactory);
+        var implants = new HashSet<ProtoId<WFAugmentPrototype>>();
+        foreach (var id in profile.AugmentImplants.OrderBy(i => i.Id))
+        {
+            if (fitting.Contains(id) && _protos.TryIndex(id, out var implant) && Buy(implant))
+                implants.Add(id);
+            else
+                changed = true;
+        }
+
+        // An owned implant that lost its part with that limb is sold too.
+        foreach (var id in owned.Where(o => picked.Contains(o) && !unlocks.Contains(o)).OrderBy(o => o.Id))
+        {
+            if (!_protos.TryIndex(id, out var sold))
+                continue;
+
+            var refund = WFAugmentRules.Refund(sold);
+            balance += refund;
+            _sawmill.Info($"User {userId} sold augment {id} off {profile.Name} for {refund}.");
+        }
+
+        profile = profile.WithBankBalance(balance)
+            .WithAugmentUnlocks(unlocks)
+            .WithAugments(choices)
+            .WithAugmentImplants(implants);
         return changed;
     }
 

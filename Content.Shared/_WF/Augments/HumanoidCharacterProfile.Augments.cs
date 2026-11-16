@@ -10,7 +10,14 @@ public sealed partial class HumanoidCharacterProfile
     [DataField]
     public Dictionary<WFAugmentSlot, WFAugmentChoice> Augments { get; set; } = new();
 
-    /// <summary>Priced augments this character has paid for. Only the server adds to it.</summary>
+    /// <summary>Implants picked for the parts their slots name, up to what each part holds.</summary>
+    [DataField]
+    public HashSet<ProtoId<WFAugmentPrototype>> AugmentImplants { get; set; } = new();
+
+    /// <summary>
+    /// Priced augments this character owns: paid for, or kept from a round. Only the server adds to it; one the
+    /// character no longer picks is sold back on the next creator save.
+    /// </summary>
     [DataField]
     public HashSet<ProtoId<WFAugmentPrototype>> AugmentUnlocks { get; set; } = new();
 
@@ -18,6 +25,12 @@ public sealed partial class HumanoidCharacterProfile
     public HumanoidCharacterProfile WithAugments(Dictionary<WFAugmentSlot, WFAugmentChoice> augments)
     {
         return new(this) { Augments = new(augments) };
+    }
+
+    /// <summary>Copy of this profile with the given implants.</summary>
+    public HumanoidCharacterProfile WithAugmentImplants(IEnumerable<ProtoId<WFAugmentPrototype>> implants)
+    {
+        return new(this) { AugmentImplants = new(implants) };
     }
 
     /// <summary>Copy of this profile with the given unlocks.</summary>
@@ -30,6 +43,7 @@ public sealed partial class HumanoidCharacterProfile
     {
         return Augments.Count == other.Augments.Count
                && Augments.All(a => other.Augments.TryGetValue(a.Key, out var o) && o == a.Value)
+               && AugmentImplants.SetEquals(other.AugmentImplants)
                && AugmentUnlocks.SetEquals(other.AugmentUnlocks);
     }
 
@@ -37,6 +51,7 @@ public sealed partial class HumanoidCharacterProfile
     {
         // Crafted network data can deliver null.
         Augments = WFAugmentRules.Validate(Species, Augments, TraitPreferences, proto, factory);
+        AugmentImplants = WFAugmentRules.ValidateImplants(Species, Augments, AugmentImplants, TraitPreferences, proto, factory);
         AugmentUnlocks = new((AugmentUnlocks ?? new()).Where(u => proto.HasIndex(u)));
     }
 }

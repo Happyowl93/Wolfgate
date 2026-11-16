@@ -68,7 +68,8 @@
   styled: true
 
 # The cyberware found, bought and installed in rounds. Each is bought once in the creator or kept from a round
-# it was installed in; scavengers find the part, organ or autosurgeon, rarer the dearer it is.
+# it was installed in; scavengers find the part, organ or autosurgeon, rarer the dearer it is. Better limbs hold more
+# implants (implantSlots); an implant's slot is the part it goes in, and host says whether that part must be synthetic.
 
 - type: wfAugment
   id: WFAugmentJawsOfLifeLeftArm
@@ -77,6 +78,7 @@
   part: JawsOfLifeLeftArm
   styled: true
   price: 60000
+  implantSlots: 2
   order: 10
 
 - type: wfAugment
@@ -86,6 +88,7 @@
   part: JawsOfLifeRightArm
   styled: true
   price: 60000
+  implantSlots: 2
   order: 10
 
 - type: wfAugment
@@ -95,6 +98,7 @@
   part: SpeedLeftLeg
   styled: true
   price: 50000
+  implantSlots: 2
   order: 10
 
 - type: wfAugment
@@ -104,6 +108,7 @@
   part: SpeedRightLeg
   styled: true
   price: 50000
+  implantSlots: 2
   order: 10
 
 - type: wfAugment
@@ -205,8 +210,9 @@
   id: WFAugmentLeftMantisBlade
   name: wf-augment-mantis-blade-left
   description: wf-augment-mantis-blade-desc
-  slot: LeftArmImplant
+  slot: LeftArm
   kind: Upgrade
+  host: Synthetic
   autosurgeon: AutosurgeonLeftMantisBladeMieyo
   price: 200000
 
@@ -214,8 +220,9 @@
   id: WFAugmentRightMantisBlade
   name: wf-augment-mantis-blade-right
   description: wf-augment-mantis-blade-desc
-  slot: RightArmImplant
+  slot: RightArm
   kind: Upgrade
+  host: Synthetic
   autosurgeon: AutosurgeonRightMantisBladeMieyo
   price: 200000
 
@@ -223,7 +230,7 @@
   id: WFAugmentDermalArmor
   name: wf-augment-dermal-armor
   description: wf-augment-dermal-armor-desc
-  slot: Dermal
+  slot: Chest
   kind: Upgrade
   autosurgeon: AutosurgeonDermalArmorPDV
   price: 150000
@@ -232,7 +239,7 @@
   id: WFAugmentMuscleFibers
   name: wf-augment-muscle-fibers
   description: wf-augment-muscle-fibers-desc
-  slot: Muscles
+  slot: Chest
   kind: Upgrade
   autosurgeon: AutosurgeonMuscleFibersMieyo
   price: 100000

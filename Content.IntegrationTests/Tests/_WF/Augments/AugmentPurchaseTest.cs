@@ -14,7 +14,7 @@ namespace Content.IntegrationTests.Tests._WF.Augments;
 
 /// <summary>
 /// A client save buys a priced augment once from the character's bank and keeps it unlocked; one the bank can't cover
-/// is dropped, and unlocks a client sends are ignored.
+/// is dropped, unlocks a client sends are ignored, and one taken off is sold back for half its price.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(ServerPreferencesManager))]
@@ -108,6 +108,16 @@ public sealed class AugmentPurchaseTest
         {
             Assert.That(Stored().AugmentUnlocks.Select(u => u.Id), Is.EquivalentTo(new[] { "WFTestPricedLeftLeg" }));
             Assert.That(Stored().Augments.Keys, Is.EquivalentTo(new[] { WFAugmentSlot.LeftLeg }));
+        });
+
+        // Taking the leg off sells it back for half: 5000 + 7500.
+        await Save(() => prefs.SetProfile(userId, slot,
+            Stored().WithAugments(new Dictionary<WFAugmentSlot, WFAugmentChoice>()), authoritative: false));
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored().BankBalance, Is.EqualTo(12500));
+            Assert.That(Stored().AugmentUnlocks, Is.Empty);
+            Assert.That(Stored().Augments, Is.Empty);
         });
 
         await pair.CleanReturnAsync();

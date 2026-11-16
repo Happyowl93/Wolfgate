@@ -39,13 +39,22 @@ public sealed partial class WFAugmentPrototype : IPrototype
     [DataField]
     public EntProtoId? Autosurgeon;
 
+    /// <summary>Whether an implant needs a flesh or a synthetic part, for <see cref="WFAugmentKind.Upgrade"/>.</summary>
+    [DataField]
+    public WFAugmentHost Host;
+
+    /// <summary>How many implants the limb holds, for <see cref="WFAugmentKind.Limb"/>.</summary>
+    [DataField]
+    public int ImplantSlots = 1;
+
     /// <summary>Whether the player picks a style for it. Limbs and plating are styled.</summary>
     [DataField]
     public bool Styled;
 
     /// <summary>
     /// One-time price in spesos, taken from the character's bank the first time it is saved with this augment.
-    /// Zero for augments that give no advantage. Scavenged loot is weighted by its inverse; free ones never drop.
+    /// Zero for augments that give no advantage. Taking it off in the creator refunds
+    /// <see cref="WFAugmentRules.RefundPercent"/> of it. Scavenged loot is weighted by its inverse; free ones never drop.
     /// </summary>
     [DataField]
     public int Price;

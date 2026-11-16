@@ -15,8 +15,9 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._WF.Augments;
 
 /// <summary>
-/// Swaps a body's parts and organs for the augments its profile picked. The old part or organ is cut loose from
-/// the body before it is deleted, so its loss doesn't read as an injury; a hand keeps what it holds.
+/// Swaps a body's parts and organs for the augments its profile picked, then puts its implants in. The old part or
+/// organ is cut loose from the body before it is deleted, so its loss doesn't read as an injury; a hand keeps what it
+/// holds.
 /// </summary>
 public sealed partial class WFAugmentSystem : EntitySystem
 {
@@ -58,10 +59,14 @@ public sealed partial class WFAugmentSystem : EntitySystem
                 case WFAugmentKind.Organ when augment.Organ is { } organ:
                     ReplaceOrgan(ent, slot, organ);
                     break;
-                case WFAugmentKind.Upgrade when Surgeon(augment) is { } surgeon:
-                    _autoSurgeon.WfApplyUpgrade(ent, surgeon);
-                    break;
             }
+        }
+
+        // Implants go in after the limbs they sit in.
+        foreach (var id in args.Profile.AugmentImplants.OrderBy(i => i.Id))
+        {
+            if (_proto.TryIndex(id, out var implant) && Surgeon(implant) is { } surgeon)
+                _autoSurgeon.WfApplyUpgrade(ent, surgeon);
         }
     }
 

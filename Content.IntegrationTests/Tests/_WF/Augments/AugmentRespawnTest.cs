@@ -65,7 +65,8 @@ public sealed class AugmentRespawnTest
         await server.WaitAssertion(() => Assert.That(Stored().Augments, Is.Not.Empty));
 
         await server.WaitPost(() => augments.Track(userId,
-            new WFAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, new Dictionary<WFAugmentSlot, WFAugmentChoice>())));
+            new WFAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, new Dictionary<WFAugmentSlot, WFAugmentChoice>(),
+                new HashSet<ProtoId<WFAugmentPrototype>>())));
         await Run(() => augments.ForfeitAugments(session));
         await server.WaitAssertion(() =>
         {
