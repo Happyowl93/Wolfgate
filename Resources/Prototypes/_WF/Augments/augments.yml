@@ -368,3 +368,35 @@
   autosurgeon: WFAutosurgeonRightThreatSole
   price: 150000
   speciesBlacklist: [ Felinid, Tajaran, Harpy ]
+
+- type: wfAugment
+  id: WFAugmentNutrimentPump
+  name: wf-augment-nutriment-pump
+  description: wf-augment-nutriment-pump-desc
+  icon: { sprite: _WF/Augments/implants.rsi, state: nutriment_pump }
+  slot: Chest
+  kind: Upgrade
+  host: Organic
+  autosurgeon: WFAutosurgeonNutrimentPump
+  price: 100000
+
+- type: wfAugment
+  id: WFAugmentReviver
+  name: wf-augment-reviver
+  description: wf-augment-reviver-desc
+  icon: { sprite: _WF/Augments/implants.rsi, state: reviver }
+  slot: Chest
+  kind: Upgrade
+  host: Organic
+  autosurgeon: WFAutosurgeonReviver
+  price: 600000
+
+- type: wfAugment
+  id: WFAugmentIatricMonitor
+  name: wf-augment-iatric-monitor
+  description: wf-augment-iatric-monitor-desc
+  icon: { sprite: _WF/Augments/implants.rsi, state: iatric_monitor }
+  slot: Head
+  kind: Upgrade
+  autosurgeon: WFAutosurgeonIatricMonitor
+  price: 75000

@@ -46,6 +46,15 @@ Three implants bring back the combat traits Monolith removed (#5023), paid for a
 adds Monolith's `Vigor`, the threat-sense sole its `TrapAvoider`, and the pain editor (`WFPainEditorSystem`) scales pain
 gain down in place of Tenacity, whose crit threshold Wolfmed doesn't read.
 
+Three more look after the body, each a component the autosurgeon puts on it. The nutriment pump
+(`WFNutrimentPumpSystem`) feeds its owner a little whenever they reach starving, which leaves them peckish and food
+still worth eating. The reviver (`WFReviverSystem`) is a defibrillator of its own: when the heart stops it charges
+for ten seconds and shocks through `WolfmedRevivalSystem`, so it is refused for what a medic's paddles are refused
+for and restarts the heart on their odds, and it heals nothing. It has three shocks, fifteen seconds apart, then
+recharges for ten minutes; an EMP knocks the charge out and locks it for two. The iatric monitor
+(`WFIatricMonitorSystem`) gives an action that opens the health analyzer's window on its own body; the action entity
+is the analyzer, and being held by the body is what keeps the window in range.
+
 A health analyzer scan carries the cyberware in the body (`WFAugmentSystem.ReadInstalled`, sent as
 `HealthAnalyzerScannedUserMessage.Augments`), and the organs tab lists it under the organs (`WFAugmentScanList`).
 
@@ -116,6 +125,9 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Persistence.cs`](WFAugmentSystem.Persistence.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Traits.cs`](WFAugmentSystem.Traits.cs)
 - [`Content.Server/_WF/Augments/WFDeployableImplantSystem.cs`](WFDeployableImplantSystem.cs)
+- [`Content.Server/_WF/Augments/WFIatricMonitorSystem.cs`](WFIatricMonitorSystem.cs)
+- [`Content.Server/_WF/Augments/WFNutrimentPumpSystem.cs`](WFNutrimentPumpSystem.cs)
+- [`Content.Server/_WF/Augments/WFReviverSystem.cs`](WFReviverSystem.cs)
 
 ### Shared
 
@@ -134,8 +146,11 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WF/Augments/WFAugmentStylePrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentStylePrototype.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentTraitSlotsPrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentTraitSlotsPrototype.cs)
 - [`Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs`](../../../Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs)
+- [`Content.Shared/_WF/Augments/WFIatricMonitorComponent.cs`](../../../Content.Shared/_WF/Augments/WFIatricMonitorComponent.cs)
+- [`Content.Shared/_WF/Augments/WFNutrimentPumpComponent.cs`](../../../Content.Shared/_WF/Augments/WFNutrimentPumpComponent.cs)
 - [`Content.Shared/_WF/Augments/WFPainEditorComponent.cs`](../../../Content.Shared/_WF/Augments/WFPainEditorComponent.cs)
 - [`Content.Shared/_WF/Augments/WFPainEditorSystem.cs`](../../../Content.Shared/_WF/Augments/WFPainEditorSystem.cs)
+- [`Content.Shared/_WF/Augments/WFReviverComponent.cs`](../../../Content.Shared/_WF/Augments/WFReviverComponent.cs)
 - [`Content.Shared/_WF/Augments/WFSmartlinkComponent.cs`](../../../Content.Shared/_WF/Augments/WFSmartlinkComponent.cs)
 - [`Content.Shared/_WF/Augments/WFSmartlinkSystem.cs`](../../../Content.Shared/_WF/Augments/WFSmartlinkSystem.cs)
 
@@ -166,6 +181,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentRespawnTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentRespawnTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentRulesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentRulesTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentSpeciesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentSpeciesTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Augments/AugmentVitalImplantsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentVitalImplantsTest.cs)
 
 ### Prototypes
 
@@ -200,6 +216,7 @@ scratch, so an unpicked augment comes off it.
 - [`Resources/Textures/_WF/Augments/engineering.rsi/`](../../../Resources/Textures/_WF/Augments/engineering.rsi/)
 - [`Resources/Textures/_WF/Augments/hephaestus.rsi/`](../../../Resources/Textures/_WF/Augments/hephaestus.rsi/)
 - [`Resources/Textures/_WF/Augments/hephaestus2.rsi/`](../../../Resources/Textures/_WF/Augments/hephaestus2.rsi/)
+- [`Resources/Textures/_WF/Augments/implants.rsi/`](../../../Resources/Textures/_WF/Augments/implants.rsi/)
 - [`Resources/Textures/_WF/Augments/mariinsky.rsi/`](../../../Resources/Textures/_WF/Augments/mariinsky.rsi/)
 - [`Resources/Textures/_WF/Augments/mining.rsi/`](../../../Resources/Textures/_WF/Augments/mining.rsi/)
 - [`Resources/Textures/_WF/Augments/morpheus.rsi/`](../../../Resources/Textures/_WF/Augments/morpheus.rsi/)

@@ -166,6 +166,26 @@
   description: Flick the lighter out of your right hand's fingertip, or back in.
   categories: [ HideSpawnMenu ]
 
+- type: entity
+  id: WFActionIatricScan
+  name: Iatric Monitor
+  description: Read your own vital signs off the monitor behind your eye, or put the readout away.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: InstantAction
+    useDelay: 1
+    checkCanInteract: false
+    icon: { sprite: _WF/Augments/implants.rsi, state: iatric_monitor }
+    itemIconStyle: NoItem
+    event: !type:WFIatricScanEvent
+  - type: HealthAnalyzer
+    silent: true
+  - type: UserInterface
+    interfaces:
+      enum.HealthAnalyzerUiKey.Key:
+        type: HealthAnalyzerBoundUserInterface
+  - type: WFIatricScanner
+
 # Autosurgeons
 
 - type: entity
@@ -309,3 +329,36 @@
     targetBodyPartSymmetry: Right
     componentsToUser:
     - type: TrapAvoider
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WFAutosurgeonNutrimentPump
+  name: autosurgeon (nutriment pump)
+  description: Fits a nutriment pump beside the stomach, which feeds its owner whenever they are starving.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Torso
+    componentsToUser:
+    - type: WFNutrimentPump
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WFAutosurgeonReviver
+  name: autosurgeon (reviver)
+  description: Wires a reviver to the heart, which shocks it when it stops.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Torso
+    componentsToUser:
+    - type: WFReviver
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WFAutosurgeonIatricMonitor
+  name: autosurgeon (iatric monitor)
+  description: Fits an iatric monitor behind the eye, which shows its owner their own vital signs.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Head
+    componentsToUser:
+    - type: WFIatricMonitor

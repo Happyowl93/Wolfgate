@@ -67,5 +67,14 @@ wf-augment-pain-editor = Pain editor
 wf-augment-pain-editor-desc = A filter on the brainstem that dulls the pain of every wound, so it takes more to put you down.
 wf-augment-threat-sole = Threat-sense sole
 wf-augment-threat-sole-desc = Sensors in the sole that keep you from setting off land mines, tripwires and other floor traps. One sole is enough; in a cybernetic foot an EMP switches it off with the foot.
+wf-augment-nutriment-pump = Nutriment pump
+wf-augment-nutriment-pump-desc = A pump beside the stomach that feeds you whenever you are starving. It keeps you from starving, not from being hungry.
+wf-augment-nutriment-pump-feed = You feel less hungry...
+wf-augment-reviver = Reviver
+wf-augment-reviver-desc = A defibrillator wired to the heart. When the heart stops it charges and shocks it, up to three times, on the odds and limits of a medic's paddles; then it recharges for ten minutes. An EMP knocks it out for two.
+wf-augment-reviver-charging = Something in your chest whines as it charges.
+wf-augment-reviver-shock = { CAPITALIZE(THE($target)) } jolts as something in { POSS-ADJ($target) } chest fires!
+wf-augment-iatric-monitor = Iatric monitor
+wf-augment-iatric-monitor-desc = A monitor behind the eye that reads your own vital signs to you, the way a health analyzer would.
 
 wf-analyzer-cyberware = Cyberware
