@@ -77,7 +77,7 @@
   kind: Limb
   part: JawsOfLifeLeftArm
   styled: true
-  price: 60000
+  price: 200000
   implantSlots: 2
   order: 10
 
@@ -87,7 +87,7 @@
   kind: Limb
   part: JawsOfLifeRightArm
   styled: true
-  price: 60000
+  price: 200000
   implantSlots: 2
   order: 10
 
@@ -97,7 +97,7 @@
   kind: Limb
   part: SpeedLeftLeg
   styled: true
-  price: 50000
+  price: 200000
   implantSlots: 2
   order: 10
 
@@ -107,7 +107,7 @@
   kind: Limb
   part: SpeedRightLeg
   styled: true
-  price: 50000
+  price: 200000
   implantSlots: 2
   order: 10
 
@@ -117,7 +117,7 @@
   kind: Limb
   part: DexLeftHand
   styled: true
-  price: 25000
+  price: 100000
   order: 10
 
 - type: wfAugment
@@ -126,7 +126,7 @@
   kind: Limb
   part: DexRightHand
   styled: true
-  price: 25000
+  price: 100000
   order: 10
 
 - type: wfAugment
@@ -134,14 +134,14 @@
   slot: Eyes
   kind: Organ
   organ: BasicCyberneticEyes
-  price: 15000
+  price: 75000
 
 - type: wfAugment
   id: WFAugmentSecurityEyes
   slot: Eyes
   kind: Organ
   organ: SecurityCyberneticEyes
-  price: 40000
+  price: 150000
   order: 10
 
 - type: wfAugment
@@ -149,7 +149,7 @@
   slot: Eyes
   kind: Organ
   organ: MedicalCyberneticEyes
-  price: 40000
+  price: 150000
   order: 10
 
 - type: wfAugment
@@ -157,21 +157,21 @@
   slot: Lungs
   kind: Organ
   organ: OrganInternalAirSystem
-  price: 50000
+  price: 150000
 
 - type: wfAugment
   id: WFAugmentScrubberLiver
   slot: Liver
   kind: Organ
   organ: WFAugmentScrubberLiver
-  price: 20000
+  price: 150000
 
 - type: wfAugment
   id: WFAugmentPDVHeart
   slot: Heart
   kind: Organ
   organ: OrganPDVAdvancedHeart
-  price: 120000
+  price: 250000
 
 - type: wfAugment
   id: WFAugmentSakimotoHeart
@@ -221,7 +221,7 @@
   kind: Upgrade
   host: Synthetic
   autosurgeon: AutosurgeonLeftMantisBladeMieyo
-  price: 200000
+  price: 400000
 
 - type: wfAugment
   id: WFAugmentRightMantisBlade
@@ -231,7 +231,7 @@
   kind: Upgrade
   host: Synthetic
   autosurgeon: AutosurgeonRightMantisBladeMieyo
-  price: 200000
+  price: 400000
 
 - type: wfAugment
   id: WFAugmentDermalArmor
@@ -240,7 +240,7 @@
   slot: Chest
   kind: Upgrade
   autosurgeon: AutosurgeonDermalArmorPDV
-  price: 150000
+  price: 300000
 
 - type: wfAugment
   id: WFAugmentMuscleFibers
@@ -249,7 +249,7 @@
   slot: Chest
   kind: Upgrade
   autosurgeon: AutosurgeonMuscleFibersMieyo
-  price: 100000
+  price: 250000
 
 - type: wfAugment
   id: WFAugmentLeftToolArm
@@ -259,7 +259,7 @@
   kind: Upgrade
   host: Synthetic
   autosurgeon: WFAutosurgeonLeftToolArm
-  price: 40000
+  price: 150000
 
 - type: wfAugment
   id: WFAugmentRightToolArm
@@ -269,7 +269,7 @@
   kind: Upgrade
   host: Synthetic
   autosurgeon: WFAutosurgeonRightToolArm
-  price: 40000
+  price: 150000
 
 - type: wfAugment
   id: WFAugmentLeftSmartlink
@@ -279,7 +279,7 @@
   kind: Upgrade
   host: Synthetic
   autosurgeon: WFAutosurgeonLeftSmartlink
-  price: 150000
+  price: 400000
 
 - type: wfAugment
   id: WFAugmentRightSmartlink
@@ -289,7 +289,7 @@
   kind: Upgrade
   host: Synthetic
   autosurgeon: WFAutosurgeonRightSmartlink
-  price: 150000
+  price: 400000
 
 - type: wfAugment
   id: WFAugmentLeftFingerLighter
@@ -298,6 +298,7 @@
   slot: LeftHand
   kind: Upgrade
   autosurgeon: WFAutosurgeonLeftFingerLighter
+  price: 50000
   order: 10
 
 - type: wfAugment
@@ -307,4 +308,5 @@
   slot: RightHand
   kind: Upgrade
   autosurgeon: WFAutosurgeonRightFingerLighter
+  price: 50000
   order: 10

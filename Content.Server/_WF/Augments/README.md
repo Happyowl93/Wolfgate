@@ -18,7 +18,7 @@ A character gets an augment three ways:
 - **Buying it in a round** from the faction lathes, uplinks or loadouts, as before, and installing it.
 - **Scavenging.** `WFAugmentSelector` (the `WFAugmentScavengeTable`, nested into the rare tiers of the Mono
   maintenance tables) drops a priced augment's bare part or organ, which a surgeon puts in, or an upgrade's
-  autosurgeon. The weight is the inverse of the price, so a Sandevistan is about 170 times rarer than cyber eyes.
+  autosurgeon. The weight is the inverse of the price, so a Sandevistan is about 33 times rarer than cyber eyes.
 
 Implants (`kind: Upgrade`) are a set of their own (`AugmentImplants`), not slot choices: an implant's `slot` is the
 part it goes in, matching its autosurgeon's target. A part holds `implantSlots` of them (a J.W.L arm or S.P.E.E.D leg

@@ -66,7 +66,7 @@ public sealed class AugmentImplantsTest
             Assert.That(WFAugmentRules.ValidateImplants("Human", cyber, Implants, noTraits, proto, factory),
                 Is.EquivalentTo(Implants));
 
-            // A hand holds one implant, and the priced one stays.
+            // A hand holds one implant, and the smartlink outranks the lighter.
             var oneHand = new ProtoId<WFAugmentPrototype>[] { "WFAugmentRightFingerLighter", "WFAugmentRightSmartlink" };
             Assert.That(WFAugmentRules.ValidateImplants("Human", cyber, oneHand, noTraits, proto, factory).Select(i => i.Id),
                 Is.EquivalentTo(new[] { "WFAugmentRightSmartlink" }));
