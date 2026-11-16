@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Content.Shared.Clothing.Components;
 using Content.Shared.Preferences.Loadouts;
+using Content.Shared.Radio.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
@@ -101,6 +102,26 @@ public sealed class BlueshieldLoadoutTest
                     }
                 }
             });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>The headset is cosmetic: anyone can pick it, so it must not carry faction channels.</summary>
+    [Test]
+    public async Task BlueshieldHeadsetOnlyHasCommonChannel()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings());
+        var server = pair.Server;
+        var entMan = server.ResolveDependency<IEntityManager>();
+        var map = await pair.CreateTestMap();
+
+        await server.WaitAssertion(() =>
+        {
+            var headset = entMan.SpawnEntity("ClothingHeadsetAltBlueshield", map.MapCoords);
+            var holder = entMan.GetComponent<EncryptionKeyHolderComponent>(headset);
+            Assert.That(holder.Channels, Is.EquivalentTo(new[] { "Common" }));
+            entMan.DeleteEntity(headset);
         });
 
         await pair.CleanReturnAsync();
