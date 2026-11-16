@@ -538,9 +538,6 @@
       - id: PillCanisterStrange
       - id: LidSalami
         weight: 0.05
-      # WOLFGATE(Augments): scavenged cyberware, the dearer the rarer
-      - !type:NestedSelector
-        tableId: WFAugmentScavengeTable
 
 #LootSpawner
 - type: entity
@@ -714,6 +711,3 @@
           - id: StorageImplanter
       - id: ClothingHeadHatCatEarsValid #most vile and powerful
         weight: 0.01
-      # WOLFGATE(Augments): scavenged cyberware, the dearer the rarer
-      - !type:NestedSelector
-        tableId: WFAugmentScavengeTable

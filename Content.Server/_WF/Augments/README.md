@@ -16,9 +16,9 @@ A character gets an augment three ways:
   however it was obtained. Only the server adds unlocks. Nothing is gated by faction: any character can buy the
   faction hearts and implants here.
 - **Buying it in a round** from the faction lathes, uplinks or loadouts, as before, and installing it.
-- **Scavenging.** `WFAugmentSelector` (the `WFAugmentScavengeTable`, nested into the rare tiers of the Mono
-  maintenance tables) drops a priced augment's bare part or organ, which a surgeon puts in, or an upgrade's
-  autosurgeon. The weight is the inverse of the price, so a Sandevistan is about 33 times rarer than cyber eyes.
+- **Scavenging.** `WFAugmentSelector` (the `WFAugmentScavengeTable`) drops a priced augment's bare part or organ,
+  which a surgeon puts in, or an upgrade's autosurgeon. It turns up only on the floors of wrecks
+  (`WFAugmentScavengeSpawner` in the wreck debris floor list, `wrecks.yml`). The weight is the inverse of the price, so a Sandevistan is about 33 times rarer than cyber eyes.
 
 Implants (`kind: Upgrade`) are a set of their own (`AugmentImplants`), not slot choices: an implant's `slot` is the
 part it goes in, matching its autosurgeon's target. A part holds `implantSlots` of them (a J.W.L arm or S.P.E.E.D leg
@@ -220,6 +220,6 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/Body/Systems/SharedBodySystem.Parts.cs`](../../../Content.Shared/Body/Systems/SharedBodySystem.Parts.cs): a part cut loose for an augment isn't lost
 - [`Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs`](../../../Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs): swaps in the augmented parts and draws their styles
 - [`Content.Shared/Preferences/HumanoidCharacterProfile.cs`](../../../Content.Shared/Preferences/HumanoidCharacterProfile.cs): augments the species can't take are dropped
-- [`Resources/Prototypes/_Mono/Catalogs/Fills/Lockers/salvmaint_locker.yml`](../../../Resources/Prototypes/_Mono/Catalogs/Fills/Lockers/salvmaint_locker.yml): scavenged cyberware, the dearer the rarer
+- [`Resources/Prototypes/_NF/Entities/World/Debris/wrecks.yml`](../../../Resources/Prototypes/_NF/Entities/World/Debris/wrecks.yml): scavenged cyberware, the dearer the rarer
 
 <!-- WOLFGATE-GENERATED END -->

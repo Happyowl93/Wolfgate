@@ -1,5 +1,5 @@
 # One scavenged augment, picked from augments.yml by price: the bare part or organ, or the autosurgeon for an
-# upgrade. Nested into the rare tiers of the maintenance loot tables.
+# upgrade. Found only on the floors of wrecks (the spawner is in the wreck debris floor list).
 
 - type: entityTable
   id: WFAugmentScavengeTable
