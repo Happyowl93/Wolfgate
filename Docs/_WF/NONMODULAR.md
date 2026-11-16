@@ -23,6 +23,10 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
   - the medical assembler is a lathe now, so show its lathe recipe
 - [`Content.Client/_RMC14/Weapons/Ranged/Prediction/GunPredictionSystem.cs`](../../Content.Client/_RMC14/Weapons/Ranged/Prediction/GunPredictionSystem.cs): restore the licence header removed by Kill Spdx
 - [`Content.Client/Atmos/EntitySystems/FireVisualizerSystem.cs`](../../Content.Client/Atmos/EntitySystems/FireVisualizerSystem.cs): a mob that arrives burning would get its light child before it is initialised itself; the appearance update queued at startup lays it.
+- [`Content.Client/Atmos/Monitor/UI/Widgets/SensorInfo.xaml.cs`](../../Content.Client/Atmos/Monitor/UI/Widgets/SensorInfo.xaml.cs)
+  - a device whose threshold list lacks this gas crashed the window
+  - use the checked threshold
+  - threshold is looked up above
 - [`Content.Client/Cargo/Systems/CargoSystem.Telepad.cs`](../../Content.Client/Cargo/Systems/CargoSystem.Telepad.cs): Stop() raises this mid-OnChangeData; re-entering it played the beam twice and crashed the client
 - [`Content.Client/Changelog/ChangelogTab.xaml.cs`](../../Content.Client/Changelog/ChangelogTab.xaml.cs): a stray bracket in one entry no longer empties the whole changelog
 - [`Content.Client/CharacterInfo/CharacterInfoSystem.cs`](../../Content.Client/CharacterInfo/CharacterInfoSystem.cs)
@@ -509,6 +513,7 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
 - [`Resources/Prototypes/_Mono/Entities/Structures/Shuttles/capital_thrusters.yml`](../../Resources/Prototypes/_Mono/Entities/Structures/Shuttles/capital_thrusters.yml): PDV pack, capital thruster 400->600
 - [`Resources/Prototypes/_Mono/Entities/Structures/Shuttles/thrusters_nfsd.yml`](../../Resources/Prototypes/_Mono/Entities/Structures/Shuttles/thrusters_nfsd.yml): PDV pack, 0.33x of the 150 default; cant be upgraded with parts
 - [`Resources/Prototypes/_Mono/Entities/Structures/Shuttles/thrusters_rogue.yml`](../../Resources/Prototypes/_Mono/Entities/Structures/Shuttles/thrusters_rogue.yml): PDV pack, 0.33x of the 150 default; cant be upgraded with parts
+- [`Resources/Prototypes/_Mono/Entities/Structures/Specific/Atmospherics/storagesensors.yml`](../../Resources/Prototypes/_Mono/Entities/Structures/Specific/Atmospherics/storagesensors.yml): a gas missing from this list crashed the air alarm UI
 - [`Resources/Prototypes/_Mono/Guidebook/rules.yml`](../../Resources/Prototypes/_Mono/Guidebook/rules.yml)
   - rule 0 is listed in the ruleset, nest it so Symphony doesn't show it as its own ruleset
   - erotic roleplay rule removed, PR #27
@@ -580,6 +585,7 @@ Standalone edits outside `_WF` that serve no module: files with an untagged `WOL
 - [`Resources/Prototypes/Entities/Structures/Lighting/base_lighting.yml`](../../Resources/Prototypes/Entities/Structures/Lighting/base_lighting.yml): draw over posters at the same depth instead of flickering with them
 - [`Resources/Prototypes/Entities/Structures/Lighting/strobe_lighting.yml`](../../Resources/Prototypes/Entities/Structures/Lighting/strobe_lighting.yml): draw over posters at the same depth instead of flickering with them
 - [`Resources/Prototypes/Entities/Structures/Machines/Computers/computers.yml`](../../Resources/Prototypes/Entities/Structures/Machines/Computers/computers.yml): restore the licence header removed by Kill Spdx
+- [`Resources/Prototypes/Entities/Structures/Specific/Atmospherics/vox.yml`](../../Resources/Prototypes/Entities/Structures/Specific/Atmospherics/vox.yml): a gas missing from this list crashed the air alarm UI
 - [`Resources/Prototypes/GameRules/pests.yml`](../../Resources/Prototypes/GameRules/pests.yml)
   - pest events were crowding out the rest of the table (was 6)
   - each pest event at most once per 90 minutes
