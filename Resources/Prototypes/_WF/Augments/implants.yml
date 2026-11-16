@@ -9,6 +9,11 @@
   name: scrubber liver
   description: A synthetic liver that strips toxins, alcohol and narcotics out of the blood several times faster than flesh does. Stimulants burn off just as fast.
   components:
+  - type: Sprite
+    sprite: _WF/Augments/implants.rsi
+    state: scrubber_liver
+  - type: Item
+    sprite: Mobs/Species/Human/organs.rsi # the flesh liver's inhands; there are no synthetic ones
   - type: Metabolizer
     maxReagents: 3
     metabolizerTypes: [ Human ]
