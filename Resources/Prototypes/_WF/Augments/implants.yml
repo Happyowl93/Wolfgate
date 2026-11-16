@@ -22,6 +22,33 @@
   - type: WolfmedOrgan
     clearanceFactor: 3
 
+# Thermal eyes that cycle through four colour bands. No flash immunity, so a flash still blinds them.
+- type: entity
+  parent: BaseCyberneticEyes
+  id: WFAugmentThermalTintEyes
+  name: spectral thermal eyes
+  description: Cybernetic eyes that see body heat through walls and the dark, and cycle the view through four colour bands. A flash still gets through.
+  components:
+  - type: Organ
+    onAdd:
+    - type: EyeProtection
+    - type: ThermalVision
+      toggleAction: null
+    - type: WFThermalTints
+      tints:
+      - name: wf-thermal-tint-ember
+        color: "#ff6a4d"
+        tint: 0.42, 0.12, 0.08
+      - name: wf-thermal-tint-glacier
+        color: "#6fd6ff"
+        tint: 0.06, 0.22, 0.42
+      - name: wf-thermal-tint-venom
+        color: "#8dff5a"
+        tint: 0.1, 0.36, 0.08
+      - name: wf-thermal-tint-solar
+        color: "#ffd34d"
+        tint: 0.4, 0.32, 0.05
+
 # Deployed items
 
 # The tool arm's heads. Each is the hand tool it stands in for, a fifth faster like the omnitool, with its own sprite;
@@ -185,6 +212,19 @@
       enum.HealthAnalyzerUiKey.Key:
         type: HealthAnalyzerBoundUserInterface
   - type: WFIatricScanner
+
+- type: entity
+  id: WFActionCycleThermalTint
+  name: Cycle Thermal Band
+  description: Switch your thermal eyes to their next colour band, or off after the last.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: InstantAction
+    useDelay: 0.5
+    checkCanInteract: false
+    icon: { sprite: _White/Clothing/Eyes/Goggles/thermal.rsi, state: icon }
+    itemIconStyle: NoItem
+    event: !type:WFCycleThermalTintEvent
 
 # Autosurgeons
 

@@ -62,6 +62,13 @@ unlinked. While linked, the player's screen (`WFSmartlinkOverlay`) shows the gun
 living, uncloaked mob in sight within twelve tiles that is nearest the cursor, with its range. The scrubber liver metabolises alcohol, poison and narcotics four times as fast and clears
 Wolfmed toxin load three times as fast (`WolfmedOrganComponent.ClearanceFactor`).
 
+The spectral thermal eyes (`WFThermalTintsSystem`) put White Dream's `ThermalVision` and `WFThermalTintsComponent`
+on the body. They have no toggle of their own: one action steps the vision through the four bands in `implants.yml`
+and then switches it off, setting the overlay's body colour and wash for each. Each switch plays the goggles' click
+under a raised scanner chirp and a quarter-second glitch (`WFThermalGlitchOverlay`) in the new band's colour. The wash
+isn't in the thermal vision's network state, so `WFThermalTintsVisualsSystem` copies it from the band on every state.
+They keep eye protection but not flash immunity.
+
 Three implants bring back the combat traits Monolith removed (#5023), paid for and losable: the adrenal booster
 adds Monolith's `Vigor`, the threat-sense sole its `TrapAvoider`, and the pain editor (`WFPainEditorSystem`) scales pain
 gain down in place of Tenacity, whose crit threshold Wolfmed doesn't read.
@@ -185,6 +192,8 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WF/Augments/WFReviverComponent.cs`](../../../Content.Shared/_WF/Augments/WFReviverComponent.cs)
 - [`Content.Shared/_WF/Augments/WFSmartlinkComponent.cs`](../../../Content.Shared/_WF/Augments/WFSmartlinkComponent.cs)
 - [`Content.Shared/_WF/Augments/WFSmartlinkSystem.cs`](../../../Content.Shared/_WF/Augments/WFSmartlinkSystem.cs)
+- [`Content.Shared/_WF/Augments/WFThermalTintsComponent.cs`](../../../Content.Shared/_WF/Augments/WFThermalTintsComponent.cs)
+- [`Content.Shared/_WF/Augments/WFThermalTintsSystem.cs`](../../../Content.Shared/_WF/Augments/WFThermalTintsSystem.cs)
 
 ### Client
 
@@ -200,8 +209,10 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Client/_WF/Augments/UI/WFAugmentTheme.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentTheme.cs)
 - [`Content.Client/_WF/Augments/UI/WFDeployableWheel.cs`](../../../Content.Client/_WF/Augments/UI/WFDeployableWheel.cs)
 - [`Content.Client/_WF/Augments/UI/WFSmartlinkOverlay.cs`](../../../Content.Client/_WF/Augments/UI/WFSmartlinkOverlay.cs)
+- [`Content.Client/_WF/Augments/UI/WFThermalGlitchOverlay.cs`](../../../Content.Client/_WF/Augments/UI/WFThermalGlitchOverlay.cs)
 - [`Content.Client/_WF/Augments/WFDeployableWheelSystem.cs`](../../../Content.Client/_WF/Augments/WFDeployableWheelSystem.cs)
 - [`Content.Client/_WF/Augments/WFSmartlinkOverlaySystem.cs`](../../../Content.Client/_WF/Augments/WFSmartlinkOverlaySystem.cs)
+- [`Content.Client/_WF/Augments/WFThermalTintsVisualsSystem.cs`](../../../Content.Client/_WF/Augments/WFThermalTintsVisualsSystem.cs)
 
 ### Integration tests
 
@@ -215,6 +226,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentRespawnTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentRespawnTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentRulesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentRulesTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentSpeciesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentSpeciesTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Augments/AugmentThermalEyesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentThermalEyesTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentVitalImplantsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentVitalImplantsTest.cs)
 
 ### Prototypes

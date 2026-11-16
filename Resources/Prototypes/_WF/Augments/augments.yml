@@ -154,6 +154,16 @@
   order: 10
 
 - type: wfAugment
+  id: WFAugmentThermalTintEyes
+  name: wf-augment-thermal-tint-eyes
+  description: wf-augment-thermal-tint-eyes-desc
+  slot: Eyes
+  kind: Organ
+  organ: WFAugmentThermalTintEyes
+  price: 1000000
+  order: 20
+
+- type: wfAugment
   id: WFAugmentInternalAirSystem
   slot: Lungs
   kind: Organ
