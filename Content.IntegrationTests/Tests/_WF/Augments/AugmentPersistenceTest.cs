@@ -194,9 +194,12 @@ public sealed class AugmentPersistenceTest
                         $"{augment.ID} names {id}, which is not an upgrading autosurgeon.");
 
                     // An implant's slot is the part its autosurgeon works on.
-                    var target = surgeon!.TargetBodyPart == BodyPartType.Torso
-                        ? WFAugmentSlot.Chest
-                        : Enum.Parse<WFAugmentSlot>($"{surgeon.TargetBodyPartSymmetry}{surgeon.TargetBodyPart}");
+                    var target = surgeon!.TargetBodyPart switch
+                    {
+                        BodyPartType.Torso => WFAugmentSlot.Chest,
+                        BodyPartType.Head => WFAugmentSlot.Head,
+                        _ => Enum.Parse<WFAugmentSlot>($"{surgeon.TargetBodyPartSymmetry}{surgeon.TargetBodyPart}"),
+                    };
                     Assert.That(augment.Slot, Is.EqualTo(target), $"{augment.ID} goes in the wrong part for {id}.");
                 }
             }

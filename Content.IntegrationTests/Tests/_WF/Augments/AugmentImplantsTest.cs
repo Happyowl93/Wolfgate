@@ -3,18 +3,23 @@ using System.Linq;
 using Content.Server._WF.Augments;
 using Content.Server._WF.Wolfmed.Life;
 using Content.Shared._Goobstation.Autosurgeon;
+using Content.Shared._Mono.Traits.Physical;
+using Content.Shared._Onyx.Wounds;
 using Content.Shared._WF.Augments;
 using Content.Shared.Actions;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
+using Content.Shared.Damage.Components;
 using Content.Shared.Emp;
 using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Humanoid;
 using Content.Shared.Preferences;
+using Content.Shared.StepTrigger.Systems;
 using Content.Shared.Traits;
 using Content.Shared.Weapons.Ranged.Components;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -30,6 +35,9 @@ public sealed class AugmentImplantsTest
 {
     private static readonly ProtoId<WFAugmentPrototype>[] Implants =
         ["WFAugmentRightToolArm", "WFAugmentRightSmartlink", "WFAugmentLeftFingerLighter"];
+
+    private static readonly ProtoId<WFAugmentPrototype>[] Revived =
+        ["WFAugmentAdrenalBooster", "WFAugmentPainEditor", "WFAugmentLeftThreatSole"];
 
     [Test]
     public async Task ImplantsTest()
@@ -150,6 +158,75 @@ public sealed class AugmentImplantsTest
             Assert.That(toxins.GetClearanceRate(mob), Is.EqualTo(clearance * 3f).Within(1e-4));
 
             entities.DeleteEntity(gun);
+            entities.DeleteEntity(mob);
+            entities.DeleteEntity(plain);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>The adrenal booster, pain editor and threat-sense sole: the removed combat traits as implants.</summary>
+    [Test]
+    public async Task RevivedTraitsTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entities = server.EntMan;
+        var proto = server.ResolveDependency<IPrototypeManager>();
+        var factory = server.ResolveDependency<IComponentFactory>();
+        var augments = server.System<WFAugmentSystem>();
+        var humanoids = server.System<SharedHumanoidAppearanceSystem>();
+        var map = await pair.CreateTestMap();
+
+        await server.WaitAssertion(() =>
+        {
+            var noTraits = new ProtoId<TraitPrototype>[0];
+            var flesh = new Dictionary<WFAugmentSlot, WFAugmentChoice>();
+
+            // The booster and the editor need flesh, an Oni takes no booster, and a Harpy no sole.
+            Assert.That(WFAugmentRules.ValidateImplants("Human", flesh, Revived, noTraits, proto, factory), Is.EquivalentTo(Revived));
+            var ipc = WFAugmentRules.ValidateImplants("IPC", flesh, Revived, noTraits, proto, factory);
+            Assert.That(ipc, Does.Not.Contain(Revived[0]));
+            Assert.That(ipc, Does.Not.Contain(Revived[1]));
+            Assert.That(WFAugmentRules.ValidateImplants("Oni", flesh, Revived, noTraits, proto, factory), Does.Not.Contain(Revived[0]));
+            Assert.That(WFAugmentRules.ValidateImplants("Harpy", flesh, Revived, noTraits, proto, factory), Does.Not.Contain(Revived[2]));
+
+            var mob = entities.SpawnEntity("MobHuman", map.GridCoords);
+            var plain = entities.SpawnEntity("MobHuman", map.GridCoords);
+            humanoids.LoadProfile(mob, HumanoidCharacterProfile.DefaultWithSpecies("Human").WithAugmentImplants(Revived));
+            Assert.That(augments.ReadImplants(mob), Is.EquivalentTo(Revived), "The implants put in don't read back.");
+
+            // More stamina.
+            var vigor = entities.GetComponent<VigorComponent>(mob);
+            Assert.That(entities.GetComponent<StaminaComponent>(mob).CritThreshold,
+                Is.EqualTo(entities.GetComponent<StaminaComponent>(plain).CritThreshold + vigor.StaminaBonus).Within(1e-4));
+
+            // Less pain from the same wound.
+            float PainGain(EntityUid body)
+            {
+                var ev = new ModifyPainGainEvent(1f);
+                entities.EventBus.RaiseLocalEvent(body, ref ev);
+                return ev.Multiplier;
+            }
+
+            var editor = entities.GetComponent<WFPainEditorComponent>(mob);
+            Assert.That(PainGain(plain), Is.GreaterThan(0f));
+            Assert.That(PainGain(mob), Is.EqualTo(PainGain(plain) * editor.PainMultiplier).Within(1e-4));
+
+            // A mine under the sole doesn't go off.
+            var mine = entities.SpawnEntity("LandMineExplosive", MapCoordinates.Nullspace);
+            bool Trips(EntityUid body)
+            {
+                var ev = new StepTriggerAttemptEvent { Source = mine, Tripper = body };
+                entities.EventBus.RaiseLocalEvent(mine, ref ev);
+                return !ev.Cancelled;
+            }
+
+            Assert.That(entities.HasComponent<TrapAvoiderComponent>(mob));
+            Assert.That(Trips(plain));
+            Assert.That(Trips(mob), Is.False);
+
+            entities.DeleteEntity(mine);
             entities.DeleteEntity(mob);
             entities.DeleteEntity(plain);
         });

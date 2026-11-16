@@ -163,3 +163,49 @@
     - type: WFFingerLighter
       item: WFAugmentFingerLighterFlame
       action: WFActionToggleRightFingerLighter
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WFAutosurgeonAdrenalBooster
+  name: autosurgeon (adrenal booster)
+  description: Wires a booster into the adrenal glands, for more stamina that comes back sooner.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Torso
+    componentsToUser:
+    - type: Vigor
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WFAutosurgeonPainEditor
+  name: autosurgeon (pain editor)
+  description: Fits a pain editor to the brainstem, dulling the pain of every wound.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Head
+    componentsToUser:
+    - type: WFPainEditor
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WFAutosurgeonLeftThreatSole
+  name: autosurgeon (left threat-sense sole)
+  description: Lines the left sole with sensors that keep its owner from setting off floor traps.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Foot
+    targetBodyPartSymmetry: Left
+    componentsToUser:
+    - type: TrapAvoider
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WFAutosurgeonRightThreatSole
+  name: autosurgeon (right threat-sense sole)
+  description: Lines the right sole with sensors that keep its owner from setting off floor traps.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Foot
+    targetBodyPartSymmetry: Right
+    componentsToUser:
+    - type: TrapAvoider

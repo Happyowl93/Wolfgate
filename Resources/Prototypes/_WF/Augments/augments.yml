@@ -310,3 +310,46 @@
   autosurgeon: WFAutosurgeonRightFingerLighter
   price: 50000
   order: 10
+
+# Monolith's removed combat traits (Vigor, Tenacity, Trap Avoider), back as cyberware that is paid for and can be lost.
+# Tenacity raised the damage crit threshold, which Wolfmed doesn't use, so the pain editor dulls pain instead.
+- type: wfAugment
+  id: WFAugmentAdrenalBooster
+  name: wf-augment-adrenal-booster
+  description: wf-augment-adrenal-booster-desc
+  slot: Chest
+  kind: Upgrade
+  host: Organic
+  autosurgeon: WFAutosurgeonAdrenalBooster
+  price: 300000
+  speciesBlacklist: [ Oni ]
+
+- type: wfAugment
+  id: WFAugmentPainEditor
+  name: wf-augment-pain-editor
+  description: wf-augment-pain-editor-desc
+  slot: Head
+  kind: Upgrade
+  host: Organic
+  autosurgeon: WFAutosurgeonPainEditor
+  price: 150000
+
+- type: wfAugment
+  id: WFAugmentLeftThreatSole
+  name: wf-augment-threat-sole
+  description: wf-augment-threat-sole-desc
+  slot: LeftFoot
+  kind: Upgrade
+  autosurgeon: WFAutosurgeonLeftThreatSole
+  price: 150000
+  speciesBlacklist: [ Felinid, Tajaran, Harpy ]
+
+- type: wfAugment
+  id: WFAugmentRightThreatSole
+  name: wf-augment-threat-sole
+  description: wf-augment-threat-sole-desc
+  slot: RightFoot
+  kind: Upgrade
+  autosurgeon: WFAutosurgeonRightThreatSole
+  price: 150000
+  speciesBlacklist: [ Felinid, Tajaran, Harpy ]

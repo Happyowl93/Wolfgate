@@ -35,6 +35,10 @@ smartlink (`WFSmartlinkSystem`) tightens the spread of a gun held in its hand, a
 EMP has it scrambled. The scrubber liver metabolises alcohol, poison and narcotics four times as fast and clears
 Wolfmed toxin load three times as fast (`WolfmedOrganComponent.ClearanceFactor`).
 
+Three implants bring back the combat traits Monolith removed (#5023), paid for and losable: the adrenal booster
+adds Monolith's `Vigor`, the threat-sense sole its `TrapAvoider`, and the pain editor (`WFPainEditorSystem`) scales pain
+gain down in place of Tenacity, whose crit threshold Wolfmed doesn't read.
+
 Installed cyberware is written back to the profile (`WFAugmentSystem.Persistence`). When the character goes into
 cryo, or the round ends with the player still in it (dead or alive), `ReadBody` lists the augments in the body:
 each slot's part or organ matched by prototype, and `ReadImplants` the upgrades by the components their autosurgeon
@@ -119,6 +123,8 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WF/Augments/WFAugmentStylePrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentStylePrototype.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentTraitSlotsPrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentTraitSlotsPrototype.cs)
 - [`Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs`](../../../Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs)
+- [`Content.Shared/_WF/Augments/WFPainEditorComponent.cs`](../../../Content.Shared/_WF/Augments/WFPainEditorComponent.cs)
+- [`Content.Shared/_WF/Augments/WFPainEditorSystem.cs`](../../../Content.Shared/_WF/Augments/WFPainEditorSystem.cs)
 - [`Content.Shared/_WF/Augments/WFSmartlinkComponent.cs`](../../../Content.Shared/_WF/Augments/WFSmartlinkComponent.cs)
 - [`Content.Shared/_WF/Augments/WFSmartlinkSystem.cs`](../../../Content.Shared/_WF/Augments/WFSmartlinkSystem.cs)
 
