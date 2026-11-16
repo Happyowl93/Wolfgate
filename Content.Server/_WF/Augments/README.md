@@ -11,7 +11,8 @@ A character gets an augment three ways:
 - **The creator.** The Augments tab lists every slot the species has (`WFAugmentRules.DisplayOrder`), each Natural
   or an augment, styled limbs drawn on the preview doll. A `price` is taken once from the character's bank the first
   time it is saved with the augment (`ServerPreferencesManager.SettleAugments`), and the unlock stays on that
-  character (`AugmentUnlocks`). Only the server adds unlocks.
+  character (`AugmentUnlocks`). Only the server adds unlocks. Nothing is gated by faction: any character can buy the
+  faction hearts and implants here.
 - **Buying it in a round** from the faction lathes, uplinks or loadouts, as before, and installing it.
 - **Scavenging.** `WFAugmentSelector` (the `WFAugmentScavengeTable`, nested into the rare tiers of the Mono
   maintenance tables) drops a priced augment's bare part or organ, which a surgeon puts in, or an upgrade's
