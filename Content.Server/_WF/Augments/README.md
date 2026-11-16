@@ -9,8 +9,12 @@ end of every round.
 A character gets an augment three ways:
 
 - **The creator.** The Augments tab draws the character as a doll (`WFAugmentDoll`); hovering a part outlines it
-  and clicking it lists that part's limb, organs and implants, each with its price, greyed out where it can't go. The
-  loadout beside it totals what confirming buys and pays back. A `price` is taken once from the character's bank
+  and clicking it lists that part's limb, organs and implants as cards (`WFAugmentCard`), each with its icon, what it
+  does and its price, greyed out where it can't go. An icon (`WFAugmentIcons`) is the augment's `icon`, else the sprite
+  of the entity it installs; implants name one because autosurgeons all look alike. A styled limb's style is picked
+  from a dropdown that draws the limb in each (`WFAugmentStylePicker`). The loadout beside it totals what confirming
+  buys and pays back. The tab takes its colors and fonts from the player's Wolfgate skin (`WFAugmentTheme`) and
+  folds from three columns to two where it is narrow. A `price` is taken once from the character's bank
   when it is saved with the augment (`ServerPreferencesManager.SettleAugments`), and the character owns it
   (`AugmentUnlocks`); one it no longer picks is sold back for `WFAugmentRules.RefundPercent` (half) of its price,
   however it was obtained. Only the server adds unlocks. Nothing is gated by faction: any character can buy the
@@ -135,14 +139,21 @@ scratch, so an unpicked augment comes off it.
 ### Client
 
 - [`Content.Client/_WF/Augments/HumanoidProfileEditor.Augments.cs`](../../../Content.Client/_WF/Augments/HumanoidProfileEditor.Augments.cs)
+- [`Content.Client/_WF/Augments/UI/WFAugmentBackdrop.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentBackdrop.cs)
+- [`Content.Client/_WF/Augments/UI/WFAugmentCard.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentCard.cs)
 - [`Content.Client/_WF/Augments/UI/WFAugmentDoll.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentDoll.cs)
 - [`Content.Client/_WF/Augments/UI/WFAugmentEditor.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentEditor.cs)
+- [`Content.Client/_WF/Augments/UI/WFAugmentIcon.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentIcon.cs)
+- [`Content.Client/_WF/Augments/UI/WFAugmentMask.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentMask.cs)
 - [`Content.Client/_WF/Augments/UI/WFAugmentScanList.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentScanList.cs)
+- [`Content.Client/_WF/Augments/UI/WFAugmentStylePicker.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentStylePicker.cs)
+- [`Content.Client/_WF/Augments/UI/WFAugmentTheme.cs`](../../../Content.Client/_WF/Augments/UI/WFAugmentTheme.cs)
 
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Augments/AugmentEditorTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentEditorTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentImplantsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentImplantsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs)

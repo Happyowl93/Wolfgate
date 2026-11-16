@@ -5,12 +5,8 @@ using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
-using Robust.Client.Utility;
 using Robust.Shared.ContentPack;
 using Robust.Shared.Input;
-using Robust.Shared.Utility;
-using Image = SixLabors.ImageSharp.Image;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace Content.Client._WF.Augments.UI;
 
@@ -128,11 +124,9 @@ public sealed class WFAugmentDoll : Control
     private const float SpriteSize = 32f;
     private const float BorderWidth = 2f;
 
-    private static readonly Color HoverColor = Color.FromHex("#E0A040");
-    private static readonly Color SelectedColor = Color.FromHex("#5AB4F0");
-
-    /// <summary>Opaque pixels of each sprite state's south-facing first frame, by RSI path and state; null if unreadable.</summary>
-    private static readonly Dictionary<(ResPath, string), Mask?> Masks = new();
+    /// <summary>The outline of the part under the mouse, and of the picked one.</summary>
+    public Color HoverColor = Color.FromHex("#EDE6D2");
+    public Color SelectedColor = Color.FromHex("#F2A54A");
 
     private readonly SpriteView _view;
     private EntityUid? _entity;
@@ -172,14 +166,8 @@ public sealed class WFAugmentDoll : Control
         _view.SetEntity(uid);
     }
 
-    /// <summary>The opaque pixels of a sprite frame, and their edges for the outline.</summary>
-    private sealed record Mask(int Width, int Height, bool[] Opaque, List<(int X, int Y)> Pixels, List<UIBox2> Edges)
-    {
-        public bool Contains(int x, int y) => x >= 0 && y >= 0 && x < Width && y < Height && Opaque[y * Width + x];
-    }
-
     /// <summary>Where a region's sprite sits: its mask, its top-left corner in doll pixels, and its scale.</summary>
-    private readonly record struct Placed(Mask Mask, Vector2 Origin, Vector2 Scale);
+    private readonly record struct Placed(WFAugmentMask Mask, Vector2 Origin, Vector2 Scale);
 
     /// <summary>The region's sprite as the doll draws it now, or null if the part has none showing.</summary>
     private Placed? Shape(WFAugmentRegion region)
@@ -188,7 +176,7 @@ public sealed class WFAugmentDoll : Control
             || !_entities.TryGetComponent(uid, out SpriteComponent? sprite)
             || !_entities.System<SpriteSystem>().LayerMapTryGet((uid, sprite), WFAugmentRegions.Layer(region), out var index, false)
             || sprite[index] is not SpriteComponent.Layer { Visible: true, ActualRsi: { } rsi } layer
-            || MaskOf(rsi.Path, layer.State.Name, rsi.Size) is not { } mask)
+            || WFAugmentMask.Of(_resources, rsi.Path, layer.State.Name, rsi.Size) is not { } mask)
             return null;
 
         // The sprite is drawn centered on the doll, the layer shifted by its offset (in meters, y up).
@@ -196,56 +184,6 @@ public sealed class WFAugmentDoll : Control
         var scale = sprite.Scale;
         var origin = new Vector2(SpriteSize / 2) + (offset - new Vector2(mask.Width, mask.Height) / 2) * scale;
         return new Placed(mask, origin, scale);
-    }
-
-    private Mask? MaskOf(ResPath rsi, string? state, Vector2i size)
-    {
-        if (state == null)
-            return null;
-        if (Masks.TryGetValue((rsi, state), out var cached))
-            return cached;
-
-        Mask? mask = null;
-        try
-        {
-            using var stream = _resources.ContentFileRead(rsi / $"{state}.png");
-            using var image = Image.Load<Rgba32>(stream);
-            var width = Math.Min(size.X, image.Width);
-            var height = Math.Min(size.Y, image.Height);
-            var pixels = image.GetPixelSpan();
-            var opaque = new bool[width * height];
-            var set = new List<(int, int)>();
-            for (var y = 0; y < height; y++)
-            {
-                for (var x = 0; x < width; x++)
-                {
-                    if (pixels[y * image.Width + x].A == 0)
-                        continue;
-                    opaque[y * width + x] = true;
-                    set.Add((x, y));
-                }
-            }
-
-            mask = new Mask(width, height, opaque, set, new List<UIBox2>());
-            foreach (var (x, y) in set)
-            {
-                if (!mask.Contains(x - 1, y))
-                    mask.Edges.Add(new UIBox2(x, y, x, y + 1));
-                if (!mask.Contains(x + 1, y))
-                    mask.Edges.Add(new UIBox2(x + 1, y, x + 1, y + 1));
-                if (!mask.Contains(x, y - 1))
-                    mask.Edges.Add(new UIBox2(x, y, x + 1, y));
-                if (!mask.Contains(x, y + 1))
-                    mask.Edges.Add(new UIBox2(x, y + 1, x + 1, y + 1));
-            }
-        }
-        catch (Exception e)
-        {
-            Logger.GetSawmill("wf.augments").Warning($"Couldn't read {rsi}/{state}.png for the augment doll: {e.Message}");
-        }
-
-        Masks[(rsi, state)] = mask;
-        return mask;
     }
 
     private WFAugmentRegion? RegionAt(Vector2 position)
@@ -307,9 +245,9 @@ public sealed class WFAugmentDoll : Control
         {
             base.Draw(handle);
             if (doll.Selected is { } selected)
-                Outline(handle, selected, SelectedColor);
+                Outline(handle, selected, doll.SelectedColor);
             if (doll.Hovered is { } hovered && hovered != doll.Selected)
-                Outline(handle, hovered, HoverColor);
+                Outline(handle, hovered, doll.HoverColor);
         }
 
         private void Outline(DrawingHandleScreen handle, WFAugmentRegion region, Color color)

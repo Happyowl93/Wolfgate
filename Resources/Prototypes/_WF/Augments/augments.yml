@@ -70,6 +70,7 @@
 # The cyberware found, bought and installed in rounds. Each is bought once in the creator or kept from a round
 # it was installed in; scavengers find the part, organ or autosurgeon, rarer the dearer it is. Better limbs hold more
 # implants (implantSlots); an implant's slot is the part it goes in, and host says whether that part must be synthetic.
+# The creator draws the installed entity's sprite beside each; autosurgeons all look alike, so implants name an icon.
 
 - type: wfAugment
   id: WFAugmentJawsOfLifeLeftArm
@@ -217,6 +218,7 @@
   id: WFAugmentLeftMantisBlade
   name: wf-augment-mantis-blade-left
   description: wf-augment-mantis-blade-desc
+  icon: { sprite: _Goobstation/Objects/Weapons/Melee/mantis_blade.rsi, state: icon }
   slot: LeftArm
   kind: Upgrade
   host: Synthetic
@@ -227,6 +229,7 @@
   id: WFAugmentRightMantisBlade
   name: wf-augment-mantis-blade-right
   description: wf-augment-mantis-blade-desc
+  icon: { sprite: _Goobstation/Objects/Weapons/Melee/mantis_blade.rsi, state: icon-mirrored }
   slot: RightArm
   kind: Upgrade
   host: Synthetic
@@ -237,6 +240,7 @@
   id: WFAugmentDermalArmor
   name: wf-augment-dermal-armor
   description: wf-augment-dermal-armor-desc
+  icon: { sprite: _Mono/Objects/Misc/cybernetics.rsi, state: armor-chest }
   slot: Chest
   kind: Upgrade
   autosurgeon: AutosurgeonDermalArmorPDV
@@ -246,6 +250,7 @@
   id: WFAugmentMuscleFibers
   name: wf-augment-muscle-fibers
   description: wf-augment-muscle-fibers-desc
+  icon: { sprite: _Mono/Objects/Misc/cybernetics.rsi, state: muscule }
   slot: Chest
   kind: Upgrade
   autosurgeon: AutosurgeonMuscleFibersMieyo
@@ -255,6 +260,7 @@
   id: WFAugmentLeftToolArm
   name: wf-augment-tool-arm
   description: wf-augment-tool-arm-desc
+  icon: { sprite: Objects/Tools/omnitool.rsi, state: omnitool-screwing }
   slot: LeftArm
   kind: Upgrade
   host: Synthetic
@@ -265,6 +271,7 @@
   id: WFAugmentRightToolArm
   name: wf-augment-tool-arm
   description: wf-augment-tool-arm-desc
+  icon: { sprite: Objects/Tools/omnitool.rsi, state: omnitool-screwing }
   slot: RightArm
   kind: Upgrade
   host: Synthetic
@@ -275,6 +282,7 @@
   id: WFAugmentLeftSmartlink
   name: wf-augment-smartlink
   description: wf-augment-smartlink-desc
+  icon: { sprite: _Mono/Objects/Misc/cybernetics.rsi, state: circuit }
   slot: LeftHand
   kind: Upgrade
   host: Synthetic
@@ -285,6 +293,7 @@
   id: WFAugmentRightSmartlink
   name: wf-augment-smartlink
   description: wf-augment-smartlink-desc
+  icon: { sprite: _Mono/Objects/Misc/cybernetics.rsi, state: circuit }
   slot: RightHand
   kind: Upgrade
   host: Synthetic
@@ -295,6 +304,7 @@
   id: WFAugmentLeftFingerLighter
   name: wf-augment-finger-lighter
   description: wf-augment-finger-lighter-desc
+  icon: { sprite: Objects/Tools/lighters.rsi, state: zippo_icon_base }
   slot: LeftHand
   kind: Upgrade
   autosurgeon: WFAutosurgeonLeftFingerLighter
@@ -305,6 +315,7 @@
   id: WFAugmentRightFingerLighter
   name: wf-augment-finger-lighter
   description: wf-augment-finger-lighter-desc
+  icon: { sprite: Objects/Tools/lighters.rsi, state: zippo_icon_base }
   slot: RightHand
   kind: Upgrade
   autosurgeon: WFAutosurgeonRightFingerLighter
@@ -317,6 +328,7 @@
   id: WFAugmentAdrenalBooster
   name: wf-augment-adrenal-booster
   description: wf-augment-adrenal-booster-desc
+  icon: { sprite: _Mono/Objects/Misc/cybernetics.rsi, state: booster }
   slot: Chest
   kind: Upgrade
   host: Organic
@@ -328,6 +340,7 @@
   id: WFAugmentPainEditor
   name: wf-augment-pain-editor
   description: wf-augment-pain-editor-desc
+  icon: { sprite: _Mono/Objects/Misc/cybernetics.rsi, state: cranial_aug }
   slot: Head
   kind: Upgrade
   host: Organic
@@ -338,6 +351,7 @@
   id: WFAugmentLeftThreatSole
   name: wf-augment-threat-sole
   description: wf-augment-threat-sole-desc
+  icon: { sprite: Objects/Misc/landmine.rsi, state: landmine }
   slot: LeftFoot
   kind: Upgrade
   autosurgeon: WFAutosurgeonLeftThreatSole
@@ -348,6 +362,7 @@
   id: WFAugmentRightThreatSole
   name: wf-augment-threat-sole
   description: wf-augment-threat-sole-desc
+  icon: { sprite: Objects/Misc/landmine.rsi, state: landmine }
   slot: RightFoot
   kind: Upgrade
   autosurgeon: WFAutosurgeonRightThreatSole

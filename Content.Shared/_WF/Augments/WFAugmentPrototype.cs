@@ -1,5 +1,6 @@
 using Content.Shared.Humanoid.Prototypes;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
 
 namespace Content.Shared._WF.Augments;
 
@@ -20,6 +21,10 @@ public sealed partial class WFAugmentPrototype : IPrototype
     /// <summary>The creator's tooltip; the installed entity's description if left out.</summary>
     [DataField]
     public LocId? Description;
+
+    /// <summary>The creator's icon; the installed entity's sprite if left out.</summary>
+    [DataField]
+    public SpriteSpecifier? Icon;
 
     [DataField(required: true)]
     public WFAugmentSlot Slot;
