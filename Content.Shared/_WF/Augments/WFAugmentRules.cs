@@ -47,6 +47,16 @@ public static class WFAugmentRules
     /// <summary>Implants a part the species was born with holds: two in the torso, one in any other part.</summary>
     public static int NaturalImplantSlots(WFAugmentSlot slot) => slot == WFAugmentSlot.Chest ? 2 : 1;
 
+    /// <summary>The limb a hand or foot sits on, which it comes with unless picked on its own.</summary>
+    public static WFAugmentSlot? LimbAbove(WFAugmentSlot slot) => slot switch
+    {
+        WFAugmentSlot.LeftHand => WFAugmentSlot.LeftArm,
+        WFAugmentSlot.RightHand => WFAugmentSlot.RightArm,
+        WFAugmentSlot.LeftFoot => WFAugmentSlot.LeftLeg,
+        WFAugmentSlot.RightFoot => WFAugmentSlot.RightLeg,
+        _ => null,
+    };
+
     /// <summary>The entity an augment puts in the body, which is also what scavengers find of it.</summary>
     public static EntProtoId? Installed(WFAugmentPrototype augment) => augment.Kind switch
     {
@@ -207,8 +217,8 @@ public static class WFAugmentRules
     }
 
     /// <summary>
-    /// How many implants the slot's part holds with these choices: the picked limb's count, none for a missing one,
-    /// one in a trait's limb, else the natural part's.
+    /// How many implants the slot's part holds with these choices: the picked limb's count, none for a missing one
+    /// or a hand or foot whose limb is missing, one in a trait's limb, else the natural part's.
     /// </summary>
     public static int ImplantSlots(WFAugmentSlot slot,
         IReadOnlyDictionary<WFAugmentSlot, WFAugmentChoice> choices,
@@ -224,13 +234,21 @@ public static class WFAugmentRules
             if (augment.Kind == WFAugmentKind.Missing)
                 return 0;
         }
+        else if (LimbAbove(slot) is { } above
+                 && choices.TryGetValue(above, out var limb)
+                 && proto.TryIndex(limb.Augment, out var limbAugment)
+                 && limbAugment.Kind == WFAugmentKind.Missing)
+        {
+            return 0;
+        }
 
         return NaturalImplantSlots(slot);
     }
 
     /// <summary>
-    /// Whether the slot's part is synthetic with these choices: a picked or trait limb is, and a natural part is if
-    /// its prototype is cybernetic or not built of flesh (an IPC's).
+    /// Whether the slot's part is synthetic with these choices: a picked or trait limb is, a hand or foot not picked
+    /// on its own is what its limb is, and a natural part is if its prototype is cybernetic or not built of flesh
+    /// (an IPC's).
     /// </summary>
     public static bool Synthetic(string species,
         WFAugmentSlot slot,
@@ -245,6 +263,9 @@ public static class WFAugmentRules
             && proto.TryIndex(choice.Augment, out var augment)
             && augment.Kind == WFAugmentKind.Limb)
             return augment.Part is not { } part || SyntheticPart(part, proto, factory);
+
+        if (LimbAbove(slot) is { } above && (claimed.ContainsKey(above) || choices.ContainsKey(above)))
+            return Synthetic(species, above, choices, claimed, proto, factory);
 
         return NaturalPart(species, slot, proto, factory) is { } natural && SyntheticPart(natural, proto, factory);
     }

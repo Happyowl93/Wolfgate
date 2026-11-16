@@ -23,9 +23,17 @@ A character gets an augment three ways:
 Implants (`kind: Upgrade`) are a set of their own (`AugmentImplants`), not slot choices: an implant's `slot` is the
 part it goes in, matching its autosurgeon's target. A part holds `implantSlots` of them (a J.W.L arm or S.P.E.E.D leg
 two, other limbs and natural parts one, the torso two, a missing limb none), and `host` says whether that part must be
-synthetic: a cybernetic or trait limb, or a natural part not built of flesh (an IPC's). Mantis blades need one. An
+synthetic: a cybernetic or trait limb, or a natural part not built of flesh (an IPC's). Mantis blades need one. A
+hand or foot with no pick of its own counts as its limb's (`WFAugmentRules.LimbAbove`). An
 implant that no longer fits after a limb changes is dropped. They are stored in the augments column as `Implant:`
 entries; the old one-per-slot entries (`LeftArmImplant`, `Dermal`, ...) still load.
+
+Wolfgate's own cyberware is in `implants.yml`. The tool arm and the finger lighter are deployables
+(`WFDeployableImplantComponent`, one subclass each so a part can hold both): `WFDeployableImplantSystem` gives the body
+an action that folds the implant's item into that side's hand and back, and an EMP folds it in and locks it. The
+smartlink (`WFSmartlinkSystem`) tightens the spread of a gun held in its hand, and widens it past unlinked while an
+EMP has it scrambled. The scrubber liver metabolises alcohol, poison and narcotics four times as fast and clears
+Wolfmed toxin load three times as fast (`WolfmedOrganComponent.ClearanceFactor`).
 
 Installed cyberware is written back to the profile (`WFAugmentSystem.Persistence`). When the character goes into
 cryo, or the round ends with the player still in it (dead or alive), `ReadBody` lists the augments in the body:
@@ -92,6 +100,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Server/_WF/Augments/WFAugmentSystem.cs`](WFAugmentSystem.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Persistence.cs`](WFAugmentSystem.Persistence.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Traits.cs`](WFAugmentSystem.Traits.cs)
+- [`Content.Server/_WF/Augments/WFDeployableImplantSystem.cs`](WFDeployableImplantSystem.cs)
 
 ### Shared
 
@@ -109,6 +118,9 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WF/Augments/WFAugmentSlot.cs`](../../../Content.Shared/_WF/Augments/WFAugmentSlot.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentStylePrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentStylePrototype.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentTraitSlotsPrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentTraitSlotsPrototype.cs)
+- [`Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs`](../../../Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs)
+- [`Content.Shared/_WF/Augments/WFSmartlinkComponent.cs`](../../../Content.Shared/_WF/Augments/WFSmartlinkComponent.cs)
+- [`Content.Shared/_WF/Augments/WFSmartlinkSystem.cs`](../../../Content.Shared/_WF/Augments/WFSmartlinkSystem.cs)
 
 ### Client
 
@@ -120,6 +132,7 @@ scratch, so an unpicked augment comes off it.
 
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Augments/AugmentImplantsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentImplantsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPurchaseTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPurchaseTest.cs)
@@ -131,6 +144,7 @@ scratch, so an unpicked augment comes off it.
 
 - [`Resources/Prototypes/_WF/Augments/augments.yml`](../../../Resources/Prototypes/_WF/Augments/augments.yml)
 - [`Resources/Prototypes/_WF/Augments/base_sprites.yml`](../../../Resources/Prototypes/_WF/Augments/base_sprites.yml)
+- [`Resources/Prototypes/_WF/Augments/implants.yml`](../../../Resources/Prototypes/_WF/Augments/implants.yml)
 - [`Resources/Prototypes/_WF/Augments/loot.yml`](../../../Resources/Prototypes/_WF/Augments/loot.yml)
 - [`Resources/Prototypes/_WF/Augments/parts.yml`](../../../Resources/Prototypes/_WF/Augments/parts.yml)
 - [`Resources/Prototypes/_WF/Augments/shapes.yml`](../../../Resources/Prototypes/_WF/Augments/shapes.yml)

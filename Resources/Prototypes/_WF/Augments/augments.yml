@@ -160,6 +160,13 @@
   price: 50000
 
 - type: wfAugment
+  id: WFAugmentScrubberLiver
+  slot: Liver
+  kind: Organ
+  organ: WFAugmentScrubberLiver
+  price: 20000
+
+- type: wfAugment
   id: WFAugmentPDVHeart
   slot: Heart
   kind: Organ
@@ -243,3 +250,61 @@
   kind: Upgrade
   autosurgeon: AutosurgeonMuscleFibersMieyo
   price: 100000
+
+- type: wfAugment
+  id: WFAugmentLeftToolArm
+  name: wf-augment-tool-arm
+  description: wf-augment-tool-arm-desc
+  slot: LeftArm
+  kind: Upgrade
+  host: Synthetic
+  autosurgeon: WFAutosurgeonLeftToolArm
+  price: 40000
+
+- type: wfAugment
+  id: WFAugmentRightToolArm
+  name: wf-augment-tool-arm
+  description: wf-augment-tool-arm-desc
+  slot: RightArm
+  kind: Upgrade
+  host: Synthetic
+  autosurgeon: WFAutosurgeonRightToolArm
+  price: 40000
+
+- type: wfAugment
+  id: WFAugmentLeftSmartlink
+  name: wf-augment-smartlink
+  description: wf-augment-smartlink-desc
+  slot: LeftHand
+  kind: Upgrade
+  host: Synthetic
+  autosurgeon: WFAutosurgeonLeftSmartlink
+  price: 150000
+
+- type: wfAugment
+  id: WFAugmentRightSmartlink
+  name: wf-augment-smartlink
+  description: wf-augment-smartlink-desc
+  slot: RightHand
+  kind: Upgrade
+  host: Synthetic
+  autosurgeon: WFAutosurgeonRightSmartlink
+  price: 150000
+
+- type: wfAugment
+  id: WFAugmentLeftFingerLighter
+  name: wf-augment-finger-lighter
+  description: wf-augment-finger-lighter-desc
+  slot: LeftHand
+  kind: Upgrade
+  autosurgeon: WFAutosurgeonLeftFingerLighter
+  order: 10
+
+- type: wfAugment
+  id: WFAugmentRightFingerLighter
+  name: wf-augment-finger-lighter
+  description: wf-augment-finger-lighter-desc
+  slot: RightHand
+  kind: Upgrade
+  autosurgeon: WFAutosurgeonRightFingerLighter
+  order: 10
