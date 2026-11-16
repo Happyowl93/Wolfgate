@@ -164,7 +164,7 @@ namespace Content.Server.Preferences.Managers
             var wfAugmentsSettled = false;
             if (!authoritative && profile is HumanoidCharacterProfile wfAugmented)
             {
-                wfAugmentsSettled = SettleAugments(userId, ref wfAugmented,
+                wfAugmentsSettled = SettleAugments(userId, slot, ref wfAugmented,
                     curPrefs.Characters.GetValueOrDefault(slot) as HumanoidCharacterProfile);
                 profile = wfAugmented;
             }

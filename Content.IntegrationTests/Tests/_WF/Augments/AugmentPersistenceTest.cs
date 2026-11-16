@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Content.Client.Lobby;
 using Content.Server._WF.Augments;
+using Content.Server.Cargo.Systems;
 using Content.Server.Preferences.Managers;
 using Content.Shared._Goobstation.Autosurgeon;
 using Content.Shared._WF.Augments;
@@ -22,8 +23,8 @@ namespace Content.IntegrationTests.Tests._WF.Augments;
 
 /// <summary>
 /// Cyberware of every kind, implants included, is applied to a body and read back from it; a body's cyberware is
-/// written to the profile it belongs to, keeping creator edits; every augment names real cyberware in the right part;
-/// scavenging finds the priced ones only.
+/// written to the profile it belongs to, keeping creator edits; paid-for cyberware taken from another character is
+/// the taker's to sell; every augment names real cyberware in the right part; scavenging finds the priced ones only.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFAugmentSystem))]
@@ -174,6 +175,167 @@ public sealed class AugmentPersistenceTest
             Assert.That(Stored().AugmentUnlocks, Is.Empty);
             Assert.That(Stored().AugmentFound, Is.Empty);
             entities.DeleteEntity(mob);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// Paid-for eyes cut out of one character and kept by another are the thief's to sell, once: the victim loses
+    /// them, and the eyes still in the thief's head after the sale are worth nothing. A victim can't sell eyes that
+    /// are no longer in their head. Cut out, the eyes are priced at what they sell back for, and selling them as
+    /// loot costs the victim the augment.
+    /// </summary>
+    [Test]
+    public async Task TheftTest()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { InLobby = true });
+        var server = pair.Server;
+        var client = pair.Client;
+        var entities = server.EntMan;
+        var prefs = server.ResolveDependency<IServerPreferencesManager>();
+        var augments = server.System<WFAugmentSystem>();
+        var body = server.System<SharedBodySystem>();
+        var pricing = server.System<PricingSystem>();
+        var clientNet = client.ResolveDependency<IClientNetManager>();
+        var states = client.ResolveDependency<IStateManager>();
+        var map = await pair.CreateTestMap();
+
+        await pair.RunTicksSync(1);
+        await PoolManager.WaitUntil(client, () => states.CurrentState is LobbyState, 600);
+        var userId = clientNet.ServerChannel!.UserId;
+        const int victim = 0;
+        const int thief = 1;
+        const int balance = 1000;
+        ProtoId<WFAugmentPrototype> eyes = "WFAugmentCyberEyes";
+        var refund = WFAugmentRules.Refund(server.ProtoMan.Index(eyes));
+        Assert.That(refund, Is.GreaterThan(0));
+
+        HumanoidCharacterProfile Stored(int slot) => (HumanoidCharacterProfile) prefs.GetPreferences(userId).Characters[slot];
+
+        async Task Run(Func<Task?> save)
+        {
+            Task? task = null;
+            await server.WaitPost(() => task = save());
+            if (task == null)
+                return;
+            await PoolManager.WaitUntil(server, () => task.IsCompleted, maxTicks: 300);
+            Assert.That(task.IsCompletedSuccessfully, $"The save failed: {task.Exception}");
+        }
+
+        var none = new Dictionary<WFAugmentSlot, WFAugmentChoice>();
+        var picked = new Dictionary<WFAugmentSlot, WFAugmentChoice> { [WFAugmentSlot.Eyes] = new(eyes, null) };
+        var bought = HumanoidCharacterProfile.DefaultWithSpecies("Human")
+            .WithBankBalance(balance)
+            .WithAugments(picked)
+            .WithAugmentUnlocks(new[] { eyes });
+        var thiefPlayed = new WFAugmentSystem.PlayedCharacter(thief, EntityUid.Invalid, none, new HashSet<ProtoId<WFAugmentPrototype>>());
+
+        // A body with the bought eyes, marked as the victim's when it spawns.
+        EntityUid Victim()
+        {
+            var mob = entities.SpawnEntity("MobHuman", map.GridCoords);
+            Apply(entities, mob, picked);
+            augments.MarkPaid(mob, Stored(victim), new WFAugmentOwner(userId, victim));
+            return mob;
+        }
+
+        EntityUid CutOut(EntityUid from)
+        {
+            var organ = body.GetBodyOrgans(from).First(o => o.Component.SlotId == "eyes").Id;
+            body.RemoveOrgan(organ);
+            return organ;
+        }
+
+        void PutIn(EntityUid organ, EntityUid into)
+        {
+            var own = body.GetBodyOrgans(into).First(o => o.Component.SlotId == "eyes").Id;
+            var head = entities.GetComponent<TransformComponent>(own).ParentUid;
+            body.RemoveOrgan(own);
+            entities.DeleteEntity(own);
+            Assert.That(body.InsertOrgan(head, organ, "eyes"), "The eyes didn't go into the thief's head.");
+        }
+
+        await Run(() => prefs.SetProfile(userId, thief, HumanoidCharacterProfile.DefaultWithSpecies("Human").WithBankBalance(balance)));
+        await Run(() => prefs.SetProfile(userId, victim, bought));
+
+        // The thief ends the round with the victim's eyes: they are the thief's, paid for, and no longer the victim's.
+        EntityUid robbed = default;
+        EntityUid robber = default;
+        await server.WaitPost(() =>
+        {
+            robbed = Victim();
+            robber = entities.SpawnEntity("MobHuman", map.GridCoords);
+            PutIn(CutOut(robbed), robber);
+        });
+        await Run(() => augments.SaveBody(userId, thiefPlayed, robber));
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored(thief).AugmentUnlocks, Is.EquivalentTo(new[] { eyes }));
+            Assert.That(Stored(thief).AugmentFound, Is.Empty, "Stolen paid-for eyes read as never bought.");
+            Assert.That(Stored(victim).AugmentUnlocks, Is.Empty, "The victim still owns the eyes the thief kept.");
+            Assert.That(Stored(victim).Augments, Is.Empty);
+        });
+
+        // Selling them pays the thief once; the eyes still in the head are scrap after that.
+        await Run(() => prefs.SetProfile(userId, thief, Stored(thief).WithAugments(none), authoritative: false));
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored(thief).BankBalance, Is.EqualTo(balance + refund));
+            Assert.That(Stored(thief).AugmentUnlocks, Is.Empty);
+        });
+        await Run(() => augments.SaveBody(userId, thiefPlayed, robber));
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored(thief).AugmentFound, Is.EquivalentTo(new[] { eyes }), "Eyes already sold can be sold again.");
+            entities.DeleteEntity(robbed);
+            entities.DeleteEntity(robber);
+        });
+
+        // A victim whose eyes were cut out can't sell them from the creator; whoever keeps them still gets them paid for.
+        await Run(() => prefs.SetProfile(userId, thief, HumanoidCharacterProfile.DefaultWithSpecies("Human").WithBankBalance(balance)));
+        await Run(() => prefs.SetProfile(userId, victim, bought));
+        EntityUid loose = default;
+        await server.WaitPost(() =>
+        {
+            robbed = Victim();
+            loose = CutOut(robbed);
+        });
+        await Run(() => prefs.SetProfile(userId, victim, Stored(victim).WithAugments(none), authoritative: false));
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored(victim).BankBalance, Is.EqualTo(balance), "The victim was paid for eyes someone else has.");
+            Assert.That(Stored(victim).AugmentUnlocks, Is.Empty);
+            robber = entities.SpawnEntity("MobHuman", map.GridCoords);
+            PutIn(loose, robber);
+        });
+        await Run(() => augments.SaveBody(userId, thiefPlayed, robber));
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored(thief).AugmentUnlocks, Is.EquivalentTo(new[] { eyes }));
+            Assert.That(Stored(thief).AugmentFound, Is.Empty);
+            entities.DeleteEntity(robbed);
+            entities.DeleteEntity(robber);
+        });
+
+        // In the victim's head the eyes are worth what any eyes are; cut out they are worth their sell-back price
+        // on top, and once sold the victim no longer owns them. The test runs in the lobby, so the sale is called.
+        await Run(() => prefs.SetProfile(userId, victim, bought));
+        await Run(() =>
+        {
+            robbed = Victim();
+            var inHead = pricing.GetPrice(body.GetBodyOrgans(robbed).First(o => o.Component.SlotId == "eyes").Id);
+            loose = CutOut(robbed);
+            Assert.That(pricing.GetPrice(loose) - inHead, Is.EqualTo(refund), "Bought eyes cut out of their owner aren't worth their sell-back price.");
+            var lost = augments.LoseDestroyed((loose, entities.GetComponent<WFAugmentPaidComponent>(loose)));
+            entities.DeleteEntity(loose);
+            return lost;
+        });
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored(victim).AugmentUnlocks, Is.Empty, "The victim still owns eyes that were sold as loot.");
+            Assert.That(Stored(victim).Augments, Is.Empty);
+            entities.DeleteEntity(robbed);
         });
 
         await pair.CleanReturnAsync();

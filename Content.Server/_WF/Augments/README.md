@@ -20,6 +20,17 @@ A character gets an augment three ways:
   if it was paid for here. One kept from a round (`AugmentFound`) is scrapped for nothing, so cheap in-round
   cyberware can't be turned into bank money. Only the server adds unlocks or marks them found. Nothing is gated by
   faction: any character can buy the faction hearts and implants here.
+
+  The value follows the bought hardware, so it can be stolen and sold (`WFAugmentSystem.Paid.cs`). A part a
+  character spawns with and paid for carries a `WFAugmentPaidComponent` mark naming that character. Cut out of that
+  body, the part is priced at its own price plus what its augments sell back for, so a cargo depot, a trader or
+  anything else that pays by appraised price buys it as loot; inside the body it is worth no more than any part,
+  so a corpse has to be cut open first. Whoever's body holds the marked part when it is saved instead owns the
+  augment as paid for. Either way the character it was taken from loses the unlock and the pick, online or not,
+  and is told in chat: when the part is sold or destroyed during the round, or when the taker's body is saved.
+  A purchase has one mark: a printed or cloned copy has none, is priced like any part and reads as found; selling
+  in the creator removes the mark from the part still in the body; and a character can't sell a part that has left
+  its body. A body left behind by `ghostrespawn` keeps its marks for whoever loots it.
 - **Buying it in a round** from the faction lathes, uplinks or loadouts, as before, and installing it.
 - **Scavenging.** `WFAugmentSelector` (the `WFAugmentScavengeTable`) drops a priced augment's bare part or organ,
   which a surgeon puts in, or an upgrade's autosurgeon. It turns up only on the floors of wrecks
@@ -125,7 +136,9 @@ scratch, so an unpicked augment comes off it.
 
 - [`Content.Server/_WF/Augments/HealthAnalyzerSystem.Augments.cs`](HealthAnalyzerSystem.Augments.cs)
 - [`Content.Server/_WF/Augments/ServerPreferencesManager.Augments.cs`](ServerPreferencesManager.Augments.cs)
+- [`Content.Server/_WF/Augments/WFAugmentPaidComponent.cs`](WFAugmentPaidComponent.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.cs`](WFAugmentSystem.cs)
+- [`Content.Server/_WF/Augments/WFAugmentSystem.Paid.cs`](WFAugmentSystem.Paid.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Persistence.cs`](WFAugmentSystem.Persistence.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Traits.cs`](WFAugmentSystem.Traits.cs)
 - [`Content.Server/_WF/Augments/WFDeployableImplantSystem.cs`](WFDeployableImplantSystem.cs)

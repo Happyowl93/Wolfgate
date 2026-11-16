@@ -22,7 +22,8 @@ namespace Content.Server._WF.Augments;
 /// <summary>
 /// Keeps a character's augments in step with its body. When it goes into cryo or the round ends with the player
 /// still in it, the cyberware still in the body is written to its profile, so what was installed in the round stays
-/// and what was lost is gone. Respawning without cryo leaves the character behind and takes all of it.
+/// and what was lost is gone. Respawning without cryo leaves the character behind and takes all of it. Which of it
+/// sells back in the creator is in <c>WFAugmentSystem.Paid.cs</c>.
 /// </summary>
 public sealed partial class WFAugmentSystem
 {
@@ -54,10 +55,13 @@ public sealed partial class WFAugmentSystem
         if (_preferences.GetPreferencesOrNull(args.Player.UserId) is { SelectedCharacter: HumanoidCharacterProfile selected } prefs
             && selected.Name == args.Profile.Name
             && _mind.TryGetMind(args.Mob, out var mind, out _))
+        {
             Track(args.Player.UserId, new PlayedCharacter(prefs.SelectedCharacterIndex,
                 mind,
                 new(args.Profile.Augments),
                 new(args.Profile.AugmentImplants)));
+            MarkPaid(args.Mob, selected, new WFAugmentOwner(args.Player.UserId, prefs.SelectedCharacterIndex));
+        }
     }
 
     internal void Track(NetUserId user, PlayedCharacter character)
@@ -132,19 +136,29 @@ public sealed partial class WFAugmentSystem
         unlocks.UnionWith(augments.Values.Select(c => c.Augment).Concat(implants)
             .Where(a => owned.Contains(a) && _proto.TryIndex(a, out var augment) && augment.Price > 0));
 
-        if (augments.Count == profile.Augments.Count
-            && augments.All(a => profile.Augments.TryGetValue(a.Key, out var c) && c == a.Value)
-            && implants.SetEquals(profile.AugmentImplants)
-            && unlocks.SetEquals(profile.AugmentUnlocks))
-            return null;
+        // Hardware paid for in the creator stays paid for, whoever bought it; the rest sells back for nothing.
+        var owner = new WFAugmentOwner(user, played.Slot);
+        var inBody = installed.Values.Select(c => c.Augment).Concat(carried).ToHashSet();
+        var taken = new Dictionary<WFAugmentOwner, HashSet<ProtoId<WFAugmentPrototype>>>();
+        var unpaid = unlocks.Where(u => !ClaimPaid(body, u, inBody.Contains(u), owner, profile, taken)).ToHashSet();
+        ReleasePaid(body, owner);
 
-        // What the round added wasn't paid for in the creator, so it sells back for nothing.
-        var unpaid = profile.AugmentFound.Concat(unlocks.Where(u => !profile.AugmentUnlocks.Contains(u)));
-        return Save(session, played.Slot,
-            profile.WithAugments(augments)
-                .WithAugmentImplants(implants)
-                .WithAugmentUnlocks(unlocks)
-                .WithAugmentFound(unpaid));
+        // A character it was taken from no longer owns it.
+        var saves = taken.Select(t => Revoke(t.Key, t.Value)).ToList();
+        if (augments.Count != profile.Augments.Count
+            || augments.Any(a => !profile.Augments.TryGetValue(a.Key, out var c) || c != a.Value)
+            || !implants.SetEquals(profile.AugmentImplants)
+            || !unlocks.SetEquals(profile.AugmentUnlocks)
+            || !unpaid.SetEquals(profile.AugmentFound))
+        {
+            saves.Add(Save(session, played.Slot,
+                profile.WithAugments(augments)
+                    .WithAugmentImplants(implants)
+                    .WithAugmentUnlocks(unlocks)
+                    .WithAugmentFound(unpaid)));
+        }
+
+        return saves.Count == 0 ? null : Task.WhenAll(saves);
     }
 
     /// <summary>
@@ -259,6 +273,8 @@ public sealed partial class WFAugmentSystem
         if (_cryoSleep.HasCryosleepingBody(user) || !_played.Remove(user, out var played))
             return null;
 
+        // Whoever takes its hardware off the body it left owns it.
+        ReleasePaid(null, new WFAugmentOwner(user, played.Slot));
         if (_preferences.GetPreferencesOrNull(user)?.Characters.GetValueOrDefault(played.Slot) is not HumanoidCharacterProfile profile
             || profile.Augments.Count == 0 && profile.AugmentImplants.Count == 0 && profile.AugmentUnlocks.Count == 0)
             return null;

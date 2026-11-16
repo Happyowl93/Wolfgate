@@ -33,6 +33,7 @@ public sealed partial class WFAugmentSystem : EntitySystem
         base.Initialize();
         SubscribeLocalEvent<BodyComponent, WFApplyAugmentsEvent>(OnApplyAugments);
         InitializePersistence();
+        InitializePaid();
     }
 
     private void OnApplyAugments(Entity<BodyComponent> ent, ref WFApplyAugmentsEvent args)

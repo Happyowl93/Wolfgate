@@ -1,5 +1,5 @@
 wf-augments-tab = Augments
-wf-augments-intro = Cyberware this character starts with. Hover over the body and click a part to change it. Priced pieces are bought once from the bank; taking one off sells it back for {$percent}% of its price. Cyberware installed during a round stays if the character ends it in cryo or in their body, but it was never bought here, so taking it off scraps it for nothing; respawning without cryo loses all of it.
+wf-augments-intro = Cyberware this character starts with. Hover over the body and click a part to change it. Priced pieces are bought once from the bank; taking one off sells it back for {$percent}% of its price. Cyberware installed during a round stays if the character ends it in cryo or in their body; respawning without cryo loses all of it. A piece made or found in a round was never bought, so taking it off scraps it for nothing. A bought piece keeps its value once it is cut out: it sells like other loot, or whoever ends a round with it in their body owns it as bought. Either way the character it came from loses it.
 wf-augments-none = Natural
 wf-augments-style = Style
 wf-augments-free = Free
@@ -26,6 +26,7 @@ wf-augments-bill-after = After purchase
 wf-augments-short = Not enough in the bank. Augments you can't pay for are dropped when you confirm.
 wf-augments-confirm = Confirm purchase
 wf-augments-forfeit = {$name} was left behind instead of going into cryo, so their augments are gone. Pick and pay for them again in the creator.
+wf-augments-stolen = {$name} no longer owns cyberware that was cut out of them: {$augments}.
 
 wf-augment-slot-head = Head
 wf-augment-slot-chest = Chest
