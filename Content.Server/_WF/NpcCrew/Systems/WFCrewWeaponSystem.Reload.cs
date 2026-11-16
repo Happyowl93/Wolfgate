@@ -429,9 +429,14 @@ public sealed partial class WFCrewWeaponSystem
     /// <summary>Chooses a hostile aboard whose approach the crewman covers because he may not go after it.</summary>
     public EntityUid? PickBraceTarget(EntityUid uid) => Pick(uid, WFCrewEngage.Brace);
 
-    /// <summary>The first known hostile the crewman would deal with as <paramref name="wanted"/>.</summary>
-    private EntityUid? Pick(EntityUid uid, WFCrewEngage wanted)
+    /// <summary>Chooses a hostile the crewman would fight that he can see right now.</summary>
+    public EntityUid? PickVisibleTarget(EntityUid uid) => Pick(uid, WFCrewEngage.Engage, mustSee: true);
+
+    /// <summary>The first known hostile the crewman would deal with as <paramref name="wanted"/>, and can see if asked.</summary>
+    private EntityUid? Pick(EntityUid uid, WFCrewEngage wanted, bool mustSee = false)
     {
+        bool Wanted(EntityUid target) => Assess(uid, target) == wanted && (!mustSee || CanSee(uid, target));
+
         TryComp<NpcFactionMemberComponent>(uid, out var member);
         if (member != null)
         {
@@ -442,7 +447,7 @@ public sealed partial class WFCrewWeaponSystem
                 NearbyHostiles(uid, member, nearby);
                 foreach (var target in nearby)
                 {
-                    if (Assess(uid, target) == wanted)
+                    if (Wanted(target))
                         return target;
                 }
             }
@@ -454,7 +459,7 @@ public sealed partial class WFCrewWeaponSystem
 
             foreach (var target in _factions.GetHostiles(uid))
             {
-                if (!_factions.IsIgnored(uid, target) && Assess(uid, target) == wanted)
+                if (!_factions.IsIgnored(uid, target) && Wanted(target))
                     return target;
             }
         }
@@ -463,12 +468,12 @@ public sealed partial class WFCrewWeaponSystem
             return null;
         foreach (var target in EntityManager.System<WFCrewAlertSystem>().GetSharedHostiles(grid, crew.Group))
         {
-            if (IsHostile(uid, member, target) && Assess(uid, target) == wanted)
+            if (IsHostile(uid, member, target) && Wanted(target))
                 return target;
         }
         foreach (var target in crew.RadioSightings.Keys)
         {
-            if (IsHostile(uid, member, target) && Assess(uid, target) == wanted)
+            if (IsHostile(uid, member, target) && Wanted(target))
                 return target;
         }
         return null;

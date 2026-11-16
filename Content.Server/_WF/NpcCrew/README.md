@@ -241,7 +241,8 @@ it (`WFCrewWeaponSystem.Brace.cs`). Regulars and up also throw a grenade they ca
 reaver riflemen carry one `ExGrenade`) at a known hostile out of sight for three seconds within nine tiles: shouted
 first, cooked by skill but always with 1.5 s of fuse left on landing, never with a crewmate or bystander in the
 blast, once per crew every 20 s, and nobody hunts into it until it has gone off (`WFCrewGrenadeSystem`). The cooldown
-is checked again as he arms it, and the blast again as it leaves his hand: with someone now in the way he picks
+is checked again as he arms it, and the blast and flight path (anything a thrown item hits, loose crates included)
+again as it leaves his hand: with someone or something now in the way he picks
 another spot, or holds on while the fuse allows. Veterans and
 elites hunt in pairs, sidestep between shots (upstream `NPCJukeComponent`) and, once a minute, fall back out of the
 hostile's sight past 50 damage to patch up for up to eight seconds (`WFCrewFallBackSystem`).

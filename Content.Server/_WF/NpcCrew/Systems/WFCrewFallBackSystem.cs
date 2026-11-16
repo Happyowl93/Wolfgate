@@ -144,7 +144,7 @@ public sealed class WFCrewFallBackSystem : EntitySystem
         if (now >= weapon.PatchUntil)
             return false;
 
-        if (_weapons.PickTarget(uid) is { } target && _weapons.CanSee(uid, target))
+        if (_weapons.PickVisibleTarget(uid) != null)
             return false;
 
         if (now >= weapon.NextPatch)

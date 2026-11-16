@@ -230,9 +230,33 @@ public sealed partial class WFCrewTest
             Assert.That(SEntMan.HasComponent<WFCrewArmedGrenadeComponent>(elite), Is.False);
             Assert.That(hands.IsHolding(elite, grenade, out _), Is.False, "An interrupted thrower never keeps an armed grenade.");
 
-            var next = Thrower(WFCrewSkill.Elite, new Vector2(1.5f, 0.5f));
-            Assert.That(grenades.TryPlan(next, hostile, GrenadeRules, out _, out _, out _), Is.False,
+            // A fresh hostile where the first stood, with no grenade on its way, so only the cooldown can refuse it.
+            SEntMan.DeleteEntity(hostile);
+            SEntMan.DeleteEntity(elite);
+            var fresh = SEntMan.SpawnAtPosition(Hostile, new EntityCoordinates(deck, new Vector2(8.5f, 6.5f)));
+            void Knows(EntityUid member)
+            {
+                SEntMan.GetComponent<WFCrewComponent>(member).RadioSightings[fresh] = STiming.CurTime + TimeSpan.FromSeconds(60);
+                SEntMan.GetComponent<WFCrewWeaponComponent>(member).Noticed[fresh] = STiming.CurTime - TimeSpan.FromSeconds(5);
+            }
+
+            var next = Thrower(WFCrewSkill.Elite);
+            Knows(next);
+            Assert.That(weapons.BlastHeld(fresh), Is.False, "Precondition: nothing is thrown at the fresh hostile.");
+            Assert.That(grenades.TryPlan(next, fresh, GrenadeRules, out _, out _, out _), Is.False,
                 "The crew waits out its cooldown.");
+
+            // Another crew, outside that cooldown, can throw at the same hostile from just behind him.
+            var behind = new Vector2(1.5f, 2.5f);
+            var outsider = ConvoyCrew(deck, "WFCrewDeckhand", "other", behind);
+            SEntMan.GetComponent<WFCrewComponent>(outsider).Skill = WFCrewSkill.Elite;
+            SEntMan.EnsureComponent<WFCrewWeaponComponent>(outsider);
+            Knows(outsider);
+            inventory.TryUnequip(outsider, "pocket2", silent: true, force: true);
+            Assert.That(inventory.TryEquip(outsider, SEntMan.SpawnAtPosition("ExGrenade", new EntityCoordinates(deck, behind)),
+                "pocket2", silent: true, force: true), Is.True);
+            Assert.That(grenades.TryPlan(outsider, fresh, GrenadeRules, out _, out _, out _), Is.True,
+                $"Control: without the cooldown the throw is on. {Describe(outsider)}");
         });
     }
 

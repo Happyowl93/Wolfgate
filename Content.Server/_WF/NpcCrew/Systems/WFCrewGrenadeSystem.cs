@@ -182,7 +182,7 @@ public sealed partial class WFCrewGrenadeSystem : EntitySystem
                     || fuseLeft - distance / speed < rules.MinFuse
                     || !_maps.TryGetTileRef(grid, gridComp, tile, out var tileRef) || tileRef.Tile.IsEmpty
                     || _turf.IsTileBlocked(tileRef, CollisionGroup.Impassable)
-                    || !Clear(uid, from, spot) || !Clear(uid, spot, there)
+                    || !ClearThrow(uid, from, spot) || !Clear(uid, spot, there)
                     || !SparesEveryone(from.Position, spot.Position, rules.BlastRadius))
                     continue;
 
@@ -198,7 +198,15 @@ public sealed partial class WFCrewGrenadeSystem : EntitySystem
         return true;
     }
 
-    /// <summary>Whether nothing built into the ship stands between two points.</summary>
+    /// <summary>Whether a thrown grenade flies clear between two points: nothing it would hit, loose crates included.</summary>
+    private bool ClearThrow(EntityUid uid, MapCoordinates a, MapCoordinates b)
+    {
+        // Mobs are left to Spared: the hostile may be struck, and crewmates are checked there.
+        return _interaction.InRangeUnobstructed(a, b, Vector2.Distance(a.Position, b.Position) + 0.01f,
+            CollisionGroup.ThrownItem, blocker => blocker == uid || HasComp<MobStateComponent>(blocker));
+    }
+
+    /// <summary>Whether nothing built into the ship stands between two points, for the blast's reach.</summary>
     private bool Clear(EntityUid uid, MapCoordinates a, MapCoordinates b)
     {
         return _interaction.InRangeUnobstructed(a, b, Vector2.Distance(a.Position, b.Position) + 0.01f,
@@ -371,6 +379,7 @@ public sealed partial class WFCrewGrenadeSystem : EntitySystem
         var rules = armed.Rules;
         Spared(uid, armed.Target, from, rules);
         if (Vector2.Distance(from.Position, aimed.Position) > rules.BlastRadius
+            && ClearThrow(uid, from, aimed)
             && SparesEveryone(from.Position, aimed.Position, rules.BlastRadius))
         {
             Throw(ent);
