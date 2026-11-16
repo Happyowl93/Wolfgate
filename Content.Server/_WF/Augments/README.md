@@ -70,6 +70,12 @@ under a raised scanner chirp and a quarter-second glitch (`WFThermalGlitchOverla
 isn't in the thermal vision's network state, so `WFThermalTintsVisualsSystem` copies it from the band on every state.
 They keep eye protection but not flash immunity.
 
+The halo burst and halo stun (`WFBurstLauncherSystem`) are chest upgrades that fire a ring of 24 pellets out from the
+body: shrapnel for the burst, rubber for the stun. Each model is its own component (`WFHaloBurstComponent`,
+`WFHaloStunComponent`) with its own action, so both can be fitted. The action holds two bursts as charges, at least
+1.5 s apart; a spent one comes back every three minutes. The pellets hit everyone round the wearer, friends included,
+but never the wearer.
+
 Three implants bring back the combat traits Monolith removed (#5023), paid for and losable: the adrenal booster
 adds Monolith's `Vigor`, the threat-sense sole its `TrapAvoider`, and the pain editor (`WFPainEditorSystem`) scales pain
 gain down in place of Tenacity, whose crit threshold Wolfmed doesn't read.
@@ -164,6 +170,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Persistence.cs`](WFAugmentSystem.Persistence.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Scavenge.cs`](WFAugmentSystem.Scavenge.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Traits.cs`](WFAugmentSystem.Traits.cs)
+- [`Content.Server/_WF/Augments/WFBurstLauncherSystem.cs`](WFBurstLauncherSystem.cs)
 - [`Content.Server/_WF/Augments/WFDeployableImplantSystem.cs`](WFDeployableImplantSystem.cs)
 - [`Content.Server/_WF/Augments/WFIatricMonitorSystem.cs`](WFIatricMonitorSystem.cs)
 - [`Content.Server/_WF/Augments/WFNutrimentPumpSystem.cs`](WFNutrimentPumpSystem.cs)
@@ -185,6 +192,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WF/Augments/WFAugmentSlot.cs`](../../../Content.Shared/_WF/Augments/WFAugmentSlot.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentStylePrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentStylePrototype.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentTraitSlotsPrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentTraitSlotsPrototype.cs)
+- [`Content.Shared/_WF/Augments/WFBurstLauncherComponent.cs`](../../../Content.Shared/_WF/Augments/WFBurstLauncherComponent.cs)
 - [`Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs`](../../../Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs)
 - [`Content.Shared/_WF/Augments/WFIatricMonitorComponent.cs`](../../../Content.Shared/_WF/Augments/WFIatricMonitorComponent.cs)
 - [`Content.Shared/_WF/Augments/WFNutrimentPumpComponent.cs`](../../../Content.Shared/_WF/Augments/WFNutrimentPumpComponent.cs)
@@ -220,6 +228,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentEditorTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentEditorTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Augments/AugmentHaloBurstTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentHaloBurstTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentImplantsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentImplantsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs)

@@ -158,6 +158,19 @@
   name: finger lighter
   description: A lighter built into a fingertip.
 
+# The halo burst's lethal pellet: a lighter shrapnel ball, since a burst throws two dozen of them.
+- type: entity
+  categories: [ HideSpawnMenu ]
+  parent: PelletClusterLethal
+  id: WFHaloBurstPellet
+  name: pellet (halo burst)
+  components:
+  - type: Projectile
+    deleteOnCollide: false
+    damage:
+      types:
+        Piercing: 25
+
 # Actions
 
 - type: entity
@@ -230,6 +243,31 @@
     icon: { sprite: _White/Clothing/Eyes/Goggles/thermal.rsi, state: icon }
     itemIconStyle: NoItem
     event: !type:WFCycleThermalTintEvent
+
+- type: entity
+  id: WFActionHaloBurst
+  name: Halo Burst
+  description: Fire a ring of shrapnel out from your torso in every direction. Holds two bursts; each comes back on its own.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: InstantAction
+    charges: 2
+    icon: { sprite: Objects/Weapons/Grenades/shrapnelgrenade.rsi, state: icon }
+    itemIconStyle: NoItem
+    event: !type:WFFireBurstLauncherEvent
+
+- type: entity
+  parent: WFActionHaloBurst
+  id: WFActionHaloStun
+  name: Halo Stun
+  description: Fire a ring of rubber pellets out from your torso in every direction. Holds two bursts; each comes back on its own.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: InstantAction
+    charges: 2
+    icon: { sprite: Objects/Weapons/Grenades/stingergrenade.rsi, state: icon }
+    itemIconStyle: NoItem
+    event: !type:WFFireBurstLauncherEvent
 
 # Autosurgeons
 
@@ -407,3 +445,29 @@
     targetBodyPart: Head
     componentsToUser:
     - type: WFIatricMonitor
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WFAutosurgeonHaloBurst
+  name: autosurgeon (halo burst)
+  description: Packs shrapnel charges round the ribcage, to be fired out in a ring.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Torso
+    componentsToUser:
+    - type: WFHaloBurst
+      pellet: WFHaloBurstPellet
+      action: WFActionHaloBurst
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WFAutosurgeonHaloStun
+  name: autosurgeon (halo stun)
+  description: Packs rubber-pellet charges round the ribcage, to be fired out in a ring.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Torso
+    componentsToUser:
+    - type: WFHaloStun
+      pellet: PelletClusterRubber
+      action: WFActionHaloStun

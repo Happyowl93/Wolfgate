@@ -257,6 +257,28 @@
   price: 600000
 
 - type: wfAugment
+  id: WFAugmentHaloBurst
+  name: wf-augment-halo-burst
+  description: wf-augment-halo-burst-desc
+  icon: { sprite: Objects/Weapons/Grenades/shrapnelgrenade.rsi, state: icon }
+  slot: Chest
+  kind: Upgrade
+  autosurgeon: WFAutosurgeonHaloBurst
+  price: 2500000
+  order: 20
+
+- type: wfAugment
+  id: WFAugmentHaloStun
+  name: wf-augment-halo-stun
+  description: wf-augment-halo-stun-desc
+  icon: { sprite: Objects/Weapons/Grenades/stingergrenade.rsi, state: icon }
+  slot: Chest
+  kind: Upgrade
+  autosurgeon: WFAutosurgeonHaloStun
+  price: 1500000
+  order: 20
+
+- type: wfAugment
   id: WFAugmentMuscleFibers
   name: wf-augment-muscle-fibers
   description: wf-augment-muscle-fibers-desc
