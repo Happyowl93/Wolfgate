@@ -11,8 +11,8 @@ using Robust.Shared.Network;
 namespace Content.Shared._WF.Augments;
 
 /// <summary>
-/// Tightens the spread of a gun held in a smartlinked hand. An EMP scrambles the link until it wears off, and the
-/// gun then spreads more than an unlinked one.
+/// Compensates for the recoil of a gun held in a smartlinked hand: its spread grows slower as it fires and settles
+/// sooner. An EMP scrambles the link until it wears off, and the gun then does worse than unlinked.
 /// </summary>
 public sealed class WFSmartlinkSystem : EntitySystem
 {
@@ -61,13 +61,20 @@ public sealed class WFSmartlinkSystem : EntitySystem
 
     private void OnRefresh(Entity<WFSmartlinkUserComponent> ent, ref GunRefreshModifiersEvent args)
     {
-        if (!_hands.IsHolding(ent.Owner, args.Gun.Owner, out var hand) || Link(ent, hand.Name) is not { } link)
+        if (LinkFor(ent, args.Gun) is not { } link)
             return;
 
-        var multiplier = link.Scrambled ? link.ScrambledSpreadMultiplier : link.SpreadMultiplier;
-        args.MinAngle *= multiplier;
-        args.MaxAngle *= multiplier;
-        args.AngleIncrease *= multiplier;
+        args.AngleIncrease *= link.Scrambled ? link.ScrambledIncreaseMultiplier : link.IncreaseMultiplier;
+        args.AngleDecay *= link.Scrambled ? link.ScrambledDecayMultiplier : link.DecayMultiplier;
+    }
+
+    /// <summary>The link in the hand of a body that holds a gun, if that hand has a working one.</summary>
+    public WFSmartlinkComponent? LinkFor(EntityUid body, EntityUid gun)
+    {
+        if (!HasComp<WFSmartlinkUserComponent>(body) || !_hands.IsHolding(body, gun, out var hand))
+            return null;
+
+        return Link(body, hand.Name);
     }
 
     private void SetScrambled(Entity<WFSmartlinkComponent> ent, bool scrambled)

@@ -157,19 +157,29 @@ public sealed class AugmentImplantsTest
             emp.DoEmpEffects(leftHand, 0f, System.TimeSpan.FromSeconds(30));
             Assert.That(lighter.Deployed, Is.Null);
 
-            // A gun spreads less in the linked hand than in the other.
+            // In the linked hand a gun's spread grows slower and settles sooner; its tightest and widest stay its own.
             var gun = entities.SpawnEntity("WeaponPistolMk58", map.GridCoords);
             var gunComp = entities.GetComponent<GunComponent>(gun);
             Assert.That(hands.TryPickup(plain, gun, HandOf(plain, HandLocation.Right).Name, checkActionBlocker: false));
-            var unlinked = gunComp.MaxAngleModified.Theta;
-            Assert.That(unlinked, Is.GreaterThan(0));
+            var increase = gunComp.AngleIncreaseModified.Theta;
+            var decay = gunComp.AngleDecayModified.Theta;
+            var widest = gunComp.MaxAngleModified.Theta;
+            Assert.That(increase, Is.GreaterThan(0));
             Assert.That(hands.TryDrop(plain, gun, checkActionBlocker: false));
+
+            void AssertLinked(float increaseBy, float decayBy)
+            {
+                Assert.That(gunComp.AngleIncreaseModified.Theta, Is.EqualTo(increase * increaseBy).Within(1e-4));
+                Assert.That(gunComp.AngleDecayModified.Theta, Is.EqualTo(decay * decayBy).Within(1e-4));
+                Assert.That(gunComp.MaxAngleModified.Theta, Is.EqualTo(widest).Within(1e-4));
+            }
 
             Assert.That(hands.TryPickup(mob, gun, HandOf(mob, HandLocation.Right).Name, checkActionBlocker: false));
             var link = entities.GetComponent<WFSmartlinkComponent>(rightHand);
-            Assert.That(gunComp.MaxAngleModified.Theta, Is.EqualTo(unlinked * link.SpreadMultiplier).Within(1e-4));
+            Assert.That(entities.System<WFSmartlinkSystem>().LinkFor(mob, gun), Is.SameAs(link));
+            AssertLinked(link.IncreaseMultiplier, link.DecayMultiplier);
             Assert.That(hands.TryDrop(mob, gun, checkActionBlocker: false));
-            Assert.That(gunComp.MaxAngleModified.Theta, Is.EqualTo(unlinked).Within(1e-4));
+            AssertLinked(1f, 1f);
 
             // Put in a flesh hand during a round, it scrambles under an EMP and the gun spreads more than unlinked.
             var surgeon = proto.Index<EntityPrototype>("WFAutosurgeonRightSmartlink");
@@ -178,14 +188,14 @@ public sealed class AugmentImplantsTest
             var fleshHand = Part(plain, BodyPartType.Hand, BodyPartSymmetry.Right);
             var fleshLink = entities.GetComponent<WFSmartlinkComponent>(fleshHand);
             Assert.That(hands.TryPickup(plain, gun, HandOf(plain, HandLocation.Right).Name, checkActionBlocker: false));
-            Assert.That(gunComp.MaxAngleModified.Theta, Is.EqualTo(unlinked * fleshLink.SpreadMultiplier).Within(1e-4));
+            AssertLinked(fleshLink.IncreaseMultiplier, fleshLink.DecayMultiplier);
 
             emp.DoEmpEffects(fleshHand, 0f, System.TimeSpan.FromSeconds(30));
             Assert.That(fleshLink.Scrambled);
-            Assert.That(gunComp.MaxAngleModified.Theta, Is.EqualTo(unlinked * fleshLink.ScrambledSpreadMultiplier).Within(1e-4));
+            AssertLinked(fleshLink.ScrambledIncreaseMultiplier, fleshLink.ScrambledDecayMultiplier);
             entities.RemoveComponent<EmpDisabledComponent>(fleshHand);
             Assert.That(fleshLink.Scrambled, Is.False);
-            Assert.That(gunComp.MaxAngleModified.Theta, Is.EqualTo(unlinked * fleshLink.SpreadMultiplier).Within(1e-4));
+            AssertLinked(fleshLink.IncreaseMultiplier, fleshLink.DecayMultiplier);
 
             // The scrubber liver clears toxin load three times as fast as a flesh one.
             var clearance = toxins.GetClearanceRate(plain);

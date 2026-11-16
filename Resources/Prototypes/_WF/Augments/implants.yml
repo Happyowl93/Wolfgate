@@ -236,7 +236,7 @@
   parent: BaseAutosurgeon
   id: WFAutosurgeonLeftSmartlink
   name: autosurgeon (left smartlink)
-  description: Wires the left hand to the gun it holds, tightening its spread.
+  description: Wires the left hand to the gun it holds, compensating for its recoil.
   components:
   - type: AutoSurgeon
     targetBodyPart: Hand
@@ -248,7 +248,7 @@
   parent: BaseAutosurgeon
   id: WFAutosurgeonRightSmartlink
   name: autosurgeon (right smartlink)
-  description: Wires the right hand to the gun it holds, tightening its spread.
+  description: Wires the right hand to the gun it holds, compensating for its recoil.
   components:
   - type: AutoSurgeon
     targetBodyPart: Hand

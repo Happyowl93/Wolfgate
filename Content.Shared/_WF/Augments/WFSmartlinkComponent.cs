@@ -2,17 +2,28 @@ using Robust.Shared.GameStates;
 
 namespace Content.Shared._WF.Augments;
 
-/// <summary>A gun link in a hand: a gun held in it spreads less, and more than an unlinked one while an EMP has it scrambled.</summary>
+/// <summary>
+/// A gun link in a hand that compensates for recoil: a gun held in it spreads slower as it fires and settles sooner,
+/// and the reverse while an EMP has it scrambled. Its tightest and widest spread stay the gun's own.
+/// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class WFSmartlinkComponent : Component
 {
-    /// <summary>What the spread of a gun in this hand is multiplied by.</summary>
+    /// <summary>What the spread each shot adds is multiplied by.</summary>
     [DataField]
-    public float SpreadMultiplier = 0.6f;
+    public float IncreaseMultiplier = 0.5f;
 
-    /// <summary>The multiplier while scrambled.</summary>
+    /// <summary>What the rate the spread settles at is multiplied by.</summary>
     [DataField]
-    public float ScrambledSpreadMultiplier = 1.5f;
+    public float DecayMultiplier = 1.5f;
+
+    /// <summary>What the spread each shot adds is multiplied by while scrambled.</summary>
+    [DataField]
+    public float ScrambledIncreaseMultiplier = 1.5f;
+
+    /// <summary>What the rate the spread settles at is multiplied by while scrambled.</summary>
+    [DataField]
+    public float ScrambledDecayMultiplier = 0.67f;
 
     /// <summary>Set by an EMP until it wears off.</summary>
     [DataField, AutoNetworkedField]
