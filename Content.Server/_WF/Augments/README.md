@@ -55,10 +55,11 @@ an action that folds the implant's item into that side's hand and back, and an E
 arm lists six tools, so its action opens a wheel under the mouse instead (`WFDeployableWheel`, sent and answered by
 network events): picking a tool folds it out in place of the one that was out, and picking that one folds it back in.
 A tool is spawned as it folds out and deleted as it folds in, so the welder comes out full each time. The
-smartlink (`WFSmartlinkSystem`) is recoil control for a gun held in its hand: the spread each shot adds is halved and
-it settles half again as fast, while the gun's tightest and widest spread stay its own (scaling those let a wielded
-rifle's flat wield bonus floor it at zero). An EMP scrambles it until it wears off, and the gun then does worse than
-unlinked. While linked, the player's screen (`WFSmartlinkOverlay`) shows the gun's rounds by the cursor and brackets the
+smartlink (`WFSmartlinkSystem`) is recoil control for a gun held in its hand: the camera kick is cut to about a third,
+projectiles fly a fifth faster, the spread each shot adds is halved and it settles half again as fast. The gun's
+tightest and widest spread stay its own (scaling those let a wielded rifle's flat wield bonus floor it at zero), so on
+a wielded rifle, whose spread the wield bonus already pins at zero, the kick and the speed are what it changes. An EMP
+scrambles it until it wears off, and the gun then kicks and spreads more than unlinked, with no faster rounds. While linked, the player's screen (`WFSmartlinkOverlay`) shows the gun's rounds by the cursor and brackets the
 living, uncloaked mob in sight within twelve tiles that is nearest the cursor, with its range. The scrubber liver metabolises alcohol, poison and narcotics four times as fast and clears
 Wolfmed toxin load three times as fast (`WolfmedOrganComponent.ClearanceFactor`).
 

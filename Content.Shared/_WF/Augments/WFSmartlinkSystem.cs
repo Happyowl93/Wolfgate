@@ -66,6 +66,9 @@ public sealed class WFSmartlinkSystem : EntitySystem
 
         args.AngleIncrease *= link.Scrambled ? link.ScrambledIncreaseMultiplier : link.IncreaseMultiplier;
         args.AngleDecay *= link.Scrambled ? link.ScrambledDecayMultiplier : link.DecayMultiplier;
+        args.CameraRecoilScalar *= link.Scrambled ? link.ScrambledCameraRecoilMultiplier : link.CameraRecoilMultiplier;
+        if (!link.Scrambled)
+            args.ProjectileSpeed *= link.ProjectileSpeedMultiplier;
     }
 
     /// <summary>The link in the hand of a body that holds a gun, if that hand has a working one.</summary>
