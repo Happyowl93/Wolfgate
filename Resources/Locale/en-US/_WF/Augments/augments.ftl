@@ -8,6 +8,7 @@ wf-augments-price = {$price}
 wf-augments-due = Due on save: {$due} (balance {$balance})
 wf-augments-due-short = Not enough in the bank: {$due} due, {$balance} available. Augments you can't pay for are dropped on save.
 wf-augments-claimed = Set by the {$trait} trait
+wf-augments-forfeit = {$name} was left behind instead of going into cryo, so their augments are gone. Pick and pay for them again in the creator.
 
 wf-augment-slot-head = Head
 wf-augment-slot-chest = Chest

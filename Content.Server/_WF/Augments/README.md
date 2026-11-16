@@ -15,6 +15,10 @@ priced augments: a `price` is taken once from the character's bank the first tim
 server adds unlocks. The integration tests use test-only prototypes for each kind; add the real ones to
 `augments.yml`.
 
+Augments last from round to round, but a character left behind loses them. When a player uses `ghostrespawn` with
+no body in cryo, the character they last spawned as this round loses its augments and unlocks, so priced ones must
+be bought again (`WFAugmentSystem.ForfeitAugments`). Cryo, cloning and the admin `respawn` command keep them.
+
 Traits that fit their own limbs at spawn (Prybar Prosthetics, Bionic Legs) claim those slots in `trait_slots.yml`.
 A character with one can't take augments there: validation drops them and the tab names the trait instead. A new
 limb trait needs an entry there. The trait systems swap their limbs the way augments are swapped, then call
@@ -62,6 +66,7 @@ scratch, so an unpicked augment comes off it.
 
 - [`Content.Server/_WF/Augments/ServerPreferencesManager.Augments.cs`](ServerPreferencesManager.Augments.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.cs`](WFAugmentSystem.cs)
+- [`Content.Server/_WF/Augments/WFAugmentSystem.Respawn.cs`](WFAugmentSystem.Respawn.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Traits.cs`](WFAugmentSystem.Traits.cs)
 
 ### Shared
@@ -90,6 +95,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPurchaseTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPurchaseTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Augments/AugmentRespawnTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentRespawnTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentRulesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentRulesTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentSpeciesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentSpeciesTest.cs)
 
@@ -162,6 +168,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Server/_Mono/Traits/Physical/PrybarProstheticsSystem.cs`](../../_Mono/Traits/Physical/PrybarProstheticsSystem.cs)
   - drawn to the species' own arm shape
   - cut the old arm loose like an augment swap, so the body keeps its arm markings
+- [`Content.Server/_NF/Commands/GhostRespawnCommand.cs`](../../_NF/Commands/GhostRespawnCommand.cs): respawning instead of cryo loses the character's augments
 - [`Content.Server/Database/ServerDbBase.cs`](../../Database/ServerDbBase.cs)
 - [`Content.Server/Preferences/Managers/ServerPreferencesManager.cs`](../../Preferences/Managers/ServerPreferencesManager.cs)
   - a client save can't unlock augments; new priced ones are bought from the bank here
