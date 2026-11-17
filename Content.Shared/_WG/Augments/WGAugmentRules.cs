@@ -385,8 +385,8 @@ public static class WGAugmentRules
     }
 
     /// <summary>
-    /// Drops choices the species can't take, slots a trait claims, augments that don't belong to their slot and
-    /// styles that don't fit, and gives a styled augment without a style the first one that fits.
+    /// Drops choices the species can't take, slots a trait claims, augments that don't belong to their slot, styles
+    /// that don't fit and hands or feet under a missing limb, and gives a styled augment without a style the first one that fits.
     /// </summary>
     public static Dictionary<WGAugmentSlot, WGAugmentChoice> Validate(string species,
         IReadOnlyDictionary<WGAugmentSlot, WGAugmentChoice>? choices,
@@ -422,6 +422,16 @@ public static class WGAugmentRules
             }
 
             valid[slot] = new WGAugmentChoice(augment.ID, style);
+        }
+
+        // A hand or foot can't go on a limb that isn't there.
+        foreach (var slot in valid.Keys.ToList())
+        {
+            if (LimbAbove(slot) is { } above
+                && valid.TryGetValue(above, out var limb)
+                && proto.TryIndex(limb.Augment, out var limbAugment)
+                && limbAugment.Kind == WGAugmentKind.Missing)
+                valid.Remove(slot);
         }
 
         return valid;

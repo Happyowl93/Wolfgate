@@ -93,7 +93,9 @@ public sealed class WGReviverSystem : EntitySystem
             }
         }
 
-        HoldBleeding(ent, reviver.NextShock.Value + reviver.HoldTime);
+        // A charge waiting on blood keeps the hold going until it shocks.
+        var shockAt = reviver.NextShock.Value > now ? reviver.NextShock.Value : now;
+        HoldBleeding(ent, shockAt + reviver.HoldTime);
         Infuse(ent);
 
         // A charge that is up waits for the blood the paddles ask for.

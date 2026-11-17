@@ -156,6 +156,13 @@ public sealed class AugmentVitalImplantsTest
             reviver.NextShock = timing.CurTime;
             revivers.Tick((mob, reviver));
             Assert.That(reviver.ShocksGiven, Is.Zero, "The reviver shocked a body the paddles refuse.");
+
+            // However long the charge waits, the bleeding stays held.
+            var hold = entities.GetComponent<WolfmedStasisHoldComponent>(mob);
+            hold.HeldUntil = timing.CurTime;
+            reviver.NextShock = timing.CurTime - reviver.HoldTime - reviver.HoldTime;
+            revivers.Tick((mob, reviver));
+            Assert.That(hold.HeldUntil, Is.EqualTo(timing.CurTime + reviver.HoldTime), "The hold ran out while the charge waited.");
             for (var i = 0; i < 40 && reviver.ShocksGiven == 0; i++)
             {
                 revivers.Tick((mob, reviver));

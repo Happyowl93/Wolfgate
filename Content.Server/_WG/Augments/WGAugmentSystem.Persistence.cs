@@ -120,11 +120,63 @@ public sealed partial class WGAugmentSystem
     /// <returns>The profile save, or null if nothing changed.</returns>
     internal Task? SaveBody(NetUserId user, PlayedCharacter played, EntityUid body)
     {
-        if (!_players.TryGetSessionById(user, out var session)
-            || !_preferences.TryGetCachedPreferences(user, out var prefs)
+        if (!_players.TryGetSessionById(user, out var session))
+            return SaveBodyOffline(user, played, body);
+
+        if (!_preferences.TryGetCachedPreferences(user, out var prefs)
             || prefs.Characters.GetValueOrDefault(played.Slot) is not HumanoidCharacterProfile profile)
             return null;
 
+        // A character it was taken from no longer owns it.
+        var updated = Reconcile(user, played, body, profile, out var taken);
+        var saves = taken.Select(t => Revoke(t.Key, t.Value)).ToList();
+        if (updated != null)
+            saves.Add(Save(session, played.Slot, updated));
+
+        return saves.Count == 0 ? null : Task.WhenAll(saves);
+    }
+
+    /// <summary>Writes the cyberware in the body of a player who has left to their stored profile.</summary>
+    private async Task SaveBodyOffline(NetUserId user, PlayedCharacter played, EntityUid body)
+    {
+        var revokes = new List<Task>();
+        await Queued(user, async () =>
+        {
+            try
+            {
+                // A body deleted while the profile loaded leaves the profile as it was.
+                var stored = await _db.GetPlayerPreferencesAsync(user, default);
+                if (Deleted(body) || stored?.Characters.GetValueOrDefault(played.Slot) is not HumanoidCharacterProfile profile)
+                    return;
+
+                var updated = Reconcile(user, played, body, profile, out var taken);
+                revokes.AddRange(taken.Select(t => Revoke(t.Key, t.Value)));
+                if (updated == null)
+                    return;
+
+                await _db.SaveCharacterSlotAsync(user, updated, played.Slot);
+                Log.Info($"Offline user {user}'s {profile.Name} kept the augments in their body.");
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Failed to save the augments of offline user {user}'s character {played.Slot}: {e}");
+            }
+        });
+
+        // Not awaited inside the queue: a victim's queue may be waiting on this player's.
+        await Task.WhenAll(revokes);
+    }
+
+    /// <summary>
+    /// The profile with the paid-for cyberware the body carries, and the characters it was taken from in
+    /// <paramref name="taken"/>; null if the profile is already in step.
+    /// </summary>
+    private HumanoidCharacterProfile? Reconcile(NetUserId user,
+        PlayedCharacter played,
+        EntityUid body,
+        HumanoidCharacterProfile profile,
+        out Dictionary<WGAugmentOwner, HashSet<ProtoId<WGAugmentPrototype>>> taken)
+    {
         var installed = ReadBody(body, played.Spawned, profile.Augments);
         var augments = new Dictionary<WGAugmentSlot, WGAugmentChoice>();
         foreach (var slot in Enum.GetValues<WGAugmentSlot>())
@@ -163,8 +215,9 @@ public sealed partial class WGAugmentSystem
         // Only paid-for hardware outlasts the round, whoever paid for it; what the round put in unpaid ends with it.
         var owner = new WGAugmentOwner(user, played.Slot);
         var inBody = installed.Values.Select(c => c.Augment).Concat(carried).ToHashSet();
-        var taken = new Dictionary<WGAugmentOwner, HashSet<ProtoId<WGAugmentPrototype>>>();
-        unlocks.RemoveWhere(u => !ClaimPaid(body, u, inBody.Contains(u), owner, profile, taken));
+        var claims = new Dictionary<WGAugmentOwner, HashSet<ProtoId<WGAugmentPrototype>>>();
+        taken = claims;
+        unlocks.RemoveWhere(u => !ClaimPaid(body, u, inBody.Contains(u), owner, profile, claims));
         ReleasePaid(body, owner);
 
         bool Kept(ProtoId<WGAugmentPrototype> id) => unlocks.Contains(id) || _proto.TryIndex(id, out var a) && a.Price == 0;
@@ -177,22 +230,17 @@ public sealed partial class WGAugmentSystem
             _proto,
             _factory);
 
-        // A character it was taken from no longer owns it.
-        var saves = taken.Select(t => Revoke(t.Key, t.Value)).ToList();
-        if (augments.Count != profile.Augments.Count
-            || augments.Any(a => !profile.Augments.TryGetValue(a.Key, out var c) || c != a.Value)
-            || !implants.SetEquals(profile.AugmentImplants)
-            || !unlocks.SetEquals(profile.AugmentUnlocks)
-            || profile.AugmentFound.Count > 0)
-        {
-            saves.Add(Save(session, played.Slot,
-                profile.WithAugments(augments)
-                    .WithAugmentImplants(implants)
-                    .WithAugmentUnlocks(unlocks)
-                    .WithAugmentFound(new HashSet<ProtoId<WGAugmentPrototype>>())));
-        }
+        if (augments.Count == profile.Augments.Count
+            && augments.All(a => profile.Augments.TryGetValue(a.Key, out var c) && c == a.Value)
+            && implants.SetEquals(profile.AugmentImplants)
+            && unlocks.SetEquals(profile.AugmentUnlocks)
+            && profile.AugmentFound.Count == 0)
+            return null;
 
-        return saves.Count == 0 ? null : Task.WhenAll(saves);
+        return profile.WithAugments(augments)
+            .WithAugmentImplants(implants)
+            .WithAugmentUnlocks(unlocks)
+            .WithAugmentFound(new HashSet<ProtoId<WGAugmentPrototype>>());
     }
 
     /// <summary>
@@ -319,7 +367,7 @@ public sealed partial class WGAugmentSystem
         _played.Remove(user);
         ReleasePaid(null, new WGAugmentOwner(user, played.Slot));
         if (!_players.TryGetSessionById(user, out var session))
-            return ForfeitOffline(user, played.Slot);
+            return Queued(user, () => ForfeitOffline(user, played.Slot));
 
         if (_preferences.GetPreferencesOrNull(user)?.Characters.GetValueOrDefault(played.Slot) is not HumanoidCharacterProfile profile
             || Stripped(profile) is not { } stripped)

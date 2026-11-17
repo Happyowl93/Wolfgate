@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Content.Client.Lobby;
 using Content.Server._WG.Augments;
 using Content.Server.Cargo.Systems;
+using Content.Server.Database;
 using Content.Server.Preferences.Managers;
 using Content.Shared._Goobstation.Autosurgeon;
 using Content.Shared._WG.Augments;
@@ -174,6 +175,55 @@ public sealed class AugmentPersistenceTest
             entities.DeleteEntity(mob);
         });
 
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>A player who left before the round ended still has their surviving body written to their stored profile.</summary>
+    [Test]
+    public async Task SaveOfflineBodyTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entities = server.EntMan;
+        var db = server.ResolveDependency<IServerDbManager>();
+        var augments = server.System<WGAugmentSystem>();
+        var map = await pair.CreateTestMap();
+        var userId = new NetUserId(Guid.NewGuid());
+        const int slot = 0;
+
+        // Spawned with paid-for eyes and a left leg, and lost the leg before leaving.
+        var spawned = new Dictionary<WGAugmentSlot, WGAugmentChoice>
+        {
+            [WGAugmentSlot.LeftLeg] = new("WGAugmentCyberLeftLeg", "WGAugmentStyleCyborg"),
+            [WGAugmentSlot.Eyes] = new("WGAugmentCyberEyes", null),
+        };
+        await db.InitPrefsAsync(userId, HumanoidCharacterProfile.DefaultWithSpecies("Human")
+            .WithAugments(spawned)
+            .WithAugmentUnlocks(new ProtoId<WGAugmentPrototype>[] { "WGAugmentCyberLeftLeg", "WGAugmentCyberEyes" }), default);
+
+        EntityUid mob = default;
+        await server.WaitPost(() =>
+        {
+            mob = entities.SpawnEntity("MobHuman", map.GridCoords);
+            Apply(entities, mob, new Dictionary<WGAugmentSlot, WGAugmentChoice>
+            {
+                [WGAugmentSlot.Eyes] = new("WGAugmentCyberEyes", null),
+            });
+        });
+
+        var played = new WGAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, mob, spawned,
+            new HashSet<ProtoId<WGAugmentPrototype>>());
+        Task? save = null;
+        await server.WaitPost(() => save = augments.SaveBody(userId, played, mob));
+        Assert.That(save, Is.Not.Null, "Nothing was saved for a player who left.");
+        await PoolManager.WaitUntil(server, () => save!.IsCompleted, maxTicks: 300);
+        Assert.That(save!.IsCompletedSuccessfully, $"The save failed: {save.Exception}");
+
+        var stored = (HumanoidCharacterProfile) (await db.GetPlayerPreferencesAsync(userId, default))!.Characters[slot];
+        Assert.That(stored.Augments.Keys, Is.EquivalentTo(new[] { WGAugmentSlot.Eyes }), "The lost leg is still on the profile.");
+        Assert.That(stored.AugmentUnlocks.Select(u => u.Id), Is.EquivalentTo(new[] { "WGAugmentCyberEyes" }));
+
+        await server.WaitPost(() => entities.DeleteEntity(mob));
         await pair.CleanReturnAsync();
     }
 

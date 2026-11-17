@@ -13,6 +13,16 @@ namespace Content.IntegrationTests.Tests._WG.Augments;
 [TestOf(typeof(WGAugmentRules))]
 public sealed class AugmentRulesTest
 {
+    [TestPrototypes]
+    private const string Prototypes = @"
+- type: wgAugment
+  id: WGTestRulesMissingLeftArm
+  name: wg-augment-cyber-arm
+  description: wg-augment-cyber-arm-desc
+  slot: LeftArm
+  kind: Missing
+";
+
     [Test]
     public async Task RulesTest()
     {
@@ -98,6 +108,15 @@ public sealed class AugmentRulesTest
             Assert.That(WGAugmentRules.ImplantSlots(WGAugmentSlot.LeftArm, cyberArm, unclaimed, proto), Is.EqualTo(1));
             Assert.That(WGAugmentRules.ImplantSlots(WGAugmentSlot.LeftArm, jawsArm, unclaimed, proto), Is.EqualTo(2));
             Assert.That(WGAugmentRules.ImplantSlots(WGAugmentSlot.Chest, natural, unclaimed, proto), Is.EqualTo(2));
+
+            // A hand can't go on a missing arm, and nor can its implants.
+            var armless = WGAugmentRules.Validate("Human", new Dictionary<WGAugmentSlot, WGAugmentChoice>
+            {
+                [WGAugmentSlot.LeftArm] = new("WGTestRulesMissingLeftArm", null),
+                [WGAugmentSlot.LeftHand] = new("WGAugmentCyberLeftHand", "WGAugmentStyleCyborg"),
+            }, none, proto, factory);
+            Assert.That(armless.Keys, Is.EquivalentTo(new[] { WGAugmentSlot.LeftArm }));
+            Assert.That(WGAugmentRules.ImplantSlots(WGAugmentSlot.LeftHand, armless, unclaimed, proto), Is.Zero);
 
             foreach (var claim in proto.EnumeratePrototypes<WGAugmentTraitSlotsPrototype>())
                 Assert.That(proto.HasIndex<TraitPrototype>(claim.ID), $"{claim.ID} claims slots for a trait that doesn't exist.");

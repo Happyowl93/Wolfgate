@@ -147,7 +147,9 @@ into cryo or the round ends with it alive (not brain-dead) in the body it spawne
 the body: each slot's part or organ matched by prototype, and `ReadImplants` the upgrades by the components their
 autosurgeon adds (`AutoSurgeonSystem.WgHasUpgrade`). Of those, only paid-for hardware is kept and owned: a marked
 part, or one the profile already paid for. What the round put in unpaid ends with it, and what the character spawned
-with and lost is gone along with its unlock, refunding nothing. A slot or the implants changed in the creator
+with and lost is gone along with its unlock, refunding nothing. A player who left mid-round has the stored profile
+read and written instead (`SaveBodyOffline`); revokes and offline writes to one player's profiles run one at a time (`Queued`), so
+two that read it first don't lose each other's change. A slot or the implants changed in the creator
 mid-round keep the new pick. An implant put in a part it doesn't fit (a mantis blade in a flesh arm) works for the
 round but isn't kept.
 

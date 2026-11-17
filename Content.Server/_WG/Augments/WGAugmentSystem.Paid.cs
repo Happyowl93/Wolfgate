@@ -26,6 +26,9 @@ public sealed partial class WGAugmentSystem
     [Dependency] private IServerDbManager _db = default!;
     [Dependency] private GameTicker _ticker = default!;
 
+    /// <summary>Each player's last queued profile write.</summary>
+    private readonly Dictionary<NetUserId, Task> _profileWrites = new();
+
     private void InitializePaid()
     {
         SubscribeLocalEvent<WGAugmentPaidComponent, PriceCalculationEvent>(OnPaidPrice);
@@ -204,7 +207,7 @@ public sealed partial class WGAugmentSystem
     /// Takes augments off the profile of the character they were taken from, online or not, once someone else has
     /// kept or sold the hardware.
     /// </summary>
-    private async Task Revoke(WGAugmentOwner victim, HashSet<ProtoId<WGAugmentPrototype>> ids)
+    private Task Revoke(WGAugmentOwner victim, HashSet<ProtoId<WGAugmentPrototype>> ids)
     {
         // The victim's body is read like any other: these slots no longer count as changed in the creator.
         if (_played.TryGetValue(victim.User, out var played) && played.Slot == victim.Slot)
@@ -214,6 +217,11 @@ public sealed partial class WGAugmentSystem
             played.SpawnedImplants.ExceptWith(ids);
         }
 
+        return Queued(victim.User, () => RevokeProfile(victim, ids));
+    }
+
+    private async Task RevokeProfile(WGAugmentOwner victim, HashSet<ProtoId<WGAugmentPrototype>> ids)
+    {
         try
         {
             if (_players.TryGetSessionById(victim.User, out var session)
@@ -251,6 +259,24 @@ public sealed partial class WGAugmentSystem
         {
             Log.Error($"Failed to take stolen augments off {victim.User}'s character {victim.Slot}: {e}");
         }
+    }
+
+    /// <summary>
+    /// Runs a write to a player's profiles after the ones queued before it, so two that read the stored profile
+    /// first don't save over each other's change.
+    /// </summary>
+    private Task Queued(NetUserId user, Func<Task> write)
+    {
+        var task = After(_profileWrites.GetValueOrDefault(user) ?? Task.CompletedTask, write);
+        _profileWrites[user] = task;
+        return task;
+    }
+
+    private static async Task After(Task previous, Func<Task> write)
+    {
+        // Every queued write logs its own failure.
+        await previous.ContinueWith(_ => { }, TaskContinuationOptions.ExecuteSynchronously);
+        await write();
     }
 
     /// <summary>The profile without the augments, their picks and their unlocks; null if it owns none of them.</summary>
