@@ -472,6 +472,17 @@
 
 - type: entity
   parent: BaseAutosurgeon
+  id: WFAutosurgeonReflexBooster
+  name: autosurgeon (NR-8 "Strizh")
+  description: Fits a reflex booster to the spinal cord, for sharper flying and the odd dodged bullet at the cost of rawer nerves.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Head
+    componentsToUser:
+    - type: WFReflexBooster
+
+- type: entity
+  parent: BaseAutosurgeon
   id: WFAutosurgeonLeftThreatSole
   name: autosurgeon (left SP-9 "Sapyor")
   description: Lines the left sole with sensors that keep its owner from setting off floor traps.

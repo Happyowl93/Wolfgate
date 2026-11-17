@@ -380,6 +380,17 @@
   price: 400000
 
 - type: wfAugment
+  id: WFAugmentReflexBooster
+  name: wf-augment-reflex-booster
+  description: wf-augment-reflex-booster-desc
+  icon: { sprite: _WF/Augments/reflex_booster.rsi, state: icon }
+  slot: Head
+  kind: Upgrade
+  host: Organic
+  autosurgeon: WFAutosurgeonReflexBooster
+  price: 1000000
+
+- type: wfAugment
   id: WFAugmentLeftThreatSole
   name: wf-augment-threat-sole
   description: wf-augment-threat-sole-desc

@@ -88,6 +88,12 @@ gain down in place of Tenacity, whose crit threshold Wolfmed doesn't read. The b
 stamina restored, then the booster rests two minutes; slips and pain shocks don't spend it. A pain shock's Wolfmed
 adrenaline lasts twice as long on its body, so the pain inhibitor keeps you up and the booster gets you back up.
 
+The reflex booster (`WFReflexBoosterComponent`) shares the head's one implant slot with the pain inhibitor and the
+vitals monitor. While its body flies a ship, thrust and turning are 15% stronger through Mono's per-pilot multipliers on
+`GetShuttleInputsEvent`, and it stacks with the Helmsmanship trait. A bullet or bolt about to hit it misses one time in
+twenty (`ProjectileReflectAttemptEvent`, the hook the elite dodge pool uses); beams aren't dodged. It costs 5% more pain
+from every wound.
+
 Three more look after the body, each a component the autosurgeon puts on it. The nutriment pump
 (`WFNutrimentPumpSystem`) feeds its owner a little whenever they reach starving, which leaves them peckish and food
 still worth eating. The reviver (`WFReviverSystem`) is a defibrillator of its own: when the heart stops it charges
@@ -183,6 +189,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Server/_WF/Augments/WFDeployableImplantSystem.cs`](WFDeployableImplantSystem.cs)
 - [`Content.Server/_WF/Augments/WFIatricMonitorSystem.cs`](WFIatricMonitorSystem.cs)
 - [`Content.Server/_WF/Augments/WFNutrimentPumpSystem.cs`](WFNutrimentPumpSystem.cs)
+- [`Content.Server/_WF/Augments/WFReflexBoosterServerSystem.cs`](WFReflexBoosterServerSystem.cs)
 - [`Content.Server/_WF/Augments/WFReviverSystem.cs`](WFReviverSystem.cs)
 
 ### Shared
@@ -209,6 +216,8 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WF/Augments/WFNutrimentPumpComponent.cs`](../../../Content.Shared/_WF/Augments/WFNutrimentPumpComponent.cs)
 - [`Content.Shared/_WF/Augments/WFPainEditorComponent.cs`](../../../Content.Shared/_WF/Augments/WFPainEditorComponent.cs)
 - [`Content.Shared/_WF/Augments/WFPainEditorSystem.cs`](../../../Content.Shared/_WF/Augments/WFPainEditorSystem.cs)
+- [`Content.Shared/_WF/Augments/WFReflexBoosterComponent.cs`](../../../Content.Shared/_WF/Augments/WFReflexBoosterComponent.cs)
+- [`Content.Shared/_WF/Augments/WFReflexBoosterSystem.cs`](../../../Content.Shared/_WF/Augments/WFReflexBoosterSystem.cs)
 - [`Content.Shared/_WF/Augments/WFReviverComponent.cs`](../../../Content.Shared/_WF/Augments/WFReviverComponent.cs)
 - [`Content.Shared/_WF/Augments/WFSmartlinkComponent.cs`](../../../Content.Shared/_WF/Augments/WFSmartlinkComponent.cs)
 - [`Content.Shared/_WF/Augments/WFSmartlinkSystem.cs`](../../../Content.Shared/_WF/Augments/WFSmartlinkSystem.cs)
@@ -245,6 +254,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPurchaseTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPurchaseTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Augments/AugmentReflexBoosterTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentReflexBoosterTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentRespawnTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentRespawnTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentRulesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentRulesTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentSpeciesTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentSpeciesTest.cs)
@@ -290,6 +300,7 @@ scratch, so an unpicked augment comes off it.
 - [`Resources/Textures/_WF/Augments/mariinsky.rsi/`](../../../Resources/Textures/_WF/Augments/mariinsky.rsi/)
 - [`Resources/Textures/_WF/Augments/mining.rsi/`](../../../Resources/Textures/_WF/Augments/mining.rsi/)
 - [`Resources/Textures/_WF/Augments/morpheus.rsi/`](../../../Resources/Textures/_WF/Augments/morpheus.rsi/)
+- [`Resources/Textures/_WF/Augments/reflex_booster.rsi/`](../../../Resources/Textures/_WF/Augments/reflex_booster.rsi/)
 - [`Resources/Textures/_WF/Augments/scrappy.rsi/`](../../../Resources/Textures/_WF/Augments/scrappy.rsi/)
 - [`Resources/Textures/_WF/Augments/scrappytinted.rsi/`](../../../Resources/Textures/_WF/Augments/scrappytinted.rsi/)
 - [`Resources/Textures/_WF/Augments/security.rsi/`](../../../Resources/Textures/_WF/Augments/security.rsi/)
