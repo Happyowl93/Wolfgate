@@ -83,7 +83,10 @@ the wait for the next charge when it is empty. `Tools/_WF/Augments/build_halo_sp
 
 Three implants bring back the combat traits Monolith removed (#5023), paid for and losable: the adrenal booster
 adds Monolith's `Vigor`, the threat-sense sole its `TrapAvoider`, and the pain editor (`WFPainEditorSystem`) scales pain
-gain down in place of Tenacity, whose crit threshold Wolfmed doesn't read.
+gain down in place of Tenacity, whose crit threshold Wolfmed doesn't read. The booster also gives a second wind
+(`WFAdrenalBoosterSystem`): a knockdown that lands while stamina is at or over its threshold ends after 1.5 s with
+stamina restored, then the booster rests two minutes; slips and pain shocks don't spend it. A pain shock's Wolfmed
+adrenaline lasts twice as long on its body, so the pain inhibitor keeps you up and the booster gets you back up.
 
 Three more look after the body, each a component the autosurgeon puts on it. The nutriment pump
 (`WFNutrimentPumpSystem`) feeds its owner a little whenever they reach starving, which leaves them peckish and food
@@ -168,6 +171,7 @@ scratch, so an unpicked augment comes off it.
 
 - [`Content.Server/_WF/Augments/HealthAnalyzerSystem.Augments.cs`](HealthAnalyzerSystem.Augments.cs)
 - [`Content.Server/_WF/Augments/ServerPreferencesManager.Augments.cs`](ServerPreferencesManager.Augments.cs)
+- [`Content.Server/_WF/Augments/WFAdrenalBoosterSystem.cs`](WFAdrenalBoosterSystem.cs)
 - [`Content.Server/_WF/Augments/WFAugmentPaidComponent.cs`](WFAugmentPaidComponent.cs)
 - [`Content.Server/_WF/Augments/WFAugmentScavengeSpawnerComponent.cs`](WFAugmentScavengeSpawnerComponent.cs)
 - [`Content.Server/_WF/Augments/WFAugmentSystem.cs`](WFAugmentSystem.cs)
@@ -188,6 +192,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WF/Augments/HumanoidCharacterProfile.Augments.cs`](../../../Content.Shared/_WF/Augments/HumanoidCharacterProfile.Augments.cs)
 - [`Content.Shared/_WF/Augments/SharedBodySystem.Augments.cs`](../../../Content.Shared/_WF/Augments/SharedBodySystem.Augments.cs)
 - [`Content.Shared/_WF/Augments/SharedHumanoidAppearanceSystem.Augments.cs`](../../../Content.Shared/_WF/Augments/SharedHumanoidAppearanceSystem.Augments.cs)
+- [`Content.Shared/_WF/Augments/WFAdrenalBoosterComponent.cs`](../../../Content.Shared/_WF/Augments/WFAdrenalBoosterComponent.cs)
 - [`Content.Shared/_WF/Augments/WFApplyAugmentsEvent.cs`](../../../Content.Shared/_WF/Augments/WFApplyAugmentsEvent.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentChoice.cs`](../../../Content.Shared/_WF/Augments/WFAugmentChoice.cs)
 - [`Content.Shared/_WF/Augments/WFAugmentPrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentPrototype.cs)
@@ -231,6 +236,7 @@ scratch, so an unpicked augment comes off it.
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WF/Augments/AugmentAdrenalBoosterTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentAdrenalBoosterTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentEditorTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentEditorTest.cs)

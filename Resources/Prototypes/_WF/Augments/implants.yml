@@ -451,12 +451,13 @@
   parent: BaseAutosurgeon
   id: WFAutosurgeonAdrenalBooster
   name: autosurgeon (KR-14 "Ryvok")
-  description: Wires a booster into the adrenal glands, for more stamina that comes back sooner.
+  description: Wires a booster into the adrenal glands, for more stamina and a second wind when a stun drops its owner.
   components:
   - type: AutoSurgeon
     targetBodyPart: Torso
     componentsToUser:
     - type: Vigor
+    - type: WFAdrenalBooster
 
 - type: entity
   parent: BaseAutosurgeon
