@@ -61,7 +61,7 @@ public abstract partial class SharedStationSpawningSystem : EntitySystem
                 }
 
                 EquipStartingGear(entity, loadoutProto, raiseEvent: false);
-                ApplyWFGagsColors(entity, loadoutProto, items); // WOLFGATE(Gags): the colours picked in the loadout window
+                ApplyWGGagsColors(entity, loadoutProto, items); // WOLFGATE(Gags): the colours picked in the loadout window
                 equippedItems.Add(loadoutProto.ID); // Frontier
             }
 

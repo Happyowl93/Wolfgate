@@ -117,7 +117,7 @@ public sealed partial class ContentAudioSystem
         if (!_timing.IsFirstTimePredicted) //otherwise this will tick like 5x faster on client. thanks prediction
             return;
 
-        WfUpdatePlanetMusic(); // WOLFGATE(Planets): planet soundscapes replace ordinary ambient music.
+        WgUpdatePlanetMusic(); // WOLFGATE(Planets): planet soundscapes replace ordinary ambient music.
 
         if (_initialStationMusicBool)
         {
@@ -423,7 +423,7 @@ public sealed partial class ContentAudioSystem
     private void PlayMusicTrack(string path, float volume, float fadein, bool combatMode)
     {
         // WOLFGATE(Planets) START: no ordinary ambient music on a planet, whether a biome, grid, timer or combat-exit request asked.
-        if (!combatMode && WfOnPlanet())
+        if (!combatMode && WgOnPlanet())
         {
             DisableAmbientMusic();
             _isCombatMusicPlaying = false;

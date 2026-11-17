@@ -19,7 +19,7 @@
   - WeaponProtoKineticAccelerator
   - ShuttleGunKineticCircuitboard
   - WeaponTurretM25Circuitboard # Mono
-  - WFWeaponTurretMiningLaserSmallCircuitboard # WOLFGATE(AsteroidMining): light mining laser board
+  - WGWeaponTurretMiningLaserSmallCircuitboard # WOLFGATE(AsteroidMining): light mining laser board
   # These are roundstart but not replenishable for salvage
   - WeaponCrusher
   - WeaponCrusherDagger
@@ -179,8 +179,8 @@
   - SmallThrusterMachineCircuitboard # Frontier
   - SmallGyroscopeMachineCircuitboard # Frontier
   # WOLFGATE(Drydock) START: mobile drydock boards
-  - WFComputerMobileDrydockCircuitboard
-  - WFMobileDrydockCraneMachineCircuitboard
+  - WGComputerMobileDrydockCircuitboard
+  - WGMobileDrydockCraneMachineCircuitboard
   # WOLFGATE END
   technologyPrerequisites:
   - AdvancedParts
@@ -247,7 +247,7 @@
   - OreBagOfHolding
   - MiningDrillDiamond
   - ShipDrillMachineCircuitboard
-  - WFWeaponTurretMiningBeamCircuitboard # WOLFGATE(AsteroidMining): mining laser board
+  - WGWeaponTurretMiningBeamCircuitboard # WOLFGATE(AsteroidMining): mining laser board
   - AdvancedMineralScannerEmpty
   - NFBlueprintOreBagOfHolding # Frontier
   - NFBlueprintMiningDrillDiamond # Frontier
@@ -308,8 +308,8 @@
   recipeUnlocks:
   - MaterialSiloMachineCircuitboard
   # WOLFGATE(Lathe) START: fabrication silos
-  - WFPartsSiloMachineCircuitboard
-  - WFChemicalSiloMachineCircuitboard
+  - WGPartsSiloMachineCircuitboard
+  - WGChemicalSiloMachineCircuitboard
   # WOLFGATE END
   technologyPrerequisites:
   - SuperParts

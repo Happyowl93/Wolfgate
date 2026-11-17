@@ -66,7 +66,7 @@ public abstract partial class SharedStunSystem : EntitySystem
         SubscribeLocalEvent<StunOnContactComponent, StartCollideEvent>(OnStunOnContactCollide);
 
         // helping people up if they're knocked down
-        // WOLFGATE(Standing) START: WFHelpUpSystem handles helping up, including through a hug
+        // WOLFGATE(Standing) START: WGHelpUpSystem handles helping up, including through a hug
         // SubscribeLocalEvent<KnockedDownComponent, InteractHandEvent>(OnInteractHand);
         // WOLFGATE END
         SubscribeLocalEvent<SlowedDownComponent, RefreshMovementSpeedModifiersEvent>(OnRefreshMovespeed);

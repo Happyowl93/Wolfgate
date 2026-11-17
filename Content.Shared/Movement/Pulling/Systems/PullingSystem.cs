@@ -28,7 +28,7 @@ using Robust.Shared.Physics.Events;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Player;
 using Robust.Shared.Timing;
-using Content.Shared._WF.RMCCore.Fireman; // WOLFGATE(RMCCore)
+using Content.Shared._WG.RMCCore.Fireman; // WOLFGATE(RMCCore)
 
 namespace Content.Shared.Movement.Pulling.Systems;
 

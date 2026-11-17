@@ -1,0 +1,22 @@
+# The Bank PDA app, on every PDA: signs into the account of the ID card in the PDA to withdraw, transfer and deposit.
+- type: entity
+  parent: NFBasePDACartridge
+  id: WGBankCartridge
+  name: ThalerLink cartridge
+  description: A PDA banking program. It signs into the account of whatever ID card sits in the PDA.
+  components:
+  - type: Sprite
+    sprite: Objects/Devices/cartridge.rsi
+    state: cart-q
+  - type: Icon
+    sprite: Objects/Devices/cartridge.rsi
+    state: cart-q
+  - type: UIFragment
+    ui: !type:BankUi
+  - type: Cartridge
+    programName: wg-bank-program-name
+    icon:
+      sprite: _NF/Objects/Economy/cash.rsi
+      state: cash_1000
+    readonly: true
+  - type: WGBankCartridge

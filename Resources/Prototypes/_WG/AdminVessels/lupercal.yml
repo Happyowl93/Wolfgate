@@ -1,0 +1,112 @@
+# The Lupercal: the admin station-ship, spawned only with the admin Spawn Vessel command (never sold).
+# See Content.Server/_WG/AdminVessels/README.md.
+
+- type: vessel
+  id: WGLupercal
+  parent: BaseVessel
+  name: Lupercal
+  description: A ring-docked station-ship for the sector's administration, spawned by admins only.
+  price: 80000000 # never sold; kept above its appraisal for the arbitrage test
+  purchasable: false
+  category: Large
+  group: Custom
+  mapchecker_group_override: PointOfInterest # allows its indestructible plastitanium walls
+  shuttlePath: /SharedMaps/_WG/AdminVessels/lupercal.yml
+  guidebookPage: null
+  class:
+  - Capital
+  engine:
+  - Plasma
+  addComponents:
+  - type: WGFtlUnrestricted
+  # Floors that can't be pried, laid over, taken by an RCD or broken by a blast; the walls and windows are
+  # indestructible kinds in the map itself.
+  - type: ProtectedGrid
+    preventFloorRemoval: true
+    preventFloorPlacement: true
+    preventRCDUse: true
+  - type: WGBlastproofFloors
+  # Only the staff list and up open maintenance panels or use an emag aboard: no hacking its doors and machines.
+  - type: WGShipCommand
+    staffOnlyWires: true
+  # Stay put and defend: marines walk the posts, gunners answer attacks on the ship and whoever is docked to it, and
+  # the pilot holds station with the best armed side to the attacker.
+  - type: WGShipRoster
+    callsign: Lupercal
+    marineOrders: Rounds
+    gunnerPolicy: DefendDocked
+    pilotStance: FaceThreats
+  # Mother Base manners (CrewBarks): the crew salute the Boss, take a punch with thanks and talk among themselves.
+  - type: WGCrewBarks
+    voices:
+      WGLupercalDockmaster: dockmaster
+      WGLupercalQuartermaster: quartermaster
+      WGLupercalApothecary: apothecary
+  - type: WGShipFitting
+  # Every job starts closed (the gameMap below); a player who takes one relieves the NPC at the matching post and
+  # stands on the command list named here while they hold it.
+  - type: WGShipJobs
+    jobs:
+      WGLupercalPilot: { role: WGCrewPilot, standing: Officers }
+      WGLupercalRadioOperator: { role: WGCrewRadioOperator, standing: Officers }
+      WGLupercalGunner: { role: WGCrewGunner, standing: Officers }
+      WGLupercalDockmaster: { counter: WGLupercalDockmaster, standing: Officers }
+      WGLupercalMarine: { role: WGCrewMarine, standing: Staff }
+      WGLupercalEngineer: { role: WGCrewEngineer, standing: Staff }
+      WGLupercalDeckhand: { role: WGCrewDeckhand, standing: Staff }
+      WGLupercalParamedic: { role: WGCrewParamedic, standing: Staff }
+      WGLupercalSurgeon: { role: WGCrewSurgeon, standing: Staff }
+      WGLupercalAi: {}
+      WGLupercalCyborg: {}
+
+- type: gameMap
+  id: WGLupercal
+  mapName: 'Lupercal'
+  mapPath: /SharedMaps/_WG/AdminVessels/lupercal.yml
+  minPlayers: 0
+  stations:
+    WGLupercal:
+      stationProto: StandardFrontierVessel
+      components:
+        - type: StationNameSetup
+          mapNameTemplate: 'Lupercal'
+        # What the cargo order and bounty consoles read; a plain vessel station has neither.
+        - type: StationCargoOrderDatabase
+        - type: StationCargoBountyDatabase
+          availableBounties:
+          - CCBountyAmanitaJelly
+          - CCBountyBun
+          - CCBountyBread
+          - CCBountyBoiledRice
+          - CCBountyBoiledSnail
+          - CCBountyCarrotFries
+          - CCBountyCookedSausage
+          - CCBountyOatmeal
+          - CCBountyOnionRings
+          - CCBountyPickle
+          - CCBountyPopcorn
+          - CCBountyRatBurger
+          - CCBountySpaceFries
+          - CCBountyBagel
+          - CCBountyBaguette
+          - CCBountyCookedSpaceshroom
+          - CCBountyCottonBagel
+          - CCBountyCottonBread
+          - CCBountyRaisinBag
+          - CCBountyRicePudding
+          - CCBountyCottonCroissant
+          - CCBountyBasicNoodles
+          - CCBountyBoiledPasta
+        - type: StationJobs
+          availableJobs:
+            WGLupercalPilot: [ 0, 0 ]
+            WGLupercalRadioOperator: [ 0, 0 ]
+            WGLupercalGunner: [ 0, 0 ]
+            WGLupercalDockmaster: [ 0, 0 ]
+            WGLupercalMarine: [ 0, 0 ]
+            WGLupercalEngineer: [ 0, 0 ]
+            WGLupercalDeckhand: [ 0, 0 ]
+            WGLupercalParamedic: [ 0, 0 ]
+            WGLupercalSurgeon: [ 0, 0 ]
+            WGLupercalAi: [ 0, 0 ]
+            WGLupercalCyborg: [ 0, 0 ]

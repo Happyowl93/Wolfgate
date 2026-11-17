@@ -6,12 +6,12 @@
   categories: [ HideSpawnMenu ]
   components:
   # WOLFGATE(ArmorSpecialization): bone plating.
-  - type: WFWoundWard
-    examine: wf-armor-spec-bone-plating-examine
+  - type: WGWoundWard
+    examine: wg-armor-spec-bone-plating-examine
     hardens:
       InternalBleedingWound: 2
-      WFWolfmedCrushInjuryWound: 2
-      WFWolfmedDislocationWound: 2
+      WGWolfmedCrushInjuryWound: 2
+      WGWolfmedDislocationWound: 2
   - type: Sprite
     sprite: _Mono/Clothing/OuterClothing/Modsuits/ussp-varyag.rsi
   - type: ClothingSpeedModifier
@@ -41,11 +41,11 @@
   categories: [ HideSpawnMenu ]
   components:
   # WOLFGATE(ArmorSpecialization): spall liner.
-  - type: WFWoundWard
-    examine: wf-armor-spec-spall-liner-examine
+  - type: WGWoundWard
+    examine: wg-armor-spec-spall-liner-examine
     blocks:
-    - WFWolfmedLodgedRoundWound
-    - WFWolfmedShrapnelWound
+    - WGWolfmedLodgedRoundWound
+    - WGWolfmedShrapnelWound
   - type: Sprite
     sprite: _Mono/Clothing/OuterClothing/Modsuits/ussp-zastavnik.rsi
   - type: ClothingSpeedModifier
@@ -75,11 +75,11 @@
   categories: [ HideSpawnMenu ]
   components:
   # WOLFGATE(ArmorSpecialization): spall liner.
-  - type: WFWoundWard
-    examine: wf-armor-spec-spall-liner-examine
+  - type: WGWoundWard
+    examine: wg-armor-spec-spall-liner-examine
     blocks:
-    - WFWolfmedLodgedRoundWound
-    - WFWolfmedShrapnelWound
+    - WGWolfmedLodgedRoundWound
+    - WGWolfmedShrapnelWound
   - type: Sprite
     sprite: _Mono/Clothing/OuterClothing/Modsuits/rogue.rsi
   - type: ExplosionResistance
@@ -111,11 +111,11 @@
   categories: [ HideSpawnMenu ]
   components:
   # WOLFGATE(ArmorSpecialization): insulation.
-  - type: WFWoundWard
-    examine: wf-armor-spec-insulation-examine
+  - type: WGWoundWard
+    examine: wg-armor-spec-insulation-examine
     blocks:
-    - WFWolfmedInternalBurnWound
-    - WFWolfmedShortCircuitWound
+    - WGWolfmedInternalBurnWound
+    - WGWolfmedShortCircuitWound
   - type: Sprite
     sprite: _Mono/Clothing/OuterClothing/Modsuits/tsfmc-volta.rsi
   - type: ClothingSpeedModifier
@@ -158,12 +158,12 @@
   categories: [ HideSpawnMenu ]
   components:
   # WOLFGATE(ArmorSpecialization): spall liner and blast liner.
-  - type: WFBlastLiner
-  - type: WFWoundWard
-    examine: wf-armor-spec-spall-liner-examine
+  - type: WGBlastLiner
+  - type: WGWoundWard
+    examine: wg-armor-spec-spall-liner-examine
     blocks:
-    - WFWolfmedLodgedRoundWound
-    - WFWolfmedShrapnelWound
+    - WGWolfmedLodgedRoundWound
+    - WGWolfmedShrapnelWound
   - type: Sprite
     sprite: _Mono/Clothing/OuterClothing/Modsuits/mercenary.rsi
     layers:

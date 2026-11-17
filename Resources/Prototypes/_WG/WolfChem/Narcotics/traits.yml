@@ -1,0 +1,37 @@
+# Start the round already dependent on a drug family, with a first fix in hand. Drawbacks, so they refund points.
+
+- type: trait
+  id: WGDependentStimulant
+  name: trait-wg-dependent-stimulant-name
+  description: trait-wg-dependent-stimulant-desc
+  category: Physical
+  cost: -3
+  traitGear: WGBaggieCocaineCut
+  biotypeBlacklist:
+  - Synthetic
+  components:
+  - type: WGDependentStimulant
+
+- type: trait
+  id: WGDependentOpioid
+  name: trait-wg-dependent-opioid-name
+  description: trait-wg-dependent-opioid-desc
+  category: Physical
+  cost: -3
+  traitGear: WGBaggieHeroinCut
+  biotypeBlacklist:
+  - Synthetic
+  components:
+  - type: WGDependentOpioid
+
+- type: trait
+  id: WGDependentNicotine
+  name: trait-wg-dependent-nicotine-name
+  description: trait-wg-dependent-nicotine-desc
+  category: Physical
+  cost: -1
+  traitGear: CigPackGreen
+  biotypeBlacklist:
+  - Synthetic
+  components:
+  - type: WGDependentNicotine

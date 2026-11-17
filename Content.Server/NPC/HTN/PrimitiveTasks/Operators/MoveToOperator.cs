@@ -150,11 +150,11 @@ public sealed partial class MoveToOperator : HTNOperator, IHtnConditionalShutdow
 
         // WOLFGATE(Performance) START: a replan toward the coordinates steering already walks to keeps that path instead of running A* again
         if (!doDirectMove
-            && _entManager.TryGetComponent<NPCSteeringComponent>(owner, out var wfSteering)
-            && !wfSteering.DirectMove
-            && wfSteering.Status == SteeringStatus.Moving
-            && wfSteering.CurrentPath.Count > 0
-            && wfSteering.Coordinates.Equals(targetCoordinates))
+            && _entManager.TryGetComponent<NPCSteeringComponent>(owner, out var wgSteering)
+            && !wgSteering.DirectMove
+            && wgSteering.Status == SteeringStatus.Moving
+            && wgSteering.CurrentPath.Count > 0
+            && wgSteering.Coordinates.Equals(targetCoordinates))
         {
             return (true, new Dictionary<string, object>()
             {
