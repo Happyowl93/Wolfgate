@@ -15,7 +15,21 @@
             "directions": 4
         },
         {
-            "name": "charging",
+            "name": "deployed-back",
+            "directions": 4
+        },
+        {
+            "name": "glow",
+            "directions": 4,
+            "delays": [
+                [ 0.1, 0.1, 0.1 ],
+                [ 0.1, 0.1, 0.1 ],
+                [ 0.1, 0.1, 0.1 ],
+                [ 0.1, 0.1, 0.1 ]
+            ]
+        },
+        {
+            "name": "glow-back",
             "directions": 4,
             "delays": [
                 [ 0.1, 0.1, 0.1 ],

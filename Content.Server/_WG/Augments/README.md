@@ -108,19 +108,22 @@ Four combat implants:
   forearm. Its battery recharges on its own. With `keepCharge`, the deployable system remembers the charge when the
   laser folds away and adds what the recharger would have restored, so folding it doesn't refill it.
 - **ZS-3 "Zaslon" hand shield** (`WGHandShieldSystem`). Raised from a cybernetic hand, which it keeps busy. While it is
-  up the body carries `WGHandShieldUserComponent`, and the shield stops shots, beams and blows that come within its
-  135° front arc. Beams glance off. Each hit drains its charge pool, which refills only while the shield is lowered.
-  Drained, it collapses and can't be raised until it is full again (`WGDeployAttemptEvent`). The augment's `exclusive`
-  group allows only one shield per body.
+  up the body carries `WGHandShieldUserComponent`, and the shield stops shots, beams and blows (stun blows included,
+  through the source `BeforeStaminaDamageEvent` now carries) that come within its 135� front arc. Beams glance off.
+  Each hit drains its charge pool, which refills only while the shield is lowered. Drained, it collapses and can't be
+  raised until it is full again (`WGDeployAttemptEvent`). The augment's `exclusive` group allows only one shield per
+  body. Whether a shot is covered is decided in `SharedWGHandShieldSystem` on both sides, so the shooter's client stops
+  its predicted bullet at the shield; the server drains the charge.
 - **KG-9 "Kasumi" optical camouflage** (`WGOpticalCamoSystem`). An action that puts the implant's `Stealth` and
   `StealthOnMove` on the body for 20 seconds. Attacking, shooting, firing the cannon, being hurt by someone else or an
   EMP drops it early, and then the action cools down. It won't stack with stealth from anything else.
 - **KR-40 "Grom" shoulder cannon** (`WGShoulderCannonSystem`). A chest upgrade with two actions. The first raises the
   cannon over the shoulder or folds it away. While it is up, the body carries `WGShoulderCannonDeployedComponent` and
   `WGShoulderCannonVisualsSystem` draws it on the body; the worn states are placed like tgstation's MOD flamethrower
-  overlay. The second action, enabled only while the cannon is up, aims at a tile. The cannon glows for a 0.8 s
-  charge, then fires a slow plasma bolt at that tile. The hands stay free. An EMP folds it away and locks it for a
-  minute.
+  overlay. Where the cannon is on the near side it draws just under the helmet, and where it is on the far side
+  (the `-back` states) under the whole body. The second action, enabled only while the cannon is up, aims at a tile. The
+  cannon glows, unshaded, for a 0.8 s charge, then fires a slow plasma bolt at that tile. The hands stay free. An EMP
+  folds it away and locks it for a minute.
 
 Three more look after the body, each a component the autosurgeon puts on it. The nutriment pump
 (`WGNutrimentPumpSystem`) feeds its owner a little whenever they reach starving, which leaves them peckish and food
@@ -238,6 +241,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WG/Augments/HumanoidCharacterProfile.Augments.cs`](../../../Content.Shared/_WG/Augments/HumanoidCharacterProfile.Augments.cs)
 - [`Content.Shared/_WG/Augments/SharedBodySystem.Augments.cs`](../../../Content.Shared/_WG/Augments/SharedBodySystem.Augments.cs)
 - [`Content.Shared/_WG/Augments/SharedHumanoidAppearanceSystem.Augments.cs`](../../../Content.Shared/_WG/Augments/SharedHumanoidAppearanceSystem.Augments.cs)
+- [`Content.Shared/_WG/Augments/SharedWGHandShieldSystem.cs`](../../../Content.Shared/_WG/Augments/SharedWGHandShieldSystem.cs)
 - [`Content.Shared/_WG/Augments/WGAdrenalBoosterComponent.cs`](../../../Content.Shared/_WG/Augments/WGAdrenalBoosterComponent.cs)
 - [`Content.Shared/_WG/Augments/WGApplyAugmentsEvent.cs`](../../../Content.Shared/_WG/Augments/WGApplyAugmentsEvent.cs)
 - [`Content.Shared/_WG/Augments/WGAugmentChoice.cs`](../../../Content.Shared/_WG/Augments/WGAugmentChoice.cs)
@@ -283,6 +287,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Client/_WG/Augments/UI/WGSmartlinkOverlay.cs`](../../../Content.Client/_WG/Augments/UI/WGSmartlinkOverlay.cs)
 - [`Content.Client/_WG/Augments/UI/WGThermalGlitchOverlay.cs`](../../../Content.Client/_WG/Augments/UI/WGThermalGlitchOverlay.cs)
 - [`Content.Client/_WG/Augments/WGDeployableWheelSystem.cs`](../../../Content.Client/_WG/Augments/WGDeployableWheelSystem.cs)
+- [`Content.Client/_WG/Augments/WGHandShieldSystem.cs`](../../../Content.Client/_WG/Augments/WGHandShieldSystem.cs)
 - [`Content.Client/_WG/Augments/WGHoloDecoyVisualsSystem.cs`](../../../Content.Client/_WG/Augments/WGHoloDecoyVisualsSystem.cs)
 - [`Content.Client/_WG/Augments/WGShoulderCannonVisualsSystem.cs`](../../../Content.Client/_WG/Augments/WGShoulderCannonVisualsSystem.cs)
 - [`Content.Client/_WG/Augments/WGSmartlinkOverlaySystem.cs`](../../../Content.Client/_WG/Augments/WGSmartlinkOverlaySystem.cs)
@@ -397,6 +402,9 @@ scratch, so an unpicked augment comes off it.
   - the creator shows the balance, unlocks and dropped augments the save left
 - [`Content.Shared/_Goobstation/Autosurgeon/AutoSurgeonSystem.cs`](../../../Content.Shared/_Goobstation/Autosurgeon/AutoSurgeonSystem.cs): augments reapply and detect upgrades
 - [`Content.Shared/Body/Systems/SharedBodySystem.Parts.cs`](../../../Content.Shared/Body/Systems/SharedBodySystem.Parts.cs): a part cut loose for an augment isn't lost
+- [`Content.Shared/Damage/Systems/StaminaSystem.cs`](../../../Content.Shared/Damage/Systems/StaminaSystem.cs)
+  - who dealt it and with what, for the hand shield
+  - source and weapon, for the hand shield
 - [`Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs`](../../../Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs): swaps in the augmented parts and draws their styles
 - [`Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs`](../../../Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs): the cyberware in the body, for the organs tab
 - [`Content.Shared/Preferences/HumanoidCharacterProfile.cs`](../../../Content.Shared/Preferences/HumanoidCharacterProfile.cs): augments the species can't take are dropped

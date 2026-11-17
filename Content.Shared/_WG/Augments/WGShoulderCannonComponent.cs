@@ -57,7 +57,10 @@ public sealed partial class WGShoulderCannonComponent : Component
     public SoundSpecifier? FireSound = new SoundPathSpecifier("/Audio/Weapons/Guns/Gunshots/laser_cannon2.ogg");
 }
 
-/// <summary>On a body whose shoulder cannon is raised: draws it over the shoulder, glowing while it charges.</summary>
+/// <summary>
+/// On a body whose shoulder cannon is raised: draws it over the shoulder, glowing while it charges. Each state has a
+/// <c>-back</c> twin holding the directions where the cannon is on the far side and draws under the body.
+/// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState(true)]
 public sealed partial class WGShoulderCannonDeployedComponent : Component
 {
@@ -65,10 +68,14 @@ public sealed partial class WGShoulderCannonDeployedComponent : Component
     public bool Charging;
 
     [DataField]
-    public SpriteSpecifier.Rsi Sprite = new(new ResPath("/Textures/_WG/Augments/shoulder_cannon.rsi"), "deployed");
+    public ResPath Rsi = new("/Textures/_WG/Augments/shoulder_cannon.rsi");
 
     [DataField]
-    public SpriteSpecifier.Rsi ChargingSprite = new(new ResPath("/Textures/_WG/Augments/shoulder_cannon.rsi"), "charging");
+    public string State = "deployed";
+
+    /// <summary>The charge glow, drawn unshaded over the cannon.</summary>
+    [DataField]
+    public string GlowState = "glow";
 }
 
 public sealed partial class WGFireShoulderCannonEvent : WorldTargetActionEvent;

@@ -1,43 +1,44 @@
-using System.Numerics;
+using System.Diagnostics.CodeAnalysis;
 using Content.Shared._Onyx.Wounds;
 using Content.Shared._WG.Augments;
 using Content.Shared.Actions;
 using Content.Shared.Body.Part;
 using Content.Shared.Damage;
+using Content.Shared.Damage.Systems;
 using Content.Shared.Popups;
 using Content.Shared.Projectiles;
 using Content.Shared.Weapons.Melee;
 using Content.Shared.Weapons.Ranged.Events;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
-using Robust.Shared.Physics.Systems;
 using Robust.Shared.Random;
+using Robust.Shared.Timing;
 
 namespace Content.Server._WG.Augments;
 
 /// <summary>
-/// Marks a body as shielded while a hand shield is raised, stops shots and blows that come at it from in front, and
-/// recharges lowered shields. Only one shield goes up at a time.
+/// Marks a body as shielded while a hand shield is raised, soaks the shots, beams and blows (stamina included) it
+/// covers, and recharges lowered shields. Only one shield goes up at a time.
 /// </summary>
-public sealed class WGHandShieldSystem : EntitySystem
+public sealed class WGHandShieldSystem : SharedWGHandShieldSystem
 {
     [Dependency] private SharedActionsSystem _actions = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private WGDeployableImplantSystem _deployables = default!;
-    [Dependency] private SharedPhysicsSystem _physics = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private IRobustRandom _random = default!;
+    [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<WGHandShieldComponent, WGDeployAttemptEvent>(OnDeployAttempt);
-        SubscribeLocalEvent<WGHandShieldUserComponent, ProjectileReflectAttemptEvent>(OnProjectile);
         SubscribeLocalEvent<WGHandShieldUserComponent, HitScanReflectAttemptEvent>(OnHitscan);
         // Ahead of Wolfmed's routing, which takes over the body's damage and cancels the event itself.
         SubscribeLocalEvent<WGHandShieldUserComponent, BeforeDamageChangedEvent>(OnBeforeDamage,
             before: [typeof(WoundDamageRoutingSystem)]);
+        SubscribeLocalEvent<WGHandShieldUserComponent, BeforeStaminaDamageEvent>(OnBeforeStamina);
     }
 
     private void OnDeployAttempt(Entity<WGHandShieldComponent> ent, ref WGDeployAttemptEvent args)
@@ -54,25 +55,19 @@ public sealed class WGHandShieldSystem : EntitySystem
         }
     }
 
-    private void OnProjectile(Entity<WGHandShieldUserComponent> ent, ref ProjectileReflectAttemptEvent args)
+    protected override void ProjectileBlocked(Entity<WGHandShieldUserComponent> ent, WGHandShieldComponent shield,
+        EntityUid projectile, float damage)
     {
-        if (args.Cancelled)
-            return;
-
-        var travel = _physics.GetMapLinearVelocity(args.ProjUid) - _physics.GetMapLinearVelocity(ent);
-        if (!TryBlock(ent, -travel, args.Component.Damage.GetTotal().Float(), true, out _))
-            return;
-
-        args.Cancelled = true;
-        QueueDel(args.ProjUid);
+        Soak(ent, shield, damage, true);
+        QueueDel(projectile);
     }
 
     private void OnHitscan(Entity<WGHandShieldUserComponent> ent, ref HitScanReflectAttemptEvent args)
     {
-        if (args.Reflected
-            || !TryBlock(ent, -args.Direction, args.Damage?.GetTotal().Float() ?? 0f, true, out var shield))
+        if (args.Reflected || !Covers(ent, -args.Direction, out var shield))
             return;
 
+        Soak(ent, shield, args.Damage?.GetTotal().Float() ?? 0f, true);
         var spread = _random.NextAngle(-shield.DeflectSpread / 2, shield.DeflectSpread / 2);
         args.Direction = -spread.RotateVec(args.Direction);
         args.Reflected = true;
@@ -80,51 +75,64 @@ public sealed class WGHandShieldSystem : EntitySystem
 
     private void OnBeforeDamage(Entity<WGHandShieldUserComponent> ent, ref BeforeDamageChangedEvent args)
     {
-        // Only blows: a weapon swung or a fist thrown by someone else, not a bullet that already got past.
-        if (args.Cancelled
-            || args.Origin is not { } attacker
-            || attacker == ent.Owner
-            || args.Tool is not { } tool
-            || !HasComp<MeleeWeaponComponent>(tool)
-            || HasComp<ProjectileComponent>(tool))
-            return;
-
         var damage = args.Damage.GetTotal().Float();
-        var from = _transform.GetWorldPosition(attacker) - _transform.GetWorldPosition(ent);
-        if (damage > 0 && TryBlock(ent, from, damage, false, out _))
+        if (!args.Cancelled && damage > 0 && TryBlockBlow(ent, args.Origin, args.Tool, damage))
+            args.Cancelled = true;
+    }
+
+    private void OnBeforeStamina(Entity<WGHandShieldUserComponent> ent, ref BeforeStaminaDamageEvent args)
+    {
+        if (!args.Cancelled && args.Value > 0 && TryBlockBlow(ent, args.Source, args.With, args.Value))
             args.Cancelled = true;
     }
 
     /// <summary>
-    /// Soaks a hit coming at the body from the given direction if the raised shield covers it, collapsing the shield
-    /// if that drains it.
+    /// Soaks a blow if it is one (a weapon swung or a fist thrown by someone else, not a shot that already got past)
+    /// and comes from where the shield faces.
     /// </summary>
-    private bool TryBlock(Entity<WGHandShieldUserComponent> ent, Vector2 from, float damage, bool shot,
-        out WGHandShieldComponent shield)
+    private bool TryBlockBlow(Entity<WGHandShieldUserComponent> ent, EntityUid? origin, EntityUid? tool, float amount)
     {
-        shield = default!;
-        if (!TryComp<WGHandShieldComponent>(ent.Comp.Part, out var found)
-            || !Exists(found.Deployed)
-            || from.LengthSquared() < 1e-6f)
+        if (!IsBlow(ent, origin, tool, out var attacker))
             return false;
 
-        shield = found;
-        var facing = _transform.GetWorldRotation(ent).ToWorldVec();
-        if (Vector2.Dot(facing, Vector2.Normalize(from)) < Math.Cos(shield.Arc.Theta / 2))
+        var from = _transform.GetWorldPosition(attacker.Value) - _transform.GetWorldPosition(ent);
+        if (!Covers(ent, from, out var shield))
             return false;
 
-        _audio.PlayPvs(shot ? shield.ShotSound : shield.BlowSound, ent, AudioParams.Default.WithVariation(0.05f));
-        shield.Charge -= damage;
+        Soak(ent, shield, amount, false);
+        return true;
+    }
+
+    private bool IsBlow(EntityUid body, EntityUid? origin, EntityUid? tool, [NotNullWhen(true)] out EntityUid? attacker)
+    {
+        attacker = origin;
+        return origin is { } who
+               && who != body
+               && tool is { } with
+               && HasComp<MeleeWeaponComponent>(with)
+               && !HasComp<ProjectileComponent>(with);
+    }
+
+    /// <summary>Takes a covered hit out of the shield's charge, collapsing it if that drains it.</summary>
+    private void Soak(Entity<WGHandShieldUserComponent> ent, WGHandShieldComponent shield, float amount, bool shot)
+    {
+        // A blow that both hurts and tires is one block, and one sound.
+        if (shield.LastBlockSound != _timing.CurTime)
+        {
+            shield.LastBlockSound = _timing.CurTime;
+            _audio.PlayPvs(shot ? shield.ShotSound : shield.BlowSound, ent, AudioParams.Default.WithVariation(0.05f));
+        }
+
+        shield.Charge -= amount;
         if (shield.Charge <= 0)
             Collapse(ent.Comp.Part, shield, ent);
-
-        return true;
     }
 
     private void Collapse(EntityUid part, WGHandShieldComponent shield, EntityUid body)
     {
         shield.Charge = 0;
         shield.Collapsed = true;
+        Dirty(part, shield);
         _deployables.Stow(part, shield);
         Lower(part, shield);
         _audio.PlayPvs(shield.CollapseSound, body);
@@ -135,7 +143,9 @@ public sealed class WGHandShieldSystem : EntitySystem
 
     private void Raise(EntityUid part, WGHandShieldComponent shield, EntityUid body)
     {
-        EnsureComp<WGHandShieldUserComponent>(body).Part = part;
+        var user = EnsureComp<WGHandShieldUserComponent>(body);
+        user.Part = part;
+        Dirty(body, user);
         shield.RaisedBy = body;
     }
 
@@ -166,8 +176,11 @@ public sealed class WGHandShieldSystem : EntitySystem
                 continue;
 
             shield.Charge = Math.Min(shield.MaxCharge, shield.Charge + shield.RechargeRate * frameTime);
-            if (shield.Charge >= shield.MaxCharge)
+            if (shield.Charge >= shield.MaxCharge && shield.Collapsed)
+            {
                 shield.Collapsed = false;
+                Dirty(uid, shield);
+            }
         }
     }
 }

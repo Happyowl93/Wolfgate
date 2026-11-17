@@ -8,7 +8,9 @@ using Content.Shared.Actions;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
 using Content.Shared.Damage;
+using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Prototypes;
+using Content.Shared.Damage.Systems;
 using Content.Shared.Emp;
 using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
@@ -188,6 +190,18 @@ public sealed class AugmentCombatImplantsTest
             damageable.TryChangeDamage(mob, new DamageSpecifier(proto.Index<DamageTypePrototype>("Blunt"), 10),
                 origin: attacker, tool: attacker);
             Assert.That(shield.Charge, Is.EqualTo(drained - 10).Within(0.01), "A blow from behind was blocked.");
+
+            // So is a stun blow, which only tires.
+            var stamina = server.System<StaminaSystem>();
+            var tired = entities.GetComponent<StaminaComponent>(mob).StaminaDamage;
+            transform.SetWorldPosition(attacker, position + facing);
+            stamina.TakeStaminaDamage(mob, 15, source: attacker, with: attacker);
+            Assert.That(shield.Charge, Is.EqualTo(drained - 25).Within(0.01), "A stun blow from in front wasn't blocked.");
+            Assert.That(entities.GetComponent<StaminaComponent>(mob).StaminaDamage, Is.EqualTo(tired).Within(0.01));
+            transform.SetWorldPosition(attacker, position - facing);
+            stamina.TakeStaminaDamage(mob, 15, source: attacker, with: attacker);
+            Assert.That(entities.GetComponent<StaminaComponent>(mob).StaminaDamage, Is.GreaterThan(tired),
+                "A stun blow from behind was blocked.");
 
             // A bolt that drains it is still stopped, and the shield folds away until it has recharged.
             shield.Charge = 1;
