@@ -1,10 +1,17 @@
 using Content.Server.Administration.Logs;
-using Content.Server.Weapons.Ranged.Systems;
 using Content.Shared._WF.Augments;
 using Content.Shared.Actions;
+using Content.Shared.Damage;
+using Content.Shared.Damage.Systems;
 using Content.Shared.Database;
+using Content.Shared.Interaction;
+using Content.Shared.Mobs.Components;
 using Content.Shared.Popups;
 using Robust.Shared.Audio.Systems;
+using Robust.Shared.Map;
+using Robust.Shared.Physics;
+using Robust.Shared.Physics.Components;
+using Robust.Shared.Physics.Systems;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
 using System.Numerics;
@@ -12,19 +19,25 @@ using System.Numerics;
 namespace Content.Server._WF.Augments;
 
 /// <summary>
-/// Gives a body with a burst launcher its action, fires the ring of pellets when it is used, and brings spent bursts
-/// back one at a time.
+/// Gives a body with a halo launcher its action, throws the ring of orbs and holds the wearer in its shield until they
+/// go off, blasts round each orb, and brings spent bursts back one at a time.
 /// </summary>
 public sealed partial class WFBurstLauncherSystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLog = default!;
     [Dependency] private SharedActionsSystem _actions = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
-    [Dependency] private GunSystem _gun = default!;
+    [Dependency] private DamageableSystem _damageable = default!;
+    [Dependency] private SharedInteractionSystem _interaction = default!;
+    [Dependency] private EntityLookupSystem _lookup = default!;
+    [Dependency] private SharedPhysicsSystem _physics = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private IRobustRandom _random = default!;
+    [Dependency] private StaminaSystem _stamina = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+
+    private readonly HashSet<Entity<MobStateComponent>> _caught = new();
 
     public override void Initialize()
     {
@@ -47,37 +60,69 @@ public sealed partial class WFBurstLauncherSystem : EntitySystem
 
     private void OnFire(Entity<WFBurstLauncherComponent> ent, WFFireBurstLauncherEvent args)
     {
-        // Both models answer the same event; each fires only for its own action.
-        if (args.Handled || args.Action.Owner != ent.Comp.ActionEntity)
+        // Both models answer the same event; each fires only for its own action, and only one ring is out at a time.
+        if (args.Handled || args.Action.Owner != ent.Comp.ActionEntity || HasComp<WFHaloArmingComponent>(ent))
             return;
-
-        // Left unhandled, the action keeps its charge.
-        if (_timing.CurTime < ent.Comp.NextBurst)
-        {
-            _popup.PopupEntity(Loc.GetString("wf-burst-launcher-cycling"), ent, ent);
-            return;
-        }
 
         args.Handled = true;
-        ent.Comp.NextBurst = _timing.CurTime + ent.Comp.Spacing;
-        Fire(ent);
+        Launch(ent);
     }
 
-    /// <summary>Fires one ring of pellets from the body, spread evenly with a little jitter.</summary>
-    public void Fire(Entity<WFBurstLauncherComponent> ent)
+    /// <summary>Throws the ring of orbs out and holds the body in its shield until they go off.</summary>
+    public void Launch(Entity<WFBurstLauncherComponent> ent)
     {
+        var detonateAt = _timing.CurTime + ent.Comp.Fuse;
+        var arming = EnsureComp<WFHaloArmingComponent>(ent);
+        arming.End = detonateAt;
+        arming.Shield = SpawnAttachedTo(ent.Comp.Shield, new EntityCoordinates(ent, Vector2.Zero));
+        Dirty(ent, arming);
+
         var origin = _transform.GetMapCoordinates(ent);
-        var segment = 360f / Math.Max(ent.Comp.Pellets, 1);
-        for (var i = 0; i < ent.Comp.Pellets; i++)
+        var segment = 360f / Math.Max(ent.Comp.Orbs, 1);
+        var turn = _random.NextFloat(segment);
+        // Slowing evenly to a stop covers half the distance the launch speed would.
+        var speed = 2f * ent.Comp.OrbDistance / (float) ent.Comp.OrbFlight.TotalSeconds;
+        for (var i = 0; i < ent.Comp.Orbs; i++)
         {
-            var angle = Angle.FromDegrees(segment * (i + _random.NextFloat()));
-            var pellet = Spawn(ent.Comp.Pellet, origin);
-            // The body is the shooter, so its own pellets pass through it.
-            _gun.ShootProjectile(pellet, angle.ToVec(), Vector2.Zero, null, ent, ent.Comp.Speed);
+            var orb = Spawn(ent.Comp.Orb, origin);
+            if (!TryComp<WFHaloOrbComponent>(orb, out var charge) || !TryComp<PhysicsComponent>(orb, out var body))
+                continue;
+
+            charge.DetonateAt = detonateAt;
+            charge.Source = ent;
+            charge.LaunchVelocity = Angle.FromDegrees(turn + segment * i).ToVec() * speed;
+            charge.LaunchedAt = _timing.CurTime;
+            charge.StopAt = _timing.CurTime + ent.Comp.OrbFlight;
+            _physics.SetBodyStatus(orb, body, BodyStatus.InAir);
+            _physics.SetLinearVelocity(orb, charge.LaunchVelocity, body: body);
         }
 
-        _audio.PlayPvs(ent.Comp.Sound, ent);
-        _adminLog.Add(LogType.Action, LogImpact.High, $"{ToPrettyString(ent):user} fired a burst launcher ({ent.Comp.Pellet})");
+        _audio.PlayPvs(ent.Comp.ArmSound, ent);
+        _adminLog.Add(LogType.Action, LogImpact.High, $"{ToPrettyString(ent):user} threw a halo ({ent.Comp.Orb})");
+    }
+
+    /// <summary>Blasts every mob in reach of the orb and in its sight, except the body that threw it.</summary>
+    public void Detonate(Entity<WFHaloOrbComponent> orb)
+    {
+        var xform = Transform(orb);
+        Spawn(orb.Comp.Blast, _transform.GetMapCoordinates(orb, xform));
+        _audio.PlayPvs(orb.Comp.Sound, xform.Coordinates);
+
+        _caught.Clear();
+        _lookup.GetEntitiesInRange(xform.Coordinates, orb.Comp.Radius, _caught);
+        foreach (var mob in _caught)
+        {
+            if (mob.Owner == orb.Comp.Source || !_interaction.InRangeUnobstructed(orb.Owner, mob.Owner, orb.Comp.Radius + 0.5f))
+                continue;
+
+            if (orb.Comp.Damage is { } damage)
+                _damageable.TryChangeDamage(mob.Owner, damage, origin: orb.Comp.Source, tool: orb);
+
+            if (orb.Comp.StaminaDamage > 0)
+                _stamina.TakeStaminaDamage(mob.Owner, orb.Comp.StaminaDamage, source: orb.Comp.Source, with: orb);
+        }
+
+        QueueDel(orb);
     }
 
     public override void Update(float frameTime)
@@ -85,45 +130,82 @@ public sealed partial class WFBurstLauncherSystem : EntitySystem
         base.Update(frameTime);
 
         var now = _timing.CurTime;
-        var burst = EntityQueryEnumerator<WFHaloBurstComponent>();
-        while (burst.MoveNext(out var comp))
+        var orbs = EntityQueryEnumerator<WFHaloOrbComponent, PhysicsComponent>();
+        while (orbs.MoveNext(out var uid, out var orb, out var body))
         {
-            Recharge(comp, now);
+            if (now >= orb.DetonateAt)
+            {
+                if (!TerminatingOrDeleted(uid))
+                    Detonate((uid, orb));
+                continue;
+            }
+
+            if (orb.StopAt is not { } stop)
+                continue;
+
+            // Floor friction rewrites damping every tick, so the orb is slowed here instead.
+            var left = now >= stop ? 0f : (float) ((stop - now) / (stop - orb.LaunchedAt));
+            _physics.SetLinearVelocity(uid, orb.LaunchVelocity * left, body: body);
+            if (left <= 0f)
+                orb.StopAt = null;
+        }
+
+        var arming = EntityQueryEnumerator<WFHaloArmingComponent>();
+        while (arming.MoveNext(out var uid, out var comp))
+        {
+            if (now < comp.End)
+                continue;
+
+            QueueDel(comp.Shield);
+            RemCompDeferred<WFHaloArmingComponent>(uid);
+        }
+
+        var burst = EntityQueryEnumerator<WFHaloBurstComponent>();
+        while (burst.MoveNext(out var uid, out var comp))
+        {
+            Recharge((uid, comp), now);
         }
 
         var stun = EntityQueryEnumerator<WFHaloStunComponent>();
-        while (stun.MoveNext(out var comp))
+        while (stun.MoveNext(out var uid, out var comp))
         {
-            Recharge(comp, now);
+            Recharge((uid, comp), now);
         }
     }
 
-    /// <summary>Brings one spent burst back each <see cref="WFBurstLauncherComponent.RechargeTime"/> until it is full.</summary>
-    private void Recharge(WFBurstLauncherComponent comp, TimeSpan now)
+    /// <summary>
+    /// Brings one spent burst back each <see cref="WFBurstLauncherComponent.RechargeTime"/> until it is full, and shows
+    /// the wait on the button: the fuse while orbs are out, then the next charge while it is empty.
+    /// </summary>
+    private void Recharge(Entity<WFBurstLauncherComponent> ent, TimeSpan now)
     {
+        var comp = ent.Comp;
         if (!_actions.TryGetActionData(comp.ActionEntity, out var action, logError: false)
             || action.Charges is not { } charges
             || action.MaxCharges is not { } max)
             return;
 
         if (charges >= max)
-        {
             comp.NextCharge = null;
-            return;
-        }
-
-        if (comp.NextCharge is not { } next)
-        {
+        else if (comp.NextCharge is not { } next)
             comp.NextCharge = now + comp.RechargeTime;
-            return;
+        else if (now >= next)
+        {
+            _actions.AddCharges(comp.ActionEntity, 1);
+            // An empty action switches itself off.
+            _actions.SetEnabled(comp.ActionEntity, true);
+            charges++;
+            comp.NextCharge = charges < max ? now + comp.RechargeTime : null;
+            _popup.PopupEntity(Loc.GetString("wf-burst-launcher-recharged", ("charges", charges), ("max", max)), ent, ent);
         }
 
-        if (now < next)
-            return;
+        (TimeSpan Start, TimeSpan End)? wait = null;
+        if (TryComp<WFHaloArmingComponent>(ent, out var arming) && arming.End > now)
+            wait = (arming.End - comp.Fuse, arming.End);
+        else if (charges == 0 && comp.NextCharge is { } due)
+            wait = (due - comp.RechargeTime, due);
 
-        _actions.AddCharges(comp.ActionEntity, 1);
-        // An empty action switches itself off.
-        _actions.SetEnabled(comp.ActionEntity, true);
-        comp.NextCharge = charges + 1 < max ? now + comp.RechargeTime : null;
+        if (wait is { } w && action.Cooldown != w)
+            _actions.SetCooldown(comp.ActionEntity, w.Start, w.End);
     }
 }

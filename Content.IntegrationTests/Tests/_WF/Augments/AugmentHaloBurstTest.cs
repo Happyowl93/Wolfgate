@@ -2,20 +2,22 @@ using System.Collections.Generic;
 using Content.Server._WF.Augments;
 using Content.Server.Atmos.Components;
 using Content.Shared._WF.Augments;
+using Content.Shared.ActionBlocker;
 using Content.Shared.Actions;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
 using Content.Shared.Humanoid;
 using Content.Shared.Preferences;
 using Robust.Shared.GameObjects;
-using Robust.Shared.Map;
+using Robust.Shared.Physics.Components;
 using Robust.Shared.Timing;
 
 namespace Content.IntegrationTests.Tests._WF.Augments;
 
 /// <summary>
-/// The halo burst and halo stun: each model fires only its own ring, hits the people round the wearer but never the
-/// wearer, spends one charge per burst, won't fire twice inside its spacing, and brings spent charges back.
+/// The halo burst and halo stun: each model throws only its own ring of orbs, holds the wearer still in a shield until
+/// they go off together, blasts the people round the wearer but never the wearer, spends one charge per ring, shows
+/// the wait on its button, and brings spent charges back.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFBurstLauncherSystem))]
@@ -28,6 +30,7 @@ public sealed class AugmentHaloBurstTest
         var server = pair.Server;
         var entities = server.EntMan;
         var actions = server.System<SharedActionsSystem>();
+        var blocker = server.System<ActionBlockerSystem>();
         var humanoids = server.System<SharedHumanoidAppearanceSystem>();
         var timing = server.ResolveDependency<IGameTiming>();
         var map = await pair.CreateTestMap();
@@ -51,67 +54,114 @@ public sealed class AugmentHaloBurstTest
             Assert.That(Charges(burstAction), Is.EqualTo(2));
         });
 
-        int? Charges(EntityUid action) => entities.GetComponent<InstantActionComponent>(action).Charges;
+        InstantActionComponent Action(EntityUid action) => entities.GetComponent<InstantActionComponent>(action);
+        int? Charges(EntityUid action) => Action(action).Charges;
 
-        // Only what pellets deal.
-        float PelletDamage(EntityUid body)
+        // Only what the blasts deal.
+        float BlastDamage(EntityUid body)
         {
             var dict = entities.GetComponent<DamageableComponent>(body).Damage.DamageDict;
-            return (dict.GetValueOrDefault("Blunt") + dict.GetValueOrDefault("Piercing")).Float();
+            return (dict.GetValueOrDefault("Piercing") + dict.GetValueOrDefault("Heat")).Float();
         }
 
-        async Task Fire(EntityUid action)
+        int Orbs()
+        {
+            var count = 0;
+            var query = entities.EntityQueryEnumerator<WFHaloOrbComponent>();
+            while (query.MoveNext(out _, out _))
+                count++;
+            return count;
+        }
+
+        async Task Press(EntityUid action)
         {
             await server.WaitPost(() =>
             {
-                var comp = entities.GetComponent<InstantActionComponent>(action);
+                var comp = Action(action);
                 actions.PerformAction(wearer, null, action, comp, comp.BaseEvent, timing.CurTime, false);
             });
-            await pair.RunTicksSync(30);
+            await pair.RunTicksSync(5);
         }
 
-        // The stun ring tires the target out and leaves the wearer alone; the lethal model keeps its charges.
-        await Fire(stunAction);
+        // Past the two-second fuse.
+        Task WaitFuse() => pair.RunSeconds(2.5f);
+
+        // Thrown: the wearer is held in the shield, the orbs hang round them, and nothing has gone off yet.
+        await Press(stunAction);
+        EntityUid? shield = null;
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.TryGetComponent<WFHaloArmingComponent>(wearer, out var arming), "The wearer isn't held.");
+            Assert.That(blocker.CanMove(wearer), Is.False, "The wearer can walk while the orbs are out.");
+            shield = arming!.Shield;
+            Assert.That(entities.EntityExists(shield), "There is no shield.");
+            Assert.That(Orbs(), Is.EqualTo(entities.GetComponent<WFHaloStunComponent>(wearer).Orbs));
+            Assert.That(entities.GetComponent<StaminaComponent>(target).StaminaDamage, Is.EqualTo(0f), "The orbs went off at once.");
+            Assert.That(Charges(stunAction), Is.EqualTo(1));
+            Assert.That(Action(stunAction).Cooldown?.End, Is.EqualTo(arming.End), "The button doesn't show the fuse.");
+        });
+
+        // The other model can't throw a second ring while one is out.
+        await Press(burstAction);
+        await server.WaitAssertion(() => Assert.That(Charges(burstAction), Is.EqualTo(2), "A second ring was thrown."));
+
+        // The orbs come to rest round the wearer, a tile and a half out.
+        await pair.RunSeconds(1f);
+        await server.WaitAssertion(() =>
+        {
+            var xforms = server.System<SharedTransformSystem>();
+            var centre = xforms.GetWorldPosition(wearer);
+            var reach = entities.GetComponent<WFHaloStunComponent>(wearer).OrbDistance;
+            var query = entities.EntityQueryEnumerator<WFHaloOrbComponent, PhysicsComponent>();
+            while (query.MoveNext(out var orb, out _, out var body))
+            {
+                Assert.That((xforms.GetWorldPosition(orb) - centre).Length(), Is.EqualTo(reach).Within(0.3f), "An orb didn't stop where it should.");
+                Assert.That(body.LinearVelocity.Length(), Is.LessThan(0.01f), "An orb is still drifting.");
+            }
+        });
+
+        // Gone off: the target is winded, the wearer is untouched and free, and the shield and orbs are gone.
+        await WaitFuse();
         await server.WaitAssertion(() =>
         {
             Assert.That(entities.GetComponent<StaminaComponent>(target).StaminaDamage, Is.GreaterThan(0f), "The stun ring missed.");
             Assert.That(entities.GetComponent<StaminaComponent>(wearer).StaminaDamage, Is.EqualTo(0f), "The wearer was hit.");
-            Assert.That(PelletDamage(wearer), Is.EqualTo(0f), "The wearer was hit.");
-            Assert.That(Charges(stunAction), Is.EqualTo(1));
-            Assert.That(Charges(burstAction), Is.EqualTo(2), "The other model fired too.");
+            Assert.That(entities.HasComponent<WFHaloArmingComponent>(wearer), Is.False);
+            Assert.That(blocker.CanMove(wearer), "The wearer is still held.");
+            Assert.That(entities.EntityExists(shield), Is.False, "The shield outlived the fuse.");
+            Assert.That(Orbs(), Is.Zero);
         });
-
-        // A second press inside the spacing keeps the charge.
-        await Fire(stunAction);
-        await server.WaitAssertion(() => Assert.That(Charges(stunAction), Is.EqualTo(1), "The spacing let a second burst through."));
 
         // The lethal ring wounds the target and still leaves the wearer alone.
         var before = 0f;
-        await server.WaitPost(() => before = PelletDamage(target));
-        await Fire(burstAction);
+        await server.WaitPost(() => before = BlastDamage(target));
+        await Press(burstAction);
+        await WaitFuse();
         await server.WaitAssertion(() =>
         {
-            Assert.That(PelletDamage(target), Is.GreaterThan(before), "The lethal ring missed.");
-            Assert.That(PelletDamage(wearer), Is.EqualTo(0f), "The wearer was hit.");
+            Assert.That(BlastDamage(target), Is.GreaterThan(before), "The lethal ring missed.");
+            Assert.That(BlastDamage(wearer), Is.EqualTo(0f), "The wearer was hit.");
             Assert.That(Charges(burstAction), Is.EqualTo(1));
         });
 
-        // Emptied, the action switches off; a recharge brings it back.
-        await server.WaitPost(() => entities.GetComponent<WFHaloStunComponent>(wearer).NextBurst = TimeSpan.Zero);
-        await Fire(stunAction);
+        // Emptied, the action switches off and its button counts down to the next charge, which turns it back on.
+        await Press(stunAction);
+        await WaitFuse();
         await server.WaitAssertion(() =>
         {
+            var stun = entities.GetComponent<WFHaloStunComponent>(wearer);
             Assert.That(Charges(stunAction), Is.EqualTo(0));
-            Assert.That(entities.GetComponent<InstantActionComponent>(stunAction).Enabled, Is.False);
-            Assert.That(entities.GetComponent<WFHaloStunComponent>(wearer).NextCharge, Is.Not.Null, "No recharge was started.");
-            entities.GetComponent<WFHaloStunComponent>(wearer).NextCharge = timing.CurTime;
+            Assert.That(Action(stunAction).Enabled, Is.False);
+            Assert.That(stun.NextCharge, Is.Not.Null, "No recharge was started.");
+            Assert.That(Action(stunAction).Cooldown?.End, Is.EqualTo(stun.NextCharge), "The button doesn't show the recharge.");
+            stun.NextCharge = timing.CurTime;
         });
         await pair.RunTicksSync(2);
         await server.WaitAssertion(() =>
         {
             var stun = entities.GetComponent<WFHaloStunComponent>(wearer);
             Assert.That(Charges(stunAction), Is.EqualTo(1));
-            Assert.That(entities.GetComponent<InstantActionComponent>(stunAction).Enabled, Is.True, "The recharged action stayed off.");
+            Assert.That(Action(stunAction).Enabled, Is.True, "The recharged action stayed off.");
             Assert.That(stun.NextCharge, Is.Not.Null, "The second charge isn't coming back.");
             stun.NextCharge = timing.CurTime;
         });

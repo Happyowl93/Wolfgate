@@ -160,16 +160,94 @@
 
 # The halo burst's lethal pellet: a lighter shrapnel ball, since a burst throws two dozen of them.
 - type: entity
+  abstract: true
+  id: WFHaloOrbBase
+  name: halo charge
+  description: An amber charge hanging in the air, about to go off.
   categories: [ HideSpawnMenu ]
-  parent: PelletClusterLethal
-  id: WFHaloBurstPellet
-  name: pellet (halo burst)
   components:
-  - type: Projectile
-    deleteOnCollide: false
+  - type: Sprite
+    sprite: _WF/Augments/halo_orb.rsi
+    state: orb
+    drawdepth: Effects
+    shader: unshaded
+    noRot: true
+  - type: PointLight
+    color: "#ffa733"
+    radius: 1.5
+    energy: 1.5
+  - type: Physics
+    bodyType: Dynamic
+    fixedRotation: true
+  - type: Fixtures
+    fixtures:
+      orb: # stops at walls and passes people
+        shape: !type:PhysShapeCircle
+          radius: 0.1
+        density: 1
+        hard: true
+        mask:
+        - Impassable
+  - type: TimedDespawn # in case the fuse is missed
+    lifetime: 4
+
+- type: entity
+  parent: WFHaloOrbBase
+  id: WFHaloOrbLethal
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: WFHaloOrb
     damage:
       types:
-        Piercing: 25
+        Piercing: 15
+        Heat: 10
+  - type: WolfmedDamageCause
+    cause: Explosion
+
+- type: entity
+  parent: WFHaloOrbBase
+  id: WFHaloOrbStun
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: WFHaloOrb
+    staminaDamage: 40
+
+- type: entity
+  id: WFHaloShield
+  name: halo shield
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: _WF/Augments/halo_shield.rsi
+    state: shield
+    drawdepth: Effects
+    shader: unshaded
+    noRot: true
+  - type: PointLight
+    color: "#ffd84a"
+    radius: 2
+    energy: 1
+  - type: TimedDespawn # in case the fuse is missed
+    lifetime: 3
+
+- type: entity
+  id: WFHaloBlast
+  name: halo blast
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: Effects/explosion.rsi
+    state: explosionfast
+    scale: 0.8, 0.8 # the blast's reach
+    drawdepth: Effects
+    noRot: true
+    shader: unshaded
+  - type: TimedDespawn
+    lifetime: 0.48
+  - type: PointLight
+    color: "#ffa733"
+    radius: 2.5
+    energy: 2
 
 # Actions
 
@@ -247,7 +325,7 @@
 - type: entity
   id: WFActionHaloBurst
   name: Halo Burst
-  description: Fire a ring of shrapnel out from your torso in every direction. Holds two bursts; each comes back on its own.
+  description: Throw a ring of explosive charges out round you; they go off together two seconds later, while you are held in a shield. Holds two bursts; each comes back on its own.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
@@ -260,7 +338,7 @@
   parent: WFActionHaloBurst
   id: WFActionHaloStun
   name: Halo Stun
-  description: Fire a ring of rubber pellets out from your torso in every direction. Holds two bursts; each comes back on its own.
+  description: Throw a ring of concussive charges out round you; they go off together two seconds later, while you are held in a shield. Holds two bursts; each comes back on its own.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
@@ -450,24 +528,24 @@
   parent: BaseAutosurgeon
   id: WFAutosurgeonHaloBurst
   name: autosurgeon (halo burst)
-  description: Packs shrapnel charges round the ribcage, to be fired out in a ring.
+  description: Packs explosive charges round the ribcage, to be thrown out in a ring.
   components:
   - type: AutoSurgeon
     targetBodyPart: Torso
     componentsToUser:
     - type: WFHaloBurst
-      pellet: WFHaloBurstPellet
+      orb: WFHaloOrbLethal
       action: WFActionHaloBurst
 
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonHaloStun
   name: autosurgeon (halo stun)
-  description: Packs rubber-pellet charges round the ribcage, to be fired out in a ring.
+  description: Packs concussive charges round the ribcage, to be thrown out in a ring.
   components:
   - type: AutoSurgeon
     targetBodyPart: Torso
     componentsToUser:
     - type: WFHaloStun
-      pellet: PelletClusterRubber
+      orb: WFHaloOrbStun
       action: WFActionHaloStun

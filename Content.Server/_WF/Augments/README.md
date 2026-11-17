@@ -70,11 +70,14 @@ under a raised scanner chirp and a quarter-second glitch (`WFThermalGlitchOverla
 isn't in the thermal vision's network state, so `WFThermalTintsVisualsSystem` copies it from the band on every state.
 They keep eye protection but not flash immunity.
 
-The halo burst and halo stun (`WFBurstLauncherSystem`) are chest upgrades that fire a ring of 24 pellets out from the
-body: shrapnel for the burst, rubber for the stun. Each model is its own component (`WFHaloBurstComponent`,
-`WFHaloStunComponent`) with its own action, so both can be fitted. The action holds two bursts as charges, at least
-1.5 s apart; a spent one comes back every three minutes. The pellets hit everyone round the wearer, friends included,
-but never the wearer.
+The halo burst and halo stun (`WFBurstLauncherSystem`) are chest upgrades that throw a ring of eight amber orbs
+(`WFHaloOrbComponent`) out from the body. The orbs drift to a stop about a tile and a half out, stopping at walls, and go off
+together after a two-second fuse, each blasting the mobs within reach and in sight: damage for the burst, stamina for the
+stun. Until then `WFHaloArmingComponent` holds the wearer still inside a shield, on both sides so the client doesn't
+predict a step, and their own blasts pass them by. Each model is its own component (`WFHaloBurstComponent`,
+`WFHaloStunComponent`) with its own action, so both can be fitted, but only one ring is out at a time. The action holds
+two bursts as charges and a spent one comes back every three minutes; the button's cooldown sweep shows the fuse, then
+the wait for the next charge when it is empty. `Tools/_WF/Augments/build_halo_sprites.py` draws the shield and orb.
 
 Three implants bring back the combat traits Monolith removed (#5023), paid for and losable: the adrenal booster
 adds Monolith's `Vigor`, the threat-sense sole its `TrapAvoider`, and the pain editor (`WFPainEditorSystem`) scales pain
@@ -194,6 +197,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WF/Augments/WFAugmentTraitSlotsPrototype.cs`](../../../Content.Shared/_WF/Augments/WFAugmentTraitSlotsPrototype.cs)
 - [`Content.Shared/_WF/Augments/WFBurstLauncherComponent.cs`](../../../Content.Shared/_WF/Augments/WFBurstLauncherComponent.cs)
 - [`Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs`](../../../Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs)
+- [`Content.Shared/_WF/Augments/WFHaloArmingSystem.cs`](../../../Content.Shared/_WF/Augments/WFHaloArmingSystem.cs)
 - [`Content.Shared/_WF/Augments/WFIatricMonitorComponent.cs`](../../../Content.Shared/_WF/Augments/WFIatricMonitorComponent.cs)
 - [`Content.Shared/_WF/Augments/WFNutrimentPumpComponent.cs`](../../../Content.Shared/_WF/Augments/WFNutrimentPumpComponent.cs)
 - [`Content.Shared/_WF/Augments/WFPainEditorComponent.cs`](../../../Content.Shared/_WF/Augments/WFPainEditorComponent.cs)
@@ -270,6 +274,8 @@ scratch, so an unpicked augment comes off it.
 - [`Resources/Textures/_WF/Augments/eexion.rsi/`](../../../Resources/Textures/_WF/Augments/eexion.rsi/)
 - [`Resources/Textures/_WF/Augments/eezenghu.rsi/`](../../../Resources/Textures/_WF/Augments/eezenghu.rsi/)
 - [`Resources/Textures/_WF/Augments/engineering.rsi/`](../../../Resources/Textures/_WF/Augments/engineering.rsi/)
+- [`Resources/Textures/_WF/Augments/halo_orb.rsi/`](../../../Resources/Textures/_WF/Augments/halo_orb.rsi/)
+- [`Resources/Textures/_WF/Augments/halo_shield.rsi/`](../../../Resources/Textures/_WF/Augments/halo_shield.rsi/)
 - [`Resources/Textures/_WF/Augments/hephaestus.rsi/`](../../../Resources/Textures/_WF/Augments/hephaestus.rsi/)
 - [`Resources/Textures/_WF/Augments/hephaestus2.rsi/`](../../../Resources/Textures/_WF/Augments/hephaestus2.rsi/)
 - [`Resources/Textures/_WF/Augments/implants.rsi/`](../../../Resources/Textures/_WF/Augments/implants.rsi/)
@@ -291,6 +297,7 @@ scratch, so an unpicked augment comes off it.
 
 ### Tools
 
+- [`Tools/_WF/Augments/build_halo_sprites.py`](../../../Tools/_WF/Augments/build_halo_sprites.py)
 - [`Tools/_WF/Augments/port.py`](../../../Tools/_WF/Augments/port.py)
 
 ## Non-modular edits
