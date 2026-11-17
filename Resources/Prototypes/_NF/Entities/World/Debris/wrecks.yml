@@ -86,7 +86,7 @@
         # Room
         - id: NFWreckRoomMarker
           prob: 0.01
-        - id: WFAugmentScavengeSpawner # WOLFGATE(Augments): scavenged cyberware, the dearer the rarer
+        - id: WGAugmentScavengeSpawner # WOLFGATE(Augments): scavenged cyberware, the dearer the rarer
           prob: 0.0015 # WOLFGATE(Augments)
       Plating: *floor
       Lattice:

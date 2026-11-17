@@ -33,7 +33,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using Content.Server.Destructible;
-using Content.Server._WF.ShipShields; // WOLFGATE(ShipShields)
+using Content.Server._WG.ShipShields; // WOLFGATE(ShipShields)
 using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
 using Content.Shared.Projectiles;
@@ -80,7 +80,7 @@ public sealed partial class ProjectileSystem : SharedProjectileSystem
             return null;
 
         // WOLFGATE(ShipShields) START: a deflector field slows a round and lets it fly on unspent
-        if (_wfShipShields.PassWolfgateDeflector(target, uid, component))
+        if (_wgShipShields.PassWolfgateDeflector(target, uid, component))
             return null;
         // WOLFGATE END
 
@@ -277,7 +277,7 @@ public sealed partial class ProjectileSystem : SharedProjectileSystem
                 var hitXform = Transform(minHit.Uid.Value);
                 var hitMapCoord = lastMap.Offset(rayDirection * minHit.Distance);
                 // WOLFGATE(ShipShields) START: consume confirmed shield ray hits without relying on a later edge contact
-                var shieldHit = new WFShipShieldProjectileRayHitEvent(uid, projectileComp, hitMapCoord);
+                var shieldHit = new WGShipShieldProjectileRayHitEvent(uid, projectileComp, hitMapCoord);
                 RaiseLocalEvent(minHit.Uid.Value, ref shieldHit);
                 if (shieldHit.Handled)
                     return true;

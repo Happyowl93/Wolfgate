@@ -293,7 +293,7 @@ public sealed partial class DockingSystem
                                 continue;
                             }
                             */
-                            if (!WFTryGetDockPlacement(
+                            if (!WGTryGetDockPlacement(
                                     other,
                                     _xformQuery.GetComponent(otherUid),
                                     otherGrid,
@@ -410,7 +410,7 @@ public sealed partial class DockingSystem
             {
                 // WOLFGATE(Performance) START: chunk-first walk, same result; this ran per dock pair for every fixture
                 // if (_mapSystem.GetLocalTilesIntersecting(gridEntity.Owner, gridEntity.Comp, aabb).Any())
-                if (WFAnyTileIntersecting(gridEntity, aabb))
+                if (WGAnyTileIntersecting(gridEntity, aabb))
                     return false;
                 // WOLFGATE END
             }
@@ -427,7 +427,7 @@ public sealed partial class DockingSystem
         //
         // return _dockingSet.ToList();
         var docks = new List<Entity<DockingComponent>>();
-        if (_wfDockIndex.DocksOn(uid) is not { } indexed)
+        if (_wgDockIndex.DocksOn(uid) is not { } indexed)
             return docks;
 
         foreach (var dock in indexed)

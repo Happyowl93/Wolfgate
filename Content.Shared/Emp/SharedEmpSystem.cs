@@ -16,7 +16,7 @@ public abstract partial class SharedEmpSystem : EntitySystem
     [Dependency] private INetManager _net = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
-    [Dependency] private Content.Shared._WF.ArmorSpecialization.WFCivilianSpecializationSystem _wfSpecs = default!; // WOLFGATE(ArmorSpecialization)
+    [Dependency] private Content.Shared._WG.ArmorSpecialization.WGCivilianSpecializationSystem _wgSpecs = default!; // WOLFGATE(ArmorSpecialization)
 
     private HashSet<EntityUid> _entSet = new();
 
@@ -89,7 +89,7 @@ public abstract partial class SharedEmpSystem : EntitySystem
     public bool TryEmpEffects(EntityUid uid, float energyConsumption, TimeSpan duration, EntityUid? user = null)
     {
         // WOLFGATE(ArmorSpecialization) START: an EMP-hardened suit shields its wearer and what they carry.
-        if (_wfSpecs.ShieldsFromEmp(uid))
+        if (_wgSpecs.ShieldsFromEmp(uid))
             return false;
         // WOLFGATE END
 

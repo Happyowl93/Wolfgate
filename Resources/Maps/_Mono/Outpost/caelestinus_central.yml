@@ -7458,7 +7458,7 @@ entities:
     - type: NavMap
     - type: ChunkContainer
       chunkEntities: []
-    - type: WFTradeMarket
+    - type: WGTradeMarket
   - uid: 11215
     components:
     - type: MetaData
@@ -9258,7 +9258,7 @@ entities:
       access:
       - - Medical
       - - Security
-    - type: WFMappingAccessFill
+    - type: WGMappingAccessFill
   - uid: 4666
     components:
     - type: Transform
@@ -9268,7 +9268,7 @@ entities:
       access:
       - - Medical
       - - Security
-    - type: WFMappingAccessFill
+    - type: WGMappingAccessFill
   - uid: 7181
     components:
     - type: Transform
@@ -76248,7 +76248,7 @@ entities:
       pos: -40.46031,-25.05595
     - type: Physics
       canCollide: False
-- proto: WFComputerMilitaryCounter
+- proto: WGComputerMilitaryCounter
   entities:
   - uid: 10894
     components:
@@ -76259,7 +76259,7 @@ entities:
       powerLoad: 5
     - type: Battery
       startingCharge: 0
-- proto: WFComputerWeatherForecast
+- proto: WGComputerWeatherForecast
   entities:
   - uid: 10893
     components:
@@ -76270,7 +76270,7 @@ entities:
       powerLoad: 5
     - type: Battery
       startingCharge: 0
-- proto: WFContractBoard
+- proto: WGContractBoard
   entities:
   - uid: 10901
     components:
@@ -76313,7 +76313,7 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -5.5,12.5
-- proto: WFContractCargoPad
+- proto: WGContractCargoPad
   entities:
   - uid: 10902
     components:
@@ -76351,7 +76351,7 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -5.5,13.5
-- proto: WFMeridianClothingAccessoryDogtag
+- proto: WGMeridianClothingAccessoryDogtag
   entities:
   - uid: 10945
     components:
@@ -76363,7 +76363,7 @@ entities:
       pos: -28.485115,36.434086
     - type: Physics
       canCollide: False
-- proto: WFMeridianClothingHeadCostumeTvHead
+- proto: WGMeridianClothingHeadCostumeTvHead
   entities:
   - uid: 10351
     components:
@@ -76372,7 +76372,7 @@ entities:
       pos: 16.042,34.74635
     - type: Physics
       canCollide: False
-- proto: WFMinigameDealer
+- proto: WGMinigameDealer
   entities:
   - uid: 10895
     components:
@@ -76476,7 +76476,7 @@ entities:
       triggersAlerts: False
     - type: MobStateActions
       actions: {}
-    - type: WFBiotype
+    - type: WGBiotype
       biotype: Organic
     - type: ContainerContainer
       containers:
@@ -76536,7 +76536,7 @@ entities:
     missingComponents:
     - InteractionPopup
     - MobCollision
-- proto: WFMinigameSage
+- proto: WGMinigameSage
   entities:
   - uid: 10896
     components:
@@ -76640,7 +76640,7 @@ entities:
       triggersAlerts: False
     - type: MobStateActions
       actions: {}
-    - type: WFBiotype
+    - type: WGBiotype
       biotype: Organic
     - type: ContainerContainer
       containers:
@@ -76700,7 +76700,7 @@ entities:
     missingComponents:
     - InteractionPopup
     - MobCollision
-- proto: WFPlushieMedMoth
+- proto: WGPlushieMedMoth
   entities:
   - uid: 10194
     components:
@@ -76709,7 +76709,7 @@ entities:
       pos: -6.539009,44.446827
     - type: Physics
       canCollide: False
-- proto: WFShower
+- proto: WGShower
   entities:
   - uid: 10313
     components:
@@ -76742,14 +76742,14 @@ entities:
       pos: 27.5,32.5
     - type: Fixtures
       fixtures: {}
-- proto: WFStreetsTrashBin
+- proto: WGStreetsTrashBin
   entities:
   - uid: 11128
     components:
     - type: Transform
       parent: 1
       pos: -9.5,27.5
-- proto: WFScratchTicketSeller
+- proto: WGScratchTicketSeller
   entities:
   - uid: 11230
     components:
@@ -76757,7 +76757,7 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 14.5,24.5
-- proto: WFTraderAstro
+- proto: WGTraderAstro
   entities:
   - uid: 10000
     components:
@@ -76920,12 +76920,12 @@ entities:
         ensnare: !type:Container
           ents: []
     - type: WolfmedConsciousness
-    - type: WFBiotype
+    - type: WGBiotype
       biotype: Organic
     missingComponents:
     - InteractionPopup
     - MobCollision
-- proto: WFTraderFlatpack
+- proto: WGTraderFlatpack
   entities:
   - uid: 10001
     components:
@@ -77088,12 +77088,12 @@ entities:
         ensnare: !type:Container
           ents: []
     - type: WolfmedConsciousness
-    - type: WFBiotype
+    - type: WGBiotype
       biotype: Organic
     missingComponents:
     - InteractionPopup
     - MobCollision
-- proto: WFTraderFuelTechnician
+- proto: WGTraderFuelTechnician
   entities:
   - uid: 10002
     components:
@@ -77252,12 +77252,12 @@ entities:
         ensnare: !type:Container
           ents: []
     - type: WolfmedConsciousness
-    - type: WFBiotype
+    - type: WGBiotype
       biotype: Organic
     missingComponents:
     - InteractionPopup
     - MobCollision
-- proto: WFTraderSalvage
+- proto: WGTraderSalvage
   entities:
   - uid: 10003
     components:
@@ -77416,12 +77416,12 @@ entities:
         ensnare: !type:Container
           ents: []
     - type: WolfmedConsciousness
-    - type: WFBiotype
+    - type: WGBiotype
       biotype: Organic
     missingComponents:
     - InteractionPopup
     - MobCollision
-- proto: WFTraderShipyard
+- proto: WGTraderShipyard
   entities:
   - uid: 10004
     components:
@@ -77579,7 +77579,7 @@ entities:
         ensnare: !type:Container
           ents: []
     - type: WolfmedConsciousness
-    - type: WFBiotype
+    - type: WGBiotype
       biotype: Organic
     missingComponents:
     - InteractionPopup
@@ -77740,12 +77740,12 @@ entities:
         ensnare: !type:Container
           ents: []
     - type: WolfmedConsciousness
-    - type: WFBiotype
+    - type: WGBiotype
       biotype: Organic
     missingComponents:
     - InteractionPopup
     - MobCollision
-- proto: WFTraderTools
+- proto: WGTraderTools
   entities:
   - uid: 10006
     components:
@@ -77904,12 +77904,12 @@ entities:
         ensnare: !type:Container
           ents: []
     - type: WolfmedConsciousness
-    - type: WFBiotype
+    - type: WGBiotype
       biotype: Organic
     missingComponents:
     - InteractionPopup
     - MobCollision
-- proto: WFTraderUsedShips
+- proto: WGTraderUsedShips
   entities:
   - uid: 10007
     components:
@@ -78072,12 +78072,12 @@ entities:
         ensnare: !type:Container
           ents: []
     - type: WolfmedConsciousness
-    - type: WFBiotype
+    - type: WGBiotype
       biotype: Organic
     missingComponents:
     - InteractionPopup
     - MobCollision
-- proto: WFTraderWolfgate
+- proto: WGTraderWolfgate
   entities:
   - uid: 10008
     components:
@@ -78240,19 +78240,19 @@ entities:
         ensnare: !type:Container
           ents: []
     - type: WolfmedConsciousness
-    - type: WFBiotype
+    - type: WGBiotype
       biotype: Organic
     missingComponents:
     - InteractionPopup
     - MobCollision
-- proto: WFVendingMachineLuvvits
+- proto: WGVendingMachineLuvvits
   entities:
   - uid: 10892
     components:
     - type: Transform
       parent: 1
       pos: -13.5,14.5
-- proto: WFWolfmedIvDrip
+- proto: WGWolfmedIvDrip
   entities:
   - uid: 10186
     components:
