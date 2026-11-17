@@ -67,6 +67,19 @@
   part: RightFootCybernetic
   styled: true
 
+# The chest converted in place: styled like the cyber limbs, synthetic, and holding a third implant. A torso can't be
+# swapped like a limb, since the rest of the body hangs from it.
+- type: wfAugment
+  id: WFAugmentCyberChest
+  name: wf-augment-cyber-chest
+  description: wf-augment-cyber-chest-desc
+  icon: { sprite: Objects/Specific/Robotics/cyborg_parts.rsi, state: borg_chest }
+  slot: Chest
+  kind: Plating
+  styled: true
+  implantSlots: 3
+  price: 400000
+
 # The cyberware found, bought and installed in rounds. Each is bought once in the creator or kept from a round
 # it was installed in; scavengers find the part, organ or autosurgeon, rarer the dearer it is. Better limbs hold more
 # implants (implantSlots); an implant's slot is the part it goes in, and host says whether that part must be synthetic.

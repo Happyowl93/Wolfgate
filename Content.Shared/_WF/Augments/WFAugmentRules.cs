@@ -225,8 +225,9 @@ public static class WFAugmentRules
     }
 
     /// <summary>
-    /// How many implants the slot's part holds with these choices: the picked limb's count, none for a missing one
-    /// or a hand or foot whose limb is missing, one in a trait's limb, else the natural part's.
+    /// How many implants the slot's part holds with these choices: the picked limb's count, plating's if it holds
+    /// more than the natural part, none for a missing one or a hand or foot whose limb is missing, one in a trait's
+    /// limb, else the natural part's.
     /// </summary>
     public static int ImplantSlots(WFAugmentSlot slot,
         IReadOnlyDictionary<WFAugmentSlot, WFAugmentChoice> choices,
@@ -239,6 +240,8 @@ public static class WFAugmentRules
         {
             if (augment.Kind == WFAugmentKind.Limb)
                 return augment.ImplantSlots;
+            if (augment.Kind == WFAugmentKind.Plating)
+                return Math.Max(augment.ImplantSlots, NaturalImplantSlots(slot));
             if (augment.Kind == WFAugmentKind.Missing)
                 return 0;
         }
@@ -254,7 +257,7 @@ public static class WFAugmentRules
     }
 
     /// <summary>
-    /// Whether the slot's part is synthetic with these choices: a picked or trait limb is, a hand or foot not picked
+    /// Whether the slot's part is synthetic with these choices: a picked or trait limb or plating is, a hand or foot not picked
     /// on its own is what its limb is, and a natural part is if its prototype is cybernetic or not built of flesh
     /// (an IPC's).
     /// </summary>
@@ -271,6 +274,10 @@ public static class WFAugmentRules
             && proto.TryIndex(choice.Augment, out var augment)
             && augment.Kind == WFAugmentKind.Limb)
             return augment.Part is not { } part || SyntheticPart(part, proto, factory);
+        if (choices.TryGetValue(slot, out var plated)
+            && proto.TryIndex(plated.Augment, out var plating)
+            && plating.Kind == WFAugmentKind.Plating)
+            return true;
 
         if (LimbAbove(slot) is { } above && (claimed.ContainsKey(above) || choices.ContainsKey(above)))
             return Synthetic(species, above, choices, claimed, proto, factory);

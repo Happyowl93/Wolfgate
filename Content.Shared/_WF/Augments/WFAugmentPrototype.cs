@@ -48,7 +48,8 @@ public sealed partial class WFAugmentPrototype : IPrototype
     [DataField]
     public WFAugmentHost Host;
 
-    /// <summary>How many implants the limb holds, for <see cref="WFAugmentKind.Limb"/>.</summary>
+    /// <summary>How many implants the limb or plating holds, for <see cref="WFAugmentKind.Limb"/> and
+    /// <see cref="WFAugmentKind.Plating"/>.</summary>
     [DataField]
     public int ImplantSlots = 1;
 

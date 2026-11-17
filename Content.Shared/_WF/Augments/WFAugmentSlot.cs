@@ -27,7 +27,10 @@ public enum WFAugmentSlot : byte
 /// <summary>What an augment does to its slot.</summary>
 public enum WFAugmentKind : byte
 {
-    /// <summary>Plating drawn over the slot in a style; the part itself is unchanged (head, chest).</summary>
+    /// <summary>
+    /// The slot's part converted in place: drawn in a style, and counted as synthetic for implants (head, chest). It
+    /// can hold more implants than the natural part, never fewer.
+    /// </summary>
     Plating,
 
     /// <summary>The limb is replaced with <see cref="WFAugmentPrototype.Part"/>.</summary>

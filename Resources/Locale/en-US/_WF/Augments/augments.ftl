@@ -85,6 +85,9 @@ wf-augment-reflex-booster = PD-VI NR-8 "Strizh" reflex booster
 wf-augment-reflex-booster-desc = A booster on the spinal cord that speeds your reflexes. Ships you fly accelerate and turn 15% better, and one bullet in twenty that would hit you misses. Your nerves run hot, so wounds hurt 5% more. Beams still hit.
 wf-reflex-booster-dodge = { CAPITALIZE(THE($target)) } twists out of the way!
 
+wf-augment-cyber-chest = PD-VI KS-2 "Kiras" chest chassis
+wf-augment-cyber-chest-desc = Your chest rebuilt around a cybernetic frame, in the style of your choice. It holds three implants instead of two, but it counts as synthetic, so implants that need living tissue won't fit.
+
 wf-augment-holo-projector = MMC KG-7 "Kagemusha" holo projector
 wf-augment-holo-projector-desc = Holo emitters under the skin of the chest. On command they cast two copies of you about the room you stand in, and you slip into the place of one while the other takes yours. The copies wander for twenty seconds and flicker out when struck; they give off no heat. They never land past a wall, window or door, and a cramped spot or a doorway won't cast at all. Recharges in ninety seconds.
 wf-holo-projector-cramped = There's no room here to cast your copies.

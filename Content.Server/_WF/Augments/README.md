@@ -43,8 +43,9 @@ A character gets an augment three ways:
 
 Implants (`kind: Upgrade`) are a set of their own (`AugmentImplants`), not slot choices: an implant's `slot` is the
 part it goes in, matching its autosurgeon's target. A part holds `implantSlots` of them (a J.W.L arm or S.P.E.E.D leg
-two, other limbs and natural parts one, the torso two, a missing limb none), and `host` says whether that part must be
-synthetic: a cybernetic or trait limb, or a natural part not built of flesh (an IPC's). Mantis blades need one. A
+two, other limbs and natural parts one, the torso two or three under a cyber chest, a missing limb none), and `host`
+says whether that part must be synthetic: a cybernetic or trait limb, plating, or a natural part not built of flesh (an
+IPC's). Mantis blades need one. A
 hand or foot with no pick of its own counts as its limb's (`WFAugmentRules.LimbAbove`). An
 implant that no longer fits after a limb changes is dropped. They are stored in the augments column as `Implant:`
 entries; the old one-per-slot entries (`LeftArmImplant`, `Dermal`, ...) still load.
@@ -133,8 +134,14 @@ left for whoever loots it. The admin `respawn` command takes nothing.
 The limbs are real Shitmed cybernetic parts: they take EMPs, repair with a welder and cable, and come off and go
 back on like any chassis limb. A hand or foot a limb generates (`GenerateChildPart`) belongs to that limb, not to
 a slot of its own. Markings from the Markings tab are drawn for flesh and stay off an augmented layer (its base
-sprites set `allowsMarkings: false`); custom markings draw over augments like anywhere else. Head and chest
-plating and missing limbs have no content yet; the integration tests use test-only prototypes for them.
+sprites set `allowsMarkings: false`); custom markings draw over augments like anywhere else.
+
+Plating (`kind: Plating`) converts a part in place, since a torso can't be swapped like a limb: the rest of the body
+hangs from it. The part is drawn in the picked style and counts as synthetic for implants, and it holds its
+`implantSlots` if that is more than the natural part's. It installs nothing, so it is never scavenged or lost, and
+it stays as picked between rounds. The one shipped is the Kiras chest chassis (`WFAugmentCyberChest`), 400,000 for a
+third chest implant; implants that need flesh, like the adrenal booster, no longer fit. Head plating and missing
+limbs have no content yet; the integration tests use test-only prototypes for them.
 
 Traits that fit their own limbs at spawn (Prybar Prosthetics, Bionic Legs) claim those slots in `trait_slots.yml`.
 A character with one can't take augments there: validation drops them and the tab names the trait instead. A new
@@ -258,6 +265,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentAdrenalBoosterTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentAdrenalBoosterTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentBodyTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Augments/AugmentCyberChestTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentCyberChestTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentEditorTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentEditorTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentHaloBurstTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentHaloBurstTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentHoloProjectorTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentHoloProjectorTest.cs)
