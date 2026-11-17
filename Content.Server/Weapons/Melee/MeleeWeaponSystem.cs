@@ -23,7 +23,7 @@ using Robust.Shared.Player;
 using Robust.Shared.Random;
 using System.Linq;
 using System.Numerics;
-using Content.Shared._WF.RMCCore.Tackle; // WOLFGATE(RMCCore)
+using Content.Shared._WG.RMCCore.Tackle; // WOLFGATE(RMCCore)
 
 namespace Content.Server.Weapons.Melee;
 
@@ -129,7 +129,7 @@ public sealed partial class MeleeWeaponSystem : SharedMeleeWeaponSystem
             inTargetHand = targetHandsComponent.ActiveHand.HeldEntity!.Value;
         }
 
-        Interaction.DoContactInteraction(user, target);
+        Interaction.DoContactInteraction(user, target, null, false); // WOLFGATE(InteractionParticles): the client does not predict disarms
 
         var attemptEvent = new DisarmAttemptEvent(target, user, inTargetHand);
 
