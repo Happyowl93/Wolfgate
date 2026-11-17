@@ -5,6 +5,7 @@ using Content.Client.Lobby;
 using Content.Server._WG.Augments;
 using Content.Server.Preferences.Managers;
 using Content.Shared._WG.Augments;
+using Content.Shared.GameTicking;
 using Content.Shared.Mind;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Systems;
@@ -20,7 +21,7 @@ namespace Content.IntegrationTests.Tests._WG.Augments;
 /// <summary>
 /// A player who respawns instead of going into cryo loses the augments and unlocks of the character they spawned as;
 /// a player who hasn't spawned a character loses nothing. At the end of the round only a character alive in the
-/// body it spawned in keeps them.
+/// body it spawned in keeps them. A character played as a borg is left as it was.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WGAugmentSystem))]
@@ -194,6 +195,88 @@ public sealed class AugmentRespawnTest
             Assert.That(Stored().Augments, Is.Empty);
         });
         await Clean(mind, mob, clone);
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task BorgTest()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { InLobby = true, Dirty = true });
+        var server = pair.Server;
+        var client = pair.Client;
+        var entities = server.EntMan;
+        var prefs = server.ResolveDependency<IServerPreferencesManager>();
+        var players = server.ResolveDependency<IPlayerManager>();
+        var augments = server.System<WGAugmentSystem>();
+        var minds = server.System<SharedMindSystem>();
+        var clientNet = client.ResolveDependency<IClientNetManager>();
+        var states = client.ResolveDependency<IStateManager>();
+        var map = await pair.CreateTestMap();
+
+        await pair.RunTicksSync(1);
+        await PoolManager.WaitUntil(client, () => states.CurrentState is LobbyState, 600);
+        var userId = clientNet.ServerChannel!.UserId;
+        var session = players.GetSessionById(userId);
+        const int slot = 0;
+        ProtoId<WGAugmentPrototype> eyes = "WGAugmentCyberEyes";
+        var bought = HumanoidCharacterProfile.DefaultWithSpecies("Human")
+            .WithAugments(new Dictionary<WGAugmentSlot, WGAugmentChoice> { [WGAugmentSlot.Eyes] = new(eyes, null) })
+            .WithAugmentUnlocks(new[] { eyes });
+
+        HumanoidCharacterProfile Stored() => (HumanoidCharacterProfile) prefs.GetPreferences(userId).Characters[slot];
+
+        async Task Run(Func<Task?> save)
+        {
+            Task? task = null;
+            await server.WaitPost(() => task = save());
+            if (task == null)
+                return;
+            await PoolManager.WaitUntil(server, () => task.IsCompleted, maxTicks: 300);
+            Assert.That(task.IsCompletedSuccessfully, $"The save failed: {task.Exception}");
+        }
+
+        // Spawns the player as the given mob through the real spawn event, then respawns them without cryo.
+        async Task SpawnAndRespawn(string proto)
+        {
+            await Run(() => prefs.SetProfile(userId, slot, bought));
+            EntityUid mob = default;
+            EntityUid mind = default;
+            EntityUid station = default;
+            await server.WaitPost(() =>
+            {
+                mob = entities.SpawnEntity(proto, map.GridCoords);
+                station = entities.SpawnEntity(null, map.GridCoords);
+                mind = minds.CreateMind(userId).Owner;
+                minds.TransferTo(mind, mob);
+                entities.EventBus.RaiseLocalEvent(mob,
+                    new PlayerSpawnCompleteEvent(mob, session, null, false, true, 1, station, Stored()),
+                    true);
+            });
+            await Run(() => augments.ForfeitAugments(session));
+            await server.WaitPost(() =>
+            {
+                minds.WipeMind(mind);
+                entities.DeleteEntity(mob);
+                entities.DeleteEntity(station);
+            });
+        }
+
+        // A borg never wore the character's body, so a borg round takes nothing.
+        await SpawnAndRespawn("PlayerBorgBattery");
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored().AugmentUnlocks, Is.EquivalentTo(new[] { eyes }), "Playing a borg took the character's paid-for eyes.");
+            Assert.That(Stored().Augments, Contains.Key(WGAugmentSlot.Eyes));
+        });
+
+        // The same spawn as the character's own body is tracked, so respawning without cryo does take them.
+        await SpawnAndRespawn("MobHuman");
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored().AugmentUnlocks, Is.Empty, "A humanoid spawn wasn't tracked.");
+            Assert.That(Stored().Augments, Is.Empty);
+        });
 
         await pair.CleanReturnAsync();
     }

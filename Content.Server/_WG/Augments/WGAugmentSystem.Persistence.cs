@@ -10,6 +10,7 @@ using Content.Shared.Body.Components;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
 using Content.Shared.GameTicking;
+using Content.Shared.Humanoid;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Preferences;
 using Robust.Server.Player;
@@ -54,6 +55,10 @@ public sealed partial class WGAugmentSystem
 
     private void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent args)
     {
+        // A job that spawns its own entity (a borg, the station AI) never wears the character's body or its augments.
+        if (!HasComp<HumanoidAppearanceComponent>(args.Mob))
+            return;
+
         // Selection is locked once a player joins, so the selected slot is the one that spawned.
         if (_preferences.GetPreferencesOrNull(args.Player.UserId) is { SelectedCharacter: HumanoidCharacterProfile selected } prefs
             && selected.Name == args.Profile.Name

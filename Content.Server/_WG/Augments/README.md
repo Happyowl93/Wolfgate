@@ -129,7 +129,8 @@ round but isn't kept.
 A character that doesn't make it through the round in its own body loses every augment and unlock (`Forfeit`), online
 or not: a player who uses `ghostrespawn` with no body in cryo (`ForfeitAugments`), one dead at the end of the round,
 one that was cloned or moved to another body, and one who left it for a ghost role. Its marks stay on the body it
-left for whoever loots it. The admin `respawn` command takes nothing.
+left for whoever loots it. The admin `respawn` command takes nothing. A job that spawns its own entity instead of
+the character (a borg, the station AI) isn't tracked at all, so the profile comes out of that round as it went in.
 
 The limbs are real Shitmed cybernetic parts: they take EMPs, repair with a welder and cable, and come off and go
 back on like any chassis limb. A hand or foot a limb generates (`GenerateChildPart`) belongs to that limb, not to
