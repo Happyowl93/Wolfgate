@@ -94,6 +94,13 @@ vitals monitor. While its body flies a ship, thrust and turning are 15% stronger
 twenty (`ProjectileReflectAttemptEvent`, the hook the elite dodge pool uses); beams aren't dodged. It costs 5% more pain
 from every wound.
 
+The Kagemusha holo projector (`WFHoloProjectorSystem`) is a chest upgrade with a 90-second action. It casts two copies
+of its body and swaps the body to a random tile within five steps, leaving one copy where the body stood. Every landing
+tile comes from a flood fill that stops at space, walls, machines, counters and any door or airtight tile, open or shut,
+so nobody lands outside the room. A doorway or a cramped spot won't cast and costs no cooldown. A copy (`WFHoloDecoy`)
+is an NPC that loiters on the idle HTN at its source's speed, wearing the source's sprite, which the client copies.
+It has no thermal signature, flickers out when it takes any damage, and despawns after 20 seconds.
+
 Three more look after the body, each a component the autosurgeon puts on it. The nutriment pump
 (`WFNutrimentPumpSystem`) feeds its owner a little whenever they reach starving, which leaves them peckish and food
 still worth eating. The reviver (`WFReviverSystem`) is a defibrillator of its own: when the heart stops it charges
@@ -187,6 +194,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Server/_WF/Augments/WFAugmentSystem.Traits.cs`](WFAugmentSystem.Traits.cs)
 - [`Content.Server/_WF/Augments/WFBurstLauncherSystem.cs`](WFBurstLauncherSystem.cs)
 - [`Content.Server/_WF/Augments/WFDeployableImplantSystem.cs`](WFDeployableImplantSystem.cs)
+- [`Content.Server/_WF/Augments/WFHoloProjectorSystem.cs`](WFHoloProjectorSystem.cs)
 - [`Content.Server/_WF/Augments/WFIatricMonitorSystem.cs`](WFIatricMonitorSystem.cs)
 - [`Content.Server/_WF/Augments/WFNutrimentPumpSystem.cs`](WFNutrimentPumpSystem.cs)
 - [`Content.Server/_WF/Augments/WFReflexBoosterServerSystem.cs`](WFReflexBoosterServerSystem.cs)
@@ -212,6 +220,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WF/Augments/WFBurstLauncherComponent.cs`](../../../Content.Shared/_WF/Augments/WFBurstLauncherComponent.cs)
 - [`Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs`](../../../Content.Shared/_WF/Augments/WFDeployableImplantComponent.cs)
 - [`Content.Shared/_WF/Augments/WFHaloArmingSystem.cs`](../../../Content.Shared/_WF/Augments/WFHaloArmingSystem.cs)
+- [`Content.Shared/_WF/Augments/WFHoloProjectorComponent.cs`](../../../Content.Shared/_WF/Augments/WFHoloProjectorComponent.cs)
 - [`Content.Shared/_WF/Augments/WFIatricMonitorComponent.cs`](../../../Content.Shared/_WF/Augments/WFIatricMonitorComponent.cs)
 - [`Content.Shared/_WF/Augments/WFNutrimentPumpComponent.cs`](../../../Content.Shared/_WF/Augments/WFNutrimentPumpComponent.cs)
 - [`Content.Shared/_WF/Augments/WFPainEditorComponent.cs`](../../../Content.Shared/_WF/Augments/WFPainEditorComponent.cs)
@@ -240,6 +249,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Client/_WF/Augments/UI/WFSmartlinkOverlay.cs`](../../../Content.Client/_WF/Augments/UI/WFSmartlinkOverlay.cs)
 - [`Content.Client/_WF/Augments/UI/WFThermalGlitchOverlay.cs`](../../../Content.Client/_WF/Augments/UI/WFThermalGlitchOverlay.cs)
 - [`Content.Client/_WF/Augments/WFDeployableWheelSystem.cs`](../../../Content.Client/_WF/Augments/WFDeployableWheelSystem.cs)
+- [`Content.Client/_WF/Augments/WFHoloDecoyVisualsSystem.cs`](../../../Content.Client/_WF/Augments/WFHoloDecoyVisualsSystem.cs)
 - [`Content.Client/_WF/Augments/WFSmartlinkOverlaySystem.cs`](../../../Content.Client/_WF/Augments/WFSmartlinkOverlaySystem.cs)
 - [`Content.Client/_WF/Augments/WFThermalTintsVisualsSystem.cs`](../../../Content.Client/_WF/Augments/WFThermalTintsVisualsSystem.cs)
 
@@ -250,6 +260,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentClothedTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentEditorTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentEditorTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentHaloBurstTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentHaloBurstTest.cs)
+- [`Content.IntegrationTests/Tests/_WF/Augments/AugmentHoloProjectorTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentHoloProjectorTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentImplantsTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentImplantsTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPersistenceTest.cs)
 - [`Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs`](../../../Content.IntegrationTests/Tests/_WF/Augments/AugmentPreviewTest.cs)
@@ -296,6 +307,7 @@ scratch, so an unpicked augment comes off it.
 - [`Resources/Textures/_WF/Augments/halo_shield.rsi/`](../../../Resources/Textures/_WF/Augments/halo_shield.rsi/)
 - [`Resources/Textures/_WF/Augments/hephaestus.rsi/`](../../../Resources/Textures/_WF/Augments/hephaestus.rsi/)
 - [`Resources/Textures/_WF/Augments/hephaestus2.rsi/`](../../../Resources/Textures/_WF/Augments/hephaestus2.rsi/)
+- [`Resources/Textures/_WF/Augments/holo_projector.rsi/`](../../../Resources/Textures/_WF/Augments/holo_projector.rsi/)
 - [`Resources/Textures/_WF/Augments/implants.rsi/`](../../../Resources/Textures/_WF/Augments/implants.rsi/)
 - [`Resources/Textures/_WF/Augments/mariinsky.rsi/`](../../../Resources/Textures/_WF/Augments/mariinsky.rsi/)
 - [`Resources/Textures/_WF/Augments/mining.rsi/`](../../../Resources/Textures/_WF/Augments/mining.rsi/)

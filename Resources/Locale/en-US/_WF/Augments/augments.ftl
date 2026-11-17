@@ -84,6 +84,10 @@ wf-augment-pain-editor-desc = A filter on the brainstem that dulls the pain of e
 wf-augment-reflex-booster = PD-VI NR-8 "Strizh" reflex booster
 wf-augment-reflex-booster-desc = A booster on the spinal cord that speeds your reflexes. Ships you fly accelerate and turn 15% better, and one bullet in twenty that would hit you misses. Your nerves run hot, so wounds hurt 5% more. Beams still hit.
 wf-reflex-booster-dodge = { CAPITALIZE(THE($target)) } twists out of the way!
+
+wf-augment-holo-projector = MMC KG-7 "Kagemusha" holo projector
+wf-augment-holo-projector-desc = Holo emitters under the skin of the chest. On command they cast two copies of you about the room you stand in, and you slip into the place of one while the other takes yours. The copies wander for twenty seconds and flicker out when struck; they give off no heat. They never land past a wall, window or door, and a cramped spot or a doorway won't cast at all. Recharges in ninety seconds.
+wf-holo-projector-cramped = There's no room here to cast your copies.
 wf-augment-threat-sole = PD-VI SP-9 "Sapyor" sole sensors
 wf-augment-threat-sole-desc = Sensors in the sole that keep you from setting off land mines, tripwires and other floor traps. One sole is enough; in a cybernetic foot an EMP switches it off with the foot.
 wf-augment-nutriment-pump = PD-VI PN-3 "Paek" nutriment pump

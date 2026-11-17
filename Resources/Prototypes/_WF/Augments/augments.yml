@@ -391,6 +391,16 @@
   price: 1000000
 
 - type: wfAugment
+  id: WFAugmentHoloProjector
+  name: wf-augment-holo-projector
+  description: wf-augment-holo-projector-desc
+  icon: { sprite: _WF/Augments/holo_projector.rsi, state: icon }
+  slot: Chest
+  kind: Upgrade
+  autosurgeon: WFAutosurgeonHoloProjector
+  price: 800000
+
+- type: wfAugment
   id: WFAugmentLeftThreatSole
   name: wf-augment-threat-sole
   description: wf-augment-threat-sole-desc

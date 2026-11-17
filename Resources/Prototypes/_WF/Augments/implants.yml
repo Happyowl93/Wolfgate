@@ -251,6 +251,77 @@
     radius: 2.5
     energy: 2
 
+# The Kagemusha's copies of its owner. The client dresses a copy in its owner's sprite; it wanders like someone
+# idling, has no heat for thermals to see, and flickers out when struck or after twenty seconds.
+- type: entity
+  id: WFHoloDecoy
+  name: hologram
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    noRot: true
+    drawdepth: Mobs
+  - type: WFHoloDecoy
+  - type: Clickable
+  - type: InteractionOutline
+  - type: MobCollision
+  - type: GravityAffected
+  - type: Physics
+    bodyType: KinematicController
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeCircle
+          radius: 0.35
+        density: 50
+        mask:
+        - MobMask
+        layer:
+        - MobLayer
+  - type: InputMover
+  - type: MobMover
+  - type: MovementSpeedModifier
+  - type: Damageable
+  - type: HTN
+    rootTask:
+      task: IdleCompound
+    blackboard:
+      IdleRange: !type:Single # how far each stroll goes
+        6
+      MinimumIdleTime: !type:Single # the pause between strolls
+        0.3
+      MaximumIdleTime: !type:Single
+        1.5
+  - type: TimedDespawn
+    lifetime: 20
+  - type: SpawnOnDespawn
+    prototype: WFHoloDecoyPuff
+
+- type: entity
+  id: WFHoloDecoyPuff
+  name: hologram flicker
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: Effects/chempuff.rsi
+    state: chempuff
+    drawdepth: Effects
+    shader: unshaded
+    noRot: true
+    scale: 2, 2
+    color: "#a8f4ffcc"
+  - type: PointLight
+    color: "#7fe6ff"
+    radius: 1.5
+    energy: 1
+  - type: TimedDespawn
+    lifetime: 0.25
+  - type: EmitSoundOnSpawn
+    sound:
+      path: /Audio/Effects/pop.ogg
+      params:
+        volume: -8
+
 # Actions
 
 - type: entity
@@ -348,6 +419,18 @@
     icon: { sprite: Objects/Weapons/Grenades/stingergrenade.rsi, state: icon }
     itemIconStyle: NoItem
     event: !type:WFFireBurstLauncherEvent
+
+- type: entity
+  id: WFActionHoloProject
+  name: Body Double
+  description: Cast two holographic copies of yourself about the room you stand in and slip into the place of one. They wander for twenty seconds; one that is struck flickers out.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: InstantAction
+    useDelay: 90
+    icon: { sprite: _WF/Augments/holo_projector.rsi, state: icon }
+    itemIconStyle: NoItem
+    event: !type:WFHoloProjectEvent
 
 # Autosurgeons
 
@@ -563,3 +646,14 @@
     - type: WFHaloStun
       orb: WFHaloOrbStun
       action: WFActionHaloStun
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WFAutosurgeonHoloProjector
+  name: autosurgeon (KG-7 "Kagemusha")
+  description: Threads holo emitters under the skin of the chest, which cast copies of their owner to hide among.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Torso
+    componentsToUser:
+    - type: WFHoloProjector
