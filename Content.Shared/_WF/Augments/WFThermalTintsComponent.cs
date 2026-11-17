@@ -8,8 +8,9 @@ using Robust.Shared.Serialization;
 namespace Content.Shared._WF.Augments;
 
 /// <summary>
-/// Thermal eyes that cycle their vision through a set of tints from one action: off, each tint in turn, then off.
-/// Drives the body's <see cref="Content.Shared._White.Overlays.ThermalVisionComponent"/>.
+/// Eyes that cycle their vision through a set of bands from one action: off, each band in turn, then off. A band is
+/// either thermal, on the body's <see cref="Content.Shared._White.Overlays.ThermalVisionComponent"/>, or night vision,
+/// on its <see cref="Content.Shared.Overlays.NightVisionComponent"/>.
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState(true)]
 public sealed partial class WFThermalTintsComponent : Component
@@ -44,15 +45,16 @@ public sealed partial class WFThermalTintsComponent : Component
 [DataDefinition, Serializable, NetSerializable]
 public sealed partial class WFThermalTint
 {
-    [DataField(required: true)]
-    public LocId Name;
+    /// <summary>Night vision instead of thermal.</summary>
+    [DataField]
+    public bool NightVision;
 
-    /// <summary>The colour warm bodies are drawn in.</summary>
+    /// <summary>The colour warm bodies are drawn in, or the night vision's phosphor.</summary>
     [DataField(required: true)]
     public Color Color;
 
-    /// <summary>The colour the rest of the view is washed towards.</summary>
-    [DataField(required: true)]
+    /// <summary>The colour the rest of a thermal view is washed towards.</summary>
+    [DataField]
     public Vector3 Tint;
 }
 

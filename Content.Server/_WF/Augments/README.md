@@ -60,20 +60,22 @@ projectiles fly a fifth faster, the spread each shot adds is halved and it settl
 tightest and widest spread stay its own (scaling those let a wielded rifle's flat wield bonus floor it at zero), so on
 a wielded rifle, whose spread the wield bonus already pins at zero, the kick and the speed are what it changes. An EMP
 scrambles it until it wears off, and the gun then kicks and spreads more than unlinked, with no faster rounds. While linked, the player's screen (`WFSmartlinkOverlay`) shows the gun's rounds by the cursor and brackets the
-living, uncloaked mob in sight within twelve tiles that is nearest the cursor, with its range. The scrubber liver metabolises alcohol, poison and narcotics four times as fast and clears
+living, uncloaked mob in sight within twelve tiles that is nearest the cursor, with its range. The PD-VI HF-12 prosthetic liver (`WFAugmentScrubberLiver`) metabolises alcohol, poison and narcotics four times as fast and clears
 Wolfmed toxin load three times as fast (`WolfmedOrganComponent.ClearanceFactor`).
 
-The spectral thermal eyes (`WFThermalTintsSystem`) put White Dream's `ThermalVision` and `WFThermalTintsComponent`
-on the body. They have no toggle of their own: one action steps the vision through the four bands in `implants.yml`
-and then switches it off, setting the overlay's body colour and wash for each. Each switch plays the goggles' click
-under a raised scanner chirp and a quarter-second glitch (`WFThermalGlitchOverlay`) in the new band's colour. The wash
-isn't in the thermal vision's network state, so `WFThermalTintsVisualsSystem` copies it from the band on every state.
-They keep eye protection but not flash immunity.
+The PD-VI OV-40 "Tapetum" eyes (`WFAugmentThermalTintEyes`, `WFThermalTintsSystem`) put White Dream's `ThermalVision`,
+Mono's `NightVision` and `WFThermalTintsComponent` on the body. Neither vision has a toggle of its own: one action steps
+through the bands in `implants.yml` and then switches off. The red band is thermal, with its body colour and wash; the
+others are night vision with the quad-tube goggles' settings, minus the tubes, each in its own phosphor. Each switch
+plays the goggles' click under a raised scanner chirp and a quarter-second glitch (`WFThermalGlitchOverlay`) in the new
+band's colour, with no text. The wash isn't in the thermal vision's network state, so `WFThermalTintsVisualsSystem`
+copies it from the band on every state. They keep eye protection but not flash immunity.
 
-The halo burst and halo stun (`WFBurstLauncherSystem`) are chest upgrades that throw a ring of eight amber orbs
+The TSF KR-30 and KR-31 "Corona" frag and concussion charges (`WFAugmentHaloBurst`, `WFAugmentHaloStun`,
+`WFBurstLauncherSystem`) are chest upgrades that throw a ring of eight amber orbs
 (`WFHaloOrbComponent`) out from the body. The orbs drift to a stop about a tile and a half out, stopping at walls, and go off
-together after a two-second fuse, each blasting the mobs within reach and in sight: damage for the burst, stamina for the
-stun. Until then `WFHaloArmingComponent` holds the wearer still inside a shield, on both sides so the client doesn't
+together after a two-second fuse, each blasting the mobs within reach and in sight: damage for the frag, stamina for the
+concussion. Like an explosion, each blast also throws everything loose it catches, outward from the wearer. Until then `WFHaloArmingComponent` holds the wearer still inside a shield, on both sides so the client doesn't
 predict a step, and their own blasts pass them by. Each model is its own component (`WFHaloBurstComponent`,
 `WFHaloStunComponent`) with its own action, so both can be fitted, but only one ring is out at a time. The action holds
 two bursts as charges and a spent one comes back every three minutes; the button's cooldown sweep shows the fuse, then

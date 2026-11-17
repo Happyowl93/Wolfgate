@@ -75,7 +75,10 @@ public sealed partial class WFHaloArmingComponent : Component
     public EntityUid? Shield;
 }
 
-/// <summary>One thrown charge: at <see cref="DetonateAt"/> it blasts every mob in reach and in sight but its thrower.</summary>
+/// <summary>
+/// One thrown charge: at <see cref="DetonateAt"/> it blasts every mob in reach and in sight but its thrower, and
+/// throws everything loose there outward.
+/// </summary>
 [RegisterComponent, AutoGenerateComponentPause]
 public sealed partial class WFHaloOrbComponent : Component
 {
@@ -87,6 +90,13 @@ public sealed partial class WFHaloOrbComponent : Component
 
     [DataField]
     public float Radius = 1.25f;
+
+    /// <summary>How far the blast throws whatever loose it catches, outward from the thrower.</summary>
+    [DataField]
+    public float Knockback = 1.5f;
+
+    [DataField]
+    public float KnockbackSpeed = 10f;
 
     [DataField]
     public EntProtoId Blast = "WFHaloBlast";

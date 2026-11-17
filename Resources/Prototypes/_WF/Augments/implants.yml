@@ -6,7 +6,7 @@
 - type: entity
   parent: OrganHumanLiver
   id: WFAugmentScrubberLiver
-  name: scrubber liver
+  name: PD-VI HF-12 prosthetic liver
   description: A synthetic liver that strips toxins, alcohol and narcotics out of the blood several times faster than flesh does. Stimulants burn off just as fast.
   components:
   - type: Sprite
@@ -27,32 +27,34 @@
   - type: WolfmedOrgan
     clearanceFactor: 3
 
-# Thermal eyes that cycle through four colour bands. No flash immunity, so a flash still blinds them.
+# Eyes that cycle a thermal band and three night-vision phosphors. No flash immunity, so a flash still blinds them.
 - type: entity
   parent: BaseCyberneticEyes
   id: WFAugmentThermalTintEyes
-  name: spectral thermal eyes
-  description: Cybernetic eyes that see body heat through walls and the dark, and cycle the view through four colour bands. A flash still gets through.
+  name: PD-VI OV-40 "Tapetum" ocular suite
+  description: Prosthetic eyes with a thermal band that sees body heat through walls, and three night-vision phosphors. A flash still gets through.
   components:
   - type: Organ
     onAdd:
     - type: EyeProtection
     - type: ThermalVision
       toggleAction: null
+    # The phosphor only shows through the goggle shader; one lens far wider than the screen keeps its edges clear.
+    - type: NightVision
+      lightingColor: "#FFFFFF32"
+      goggleEffect: true
+      viewCircleCount: 1
+      viewCircleRadius: 100000
     - type: WFThermalTints
       tints:
-      - name: wf-thermal-tint-ember
-        color: "#ff6a4d"
+      - color: "#ff6a4d" # thermal
         tint: 0.42, 0.12, 0.08
-      - name: wf-thermal-tint-glacier
-        color: "#6fd6ff"
-        tint: 0.06, 0.22, 0.42
-      - name: wf-thermal-tint-venom
-        color: "#8dff5a"
-        tint: 0.1, 0.36, 0.08
-      - name: wf-thermal-tint-solar
-        color: "#ffd34d"
-        tint: 0.4, 0.32, 0.05
+      - nightVision: true # green phosphor
+        color: "#5cff6e"
+      - nightVision: true # Gen 4 cyan phosphor
+        color: "#41D7D9"
+      - nightVision: true # white phosphor
+        color: "#FFE4B3"
 
 # Deployed items
 
@@ -158,11 +160,11 @@
   name: finger lighter
   description: A lighter built into a fingertip.
 
-# The halo burst's lethal pellet: a lighter shrapnel ball, since a burst throws two dozen of them.
+# The Corona's charges, thrown out in a ring; WFBurstLauncherSystem sets them off together. The shield holds the wearer meanwhile.
 - type: entity
   abstract: true
   id: WFHaloOrbBase
-  name: halo charge
+  name: corona charge
   description: An amber charge hanging in the air, about to go off.
   categories: [ HideSpawnMenu ]
   components:
@@ -214,7 +216,7 @@
 
 - type: entity
   id: WFHaloShield
-  name: halo shield
+  name: corona shield
   categories: [ HideSpawnMenu ]
   components:
   - type: Sprite
@@ -232,7 +234,7 @@
 
 - type: entity
   id: WFHaloBlast
-  name: halo blast
+  name: corona blast
   categories: [ HideSpawnMenu ]
   components:
   - type: Sprite
@@ -291,7 +293,7 @@
 
 - type: entity
   id: WFActionIatricScan
-  name: Iatric Monitor
+  name: Vitals Readout
   description: Read your own vital signs off the monitor behind your eye, or put the readout away.
   categories: [ HideSpawnMenu ]
   components:
@@ -311,8 +313,8 @@
 
 - type: entity
   id: WFActionCycleThermalTint
-  name: Cycle Thermal Band
-  description: Switch your thermal eyes to their next colour band, or off after the last.
+  name: Cycle Vision
+  description: Switch your eyes to their next mode, thermal then each night-vision phosphor, or off after the last.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
@@ -324,7 +326,7 @@
 
 - type: entity
   id: WFActionHaloBurst
-  name: Halo Burst
+  name: Corona Frag
   description: Throw a ring of explosive charges out round you; they go off together two seconds later, while you are held in a shield. Holds two bursts; each comes back on its own.
   categories: [ HideSpawnMenu ]
   components:
@@ -337,7 +339,7 @@
 - type: entity
   parent: WFActionHaloBurst
   id: WFActionHaloStun
-  name: Halo Stun
+  name: Corona Concussion
   description: Throw a ring of concussive charges out round you; they go off together two seconds later, while you are held in a shield. Holds two bursts; each comes back on its own.
   categories: [ HideSpawnMenu ]
   components:
@@ -352,7 +354,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonLeftToolArm
-  name: autosurgeon (left tool arm)
+  name: autosurgeon (left RM-5 "Verstak")
   description: Builds a set of tools into the left forearm, to fold out one at a time on command.
   components:
   - type: AutoSurgeon
@@ -374,7 +376,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonRightToolArm
-  name: autosurgeon (right tool arm)
+  name: autosurgeon (right RM-5 "Verstak")
   description: Builds a set of tools into the right forearm, to fold out one at a time on command.
   components:
   - type: AutoSurgeon
@@ -396,7 +398,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonLeftSmartlink
-  name: autosurgeon (left smartlink)
+  name: autosurgeon (left SL-4 "Shojun")
   description: Wires the left hand to the gun it holds, compensating for its recoil.
   components:
   - type: AutoSurgeon
@@ -408,7 +410,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonRightSmartlink
-  name: autosurgeon (right smartlink)
+  name: autosurgeon (right SL-4 "Shojun")
   description: Wires the right hand to the gun it holds, compensating for its recoil.
   components:
   - type: AutoSurgeon
@@ -420,7 +422,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonLeftFingerLighter
-  name: autosurgeon (left finger lighter)
+  name: autosurgeon (left HB-2 "Hibana")
   description: Fits a lighter into a fingertip of the left hand.
   components:
   - type: AutoSurgeon
@@ -434,7 +436,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonRightFingerLighter
-  name: autosurgeon (right finger lighter)
+  name: autosurgeon (right HB-2 "Hibana")
   description: Fits a lighter into a fingertip of the right hand.
   components:
   - type: AutoSurgeon
@@ -448,7 +450,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonAdrenalBooster
-  name: autosurgeon (adrenal booster)
+  name: autosurgeon (KR-14 "Ryvok")
   description: Wires a booster into the adrenal glands, for more stamina that comes back sooner.
   components:
   - type: AutoSurgeon
@@ -459,8 +461,8 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonPainEditor
-  name: autosurgeon (pain editor)
-  description: Fits a pain editor to the brainstem, dulling the pain of every wound.
+  name: autosurgeon (EVT-130 "Mushin")
+  description: Fits a pain inhibitor to the brainstem, dulling the pain of every wound.
   components:
   - type: AutoSurgeon
     targetBodyPart: Head
@@ -470,7 +472,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonLeftThreatSole
-  name: autosurgeon (left threat-sense sole)
+  name: autosurgeon (left SP-9 "Sapyor")
   description: Lines the left sole with sensors that keep its owner from setting off floor traps.
   components:
   - type: AutoSurgeon
@@ -482,7 +484,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonRightThreatSole
-  name: autosurgeon (right threat-sense sole)
+  name: autosurgeon (right SP-9 "Sapyor")
   description: Lines the right sole with sensors that keep its owner from setting off floor traps.
   components:
   - type: AutoSurgeon
@@ -494,7 +496,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonNutrimentPump
-  name: autosurgeon (nutriment pump)
+  name: autosurgeon (PN-3 "Paek")
   description: Fits a nutriment pump beside the stomach, which feeds its owner whenever they are starving.
   components:
   - type: AutoSurgeon
@@ -505,8 +507,8 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonReviver
-  name: autosurgeon (reviver)
-  description: Wires a reviver to the heart, which shocks it when it stops.
+  name: autosurgeon (EVT-090 "Fukkatsu")
+  description: Wires a cardiac reviver to the heart, which shocks it when it stops.
   components:
   - type: AutoSurgeon
     targetBodyPart: Torso
@@ -516,8 +518,8 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonIatricMonitor
-  name: autosurgeon (iatric monitor)
-  description: Fits an iatric monitor behind the eye, which shows its owner their own vital signs.
+  name: autosurgeon (EVT-120 "Kanshi")
+  description: Fits a vitals monitor behind the eye, which shows its owner their own vital signs.
   components:
   - type: AutoSurgeon
     targetBodyPart: Head
@@ -527,7 +529,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonHaloBurst
-  name: autosurgeon (halo burst)
+  name: autosurgeon (KR-30 "Corona")
   description: Packs explosive charges round the ribcage, to be thrown out in a ring.
   components:
   - type: AutoSurgeon
@@ -540,7 +542,7 @@
 - type: entity
   parent: BaseAutosurgeon
   id: WFAutosurgeonHaloStun
-  name: autosurgeon (halo stun)
+  name: autosurgeon (KR-31 "Corona")
   description: Packs concussive charges round the ribcage, to be thrown out in a ring.
   components:
   - type: AutoSurgeon

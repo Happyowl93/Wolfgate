@@ -15,9 +15,9 @@ using Robust.Shared.Timing;
 namespace Content.IntegrationTests.Tests._WF.Augments;
 
 /// <summary>
-/// The halo burst and halo stun: each model throws only its own ring of orbs, holds the wearer still in a shield until
-/// they go off together, blasts the people round the wearer but never the wearer, spends one charge per ring, shows
-/// the wait on its button, and brings spent charges back.
+/// The Corona frag and concussion charges: each model throws only its own ring of orbs, holds the wearer still in a
+/// shield until they go off together, blasts and throws back the people round the wearer but never the wearer, spends
+/// one charge per ring, shows the wait on its button, and brings spent charges back.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WFBurstLauncherSystem))]
@@ -130,16 +130,23 @@ public sealed class AugmentHaloBurstTest
             Assert.That(blocker.CanMove(wearer), "The wearer is still held.");
             Assert.That(entities.EntityExists(shield), Is.False, "The shield outlived the fuse.");
             Assert.That(Orbs(), Is.Zero);
+            var xforms = server.System<SharedTransformSystem>();
+            var thrown = (xforms.GetWorldPosition(target) - xforms.GetWorldPosition(wearer)).Length();
+            Assert.That(thrown, Is.GreaterThan(1.4f), "The blast didn't throw the target back.");
         });
 
-        // The lethal ring wounds the target and still leaves the wearer alone.
-        var before = 0f;
-        await server.WaitPost(() => before = BlastDamage(target));
+        // The lethal ring wounds a fresh target, the first having been thrown clear, and still leaves the wearer alone.
+        EntityUid second = default;
+        await server.WaitPost(() =>
+        {
+            second = entities.SpawnEntity("MobHuman", map.GridCoords.Offset(new System.Numerics.Vector2(-1f, 0f)));
+            entities.RemoveComponent<BarotraumaComponent>(second);
+        });
         await Press(burstAction);
         await WaitFuse();
         await server.WaitAssertion(() =>
         {
-            Assert.That(BlastDamage(target), Is.GreaterThan(before), "The lethal ring missed.");
+            Assert.That(BlastDamage(second), Is.GreaterThan(0f), "The lethal ring missed.");
             Assert.That(BlastDamage(wearer), Is.EqualTo(0f), "The wearer was hit.");
             Assert.That(Charges(burstAction), Is.EqualTo(1));
         });
@@ -181,6 +188,7 @@ public sealed class AugmentHaloBurstTest
         {
             entities.DeleteEntity(wearer);
             entities.DeleteEntity(target);
+            entities.DeleteEntity(second);
         });
         await pair.CleanReturnAsync();
     }

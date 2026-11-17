@@ -7,6 +7,7 @@ using Content.Shared.Database;
 using Content.Shared.Interaction;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Popups;
+using Content.Shared.Throwing;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Map;
 using Robust.Shared.Physics;
@@ -34,10 +35,11 @@ public sealed partial class WFBurstLauncherSystem : EntitySystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private StaminaSystem _stamina = default!;
+    [Dependency] private ThrowingSystem _throwing = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
 
-    private readonly HashSet<Entity<MobStateComponent>> _caught = new();
+    private readonly HashSet<Entity<PhysicsComponent>> _caught = new();
 
     public override void Initialize()
     {
@@ -101,25 +103,55 @@ public sealed partial class WFBurstLauncherSystem : EntitySystem
         _adminLog.Add(LogType.Action, LogImpact.High, $"{ToPrettyString(ent):user} threw a halo ({ent.Comp.Orb})");
     }
 
-    /// <summary>Blasts every mob in reach of the orb and in its sight, except the body that threw it.</summary>
+    /// <summary>
+    /// Blasts every mob in reach of the orb and in its sight, except the body that threw it, and throws everything loose
+    /// there outward from that body, as an explosion would.
+    /// </summary>
     public void Detonate(Entity<WFHaloOrbComponent> orb)
     {
         var xform = Transform(orb);
-        Spawn(orb.Comp.Blast, _transform.GetMapCoordinates(orb, xform));
+        var position = _transform.GetMapCoordinates(orb, xform);
+        Spawn(orb.Comp.Blast, position);
         _audio.PlayPvs(orb.Comp.Sound, xform.Coordinates);
+
+        // The ring pushes out from its middle; with the thrower gone, each blast pushes out from itself.
+        var centre = position.Position;
+        if (orb.Comp.Source is { } source && !TerminatingOrDeleted(source))
+        {
+            var from = _transform.GetMapCoordinates(source);
+            if (from.MapId == position.MapId)
+                centre = from.Position;
+        }
 
         _caught.Clear();
         _lookup.GetEntitiesInRange(xform.Coordinates, orb.Comp.Radius, _caught);
-        foreach (var mob in _caught)
+        foreach (var hit in _caught)
         {
-            if (mob.Owner == orb.Comp.Source || !_interaction.InRangeUnobstructed(orb.Owner, mob.Owner, orb.Comp.Radius + 0.5f))
+            if (hit.Owner == orb.Comp.Source
+                || HasComp<WFHaloOrbComponent>(hit)
+                || !_interaction.InRangeUnobstructed(orb.Owner, hit.Owner, orb.Comp.Radius + 0.5f))
                 continue;
 
-            if (orb.Comp.Damage is { } damage)
-                _damageable.TryChangeDamage(mob.Owner, damage, origin: orb.Comp.Source, tool: orb);
+            if (HasComp<MobStateComponent>(hit))
+            {
+                if (orb.Comp.Damage is { } damage)
+                    _damageable.TryChangeDamage(hit.Owner, damage, origin: orb.Comp.Source, tool: orb);
 
-            if (orb.Comp.StaminaDamage > 0)
-                _stamina.TakeStaminaDamage(mob.Owner, orb.Comp.StaminaDamage, source: orb.Comp.Source, with: orb);
+                if (orb.Comp.StaminaDamage > 0)
+                    _stamina.TakeStaminaDamage(hit.Owner, orb.Comp.StaminaDamage, source: orb.Comp.Source, with: orb);
+            }
+
+            // Mobs are kinematic controllers; the throw moves them as it does loose items.
+            if (orb.Comp.Knockback <= 0f
+                || (hit.Comp.BodyType & (BodyType.Dynamic | BodyType.KinematicController)) == 0
+                || Transform(hit).Anchored)
+                continue;
+
+            var away = _transform.GetWorldPosition(hit) - centre;
+            if (away.LengthSquared() < 0.0001f)
+                away = _random.NextAngle().ToVec();
+            _throwing.TryThrow(hit, Vector2.Normalize(away) * orb.Comp.Knockback, orb.Comp.KnockbackSpeed,
+                compensateFriction: true, playSound: false);
         }
 
         QueueDel(orb);
