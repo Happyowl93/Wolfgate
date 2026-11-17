@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Content.Server._WG.NpcCrew.Components;
 using Content.Server._WG.NpcCrew.Systems;
 using Content.Server._WG.Strangers;
+using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared._WG.NpcCrew;
 using Content.Shared._WG.PlanetPois;
 using Content.Shared.NPC.Components;
@@ -43,11 +44,8 @@ public sealed partial class WGPlanetPoiSystem
     /// <summary>Tiles a roadside camp keeps along the road from its bends, junctions and ends.</summary>
     private const int CampRoadClear = 16;
 
-    /// <summary>Stretches of road tried for a roadside camp before it goes out in the open instead.</summary>
-    private const int RoadsideAttempts = 64;
-
-    /// <summary>Hulls picked for a camp before it is left out.</summary>
-    private const int CampAttempts = 4;
+    /// <summary>Spots beside the road tried for a roadside camp before it goes out in the open instead.</summary>
+    private const int RoadsideAttempts = 1024;
 
     private async Task PlaceCampsAsync(EntityUid ground, MapGridComponent grid, BiomeComponent biome, EntityUid orbit, Vector2 centre, float radius,
         WGPlanetPoiTablePrototype table, WGPlanetPoiComponent record, HashSet<EntityUid> created)
@@ -66,10 +64,20 @@ public sealed partial class WGPlanetPoiSystem
                 await _preload.Breathe();
                 if (TerminatingOrDeleted(ground))
                     return;
-                // A smaller hull of the camp's may fit where the one picked did not.
+                // Every hull of the camp's in a random order: a smaller one may fit where the first did not, and
+                // random picks alone could keep missing it.
+                var hulls = camp.Vessels.Distinct().Select(id => (ProtoId<VesselPrototype>?) id).ToList();
+                if (hulls.Count == 0)
+                    hulls.Add(null);
+                _random.Shuffle(hulls);
                 var placed = false;
-                for (var attempt = 0; attempt < CampAttempts && !placed; attempt++)
-                    placed = await TryPlaceCampAsync(ground, grid, biome, orbit, centre, radius, table, record, camp, created);
+                foreach (var hull in hulls)
+                {
+                    if (placed = await TryPlaceCampAsync(ground, grid, biome, orbit, centre, radius, table, record, camp, hull, created))
+                        break;
+                    if (TerminatingOrDeleted(ground))
+                        return;
+                }
                 if (!placed)
                     Log.Warning($"No {camp.ID} on {ToPrettyString(ground)}; it is skipped.");
             }
@@ -77,11 +85,12 @@ public sealed partial class WGPlanetPoiSystem
     }
 
     private async Task<bool> TryPlaceCampAsync(EntityUid ground, MapGridComponent grid, BiomeComponent biome, EntityUid orbit, Vector2 centre, float radius,
-        WGPlanetPoiTablePrototype table, WGPlanetPoiComponent record, WGPlanetCampPrototype camp, HashSet<EntityUid> created)
+        WGPlanetPoiTablePrototype table, WGPlanetPoiComponent record, WGPlanetCampPrototype camp, ProtoId<VesselPrototype>? hullId,
+        HashSet<EntityUid> created)
     {
-        if (camp.Vessels.Count == 0)
+        if (hullId is not { } vesselId)
             return TryPlaceOpenCamp(ground, grid, biome, orbit, centre, radius, table, record, camp, created);
-        if (!_proto.TryIndex(_random.Pick(camp.Vessels), out var vessel))
+        if (!_proto.TryIndex(vesselId, out var vessel))
             return false;
 
         var stagingMap = _maps.CreateMap(out var stagingId, runMapInit: false);
@@ -185,10 +194,17 @@ public sealed partial class WGPlanetPoiSystem
 
         // The ring's edge a tile off the shoulder's.
         var off = roads.Width / 2 + roads.ShoulderWidth + camped + 2f;
-        for (var attempt = 0; attempt < RoadsideAttempts; attempt++)
+        // Each side of each straight tile once, in a random order: random picks alone could miss the few free ones.
+        var sides = new List<(Vector2i Tile, Vector2i Across)>(straight.Count * 2);
+        foreach (var (tile, axis) in straight)
         {
-            var (tile, axis) = _random.Pick(straight);
-            var across = WGRoadDressingPlanner.Across(axis) * (_random.Prob(0.5f) ? 1 : -1);
+            sides.Add((tile, WGRoadDressingPlanner.Across(axis)));
+            sides.Add((tile, -WGRoadDressingPlanner.Across(axis)));
+        }
+        _random.Shuffle(sides);
+        for (var attempt = 0; attempt < Math.Min(RoadsideAttempts, sides.Count); attempt++)
+        {
+            var (tile, across) = sides[attempt];
             var candidate = new Vector2(tile.X + 0.5f, tile.Y + 0.5f) + (Vector2) across * off;
             var distance = Vector2.Distance(candidate, centre);
             if (distance + camped > radius - 2f || distance - camped < table.CentreClear || !CampGroundFree(ground, candidate, camped + 1f))

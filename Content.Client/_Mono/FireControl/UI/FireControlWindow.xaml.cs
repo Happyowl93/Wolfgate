@@ -47,8 +47,10 @@ public sealed partial class FireControlWindow : FancyWindow
         IFFDetailedToggle.OnToggled += OnIFFDetailedTogglePressed; // Mono
         IFFDetailedToggle.Pressed = NavRadar.ShowIFFDetailed; // Mono
 
-        DockToggle.OnToggled += OnDockTogglePressed;
-        DockToggle.Pressed = NavRadar.ShowDocks;
+        // WOLFGATE(RadarLabels) START: radars always mark docks, so there is nothing to toggle
+        // DockToggle.OnToggled += OnDockTogglePressed;
+        // DockToggle.Pressed = NavRadar.ShowDocks;
+        // WOLFGATE END
         WgInitializeCombatConsole(); // WOLFGATE(CombatConsole): compose the instrument deck and fire-group controls.
     }
 

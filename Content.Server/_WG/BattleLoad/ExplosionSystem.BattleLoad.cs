@@ -1,4 +1,6 @@
 using Content.Server._WG.BattleLoad;
+using Content.Server.Explosion.Components;
+using Content.Shared.Atmos;
 using Content.Shared.Explosion;
 using Content.Shared.Tiles;
 using Robust.Shared.Map;
@@ -19,6 +21,12 @@ public sealed partial class ExplosionSystem
     private static readonly Vector2i[] WGMicroOffsets =
     {
         new(0, 0), new(1, 0), new(-1, 0), new(0, 1), new(0, -1),
+    };
+
+    /// <summary>The direction from the epicentre to each of <see cref="WGMicroOffsets"/>.</summary>
+    private static readonly AtmosDirection[] WGMicroDirections =
+    {
+        AtmosDirection.Invalid, AtmosDirection.East, AtmosDirection.West, AtmosDirection.North, AtmosDirection.South,
     };
 
     private const int WGMicroMaxPerTick = 40;
@@ -118,13 +126,23 @@ public sealed partial class ExplosionSystem
         var centerIntensity = centerExists ? MathF.Min(micro.MaxTileIntensity, micro.TotalIntensity) : 0f;
         var ringIntensity = MathF.Min(micro.MaxTileIntensity, (micro.TotalIntensity - centerIntensity) / 4f);
         var damageModifier = _damageableSystem.UniversalExplosionDamageModifier * _damageableSystem.UniversalAllDamageModifier;
+        // A blast inside a standing wall leaves it only through the sides the wall leaves open, as a full explosion does.
+        // A wall the blast at its centre breaks, one already weakened say, no longer holds it.
+        var blocked = AtmosDirection.Invalid;
+        if (TryComp<ExplosionAirtightGridComponent>(gridUid, out var airtight)
+            && airtight.Tiles.TryGetValue(center, out var centerData)
+            && !(_explosionTypes.TryGetValue(micro.Proto.ID, out var typeIndex)
+                 && (float) GetToleranceValues(centerData.ToleranceCacheIndex).Values[typeIndex] <= centerIntensity))
+        {
+            blocked = centerData.BlockedDirections;
+        }
 
         _wgMicroProcessed.Clear();
         _wgMicroTiles.Clear();
         for (var i = 0; i < WGMicroOffsets.Length; i++)
         {
             var intensity = i == 0 ? centerIntensity : ringIntensity;
-            if (intensity <= 0f)
+            if (intensity <= 0f || i > 0 && blocked.IsFlagSet(WGMicroDirections[i]))
                 continue;
 
             var tile = center + WGMicroOffsets[i];

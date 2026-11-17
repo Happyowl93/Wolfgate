@@ -26877,3 +26877,62 @@ Entries:
   id: 2920
   time: '2026-11-14T23:35:00.0000000+00:00'
   url: https://github.com/Monolith-Station/Monolith/pull/5024
+- author: DoubleHypercube
+  changes:
+    - type: Remove
+      message: All player-facing references to "Unathi" and "Asakim" have been killed.
+    - type: Add
+      message: >-
+        Added translators & their implants for Hydraspeak, Felyaic, Nova-Cygni
+        Classic, Scratch, and Squeakish.
+    - type: Add
+      message: Draconic and Azaziba are now trait-selectable languages.
+    - type: Tweak
+      message: Azaziba is no longer unobtainable "for lore reasons". Who's lore?
+    - type: Tweak
+      message: Standardized translator & implant names and descriptions.
+    - type: Remove
+      message: Nekomimetic, Gary, and Nova-Cygni translators are no longer obtainable.
+    - type: Fix
+      message: Siik'maas translators are now properly obtainable again.
+  id: 2921
+  time: '2026-11-15T10:44:58.0000000+00:00'
+  url: https://github.com/Monolith-Station/Monolith/pull/5025
+- author: SuperGDPWYL
+  changes:
+    - type: Fix
+      message: >-
+        The windoors at TSFMC Flagship Halcyon's reception now use the correct
+        access.
+  id: 2922
+  time: '2026-11-15T16:07:08.0000000+00:00'
+  url: https://github.com/Monolith-Station/Monolith/pull/5029
+- author: SuperGDPWYL
+  changes:
+    - type: Tweak
+      message: >-
+        TSFMC and PDV can now equip their respective roundstart hardsuits in
+        their loadout.
+    - type: Fix
+      message: USSP can no longer equip TSF winter coats in their loadout.
+  id: 2924
+  time: '2026-11-16T04:31:28.0000000+00:00'
+  url: https://github.com/Monolith-Station/Monolith/pull/5031
+- author: Mrrpip
+  changes:
+    - type: Add
+      message: >-
+        Adds a variant of the QJ-490, the QJ-490 classic. Comes with it's
+        Tumour-era loadout.
+    - type: Fix
+      message: Fixed Hullmod rotation, applies a negative hullmod to Zvezda's shipyard.
+  id: 2926
+  time: '2026-11-16T04:36:45.0000000+00:00'
+  url: https://github.com/Monolith-Station/Monolith/pull/5008
+- author: EquanimityX0880
+  changes:
+    - type: Tweak
+      message: Cargo Bounties can now be skipped non-USSP players
+  id: 2923
+  time: '2026-11-15T16:10:19.0000000+00:00'
+  url: https://github.com/Monolith-Station/Monolith/pull/5030

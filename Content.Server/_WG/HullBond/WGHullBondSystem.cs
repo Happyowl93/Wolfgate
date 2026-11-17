@@ -23,6 +23,7 @@ public sealed partial class WGHullBondSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<WGHullBondComponent, MapInitEvent>(OnMapInit);
+        SubscribeLocalEvent<WGHullBondComponent, AnchorStateChangedEvent>(OnAnchorChanged);
         SubscribeLocalEvent<WGHullBondComponent, AnchorAttemptEvent>(OnAnchorAttempt);
         SubscribeLocalEvent<WGHullBondComponent, UserAnchoredEvent>(OnUserAnchored);
         SubscribeLocalEvent<WGHullBondComponent, UnanchorAttemptEvent>(OnUnanchorAttempt);
@@ -55,6 +56,13 @@ public sealed partial class WGHullBondSystem : EntitySystem
 
         _transform.Unanchor(ent, xform);
         _popup.PopupEntity(RefusalText(ent), ent, PopupType.MediumCaution);
+    }
+
+    private void OnAnchorChanged(Entity<WGHullBondComponent> ent, ref AnchorStateChangedEvent args)
+    {
+        // Bolted down by anything but a wrench, such as a repair rebuilding it. Map init handles a fitting still loading.
+        if (args.Anchored && LifeStage(ent) >= EntityLifeStage.MapInitialized)
+            BondIfBolted(ent);
     }
 
     private void OnAnchorAttempt(Entity<WGHullBondComponent> ent, ref AnchorAttemptEvent args)
@@ -143,12 +151,36 @@ public sealed partial class WGHullBondSystem : EntitySystem
     private void OnGridSplit(ref GridSplitEvent args)
     {
         // The pieces of a broken hull are still that hull.
-        if (HullId(args.Grid) is not { } id)
+        if (!TryComp<WGHullBondIdComponent>(args.Grid, out var source))
             return;
 
         foreach (var grid in args.NewGrids)
         {
-            EnsureComp<WGHullBondIdComponent>(grid).Id = id;
+            var piece = EnsureComp<WGHullBondIdComponent>(grid);
+            piece.Id = source.Id;
+            piece.Loose = source.Loose;
+        }
+    }
+
+    /// <summary>
+    /// Makes a hull loose: the fittings already bonded to it lose their bond, and nothing bonds to it again. A stripped
+    /// fitting then bonds to the first other hull it is bolted to.
+    /// </summary>
+    public void Loosen(EntityUid grid)
+    {
+        var id = EnsureComp<WGHullBondIdComponent>(grid);
+        id.Loose = true;
+        if (id.Id.Length == 0)
+            return;
+
+        var query = EntityQueryEnumerator<WGHullBondComponent>();
+        while (query.MoveNext(out _, out var bond))
+        {
+            if (bond.Hull != id.Id)
+                continue;
+
+            bond.Hull = null;
+            bond.HullName = null;
         }
     }
 
@@ -163,6 +195,9 @@ public sealed partial class WGHullBondSystem : EntitySystem
             return;
 
         var id = EnsureComp<WGHullBondIdComponent>(grid);
+        if (id.Loose)
+            return;
+
         if (id.Id.Length == 0)
             id.Id = Guid.NewGuid().ToString("N");
 

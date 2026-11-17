@@ -1248,7 +1248,7 @@
     color: "#b89f25"
   - type: AccessReader
     #access: [["Quartermaster"]] #Monolith Change: Allows Serzhants and Kommissars to skip bounties
-    access: [["USSPHigh"], ["MieyoLiason"]] # WOLFGATE(Feedback): the MMC liaison can skip bounties too
+    #access: [["USSPHigh"]] # USSP no longer has the only bounty computer
   # - type: GuideHelp # Frontier
   #   guides: # Frontier
   #   - CargoBounties # Frontier

@@ -49,8 +49,9 @@ public sealed partial class WGPilotDutySystem
     /// <summary>
     /// Picks a free dock pair whose approach lane touches no grid but the two, nearest standoff first. The lane is the
     /// box our grid sweeps from its final pose out <paramref name="standoff"/> metres along the target dock's normal.
+    /// With <paramref name="onlyDock"/>, only that dock of the target is considered.
     /// </summary>
-    public bool TryPlanDock(EntityUid grid, EntityUid target, float standoff, out WGDockPlan plan)
+    public bool TryPlanDock(EntityUid grid, EntityUid target, float standoff, out WGDockPlan plan, EntityUid? onlyDock = null)
     {
         plan = default;
         var gridXform = Transform(grid);
@@ -78,6 +79,7 @@ public sealed partial class WGPilotDutySystem
             foreach (var theirs in targetDocks)
             {
                 if (theirs.Comp.Docked
+                    || onlyDock != null && theirs.Owner != onlyDock
                     || _docking.GetDockingConfig(grid, target, own, own.Comp, theirs, theirs.Comp) is not { } config)
                 {
                     continue;
@@ -318,7 +320,7 @@ public sealed partial class WGPilotDutySystem
     /// Whether the ship is out in front of the target's port, near the standoff, with a straight run to the standoff
     /// that clears the target's hull.
     /// </summary>
-    private bool InDockCorridor(EntityUid grid,
+    public bool InDockCorridor(EntityUid grid,
         EntityUid target,
         WGDockPlan plan,
         MapId map,
@@ -431,7 +433,7 @@ public sealed partial class WGPilotDutySystem
     }
 
     /// <summary>Whether the ship has stopped moving relative to the target and stopped turning.</summary>
-    private bool Settled(EntityUid grid, EntityUid target, WGCrewNavigationSettings limits)
+    public bool Settled(EntityUid grid, EntityUid target, WGCrewNavigationSettings limits)
     {
         if (!TryComp<PhysicsComponent>(grid, out var body))
             return true;
@@ -448,7 +450,7 @@ public sealed partial class WGPilotDutySystem
     /// The steerer's heading for our grid at the final pose. The steerer measures heading as world rotation plus a
     /// half turn.
     /// </summary>
-    private Angle DockHeading(WGDockPlan plan, EntityUid target)
+    public Angle DockHeading(WGDockPlan plan, EntityUid target)
     {
         return _transform.GetWorldRotation(target) + plan.FinalAngle + new Angle(Math.PI);
     }
@@ -458,7 +460,7 @@ public sealed partial class WGPilotDutySystem
     /// <c>InRangeRotation</c> once in range; on the way in it faces the target plus this offset, so the offset that
     /// keeps the final heading is worked out every update. It is added in range too, so there it is zero.
     /// </summary>
-    private float CreepHeadingOffset(ShipSteererComponent steerer, Angle heading, EntityUid grid)
+    public float CreepHeadingOffset(ShipSteererComponent steerer, Angle heading, EntityUid grid)
     {
         var toTarget = _transform.ToMapCoordinates(steerer.Coordinates).Position - _transform.GetWorldPosition(grid);
         if (toTarget.Length() <= steerer.Range)
@@ -467,7 +469,7 @@ public sealed partial class WGPilotDutySystem
         return (float) ShipSteeringSystem.ShortestAngleDistance(toTarget.ToWorldAngle(), heading).Degrees;
     }
 
-    private EntityCoordinates StandoffOnMap(WGDockPlan plan, EntityUid map)
+    public EntityCoordinates StandoffOnMap(WGDockPlan plan, EntityUid map)
     {
         return new EntityCoordinates(map, _transform.ToMapCoordinates(plan.Standoff).Position);
     }

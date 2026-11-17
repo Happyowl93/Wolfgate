@@ -153,6 +153,8 @@
     - MonoScratch
     - MonoSqueakish
     - MonoNovaCygniClassical
+    - MonoDraconic
+    - MonoAzaziba
   - name: wg-trait-group-language-drawbacks
     traits:
     - Foreigner

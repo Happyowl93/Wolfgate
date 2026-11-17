@@ -77,12 +77,6 @@ public sealed class WolfgateCVars
         CVarDef.Create("wg.radar_show_iff_detailed", true, CVar.CLIENTONLY | CVar.ARCHIVE);
 
     /// <summary>
-    /// Whether radar screens with a docks toggle mark docking ports.
-    /// </summary>
-    public static readonly CVarDef<bool> RadarShowDocks =
-        CVarDef.Create("wg.radar_show_docks", true, CVar.CLIENTONLY | CVar.ARCHIVE);
-
-    /// <summary>
     /// The radar's bearing marks: 0 at the edge, 1 as a ring, 2 off.
     /// </summary>
     public static readonly CVarDef<int> RadarAzimuth =
@@ -93,6 +87,27 @@ public sealed class WolfgateCVars
     /// </summary>
     public static readonly CVarDef<bool> RadarZoomToMouse =
         CVarDef.Create("wg.radar_zoom_to_mouse", false, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// With smart radar tags, every contact on the scope shows its name; the cursor's lens then only adds details.
+    /// </summary>
+    public static readonly CVarDef<bool> RadarAllNames =
+        CVarDef.Create("wg.radar_all_names", false, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Smart radar tags: quiet by default, every tag and its details round the cursor, overlapping tags stacked. Off,
+    /// every tag sits whole by its contact as it always did.
+    /// </summary>
+    public static readonly CVarDef<bool> RadarSmartTags =
+        CVarDef.Create("wg.radar_smart_tags", true, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    /// <summary>Radar contacts show as icons alone: no name or crowd count unless revealed by the cursor or the all-names toggle.</summary>
+    public static readonly CVarDef<bool> RadarIconsOnly =
+        CVarDef.Create("wg.radar_icons_only", false, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    /// <summary>Hovering the radar reveals tags: the lens round the cursor, or with icons only, the contact under it.</summary>
+    public static readonly CVarDef<bool> RadarHoverReveal =
+        CVarDef.Create("wg.radar_hover_reveal", true, CVar.CLIENTONLY | CVar.ARCHIVE);
 
     /// <summary>
     /// The player's chat tabs: <c>name=channel,channel</c> entries separated by <c>|</c>, with <c>*</c> for every

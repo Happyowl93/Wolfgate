@@ -261,6 +261,7 @@ wg-crew-action-air = Air running low. Returning to a safe compartment.
 wg-crew-radio-contact = Crew, contact aboard: { $target }. Check your compartments.
 wg-crew-action-patrol = Checking the next compartment.
 wg-crew-action-gunnery = Taking the weapons console.
+wg-crew-action-fallback = I'm hit! Falling back.
 wg-crew-objective-escort = Escort grid (formation)
 wg-crew-setup-escort-help = Stay in a staggered formation beside and behind the target. Range sets minimum spacing; zero duration escorts until skipped.
 
@@ -268,6 +269,12 @@ wg-crew-coward-cry-1 = Help! Somebody help!
 wg-crew-coward-cry-2 = Don't shoot! Please, don't shoot!
 wg-crew-coward-cry-3 = I'm just a deckhand!
 wg-crew-coward-cry-4 = Take what you want, just leave me be!
+
+wg-crew-grenade-frag-1 = Frag out!
+wg-crew-grenade-frag-2 = Grenade out!
+wg-crew-grenade-frag-3 = Fire in the hole!
+wg-crew-grenade-1 = Grenade out!
+wg-crew-grenade-2 = Throwing!
 wg-crew-coward-cry-5 = Somebody, anybody, help us!
 
 wg-crew-shove = {CAPITALIZE(THE($user))} shoves {THE($crate)} aside.

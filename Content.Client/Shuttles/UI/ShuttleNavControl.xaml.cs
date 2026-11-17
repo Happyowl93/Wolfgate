@@ -304,6 +304,7 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
         _radarModeButtons.AddChild(_radarAnchorButton);
         _radarModeButtons.AddChild(_radarResetButton);
         AddWgZoomToMouseButton(_radarModeButtons); // WOLFGATE(Shuttles): zoom toward the cursor toggle.
+        AddWgAllNamesButton(_radarModeButtons); // WOLFGATE(RadarLabels): every contact named toggle.
 
         parent.AddChild(_radarModeButtons);
         AddWgTerrainButton(parent); // WOLFGATE(Planets): terrain toggle overlays the radar, not the settings column.
@@ -346,7 +347,8 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
         Rotation,
         Anchor,
         Reset,
-        WgZoomToMouse // WOLFGATE(Shuttles): zoom toward the cursor toggle.
+        WgZoomToMouse, // WOLFGATE(Shuttles): zoom toward the cursor toggle.
+        WgAllNames // WOLFGATE(RadarLabels): every contact named toggle.
     }
 
     public sealed partial class RadarModeButton : BaseButton // WOLFGATE(CombatConsole): theme the original radar mode controls.
@@ -452,6 +454,9 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
                 // WOLFGATE(Shuttles) START: zoom toward the cursor toggle.
                 case RadarModeButtonIcon.WgZoomToMouse:
                     WgDrawZoomToMouse(handle, center, radius, Color.Lime.WithAlpha(0.95f));
+                    break;
+                case RadarModeButtonIcon.WgAllNames: // WOLFGATE(RadarLabels): every contact named toggle
+                    WgDrawAllNames(handle, center, radius, Color.Lime.WithAlpha(0.95f));
                     break;
                 // WOLFGATE END
                 default:
@@ -742,6 +747,7 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
 
         // Mono edited: Frontier - collect blip location data outside foreach - more changes ahead
         _tempBlipDataList.Clear();
+        WgGatherEncounterGrids(); // WOLFGATE(RadarLabels): encounter ships draw as ships
 
         _visibleGridsSet.Clear();
 
@@ -838,6 +844,7 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
             }
         }
         #endregion
+        WgDrawTags(handle); // WOLFGATE(RadarLabels): every contact's tag, laid out together over the scope.
         DrawWgLatticeDeadZones(handle, worldToView, xform.MapUid); // WOLFGATE(Lattice): the Coda shows only as static on every scanner.
         DrawWgCoordinateReadout(handle); // WOLFGATE(Waypoints): cursor and scanner coordinates over everything else.
     }
@@ -969,7 +976,10 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
                     var uiX = uiXCentre * uiXOffset / uiDistance;
                     var uiY = uiYCentre * uiYOffset / uiDistance;
 
-                    var isOutsideRadarCircle = uiDistance > Math.Abs(uiX) && uiDistance > Math.Abs(uiY);
+                    // WOLFGATE(RadarLabels) START: the old test called contacts on the scope's diagonals outside it
+                    // var isOutsideRadarCircle = uiDistance > Math.Abs(uiX) && uiDistance > Math.Abs(uiY);
+                    var isOutsideRadarCircle = !WgOnScope(uiPosition * UIScale);
+                    // WOLFGATE END
                     if (isOutsideRadarCircle)
                     {
                         // 0.95f for offsetting the icons slightly away from edge of radar so it doesnt clip.
@@ -989,7 +999,10 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
 
                     var distance = Vector2.Distance(gridMapPos, mapPos.Position);
 
-                    if (!isOutsideRadarCircle || isDistantPOI || isMouseOver)
+                    // WOLFGATE(RadarLabels) START: only contacts on the scope get a tag; one pinned to the rim keeps just its blip unless hovered
+                    // if (!isOutsideRadarCircle || isDistantPOI || isMouseOver)
+                    if (!isOutsideRadarCircle || isMouseOver)
+                    // WOLFGATE END
                     {
                         // Shows decimal when distance is < 50m, otherwise pointless to show it.
                         var displayedDistance = distance < 50f ? $"{distance:0.0}" : distance < 1000 ? $"{distance:0}" : $"{distance / 1000:0.0}k";
@@ -1058,39 +1071,54 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
                         var lines = labelText.Split('\n');
                         var mainLabel = lines[0];
 
-                        // Draw main ship label with company color if available
-                        handle.DrawString(Font, (uiPosition + labelOffset) * UIScale, mainLabel, UIScale * 0.9f, displayColor);
-
-                        // Mono start - draw main stack of info
+                        // WOLFGATE(RadarLabels) START: lines go to the scope's shared tag layout, which stacks overlapping tags.
+                        WgBeginTag(uiPosition * UIScale, (uiPosition + labelOffset) * UIScale, isMouseOver ? 3 : isPlayerShuttle ? 2 : 1,
+                            always: isMouseOver && WgHoverReveal || distance <= WgTagCloseRange, key: gUid.Id); // a ship this close keeps its name: it could be shooting
+                        WgTagLine(handle, mainLabel, UIScale * 0.9f, displayColor);
                         if (shouldDrawDetailedIFF)
                         {
-                            // Get company label & draw
-                            var companyLabel = !hideLabel ? lines[1] : Loc.GetString("shuttle-console-company-unknown");
-                            var companyLabelOffset = new Vector2(
-                                labelOffset.X,
-                                labelOffset.Y + handle.GetDimensions(Font, mainLabel, 0.9f).Y
-                            );
-                            handle.DrawString(Font, (uiPosition + companyLabelOffset) * UIScale, companyLabel, UIScale * 0.7f, displayColor);
-
-                            // Draw coordinates
-                            var coordDimensions = handle.GetDimensions(Font, coordsText, 0.7f);
-                            var coordOffset = new Vector2(
-                                labelOffset.X,
-                                labelOffset.Y + handle.GetDimensions(Font, mainLabel, 0.9f).Y + handle.GetDimensions(Font, companyLabel, 0.7f).Y);
-                            handle.DrawString(Font, (uiPosition + coordOffset) * UIScale, coordsText, 0.7f * UIScale, displayColor);
-
-                            // Draw track ID (if it has one)
-                            var trackIdDimensions = handle.GetDimensions(Font, trackIdText, 0.7f);
-                            var trackIdOffset = new Vector2(
-                                labelOffset.X,
-                                labelOffset.Y + handle.GetDimensions(Font, mainLabel, 0.9f).Y + handle.GetDimensions(Font, companyLabel, 0.7f).Y + handle.GetDimensions(Font, coordsText, 0.7f).Y);
+                            WgTagLine(handle, !hideLabel ? lines[1] : Loc.GetString("shuttle-console-company-unknown"), UIScale * 0.7f, displayColor);
+                            WgTagLine(handle, coordsText, UIScale * 0.7f, displayColor);
                             if (iff != null)
-                                handle.DrawString(Font, (uiPosition + trackIdOffset) * UIScale, trackIdText, 0.7f * UIScale, displayColor);
+                                WgTagLine(handle, trackIdText, UIScale * 0.7f, displayColor);
                         }
-                        // Mono end
+
+                        // // Draw main ship label with company color if available
+                        // handle.DrawString(Font, (uiPosition + labelOffset) * UIScale, mainLabel, UIScale * 0.9f, displayColor);
+                        //
+                        // // Mono start - draw main stack of info
+                        // if (shouldDrawDetailedIFF)
+                        // {
+                        //     // Get company label & draw
+                        //     var companyLabel = !hideLabel ? lines[1] : Loc.GetString("shuttle-console-company-unknown");
+                        //     var companyLabelOffset = new Vector2(
+                        //         labelOffset.X,
+                        //         labelOffset.Y + handle.GetDimensions(Font, mainLabel, 0.9f).Y
+                        //     );
+                        //     handle.DrawString(Font, (uiPosition + companyLabelOffset) * UIScale, companyLabel, UIScale * 0.7f, displayColor);
+                        //
+                        //     // Draw coordinates
+                        //     var coordDimensions = handle.GetDimensions(Font, coordsText, 0.7f);
+                        //     var coordOffset = new Vector2(
+                        //         labelOffset.X,
+                        //         labelOffset.Y + handle.GetDimensions(Font, mainLabel, 0.9f).Y + handle.GetDimensions(Font, companyLabel, 0.7f).Y);
+                        //     handle.DrawString(Font, (uiPosition + coordOffset) * UIScale, coordsText, 0.7f * UIScale, displayColor);
+                        //
+                        //     // Draw track ID (if it has one)
+                        //     var trackIdDimensions = handle.GetDimensions(Font, trackIdText, 0.7f);
+                        //     var trackIdOffset = new Vector2(
+                        //         labelOffset.X,
+                        //         labelOffset.Y + handle.GetDimensions(Font, mainLabel, 0.9f).Y + handle.GetDimensions(Font, companyLabel, 0.7f).Y + handle.GetDimensions(Font, coordsText, 0.7f).Y);
+                        //     if (iff != null)
+                        //         handle.DrawString(Font, (uiPosition + trackIdOffset) * UIScale, trackIdText, 0.7f * UIScale, displayColor);
+                        // }
+                        // // Mono end
+                        // WOLFGATE END
                     }
 
-                    NfAddBlipToList(_tempBlipDataList, isOutsideRadarCircle, uiPosition, uiXCentre, uiYCentre, labelColor, hideLabel ? default : gUid); // Frontier code
+                    // WOLFGATE(RadarLabels): a contact on the scope is drawn as what it is; at the rim, or unknown, it keeps the triangle
+                    if (isOutsideRadarCircle || !WgQueueContactIcon(gUid, uiPosition, curGridToView, labelColor, hideLabel || blipOnly))
+                        NfAddBlipToList(_tempBlipDataList, isOutsideRadarCircle, uiPosition, uiXCentre, uiYCentre, labelColor, hideLabel ? default : gUid); // Frontier code
                                                                                                                                                         // End Frontier: IFF drawing functions
                 }
 
@@ -1135,6 +1163,7 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
         WgFlushGrids(handle);
         if (!renderFill)
             NfDrawBlips(handle, _tempBlipDataList);
+        WgDrawContactIcons(handle, !renderFill); // WOLFGATE(RadarLabels): contacts on the scope, by what they are
 
         // If we've set the controlling console, and it's on a different grid
         // to the shuttle itself, then draw an additional marker to help the
@@ -1312,13 +1341,17 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
                 //var color = Color.ToSrgb(Color.Magenta); // Frontier
                 var color = Color.ToSrgb(state.HighlightedRadarColor); // Frontier
 
-                var verts = new[]
-                {
-                    Vector2.Transform(position + new Vector2(-DockScale, -DockScale), gridToView),
-                    Vector2.Transform(position + new Vector2(DockScale, -DockScale), gridToView),
-                    Vector2.Transform(position + new Vector2(DockScale, DockScale), gridToView),
-                    Vector2.Transform(position + new Vector2(-DockScale, DockScale), gridToView),
-                };
+                // WOLFGATE(Shuttles) START: a dock marker keeps a small minimum size on screen, and hides when zoomed far out
+                // var verts = new[]
+                // {
+                //     Vector2.Transform(position + new Vector2(-DockScale, -DockScale), gridToView),
+                //     Vector2.Transform(position + new Vector2(DockScale, -DockScale), gridToView),
+                //     Vector2.Transform(position + new Vector2(DockScale, DockScale), gridToView),
+                //     Vector2.Transform(position + new Vector2(-DockScale, DockScale), gridToView),
+                // };
+                if (WgDockVertices(position, positionInView, gridToView, DockScale) is not { } verts)
+                    break;
+                // WOLFGATE END
 
                 handle.DrawPrimitives(DrawPrimitiveTopology.TriangleFan, verts, color.WithAlpha(0.8f));
                 handle.DrawPrimitives(DrawPrimitiveTopology.LineStrip, verts, color);
@@ -1330,6 +1363,8 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
             {
                 if (state.LabelName == null || labeled.Contains(state.LabelName))
                     continue;
+                if (!WgDockNamesShown(gridToView, DockScale)) // WOLFGATE(Shuttles): dock names only up close, so they don't crowd the contacts
+                    break;
 
                 var position = state.Coordinates.Position;
                 var uiPosition = Vector2.Transform(position, gridToView);
@@ -1339,7 +1374,11 @@ public partial class ShuttleNavControl : BaseShuttleControl // Mono
 
                 labeled.Add(state.LabelName);
                 var labelDimensions = handle.GetDimensions(Font, state.LabelName, 0.9f);
-                handle.DrawString(Font, (uiPosition / UIScale - labelDimensions / 2) * UIScale, state.LabelName, UIScale * 0.9f, _dockLabelColor);
+                // WOLFGATE(RadarLabels) START: dock names join the scope's shared tag layout.
+                // handle.DrawString(Font, (uiPosition / UIScale - labelDimensions / 2) * UIScale, state.LabelName, UIScale * 0.9f, _dockLabelColor);
+                WgBeginTag(uiPosition, (uiPosition / UIScale - labelDimensions / 2) * UIScale);
+                WgTagLine(handle, state.LabelName, UIScale * 0.9f, _dockLabelColor);
+                // WOLFGATE END
             }
             // End Frontier
         }

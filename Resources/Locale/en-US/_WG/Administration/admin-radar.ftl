@@ -12,8 +12,6 @@ wg-admin-radar-players = Players
 wg-admin-radar-players-tooltip = Mark every player on this map.
 wg-admin-radar-player-group = { $name } +{ $count }
 
-wg-admin-radar-encounters = Encounters
-wg-admin-radar-encounters-tooltip = Show encounter markers, their warning and attack zones, and NPC crew tags.
 
 wg-admin-radar-jump = Jump to player
 wg-admin-radar-jump-tooltip = Pick a player to warp to. Enter takes the first match.

@@ -1,5 +1,6 @@
 using Content.Server._WG.NpcCrew;
 using Content.Server._WG.NpcCrew.Components;
+using Content.Server._WG.NpcCrew.Systems;
 using Content.Shared._WG.Wolfmed.Consciousness;
 using Content.Server.NPC.Components;
 using Content.Shared.ActionBlocker;
@@ -15,6 +16,25 @@ public sealed partial class NPCCombatSystem
     public const float CrewSemiAutoInterval = 0.5f;
 
     [Dependency] private ActionBlockerSystem _blocker = default!;
+    [Dependency] private WGCrewWeaponSystem _wgCrewWeapons = default!;
+
+    /// <summary>
+    /// A crewman with his target in sight. Regaining sight of one he saw moments ago or was braced for, he fires after
+    /// his skill's short re-acquire delay instead of the full first-contact one.
+    /// </summary>
+    private void CrewSighted(EntityUid uid, NPCRangedCombatComponent combat, bool regained)
+    {
+        if (!TryComp<WGCrewWeaponComponent>(uid, out var weapon) || !TryComp<WGCrewComponent>(uid, out var crew))
+            return;
+
+        if (regained && _wgCrewWeapons.Expects((uid, weapon), combat.Target))
+        {
+            var ready = combat.ShootDelay - WGCrewSkills.Of(crew).ReacquireDelay;
+            combat.ShootAccumulator = MathF.Max(combat.ShootAccumulator, ready);
+        }
+
+        _wgCrewWeapons.Saw((uid, weapon), combat.Target);
+    }
 
     /// <summary>
     /// Whether an NPC is fit to fire: not crit, stunned or asleep, and not Downed. Players keep a sidearm while
@@ -38,7 +58,7 @@ public sealed partial class NPCCombatSystem
         if (!TryComp<WGCrewComponent>(uid, out var crew))
             return target;
 
-        var error = WGCrewSkills.Of(crew.Skill).AimError;
+        var error = WGCrewSkills.Of(crew).AimError;
         if (error <= 0f)
             return target;
 

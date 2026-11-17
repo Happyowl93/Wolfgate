@@ -357,7 +357,7 @@ public sealed partial class WGPilotDutySystem
         if (body.LinearVelocity.Length() > maximumSpeed + limits.SpeedTolerance)
             input = new ShuttleInput(Vector2.Zero, input.Rotation, 1f);
         args.SetMaxVelocity = float.IsFinite(maximumSpeed) ? maximumSpeed : null;
-        var handling = WGCrewSkills.Of(CompOrNull<WGCrewComponent>(ent)?.Skill ?? WGCrewSkill.Veteran).Handling;
+        var handling = (TryComp<WGCrewComponent>(ent, out var pilotCrew) ? WGCrewSkills.Of(pilotCrew) : WGCrewSkills.Of(WGCrewSkill.Veteran)).Handling;
         args.AccelMul *= input.Brakes > 0f ? 1f : limits.ThrustMultiplier * handling;
         args.AngularMul *= input.Brakes > 0f ? 1f : limits.AngularThrustMultiplier * handling;
 

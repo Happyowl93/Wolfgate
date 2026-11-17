@@ -270,6 +270,9 @@ public sealed partial class WGCrewSetupSystem : EntitySystem
                 continue;
             if (profile != null && profile.Components.Count > 0)
                 EntityManager.AddComponents(mob, profile.Components);
+            if (loadout is { } gear && profile != null && profile.SkillOffsets.TryGetValue(gear, out var offset)
+                && TryComp<WGCrewComponent>(mob, out var member))
+                member.SkillOffset = offset;
             if (post.Engagement is { } engagement)
                 _crew.SetEngagement(mob, engagement);
             else if (profile != null && profile.Engagement.TryGetValue(post.Role, out var manner))

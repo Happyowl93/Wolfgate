@@ -6,6 +6,7 @@ using Content.Server.Power.Components;
 using Content.Shared.Radio.Components;
 using Content.Shared._Mono.Radio;
 using Content.Shared._WG.ChatFont; // WOLFGATE(ChatFont)
+using Content.Shared._WG.Modsuits.Modules; // WOLFGATE(Modsuits)
 using Content.Shared.Chat;
 using Content.Shared.Database;
 using Content.Shared._EinsteinEngines.Language;
@@ -128,7 +129,8 @@ public sealed partial class RadioSystem : EntitySystem
         if (language == null)
             language = _language.GetLanguage(messageSource);
 
-        if (!language.SpeechOverride.AllowRadio)
+        if (!language.SpeechOverride.AllowRadio
+            && !LanguageRadioOverride(messageSource, ref language)) // WOLFGATE(Modsuits): glove translator
             return;
         // Einstein Engines - Language end
 
@@ -339,4 +341,19 @@ public sealed partial class RadioSystem : EntitySystem
         }
         return false;
     }
+
+    // WOLFGATE(Modsuits) START: the glove translator lets the suit relay a language radio would otherwise drop.
+    private bool LanguageRadioOverride(EntityUid speaker, ref LanguagePrototype language)
+    {
+        var ev = new LanguageRadioAttemptEvent(language.ID);
+        RaiseLocalEvent(speaker, ref ev);
+        if (!ev.Allowed)
+            return false;
+
+        if (ev.TranslateTo != null && _prototype.TryIndex<LanguagePrototype>(ev.TranslateTo, out var translated))
+            language = translated;
+
+        return true;
+    }
+    // WOLFGATE END
 }

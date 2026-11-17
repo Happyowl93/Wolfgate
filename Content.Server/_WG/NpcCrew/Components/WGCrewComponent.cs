@@ -66,9 +66,13 @@ public sealed partial class WGCrewComponent : Component
     [DataField]
     public string Battlegroup = string.Empty;
 
-    /// <summary>How well this crewman shoots, lays ship guns and flies.</summary>
+    /// <summary>How well this crewman's crew shoots, lays ship guns and flies; the same for everyone aboard.</summary>
     [DataField]
     public WGCrewSkill Skill = WGCrewSkill.Veteran;
+
+    /// <summary>Tiers this crewman stands above or below <see cref="Skill"/>, from his profile's loadout. See <see cref="WGCrewSkills.Effective"/>.</summary>
+    [DataField]
+    public int SkillOffset;
 
     /// <summary>The crewman's gun refills itself when it runs dry, so he never falls back to his fists.</summary>
     [DataField]

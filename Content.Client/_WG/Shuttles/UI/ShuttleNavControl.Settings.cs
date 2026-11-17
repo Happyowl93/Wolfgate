@@ -10,16 +10,17 @@ public partial class ShuttleNavControl
 
     private bool _wgSavedIff;
     private bool _wgSavedIffDetailed;
-    private bool _wgSavedDocks;
     private RadarAzimuthMode _wgSavedAzimuth;
-    private bool _wgDocksPinned;
 
-    /// <summary>Starts the radar with the player's saved contact labels, dock markers and bearing ring.</summary>
+    /// <summary>
+    /// Starts the radar with the player's saved contact labels and bearing ring. Docks always show, as markers that
+    /// stay visible from afar; their names only up close (see ShuttleNavControl.Docks.cs).
+    /// </summary>
     private void WgLoadDisplaySettings()
     {
         ShowIFF = _wgSavedIff = _wgSettingsCfg.GetCVar(WolfgateCVars.RadarShowIff);
         ShowIFFDetailed = _wgSavedIffDetailed = _wgSettingsCfg.GetCVar(WolfgateCVars.RadarShowIffDetailed);
-        ShowDocks = _wgSavedDocks = _wgSettingsCfg.GetCVar(WolfgateCVars.RadarShowDocks);
+        ShowDocks = true;
         _azimuthMode = _wgSavedAzimuth = _wgSettingsCfg.GetCVar(WolfgateCVars.RadarAzimuth) switch
         {
             1 => RadarAzimuthMode.Ring,
@@ -28,24 +29,15 @@ public partial class ShuttleNavControl
         };
     }
 
-    /// <summary>For a radar screen with no docks toggle: docks always show and its state is never saved.</summary>
-    public void WgPinDocks()
-    {
-        _wgDocksPinned = true;
-        ShowDocks = true;
-    }
-
     /// <summary>Saves a display choice when the player changes it.</summary>
     private void WgSaveDisplaySettings()
     {
-        var docks = _wgDocksPinned ? _wgSavedDocks : ShowDocks;
-        if (ShowIFF == _wgSavedIff && ShowIFFDetailed == _wgSavedIffDetailed && docks == _wgSavedDocks &&
+        if (ShowIFF == _wgSavedIff && ShowIFFDetailed == _wgSavedIffDetailed &&
             _azimuthMode == _wgSavedAzimuth)
             return;
 
         _wgSettingsCfg.SetCVar(WolfgateCVars.RadarShowIff, _wgSavedIff = ShowIFF);
         _wgSettingsCfg.SetCVar(WolfgateCVars.RadarShowIffDetailed, _wgSavedIffDetailed = ShowIFFDetailed);
-        _wgSettingsCfg.SetCVar(WolfgateCVars.RadarShowDocks, _wgSavedDocks = docks);
         _wgSettingsCfg.SetCVar(WolfgateCVars.RadarAzimuth, (int) (_wgSavedAzimuth = _azimuthMode));
         _wgSettingsCfg.SaveToFile();
     }

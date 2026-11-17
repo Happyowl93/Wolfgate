@@ -237,6 +237,11 @@
   - WGContractorBunnysuitClown
   - WGContractorBunnysuitMime
   # WOLFGATE END
+  # WOLFGATE(Blueshield) START: blueshield officer clothing ported from GoobStation
+  - WGContractorClothingUniformJumpsuitBlueshieldOfficer
+  - WGContractorClothingUniformJumpskirtBlueshieldOfficer
+  - WGContractorClothingUniformJumpsuitBlueshieldShirt
+  # WOLFGATE END
 
   fallbacks:
   - ContractorClothingUniformJumpsuitColorGrey
@@ -252,6 +257,10 @@
   ## Mono end
   # WOLFGATE(ClownCosmetics) START
   - WGContractorClothingModsuitClownPowerCell
+  # WOLFGATE END
+  # WOLFGATE(Modsuits) START: Add sanitater and standard modsuit to loadouts
+  - MdMedicClothingModsuitParamedicPowerCell
+  - MdClothingModsuitStandardPowerCell
   # WOLFGATE END
   - ContractorClothingBackpack
   - ContractorClothingBackpackDuffel
@@ -323,6 +332,12 @@
   - ContractorClothingBackpackDuffelMime
   - ContractorClothingBackpackSatchelMime
   - ContractorClothingBackpackMessengerMime
+  # WOLFGATE(Blueshield) START: blueshield officer clothing ported from GoobStation
+  - WGContractorClothingBackpackBlueshield
+  - WGContractorClothingBackpackDuffelBlueshield
+  - WGContractorClothingBackpackSatchelBlueshield
+  - WGContractorClothingBackpackMessengerBlueshield
+  # WOLFGATE END
   fallbacks:
   - ContractorClothingBackpack
 
@@ -583,6 +598,10 @@
   - WGContractorClothingOuterHardsuitMimeBlack
   - WGContractorClothingOuterClownPriest
   # WOLFGATE END
+  # WOLFGATE(Blueshield) START: blueshield officer clothing ported from GoobStation
+  - WGContractorClothingOuterBlueshieldArmourVest
+  - WGContractorClothingOuterBlueshieldArmoredJacket
+  # WOLFGATE END
 
 - type: loadoutGroup
   id: ContractorBelt
@@ -620,6 +639,9 @@
   - ContractorClothingBeltPunkRandomizedFilled # Punkish (Randomized visuals)
   - ContractorClothingBeltSheathFilled # Mono
   - ContractorClothingBeltChampion
+  # WOLFGATE(Blueshield) START: blueshield officer clothing ported from GoobStation
+  - WGContractorClothingBeltMilitaryWebbingBSO
+  # WOLFGATE END
 
 - type: loadoutGroup
   id: ContractorShoes
@@ -697,6 +719,9 @@
   - WGContractorClothingUndergarmentSocksBunnysuitClown
   - WGContractorClothingUndergarmentSocksBunnysuitMime
   - WGContractorClothingShoesPinkClownHeels
+  # WOLFGATE END
+  # WOLFGATE(Blueshield) START: blueshield officer clothing ported from GoobStation
+  - WGContractorClothingShoesBootsWinterSnowjackBso
   # WOLFGATE END
   fallbacks:
   - ContractorClothingShoesColorBlack
@@ -879,6 +904,9 @@
   - WGContractorBunnyEarsMime
   - WGContractorClothingHeadHatMitreClown
   # WOLFGATE END
+  # WOLFGATE(Blueshield) START: blueshield officer clothing ported from GoobStation
+  - WGContractorClothingHeadHatCowboyBlueshield
+  # WOLFGATE END
 
 - type: loadoutGroup
   id: ContractorEars
@@ -902,6 +930,9 @@
   - ContractorClothingHeadsetAltMedicalCommon
   - ContractorClothingHeadsetAltScienceCommon
   # - USSPHeadset # Mono
+  # WOLFGATE(Blueshield) START: blueshield officer clothing ported from GoobStation
+  - WGContractorClothingHeadsetAltBlueshield
+  # WOLFGATE END
   fallbacks:
   - ContractorClothingHeadsetGreyCommon
 
@@ -1167,6 +1198,12 @@
   # WOLFGATE END
 #  - ContractorClothingCloakCmo # Temp removed for MOM. Will return if replaced.
 #  - ContractorClothingNeckMantleCMO # Temp removed for MOM. Will return if replaced.
+  # WOLFGATE(Resprites) START: CMO neckwear restored and the resprited HOS set added to the Vagrant neck group
+  - ContractorClothingCloakCmo
+  - ContractorClothingNeckMantleCMO
+  - WGContractorClothingNeckCloakHos
+  - WGContractorClothingNeckMantleHOS
+  # WOLFGATE END
   - ContractorClothingNeckCloakRd
   - ContractorClothingNeckMantleRD
   - ContractorClothingNeckCloakCe
@@ -1187,6 +1224,10 @@
   - WGContractorClothingNeckCloakHonk
   - WGContractorClothingNeckClownPin
   - WGContractorClothingNeckMimePin
+  # WOLFGATE END
+  # WOLFGATE(Blueshield) START: blueshield officer clothing ported from GoobStation
+  - WGContractorClothingNeckMantleBlueshield
+  - WGContractorClothingNeckEnsembleBlueshield
   # WOLFGATE END
 
 - type: loadoutGroup
@@ -1251,6 +1292,9 @@
   # WOLFGATE(MeridianClothing) START: Meridian Rift clothing, written by Tools/_WG/MeridianClothing/port.py
   - WGMeridianLoadoutClothingGlassesEyepatchMedical
   - WGMeridianLoadoutClothingGlassesPsych
+  # WOLFGATE END
+  # WOLFGATE(Blueshield) START: blueshield officer clothing ported from GoobStation
+  - WGContractorClothingEyesGlassesBSO
   # WOLFGATE END
 
 - type: loadoutGroup
@@ -1343,6 +1387,9 @@
   - WGContractorClothingMaskBlushingClown
   - WGContractorClothingMaskClownHarlequin
   - WGContractorClothingMaskMimePierrot
+  # WOLFGATE END
+  # WOLFGATE(Blueshield) START: blueshield officer clothing ported from GoobStation
+  - WGContractorClothingMaskGasSwatBSO
   # WOLFGATE END
   fallbacks:
   - ContractorClothingMaskBreath

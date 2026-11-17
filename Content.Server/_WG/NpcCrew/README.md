@@ -78,7 +78,7 @@ or fires a gun is seen for 60 s, and a ship reported attacking for 120 s. A thef
 
 A Warn crew gives a stranger it notices aboard `WarnTime` (30 s) to leave; if he stays, or strikes any crewman, the
 crew's fighters (on-sight crew, marines, the captain and radio officer; not the helm or the guns) take him on as
-their own attacker, by the usual rules: in sight, and one man hunting him unseen. A when-attacked hand answers only
+their own attacker, by the usual rules: in sight, and a hunt party sized by skill going after him unseen. A when-attacked hand answers only
 his own attacker, and an attacker is remembered while he is aboard and seen or reported, then for 30 s more. Only a
 blow to a crewman himself sends him straight after someone he cannot see. Crew who never fight, including the
 cowards a profile's `cowards` chance makes (half the hauler deckhands), drop their work, run for the bridge and lie
@@ -138,7 +138,9 @@ A gunner's guns hold fire while any ship its crew does not count as hostile lies
 a company whose `wgStanding` has `recklessFire` (the Reavers) fires through anything.
 Crew-operated cannon rounds also protect allies and allied hulls, retaining their firing origin after a gunner dies
 or a player takes over. Explicit Attack orders, incoming fire and hostile docking permit retaliation against
-the targeted ship, including a normally friendly company; escorts in the same formation remain protected. Before a
+the targeted ship, including a normally friendly company; escorts in the same formation remain protected. A cannon
+round that passes an allied hull spares everyone aboard it too, attackers included, so nobody is shot through a
+standing wall once their ship stops counting as hostile. Before a
 hit from a vessel of another faction counts as an attack, the crew ask (`WGCrewFriendlyFireQueryEvent`) whether anyone
 vouches for it as a friend of the ship; the encounter it is fighting in does, by alliance or by whom it has been
 shooting, and a friend's fire is let pass outright.
@@ -231,6 +233,21 @@ Reloading uses real compatible magazines from equipment slots through normal ite
 holstered in favor of a loaded sidearm, melee weapon, or empty hands; no ammunition is created, unless the crewman has
 `InfiniteAmmo` (a commanded ship's roster sets it), when his magazine refills in place. Two-handed guns are wielded
 when drawn and after a reload, for their wielded spread.
+
+Skill (`WGCrewSkills`) sets how crew fight as well as how well. The crew's skill is the baseline; a profile's
+`skillOffsets` raise or lower it per loadout (reaver hands a tier below, officers a tier above), clamped to
+Green..Elite. A crewman who regains sight of a target he saw within six seconds, or braced for, fires after his
+re-acquire delay instead of the full shoot delay (`NPCCombatSystem.Crew.cs`). From Regular up, a crewman who knows of
+a hostile aboard but may not hunt it braces: weapon drawn and loaded, facing its way, for up to 90 s without sight of
+it (`WGCrewWeaponSystem.Brace.cs`). Regulars and up also throw a grenade they carry (any slot item with a use timer;
+reaver riflemen carry one `ExGrenade`) at a known hostile out of sight for three seconds within nine tiles: shouted
+first, cooked by skill but always with 1.5 s of fuse left on landing, never with a crewmate or bystander in the
+blast, once per crew every 20 s, and nobody hunts into it until it has gone off (`WGCrewGrenadeSystem`). The cooldown
+is checked again as he arms it, and the blast and flight path (anything a thrown item hits, loose crates included)
+again as it leaves his hand: with someone or something now in the way he picks
+another spot, or holds on while the fuse allows. Veterans and
+elites hunt in pairs, sidestep between shots (upstream `NPCJukeComponent`) and, once a minute, fall back out of the
+hostile's sight past 50 damage to patch up for up to eight seconds (`WGCrewFallBackSystem`).
 
 Since the Lupercal's first playtest: a crewman who sees a trespasser on a Warn ship names him and the zone aloud,
 points him out (`PointingSystem.TryNpcPoint`) and gives him his time, gives a last warning ten seconds before it runs
@@ -336,6 +353,7 @@ crew never turns on what it carries, such as the Remade aboard a flesh ship.
 - [`Content.Server/_WG/NpcCrew/Commands/WGCrewCommand.Arena.cs`](Commands/WGCrewCommand.Arena.cs)
 - [`Content.Server/_WG/NpcCrew/Commands/WGCrewCommand.cs`](Commands/WGCrewCommand.cs)
 - [`Content.Server/_WG/NpcCrew/Components/WGCaptainComponent.cs`](Components/WGCaptainComponent.cs)
+- [`Content.Server/_WG/NpcCrew/Components/WGCrewArmedGrenadeComponent.cs`](Components/WGCrewArmedGrenadeComponent.cs)
 - [`Content.Server/_WG/NpcCrew/Components/WGCrewComponent.cs`](Components/WGCrewComponent.cs)
 - [`Content.Server/_WG/NpcCrew/Components/WGCrewEngineerComponent.cs`](Components/WGCrewEngineerComponent.cs)
 - [`Content.Server/_WG/NpcCrew/Components/WGCrewGrabberComponent.cs`](Components/WGCrewGrabberComponent.cs)
@@ -362,11 +380,15 @@ crew never turns on what it carries, such as the Remade aboard a flesh ship.
 - [`Content.Server/_WG/NpcCrew/Components/WGHoldFireComponent.cs`](Components/WGHoldFireComponent.cs)
 - [`Content.Server/_WG/NpcCrew/Components/WGPilotDutyComponent.cs`](Components/WGPilotDutyComponent.cs)
 - [`Content.Server/_WG/NpcCrew/Components/WGRadioOperatorComponent.cs`](Components/WGRadioOperatorComponent.cs)
+- [`Content.Server/_WG/NpcCrew/HTN/WGCrewBraceOperator.cs`](HTN/WGCrewBraceOperator.cs)
+- [`Content.Server/_WG/NpcCrew/HTN/WGCrewFallBackOperator.cs`](HTN/WGCrewFallBackOperator.cs)
 - [`Content.Server/_WG/NpcCrew/HTN/WGCrewGrabOperator.cs`](HTN/WGCrewGrabOperator.cs)
+- [`Content.Server/_WG/NpcCrew/HTN/WGCrewGrenadeOperator.cs`](HTN/WGCrewGrenadeOperator.cs)
 - [`Content.Server/_WG/NpcCrew/HTN/WGCrewLoadedGunPrecondition.cs`](HTN/WGCrewLoadedGunPrecondition.cs)
 - [`Content.Server/_WG/NpcCrew/HTN/WGCrewMayFightPrecondition.cs`](HTN/WGCrewMayFightPrecondition.cs)
 - [`Content.Server/_WG/NpcCrew/HTN/WGCrewMedicOperator.cs`](HTN/WGCrewMedicOperator.cs)
 - [`Content.Server/_WG/NpcCrew/HTN/WGCrewReturnOperator.cs`](HTN/WGCrewReturnOperator.cs)
+- [`Content.Server/_WG/NpcCrew/HTN/WGCrewSidestepOperator.cs`](HTN/WGCrewSidestepOperator.cs)
 - [`Content.Server/_WG/NpcCrew/HTN/WGCrewTargetOperator.cs`](HTN/WGCrewTargetOperator.cs)
 - [`Content.Server/_WG/NpcCrew/HTN/WGCrewWorkOperator.cs`](HTN/WGCrewWorkOperator.cs)
 - [`Content.Server/_WG/NpcCrew/HTN/WGDrawWeaponOperator.cs`](HTN/WGDrawWeaponOperator.cs)
@@ -399,8 +421,10 @@ crew never turns on what it carries, such as the Remade aboard a flesh ship.
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewConductSystem.cs`](Systems/WGCrewConductSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewEscortSystem.cs`](Systems/WGCrewEscortSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewEvaSystem.cs`](Systems/WGCrewEvaSystem.cs)
+- [`Content.Server/_WG/NpcCrew/Systems/WGCrewFallBackSystem.cs`](Systems/WGCrewFallBackSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewFriendlyFireSystem.cs`](Systems/WGCrewFriendlyFireSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewGrabberSystem.cs`](Systems/WGCrewGrabberSystem.cs)
+- [`Content.Server/_WG/NpcCrew/Systems/WGCrewGrenadeSystem.cs`](Systems/WGCrewGrenadeSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewMedicSystem.Cloning.cs`](Systems/WGCrewMedicSystem.Cloning.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewMedicSystem.cs`](Systems/WGCrewMedicSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewMedicSystem.SelfCare.cs`](Systems/WGCrewMedicSystem.SelfCare.cs)
@@ -423,6 +447,7 @@ crew never turns on what it carries, such as the Remade aboard a flesh ship.
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewStealthSystem.cs`](Systems/WGCrewStealthSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewSystem.cs`](Systems/WGCrewSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewUiDiagnosticsSystem.cs`](Systems/WGCrewUiDiagnosticsSystem.cs)
+- [`Content.Server/_WG/NpcCrew/Systems/WGCrewWeaponSystem.Brace.cs`](Systems/WGCrewWeaponSystem.Brace.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewWeaponSystem.cs`](Systems/WGCrewWeaponSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewWeaponSystem.Reload.cs`](Systems/WGCrewWeaponSystem.Reload.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewWorkSystem.cs`](Systems/WGCrewWorkSystem.cs)
@@ -523,6 +548,7 @@ crew never turns on what it carries, such as the Remade aboard a flesh ship.
 - [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Sleep.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Sleep.cs)
 - [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Spared.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Spared.cs)
 - [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Stations.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Stations.cs)
+- [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Tactics.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Tactics.cs)
 - [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.TargetLifetime.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.TargetLifetime.cs)
 - [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Titles.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Titles.cs)
 - [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Work.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Work.cs)
@@ -599,6 +625,7 @@ crew never turns on what it carries, such as the Remade aboard a flesh ship.
 - [`Content.Server/NPC/Pathfinding/PathFlags.cs`](../../NPC/Pathfinding/PathFlags.cs): can we shove a loose crate out of the way.
 - [`Content.Server/NPC/Systems/NPCCombatSystem.Ranged.cs`](../../NPC/Systems/NPCCombatSystem.Ranged.cs)
   - no shooting while Downed, crit, stunned or asleep
+  - crew fire sooner on a target they saw moments ago or braced for
   - Crew miss by their skill level.
   - crew pull a semi-automatic's trigger at a person's pace
 - [`Content.Server/NPC/Systems/NPCRetaliationSystem.cs`](../../NPC/Systems/NPCRetaliationSystem.cs): a crewman's ship may let an attacker off, such as its Boss

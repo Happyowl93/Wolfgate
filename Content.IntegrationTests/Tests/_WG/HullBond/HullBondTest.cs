@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Content.IntegrationTests.Pair;
+using Content.Server._Mono.ShipRepair;
 using Content.Server._WG.HullBond;
 using Content.Server.Construction;
 using Content.Server.Construction.Components;
 using Content.Shared.Construction.Components;
+using Content.Shared._Mono.ShipRepair.Components;
 using Content.Shared.Containers.ItemSlots;
+using Content.Shared.Hands.EntitySystems;
+using Content.Shared.Interaction;
 using Robust.Server.Physics;
 using Robust.Shared.Containers;
 using Robust.Shared.GameObjects;
@@ -153,6 +157,52 @@ public sealed class HullBondTest
     }
 
     [Test]
+    public async Task LooseHullFittingsBondElsewhere()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var hullBond = server.System<WGHullBondSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var raider = CreateHull(pair, map.MapId, new Vector2(40, 40), "Raider");
+            var bravo = CreateHull(pair, map.MapId, new Vector2(60, 60), "Bravo");
+
+            var drive = entMan.SpawnEntity(Drive, At(raider, 1, 1));
+            var bond = entMan.GetComponent<WGHullBondComponent>(drive);
+            Assert.That(bond.Hull, Is.Not.Null, "The drive bonds to the hull it spawned on.");
+
+            // An encounter ship is loosened once its hull is built.
+            hullBond.Loosen(raider);
+            Assert.That(bond.Hull, Is.Null, "Loosening a hull frees the fittings bonded to it.");
+
+            var shield = entMan.SpawnEntity(Drive, At(raider, 2, 2));
+            Assert.That(entMan.GetComponent<WGHullBondComponent>(shield).Hull, Is.Null, "Nothing bonds to a loose hull.");
+
+            Carry(pair, drive, bravo, 1, 1);
+            Assert.That(Refused(pair, drive), Is.False, "A fitting stripped off a loose hull bolts down on another.");
+            Bolt(pair, drive);
+            Assert.Multiple(() =>
+            {
+                Assert.That(entMan.GetComponent<TransformComponent>(drive).Anchored, "The stolen fitting stays bolted down.");
+                Assert.That(bond.Hull, Is.Not.Null.And.EqualTo(HullId(pair, bravo)), "It bonds to the hull it was bolted to.");
+            });
+
+            Carry(pair, drive, raider, 1, 1);
+            Assert.That(Refused(pair, drive), Is.True, "Once bonded elsewhere, it must not go back on the loose hull.");
+
+            // A piece broken off a loose hull stays loose.
+            var split = new GridSplitEvent(new[] { bravo }, raider);
+            entMan.EventBus.RaiseEvent(EventSource.Local, ref split);
+            Assert.That(entMan.GetComponent<WGHullBondIdComponent>(bravo).Loose, "A piece split off a loose hull is loose.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
     public async Task UnboltedFittingBondsWhereFirstBolted()
     {
         await using var pair = await PoolManager.GetServerClient();
@@ -222,6 +272,60 @@ public sealed class HullBondTest
 
             Carry(pair, rebuilt, alpha, 2, 2);
             Assert.That(Refused(pair, rebuilt), Is.False, "The rebuilt fitting still bolts down on its own hull.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// The mobile drydock crane spawns loose, so an SRD rebuild once left it unbolted and unbonded, free to carry to
+    /// another ship.
+    /// </summary>
+    [Test]
+    public async Task SrdRebuildsFittingBoltedAndBonded()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var alpha = EntityUid.Invalid;
+        var bravo = EntityUid.Invalid;
+        var user = EntityUid.Invalid;
+        var tool = EntityUid.Invalid;
+
+        await server.WaitAssertion(() =>
+        {
+            alpha = CreateHull(pair, map.MapId, new Vector2(40, 40), "Alpha");
+            bravo = CreateHull(pair, map.MapId, new Vector2(60, 60), "Bravo");
+            var crane = entMan.SpawnEntity(Crane, At(alpha, 1, 2));
+            Bolt(pair, crane);
+            server.System<ShipRepairSystem>().GenerateRepairData(alpha);
+            entMan.DeleteEntity(crane);
+
+            user = entMan.SpawnEntity("MobHuman", At(alpha, 0, 0));
+            tool = entMan.SpawnEntity("ShipRepairDeviceRecharging", At(alpha, 0, 0));
+            Assert.That(server.System<SharedHandsSystem>().TryPickupAnyHand(user, tool), Is.True);
+            entMan.GetComponent<ShipRepairToolComponent>(tool).RepairTimeMultiplier = 0.03f;
+        });
+        await server.WaitRunTicks(1);
+
+        await server.WaitPost(() =>
+            entMan.EventBus.RaiseLocalEvent(tool, new AfterInteractEvent(user, tool, null, At(alpha, 1, 2), true)));
+        await server.WaitRunTicks(pair.SecondsToTicks(1f));
+
+        await server.WaitAssertion(() =>
+        {
+            var rebuilt = SingleOn<WGHullBondComponent, MetaDataComponent>(pair, alpha);
+            Assert.Multiple(() =>
+            {
+                Assert.That(entMan.GetComponent<TransformComponent>(rebuilt).Anchored, Is.True,
+                    "The SRD should rebuild a fitting bolted down, as the snapshot had it.");
+                Assert.That(entMan.GetComponent<WGHullBondComponent>(rebuilt).Hull, Is.Not.Null.And.EqualTo(HullId(pair, alpha)),
+                    "A fitting the SRD rebuilds should bond to the hull it was rebuilt on.");
+            });
+
+            Carry(pair, rebuilt, bravo, 1, 2);
+            Assert.That(Refused(pair, rebuilt), Is.True, "A rebuilt fitting must not bolt down on another hull.");
         });
 
         await pair.CleanReturnAsync();

@@ -6,6 +6,8 @@
     <BoxContainer Orientation="Vertical" Margin="8" SeparationOverride="6">
         <BoxContainer Orientation="Horizontal" SeparationOverride="6">
             <LineEdit Name="SearchBar" PlaceHolder="{Loc 'wg-ghost-orbit-search'}" HorizontalExpand="True" />
+            <Button Name="FactionViewButton" Text="{Loc 'wg-ghost-orbit-view-faction'}" ToggleMode="True" StyleClasses="OpenRight" />
+            <Button Name="PlaceViewButton" Text="{Loc 'wg-ghost-orbit-view-place'}" ToggleMode="True" StyleClasses="OpenLeft" />
             <Button Name="MostFollowedButton" Text="{Loc 'ghost-target-window-warp-to-most-followed'}" />
             <Button Name="RefreshButton" Text="{Loc 'wg-ghost-orbit-refresh'}" />
             <CheckBox Name="AutoRefreshBox" Text="{Loc 'wg-ghost-orbit-auto-refresh'}" Pressed="True" />

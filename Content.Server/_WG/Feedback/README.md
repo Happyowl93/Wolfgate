@@ -157,6 +157,7 @@ refresh of everyone.
 - [`Content.IntegrationTests/Tests/_WG/Feedback/WGFeedbackBatch1114Test.cs`](../../../Content.IntegrationTests/Tests/_WG/Feedback/WGFeedbackBatch1114Test.cs)
 - [`Content.IntegrationTests/Tests/_WG/Feedback/WGFeedbackBatch1115Test.cs`](../../../Content.IntegrationTests/Tests/_WG/Feedback/WGFeedbackBatch1115Test.cs)
 - [`Content.IntegrationTests/Tests/_WG/Feedback/WGGasTankLeakTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Feedback/WGGasTankLeakTest.cs)
+- [`Content.IntegrationTests/Tests/_WG/Feedback/WGTsfPayrollAccessTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Feedback/WGTsfPayrollAccessTest.cs)
 
 ### Localization
 
@@ -188,7 +189,6 @@ refresh of everyone.
 - [`Content.Shared/Access/Systems/AccessReaderSystem.cs`](../../../Content.Shared/Access/Systems/AccessReaderSystem.cs): a vehicle opens doors for its rider, so the rider is the one logged
 - [`Content.Shared/NightVision/SharedNightVisionSystem.cs`](../../../Content.Shared/NightVision/SharedNightVisionSystem.cs): clear the wearer's overlay, not the clothing's
 - [`Resources/Prototypes/_HL/Body/Organs/synth.yml`](../../../Resources/Prototypes/_HL/Body/Organs/synth.yml): cryoxadone drains from a Synth like it does from a human
-- [`Resources/Prototypes/Entities/Structures/Machines/Computers/computers.yml`](../../../Resources/Prototypes/Entities/Structures/Machines/Computers/computers.yml): the MMC liaison can skip bounties too
 - [`Resources/Prototypes/Roles/Jobs/Engineering/atmospheric_technician.yml`](../../../Resources/Prototypes/Roles/Jobs/Engineering/atmospheric_technician.yml): atmos techs can use air alarms
 
 <!-- WOLFGATE-GENERATED END -->

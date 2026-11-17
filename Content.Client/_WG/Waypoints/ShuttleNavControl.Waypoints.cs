@@ -213,6 +213,8 @@ public partial class ShuttleNavControl
                 continue;
 
             var view = Vector2.Transform(waypoint.Position, worldToView);
+            // Off the scope its marker sits at the edge, untagged: a stack lists only what the scope shows.
+            var onScope = WgOnScope(view);
             view = Vector2.Clamp(view, new Vector2(inset), Vector2.Max(new Vector2(inset), new Vector2(PixelSize.X, PixelSize.Y) - new Vector2(inset)));
             var size = WgWaypointMarkerSize * UIScale;
             _wgWaypointVertices[0] = view + new Vector2(0, -size);
@@ -221,12 +223,15 @@ public partial class ShuttleNavControl
             _wgWaypointVertices[3] = view + new Vector2(-size, 0);
             _wgWaypointVertices[4] = _wgWaypointVertices[0];
             handle.DrawPrimitives(DrawPrimitiveTopology.LineStrip, _wgWaypointVertices, WgWaypointColor);
+            if (!onScope)
+                continue;
 
             var dimensions = handle.GetDimensions(Font, waypoint.Name, UIScale * 0.8f);
             var labelX = view.X + size + 2f * UIScale + dimensions.X > PixelSize.X
                 ? view.X - size - 2f * UIScale - dimensions.X
                 : view.X + size + 2f * UIScale;
-            handle.DrawString(Font, new Vector2(labelX, view.Y - dimensions.Y / 2f), waypoint.Name, UIScale * 0.8f, WgWaypointColor);
+            WgBeginTag(view, new Vector2(labelX, view.Y - dimensions.Y / 2f), 2, always: true);
+            WgTagLine(handle, waypoint.Name, UIScale * 0.8f, WgWaypointColor);
         }
     }
 

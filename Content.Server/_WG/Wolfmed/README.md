@@ -1746,7 +1746,6 @@ Skipped ("dirty-disposed").
   - playtest 3: the IPC's container, so its bar shows
   - the HardLight Synth's container, so its bar shows
 - [`Resources/Prototypes/_Goobstation/Entities/Clothing/Head/hardsuit-helmets.yml`](../../../Resources/Prototypes/_Goobstation/Entities/Clothing/Head/hardsuit-helmets.yml): P6, P3-D6: locational armour coverage
-- [`Resources/Prototypes/_Goobstation/Entities/Clothing/Head/modsuit.yml`](../../../Resources/Prototypes/_Goobstation/Entities/Clothing/Head/modsuit.yml): P6, P3-D6: locational armour coverage
 - [`Resources/Prototypes/_Goobstation/Entities/Clothing/OuterClothing/armour.yml`](../../../Resources/Prototypes/_Goobstation/Entities/Clothing/OuterClothing/armour.yml): P6, P3-D6: locational armour coverage
 - [`Resources/Prototypes/_Goobstation/Entities/Mobs/Species/tajaran.yml`](../../../Resources/Prototypes/_Goobstation/Entities/Mobs/Species/tajaran.yml): rinses caustic residue off, as on the humanoid base
 - [`Resources/Prototypes/_Goobstation/Entities/Objects/Misc/Crafting/ghetto_stuff.yml`](../../../Resources/Prototypes/_Goobstation/Entities/Objects/Misc/Crafting/ghetto_stuff.yml): a blunt weapon can execute, with bludgeoning lines in place of the throat-slitting ones

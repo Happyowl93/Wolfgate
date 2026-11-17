@@ -525,4 +525,9 @@ public enum LogType
     /// <summary>A commanded ship's price rules were changed.</summary>
     WGShipServiceRules = 12493,
     // WOLFGATE END
+
+    // WOLFGATE(ShipAdmin) START: admin ship panel actions
+    /// <summary>Staff changed a ship from the admin ship panel.</summary>
+    WGShipAdmin = 12494,
+    // WOLFGATE END
 }
