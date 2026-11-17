@@ -32,6 +32,17 @@ public abstract partial class WGDeployableImplantComponent : Component
     /// <summary>The item while it is out.</summary>
     [ViewVariables]
     public EntityUid? Deployed;
+
+    /// <summary>
+    /// Whether the item's battery keeps its charge while folded away, recharging at its own rate meanwhile, instead of
+    /// coming out full every time.
+    /// </summary>
+    [DataField]
+    public bool KeepCharge;
+
+    /// <summary>The battery's charge when the item last folded away, and when.</summary>
+    [ViewVariables]
+    public (float Charge, TimeSpan At)? StoredCharge;
 }
 
 /// <summary>A set of tools folded into a forearm.</summary>
@@ -42,7 +53,15 @@ public sealed partial class WGToolArmComponent : WGDeployableImplantComponent;
 [RegisterComponent]
 public sealed partial class WGFingerLighterComponent : WGDeployableImplantComponent;
 
+/// <summary>A laser folded into a forearm.</summary>
+[RegisterComponent]
+public sealed partial class WGArmLaserComponent : WGDeployableImplantComponent;
+
 public sealed partial class WGToggleDeployableImplantEvent : InstantActionEvent;
+
+/// <summary>Raised on the part before its implant folds an item out; cancelling keeps it in.</summary>
+[ByRefEvent]
+public record struct WGDeployAttemptEvent(EntityUid Body, bool Cancelled = false);
 
 /// <summary>Sent to the player whose implant holds several items, to open the wheel they pick one from.</summary>
 [Serializable, NetSerializable]

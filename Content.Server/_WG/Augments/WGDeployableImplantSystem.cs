@@ -1,4 +1,6 @@
 using Content.Server._Goobstation.PairedExtendable;
+using Content.Server.Power.Components;
+using Content.Server.Power.EntitySystems;
 using Content.Shared._Shitmed.Body.Events;
 using Content.Shared._WG.Augments;
 using Content.Shared.ActionBlocker;
@@ -7,29 +9,36 @@ using Content.Shared.Body.Part;
 using Content.Shared.Emp;
 using Content.Shared.Hands.Components;
 using Content.Shared.Popups;
+using Content.Shared.Power.Components;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Player;
+using Robust.Shared.Timing;
 
 namespace Content.Server._WG.Augments;
 
 /// <summary>
 /// Gives a body the action of each deployable implant in its parts, and folds the implant's item out into that
 /// side's hand and back. An implant with several items opens a wheel for its owner to pick one from. An EMP folds
-/// the item in and locks the implant until it wears off.
+/// the item in and locks the implant until it wears off. An item whose implant keeps its charge comes back out with
+/// the battery it went in with, plus what it recharged meanwhile.
 /// </summary>
 public sealed class WGDeployableImplantSystem : EntitySystem
 {
     [Dependency] private ActionBlockerSystem _blocker = default!;
     [Dependency] private SharedActionsSystem _actions = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
+    [Dependency] private BatterySystem _battery = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private PairedExtendableSystem _extendable = default!;
+    [Dependency] private IGameTiming _timing = default!;
 
     public override void Initialize()
     {
         base.Initialize();
         Subscribe<WGToolArmComponent>();
         Subscribe<WGFingerLighterComponent>();
+        Subscribe<WGArmLaserComponent>();
+        Subscribe<WGHandShieldComponent>();
         SubscribeNetworkEvent<WGDeployableWheelPickEvent>(OnPick);
     }
 
@@ -69,8 +78,44 @@ public sealed class WGDeployableImplantSystem : EntitySystem
 
     private void Retract(WGDeployableImplantComponent implant)
     {
+        StoreCharge(implant);
         QueueDel(implant.Deployed);
         implant.Deployed = null;
+    }
+
+    /// <summary>Folds a part's implant item away, if it is out.</summary>
+    public void Stow(EntityUid part, WGDeployableImplantComponent implant)
+    {
+        if (!Exists(implant.Deployed))
+            return;
+
+        Retract(implant);
+        _audio.PlayPvs(implant.RetractSound, part);
+    }
+
+    /// <summary>Whether the part's implant may fold an item out into the body's hand.</summary>
+    private bool CanDeploy(EntityUid part, EntityUid body)
+    {
+        var ev = new WGDeployAttemptEvent(body);
+        RaiseLocalEvent(part, ref ev);
+        return !ev.Cancelled;
+    }
+
+    private void StoreCharge(WGDeployableImplantComponent implant)
+    {
+        if (implant.KeepCharge && TryComp<BatteryComponent>(implant.Deployed, out var battery))
+            implant.StoredCharge = (battery.CurrentCharge, _timing.CurTime);
+    }
+
+    private void RestoreCharge(WGDeployableImplantComponent implant)
+    {
+        if (implant.StoredCharge is not { } stored
+            || implant.Deployed is not { } item
+            || !TryComp<BatteryComponent>(item, out var battery))
+            return;
+
+        var rate = CompOrNull<BatterySelfRechargerComponent>(item)?.AutoRechargeRate ?? 0f;
+        _battery.SetCharge(item, stored.Charge + rate * (float) (_timing.CurTime - stored.At).TotalSeconds, battery);
     }
 
     private void Toggle(EntityUid part, WGDeployableImplantComponent implant, WGToggleDeployableImplantEvent args)
@@ -95,12 +140,16 @@ public sealed class WGDeployableImplantSystem : EntitySystem
             return;
         }
 
-        if (implant.Items.Count == 0)
+        if (implant.Items.Count == 0 || !Exists(implant.Deployed) && !CanDeploy(part, body))
             return;
 
+        StoreCharge(implant);
         args.Handled = _extendable.ToggleExtendable(body, implant.Items[0], side, out implant.Deployed, implant.Deployed);
-        if (args.Handled)
-            _audio.PlayPvs(implant.Deployed == null ? implant.RetractSound : implant.DeploySound, part);
+        if (!args.Handled)
+            return;
+
+        RestoreCharge(implant);
+        _audio.PlayPvs(implant.Deployed == null ? implant.RetractSound : implant.DeploySound, part);
     }
 
     private void OnPick(WGDeployableWheelPickEvent msg, EntitySessionEventArgs args)
@@ -138,13 +187,19 @@ public sealed class WGDeployableImplantSystem : EntitySystem
             return false;
 
         var stow = DeployedIndex(implant) == index;
+        if (!stow && !CanDeploy(part, body))
+            return false;
+
         // Deleted now, not queued, so the hand is free for the next item.
+        StoreCharge(implant);
         if (Exists(implant.Deployed))
             Del(implant.Deployed);
         implant.Deployed = null;
 
         if (!stow && !_extendable.ToggleExtendable(body, implant.Items[index], side, out implant.Deployed))
             return false;
+
+        RestoreCharge(implant);
 
         _audio.PlayPvs(stow ? implant.RetractSound : implant.DeploySound, part);
         _actions.StartUseDelay(action);

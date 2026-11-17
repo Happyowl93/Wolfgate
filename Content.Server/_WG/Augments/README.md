@@ -102,6 +102,26 @@ so nobody lands outside the room. A doorway or a cramped spot won't cast and cos
 is an NPC that loiters on the idle HTN at its source's speed, wearing the source's sprite, which the client copies.
 It has no thermal signature, flickers out when it takes any damage, and despawns after 20 seconds.
 
+Four combat implants:
+
+- **HT-6 "Hotaru" arm laser** (`WGArmLaserComponent`). A deployable that folds a rapid-fire laser out of a cybernetic
+  forearm. Its battery recharges on its own. With `keepCharge`, the deployable system remembers the charge when the
+  laser folds away and adds what the recharger would have restored, so folding it doesn't refill it.
+- **ZS-3 "Zaslon" hand shield** (`WGHandShieldSystem`). Raised from a cybernetic hand, which it keeps busy. While it is
+  up the body carries `WGHandShieldUserComponent`, and the shield stops shots, beams and blows that come within its
+  135° front arc. Beams glance off. Each hit drains its charge pool, which refills only while the shield is lowered.
+  Drained, it collapses and can't be raised until it is full again (`WGDeployAttemptEvent`). The augment's `exclusive`
+  group allows only one shield per body.
+- **KG-9 "Kasumi" optical camouflage** (`WGOpticalCamoSystem`). An action that puts the implant's `Stealth` and
+  `StealthOnMove` on the body for 20 seconds. Attacking, shooting, firing the cannon, being hurt by someone else or an
+  EMP drops it early, and then the action cools down. It won't stack with stealth from anything else.
+- **KR-40 "Grom" shoulder cannon** (`WGShoulderCannonSystem`). A chest upgrade with two actions. The first raises the
+  cannon over the shoulder or folds it away. While it is up, the body carries `WGShoulderCannonDeployedComponent` and
+  `WGShoulderCannonVisualsSystem` draws it on the body; the worn states are placed like tgstation's MOD flamethrower
+  overlay. The second action, enabled only while the cannon is up, aims at a tile. The cannon glows for a 0.8 s
+  charge, then fires a slow plasma bolt at that tile. The hands stay free. An EMP folds it away and locks it for a
+  minute.
+
 Three more look after the body, each a component the autosurgeon puts on it. The nutriment pump
 (`WGNutrimentPumpSystem`) feeds its owner a little whenever they reach starving, which leaves them peckish and food
 still worth eating. The reviver (`WGReviverSystem`) is a defibrillator of its own: when the heart stops it charges
@@ -202,11 +222,14 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Server/_WG/Augments/WGAugmentSystem.Traits.cs`](WGAugmentSystem.Traits.cs)
 - [`Content.Server/_WG/Augments/WGBurstLauncherSystem.cs`](WGBurstLauncherSystem.cs)
 - [`Content.Server/_WG/Augments/WGDeployableImplantSystem.cs`](WGDeployableImplantSystem.cs)
+- [`Content.Server/_WG/Augments/WGHandShieldSystem.cs`](WGHandShieldSystem.cs)
 - [`Content.Server/_WG/Augments/WGHoloProjectorSystem.cs`](WGHoloProjectorSystem.cs)
 - [`Content.Server/_WG/Augments/WGIatricMonitorSystem.cs`](WGIatricMonitorSystem.cs)
 - [`Content.Server/_WG/Augments/WGNutrimentPumpSystem.cs`](WGNutrimentPumpSystem.cs)
+- [`Content.Server/_WG/Augments/WGOpticalCamoSystem.cs`](WGOpticalCamoSystem.cs)
 - [`Content.Server/_WG/Augments/WGReflexBoosterServerSystem.cs`](WGReflexBoosterServerSystem.cs)
 - [`Content.Server/_WG/Augments/WGReviverSystem.cs`](WGReviverSystem.cs)
+- [`Content.Server/_WG/Augments/WGShoulderCannonSystem.cs`](WGShoulderCannonSystem.cs)
 
 ### Shared
 
@@ -228,14 +251,17 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WG/Augments/WGBurstLauncherComponent.cs`](../../../Content.Shared/_WG/Augments/WGBurstLauncherComponent.cs)
 - [`Content.Shared/_WG/Augments/WGDeployableImplantComponent.cs`](../../../Content.Shared/_WG/Augments/WGDeployableImplantComponent.cs)
 - [`Content.Shared/_WG/Augments/WGHaloArmingSystem.cs`](../../../Content.Shared/_WG/Augments/WGHaloArmingSystem.cs)
+- [`Content.Shared/_WG/Augments/WGHandShieldComponent.cs`](../../../Content.Shared/_WG/Augments/WGHandShieldComponent.cs)
 - [`Content.Shared/_WG/Augments/WGHoloProjectorComponent.cs`](../../../Content.Shared/_WG/Augments/WGHoloProjectorComponent.cs)
 - [`Content.Shared/_WG/Augments/WGIatricMonitorComponent.cs`](../../../Content.Shared/_WG/Augments/WGIatricMonitorComponent.cs)
 - [`Content.Shared/_WG/Augments/WGNutrimentPumpComponent.cs`](../../../Content.Shared/_WG/Augments/WGNutrimentPumpComponent.cs)
+- [`Content.Shared/_WG/Augments/WGOpticalCamoComponent.cs`](../../../Content.Shared/_WG/Augments/WGOpticalCamoComponent.cs)
 - [`Content.Shared/_WG/Augments/WGPainEditorComponent.cs`](../../../Content.Shared/_WG/Augments/WGPainEditorComponent.cs)
 - [`Content.Shared/_WG/Augments/WGPainEditorSystem.cs`](../../../Content.Shared/_WG/Augments/WGPainEditorSystem.cs)
 - [`Content.Shared/_WG/Augments/WGReflexBoosterComponent.cs`](../../../Content.Shared/_WG/Augments/WGReflexBoosterComponent.cs)
 - [`Content.Shared/_WG/Augments/WGReflexBoosterSystem.cs`](../../../Content.Shared/_WG/Augments/WGReflexBoosterSystem.cs)
 - [`Content.Shared/_WG/Augments/WGReviverComponent.cs`](../../../Content.Shared/_WG/Augments/WGReviverComponent.cs)
+- [`Content.Shared/_WG/Augments/WGShoulderCannonComponent.cs`](../../../Content.Shared/_WG/Augments/WGShoulderCannonComponent.cs)
 - [`Content.Shared/_WG/Augments/WGSmartlinkComponent.cs`](../../../Content.Shared/_WG/Augments/WGSmartlinkComponent.cs)
 - [`Content.Shared/_WG/Augments/WGSmartlinkSystem.cs`](../../../Content.Shared/_WG/Augments/WGSmartlinkSystem.cs)
 - [`Content.Shared/_WG/Augments/WGThermalTintsComponent.cs`](../../../Content.Shared/_WG/Augments/WGThermalTintsComponent.cs)
@@ -258,6 +284,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Client/_WG/Augments/UI/WGThermalGlitchOverlay.cs`](../../../Content.Client/_WG/Augments/UI/WGThermalGlitchOverlay.cs)
 - [`Content.Client/_WG/Augments/WGDeployableWheelSystem.cs`](../../../Content.Client/_WG/Augments/WGDeployableWheelSystem.cs)
 - [`Content.Client/_WG/Augments/WGHoloDecoyVisualsSystem.cs`](../../../Content.Client/_WG/Augments/WGHoloDecoyVisualsSystem.cs)
+- [`Content.Client/_WG/Augments/WGShoulderCannonVisualsSystem.cs`](../../../Content.Client/_WG/Augments/WGShoulderCannonVisualsSystem.cs)
 - [`Content.Client/_WG/Augments/WGSmartlinkOverlaySystem.cs`](../../../Content.Client/_WG/Augments/WGSmartlinkOverlaySystem.cs)
 - [`Content.Client/_WG/Augments/WGThermalTintsVisualsSystem.cs`](../../../Content.Client/_WG/Augments/WGThermalTintsVisualsSystem.cs)
 
@@ -266,6 +293,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentAdrenalBoosterTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentAdrenalBoosterTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentBodyTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentBodyTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentClothedTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentClothedTest.cs)
+- [`Content.IntegrationTests/Tests/_WG/Augments/AugmentCombatImplantsTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentCombatImplantsTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentCyberChestTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentCyberChestTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentEditorTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentEditorTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentHaloBurstTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentHaloBurstTest.cs)
@@ -300,6 +328,7 @@ scratch, so an unpicked augment comes off it.
 ### Textures
 
 - [`Resources/Textures/_WG/Augments/advanced.rsi/`](../../../Resources/Textures/_WG/Augments/advanced.rsi/)
+- [`Resources/Textures/_WG/Augments/arm_laser.rsi/`](../../../Resources/Textures/_WG/Augments/arm_laser.rsi/)
 - [`Resources/Textures/_WG/Augments/bishop.rsi/`](../../../Resources/Textures/_WG/Augments/bishop.rsi/)
 - [`Resources/Textures/_WG/Augments/bishop2.rsi/`](../../../Resources/Textures/_WG/Augments/bishop2.rsi/)
 - [`Resources/Textures/_WG/Augments/cyborg.rsi/`](../../../Resources/Textures/_WG/Augments/cyborg.rsi/)
@@ -326,6 +355,7 @@ scratch, so an unpicked augment comes off it.
 - [`Resources/Textures/_WG/Augments/scrappytinted.rsi/`](../../../Resources/Textures/_WG/Augments/scrappytinted.rsi/)
 - [`Resources/Textures/_WG/Augments/security.rsi/`](../../../Resources/Textures/_WG/Augments/security.rsi/)
 - [`Resources/Textures/_WG/Augments/shellguard.rsi/`](../../../Resources/Textures/_WG/Augments/shellguard.rsi/)
+- [`Resources/Textures/_WG/Augments/shoulder_cannon.rsi/`](../../../Resources/Textures/_WG/Augments/shoulder_cannon.rsi/)
 - [`Resources/Textures/_WG/Augments/surplus.rsi/`](../../../Resources/Textures/_WG/Augments/surplus.rsi/)
 - [`Resources/Textures/_WG/Augments/tool_arm.rsi/`](../../../Resources/Textures/_WG/Augments/tool_arm.rsi/)
 - [`Resources/Textures/_WG/Augments/wardtakahashi.rsi/`](../../../Resources/Textures/_WG/Augments/wardtakahashi.rsi/)

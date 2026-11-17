@@ -505,6 +505,8 @@ public sealed partial class WGAugmentEditor : BoxContainer
                 blocked = Loc.GetString(implant.Host == WGAugmentHost.Synthetic ? "wg-augments-needs-synthetic" : "wg-augments-needs-organic");
             else if (!installed && used >= slots)
                 blocked = Loc.GetString("wg-augments-no-room");
+            else if (!installed && ExclusiveTaken(implant))
+                blocked = Loc.GetString("wg-augments-exclusive");
 
             var (price, color) = PriceText(implant);
             var info = new WGAugmentCardInfo(_icons.Of(implant),
@@ -520,6 +522,13 @@ public sealed partial class WGAugmentEditor : BoxContainer
                 Changed();
             }));
         }
+    }
+
+    /// <summary>Whether another implant of the same exclusive group is already fitted anywhere on the body.</summary>
+    private bool ExclusiveTaken(WGAugmentPrototype implant)
+    {
+        return implant.Exclusive is { } group
+            && _implants.Any(id => id != implant.ID && _proto.TryIndex(id, out var other) && other.Exclusive == group);
     }
 
     /// <summary>A square for each implant slot of a part, filled for the ones in use.</summary>

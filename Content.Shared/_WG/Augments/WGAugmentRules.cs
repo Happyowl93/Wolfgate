@@ -321,8 +321,8 @@ public static class WGAugmentRules
     };
 
     /// <summary>
-    /// Drops implants the species can't take, that don't fit the part the choices leave in their slot, and those past
-    /// what the part holds, keeping the first by order.
+    /// Drops implants the species can't take, that don't fit the part the choices leave in their slot, those past
+    /// what the part holds and those that share an exclusive group with one already kept, keeping the first by order.
     /// </summary>
     public static HashSet<ProtoId<WGAugmentPrototype>> ValidateImplants(string species,
         IReadOnlyDictionary<WGAugmentSlot, WGAugmentChoice> choices,
@@ -337,6 +337,7 @@ public static class WGAugmentRules
 
         var claimed = ClaimedSlots(traits, proto);
         var used = new Dictionary<WGAugmentSlot, int>();
+        var groups = new HashSet<string>();
         var picked = implants
             .Select(id => proto.TryIndex(id, out var augment) ? augment : null)
             .OfType<WGAugmentPrototype>()
@@ -350,7 +351,8 @@ public static class WGAugmentRules
             if (implant.SpeciesBlacklist.Contains(species)
                 || !SlotAvailable(species, slot, proto, factory)
                 || !HostFits(implant, Synthetic(species, slot, choices, claimed, proto, factory))
-                || used.GetValueOrDefault(slot) >= ImplantSlots(slot, choices, claimed, proto))
+                || used.GetValueOrDefault(slot) >= ImplantSlots(slot, choices, claimed, proto)
+                || implant.Exclusive is { } group && !groups.Add(group))
                 continue;
 
             used[slot] = used.GetValueOrDefault(slot) + 1;

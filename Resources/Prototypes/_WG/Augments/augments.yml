@@ -367,6 +367,76 @@
   price: 100000
   order: 10
 
+- type: wgAugment
+  id: WGAugmentLeftArmLaser
+  name: wg-augment-arm-laser
+  description: wg-augment-arm-laser-desc
+  icon: { sprite: _WG/Augments/arm_laser.rsi, state: icon }
+  slot: LeftArm
+  kind: Upgrade
+  host: Synthetic
+  autosurgeon: WGAutosurgeonLeftArmLaser
+  price: 1200000
+
+- type: wgAugment
+  id: WGAugmentRightArmLaser
+  name: wg-augment-arm-laser
+  description: wg-augment-arm-laser-desc
+  icon: { sprite: _WG/Augments/arm_laser.rsi, state: icon }
+  slot: RightArm
+  kind: Upgrade
+  host: Synthetic
+  autosurgeon: WGAutosurgeonRightArmLaser
+  price: 1200000
+
+# One shield to a body: two would cover front and back at once.
+- type: wgAugment
+  id: WGAugmentLeftHandShield
+  name: wg-augment-hand-shield
+  description: wg-augment-hand-shield-desc
+  icon: { sprite: Objects/Weapons/Melee/e_shield.rsi, state: eshield-icon }
+  slot: LeftHand
+  kind: Upgrade
+  host: Synthetic
+  exclusive: HandShield
+  autosurgeon: WGAutosurgeonLeftHandShield
+  price: 1000000
+
+- type: wgAugment
+  id: WGAugmentRightHandShield
+  name: wg-augment-hand-shield
+  description: wg-augment-hand-shield-desc
+  icon: { sprite: Objects/Weapons/Melee/e_shield.rsi, state: eshield-icon }
+  slot: RightHand
+  kind: Upgrade
+  host: Synthetic
+  exclusive: HandShield
+  autosurgeon: WGAutosurgeonRightHandShield
+  price: 1000000
+
+- type: wgAugment
+  id: WGAugmentOpticalCamo
+  name: wg-augment-optical-camo
+  description: wg-augment-optical-camo-desc
+  icon: { sprite: _Goobstation/Objects/Specific/Robotics/mod_modules.rsi, state: cloak_traitor }
+  slot: Chest
+  kind: Upgrade
+  autosurgeon: WGAutosurgeonOpticalCamo
+  price: 1500000
+  order: 20
+
+- type: wgAugment
+  id: WGAugmentShoulderCannon
+  name: wg-augment-shoulder-cannon
+  description: wg-augment-shoulder-cannon-desc
+  icon: { sprite: _WG/Augments/shoulder_cannon.rsi, state: icon }
+  slot: Chest
+  kind: Upgrade
+  host: Synthetic
+  autosurgeon: WGAutosurgeonShoulderCannon
+  price: 2000000
+  order: 20
+
 # Monolith's removed combat traits (Vigor, Tenacity, Trap Avoider), back as cyberware that is paid for and can be lost.
 # Tenacity raised the damage crit threshold, which Wolfmed doesn't use, so the pain editor dulls pain instead.
 - type: wgAugment

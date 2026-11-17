@@ -66,6 +66,13 @@ public sealed partial class WGAugmentPrototype : IPrototype
     [DataField]
     public int Price;
 
+    /// <summary>
+    /// Implants that share a group can't be fitted to the same body, even in different parts, for
+    /// <see cref="WGAugmentKind.Upgrade"/>.
+    /// </summary>
+    [DataField]
+    public string? Exclusive;
+
     /// <summary>Species that can't take it.</summary>
     [DataField]
     public List<ProtoId<SpeciesPrototype>> SpeciesBlacklist = new();

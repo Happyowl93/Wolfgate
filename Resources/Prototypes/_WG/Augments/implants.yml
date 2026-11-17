@@ -160,6 +160,107 @@
   name: finger lighter
   description: A lighter built into a fingertip.
 
+# The Hotaru's emitter. It runs off a cell in the arm, which keeps its charge while folded away.
+- type: entity
+  categories: [ DoNotMap, HideSpawnMenu ]
+  parent: BaseItem
+  id: WGAugmentArmLaserGun
+  name: arm laser
+  description: A laser emitter that slides out of a cybernetic forearm. It fires as fast as you can hold the trigger, until the cell in the arm runs dry.
+  components:
+  - type: Sprite
+    sprite: _WG/Augments/arm_laser.rsi
+    state: icon
+  - type: Item
+    size: Huge
+    sprite: _WG/Augments/arm_laser.rsi
+  - type: Gun
+    fireRate: 5
+    projectileSpeed: 60
+    selectedMode: FullAuto
+    availableModes: [ FullAuto ]
+    minAngle: 1
+    maxAngle: 12
+    angleIncrease: 1.5
+    angleDecay: 12
+    cameraRecoilScalar: 0.3
+    soundGunshot:
+      path: /Audio/Weapons/Guns/Gunshots/laser.ogg
+  - type: HitscanBatteryAmmoProvider
+    proto: RedLightLaser
+    fireCost: 40
+  - type: Battery
+    maxCharge: 1000
+    startingCharge: 1000
+  - type: BatterySelfRecharger
+    autoRecharge: true
+    autoRechargeRate: 30
+    autoRechargePause: true
+    autoRechargePauseTime: 1.5
+  - type: AmmoCounter
+  - type: Appearance
+
+# The Zaslon's shield. WGHandShieldSystem does the blocking; the item only fills the hand and shows it.
+- type: entity
+  categories: [ DoNotMap, HideSpawnMenu ]
+  parent: BaseItem
+  id: WGAugmentHandShieldProjector
+  name: hand shield
+  description: A pane of hard light thrown up from the palm. It stops shots and blows from the front, until it runs out of charge.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Melee/e_shield.rsi
+    layers:
+    - state: eshield-icon
+    - state: eshield-on
+      shader: unshaded
+  - type: Item
+    size: Huge
+    inhandVisuals:
+      left:
+      - sprite: Objects/Weapons/Melee/e_shield.rsi
+        state: inhand-left-shield
+        shader: unshaded
+      right:
+      - sprite: Objects/Weapons/Melee/e_shield.rsi
+        state: inhand-right-shield
+        shader: unshaded
+  - type: HeldSpeedModifier
+    walkModifier: 0.85
+    sprintModifier: 0.85
+  - type: PointLight
+    radius: 1.5
+    energy: 0.7
+    color: "#678AD9"
+
+# The Grom's bolt: slow, so it can be dodged at range.
+- type: entity
+  categories: [ HideSpawnMenu ]
+  parent: BaseBullet
+  id: WGShoulderCannonBolt
+  name: plasma bolt
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Heat: 40
+        Radiation: 5
+  - type: Reflective
+    reflective:
+    - Energy
+  - type: Sprite
+    sprite: _Mono/Objects/SpaceArtillery/plasmashot.rsi
+    scale: 0.7, 0.7
+    layers:
+    - state: plasmashot
+      shader: unshaded
+  - type: PointLight
+    color: "#FF00AA"
+    radius: 2
+    energy: 2
+  - type: TimedDespawn
+    lifetime: 3
+
 # The Corona's charges, thrown out in a ring; WGBurstLauncherSystem sets them off together. The shield holds the wearer meanwhile.
 - type: entity
   abstract: true
@@ -432,6 +533,83 @@
     itemIconStyle: NoItem
     event: !type:WGHoloProjectEvent
 
+- type: entity
+  id: WGActionToggleLeftArmLaser
+  name: Left Arm Laser
+  description: Slide the laser out of your left forearm, or put it away.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: InstantAction
+    useDelay: 1
+    icon: { sprite: _WG/Augments/arm_laser.rsi, state: icon }
+    itemIconStyle: NoItem
+    event: !type:WGToggleDeployableImplantEvent
+
+- type: entity
+  parent: WGActionToggleLeftArmLaser
+  id: WGActionToggleRightArmLaser
+  name: Right Arm Laser
+  description: Slide the laser out of your right forearm, or put it away.
+  categories: [ HideSpawnMenu ]
+
+- type: entity
+  id: WGActionToggleLeftHandShield
+  name: Left Hand Shield
+  description: Raise a shield from your left palm, or lower it. It only covers your front, and it only recharges while lowered.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: InstantAction
+    useDelay: 1
+    icon: { sprite: Objects/Weapons/Melee/e_shield.rsi, state: eshield-on }
+    itemIconStyle: NoItem
+    event: !type:WGToggleDeployableImplantEvent
+
+- type: entity
+  parent: WGActionToggleLeftHandShield
+  id: WGActionToggleRightHandShield
+  name: Right Hand Shield
+  description: Raise a shield from your right palm, or lower it. It only covers your front, and it only recharges while lowered.
+  categories: [ HideSpawnMenu ]
+
+- type: entity
+  id: WGActionOpticalCamo
+  name: Optical Camouflage
+  description: Fade from sight for twenty seconds. Attacking, shooting or getting hurt drops it early. Use it again to drop it yourself.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: InstantAction
+    useDelay: 1
+    icon: { sprite: _Goobstation/Objects/Specific/Robotics/mod_modules.rsi, state: cloak_traitor }
+    itemIconStyle: NoItem
+    event: !type:WGToggleOpticalCamoEvent
+
+- type: entity
+  id: WGActionDeployShoulderCannon
+  name: Raise Shoulder Cannon
+  description: Swing the cannon up over your shoulder, or fold it away again.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: InstantAction
+    useDelay: 1
+    icon: { sprite: _WG/Augments/shoulder_cannon.rsi, state: icon }
+    itemIconStyle: NoItem
+    event: !type:WGToggleShoulderCannonEvent
+
+- type: entity
+  id: WGActionShoulderCannon
+  name: Fire Shoulder Cannon
+  description: Charge the raised cannon and fire a plasma bolt at the spot you pick.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: WorldTargetAction
+    useDelay: 8
+    range: 60
+    checkCanAccess: false
+    raiseOnUser: true
+    icon: { sprite: _Mono/Objects/SpaceArtillery/plasmashot.rsi, state: plasmashot }
+    itemIconStyle: NoItem
+    event: !type:WGFireShoulderCannonEvent
+
 # Autosurgeons
 
 - type: entity
@@ -657,3 +835,100 @@
     targetBodyPart: Torso
     componentsToUser:
     - type: WGHoloProjector
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WGAutosurgeonLeftArmLaser
+  name: autosurgeon (left HT-6 "Hotaru")
+  description: Builds a Mieyo laser emitter into a cybernetic left forearm.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Arm
+    targetBodyPartSymmetry: Left
+    componentsToPart:
+    - type: WGArmLaser
+      items: [ WGAugmentArmLaserGun ]
+      action: WGActionToggleLeftArmLaser
+      keepCharge: true
+      deploySound: /Audio/Weapons/Guns/MagIn/batrifle_magin.ogg
+      retractSound: /Audio/Weapons/Guns/MagOut/batrifle_magout.ogg
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WGAutosurgeonRightArmLaser
+  name: autosurgeon (right HT-6 "Hotaru")
+  description: Builds a Mieyo laser emitter into a cybernetic right forearm.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Arm
+    targetBodyPartSymmetry: Right
+    componentsToPart:
+    - type: WGArmLaser
+      items: [ WGAugmentArmLaserGun ]
+      action: WGActionToggleRightArmLaser
+      keepCharge: true
+      deploySound: /Audio/Weapons/Guns/MagIn/batrifle_magin.ogg
+      retractSound: /Audio/Weapons/Guns/MagOut/batrifle_magout.ogg
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WGAutosurgeonLeftHandShield
+  name: autosurgeon (left ZS-3 "Zaslon")
+  description: Fits a Vanguard shield projector into the palm of a cybernetic left hand.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Hand
+    targetBodyPartSymmetry: Left
+    componentsToPart:
+    - type: WGHandShield
+      items: [ WGAugmentHandShieldProjector ]
+      action: WGActionToggleLeftHandShield
+      deploySound: /Audio/Weapons/ebladeon.ogg
+      retractSound: /Audio/Weapons/ebladeoff.ogg
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WGAutosurgeonRightHandShield
+  name: autosurgeon (right ZS-3 "Zaslon")
+  description: Fits a Vanguard shield projector into the palm of a cybernetic right hand.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Hand
+    targetBodyPartSymmetry: Right
+    componentsToPart:
+    - type: WGHandShield
+      items: [ WGAugmentHandShieldProjector ]
+      action: WGActionToggleRightHandShield
+      deploySound: /Audio/Weapons/ebladeon.ogg
+      retractSound: /Audio/Weapons/ebladeoff.ogg
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WGAutosurgeonOpticalCamo
+  name: autosurgeon (KG-9 "Kasumi")
+  description: Lays a mesh of light-bending cells under the skin, to fade from sight for a while.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Torso
+    componentsToUser:
+    - type: WGOpticalCamo
+      components:
+      - type: Stealth
+        minVisibility: 0.1
+        maxVisibility: 0.4
+        enabledOnDeath: false
+        enabledOnCrit: false
+      - type: StealthOnMove
+        passiveVisibilityRate: -0.3
+        movementVisibilityRate: 0.1
+
+- type: entity
+  parent: BaseAutosurgeon
+  id: WGAutosurgeonShoulderCannon
+  name: autosurgeon (KR-40 "Grom")
+  description: Bolts a Marine Corps plasma cannon on a folding arm behind the shoulder of a cybernetic chest.
+  components:
+  - type: AutoSurgeon
+    targetBodyPart: Torso
+    componentsToUser:
+    - type: WGShoulderCannon
