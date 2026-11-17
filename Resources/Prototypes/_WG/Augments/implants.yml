@@ -7,7 +7,7 @@
   parent: OrganHumanLiver
   id: WGAugmentScrubberLiver
   name: PD-VI HF-12 prosthetic liver
-  description: A synthetic liver that strips toxins, alcohol and narcotics out of the blood several times faster than flesh does. Stimulants burn off just as fast.
+  description: A Vanguard prosthetic liver. It strips alcohol, poison and narcotics out of the blood far faster than flesh can, so don't count on stimulants lasting either.
   components:
   - type: Sprite
     sprite: _WG/Augments/implants.rsi
@@ -32,7 +32,7 @@
   parent: BaseCyberneticEyes
   id: WGAugmentThermalTintEyes
   name: PD-VI OV-40 "Tapetum" ocular suite
-  description: Prosthetic eyes with a thermal band that sees body heat through walls, and three night-vision phosphors. A flash still gets through.
+  description: Vanguard scout optics, with a thermal mode that picks out body heat through walls and three night-vision tints. A flash still gets through.
   components:
   - type: Organ
     onAdd:
@@ -140,7 +140,7 @@
   parent: WelderIndustrial
   id: WGAugmentToolArmWelder
   name: integrated welding tool
-  description: A welding torch on the end of a cybernetic forearm, fed from a tank in the arm that is full each time it folds out.
+  description: A welding torch on the end of a cybernetic forearm. Its tank tops itself up every time it folds away.
   components:
   - type: Sprite
     sprite: _WG/Augments/tool_arm.rsi
@@ -327,7 +327,7 @@
 - type: entity
   id: WGActionToggleLeftToolArm
   name: Left Tool Arm
-  description: Pick a tool to fold out of your left arm, or the one that is out to fold it back in.
+  description: Pick a tool to fold out of your left arm. Pick the one that's out to put it away.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
@@ -340,13 +340,13 @@
   parent: WGActionToggleLeftToolArm
   id: WGActionToggleRightToolArm
   name: Right Tool Arm
-  description: Pick a tool to fold out of your right arm, or the one that is out to fold it back in.
+  description: Pick a tool to fold out of your right arm. Pick the one that's out to put it away.
   categories: [ HideSpawnMenu ]
 
 - type: entity
   id: WGActionToggleLeftFingerLighter
   name: Toggle Left Finger Lighter
-  description: Flick the lighter out of your left hand's fingertip, or back in.
+  description: Flick the lighter in your left fingertip on or off.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
@@ -359,13 +359,13 @@
   parent: WGActionToggleLeftFingerLighter
   id: WGActionToggleRightFingerLighter
   name: Toggle Right Finger Lighter
-  description: Flick the lighter out of your right hand's fingertip, or back in.
+  description: Flick the lighter in your right fingertip on or off.
   categories: [ HideSpawnMenu ]
 
 - type: entity
   id: WGActionIatricScan
   name: Vitals Readout
-  description: Read your own vital signs off the monitor behind your eye, or put the readout away.
+  description: Check your own vitals on the readout behind your eye.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
@@ -385,7 +385,7 @@
 - type: entity
   id: WGActionCycleThermalTint
   name: Cycle Vision
-  description: Switch your eyes to their next mode, thermal then each night-vision phosphor, or off after the last.
+  description: Switch your eyes to the next mode, from thermal through green, cyan and white night vision, then off.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
@@ -398,7 +398,7 @@
 - type: entity
   id: WGActionHaloBurst
   name: Corona Frag
-  description: Throw a ring of explosive charges out round you; they go off together two seconds later, while you are held in a shield. Holds two bursts; each comes back on its own.
+  description: Throw a ring of frag charges out around you. They go off two seconds later, and you're held in place behind a shield until they do. Holds two charges.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
@@ -411,7 +411,7 @@
   parent: WGActionHaloBurst
   id: WGActionHaloStun
   name: Corona Concussion
-  description: Throw a ring of concussive charges out round you; they go off together two seconds later, while you are held in a shield. Holds two bursts; each comes back on its own.
+  description: Throw a ring of concussion charges out around you. They go off two seconds later, and you're held in place behind a shield until they do. Holds two charges.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
@@ -423,7 +423,7 @@
 - type: entity
   id: WGActionHoloProject
   name: Body Double
-  description: Cast two holographic copies of yourself about the room you stand in and slip into the place of one. They wander for twenty seconds; one that is struck flickers out.
+  description: Cast two holographic copies of yourself around the room and swap places with one of them. They wander for twenty seconds and vanish when hit.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
@@ -438,7 +438,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonLeftToolArm
   name: autosurgeon (left RM-5 "Verstak")
-  description: Builds a set of tools into the left forearm, to fold out one at a time on command.
+  description: Builds a Vanguard tool set into a cybernetic left forearm.
   components:
   - type: AutoSurgeon
     targetBodyPart: Arm
@@ -460,7 +460,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonRightToolArm
   name: autosurgeon (right RM-5 "Verstak")
-  description: Builds a set of tools into the right forearm, to fold out one at a time on command.
+  description: Builds a Vanguard tool set into a cybernetic right forearm.
   components:
   - type: AutoSurgeon
     targetBodyPart: Arm
@@ -482,7 +482,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonLeftSmartlink
   name: autosurgeon (left SL-4 "Shojun")
-  description: Wires the left hand to the gun it holds, compensating for its recoil.
+  description: Links a cybernetic left hand to whatever gun it holds, taming the recoil.
   components:
   - type: AutoSurgeon
     targetBodyPart: Hand
@@ -494,7 +494,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonRightSmartlink
   name: autosurgeon (right SL-4 "Shojun")
-  description: Wires the right hand to the gun it holds, compensating for its recoil.
+  description: Links a cybernetic right hand to whatever gun it holds, taming the recoil.
   components:
   - type: AutoSurgeon
     targetBodyPart: Hand
@@ -534,7 +534,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonAdrenalBooster
   name: autosurgeon (KR-14 "Ryvok")
-  description: Wires a booster into the adrenal glands, for more stamina and a second wind when a stun drops its owner.
+  description: Wires a Marine Corps combat booster into the adrenal glands. More stamina, and a second wind when you get knocked down.
   components:
   - type: AutoSurgeon
     targetBodyPart: Torso
@@ -557,7 +557,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonReflexBooster
   name: autosurgeon (NR-8 "Strizh")
-  description: Fits a reflex booster to the spinal cord, for sharper flying and the odd dodged bullet at the cost of rawer nerves.
+  description: Fits a reflex booster to the spinal cord. Sharper flying and the odd dodged bullet, at the cost of rawer nerves.
   components:
   - type: AutoSurgeon
     targetBodyPart: Head
@@ -568,7 +568,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonLeftThreatSole
   name: autosurgeon (left SP-9 "Sapyor")
-  description: Lines the left sole with sensors that keep its owner from setting off floor traps.
+  description: Lines the left sole with sensors that keep you from setting off floor traps.
   components:
   - type: AutoSurgeon
     targetBodyPart: Foot
@@ -580,7 +580,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonRightThreatSole
   name: autosurgeon (right SP-9 "Sapyor")
-  description: Lines the right sole with sensors that keep its owner from setting off floor traps.
+  description: Lines the right sole with sensors that keep you from setting off floor traps.
   components:
   - type: AutoSurgeon
     targetBodyPart: Foot
@@ -592,7 +592,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonNutrimentPump
   name: autosurgeon (PN-3 "Paek")
-  description: Fits a nutriment pump beside the stomach, which feeds its owner whenever they are starving.
+  description: Fits a ration pump beside the stomach that feeds you when you're starving.
   components:
   - type: AutoSurgeon
     targetBodyPart: Torso
@@ -603,7 +603,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonReviver
   name: autosurgeon (EVT-090 "Fukkatsu")
-  description: Wires a cardiac reviver to the heart, which shocks it when it stops.
+  description: Wires a defibrillator to the heart that shocks it back when it stops.
   components:
   - type: AutoSurgeon
     targetBodyPart: Torso
@@ -614,7 +614,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonIatricMonitor
   name: autosurgeon (EVT-120 "Kanshi")
-  description: Fits a vitals monitor behind the eye, which shows its owner their own vital signs.
+  description: Fits a vitals readout behind the eye.
   components:
   - type: AutoSurgeon
     targetBodyPart: Head
@@ -625,7 +625,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonHaloBurst
   name: autosurgeon (KR-30 "Corona")
-  description: Packs explosive charges round the ribcage, to be thrown out in a ring.
+  description: Packs frag charges around the ribcage, to throw out in a ring.
   components:
   - type: AutoSurgeon
     targetBodyPart: Torso
@@ -638,7 +638,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonHaloStun
   name: autosurgeon (KR-31 "Corona")
-  description: Packs concussive charges round the ribcage, to be thrown out in a ring.
+  description: Packs concussion charges around the ribcage, to throw out in a ring.
   components:
   - type: AutoSurgeon
     targetBodyPart: Torso
@@ -651,7 +651,7 @@
   parent: BaseAutosurgeon
   id: WGAutosurgeonHoloProjector
   name: autosurgeon (KG-7 "Kagemusha")
-  description: Threads holo emitters under the skin of the chest, which cast copies of their owner to hide among.
+  description: Threads holo emitters under the skin of the chest, to cast copies of you to hide among.
   components:
   - type: AutoSurgeon
     targetBodyPart: Torso
