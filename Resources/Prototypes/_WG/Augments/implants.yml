@@ -160,6 +160,17 @@
   name: finger lighter
   description: A lighter built into a fingertip.
 
+# The Hotaru's beam: a light laser with a little more bite.
+- type: entity
+  parent: RedLightLaser
+  id: WGArmLaserBeam
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: HitscanBasicDamage
+    damage:
+      types:
+        Heat: 14
+
 # The Hotaru's emitter. It runs off a cell in the arm, which keeps its charge while folded away.
 - type: entity
   categories: [ DoNotMap, HideSpawnMenu ]
@@ -188,7 +199,7 @@
       path: /Audio/Weapons/Guns/Gunshots/laser.ogg
   - type: WGTwinLaser
   - type: HitscanBatteryAmmoProvider
-    proto: RedLightLaser
+    proto: WGArmLaserBeam
     fireCost: 40
   - type: Battery
     maxCharge: 1000
@@ -244,8 +255,8 @@
   - type: Projectile
     damage:
       types:
-        Heat: 40
-        Radiation: 5
+        Heat: 80
+        Radiation: 10
   - type: Reflective
     reflective:
     - Energy
@@ -260,7 +271,7 @@
     radius: 2
     energy: 2
   - type: TimedDespawn
-    lifetime: 3
+    lifetime: 2
 
 # The Corona's charges, thrown out in a ring; WGBurstLauncherSystem sets them off together. The shield holds the wearer meanwhile.
 - type: entity

@@ -125,7 +125,7 @@ Four combat implants:
   overlay. Where the cannon is on the near side it draws just under the helmet, and where it is on the far side
   (the `-back` states) under the whole body. A middle click (`ContentKeyFunctions.MouseMiddle`, bound on the server)
   aims it at the clicked spot. The cannon glows, unshaded, for a 0.8 s charge, then fires a slow plasma bolt there, and
-  can't start another charge for 8 s. The hands stay free. An EMP folds it away and locks it for a minute.
+  can't start another charge for 5 s. The hands stay free. An EMP folds it away and locks it for a minute.
 
 Three more look after the body, each a component the autosurgeon puts on it. The nutriment pump
 (`WGNutrimentPumpSystem`) feeds its owner a little whenever they reach starving, which leaves them peckish and food

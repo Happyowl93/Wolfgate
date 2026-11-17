@@ -13,10 +13,10 @@ public sealed partial class WGHandShieldComponent : WGDeployableImplantComponent
 {
     /// <summary>How much damage the shield takes before it collapses.</summary>
     [DataField]
-    public float MaxCharge = 150f;
+    public float MaxCharge = 200f;
 
     [ViewVariables(VVAccess.ReadWrite)]
-    public float Charge = 150f;
+    public float Charge = 200f;
 
     /// <summary>Whether the shield was drained and is waiting to be full again before it can be raised.</summary>
     [ViewVariables, AutoNetworkedField]

@@ -28,7 +28,7 @@ public sealed partial class WGShoulderCannonComponent : Component
 
     /// <summary>How fast the bolt flies, in tiles per second.</summary>
     [DataField]
-    public float BoltSpeed = 10f;
+    public float BoltSpeed = 18f;
 
     /// <summary>How long the cannon charges before each shot.</summary>
     [DataField]
@@ -36,7 +36,7 @@ public sealed partial class WGShoulderCannonComponent : Component
 
     /// <summary>How long after starting a charge the cannon can start another.</summary>
     [DataField]
-    public TimeSpan FireDelay = TimeSpan.FromSeconds(8);
+    public TimeSpan FireDelay = TimeSpan.FromSeconds(5);
 
     [ViewVariables]
     public TimeSpan NextFire;
