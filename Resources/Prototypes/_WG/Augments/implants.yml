@@ -909,15 +909,15 @@
     targetBodyPart: Torso
     componentsToUser:
     - type: WGOpticalCamo
+      # The MOD cloaking module's stealth, a shade better: it settles faster, and moving gives less away.
       components:
       - type: Stealth
-        minVisibility: 0.1
-        maxVisibility: 0.4
         enabledOnDeath: false
         enabledOnCrit: false
       - type: StealthOnMove
-        passiveVisibilityRate: -0.3
-        movementVisibilityRate: 0.1
+        passiveVisibilityRate: -0.5
+        movementVisibilityRate: 0.6
+        maxInvisibilityPenalty: 0.4
 
 - type: entity
   parent: BaseAutosurgeon

@@ -117,7 +117,8 @@ Four combat implants:
   body. Whether a shot is covered is decided in `SharedWGHandShieldSystem` on both sides, so the shooter's client stops
   its predicted bullet at the shield; the server drains the charge.
 - **KG-9 "Kasumi" optical camouflage** (`WGOpticalCamoSystem`). An action that puts the implant's `Stealth` and
-  `StealthOnMove` on the body for 20 seconds. Attacking, shooting, firing the cannon, being hurt by someone else or an
+  `StealthOnMove` on the body for 20 seconds: gone at once and while still, fading back in on the move, like the MOD
+  cloaking module but settling faster and giving less away per step. Attacking, shooting, firing the cannon, being hurt by someone else or an
   EMP drops it early, and then the action cools down. It won't stack with stealth from anything else.
 - **KR-40 "Grom" shoulder cannon** (`WGShoulderCannonSystem`). A chest upgrade whose one action raises the cannon over
   the shoulder or folds it away. While it is up, the body carries `WGShoulderCannonDeployedComponent` and

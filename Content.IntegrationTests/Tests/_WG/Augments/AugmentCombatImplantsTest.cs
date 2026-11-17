@@ -18,6 +18,7 @@ using Content.Shared.Humanoid;
 using Content.Shared.Power.Components;
 using Content.Shared.Preferences;
 using Content.Shared.Projectiles;
+using Content.Shared.Stealth;
 using Content.Shared.Stealth.Components;
 using Content.Shared.Traits;
 using Content.Shared.Weapons.Ranged.Components;
@@ -64,6 +65,7 @@ public sealed class AugmentCombatImplantsTest
         var damageable = server.System<DamageableSystem>();
         var battery = server.System<BatterySystem>();
         var camo = server.System<WGOpticalCamoSystem>();
+        var stealthSystem = server.System<SharedStealthSystem>();
         var cannons = server.System<WGShoulderCannonSystem>();
         var map = await pair.CreateTestMap();
 
@@ -112,6 +114,7 @@ public sealed class AugmentCombatImplantsTest
             Assert.That(cloak.ActionEntity, Is.Not.Null);
             entities.EventBus.RaiseLocalEvent(mob, new WGToggleOpticalCamoEvent());
             Assert.That(entities.TryGetComponent<StealthComponent>(mob, out var stealth), "The camouflage didn't hide the body.");
+            Assert.That(stealthSystem.GetVisibility(mob, stealth), Is.LessThan(-1f), "The camouflage left the body showing.");
             Assert.That(entities.HasComponent<StealthOnMoveComponent>(mob));
             Assert.That(cloak.EndsAt, Is.Not.Null);
 

@@ -5,7 +5,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._WG.Augments;
 
 /// <summary>
-/// Optical camouflage under the skin: an action that turns the body nearly invisible for a while, walking included.
+/// Optical camouflage under the skin: an action that turns the body invisible for a while, until it moves.
 /// Attacking, shooting, getting hurt by someone or an EMP drops it early, and it needs time to cool down after.
 /// </summary>
 [RegisterComponent]
