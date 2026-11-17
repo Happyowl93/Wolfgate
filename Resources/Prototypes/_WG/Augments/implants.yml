@@ -186,6 +186,7 @@
     cameraRecoilScalar: 0.3
     soundGunshot:
       path: /Audio/Weapons/Guns/Gunshots/laser.ogg
+  - type: WGTwinLaser
   - type: HitscanBatteryAmmoProvider
     proto: RedLightLaser
     fireCost: 40
@@ -585,8 +586,8 @@
 
 - type: entity
   id: WGActionDeployShoulderCannon
-  name: Raise Shoulder Cannon
-  description: Swing the cannon up over your shoulder, or fold it away again.
+  name: Shoulder Cannon
+  description: Swing the cannon up over your shoulder, or fold it away again. While it's up, middle-click to fire at a spot.
   categories: [ HideSpawnMenu ]
   components:
   - type: InstantAction
@@ -594,21 +595,6 @@
     icon: { sprite: _WG/Augments/shoulder_cannon.rsi, state: icon }
     itemIconStyle: NoItem
     event: !type:WGToggleShoulderCannonEvent
-
-- type: entity
-  id: WGActionShoulderCannon
-  name: Fire Shoulder Cannon
-  description: Charge the raised cannon and fire a plasma bolt at the spot you pick.
-  categories: [ HideSpawnMenu ]
-  components:
-  - type: WorldTargetAction
-    useDelay: 8
-    range: 60
-    checkCanAccess: false
-    raiseOnUser: true
-    icon: { sprite: _Mono/Objects/SpaceArtillery/plasmashot.rsi, state: plasmashot }
-    itemIconStyle: NoItem
-    event: !type:WGFireShoulderCannonEvent
 
 # Autosurgeons
 

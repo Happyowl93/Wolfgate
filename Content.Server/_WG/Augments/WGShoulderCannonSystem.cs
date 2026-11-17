@@ -2,17 +2,22 @@ using Content.Shared._WG.Augments;
 using Content.Shared.Actions;
 using Content.Shared.DoAfter;
 using Content.Shared.Emp;
+using Content.Shared.Input;
+using Content.Shared.Popups;
 using Content.Shared.Weapons.Ranged.Systems;
 using Robust.Shared.Audio.Systems;
+using Robust.Shared.Input.Binding;
 using Robust.Shared.Map;
 using Robust.Shared.Physics.Systems;
+using Robust.Shared.Player;
+using Robust.Shared.Timing;
 
 namespace Content.Server._WG.Augments;
 
 /// <summary>
-/// Works a shoulder cannon: one action raises it over the shoulder or folds it away, and while it is up the other
-/// starts the charge, after which a bolt flies at the spot that was aimed at. Firing drops optical camouflage, and an
-/// EMP folds the cannon away and locks both actions for a while.
+/// Works a shoulder cannon: its action raises it over the shoulder or folds it away, and while it is up a middle click
+/// starts the charge, after which a bolt flies at the spot that was clicked. Firing drops optical camouflage, and an
+/// EMP folds the cannon away and locks the action for a while.
 /// </summary>
 public sealed class WGShoulderCannonSystem : EntitySystem
 {
@@ -22,6 +27,8 @@ public sealed class WGShoulderCannonSystem : EntitySystem
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedGunSystem _gun = default!;
     [Dependency] private SharedPhysicsSystem _physics = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
+    [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
 
     public override void Initialize()
@@ -30,16 +37,23 @@ public sealed class WGShoulderCannonSystem : EntitySystem
         SubscribeLocalEvent<WGShoulderCannonComponent, ComponentInit>(OnInit);
         SubscribeLocalEvent<WGShoulderCannonComponent, ComponentShutdown>(OnShutdown);
         SubscribeLocalEvent<WGShoulderCannonComponent, WGToggleShoulderCannonEvent>(OnToggle);
-        SubscribeLocalEvent<WGShoulderCannonComponent, WGFireShoulderCannonEvent>(OnFire);
         SubscribeLocalEvent<WGShoulderCannonComponent, WGShoulderCannonDoAfterEvent>(OnCharged);
         SubscribeLocalEvent<WGShoulderCannonComponent, EmpPulseEvent>(OnEmp);
+
+        CommandBinds.Builder
+            .Bind(ContentKeyFunctions.MouseMiddle, new PointerInputCmdHandler(OnMiddleClick))
+            .Register<WGShoulderCannonSystem>();
+    }
+
+    public override void Shutdown()
+    {
+        base.Shutdown();
+        CommandBinds.Unregister<WGShoulderCannonSystem>();
     }
 
     private void OnInit(Entity<WGShoulderCannonComponent> ent, ref ComponentInit args)
     {
         _actions.AddAction(ent, ref ent.Comp.DeployActionEntity, ent.Comp.DeployAction);
-        _actions.AddAction(ent, ref ent.Comp.ActionEntity, ent.Comp.Action);
-        _actions.SetEnabled(ent.Comp.ActionEntity, false);
     }
 
     private void OnShutdown(Entity<WGShoulderCannonComponent> ent, ref ComponentShutdown args)
@@ -47,9 +61,7 @@ public sealed class WGShoulderCannonSystem : EntitySystem
         if (!TerminatingOrDeleted(ent))
             RemComp<WGShoulderCannonDeployedComponent>(ent);
 
-        QueueDel(ent.Comp.ActionEntity);
         QueueDel(ent.Comp.DeployActionEntity);
-        ent.Comp.ActionEntity = null;
         ent.Comp.DeployActionEntity = null;
     }
 
@@ -74,17 +86,34 @@ public sealed class WGShoulderCannonSystem : EntitySystem
             RemComp<WGShoulderCannonDeployedComponent>(ent);
 
         _actions.SetToggled(ent.Comp.DeployActionEntity, deployed);
-        _actions.SetEnabled(ent.Comp.ActionEntity, deployed);
         _audio.PlayPvs(deployed ? ent.Comp.DeploySound : ent.Comp.StowSound, ent);
     }
 
-    private void OnFire(Entity<WGShoulderCannonComponent> ent, ref WGFireShoulderCannonEvent args)
+    private bool OnMiddleClick(ICommonSession? session, EntityCoordinates coords, EntityUid uid)
     {
-        if (args.Handled || !TryComp<WGShoulderCannonDeployedComponent>(ent, out var deployed))
-            return;
+        if (session?.AttachedEntity is { } body
+            && TryComp<WGShoulderCannonComponent>(body, out var cannon)
+            && coords.IsValid(EntityManager))
+            TryCharge((body, cannon), coords);
+
+        // Other middle-click binds still get the click.
+        return false;
+    }
+
+    /// <summary>Starts charging the raised cannon at a spot, if it isn't folded away, charging or cooling down.</summary>
+    public bool TryCharge(Entity<WGShoulderCannonComponent> ent, EntityCoordinates target)
+    {
+        if (!TryComp<WGShoulderCannonDeployedComponent>(ent, out var deployed) || deployed.Charging)
+            return false;
+
+        if (_timing.CurTime < ent.Comp.NextFire)
+        {
+            _popup.PopupEntity(Loc.GetString("wg-shoulder-cannon-cooling"), ent, ent);
+            return false;
+        }
 
         var doAfter = new DoAfterArgs(EntityManager, ent, ent.Comp.ChargeTime,
-            new WGShoulderCannonDoAfterEvent(GetNetCoordinates(args.Target)), ent)
+            new WGShoulderCannonDoAfterEvent(GetNetCoordinates(target)), ent)
         {
             BreakOnDamage = false,
             BreakOnMove = false,
@@ -92,11 +121,12 @@ public sealed class WGShoulderCannonSystem : EntitySystem
             RequireCanInteract = true,
         };
         if (!_doAfter.TryStartDoAfter(doAfter))
-            return;
+            return false;
 
-        args.Handled = true;
+        ent.Comp.NextFire = _timing.CurTime + ent.Comp.FireDelay;
         SetCharging((ent, deployed), true);
         _audio.PlayPvs(ent.Comp.ChargeSound, ent);
+        return true;
     }
 
     private void OnCharged(Entity<WGShoulderCannonComponent> ent, ref WGShoulderCannonDoAfterEvent args)

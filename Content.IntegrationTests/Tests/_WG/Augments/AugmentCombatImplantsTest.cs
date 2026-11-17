@@ -20,7 +20,9 @@ using Content.Shared.Preferences;
 using Content.Shared.Projectiles;
 using Content.Shared.Stealth.Components;
 using Content.Shared.Traits;
+using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Events;
+using Content.Shared.Weapons.Ranged.Systems;
 using Content.Shared.Weapons.Reflect;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
@@ -122,19 +124,22 @@ public sealed class AugmentCombatImplantsTest
             Assert.That(entities.GetComponent<InstantActionComponent>(cloak.ActionEntity!.Value).Cooldown, Is.Not.Null,
                 "The camouflage came off without a cooldown.");
 
-            // The cannon only aims once raised, which shows it on the body; it throws a bolt toward its mark, and
-            // firing drops the camouflage.
+            // The cannon only charges once raised, which shows it on the body, and not again until it has cooled; it
+            // throws a bolt toward its mark, and firing drops the camouflage.
             var cannon = entities.GetComponent<WGShoulderCannonComponent>(mob);
-            bool Enabled(EntityUid? action) => entities.GetComponent<WorldTargetActionComponent>(action!.Value).Enabled;
-            Assert.That(Enabled(cannon.ActionEntity), Is.False, "The folded cannon could aim.");
+            var origin = transform.GetWorldPosition(mob);
+            var mark = new EntityCoordinates(map.MapUid, origin + new Vector2(5, 0));
+            Assert.That(cannons.TryCharge((mob, cannon), mark), Is.False, "The folded cannon charged.");
             entities.EventBus.RaiseLocalEvent(mob, new WGToggleShoulderCannonEvent());
             Assert.That(entities.HasComponent<WGShoulderCannonDeployedComponent>(mob), "The cannon didn't go up.");
-            Assert.That(Enabled(cannon.ActionEntity), "The raised cannon can't aim.");
+            Assert.That(cannons.TryCharge((mob, cannon), mark), "The raised cannon didn't charge.");
+            Assert.That(entities.GetComponent<WGShoulderCannonDeployedComponent>(mob).Charging);
+            Assert.That(cannon.NextFire, Is.GreaterThan(timing.CurTime), "The charge left no cooldown.");
+            Assert.That(cannons.TryCharge((mob, cannon), mark), Is.False, "The cannon charged twice at once.");
 
             entities.EventBus.RaiseLocalEvent(mob, new WGToggleOpticalCamoEvent());
             Assert.That(entities.HasComponent<StealthComponent>(mob));
-            var origin = transform.GetWorldPosition(mob);
-            var bolt = cannons.Fire((mob, cannon), new EntityCoordinates(map.MapUid, origin + new Vector2(5, 0)));
+            var bolt = cannons.Fire((mob, cannon), mark);
             Assert.That(Proto(bolt), Is.EqualTo("WGShoulderCannonBolt"));
             Assert.That(physics.GetMapLinearVelocity(bolt!.Value).X, Is.GreaterThan(1f), "The bolt didn't fly at the mark.");
             Assert.That(entities.HasComponent<StealthComponent>(mob), Is.False, "Firing the cannon left the body hidden.");
@@ -144,7 +149,6 @@ public sealed class AugmentCombatImplantsTest
             var pulse = new EmpPulseEvent(1f, false, false, TimeSpan.FromSeconds(1), null);
             entities.EventBus.RaiseLocalEvent(mob, ref pulse);
             Assert.That(entities.HasComponent<WGShoulderCannonDeployedComponent>(mob), Is.False, "An EMP left the cannon up.");
-            Assert.That(Enabled(cannon.ActionEntity), Is.False);
 
             // The laser folds out into the right hand and keeps what was left in it when folded away.
             var laser = entities.GetComponent<WGArmLaserComponent>(Part(BodyPartType.Arm, BodyPartSymmetry.Right));
@@ -239,6 +243,77 @@ public sealed class AugmentCombatImplantsTest
         {
             entities.DeleteEntity(mob);
             entities.DeleteEntity(attacker);
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>With a laser out of each arm, a shot from one fires both, and both spread wider until one folds away.</summary>
+    [Test]
+    public async Task TwinLaserTest()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Dirty = true });
+        var server = pair.Server;
+        var entities = server.EntMan;
+        var timing = server.ResolveDependency<IGameTiming>();
+        var bodies = server.System<SharedBodySystem>();
+        var hands = server.System<SharedHandsSystem>();
+        var actions = server.System<SharedActionsSystem>();
+        var guns = server.System<SharedGunSystem>();
+        var transform = server.System<SharedTransformSystem>();
+        var map = await pair.CreateTestMap();
+
+        EntityUid mob = default, left = default, right = default;
+        WGArmLaserComponent Laser(BodyPartSymmetry side) => entities.GetComponent<WGArmLaserComponent>(
+            bodies.GetBodyChildrenOfType(mob, BodyPartType.Arm, symmetry: side).Single().Id);
+        void Toggle(EntityUid? action)
+        {
+            var comp = entities.GetComponent<InstantActionComponent>(action!.Value);
+            actions.PerformAction(mob, null, action.Value, comp, comp.BaseEvent, timing.CurTime, false);
+        }
+        EntityUid Held(HandLocation side) => hands.EnumerateHands(mob).Single(h => h.Location == side).HeldEntity!.Value;
+        float Charge(EntityUid gun) => entities.GetComponent<BatteryComponent>(gun).CurrentCharge;
+        double alone = 0;
+
+        await server.WaitAssertion(() =>
+        {
+            var cyber = new Dictionary<WGAugmentSlot, WGAugmentChoice>
+            {
+                [WGAugmentSlot.LeftArm] = new("WGAugmentCyberLeftArm", "WGAugmentStyleCyborg"),
+                [WGAugmentSlot.RightArm] = new("WGAugmentCyberRightArm", "WGAugmentStyleCyborg"),
+            };
+            mob = entities.SpawnEntity("MobHuman", map.GridCoords);
+            server.System<SharedHumanoidAppearanceSystem>().LoadProfile(mob, HumanoidCharacterProfile
+                .DefaultWithSpecies("Human").WithAugments(cyber)
+                .WithAugmentImplants(new ProtoId<WGAugmentPrototype>[] { "WGAugmentLeftArmLaser", "WGAugmentRightArmLaser" }));
+
+            Toggle(Laser(BodyPartSymmetry.Right).ActionEntity);
+            right = Held(HandLocation.Right);
+            alone = entities.GetComponent<GunComponent>(right).MaxAngleModified.Theta;
+
+            Toggle(Laser(BodyPartSymmetry.Left).ActionEntity);
+            left = Held(HandLocation.Left);
+            foreach (var laser in new[] { left, right })
+            {
+                Assert.That(entities.GetComponent<GunComponent>(laser).MaxAngleModified.Theta,
+                    Is.EqualTo(alone * 2).Within(1e-4), "The twin didn't widen the spread.");
+            }
+        });
+
+        // A gun can't fire on the tick it comes out.
+        await pair.RunTicksSync(30);
+
+        await server.WaitAssertion(() =>
+        {
+            var gun = entities.GetComponent<GunComponent>(right);
+            var full = Charge(left);
+            var mark = new EntityCoordinates(map.MapUid, transform.GetWorldPosition(mob) + new Vector2(5, 0));
+            guns.AttemptShoot(mob, right, gun, mark);
+            Assert.That(Charge(right), Is.LessThan(full), "The laser didn't fire.");
+            Assert.That(Charge(left), Is.LessThan(full), "The twin didn't fire with it.");
+
+            Toggle(Laser(BodyPartSymmetry.Left).ActionEntity);
+            Assert.That(gun.MaxAngleModified.Theta, Is.EqualTo(alone).Within(1e-4), "Folding the twin away left the spread wide.");
+            entities.DeleteEntity(mob);
         });
         await pair.CleanReturnAsync();
     }

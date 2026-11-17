@@ -106,7 +106,9 @@ Four combat implants:
 
 - **HT-6 "Hotaru" arm laser** (`WGArmLaserComponent`). A deployable that folds a rapid-fire laser out of a cybernetic
   forearm. Its battery recharges on its own. With `keepCharge`, the deployable system remembers the charge when the
-  laser folds away and adds what the recharger would have restored, so folding it doesn't refill it.
+  laser folds away and adds what the recharger would have restored, so folding it doesn't refill it. With one in each
+  arm, `WGTwinLaserSystem` (shared, so the shooter predicts both shots) fires the other laser whenever one fires, and
+  doubles both lasers' spread while both are out.
 - **ZS-3 "Zaslon" hand shield** (`WGHandShieldSystem`). Raised from a cybernetic hand, which it keeps busy. While it is
   up the body carries `WGHandShieldUserComponent`, and the shield stops shots, beams and blows (stun blows included,
   through the source `BeforeStaminaDamageEvent` now carries) that come within its 135� front arc. Beams glance off.
@@ -117,13 +119,13 @@ Four combat implants:
 - **KG-9 "Kasumi" optical camouflage** (`WGOpticalCamoSystem`). An action that puts the implant's `Stealth` and
   `StealthOnMove` on the body for 20 seconds. Attacking, shooting, firing the cannon, being hurt by someone else or an
   EMP drops it early, and then the action cools down. It won't stack with stealth from anything else.
-- **KR-40 "Grom" shoulder cannon** (`WGShoulderCannonSystem`). A chest upgrade with two actions. The first raises the
-  cannon over the shoulder or folds it away. While it is up, the body carries `WGShoulderCannonDeployedComponent` and
+- **KR-40 "Grom" shoulder cannon** (`WGShoulderCannonSystem`). A chest upgrade whose one action raises the cannon over
+  the shoulder or folds it away. While it is up, the body carries `WGShoulderCannonDeployedComponent` and
   `WGShoulderCannonVisualsSystem` draws it on the body; the worn states are placed like tgstation's MOD flamethrower
   overlay. Where the cannon is on the near side it draws just under the helmet, and where it is on the far side
-  (the `-back` states) under the whole body. The second action, enabled only while the cannon is up, aims at a tile. The
-  cannon glows, unshaded, for a 0.8 s charge, then fires a slow plasma bolt at that tile. The hands stay free. An EMP
-  folds it away and locks it for a minute.
+  (the `-back` states) under the whole body. A middle click (`ContentKeyFunctions.MouseMiddle`, bound on the server)
+  aims it at the clicked spot. The cannon glows, unshaded, for a 0.8 s charge, then fires a slow plasma bolt there, and
+  can't start another charge for 8 s. The hands stay free. An EMP folds it away and locks it for a minute.
 
 Three more look after the body, each a component the autosurgeon puts on it. The nutriment pump
 (`WGNutrimentPumpSystem`) feeds its owner a little whenever they reach starving, which leaves them peckish and food
@@ -270,6 +272,8 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Shared/_WG/Augments/WGSmartlinkSystem.cs`](../../../Content.Shared/_WG/Augments/WGSmartlinkSystem.cs)
 - [`Content.Shared/_WG/Augments/WGThermalTintsComponent.cs`](../../../Content.Shared/_WG/Augments/WGThermalTintsComponent.cs)
 - [`Content.Shared/_WG/Augments/WGThermalTintsSystem.cs`](../../../Content.Shared/_WG/Augments/WGThermalTintsSystem.cs)
+- [`Content.Shared/_WG/Augments/WGTwinLaserComponent.cs`](../../../Content.Shared/_WG/Augments/WGTwinLaserComponent.cs)
+- [`Content.Shared/_WG/Augments/WGTwinLaserSystem.cs`](../../../Content.Shared/_WG/Augments/WGTwinLaserSystem.cs)
 
 ### Client
 

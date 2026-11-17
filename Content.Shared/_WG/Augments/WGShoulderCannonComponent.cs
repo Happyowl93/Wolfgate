@@ -10,19 +10,13 @@ using Robust.Shared.Utility;
 namespace Content.Shared._WG.Augments;
 
 /// <summary>
-/// A plasma cannon on an arm behind the shoulder. One action raises it over the shoulder or folds it away; while it is
-/// up, the other aims at a spot, and the cannon charges for a moment, then throws a slow, heavy bolt at it, leaving the
-/// hands free. An EMP folds it away and knocks it out for a while.
+/// A plasma cannon on an arm behind the shoulder. Its action raises it over the shoulder or folds it away; while it is
+/// up, a middle click aims at a spot, and the cannon charges for a moment, then throws a slow, heavy bolt at it,
+/// leaving the hands free. An EMP folds it away and knocks it out for a while.
 /// </summary>
 [RegisterComponent]
 public sealed partial class WGShoulderCannonComponent : Component
 {
-    [DataField]
-    public EntProtoId Action = "WGActionShoulderCannon";
-
-    [ViewVariables]
-    public EntityUid? ActionEntity;
-
     [DataField]
     public EntProtoId DeployAction = "WGActionDeployShoulderCannon";
 
@@ -39,6 +33,13 @@ public sealed partial class WGShoulderCannonComponent : Component
     /// <summary>How long the cannon charges before each shot.</summary>
     [DataField]
     public TimeSpan ChargeTime = TimeSpan.FromSeconds(0.8);
+
+    /// <summary>How long after starting a charge the cannon can start another.</summary>
+    [DataField]
+    public TimeSpan FireDelay = TimeSpan.FromSeconds(8);
+
+    [ViewVariables]
+    public TimeSpan NextFire;
 
     /// <summary>How long an EMP keeps it from firing.</summary>
     [DataField]
@@ -77,8 +78,6 @@ public sealed partial class WGShoulderCannonDeployedComponent : Component
     [DataField]
     public string GlowState = "glow";
 }
-
-public sealed partial class WGFireShoulderCannonEvent : WorldTargetActionEvent;
 
 public sealed partial class WGToggleShoulderCannonEvent : InstantActionEvent;
 
