@@ -4,6 +4,7 @@ using Content.Client._WG.Cockpit;
 using Content.Client._WG.Shuttles.UI;
 using Content.Shared._WG.Augments;
 using Content.Shared.Examine;
+using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
@@ -80,7 +81,9 @@ public sealed partial class WGSmartlinkOverlay : Overlay
             || !_entities.TryGetComponent<EyeComponent>(player, out var eye) || eye.Eye == null
             || !ShuttleHullRoofOverlay.IsPilotPass(args.Viewport.Eye, eye.Eye, primaryOnly: true)
             || _ui.GetUIController<WGCockpitUIController>().Active
-            || _hands.GetActiveItem(player) is not { } gun
+            // A ghost has no hands; asking anyway logs an error every frame.
+            || !_entities.TryGetComponent<HandsComponent>(player, out var hands)
+            || _hands.GetActiveItem((player, hands)) is not { } gun
             || !_entities.HasComponent<GunComponent>(gun)
             || _smartlink.LinkFor(player, gun) is not { Scrambled: false })
             return false;
