@@ -6,6 +6,7 @@ using Content.Shared.Popups;
 using Content.Shared.Stealth;
 using Content.Shared.Stealth.Components;
 using Content.Shared.Weapons.Melee.Events;
+using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Events;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Timing;
@@ -86,6 +87,18 @@ public sealed class WGOpticalCamoSystem : EntitySystem
 
     private void OnShotAttempted(Entity<WGOpticalCamoComponent> ent, ref ShotAttemptedEvent args)
     {
+        // The attempt comes before the gun's own checks: a dry click or a trigger held between shots fires nothing.
+        var gun = args.Used.Comp;
+        if (args.Cancelled
+            || gun.NextFire > _timing.CurTime
+            || gun.SelectedMode == SelectiveFire.SemiAuto && gun.ShotCounter > 0)
+            return;
+
+        var ammo = new GetAmmoCountEvent();
+        RaiseLocalEvent(args.Used, ref ammo);
+        if (ammo.Capacity > 0 && ammo.Count <= 0)
+            return;
+
         Reveal((ent, ent.Comp));
     }
 

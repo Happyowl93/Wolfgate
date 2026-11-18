@@ -1,9 +1,9 @@
-using System.Linq;
 using System.Numerics;
 using Content.Client._WG.Cockpit;
 using Content.Client._WG.Shuttles.UI;
 using Content.Shared._WG.Augments;
 using Content.Shared.Examine;
+using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
@@ -80,7 +80,9 @@ public sealed partial class WGSmartlinkOverlay : Overlay
             || !_entities.TryGetComponent<EyeComponent>(player, out var eye) || eye.Eye == null
             || !ShuttleHullRoofOverlay.IsPilotPass(args.Viewport.Eye, eye.Eye, primaryOnly: true)
             || _ui.GetUIController<WGCockpitUIController>().Active
-            || _hands.GetActiveItem(player) is not { } gun
+            // A ghost has no hands; asking anyway logs an error every frame.
+            || !_entities.TryGetComponent<HandsComponent>(player, out var hands)
+            || _hands.GetActiveItem((player, hands)) is not { } gun
             || !_entities.HasComponent<GunComponent>(gun)
             || _smartlink.LinkFor(player, gun) is not { Scrambled: false })
             return false;
@@ -110,19 +112,25 @@ public sealed partial class WGSmartlinkOverlay : Overlay
         _mobs.Clear();
         _lookup.GetEntitiesInRange(_transform.GetMapCoordinates(player), Range, _mobs, LookupFlags.Uncontained);
 
-        foreach (var mob in _mobs.OrderBy(m => (_transform.GetMapCoordinates(m).Position - cursor.Position).LengthSquared()))
+        EntityUid? nearest = null;
+        var best = float.MaxValue;
+        foreach (var mob in _mobs)
         {
+            var distance = (_transform.GetMapCoordinates(mob).Position - cursor.Position).LengthSquared();
+
             // The sight sees no better than its owner: not through walls, and not a cloaked mob.
-            if (mob.Owner == player
+            if (distance >= best
+                || mob.Owner == player
                 || _mobState.IsDead(mob, mob.Comp)
                 || _entities.TryGetComponent<StealthComponent>(mob, out var stealth) && stealth.Enabled
                 || !_examine.InRangeUnOccluded(player, mob, Range))
                 continue;
 
-            return mob;
+            best = distance;
+            nearest = mob;
         }
 
-        return null;
+        return nearest;
     }
 
     private void DrawBrackets(DrawingHandleScreen handle, EntityUid target, float scale)

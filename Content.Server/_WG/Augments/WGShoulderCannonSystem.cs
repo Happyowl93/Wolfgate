@@ -4,6 +4,7 @@ using Content.Shared.DoAfter;
 using Content.Shared.Emp;
 using Content.Shared.Input;
 using Content.Shared.Popups;
+using Content.Shared.Shuttles.Components;
 using Content.Shared.Weapons.Ranged.Systems;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Input.Binding;
@@ -91,7 +92,9 @@ public sealed class WGShoulderCannonSystem : EntitySystem
 
     private bool OnMiddleClick(ICommonSession? session, EntityCoordinates coords, EntityUid uid)
     {
+        // At a console, a middle click pans the view instead.
         if (session?.AttachedEntity is { } body
+            && !HasComp<PilotComponent>(body)
             && TryComp<WGShoulderCannonComponent>(body, out var cannon)
             && coords.IsValid(EntityManager))
             TryCharge((body, cannon), coords);

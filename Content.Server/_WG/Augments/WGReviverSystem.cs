@@ -72,8 +72,13 @@ public sealed class WGReviverSystem : EntitySystem
         var now = _timing.CurTime;
         if (!_revival.OwnsRevival(ent) || !_life.InArrest(ent) && !_mobState.IsDead(ent))
         {
+            // The arrest is over however it ended: shocks given still need the recharge, and it refills the reserve.
+            if (reviver.ShocksGiven > 0 && reviver.ReadyAt < now + reviver.Recharge)
+                reviver.ReadyAt = now + reviver.Recharge;
+
             reviver.NextShock = null;
             reviver.ShocksGiven = 0;
+            reviver.Infused = 0f;
             return;
         }
 
