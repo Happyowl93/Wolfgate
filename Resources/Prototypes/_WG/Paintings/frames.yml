@@ -182,7 +182,7 @@
         doAfter: 1
     - to: LargePaintingFrameNode
       completed:
-      - !type:SnapToGrid { }
+      - !type:WGHangLargeFrame { }
       steps:
       - tag: WGPaintingFrameLargeKit
         name: wg-painting-construction-frame-large-kit
@@ -227,6 +227,7 @@
   canBuildInImpassable: true
   conditions:
   - !type:WallmountCondition
+  - !type:WGPaintingFrameSpace
   icon:
     sprite: _WG/Paintings/frame.rsi
     state: frame-empty
@@ -234,7 +235,7 @@
 - type: construction
   id: WGPaintingFrameLargeConstruction
   name: large painting frame
-  description: A wall frame for a finished large canvas, put up from a large painting frame kit.
+  description: A wall frame for a finished large canvas, put up from a large painting frame kit. It spans two wall tiles, the one you pick and the one east of it.
   graph: WGPaintingFrameGraph
   startNode: start
   targetNode: LargePaintingFrameNode
@@ -245,6 +246,8 @@
   canBuildInImpassable: true
   conditions:
   - !type:WallmountCondition
+  - !type:WGPaintingFrameSpace
+    large: true
   icon:
     sprite: _WG/Paintings/frame.rsi
     state: frame-large-empty
@@ -297,7 +300,7 @@
   parent: WGPaintingFrameKit
   id: WGPaintingFrameLargeKit
   name: large painting frame kit
-  description: A flat-packed frame for a large painting. Put it up on a wall from the construction menu.
+  description: A flat-packed frame for a large painting. Put it up from the construction menu on a wall two tiles wide, facing north or south.
   components:
   - type: Sprite
     sprite: _WG/Paintings/frame.rsi

@@ -51,6 +51,8 @@ wg-painting-frame-examine-gallery = It hangs a painting from the art catalogue e
 wg-easel-slot-canvas = Canvas
 wg-painting-construction-frame-kit = a painting frame kit
 wg-painting-construction-frame-large-kit = a large painting frame kit
+wg-painting-construction-frame-space = It can't overlap another painting frame.
+wg-painting-construction-large-frame-space = It spans this wall tile and the one east of it, on a wall facing north or south, and can't overlap another painting frame.
 
 ## Art app
 

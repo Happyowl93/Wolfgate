@@ -333,6 +333,51 @@ public sealed class PaintingsTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>A large frame needs two wall tiles facing north or south, hangs across them and blocks overlaps.</summary>
+    [Test]
+    public async Task LargeFrameSpansTwoWallTiles()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var map = await pair.CreateTestMap();
+
+        await server.WaitAssertion(() =>
+        {
+            var maps = entMan.System<SharedMapSystem>();
+            for (var x = 1; x <= 3; x++)
+                maps.SetTile(map.Grid.Owner, map.Grid.Comp, new Vector2i(x, 0), map.Tile.Tile);
+            entMan.SpawnEntity("WallSolid", new EntityCoordinates(map.Grid, 0.5f, 0.5f));
+            entMan.SpawnEntity("WallSolid", new EntityCoordinates(map.Grid, 1.5f, 0.5f));
+
+            var large = new WGPaintingFrameSpace { Large = true };
+            var small = new WGPaintingFrameSpace();
+            var first = new EntityCoordinates(map.Grid, 0.5f, 0.5f);
+            var second = new EntityCoordinates(map.Grid, 1.5f, 0.5f);
+            Assert.Multiple(() =>
+            {
+                Assert.That(large.Condition(EntityUid.Invalid, first, Direction.South), Is.True);
+                Assert.That(large.Condition(EntityUid.Invalid, first, Direction.North), Is.True);
+                Assert.That(large.Condition(EntityUid.Invalid, first, Direction.East), Is.False, "A large frame can't hang on a wall facing east.");
+                Assert.That(large.Condition(EntityUid.Invalid, second, Direction.South), Is.False, "The tile east of it must be a wall.");
+            });
+
+            var frame = entMan.SpawnEntity("WGPaintingFrameLarge", first);
+            new WGHangLargeFrame().PerformAction(frame, null, entMan);
+            var position = entMan.GetComponent<TransformComponent>(frame).LocalPosition;
+            Assert.Multiple(() =>
+            {
+                Assert.That(position.X, Is.EqualTo(1f).Within(0.001f), "The frame must hang on the joint of its two tiles.");
+                Assert.That(position.Y, Is.EqualTo(0.5f).Within(0.001f));
+                Assert.That(small.Condition(EntityUid.Invalid, second, Direction.South), Is.False, "The large frame covers the second tile.");
+                Assert.That(small.Condition(EntityUid.Invalid, new EntityCoordinates(map.Grid, 2.5f, 0.5f), Direction.South), Is.True);
+                Assert.That(large.Condition(EntityUid.Invalid, first, Direction.South), Is.False, "Frames can't overlap.");
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     /// <summary>Painting supplies come only from John Wolfgate's stock; frames need his kits, not planks.</summary>
     [Test]
     public async Task SuppliesAreSoldByJohnWolfgate()

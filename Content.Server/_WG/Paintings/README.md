@@ -1,13 +1,16 @@
 # Paintings
 
-Player-drawn paintings, kept between rounds. A canvas (seven sizes) is painted pixel by
-pixel while the painter holds a crayon, which paints its own colour, or a paint palette, which paints any colour. A palette
-keeps up to 24 saved colours, which the painter adds and removes in the canvas window (it starts with 16), and the
-last few colours used. An easel holds a canvas up to paint. A finished painting carries a title and the painter's
-name, or no name, and can be hung in a painting frame. Frames are put up on a wall from a frame kit in the construction menu;
-clicking a framed painting with an empty hand opens it up close. Canvases, palettes, frame kits and the easel
-flatpack are sold only by John Wolfgate and the Wolfgate vendor; crayons come from their usual places. The mechanics and sprites follow tgstation's art, via Meridian
-Rift.
+Player-drawn paintings, kept between rounds. A canvas (seven sizes) is painted pixel by pixel while the painter holds
+a crayon, which paints its own colour, or a paint palette, which paints any colour. A palette keeps up to 24 saved
+colours, which the painter adds and removes in the canvas window (it starts with 16), and the last few colours used.
+An easel holds a canvas up to paint. A finished painting carries a title and the painter's name, or no name, and can
+be hung in a painting frame; clicking a framed painting with an empty hand opens it up close.
+
+Frames are put up on a wall from a frame kit in the construction menu. A large frame hangs across two wall tiles (the
+one picked and the one east of it, on a wall facing north or south), so a large painting never overhangs a tile in
+shadow; mapped large frames go on the joint between two wall tiles. Canvases, palettes, frame kits and the easel
+flatpack are sold only by John Wolfgate and the Wolfgate vendor; crayons come from their usual places. The mechanics
+and sprites follow tgstation's art, via Meridian Rift.
 
 The Art Catalogue PDA app, installed on every PDA, keeps paintings across rounds. Using a PDA on a finished canvas,
 with the app open, scans it into the catalogue. Anyone can browse the catalogue and order a print, which is charged
