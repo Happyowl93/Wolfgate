@@ -40,6 +40,7 @@ block from the console, and each painting's hash is in the `WGPainting` admin lo
 - [`Content.Server/_WG/Paintings/ServerDbManager.Paintings.cs`](ServerDbManager.Paintings.cs)
 - [`Content.Server/_WG/Paintings/WGArtAppSystem.cs`](WGArtAppSystem.cs)
 - [`Content.Server/_WG/Paintings/WGCanvasSystem.cs`](WGCanvasSystem.cs)
+- [`Content.Server/_WG/Paintings/WGHangLargeFrame.cs`](WGHangLargeFrame.cs)
 - [`Content.Server/_WG/Paintings/WGPaintingAdminEui.cs`](WGPaintingAdminEui.cs)
 - [`Content.Server/_WG/Paintings/WGPaintingBlockCommand.cs`](WGPaintingBlockCommand.cs)
 - [`Content.Server/_WG/Paintings/WGPaintingBrowserCommand.cs`](WGPaintingBrowserCommand.cs)
@@ -51,6 +52,7 @@ block from the console, and each painting's hash is in the `WGPainting` admin lo
 - [`Content.Shared/_WG/Paintings/WGPaintingAdminEuiTypes.cs`](../../../Content.Shared/_WG/Paintings/WGPaintingAdminEuiTypes.cs)
 - [`Content.Shared/_WG/Paintings/WGPaintingComponents.cs`](../../../Content.Shared/_WG/Paintings/WGPaintingComponents.cs)
 - [`Content.Shared/_WG/Paintings/WGPaintingCVars.cs`](../../../Content.Shared/_WG/Paintings/WGPaintingCVars.cs)
+- [`Content.Shared/_WG/Paintings/WGPaintingFrameSpace.cs`](../../../Content.Shared/_WG/Paintings/WGPaintingFrameSpace.cs)
 - [`Content.Shared/_WG/Paintings/WGPaintingMessages.cs`](../../../Content.Shared/_WG/Paintings/WGPaintingMessages.cs)
 - [`Content.Shared/_WG/Paintings/WGPaintingRules.cs`](../../../Content.Shared/_WG/Paintings/WGPaintingRules.cs)
 
