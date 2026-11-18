@@ -70,10 +70,11 @@ body. Smuggling crates sold at open
 chutes share this heat, price cut and tip (`Share` and `Sold`, called by TradeGoods `WGTradeContrabandSystem`), so a
 seller can't work both at full price. `WGNarcoticStockSystem` adds up the narcotics aboard each deeded ship every 30 s
 and, from `stock_signature` of street value up, puts a radar blip on its largest lot that every radar in reach sees. At
-a contraband pallet a narcotic hands in for a point per `turn_in_value` of street value it holds
-(`WGNarcoticGoodsSystem.TurnIn`) and has no flat reward, so seizing a stockpile pays and splitting one into doses
-doesn't. A point cashes for 2,000, which at 15,000 a point is about 13% of the value: under the `heat_floor` a dump
-sells for, so handing in never beats selling.
+a contraband pallet narcotics hand in for a point per `turn_in_value` of the street value they hold together
+(`WGNarcoticGoodsSystem.TurnIn`), with no flat reward, and the pallet takes every one it counted: seizing a stockpile
+pays the same in a tank or in baggies, and splitting one into doses earns nothing more. A point cashes for 2,000,
+which at 15,000 a point is about 13% of the value: under the `heat_floor` a dump sells for, so handing in never beats
+selling.
 
 Entry points: `WGDose` and `WGClearIntoxication` (entity effects), `SharedWGIntoxicationSystem` (levels, tiers,
 `IsNeurowareHost`), `WGIntoxicationSystem.Tick`, `WGDependenceSystem.Tick`, `WGDeliverySystem`,
@@ -208,6 +209,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/HarvestedNarcoticMarksTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/HarvestedNarcoticMarksTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/HeroinSedationTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/HeroinSedationTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/IntoxicationTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/IntoxicationTest.cs)
+- [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NarcoticHandInTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NarcoticHandInTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NarcoticHeatTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NarcoticHeatTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NarcoticTipPlanetTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NarcoticTipPlanetTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NodTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NodTest.cs)
@@ -295,7 +297,9 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Content.Client/Chemistry/UI/ChemMasterWindow.xaml.cs`](../../../Content.Client/Chemistry/UI/ChemMasterWindow.xaml.cs)
 - [`Content.Client/UserInterface/Systems/Chat/ChatUIController.cs`](../../../Content.Client/UserInterface/Systems/Chat/ChatUIController.cs): chat seen through the local player's high, before tags split the message text
 - [`Content.IntegrationTests/Pair/TestPair.cs`](../../../Content.IntegrationTests/Pair/TestPair.cs): records radio sends for the narcotic heat test
-- [`Content.Server/_NF/Contraband/Systems/ContrabandTurnInSystem.cs`](../../_NF/Contraband/Systems/ContrabandTurnInSystem.cs): a narcotic hands in for what it holds
+- [`Content.Server/_NF/Contraband/Systems/ContrabandTurnInSystem.cs`](../../_NF/Contraband/Systems/ContrabandTurnInSystem.cs)
+  - the street value of the narcotics handed in, summed over the pallets
+  - narcotics hand in for what they hold together
 - [`Content.Server/Body/Systems/MetabolizerSystem.cs`](../../Body/Systems/MetabolizerSystem.cs)
   - impurity damage
   - a rate below 0.01 u a tick builds up instead of rounding to nothing
