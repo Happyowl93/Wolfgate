@@ -106,6 +106,7 @@
     - type: GasMiner
       spawnGas: Plasma
       maxExternalPressure: 50 # Mono
+      spawnAmount: 2 # WOLFGATE: a sellable gas trickles from its miner, 400 -> 2 mol/s
 
 - type: entity
   name: tritium gas miner
@@ -115,6 +116,7 @@
     - type: GasMiner
       spawnGas: Tritium
       maxExternalPressure: 50 # Mono
+      spawnAmount: 2 # WOLFGATE: a sellable gas trickles from its miner, 400 -> 2 mol/s
 
 - type: entity
   name: frezon gas miner
@@ -124,6 +126,7 @@
     - type: GasMiner
       spawnGas: Frezon
       maxExternalPressure: 50 # Mono
+      spawnAmount: 2 # WOLFGATE: a sellable gas trickles from its miner, 400 -> 2 mol/s
 
 - type: entity
   name: water vapor gas miner

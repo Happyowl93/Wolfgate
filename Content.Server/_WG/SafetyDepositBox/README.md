@@ -64,6 +64,7 @@ carry no markers; check them on an upstream merge:
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WG/SafetyDepositBox/SafetyDepositBoxBlacklistTest.cs`](../../../Content.IntegrationTests/Tests/_WG/SafetyDepositBox/SafetyDepositBoxBlacklistTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/SafetyDepositBox/SafetyDepositBoxDamoclesTest.cs`](../../../Content.IntegrationTests/Tests/_WG/SafetyDepositBox/SafetyDepositBoxDamoclesTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/SafetyDepositBox/SafetyDepositBoxPurchaseTest.cs`](../../../Content.IntegrationTests/Tests/_WG/SafetyDepositBox/SafetyDepositBoxPurchaseTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/SafetyDepositBox/SafetyDepositBoxWithdrawTest.cs`](../../../Content.IntegrationTests/Tests/_WG/SafetyDepositBox/SafetyDepositBoxWithdrawTest.cs)

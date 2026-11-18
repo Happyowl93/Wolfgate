@@ -11,6 +11,7 @@ using Content.Shared._WG.WolfChem.Narcotics;
 using Content.Shared.Cargo.Components;
 using Content.Shared.Cargo.Events;
 using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.Contraband;
 using Content.Shared.FixedPoint;
 using Content.Shared.Stacks;
 using Robust.Shared.Configuration;
@@ -200,6 +201,12 @@ public sealed class NarcoticHeatTest
             var tank = entMan.SpawnEntity("WaterTank", map.GridCoords);
             Assert.That(solutions.TryGetSolution(tank, "tank", out var tankSoln, out _));
             solutions.TryAddReagent(tankSoln!.Value, "WGCocaine", FixedPoint2.New(300));
+            var flat = entMan.GetComponent<ContrabandComponent>(tank).TurnInValues["FederationMilitaryCredit"];
+
+            // Off the ship, so the stock count below is the jug and the tank alone.
+            var dose = entMan.SpawnEntity("Beaker", MapCoordinates.Nullspace);
+            Assert.That(solutions.TryGetSolution(dose, "beaker", out var doseSoln, out _));
+            solutions.TryAddReagent(doseSoln!.Value, "WGCocaine", FixedPoint2.New(10));
             stock.Scan();
             Assert.Multiple(() =>
             {
@@ -207,7 +214,9 @@ public sealed class NarcoticHeatTest
                 Assert.That(entMan.HasComponent<WGNarcoticSignatureComponent>(tank), Is.True, "The largest lot shows the stockpile.");
                 Assert.That(entMan.HasComponent<RadarBlipComponent>(tank), Is.True);
                 Assert.That(entMan.HasComponent<WGNarcoticSignatureComponent>(jug), Is.False);
-                Assert.That(goods.TurnIn(tank, 5), Is.EqualTo(65), "300,000 of cocaine adds 60 to the flat reward.");
+                Assert.That(flat, Is.Zero, "A narcotic has a flat hand-in reward, so a batch split into doses pays per dose.");
+                Assert.That(goods.TurnIn(tank, flat), Is.EqualTo(20), "300,000 of cocaine hands in for 20 points.");
+                Assert.That(goods.TurnIn(dose, flat), Is.Zero, "A single dose hands in for a point.");
             });
 
             solutions.RemoveAllSolution(tankSoln.Value);
@@ -217,7 +226,7 @@ public sealed class NarcoticHeatTest
                 Assert.That(stock.Stock(ship), Is.EqualTo(100_000).Within(1));
                 Assert.That(entMan.HasComponent<WGNarcoticSignatureComponent>(tank), Is.False, "Poured out, the signature goes.");
                 Assert.That(entMan.HasComponent<RadarBlipComponent>(tank), Is.False);
-                Assert.That(goods.TurnIn(tank, 5), Is.EqualTo(5), "A clean tank hands in for no more than it did.");
+                Assert.That(goods.TurnIn(tank, 5), Is.EqualTo(5), "A clean tank hands in for more than its own reward.");
             });
         });
 
