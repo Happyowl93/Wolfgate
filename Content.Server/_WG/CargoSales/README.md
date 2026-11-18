@@ -5,7 +5,8 @@ too much of one item. Here the check runs apart from the radio alert, the consol
 pallet would be refused, the popup names the item and limit, and a group uses its lowest limit. Pricing a pallet no
 longer adds to the first item's `CurrencyInjectionOnSellComponent.Amount`, which raised its payout on every appraisal.
 Goods with an `ItemTaxComponent` pay their tax inside an untaxed crate or bag too (`WgContentsTax`), not only loose on
-the pallet.
+the pallet. A sold alert goes out from off any map (`WgSendSoldAlert`), so a sale on a world whose comms are down still
+reaches the channels it names; one marked jammable still goes out from the console.
 
 `WGPalletSaleEvent` is raised when a pallet sale goes through, with everything sold and all it contained, who sold it
 and at which console; unlike `EntitySoldEvent` it leaves out contraband turn-ins. A handler can hold back part of the
@@ -25,11 +26,13 @@ Entry points: `CargoSystem.WgRefuseOverLimit`, called from `SellPallets` and `Up
 - [`Content.Server/_WG/CargoSales/CargoSystem.ContentsTax.cs`](CargoSystem.ContentsTax.cs)
 - [`Content.Server/_WG/CargoSales/CargoSystem.PalletSale.cs`](CargoSystem.PalletSale.cs)
 - [`Content.Server/_WG/CargoSales/CargoSystem.SaleLimit.cs`](CargoSystem.SaleLimit.cs)
+- [`Content.Server/_WG/CargoSales/CargoSystem.SoldAlert.cs`](CargoSystem.SoldAlert.cs)
 - [`Content.Server/_WG/CargoSales/WGPalletSaleEvent.cs`](WGPalletSaleEvent.cs)
 
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WG/CargoSales/SaleLimitTest.cs`](../../../Content.IntegrationTests/Tests/_WG/CargoSales/SaleLimitTest.cs)
+- [`Content.IntegrationTests/Tests/_WG/CargoSales/SoldAlertPlanetTest.cs`](../../../Content.IntegrationTests/Tests/_WG/CargoSales/SoldAlertPlanetTest.cs)
 
 ## Non-modular edits
 
@@ -38,6 +41,7 @@ Entry points: `CargoSystem.WgRefuseOverLimit`, called from `SellPallets` and `Up
   - a pallet that would be refused pays nothing, so it shows nothing
   - the MaxPerSale check runs apart from the alert
   - a pallet sale event that leaves out contraband turn-ins
+  - the alert goes out from off any map, so a world with its comms down doesn't swallow it
   - taxed goods inside an untaxed crate or bag pay their tax too
   - the pallet sale event names who sold
   - what the sale's handlers held back

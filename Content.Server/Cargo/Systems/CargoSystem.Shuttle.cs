@@ -390,10 +390,13 @@ public sealed partial class CargoSystem
 
             var message = Loc.GetString(alert.Message, ("item", name), ("count", count), ("location", location));
             var speaker = Transform(console).GridUid ?? console;
-            foreach (var channel in alert.Channels)
-            {
-                _radio.SendRadioMessage(speaker, message, channel, console, jammable: alert.Jammable);
-            }
+            // WOLFGATE(CargoSales) START: the alert goes out from off any map, so a world with its comms down doesn't swallow it
+            // foreach (var channel in alert.Channels)
+            // {
+            //     _radio.SendRadioMessage(speaker, message, channel, console, jammable: alert.Jammable);
+            // }
+            WgSendSoldAlert(speaker, message, alert, console);
+            // WOLFGATE END
         }
     }
 
