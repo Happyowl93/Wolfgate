@@ -39,8 +39,6 @@
       - MachineBoard # lets you lockbox TSF servers and shit :face_holding_back_tears:
       - Flatpack # ditto
       - ContainerContainer # WL bypass.
-      - PlantAnalyzer # Its gene banks carried a round's mutations into every later one
-      - Seed # Ditto: a packet saves its plant's genes
       tags:
       - Unstashable
       - SafetyDepositBlacklist
