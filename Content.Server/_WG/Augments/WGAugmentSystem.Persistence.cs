@@ -366,8 +366,9 @@ public sealed partial class WGAugmentSystem
     }
 
     /// <summary>
-    /// Takes every augment and unlock off a character, online or not. Whoever takes its hardware off the body it left
-    /// owns it.
+    /// Takes the augments a character spawned with and their unlocks off it, online or not. Whoever takes its
+    /// hardware off the body it left owns it. What was picked in the creator since the spawn never reached the body,
+    /// so it stays.
     /// </summary>
     /// <returns>The profile save, or null if nothing was taken.</returns>
     internal Task? Forfeit(NetUserId user, PlayedCharacter played, string message)
@@ -375,10 +376,10 @@ public sealed partial class WGAugmentSystem
         _played.Remove(user);
         ReleasePaid(null, new WGAugmentOwner(user, played.Slot));
         if (!_players.TryGetSessionById(user, out var session))
-            return Queued(user, () => ForfeitOffline(user, played.Slot));
+            return Queued(user, () => ForfeitOffline(user, played));
 
         if (_preferences.GetPreferencesOrNull(user)?.Characters.GetValueOrDefault(played.Slot) is not HumanoidCharacterProfile profile
-            || Stripped(profile) is not { } stripped)
+            || Stripped(profile, played) is not { } stripped)
             return null;
 
         _chat.DispatchServerMessage(session, Loc.GetString(message, ("name", profile.Name)));
@@ -386,32 +387,37 @@ public sealed partial class WGAugmentSystem
         return Save(session, played.Slot, stripped);
     }
 
-    private async Task ForfeitOffline(NetUserId user, int slot)
+    private async Task ForfeitOffline(NetUserId user, PlayedCharacter played)
     {
         try
         {
             var stored = await _db.GetPlayerPreferencesAsync(user, default);
-            if (stored?.Characters.GetValueOrDefault(slot) is HumanoidCharacterProfile profile && Stripped(profile) is { } stripped)
+            if (stored?.Characters.GetValueOrDefault(played.Slot) is HumanoidCharacterProfile profile
+                && Stripped(profile, played) is { } stripped)
             {
-                await _db.SaveCharacterSlotAsync(user, stripped, slot);
+                await _db.SaveCharacterSlotAsync(user, stripped, played.Slot);
                 Log.Info($"Offline user {user}'s {profile.Name} lost their augments.");
             }
         }
         catch (Exception e)
         {
-            Log.Error($"Failed to take the augments off offline user {user}'s character {slot}: {e}");
+            Log.Error($"Failed to take the augments off offline user {user}'s character {played.Slot}: {e}");
         }
     }
 
-    /// <summary>The profile with no augments, implants or unlocks; null if it has none to lose.</summary>
-    private static HumanoidCharacterProfile? Stripped(HumanoidCharacterProfile profile)
+    /// <summary>
+    /// The profile without the augments and implants the character spawned with, or their unlocks; null if it has
+    /// none of them to lose.
+    /// </summary>
+    private static HumanoidCharacterProfile? Stripped(HumanoidCharacterProfile profile, PlayedCharacter played)
     {
-        if (profile.Augments.Count == 0 && profile.AugmentImplants.Count == 0 && profile.AugmentUnlocks.Count == 0)
+        var spawned = played.Spawned.Values.Select(c => c.Augment).Concat(played.SpawnedImplants).ToHashSet();
+        if (!WGAugmentRules.Picked(profile).Concat(profile.AugmentUnlocks).Any(spawned.Contains))
             return null;
 
-        return profile.WithAugments(new Dictionary<WGAugmentSlot, WGAugmentChoice>())
-            .WithAugmentImplants([])
-            .WithAugmentUnlocks([]);
+        return profile.WithAugments(profile.Augments.Where(a => !spawned.Contains(a.Value.Augment)).ToDictionary(a => a.Key, a => a.Value))
+            .WithAugmentImplants(profile.AugmentImplants.Where(i => !spawned.Contains(i)))
+            .WithAugmentUnlocks(profile.AugmentUnlocks.Where(u => !spawned.Contains(u)));
     }
 
     private async Task Save(ICommonSession session, int slot, HumanoidCharacterProfile profile)

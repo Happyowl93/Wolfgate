@@ -163,12 +163,12 @@ public sealed class AugmentPersistenceTest
             Assert.That(Stored().AugmentFound, Is.Empty);
         });
 
-        // Respawning without cryo takes it all.
+        // Respawning without cryo takes what the character spawned with; the leg picked in the creator since stays.
         await server.WaitPost(() => augments.Track(userId, played));
         await Run(() => augments.ForfeitAugments(players.GetSessionById(userId)));
         await server.WaitAssertion(() =>
         {
-            Assert.That(Stored().Augments, Is.Empty);
+            Assert.That(Stored().Augments.Keys, Is.EquivalentTo(new[] { WGAugmentSlot.RightLeg }));
             Assert.That(Stored().AugmentImplants, Is.Empty);
             Assert.That(Stored().AugmentUnlocks, Is.Empty);
             Assert.That(Stored().AugmentFound, Is.Empty);

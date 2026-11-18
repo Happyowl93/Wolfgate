@@ -17,9 +17,17 @@ public sealed partial class ServerPreferencesManager
     /// was paid for and its hardware hasn't been taken, else for nothing; then a priced augment it hasn't unlocked is
     /// bought from the character's bank if the balance covers it, and dropped otherwise.
     /// </summary>
-    /// <returns>Whether anything was bought, sold or dropped, so the client's copy is out of date.</returns>
-    private bool SettleAugments(NetUserId userId, int character, ref HumanoidCharacterProfile profile, HumanoidCharacterProfile? stored)
+    /// <returns>
+    /// Whether the client's copy is out of date: something was bought, sold or dropped, or the unlocks or the
+    /// balance it sent aren't the settled ones.
+    /// </returns>
+    private bool SettleAugments(NetUserId userId,
+        int character,
+        ref HumanoidCharacterProfile profile,
+        HumanoidCharacterProfile? stored,
+        int? sentBalance)
     {
+        var sent = profile;
         var hardware = _entityManager.System<WGAugmentSystem>();
         var owned = new HashSet<ProtoId<WGAugmentPrototype>>(stored?.AugmentUnlocks ?? new());
         var found = new HashSet<ProtoId<WGAugmentPrototype>>(stored?.AugmentFound ?? new());
@@ -99,7 +107,10 @@ public sealed partial class ServerPreferencesManager
             .WithAugmentFound(found)
             .WithAugments(choices)
             .WithAugmentImplants(implants);
-        return changed;
+        return changed
+               || sentBalance != balance
+               || !sent.AugmentUnlocks.SetEquals(profile.AugmentUnlocks)
+               || !sent.AugmentFound.SetEquals(profile.AugmentFound);
     }
 
     /// <summary>Sends a player their preferences again, so the creator shows what the server changed.</summary>

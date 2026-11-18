@@ -406,6 +406,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.Server/Database/ServerDbBase.cs`](../../Database/ServerDbBase.cs)
 - [`Content.Server/Medical/HealthAnalyzerSystem.cs`](../../Medical/HealthAnalyzerSystem.cs): the cyberware in the body
 - [`Content.Server/Preferences/Managers/ServerPreferencesManager.cs`](../../Preferences/Managers/ServerPreferencesManager.cs)
+  - the balance the client last saw, to tell a stale copy
   - a client save can't unlock augments; new priced ones are bought from the bank here
   - the creator shows the balance, unlocks and dropped augments the save left
 - [`Content.Shared/_Goobstation/Autosurgeon/AutoSurgeonSystem.cs`](../../../Content.Shared/_Goobstation/Autosurgeon/AutoSurgeonSystem.cs): augments reapply and detect upgrades

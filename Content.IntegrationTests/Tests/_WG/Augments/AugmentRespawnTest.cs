@@ -20,9 +20,10 @@ using Robust.Shared.Prototypes;
 namespace Content.IntegrationTests.Tests._WG.Augments;
 
 /// <summary>
-/// A player who respawns instead of going into cryo loses the augments and unlocks of the character they spawned as;
-/// a player who hasn't spawned a character loses nothing. At the end of the round only a character alive in the
-/// body it spawned in keeps them. A character played as a borg is left as it was.
+/// A player who respawns instead of going into cryo loses the augments their character spawned with and their
+/// unlocks, and keeps what they bought in the creator since; a player who hasn't spawned a character loses nothing.
+/// At the end of the round only a character alive in the body it spawned in keeps them. A character played as a borg
+/// is left as it was.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WGAugmentSystem))]
@@ -70,14 +71,20 @@ public sealed class AugmentRespawnTest
         await Run(() => augments.ForfeitAugments(session));
         await server.WaitAssertion(() => Assert.That(Stored().Augments, Is.Not.Empty));
 
+        // Spawned with the arm, then bought eyes in the creator during the round: the arm goes with the body, and the
+        // eyes, which never reached it, stay.
+        ProtoId<WGAugmentPrototype> eyes = "WGAugmentCyberEyes";
         await server.WaitPost(() => augments.Track(userId,
-            new WGAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, EntityUid.Invalid, new Dictionary<WGAugmentSlot, WGAugmentChoice>(),
+            new WGAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, EntityUid.Invalid, new(augmented.Augments),
                 new HashSet<ProtoId<WGAugmentPrototype>>())));
+        var withEyes = new Dictionary<WGAugmentSlot, WGAugmentChoice>(augmented.Augments) { [WGAugmentSlot.Eyes] = new(eyes, null) };
+        await Run(() => prefs.SetProfile(userId, slot,
+            augmented.WithAugments(withEyes).WithAugmentUnlocks(new ProtoId<WGAugmentPrototype>[] { "WGAugmentCyberLeftArm", eyes })));
         await Run(() => augments.ForfeitAugments(session));
         await server.WaitAssertion(() =>
         {
-            Assert.That(Stored().Augments, Is.Empty);
-            Assert.That(Stored().AugmentUnlocks, Is.Empty);
+            Assert.That(Stored().Augments.Keys, Is.EquivalentTo(new[] { WGAugmentSlot.Eyes }), "Only the arm the body carried is lost.");
+            Assert.That(Stored().AugmentUnlocks, Is.EquivalentTo(new[] { eyes }), "Eyes bought in the creator after the spawn were taken.");
         });
 
         await pair.CleanReturnAsync();
