@@ -1,11 +1,12 @@
 # Paintings
 
-Player-drawn paintings, kept between rounds. A canvas (seven sizes, sold at the PTech vendor) is painted pixel by
+Player-drawn paintings, kept between rounds. A canvas (seven sizes) is painted pixel by
 pixel while the painter holds a crayon, which paints its own colour, or a paint palette, which paints any colour. A palette
 keeps up to 24 saved colours, which the painter adds and removes in the canvas window (it starts with 16), and the
 last few colours used. An easel holds a canvas up to paint. A finished painting carries a title and the painter's
-name, or no name, and can be hung in a painting frame. Frames are built on a wall; clicking a framed painting with an
-empty hand opens it up close. The mechanics and sprites follow tgstation's art, via Meridian
+name, or no name, and can be hung in a painting frame. Frames are put up on a wall from a frame kit in the construction menu;
+clicking a framed painting with an empty hand opens it up close. Canvases, palettes, frame kits and the easel
+flatpack are sold only by John Wolfgate and the Wolfgate vendor; crayons come from their usual places. The mechanics and sprites follow tgstation's art, via Meridian
 Rift.
 
 The Art Catalogue PDA app, installed on every PDA, keeps paintings across rounds. Using a PDA on a finished canvas,
@@ -91,6 +92,5 @@ block from the console, and each painting's hash is in the `WGPainting` admin lo
   - the art catalogue
   - paintings scanned into the art catalogue
 - [`Content.Shared.Database/LogType.cs`](../../../Content.Shared.Database/LogType.cs): paintings finished, scanned, ordered and blocked
-- [`Resources/Prototypes/_NF/Catalog/VendingMachines/Inventories/cart.yml`](../../../Resources/Prototypes/_NF/Catalog/VendingMachines/Inventories/cart.yml)
 
 <!-- WOLFGATE-GENERATED END -->

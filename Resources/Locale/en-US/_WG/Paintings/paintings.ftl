@@ -49,6 +49,8 @@ wg-painting-frame-examine-view = Click it with an empty hand for a closer look.
 wg-painting-frame-examine-gallery = It hangs a painting from the art catalogue every shift.
 
 wg-easel-slot-canvas = Canvas
+wg-painting-construction-frame-kit = a painting frame kit
+wg-painting-construction-frame-large-kit = a large painting frame kit
 
 ## Art app
 

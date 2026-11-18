@@ -21,15 +21,6 @@
     # WOLFGATE(Photography)
     WGCamera: 4
     WGCameraFilm: 12
-    # WOLFGATE(Paintings)
-    WGCanvas11x11: 6
-    WGCanvas19x19: 6
-    WGCanvas23x19: 6
-    WGCanvas23x23: 6
-    WGCanvas24x24: 6
-    WGCanvas36x24: 4
-    WGCanvas45x27: 4
-    WGPaintPalette: 4
     HandLabeler: 4294967295 #Infinite
     BrbSign: 4294967295 #Infinite
     DeskBell: 4294967295 #Infinite

@@ -2,6 +2,8 @@
 using System.Linq;
 using Content.Server._WG.Paintings;
 using Content.Shared._WG.Paintings;
+using Content.Shared.Construction.Prototypes;
+using Content.Shared.VendingMachines;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Robust.Shared.Containers;
@@ -9,6 +11,7 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Localization;
 using Robust.Shared.Map;
 using Robust.Shared.Maths;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WG.Paintings;
 
@@ -325,6 +328,39 @@ public sealed class PaintingsTest
 
             interaction.InteractHand(painter, frame);
             Assert.That(ui.IsUiOpen(frame, WGPaintingViewUiKey.Key, painter), Is.True);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>Painting supplies come only from John Wolfgate's stock; frames need his kits, not planks.</summary>
+    [Test]
+    public async Task SuppliesAreSoldByJohnWolfgate()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var protoMan = pair.Server.ResolveDependency<IPrototypeManager>();
+        var supplies = new[]
+        {
+            "WGCanvas11x11", "WGCanvas19x19", "WGCanvas23x19", "WGCanvas23x23", "WGCanvas24x24", "WGCanvas36x24",
+            "WGCanvas45x27", "WGPaintPalette", "WGPaintingFrameKit", "WGPaintingFrameLargeKit", "WGEaselFlatpack",
+        };
+
+        var wolfgate = protoMan.Index<VendingMachineInventoryPrototype>("WGWolfgateVendInventory");
+        Assert.Multiple(() =>
+        {
+            foreach (var supply in supplies)
+            {
+                Assert.That(wolfgate.StartingInventory.ContainsKey(supply), Is.True, $"{supply} must be in John Wolfgate's stock.");
+                foreach (var inventory in protoMan.EnumeratePrototypes<VendingMachineInventoryPrototype>())
+                {
+                    if (inventory.ID != wolfgate.ID)
+                        Assert.That(inventory.StartingInventory.ContainsKey(supply), Is.False, $"{supply} is also sold by {inventory.ID}.");
+                }
+            }
+
+            var recipes = protoMan.EnumeratePrototypes<ConstructionPrototype>().Select(r => r.Graph).ToHashSet();
+            Assert.That(recipes, Does.Not.Contain("WGEaselGraph"), "The easel comes as a flatpack, not from planks.");
+            Assert.That(recipes, Does.Contain("WGPaintingFrameGraph"));
         });
 
         await pair.CleanReturnAsync();

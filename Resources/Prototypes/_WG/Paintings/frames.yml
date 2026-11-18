@@ -174,15 +174,21 @@
       completed:
       - !type:SnapToGrid { }
       steps:
-      - material: WoodPlank
-        amount: 1
+      - tag: WGPaintingFrameKit
+        name: wg-painting-construction-frame-kit
+        icon:
+          sprite: _WG/Paintings/frame.rsi
+          state: frame-empty
         doAfter: 1
     - to: LargePaintingFrameNode
       completed:
       - !type:SnapToGrid { }
       steps:
-      - material: WoodPlank
-        amount: 2
+      - tag: WGPaintingFrameLargeKit
+        name: wg-painting-construction-frame-large-kit
+        icon:
+          sprite: _WG/Paintings/frame.rsi
+          state: frame-large-empty
         doAfter: 1
   - node: PaintingFrameNode
     entity: WGPaintingFrame
@@ -191,7 +197,7 @@
       completed:
       - !type:EmptyAllContainers { }
       - !type:SpawnPrototype
-        prototype: MaterialWoodPlank1
+        prototype: WGPaintingFrameKit
       steps:
       - tool: Screwing
         doAfter: 3
@@ -202,8 +208,7 @@
       completed:
       - !type:EmptyAllContainers { }
       - !type:SpawnPrototype
-        prototype: MaterialWoodPlank1
-        amount: 2
+        prototype: WGPaintingFrameLargeKit
       steps:
       - tool: Screwing
         doAfter: 3
@@ -211,7 +216,7 @@
 - type: construction
   id: WGPaintingFrameConstruction
   name: painting frame
-  description: A wooden wall frame for a finished canvas.
+  description: A wall frame for a finished canvas, put up from a painting frame kit.
   graph: WGPaintingFrameGraph
   startNode: start
   targetNode: PaintingFrameNode
@@ -229,7 +234,7 @@
 - type: construction
   id: WGPaintingFrameLargeConstruction
   name: large painting frame
-  description: A wooden wall frame for a finished large canvas.
+  description: A wall frame for a finished large canvas, put up from a large painting frame kit.
   graph: WGPaintingFrameGraph
   startNode: start
   targetNode: LargePaintingFrameNode
@@ -251,12 +256,6 @@
   - node: start
     actions:
     - !type:DestroyEntity { }
-    edges:
-    - to: EaselNode
-      steps:
-      - material: WoodPlank
-        amount: 3
-        doAfter: 2
   - node: EaselNode
     entity: WGEasel
     edges:
@@ -264,26 +263,68 @@
       completed:
       - !type:EmptyAllContainers { }
       - !type:SpawnPrototype
-        prototype: MaterialWoodPlank1
-        amount: 3
+        prototype: WGEaselFlatpack
       steps:
       - tool: Prying
         doAfter: 2
 
-- type: construction
-  id: WGEaselConstruction
-  name: easel
-  description: Holds a canvas up while it is painted.
-  graph: WGEaselGraph
-  startNode: start
-  targetNode: EaselNode
-  category: construction-category-furniture
-  objectType: Structure
-  placementMode: SnapgridCenter
-  canBuildInImpassable: false
-  icon:
-    sprite: _WG/Paintings/easel.rsi
-    state: easel
+# Frame kits and the easel flatpack are sold by John Wolfgate and the Wolfgate vendor.
+- type: Tag
+  id: WGPaintingFrameKit
+
+- type: Tag
+  id: WGPaintingFrameLargeKit
+
+- type: entity
+  parent: BaseItem
+  id: WGPaintingFrameKit
+  name: painting frame kit
+  description: A flat-packed painting frame. Put it up on a wall from the construction menu.
+  components:
+  - type: Sprite
+    sprite: _WG/Paintings/frame.rsi
+    state: frame-empty
+  - type: Item
+    size: Small
+  - type: Tag
+    tags:
+    - WGPaintingFrameKit
+  - type: StaticPrice
+    price: 10
+    vendPrice: 60
+
+- type: entity
+  parent: WGPaintingFrameKit
+  id: WGPaintingFrameLargeKit
+  name: large painting frame kit
+  description: A flat-packed frame for a large painting. Put it up on a wall from the construction menu.
+  components:
+  - type: Sprite
+    sprite: _WG/Paintings/frame.rsi
+    state: frame-large-empty
+  - type: Item
+    size: Normal
+  - type: Tag
+    tags:
+    - WGPaintingFrameLargeKit
+  - type: StaticPrice
+    price: 20
+    vendPrice: 100
+
+- type: entity
+  parent: BaseNFFlatpack
+  id: WGEaselFlatpack
+  name: easel flatpack
+  description: A flatpack holding an easel. Use a multitool on it to unpack it; a crowbar packs the easel back up.
+  components:
+  - type: Flatpack
+    entity: WGEasel
+  - type: Sprite
+    layers:
+    - state: service_tray
+  - type: StaticPrice
+    price: 30
+    vendPrice: 200
 
 # The art PDA app: browse and order paintings, and scan finished canvases into the catalogue.
 - type: entity
