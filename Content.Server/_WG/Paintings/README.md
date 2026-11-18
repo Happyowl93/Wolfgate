@@ -1,9 +1,11 @@
 # Paintings
 
 Player-drawn paintings, kept between rounds. A canvas (seven sizes, sold at the PTech vendor) is painted pixel by
-pixel while the painter holds a crayon, which paints its own colour, or a paint palette, which paints any colour and
-keeps the last few used. An easel holds a canvas up to paint. A finished painting carries a title and the painter's
-name, or no name, and can be hung in a painting frame. The mechanics and sprites follow tgstation's art, via Meridian
+pixel while the painter holds a crayon, which paints its own colour, or a paint palette, which paints any colour. A palette
+keeps up to 24 saved colours, which the painter adds and removes in the canvas window (it starts with 16), and the
+last few colours used. An easel holds a canvas up to paint. A finished painting carries a title and the painter's
+name, or no name, and can be hung in a painting frame. Frames are built on a wall; clicking a framed painting with an
+empty hand opens it up close. The mechanics and sprites follow tgstation's art, via Meridian
 Rift.
 
 The Art Catalogue PDA app, installed on every PDA, keeps paintings across rounds. Using a PDA on a finished canvas,
@@ -14,7 +16,7 @@ catalogue painting at round start.
 
 Entry points: `WGCanvasSystem` (painting, finishing, prints), `WGPaintingStoreSystem` (the catalogue, kept in the
 `wolfgate_painting` table), `WGArtAppSystem` (the PDA app), `WGPaintingFrameSystem` (frames and easels), and on the
-client `WGPaintingArtSystem` (drawing paintings) and `WGCanvasWindow`. Server settings are in `WGPaintingCVars`
+client `WGPaintingArtSystem` (drawing paintings), `WGCanvasWindow` and `WGPaintingViewWindow`. Server settings are in `WGPaintingCVars`
 (`wg.paintings.*`): the print price, scans per player per day, and catalogue downloads per minute.
 
 Moderators manage the catalogue in `paintingbrowser` (`WGPaintingAdminEui`). It searches every stored painting,
@@ -53,10 +55,14 @@ block from the console, and each painting's hash is in the `WGPainting` admin lo
 - [`Content.Client/_WG/Paintings/WGArtAppUi.cs`](../../../Content.Client/_WG/Paintings/WGArtAppUi.cs)
 - [`Content.Client/_WG/Paintings/WGCanvasBoundUserInterface.cs`](../../../Content.Client/_WG/Paintings/WGCanvasBoundUserInterface.cs)
 - [`Content.Client/_WG/Paintings/WGCanvasControl.cs`](../../../Content.Client/_WG/Paintings/WGCanvasControl.cs)
-- [`Content.Client/_WG/Paintings/WGCanvasWindow.cs`](../../../Content.Client/_WG/Paintings/WGCanvasWindow.cs)
+- [`Content.Client/_WG/Paintings/WGCanvasWindow.xaml`](../../../Content.Client/_WG/Paintings/WGCanvasWindow.xaml)
+- [`Content.Client/_WG/Paintings/WGCanvasWindow.xaml.cs`](../../../Content.Client/_WG/Paintings/WGCanvasWindow.xaml.cs)
 - [`Content.Client/_WG/Paintings/WGPaintingAdminEui.cs`](../../../Content.Client/_WG/Paintings/WGPaintingAdminEui.cs)
 - [`Content.Client/_WG/Paintings/WGPaintingAdminWindow.cs`](../../../Content.Client/_WG/Paintings/WGPaintingAdminWindow.cs)
 - [`Content.Client/_WG/Paintings/WGPaintingArtSystem.cs`](../../../Content.Client/_WG/Paintings/WGPaintingArtSystem.cs)
+- [`Content.Client/_WG/Paintings/WGPaintingViewBoundUserInterface.cs`](../../../Content.Client/_WG/Paintings/WGPaintingViewBoundUserInterface.cs)
+- [`Content.Client/_WG/Paintings/WGPaintingViewWindow.xaml`](../../../Content.Client/_WG/Paintings/WGPaintingViewWindow.xaml)
+- [`Content.Client/_WG/Paintings/WGPaintingViewWindow.xaml.cs`](../../../Content.Client/_WG/Paintings/WGPaintingViewWindow.xaml.cs)
 
 ### Integration tests
 
