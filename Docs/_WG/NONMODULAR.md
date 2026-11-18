@@ -616,7 +616,7 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
 - [`Resources/Prototypes/Entities/Structures/Lighting/strobe_lighting.yml`](../../Resources/Prototypes/Entities/Structures/Lighting/strobe_lighting.yml): draw over posters at the same depth instead of flickering with them
 - [`Resources/Prototypes/Entities/Structures/Machines/chemistry.yml`](../../Resources/Prototypes/Entities/Structures/Machines/chemistry.yml): a tabletop machine's fixture, so it anchors on tables and counters like the grinder
 - [`Resources/Prototypes/Entities/Structures/Machines/Computers/computers.yml`](../../Resources/Prototypes/Entities/Structures/Machines/Computers/computers.yml): restore the licence header removed by Kill Spdx
-- [`Resources/Prototypes/Entities/Structures/Piping/Atmospherics/miners.yml`](../../Resources/Prototypes/Entities/Structures/Piping/Atmospherics/miners.yml): a sellable gas trickles from its miner, 400 -> 2 mol/s
+- [`Resources/Prototypes/Entities/Structures/Piping/Atmospherics/miners.yml`](../../Resources/Prototypes/Entities/Structures/Piping/Atmospherics/miners.yml): a sellable gas trickles from its miner, 400 -> 3 mol/s
 - [`Resources/Prototypes/Entities/Structures/Specific/Atmospherics/vox.yml`](../../Resources/Prototypes/Entities/Structures/Specific/Atmospherics/vox.yml): a gas missing from this list crashed the air alarm UI
 - [`Resources/Prototypes/GameRules/pests.yml`](../../Resources/Prototypes/GameRules/pests.yml)
   - pest events were crowding out the rest of the table (was 6)
