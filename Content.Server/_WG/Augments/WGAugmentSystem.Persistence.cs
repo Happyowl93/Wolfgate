@@ -10,6 +10,7 @@ using Content.Shared.Body.Components;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
 using Content.Shared.GameTicking;
+using Content.Shared.Ghost;
 using Content.Shared.Humanoid;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Preferences;
@@ -102,15 +103,18 @@ public sealed partial class WGAugmentSystem
     }
 
     /// <summary>
-    /// Keeps a character's paid-for augments if it ends the round alive in its own body, and takes them all if it is
-    /// a corpse, a clone, a ghost role or a new character. One in cryo kept them going in.
+    /// Keeps a character's paid-for augments if it ends the round alive in its own body, or alive with its player
+    /// ghosted out of it, and takes them all if it is a corpse, a clone, a ghost role or a new character. One in cryo
+    /// kept them going in.
     /// </summary>
     internal Task? SaveAtRoundEnd(NetUserId user, PlayedCharacter played)
     {
         if (_mind.TryGetMind(user, out var mind)
             && mind.Value.Owner == played.Mind
-            && mind.Value.Comp.OwnedEntity == played.Body
-            && !_mobState.IsDead(played.Body))
+            && !Deleted(played.Body)
+            && !_mobState.IsDead(played.Body)
+            && (mind.Value.Comp.OwnedEntity == played.Body
+                || HasComp<GhostComponent>(mind.Value.Comp.OwnedEntity) && !_mind.TryGetMind(played.Body, out _, out _)))
             return SaveBody(user, played, played.Body);
 
         return _cryoSleep.HasCryosleepingBody(user) ? null : Forfeit(user, played, "wg-augments-forfeit-dead");

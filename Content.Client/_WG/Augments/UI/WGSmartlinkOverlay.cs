@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Numerics;
 using Content.Client._WG.Cockpit;
 using Content.Client._WG.Shuttles.UI;
@@ -113,19 +112,25 @@ public sealed partial class WGSmartlinkOverlay : Overlay
         _mobs.Clear();
         _lookup.GetEntitiesInRange(_transform.GetMapCoordinates(player), Range, _mobs, LookupFlags.Uncontained);
 
-        foreach (var mob in _mobs.OrderBy(m => (_transform.GetMapCoordinates(m).Position - cursor.Position).LengthSquared()))
+        EntityUid? nearest = null;
+        var best = float.MaxValue;
+        foreach (var mob in _mobs)
         {
+            var distance = (_transform.GetMapCoordinates(mob).Position - cursor.Position).LengthSquared();
+
             // The sight sees no better than its owner: not through walls, and not a cloaked mob.
-            if (mob.Owner == player
+            if (distance >= best
+                || mob.Owner == player
                 || _mobState.IsDead(mob, mob.Comp)
                 || _entities.TryGetComponent<StealthComponent>(mob, out var stealth) && stealth.Enabled
                 || !_examine.InRangeUnOccluded(player, mob, Range))
                 continue;
 
-            return mob;
+            best = distance;
+            nearest = mob;
         }
 
-        return null;
+        return nearest;
     }
 
     private void DrawBrackets(DrawingHandleScreen handle, EntityUid target, float scale)

@@ -170,6 +170,19 @@ public sealed class AugmentRespawnTest
         });
         await Clean(mind, mob);
 
+        // Alive, with the player ghosted out of it: the eyes are kept.
+        (mind, mob, played) = await Spawn();
+        EntityUid ghost = default;
+        await server.WaitPost(() =>
+        {
+            ghost = entities.SpawnEntity("MobObserver", map.GridCoords);
+            minds.TransferTo(mind, ghost);
+        });
+        await Run(() => augments.SaveAtRoundEnd(userId, played));
+        await server.WaitAssertion(() =>
+            Assert.That(Stored().AugmentUnlocks, Is.EquivalentTo(new[] { eyes }), "A living body lost its eyes when its player ghosted."));
+        await Clean(mind, mob, ghost);
+
         // Dead at the end: everything is gone.
         (mind, mob, played) = await Spawn();
         await server.WaitPost(() => mobState.ChangeMobState(mob, MobState.Dead));
