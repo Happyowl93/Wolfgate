@@ -319,6 +319,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentRulesTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentRulesTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentSpeciesTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentSpeciesTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentThermalEyesTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentThermalEyesTest.cs)
+- [`Content.IntegrationTests/Tests/_WG/Augments/AugmentTraitLimbsTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentTraitLimbsTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentVitalImplantsTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentVitalImplantsTest.cs)
 
 ### Prototypes

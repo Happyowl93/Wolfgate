@@ -4,6 +4,7 @@ using Content.Server._NF.CryoSleep;
 using Content.Server.Chat.Managers;
 using Content.Server.Mind;
 using Content.Server.Preferences.Managers;
+using Content.Server.Traits;
 using Content.Shared._Shitmed.BodyEffects.Subsystems;
 using Content.Shared._WG.Augments;
 using Content.Shared.Body.Components;
@@ -47,7 +48,8 @@ public sealed partial class WGAugmentSystem
 
     private void InitializePersistence()
     {
-        SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
+        // After traits, so augments under a trait's limbs are put back before the paid marks go on.
+        SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete, after: new[] { typeof(TraitSystem) });
         SubscribeLocalEvent<BodyComponent, CryosleepBeforeMindRemovedEvent>(OnCryosleep);
         SubscribeLocalEvent<RoundEndedEvent>(OnRoundEnded);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(_ => _played.Clear());
@@ -58,6 +60,8 @@ public sealed partial class WGAugmentSystem
         // A job that spawns its own entity (a borg, the station AI) never wears the character's body or its augments.
         if (!HasComp<HumanoidAppearanceComponent>(args.Mob))
             return;
+
+        ReapplyOverTraits(args.Mob, args.Profile);
 
         // Selection is locked once a player joins, so the selected slot is the one that spawned.
         if (_preferences.GetPreferencesOrNull(args.Player.UserId) is { SelectedCharacter: HumanoidCharacterProfile selected } prefs

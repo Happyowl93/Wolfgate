@@ -222,14 +222,6 @@
   order: 20
 
 - type: wgAugment
-  id: WGAugmentLotusSandevistan
-  slot: Heart
-  kind: Organ
-  organ: OrganHeartMMCSandevistan
-  price: 2500000
-  order: 20
-
-- type: wgAugment
   id: WGAugmentSandevistan
   slot: Heart
   kind: Organ

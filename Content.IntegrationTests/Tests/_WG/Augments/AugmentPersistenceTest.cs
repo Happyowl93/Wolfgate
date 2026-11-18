@@ -36,7 +36,7 @@ public sealed class AugmentPersistenceTest
     {
         [WGAugmentSlot.RightArm] = new("WGAugmentJawsOfLifeRightArm", "WGAugmentStyleCyborg"),
         [WGAugmentSlot.LeftHand] = new("WGAugmentDexLeftHand", "WGAugmentStyleCyborg"),
-        [WGAugmentSlot.Heart] = new("WGAugmentLotusSandevistan", null),
+        [WGAugmentSlot.Heart] = new("WGAugmentSandevistan", null),
     };
 
     private static readonly HashSet<ProtoId<WGAugmentPrototype>> Implants = new()
@@ -147,7 +147,7 @@ public sealed class AugmentPersistenceTest
             mob = entities.SpawnEntity("MobHuman", map.GridCoords);
             Apply(entities, mob, new Dictionary<WGAugmentSlot, WGAugmentChoice>
             {
-                [WGAugmentSlot.Heart] = new("WGAugmentLotusSandevistan", null),
+                [WGAugmentSlot.Heart] = new("WGAugmentSandevistan", null),
                 [WGAugmentSlot.Eyes] = new("WGAugmentCyberEyes", null),
             }, new HashSet<ProtoId<WGAugmentPrototype>> { "WGAugmentMuscleFibers" });
         });
@@ -507,7 +507,7 @@ public sealed class AugmentPersistenceTest
             var odds = table.ListSpawns(server.EntMan, proto, new EntityTableContext()).ToDictionary(s => s.spawn.Id, s => s.prob);
             Assert.That(odds.Values.Sum(), Is.EqualTo(1).Within(1e-6));
             Assert.That(odds, Does.Not.ContainKey("WGAugmentLeftArm"), "A free augment is scavenged.");
-            Assert.That(odds["OrganHeartMMCSandevistan"], Is.LessThan(odds["BasicCyberneticEyes"]));
+            Assert.That(odds["OrganHeartSandevistan"], Is.LessThan(odds["BasicCyberneticEyes"]));
             Assert.That(odds, Contains.Key("AutosurgeonDermalArmorPDV"));
         });
 
