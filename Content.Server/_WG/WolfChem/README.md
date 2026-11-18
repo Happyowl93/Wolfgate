@@ -61,7 +61,8 @@ buyer's manner (a popup only the seller sees, before and after a sale) tells the
 the last fifth of their line is all that is left. Caelestinus
 Security, the TSF and the PDV hear of sales on their channels (`TipChannels`), at most once per `tip_cooldown` for a
 seller unless they have grown hotter: only the place while cold, the model of the seller's own ship once past
-`heat_free`, and their species and clothing past `heat_hot`. A tip never names anyone. Past `heat_hot` customs also
+`heat_free`, and their species and clothing past `heat_hot`. A tip never names anyone, and it goes out from off any
+map, so it reaches them from a world whose comms are down and no jammer at the pallet stops it. Past `heat_hot` customs also
 puts a warrant out on the seller (`.Warrant`, through Drydock's `WGShipbreakerWarrantSystem`): it names them on the
 bounty board, the one place they are named, and pays the players who hurt them in person once they die. Each sale adds
 `warrant_share` of what it sold past the line, up to `warrant_cap`; the warrant outlasts the heat and goes with the
@@ -204,6 +205,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/HeroinSedationTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/HeroinSedationTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/IntoxicationTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/IntoxicationTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NarcoticHeatTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NarcoticHeatTest.cs)
+- [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NarcoticTipPlanetTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NarcoticTipPlanetTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NodTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/NodTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/RadioProbeSystem.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/RadioProbeSystem.cs)
 - [`Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/SecondhandSmokeTest.cs`](../../../Content.IntegrationTests/Tests/_WG/WolfChem/Narcotics/SecondhandSmokeTest.cs)

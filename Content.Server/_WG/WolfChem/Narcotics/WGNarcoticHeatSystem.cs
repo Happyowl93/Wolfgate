@@ -8,7 +8,9 @@ using Content.Shared.Humanoid;
 using Content.Shared.Inventory;
 using Content.Shared.Popups;
 using Content.Shared.Radio;
+using Content.Shared.Radio.Components;
 using Robust.Shared.Configuration;
+using Robust.Shared.Map;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
@@ -221,10 +223,15 @@ public sealed partial class WGNarcoticHeatSystem : EntitySystem
         record.Told = now;
         record.ToldTier = tier;
         var line = TipLine(seller, console, grid, tier, goods);
+        // Customs passes the tip on from off any map, so a world whose comms are down doesn't swallow it.
+        var relay = Spawn(null, MapCoordinates.Nullspace);
+        EnsureComp<TelecomExemptComponent>(relay);
         foreach (var channel in TipChannels)
         {
-            _radio.SendRadioMessage(grid, line, channel, console);
+            _radio.SendRadioMessage(grid, line, channel, relay);
         }
+
+        QueueDel(relay);
     }
 
     /// <summary>The model of the ship the seller's player owns, the nearest to the console if they own several.</summary>
