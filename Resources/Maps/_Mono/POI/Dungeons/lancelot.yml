@@ -15737,6 +15737,8 @@ entities:
     - type: Transform
       pos: 20.5,-2.5
       parent: 1
+    - type: GasMiner
+      spawnAmount: 3
 - proto: GasMixerOn
   entities:
   - uid: 2305

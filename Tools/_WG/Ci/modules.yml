@@ -3121,3 +3121,9 @@ unmarked:
   - path: Resources/SharedMaps/_Mono/Shuttles/CSec/lightning.yml
     module: Bench
     reason: Bench refit swapped one TOVEK hardpoint for a SHRIKE ion disruptor.
+  - path: Resources/Maps/_Mono/POI/sevastopol.yml
+    module: null
+    reason: The plasma miner trickles 3 mol/s, down from 400, so its gas is no endless income.
+  - path: Resources/Maps/_Mono/POI/Dungeons/lancelot.yml
+    module: null
+    reason: The plasma miner trickles 3 mol/s, down from 400, so its gas is no endless income.

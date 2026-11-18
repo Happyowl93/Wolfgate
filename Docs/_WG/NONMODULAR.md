@@ -454,8 +454,10 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
 - [`Resources/Maps/_Mono/Monolithic/monolithicasteroidsmallship.yml`](../../Resources/Maps/_Mono/Monolithic/monolithicasteroidsmallship.yml): Hardpoint mapped under the asteroid ship's AK570 so gunnery links it.
 - [`Resources/Maps/_Mono/Outpost/caelestinus_central.yml`](../../Resources/Maps/_Mono/Outpost/caelestinus_central.yml): Sector map entity gets its Parallax component and Colossus Sector name back after the
 - [`Resources/Maps/_Mono/POI/anomalouslab.yml`](../../Resources/Maps/_Mono/POI/anomalouslab.yml): Caelestinus Expansion I (#675) reverted.
+- [`Resources/Maps/_Mono/POI/Dungeons/lancelot.yml`](../../Resources/Maps/_Mono/POI/Dungeons/lancelot.yml): The plasma miner trickles 3 mol/s, down from 400, so its gas is no endless income.
 - [`Resources/Maps/_Mono/POI/Dungeons/zvezda.yml`](../../Resources/Maps/_Mono/POI/Dungeons/zvezda.yml): Zvezda lighting re-work and power generation.
 - [`Resources/Maps/_Mono/POI/pdvhelios.yml`](../../Resources/Maps/_Mono/POI/pdvhelios.yml): Helios mapping fixes for lighting, wallmounts and small layout tweaks.
+- [`Resources/Maps/_Mono/POI/sevastopol.yml`](../../Resources/Maps/_Mono/POI/sevastopol.yml): The plasma miner trickles 3 mol/s, down from 400, so its gas is no endless income.
 - [`Resources/Maps/_Mono/POI/tsfmc_industry.yml`](../../Resources/Maps/_Mono/POI/tsfmc_industry.yml): Stellar Blessing lighting, colour-coded distro, fire suit lockers and extinguishers.
 - [`Resources/Maps/Dungeon/haunted.yml`](../../Resources/Maps/Dungeon/haunted.yml): Removed every chasm.
 - [`Resources/Maps/Dungeon/mineshaft.yml`](../../Resources/Maps/Dungeon/mineshaft.yml): Removed every chasm.
@@ -616,7 +618,6 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
 - [`Resources/Prototypes/Entities/Structures/Lighting/strobe_lighting.yml`](../../Resources/Prototypes/Entities/Structures/Lighting/strobe_lighting.yml): draw over posters at the same depth instead of flickering with them
 - [`Resources/Prototypes/Entities/Structures/Machines/chemistry.yml`](../../Resources/Prototypes/Entities/Structures/Machines/chemistry.yml): a tabletop machine's fixture, so it anchors on tables and counters like the grinder
 - [`Resources/Prototypes/Entities/Structures/Machines/Computers/computers.yml`](../../Resources/Prototypes/Entities/Structures/Machines/Computers/computers.yml): restore the licence header removed by Kill Spdx
-- [`Resources/Prototypes/Entities/Structures/Piping/Atmospherics/miners.yml`](../../Resources/Prototypes/Entities/Structures/Piping/Atmospherics/miners.yml): a sellable gas trickles from its miner, 400 -> 3 mol/s
 - [`Resources/Prototypes/Entities/Structures/Specific/Atmospherics/vox.yml`](../../Resources/Prototypes/Entities/Structures/Specific/Atmospherics/vox.yml): a gas missing from this list crashed the air alarm UI
 - [`Resources/Prototypes/GameRules/pests.yml`](../../Resources/Prototypes/GameRules/pests.yml)
   - pest events were crowding out the rest of the table (was 6)
