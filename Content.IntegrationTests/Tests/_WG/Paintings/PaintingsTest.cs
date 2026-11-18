@@ -272,6 +272,69 @@ public sealed class PaintingsTest
         await pair.CleanReturnAsync();
     }
 
+    [Test]
+    public async Task PaletteSavesColoursAndFrameShowsPainting()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var map = await pair.CreateTestMap();
+
+        await server.WaitAssertion(() =>
+        {
+            var hands = entMan.System<SharedHandsSystem>();
+            var ui = entMan.System<SharedUserInterfaceSystem>();
+            var (painter, canvasUid) = SpawnPainter(entMan, map.GridCoords, Canvas);
+            hands.TryDrop(painter, hands.GetActiveItem(painter)!.Value);
+            var paletteUid = entMan.SpawnEntity("WGPaintPalette", map.GridCoords);
+            Assert.That(hands.TryPickupAnyHand(painter, paletteUid), Is.True);
+            var palette = entMan.GetComponent<WGPaintPaletteComponent>(paletteUid);
+            var starting = palette.Swatches.Count;
+            ui.OpenUi(canvasUid, WGCanvasUiKey.Key, painter);
+
+            var teal = new Color(0.1f, 0.6f, 0.55f);
+            var stored = WGPaintingRules.Quantize(teal);
+            Swatch(ui, canvasUid, painter, teal, false);
+            Swatch(ui, canvasUid, painter, stored, false);
+            Assert.That(palette.Swatches, Has.Count.EqualTo(starting + 1), "A saved colour must be kept once.");
+            Assert.That(palette.Swatches[^1], Is.EqualTo(stored));
+
+            Swatch(ui, canvasUid, painter, teal, true);
+            Assert.That(palette.Swatches, Does.Not.Contain(stored));
+
+            ui.RaiseUiMessage(canvasUid, WGCanvasUiKey.Key, new WGCanvasPickColorMessage(teal) { Actor = painter });
+            Assert.Multiple(() =>
+            {
+                Assert.That(palette.Selected, Is.EqualTo(stored));
+                Assert.That(palette.Recent, Is.EqualTo(new[] { Color.Black }), "The colour picked before goes to recent.");
+                Assert.That(palette.Swatches, Has.Count.EqualTo(starting), "Picking a colour must not save it.");
+            });
+
+            // A framed painting opens up close with an empty hand.
+            Paint(ui, canvasUid, painter, false, 3);
+            ui.RaiseUiMessage(canvasUid, WGCanvasUiKey.Key, new WGCanvasFinishMessage("Teal", false) { Actor = painter });
+            var frame = entMan.SpawnEntity("WGPaintingFrame", map.GridCoords);
+            var interaction = entMan.System<SharedInteractionSystem>();
+            interaction.InteractHand(painter, frame);
+            Assert.That(ui.IsUiOpen(frame, WGPaintingViewUiKey.Key, painter), Is.False, "An empty frame has nothing to show.");
+
+            hands.TryDrop(painter, paletteUid);
+            Assert.That(hands.TryPickupAnyHand(painter, canvasUid), Is.True);
+            interaction.InteractUsing(painter, canvasUid, frame, map.GridCoords);
+            Assert.That(Framed(entMan, frame), Is.EqualTo(canvasUid));
+
+            interaction.InteractHand(painter, frame);
+            Assert.That(ui.IsUiOpen(frame, WGPaintingViewUiKey.Key, painter), Is.True);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    private static void Swatch(SharedUserInterfaceSystem ui, EntityUid canvas, EntityUid painter, Color colour, bool remove)
+    {
+        ui.RaiseUiMessage(canvas, WGCanvasUiKey.Key, new WGCanvasSwatchMessage(colour, remove) { Actor = painter });
+    }
+
     /// <summary>A human holding a red crayon, and a canvas beside them.</summary>
     private static (EntityUid Painter, EntityUid Canvas) SpawnPainter(IEntityManager entMan, EntityCoordinates coords,
         string canvas)
