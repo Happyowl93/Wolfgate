@@ -25,6 +25,9 @@ public sealed partial class WGPaintingArtSystem : EntitySystem
     /// <summary>How long to wait before asking again, as the server skips requests over its rate limit.</summary>
     private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(15);
 
+    /// <summary>How long a painting the server had no pixels for is left alone, as a failed load may be temporary.</summary>
+    private static readonly TimeSpan MissingDelay = TimeSpan.FromMinutes(2);
+
     /// <summary>Row of the easel's ledge, which a canvas on it rests on.</summary>
     private const int EaselLedge = 22;
 
@@ -38,7 +41,8 @@ public sealed partial class WGPaintingArtSystem : EntitySystem
     private readonly Dictionary<string, Texture> _art = new();
 
     private readonly Dictionary<string, TimeSpan> _requested = new();
-    private readonly HashSet<string> _missing = new();
+    /// <summary>Paintings the server had no pixels for, with when they may be asked for again.</summary>
+    private readonly Dictionary<string, TimeSpan> _missing = new();
     private readonly List<string> _due = new();
 
     /// <summary>Raised when a downloaded painting arrives, so open views can show it.</summary>
@@ -84,9 +88,17 @@ public sealed partial class WGPaintingArtSystem : EntitySystem
         if (_art.TryGetValue(hash, out var texture))
             return texture;
 
-        if (!_missing.Contains(hash) && !_requested.ContainsKey(hash))
+        var now = _timing.RealTime;
+        if (_missing.TryGetValue(hash, out var retry))
         {
-            _requested[hash] = _timing.RealTime;
+            if (now < retry)
+                return null;
+            _missing.Remove(hash);
+        }
+
+        if (!_requested.ContainsKey(hash))
+        {
+            _requested[hash] = now;
             RaiseNetworkEvent(new WGPaintingArtRequestEvent(new List<string> { hash }));
         }
 
@@ -124,7 +136,7 @@ public sealed partial class WGPaintingArtSystem : EntitySystem
         _requested.Remove(ev.Hash);
         if (ev.Pixels == null || ev.Pixels.Length != ev.Width * ev.Height * 4 || ev.Width <= 0 || ev.Height <= 0)
         {
-            _missing.Add(ev.Hash);
+            _missing[ev.Hash] = _timing.RealTime + MissingDelay;
             return;
         }
 

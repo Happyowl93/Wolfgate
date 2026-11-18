@@ -38,7 +38,7 @@ public sealed class WGPaintingAdminWindow : DefaultWindow
     };
     private readonly Label _previewNote = new() { FontColorOverride = Dim, HorizontalAlignment = HAlignment.Center };
     private readonly Button _block = new();
-    private readonly ConfirmButton _delete;
+    private ConfirmButton _delete;
     private readonly BoxContainer _actions = new() { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 6 };
 
     private WGPaintingAdminEntry? _selected;
@@ -66,16 +66,7 @@ public sealed class WGPaintingAdminWindow : DefaultWindow
             if (_selected is { } entry)
                 OnBlock?.Invoke(entry.Hash, !entry.Blocked);
         };
-        _delete = new ConfirmButton
-        {
-            Text = Loc.GetString("wg-painting-admin-delete"),
-            ConfirmationText = Loc.GetString("wg-painting-admin-delete-confirm"),
-        };
-        _delete.OnPressed += _ =>
-        {
-            if (_selected is { } entry)
-                OnDelete?.Invoke(entry.Hash);
-        };
+        _delete = DeleteButton();
         _actions.AddChild(_block);
         _actions.AddChild(_delete);
 
@@ -120,6 +111,21 @@ public sealed class WGPaintingAdminWindow : DefaultWindow
         root.AddChild(body);
         Contents.AddChild(root);
         ShowSelected(null, null);
+    }
+
+    private ConfirmButton DeleteButton()
+    {
+        var button = new ConfirmButton
+        {
+            Text = Loc.GetString("wg-painting-admin-delete"),
+            ConfirmationText = Loc.GetString("wg-painting-admin-delete-confirm"),
+        };
+        button.OnPressed += _ =>
+        {
+            if (_selected is { } entry)
+                OnDelete?.Invoke(entry.Hash);
+        };
+        return button;
     }
 
     private void Search()
@@ -221,6 +227,14 @@ public sealed class WGPaintingAdminWindow : DefaultWindow
 
     private void ShowSelected(WGPaintingAdminEntry? entry, byte[]? pixels)
     {
+        // A delete armed for one painting must not confirm another; the button has no reset, so it is replaced.
+        if (_delete.IsConfirming && entry?.Hash != _selected?.Hash)
+        {
+            _actions.RemoveChild(_delete);
+            _delete = DeleteButton();
+            _actions.AddChild(_delete);
+        }
+
         _selected = entry;
         _details.RemoveAllChildren();
         _actions.Visible = entry != null;

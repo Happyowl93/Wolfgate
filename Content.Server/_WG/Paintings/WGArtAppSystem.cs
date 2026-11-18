@@ -218,7 +218,7 @@ public sealed partial class WGArtAppSystem : EntitySystem
         if (TerminatingOrDeleted(user))
             return;
 
-        if (pixels == null)
+        if (pixels == null || !_store.TryGetEntry(hash, out _))
         {
             _popup.PopupEntity(Loc.GetString("wg-art-app-order-gone"), user, user, PopupType.SmallCaution);
             Refresh(ent, loader);

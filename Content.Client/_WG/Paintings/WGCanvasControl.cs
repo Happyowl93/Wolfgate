@@ -3,6 +3,7 @@ using Content.Shared._WG.Paintings;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Shared.Input;
+using Robust.Shared.Timing;
 
 namespace Content.Client._WG.Paintings;
 
@@ -10,7 +11,7 @@ namespace Content.Client._WG.Paintings;
 /// A canvas's pixels, painted with the left button and erased with the right. Strokes show at once and are
 /// collected for the window to send.
 /// </summary>
-public sealed class WGCanvasControl : Control
+public sealed partial class WGCanvasControl : Control
 {
     public enum Tool : byte { Pencil, Fill, Picker }
 
@@ -50,6 +51,16 @@ public sealed class WGCanvasControl : Control
     /// <summary>Pixels erased since the window last sent them.</summary>
     public readonly HashSet<ushort> Erased = new();
 
+    /// <summary>How long a sent stroke shows over server states that lack it.</summary>
+    private static readonly TimeSpan InFlightTimeout = TimeSpan.FromSeconds(2);
+
+    /// <summary>Sent pixels the server hasn't confirmed, with the colour sent and when.</summary>
+    private readonly Dictionary<ushort, (Color Colour, uint Stored, TimeSpan Sent)> _inFlight = new();
+
+    private readonly byte[] _scratch = new byte[4];
+
+    [Dependency] private IGameTiming _timing = default!;
+
     private int _width;
     private int _height;
     private byte[] _pixels = Array.Empty<byte>();
@@ -59,10 +70,31 @@ public sealed class WGCanvasControl : Control
 
     public WGCanvasControl()
     {
+        IoCManager.InjectDependencies(this);
         MouseFilter = MouseFilterMode.Stop;
     }
 
-    /// <summary>Shows the server's pixels, with strokes not yet sent laid over them.</summary>
+    /// <summary>Notes the strokes about to be sent, so they keep showing until a server state has them.</summary>
+    public void MarkSent()
+    {
+        var now = _timing.RealTime;
+        foreach (var index in Erased)
+            _inFlight[index] = (WGPaintingRules.Blank, Stored(WGPaintingRules.Blank), now);
+        if (Brush is { } brush)
+        {
+            foreach (var index in Painted)
+                _inFlight[index] = (brush, Stored(brush), now);
+        }
+    }
+
+    /// <summary>A colour as the four bytes a canvas stores it in.</summary>
+    private uint Stored(Color colour)
+    {
+        WGPaintingRules.Write(_scratch, 0, colour);
+        return BitConverter.ToUInt32(_scratch, 0);
+    }
+
+    /// <summary>Shows the server's pixels, with strokes it doesn't have yet laid over them.</summary>
     public void SetPixels(int width, int height, byte[] pixels)
     {
         if (width != _width || height != _height)
@@ -74,9 +106,19 @@ public sealed class WGCanvasControl : Control
             MinSize = new Vector2(width * cell + margin, height * cell + margin);
             Painted.Clear();
             Erased.Clear();
+            _inFlight.Clear();
         }
 
         _pixels = (byte[]) pixels.Clone();
+        var now = _timing.RealTime;
+        foreach (var (index, sent) in _inFlight)
+        {
+            if (BitConverter.ToUInt32(_pixels, index * 4) == sent.Stored || now - sent.Sent > InFlightTimeout)
+                _inFlight.Remove(index);
+            else
+                WGPaintingRules.Write(_pixels, index * 4, sent.Colour);
+        }
+
         foreach (var index in Erased)
             WGPaintingRules.Write(_pixels, index * 4, WGPaintingRules.Blank);
         if (Brush is { } brush)

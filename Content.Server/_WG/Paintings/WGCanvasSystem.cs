@@ -10,6 +10,7 @@ using Content.Shared.Popups;
 using Robust.Server.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Player;
+using Robust.Shared.Utility;
 
 namespace Content.Server._WG.Paintings;
 
@@ -89,7 +90,7 @@ public sealed partial class WGCanvasSystem : EntitySystem
         }
 
         args.PushMarkup(Loc.GetString("wg-canvas-examine-finished",
-            ("title", comp.Title), ("artist", comp.Artist)));
+            ("title", FormattedMessage.EscapeText(comp.Title)), ("artist", FormattedMessage.EscapeText(comp.Artist))));
         if (comp.Print)
             args.PushMarkup(Loc.GetString("wg-canvas-examine-print"));
     }

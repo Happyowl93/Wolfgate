@@ -173,7 +173,8 @@ public sealed partial class WGPaintingStoreSystem : EntitySystem
         try
         {
             var pixels = await _db.GetPaintingPixelsAsync(hash);
-            if (pixels != null && _index.TryGetValue(hash, out var entry)
+            // Checked again, as the painting may have been blocked or deleted while it loaded.
+            if (pixels != null && _index.TryGetValue(hash, out var entry) && !entry.Blocked
                 && pixels.Length == entry.Width * entry.Height * 4)
             {
                 _pixels[hash] = pixels;
@@ -264,7 +265,9 @@ public sealed partial class WGPaintingStoreSystem : EntitySystem
         if (!_index.TryGetValue(hash, out var entry) || entry.Blocked || entry.Author != userId)
             return false;
 
-        await Forget(hash);
+        if (!await Forget(hash))
+            return false;
+
         _adminLog.Add(LogType.WGPainting, LogImpact.Low,
             $"{ToPrettyString(user):player} removed their painting \"{entry.Title}\" ({hash}) from the catalogue");
         return true;
@@ -276,20 +279,18 @@ public sealed partial class WGPaintingStoreSystem : EntitySystem
         if (!_index.TryGetValue(hash, out var entry))
             return false;
 
-        await Forget(hash);
+        if (!await Forget(hash))
+            return false;
+
         DeleteCopies(hash);
         _adminLog.Add(LogType.WGPainting, LogImpact.High,
             $"{actor} deleted painting \"{entry.Title}\" by {entry.Artist} ({hash}) from the database");
         return true;
     }
 
-    /// <summary>Drops a painting from the index and the database.</summary>
-    private async Task Forget(string hash)
+    /// <summary>Drops a painting from the database, then the index. False when the database delete failed.</summary>
+    private async Task<bool> Forget(string hash)
     {
-        _index.Remove(hash);
-        _pixels.Remove(hash);
-        RebuildCatalogue();
-        Changed?.Invoke();
         try
         {
             await _db.DeletePaintingAsync(hash);
@@ -297,7 +298,14 @@ public sealed partial class WGPaintingStoreSystem : EntitySystem
         catch (Exception e)
         {
             Log.Error($"Deleting painting {hash} threw: {e}");
+            return false;
         }
+
+        _index.Remove(hash);
+        _pixels.Remove(hash);
+        RebuildCatalogue();
+        Changed?.Invoke();
+        return true;
     }
 
     private void DeleteCopies(string hash)
@@ -392,6 +400,8 @@ public sealed partial class WGPaintingStoreSystem : EntitySystem
             if (session.Status != SessionStatus.InGame && session.Status != SessionStatus.Connected)
                 return;
 
+            if (!TryGetEntry(hash, out _))
+                pixels = null;
             _index.TryGetValue(hash, out var entry);
             RaiseNetworkEvent(new WGPaintingArtEvent(hash, entry?.Width ?? 0, entry?.Height ?? 0, pixels), session);
         }

@@ -9,6 +9,7 @@ using Robust.Server.GameObjects;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
+using Robust.Shared.Utility;
 
 namespace Content.Server._WG.Paintings;
 
@@ -95,7 +96,7 @@ public sealed partial class WGPaintingFrameSystem : EntitySystem
             return;
 
         var pixels = await _store.GetPixelsAsync(entry.Hash);
-        if (pixels == null || TerminatingOrDeleted(ent) || Framed(ent) != null)
+        if (pixels == null || !_store.TryGetEntry(entry.Hash, out _) || TerminatingOrDeleted(ent) || Framed(ent) != null)
             return;
 
         if (_canvas.SpawnPrint(entry, pixels, Transform(ent).Coordinates) is not { } print)
@@ -190,7 +191,8 @@ public sealed partial class WGPaintingFrameSystem : EntitySystem
         if (Framed(ent) is { } canvas)
         {
             args.PushMarkup(Loc.GetString("wg-canvas-examine-finished",
-                ("title", canvas.Comp.Title), ("artist", canvas.Comp.Artist)));
+                ("title", FormattedMessage.EscapeText(canvas.Comp.Title)),
+                ("artist", FormattedMessage.EscapeText(canvas.Comp.Artist))));
             args.PushMarkup(Loc.GetString("wg-painting-frame-examine-view"));
         }
         else

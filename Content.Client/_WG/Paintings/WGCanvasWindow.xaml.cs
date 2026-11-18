@@ -239,6 +239,7 @@ public sealed partial class WGCanvasWindow : FancyWindow
 
         if (_pending is { } colour && CanvasView.Painted.Count > 0)
             OnPickColor?.Invoke(colour);
+        CanvasView.MarkSent();
         SendChunks(CanvasView.Painted, false);
         SendChunks(CanvasView.Erased, true);
     }

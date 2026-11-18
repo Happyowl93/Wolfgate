@@ -34,7 +34,7 @@ public sealed partial class WGPaintingAdminEui : BaseEui
 
     public override async void Opened()
     {
-        _store.Changed += StateDirty;
+        _store.Changed += OnStoreChanged;
         StateDirty();
         if (await _store.LoadPlayerNames() && !IsShutDown)
             StateDirty();
@@ -42,7 +42,19 @@ public sealed partial class WGPaintingAdminEui : BaseEui
 
     public override void Closed()
     {
-        _store.Changed -= StateDirty;
+        _store.Changed -= OnStoreChanged;
+    }
+
+    /// <summary>Refreshes the results, or closes the browser for a player who is no longer a moderator.</summary>
+    private void OnStoreChanged()
+    {
+        if (!_admin.HasAdminFlag(Player, AdminFlags.Moderator))
+        {
+            Close();
+            return;
+        }
+
+        StateDirty();
     }
 
     public override EuiStateBase GetNewState()
@@ -118,21 +130,32 @@ public sealed partial class WGPaintingAdminEui : BaseEui
         };
     }
 
-    /// <summary>The query's words, with quoted phrases kept whole.</summary>
+    /// <summary>The query's words, with quoted phrases kept whole and <c>field:"a phrase"</c> kept together.</summary>
     private static IEnumerable<string> Terms(string query)
     {
         var parts = query.Split('"');
+        var field = string.Empty;
         for (var i = 0; i < parts.Length; i++)
         {
             if (i % 2 == 1)
             {
                 if (parts[i].Trim() is { Length: > 0 } phrase)
-                    yield return phrase;
+                    yield return field + phrase;
+                field = string.Empty;
                 continue;
             }
 
-            foreach (var word in parts[i].Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                yield return word;
+            var words = parts[i].Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var count = words.Length;
+            // A field word touching the next quote qualifies the phrase in it.
+            if (i + 1 < parts.Length && count > 0 && parts[i].EndsWith(':') && words[^1].Length > 1)
+            {
+                field = words[^1];
+                count--;
+            }
+
+            for (var w = 0; w < count; w++)
+                yield return words[w];
         }
     }
 

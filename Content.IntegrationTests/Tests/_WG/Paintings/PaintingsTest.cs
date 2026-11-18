@@ -247,6 +247,8 @@ public sealed class PaintingsTest
             Assert.That(Found(tag), Does.Contain(hash), "A plain word matches the title.");
             Assert.That(Found($"title:{tag} size:36x24"), Does.Contain(hash), "Field words combine.");
             Assert.That(Found($"\"{tag} at dusk\""), Does.Contain(hash), "A quoted phrase matches whole.");
+            Assert.That(Found($"title:\"{tag} at dusk\""), Does.Contain(hash), "A field word qualifies a phrase.");
+            Assert.That(Found($"artist:\"{tag} at dusk\""), Is.Empty, "A qualified phrase only looks in its field.");
             Assert.That(Found($"hash:{hash[..12]}"), Is.EqualTo(new[] { hash }));
             Assert.That(Found($"{tag} size:11x11"), Is.Empty, "Every word must match.");
             Assert.That(Found($"artist:{tag}"), Is.Empty, "A field word only looks in its field.");
