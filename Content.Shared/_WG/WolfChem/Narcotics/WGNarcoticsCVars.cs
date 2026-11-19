@@ -28,7 +28,7 @@ public sealed class WGNarcoticsCVars
     public static readonly CVarDef<float> HeatScale =
         CVarDef.Create("wg.narcotics.heat_scale", 250000f, CVar.SERVERONLY);
 
-    /// <summary>The least share of its value a buyer pays, however hot the seller: what a dump sells for.</summary>
+    /// <summary>The least share of its value a buyer pays below <see cref="HeatCap"/>.</summary>
     public static readonly CVarDef<float> HeatFloor =
         CVarDef.Create("wg.narcotics.heat_floor", 0.15f, CVar.SERVERONLY);
 
@@ -41,8 +41,9 @@ public sealed class WGNarcoticsCVars
         CVarDef.Create("wg.narcotics.heat_cooling", 150f, CVar.SERVERONLY);
 
     /// <summary>
-    /// The most heat a seller holds, so the longest wait back to full price is this over the cooling. Keep it past
-    /// where the price reaches its floor (free + scale * ln(1 / floor)), or a seller at the cap sells on above the floor.
+    /// The most heat a seller holds, and the heat past which a buyer pays nothing: the market is saturated, so a dump
+    /// of any size earns at most what lies under it (about 0.7M from cold at the defaults). The longest wait back to
+    /// full price is this over the cooling.
     /// </summary>
     public static readonly CVarDef<float> HeatCap =
         CVarDef.Create("wg.narcotics.heat_cap", 1000000f, CVar.SERVERONLY);

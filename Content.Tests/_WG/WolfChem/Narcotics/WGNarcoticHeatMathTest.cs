@@ -50,6 +50,21 @@ public sealed class WGNarcoticHeatMathTest
     }
 
     [Test]
+    public void NothingPastTheCapIsPaid()
+    {
+        const double cap = 500_000;
+        var capped = WGNarcoticHeatMath.Payout(0, cap, Free, Scale, Floor, cap);
+        Assert.Multiple(() =>
+        {
+            Assert.That(WGNarcoticHeatMath.Payout(0, 100_000_000, Free, Scale, Floor, cap), Is.EqualTo(capped).Within(0.01),
+                "A dump earns no more than what lies under the cap.");
+            Assert.That(WGNarcoticHeatMath.Payout(cap, 10_000, Free, Scale, Floor, cap), Is.Zero);
+            Assert.That(WGNarcoticHeatMath.Payout(450_000, 100_000, Free, Scale, Floor, cap),
+                Is.EqualTo(WGNarcoticHeatMath.Payout(450_000, 50_000, Free, Scale, Floor)).Within(0.01));
+        });
+    }
+
+    [Test]
     public void OnlyWhatIsSoldPastALineCounts()
     {
         Assert.Multiple(() =>
