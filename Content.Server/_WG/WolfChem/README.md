@@ -52,9 +52,9 @@ for it and the Medical guide a player page.
 
 Selling at a cargo pallet is where the risk is (`WGNarcoticHeatSystem`). Each seller has a heat of their own: the street
 value they sold lately, cooling at `wg.narcotics.heat_cooling` a second and capped at `heat_cap`. A buyer pays in full up
-to `heat_free` and then less and less, down to `heat_floor` of the value, and nothing for what is sold past `heat_cap`
-(`WGNarcoticHeatMath.Payout`), so the most a seller earns at full price is the cooling rate and a stockpile sold at
-once, or held to the end of the round, fetches about 0.7M however large it is. The fall is gentle (`heat_scale`), so selling past the line still pays: what it costs is exposure. The line
+to `heat_free` and then less and less, down to `heat_floor` of the value, and only `heat_glut_floor` for what is sold
+past `heat_cap`, where the market is saturated (`WGNarcoticHeatMath.Payout`), so the most a seller earns at full price
+is the cooling rate and a stockpile sold at once, or held to the end of the round, fetches a small fraction. The fall is gentle (`heat_scale`), so selling past the line still pays: what it costs is exposure. The line
 itself is fuzzy: each seller's sits up to `heat_fuzz` of `heat_free` either side of it, holds through a visit and is
 drawn anew once they have kept from selling for `heat_fuzz_time`, so a load can't be sized to it beforehand. Heat follows the player, not the body, and nobody else's price moves. The console shows the cut price, and the
 buyer's manner (a popup only the seller sees, before and after a sale) tells them which tier they are in, and when

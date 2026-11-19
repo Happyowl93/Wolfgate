@@ -41,12 +41,18 @@ public sealed class WGNarcoticsCVars
         CVarDef.Create("wg.narcotics.heat_cooling", 150f, CVar.SERVERONLY);
 
     /// <summary>
-    /// The most heat a seller holds, and the heat past which a buyer pays nothing: the market is saturated, so a dump
-    /// of any size earns at most what lies under it (about 0.7M from cold at the defaults). The longest wait back to
-    /// full price is this over the cooling.
+    /// The most heat a seller holds, and the heat past which the market is saturated and a buyer pays only
+    /// <see cref="HeatGlutFloor"/>. The longest wait back to full price is this over the cooling.
     /// </summary>
     public static readonly CVarDef<float> HeatCap =
         CVarDef.Create("wg.narcotics.heat_cap", 1000000f, CVar.SERVERONLY);
+
+    /// <summary>
+    /// The share of its value a buyer pays for what is sold past <see cref="HeatCap"/>. At 0.02 a cold dump of 145M
+    /// street value fetches about 3.6M, near what careful selling earns over a whole round.
+    /// </summary>
+    public static readonly CVarDef<float> HeatGlutFloor =
+        CVarDef.Create("wg.narcotics.heat_glut_floor", 0.02f, CVar.SERVERONLY);
 
     /// <summary>Heat past which a tip describes the seller and customs puts a warrant out on them.</summary>
     public static readonly CVarDef<float> HeatHot =

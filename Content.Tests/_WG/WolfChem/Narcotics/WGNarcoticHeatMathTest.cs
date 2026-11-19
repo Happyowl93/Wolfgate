@@ -50,17 +50,20 @@ public sealed class WGNarcoticHeatMathTest
     }
 
     [Test]
-    public void NothingPastTheCapIsPaid()
+    public void PastTheCapPaysTheGlutFloor()
     {
         const double cap = 500_000;
-        var capped = WGNarcoticHeatMath.Payout(0, cap, Free, Scale, Floor, cap);
+        const double glut = 0.01;
+        var capped = WGNarcoticHeatMath.Payout(0, cap, Free, Scale, Floor, cap, glut);
         Assert.Multiple(() =>
         {
-            Assert.That(WGNarcoticHeatMath.Payout(0, 100_000_000, Free, Scale, Floor, cap), Is.EqualTo(capped).Within(0.01),
-                "A dump earns no more than what lies under the cap.");
-            Assert.That(WGNarcoticHeatMath.Payout(cap, 10_000, Free, Scale, Floor, cap), Is.Zero);
-            Assert.That(WGNarcoticHeatMath.Payout(450_000, 100_000, Free, Scale, Floor, cap),
-                Is.EqualTo(WGNarcoticHeatMath.Payout(450_000, 50_000, Free, Scale, Floor)).Within(0.01));
+            Assert.That(WGNarcoticHeatMath.Payout(0, 100_000_000, Free, Scale, Floor, cap, glut),
+                Is.EqualTo(capped + (100_000_000 - cap) * glut).Within(0.01),
+                "What is sold past the cap pays the glut floor.");
+            Assert.That(WGNarcoticHeatMath.Payout(cap, 10_000, Free, Scale, Floor, cap, glut), Is.EqualTo(100).Within(0.01));
+            Assert.That(WGNarcoticHeatMath.Payout(cap, 10_000, Free, Scale, Floor, cap), Is.Zero, "No glut floor pays nothing.");
+            Assert.That(WGNarcoticHeatMath.Payout(450_000, 100_000, Free, Scale, Floor, cap, glut),
+                Is.EqualTo(WGNarcoticHeatMath.Payout(450_000, 50_000, Free, Scale, Floor) + 50_000 * glut).Within(0.01));
         });
     }
 

@@ -13,9 +13,19 @@ public sealed class WGPurityTintSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<WGPurityTintComponent, MapInitEvent>((ent, ref MapInitEvent _) => Refresh(ent),
+        SubscribeLocalEvent<WGPurityTintComponent, MapInitEvent>(OnMapInit,
             after: new[] { typeof(SolutionContainerSystem), typeof(WGSolutionPuritySystem) });
-        SubscribeLocalEvent<WGPurityTintComponent, SolutionContainerChangedEvent>((ent, ref SolutionContainerChangedEvent _) => Refresh(ent));
+        SubscribeLocalEvent<WGPurityTintComponent, SolutionContainerChangedEvent>(OnSolutionChanged);
+    }
+
+    private void OnMapInit(Entity<WGPurityTintComponent> ent, ref MapInitEvent args)
+    {
+        Refresh(ent);
+    }
+
+    private void OnSolutionChanged(Entity<WGPurityTintComponent> ent, ref SolutionContainerChangedEvent args)
+    {
+        Refresh(ent);
     }
 
     /// <summary>Shows the tint if the reagent is present at or above the threshold grade.</summary>
