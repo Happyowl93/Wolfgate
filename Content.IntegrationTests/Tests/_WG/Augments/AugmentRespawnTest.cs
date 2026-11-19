@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Content.Client.Lobby;
+using Content.Server._NF.CryoSleep;
 using Content.Server._WG.Augments;
 using Content.Server.Preferences.Managers;
 using Content.Shared._WG.Augments;
@@ -22,8 +23,8 @@ namespace Content.IntegrationTests.Tests._WG.Augments;
 /// <summary>
 /// A player who respawns instead of going into cryo loses the augments their character spawned with and their
 /// unlocks, and keeps what they bought in the creator since; a player who hasn't spawned a character loses nothing.
-/// At the end of the round only a character alive in the body it spawned in keeps them. A character played as a borg
-/// is left as it was.
+/// At the end of the round only a character alive in the body it spawned in keeps them, or one that went into cryo
+/// and didn't wake. A character played as a borg is left as it was.
 /// </summary>
 [TestFixture]
 [TestOf(typeof(WGAugmentSystem))]
@@ -216,6 +217,33 @@ public sealed class AugmentRespawnTest
             Assert.That(Stored().Augments, Is.Empty);
         });
         await Clean(mind, mob, clone);
+
+        // Went into cryo alive, then back to the lobby, which deletes the stored body: the eyes are kept.
+        (mind, mob, played) = await Spawn();
+        await server.WaitPost(() => entities.EventBus.RaiseLocalEvent(mob, new CryosleepBeforeMindRemovedEvent(mob, userId), true));
+        await Clean(mind, mob);
+        await Run(() => augments.SaveAllAtRoundEnd());
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored().AugmentUnlocks, Is.EquivalentTo(new[] { eyes }), "A character that left from cryo lost its eyes.");
+            Assert.That(Stored().Augments, Contains.Key(WGAugmentSlot.Eyes));
+        });
+
+        // Woke up from cryo and died: it is in play again, so everything is gone.
+        (mind, mob, played) = await Spawn();
+        await server.WaitPost(() =>
+        {
+            entities.EventBus.RaiseLocalEvent(mob, new CryosleepBeforeMindRemovedEvent(mob, userId), true);
+            entities.EventBus.RaiseLocalEvent(mob, new CryosleepWakeUpEvent(mob, userId), true);
+            mobState.ChangeMobState(mob, MobState.Dead);
+        });
+        await Run(() => augments.SaveAllAtRoundEnd());
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Stored().AugmentUnlocks, Is.Empty, "A character that woke from cryo and died kept its eyes.");
+            Assert.That(Stored().Augments, Is.Empty);
+        });
+        await Clean(mind, mob);
 
         await pair.CleanReturnAsync();
     }

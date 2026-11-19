@@ -26,7 +26,8 @@ namespace Content.Server._WG.Augments;
 /// Keeps a character's augments in step with its body. When it goes into cryo or the round ends with it alive in the
 /// body it spawned in, the paid-for cyberware still in that body is written to its profile, so what was lost is gone
 /// and what the round put in without being paid for ends with the round. A character that respawns, is dead at the
-/// end or ends up in another body loses all of it. Which of it sells back in the creator is in
+/// end or ends up in another body loses all of it; one asleep in cryo is out of play until it wakes, so nothing
+/// after takes them. Which of it sells back in the creator is in
 /// <c>WGAugmentSystem.Paid.cs</c>.
 /// </summary>
 public sealed partial class WGAugmentSystem
@@ -47,13 +48,21 @@ public sealed partial class WGAugmentSystem
 
     private readonly Dictionary<NetUserId, PlayedCharacter> _played = new();
 
+    /// <summary>Characters asleep in cryo: saved going in, and back in play only if they wake.</summary>
+    private readonly Dictionary<NetUserId, PlayedCharacter> _asleep = new();
+
     private void InitializePersistence()
     {
         // After traits, so augments under a trait's limbs are put back before the paid marks go on.
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete, after: new[] { typeof(TraitSystem) });
         SubscribeLocalEvent<BodyComponent, CryosleepBeforeMindRemovedEvent>(OnCryosleep);
+        SubscribeLocalEvent<BodyComponent, CryosleepWakeUpEvent>(OnCryoWakeUp);
         SubscribeLocalEvent<RoundEndedEvent>(OnRoundEnded);
-        SubscribeLocalEvent<RoundRestartCleanupEvent>(_ => _played.Clear());
+        SubscribeLocalEvent<RoundRestartCleanupEvent>(_ =>
+        {
+            _played.Clear();
+            _asleep.Clear();
+        });
     }
 
     private void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent args)
@@ -81,6 +90,7 @@ public sealed partial class WGAugmentSystem
     internal void Track(NetUserId user, PlayedCharacter character)
     {
         _played[user] = character;
+        _asleep.Remove(user);
     }
 
     private void OnCryosleep(EntityUid uid, BodyComponent body, CryosleepBeforeMindRemovedEvent args)
@@ -91,19 +101,34 @@ public sealed partial class WGAugmentSystem
             && mind == played.Mind)
         {
             // A clone going to sleep is not the body the augments were in.
-            if (uid == played.Body)
-                SaveBody(user, played, uid);
-            else
+            if (uid != played.Body)
+            {
                 Forfeit(user, played, "wg-augments-forfeit-dead");
+                return;
+            }
+
+            // Out of play from here: the stored body is deleted when its player goes to the lobby or it expires.
+            SaveBody(user, played, uid);
+            _played.Remove(user);
+            _asleep[user] = played;
         }
+    }
+
+    private void OnCryoWakeUp(EntityUid uid, BodyComponent body, CryosleepWakeUpEvent args)
+    {
+        if (args.User is { } user && _asleep.Remove(user, out var played) && uid == played.Body)
+            _played[user] = played;
     }
 
     private void OnRoundEnded(RoundEndedEvent args)
     {
-        foreach (var (user, played) in _played.ToList())
-        {
-            SaveAtRoundEnd(user, played);
-        }
+        SaveAllAtRoundEnd();
+    }
+
+    /// <summary>Saves or forfeits every character in play. One asleep in cryo was saved going in.</summary>
+    internal Task SaveAllAtRoundEnd()
+    {
+        return Task.WhenAll(_played.ToList().Select(p => SaveAtRoundEnd(p.Key, p.Value)).OfType<Task>().ToList());
     }
 
     /// <summary>
