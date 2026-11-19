@@ -62,8 +62,8 @@ public sealed partial class HumanoidCharacterProfile
     private void EnsureAugmentsValid(IPrototypeManager proto, IComponentFactory factory)
     {
         // Crafted network data can deliver null.
-        Augments = WGAugmentRules.Validate(Species, Augments, TraitPreferences, proto, factory);
-        AugmentImplants = WGAugmentRules.ValidateImplants(Species, Augments, AugmentImplants, TraitPreferences, proto, factory);
+        Augments = WGAugmentRules.Validate(Species, Augments, TraitPreferences, proto, factory, Biotype);
+        AugmentImplants = WGAugmentRules.ValidateImplants(Species, Augments, AugmentImplants, TraitPreferences, proto, factory, Biotype);
         AugmentUnlocks = new((AugmentUnlocks ?? new()).Where(u => proto.HasIndex(u)));
         AugmentFound = new((AugmentFound ?? new()).Where(AugmentUnlocks.Contains));
     }

@@ -298,6 +298,10 @@ public sealed class AugmentRespawnTest
                 station = entities.SpawnEntity(null, map.GridCoords);
                 mind = minds.CreateMind(userId).Owner;
                 minds.TransferTo(mind, mob);
+
+                // A real spawn loads the profile first; a pick that never reached the body isn't taken with it.
+                var apply = new WGApplyAugmentsEvent(Stored());
+                entities.EventBus.RaiseLocalEvent(mob, ref apply);
                 entities.EventBus.RaiseLocalEvent(mob,
                     new PlayerSpawnCompleteEvent(mob, session, null, false, true, 1, station, Stored()),
                     true);

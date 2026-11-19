@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Content.Shared._WG.Augments;
+using Content.Shared._WG.Biotype;
 using Content.Shared.Humanoid;
 using Content.Shared.Traits;
 using Robust.Shared.GameObjects;
@@ -102,6 +103,28 @@ public sealed class AugmentRulesTest
             Assert.That(WGAugmentRules.Synthetic("Human", WGAugmentSlot.LeftArm, natural,
                 WGAugmentRules.ClaimedSlots(new ProtoId<TraitPrototype>[] { "PrybarProsthetics" }, proto), proto, factory));
             Assert.That(WGAugmentRules.Synthetic("IPC", WGAugmentSlot.LeftArm, natural, unclaimed, proto, factory));
+
+            // A converted character is ruled by its biotype's body: a synthetic human has the chassis, with no heart
+            // to replace and no flesh for an organic implant.
+            Assert.That(WGAugmentRules.SlotAvailable("Human", WGAugmentSlot.Heart, proto, factory));
+            Assert.That(WGAugmentRules.SlotAvailable("Human", WGAugmentSlot.Heart, proto, factory, WGBiotype.Synthetic), Is.False);
+            Assert.That(WGAugmentRules.SlotAvailable("Human", WGAugmentSlot.Eyes, proto, factory, WGBiotype.Synthetic));
+            Assert.That(WGAugmentRules.AugmentsFor("Human", WGAugmentSlot.Heart, proto, factory, WGBiotype.Synthetic), Is.Empty);
+            Assert.That(WGAugmentRules.Validate("Human", new Dictionary<WGAugmentSlot, WGAugmentChoice>
+            {
+                [WGAugmentSlot.Heart] = new("WGAugmentSandevistan", null),
+                [WGAugmentSlot.Eyes] = new("WGAugmentCyberEyes", null),
+            }, none, proto, factory, WGBiotype.Synthetic).Keys, Is.EquivalentTo(new[] { WGAugmentSlot.Eyes }));
+            Assert.That(WGAugmentRules.Synthetic("Human", WGAugmentSlot.LeftArm, natural, unclaimed, proto, factory, WGBiotype.Synthetic));
+            Assert.That(WGAugmentRules.Synthetic("IPC", WGAugmentSlot.LeftArm, natural, unclaimed, proto, factory, WGBiotype.Organic), Is.False);
+            Assert.That(WGAugmentRules.ValidateImplants("Human", natural,
+                    new ProtoId<WGAugmentPrototype>[] { "WGAugmentLeftMantisBlade", "WGAugmentAdrenalBooster" },
+                    none, proto, factory, WGBiotype.Synthetic).Select(i => i.Id),
+                Is.EquivalentTo(new[] { "WGAugmentLeftMantisBlade" }));
+            Assert.That(WGAugmentRules.ValidateImplants("Human", natural,
+                    new ProtoId<WGAugmentPrototype>[] { "WGAugmentLeftMantisBlade", "WGAugmentAdrenalBooster" },
+                    none, proto, factory).Select(i => i.Id),
+                Is.EquivalentTo(new[] { "WGAugmentAdrenalBooster" }));
 
             // Better arms hold more implants; a missing one none.
             Assert.That(WGAugmentRules.ImplantSlots(WGAugmentSlot.LeftArm, natural, unclaimed, proto), Is.EqualTo(1));

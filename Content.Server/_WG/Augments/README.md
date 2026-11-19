@@ -50,6 +50,12 @@ hand or foot with no pick of its own counts as its limb's (`WGAugmentRules.LimbA
 implant that no longer fits after a limb changes is dropped. They are stored in the augments column as `Implant:`
 entries; the old one-per-slot entries (`LeftArmImplant`, `Dermal`, ...) still load.
 
+The rules read the body a character is built with, not its species': one converted to a biotype that isn't its
+species' own gets that biotype's body (`WGAugmentRules.Body`), so a synthetic human has the chassis' parts, with no
+heart to replace and no flesh for an organic implant. Changing the biotype in the creator drops the picks the new
+body can't take. A pick that still fails to reach the body at spawn (`PlayedCharacter.Unfitted`, logged as a
+warning) was never there to lose: a save or a forfeit leaves it and its unlock on the profile.
+
 Wolfgate's own cyberware is in `implants.yml`. The tool arm and the finger lighter are deployables
 (`WGDeployableImplantComponent`, one subclass each so a part can hold both): `WGDeployableImplantSystem` gives the body
 an action that folds the implant's item into that side's hand and back, and an EMP folds it in and locks it. The tool

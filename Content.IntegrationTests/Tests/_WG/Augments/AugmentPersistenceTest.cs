@@ -8,8 +8,10 @@ using Content.Server._WG.Augments;
 using Content.Server.Cargo.Systems;
 using Content.Server.Database;
 using Content.Server.Preferences.Managers;
+using Content.Server.Station.Systems;
 using Content.Shared._Goobstation.Autosurgeon;
 using Content.Shared._WG.Augments;
+using Content.Shared._WG.Biotype;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
@@ -222,6 +224,74 @@ public sealed class AugmentPersistenceTest
         var stored = (HumanoidCharacterProfile) (await db.GetPlayerPreferencesAsync(userId, default))!.Characters[slot];
         Assert.That(stored.Augments.Keys, Is.EquivalentTo(new[] { WGAugmentSlot.Eyes }), "The lost leg is still on the profile.");
         Assert.That(stored.AugmentUnlocks.Select(u => u.Id), Is.EquivalentTo(new[] { "WGAugmentCyberEyes" }));
+
+        await server.WaitPost(() => entities.DeleteEntity(mob));
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// A paid-for heart the body had no slot for never reached it, so neither a save nor a forfeit takes it or its
+    /// unlock; the eyes that did go in are saved as before.
+    /// </summary>
+    [Test]
+    public async Task UnfittedTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entities = server.EntMan;
+        var db = server.ResolveDependency<IServerDbManager>();
+        var augments = server.System<WGAugmentSystem>();
+        var spawning = server.System<StationSpawningSystem>();
+        var map = await pair.CreateTestMap();
+        var userId = new NetUserId(Guid.NewGuid());
+        const int slot = 0;
+
+        // A synthetic human is built as the chassis, which has eyes and no heart.
+        var picked = new Dictionary<WGAugmentSlot, WGAugmentChoice>
+        {
+            [WGAugmentSlot.Heart] = new("WGAugmentSandevistan", null),
+            [WGAugmentSlot.Eyes] = new("WGAugmentCyberEyes", null),
+        };
+        var profile = HumanoidCharacterProfile.DefaultWithSpecies("Human")
+            .WithBiotype(WGBiotype.Synthetic)
+            .WithAugments(picked)
+            .WithAugmentUnlocks(new ProtoId<WGAugmentPrototype>[] { "WGAugmentSandevistan", "WGAugmentCyberEyes" });
+        await db.InitPrefsAsync(userId, profile, default);
+
+        EntityUid mob = default;
+        HashSet<ProtoId<WGAugmentPrototype>> unfitted = new();
+        await server.WaitPost(() =>
+        {
+            mob = spawning.SpawnPlayerMob(map.GridCoords, job: null, profile, station: null);
+            unfitted = augments.Unfitted(mob, profile);
+        });
+        Assert.That(unfitted.Select(u => u.Id), Is.EquivalentTo(new[] { "WGAugmentSandevistan" }));
+
+        var played = new WGAugmentSystem.PlayedCharacter(slot, EntityUid.Invalid, mob, new(picked),
+            new HashSet<ProtoId<WGAugmentPrototype>>()) { Unfitted = unfitted };
+        Task? save = null;
+        await server.WaitPost(() => save = augments.SaveBody(userId, played, mob));
+        if (save != null)
+        {
+            await PoolManager.WaitUntil(server, () => save.IsCompleted, maxTicks: 300);
+            Assert.That(save.IsCompletedSuccessfully, $"The save failed: {save.Exception}");
+        }
+
+        var stored = (HumanoidCharacterProfile) (await db.GetPlayerPreferencesAsync(userId, default))!.Characters[slot];
+        Assert.That(stored.Augments.Keys, Is.EquivalentTo(new[] { WGAugmentSlot.Heart, WGAugmentSlot.Eyes }),
+            "A heart that never went in was taken off the profile.");
+        Assert.That(stored.AugmentUnlocks.Select(u => u.Id),
+            Is.EquivalentTo(new[] { "WGAugmentSandevistan", "WGAugmentCyberEyes" }));
+
+        // Dead at the end, the character loses the eyes it had and keeps the heart it never did.
+        Task? forfeit = null;
+        await server.WaitPost(() => forfeit = augments.Forfeit(userId, played, "wg-augments-forfeit-dead"));
+        Assert.That(forfeit, Is.Not.Null);
+        await PoolManager.WaitUntil(server, () => forfeit!.IsCompleted, maxTicks: 300);
+
+        stored = (HumanoidCharacterProfile) (await db.GetPlayerPreferencesAsync(userId, default))!.Characters[slot];
+        Assert.That(stored.Augments.Keys, Is.EquivalentTo(new[] { WGAugmentSlot.Heart }));
+        Assert.That(stored.AugmentUnlocks.Select(u => u.Id), Is.EquivalentTo(new[] { "WGAugmentSandevistan" }));
 
         await server.WaitPost(() => entities.DeleteEntity(mob));
         await pair.CleanReturnAsync();

@@ -406,7 +406,7 @@ public sealed partial class WGAugmentEditor : BoxContainer
         foreach (var slot in slots)
         {
             var claimed = _claimed.TryGetValue(slot, out var trait);
-            var augments = WGAugmentRules.AugmentsFor(_profile.Species, slot, _proto, _factory);
+            var augments = WGAugmentRules.AugmentsFor(_profile.Species, slot, _proto, _factory, _profile.Biotype);
             if (!claimed && augments.Count == 0)
                 continue;
 
@@ -426,7 +426,7 @@ public sealed partial class WGAugmentEditor : BoxContainer
         }
 
         var host = WGAugmentRegions.Host(region);
-        var implants = WGAugmentRules.ImplantsFor(_profile.Species, host, _proto, _factory);
+        var implants = WGAugmentRules.ImplantsFor(_profile.Species, host, _proto, _factory, _profile.Biotype);
         if (implants.Count > 0)
         {
             any = true;
@@ -493,7 +493,7 @@ public sealed partial class WGAugmentEditor : BoxContainer
     private void AddImplants(WGAugmentSlot host, List<WGAugmentPrototype> implants)
     {
         var slots = WGAugmentRules.ImplantSlots(host, _choices, _claimed, _proto);
-        var synthetic = WGAugmentRules.Synthetic(_profile!.Species, host, _choices, _claimed, _proto, _factory);
+        var synthetic = WGAugmentRules.Synthetic(_profile!.Species, host, _choices, _claimed, _proto, _factory, _profile.Biotype);
         var used = implants.Count(i => _implants.Contains(i.ID));
         _part.AddChild(_theme.Section(Loc.GetString("wg-augments-implants", ("used", used), ("slots", slots)), new Pips(used, slots, _theme.Accent, _theme.Faint)));
 

@@ -16,9 +16,9 @@ public sealed partial class HumanoidProfileEditor
 
             // A styled augment picked without a style gets the first that fits; implants a new limb can't hold drop.
             var valid = WGAugmentRules.Validate(Profile.Species, augments, Profile.TraitPreferences,
-                _prototypeManager, _entManager.ComponentFactory);
+                _prototypeManager, _entManager.ComponentFactory, Profile.Biotype);
             Profile = Profile.WithAugments(valid).WithAugmentImplants(WGAugmentRules.ValidateImplants(Profile.Species,
-                valid, implants, Profile.TraitPreferences, _prototypeManager, _entManager.ComponentFactory));
+                valid, implants, Profile.TraitPreferences, _prototypeManager, _entManager.ComponentFactory, Profile.Biotype));
             SetDirty();
             AugmentEditor.SetProfile(Profile);
             ReloadProfilePreview();
@@ -41,16 +41,16 @@ public sealed partial class HumanoidProfileEditor
         };
     }
 
-    /// <summary>Drops augments and implants the species or the traits now rule out, and refreshes the tab.</summary>
+    /// <summary>Drops augments and implants the species, the biotype or the traits now rule out, and refreshes the tab.</summary>
     private void UpdateAugments()
     {
         if (Profile == null)
             return;
 
         var valid = WGAugmentRules.Validate(Profile.Species, Profile.Augments, Profile.TraitPreferences,
-            _prototypeManager, _entManager.ComponentFactory);
+            _prototypeManager, _entManager.ComponentFactory, Profile.Biotype);
         var implants = WGAugmentRules.ValidateImplants(Profile.Species, valid, Profile.AugmentImplants,
-            Profile.TraitPreferences, _prototypeManager, _entManager.ComponentFactory);
+            Profile.TraitPreferences, _prototypeManager, _entManager.ComponentFactory, Profile.Biotype);
         if (valid.Count != Profile.Augments.Count
             || valid.Any(v => !Profile.Augments.TryGetValue(v.Key, out var c) || c != v.Value)
             || !implants.SetEquals(Profile.AugmentImplants))

@@ -27,8 +27,8 @@ namespace Content.Server._WG.Augments;
 /// body it spawned in, the paid-for cyberware still in that body is written to its profile, so what was lost is gone
 /// and what the round put in without being paid for ends with the round. A character that respawns, is dead at the
 /// end or ends up in another body loses all of it; one asleep in cryo is out of play until it wakes, so nothing
-/// after takes them. Which of it sells back in the creator is in
-/// <c>WGAugmentSystem.Paid.cs</c>.
+/// after takes them. A pick that never reached the body was never there to lose, so it and its unlock stay. Which
+/// of it sells back in the creator is in <c>WGAugmentSystem.Paid.cs</c>.
 /// </summary>
 public sealed partial class WGAugmentSystem
 {
@@ -44,7 +44,11 @@ public sealed partial class WGAugmentSystem
         EntityUid Mind,
         EntityUid Body,
         Dictionary<WGAugmentSlot, WGAugmentChoice> Spawned,
-        HashSet<ProtoId<WGAugmentPrototype>> SpawnedImplants);
+        HashSet<ProtoId<WGAugmentPrototype>> SpawnedImplants)
+    {
+        /// <summary>The picks that never reached the body: it had no part or organ to take them.</summary>
+        public HashSet<ProtoId<WGAugmentPrototype>> Unfitted { get; init; } = new();
+    }
 
     private readonly Dictionary<NetUserId, PlayedCharacter> _played = new();
 
@@ -72,6 +76,9 @@ public sealed partial class WGAugmentSystem
             return;
 
         ReapplyOverTraits(args.Mob, args.Profile);
+        var unfitted = Unfitted(args.Mob, args.Profile);
+        if (unfitted.Count > 0)
+            Log.Warning($"User {args.Player.UserId}'s {args.Profile.Name} spawned without picked augments: {string.Join(", ", unfitted)}.");
 
         // Selection is locked once a player joins, so the selected slot is the one that spawned.
         if (_preferences.GetPreferencesOrNull(args.Player.UserId) is { SelectedCharacter: HumanoidCharacterProfile selected } prefs
@@ -82,7 +89,7 @@ public sealed partial class WGAugmentSystem
                 mind,
                 args.Mob,
                 new(args.Profile.Augments),
-                new(args.Profile.AugmentImplants)));
+                new(args.Profile.AugmentImplants)) { Unfitted = unfitted });
             MarkPaid(args.Mob, selected, new WGAugmentOwner(args.Player.UserId, prefs.SelectedCharacterIndex));
         }
     }
@@ -91,6 +98,35 @@ public sealed partial class WGAugmentSystem
     {
         _played[user] = character;
         _asleep.Remove(user);
+    }
+
+    /// <summary>The profile's picks a freshly spawned body doesn't carry.</summary>
+    internal HashSet<ProtoId<WGAugmentPrototype>> Unfitted(EntityUid uid, HumanoidCharacterProfile profile)
+    {
+        var unfitted = new HashSet<ProtoId<WGAugmentPrototype>>();
+        if (!TryComp<BodyComponent>(uid, out var comp))
+            return unfitted;
+
+        Entity<BodyComponent> body = (uid, comp);
+        foreach (var (slot, choice) in profile.Augments)
+        {
+            if (!_proto.TryIndex(choice.Augment, out var augment))
+                continue;
+
+            var fitted = augment.Kind switch
+            {
+                WGAugmentKind.Limb => FindLimb(body, slot) is { } limb && Prototype(limb.Id) == augment.Part?.Id,
+                WGAugmentKind.Organ => OrganIn(body, slot) is { } organ && Prototype(organ) == augment.Organ?.Id,
+                WGAugmentKind.Missing => FindLimb(body, slot) == null,
+                _ => true,
+            };
+            if (!fitted)
+                unfitted.Add(choice.Augment);
+        }
+
+        var carried = ReadImplants(uid);
+        unfitted.UnionWith(profile.AugmentImplants.Where(i => !carried.Contains(i)));
+        return unfitted;
     }
 
     private void OnCryosleep(EntityUid uid, BodyComponent body, CryosleepBeforeMindRemovedEvent args)
@@ -227,21 +263,31 @@ public sealed partial class WGAugmentSystem
             {
                 augments[slot] = found;
             }
+            else if (picked is { } unfitted && played.Unfitted.Contains(unfitted.Augment))
+            {
+                augments[slot] = unfitted;
+            }
         }
 
-        // Implants changed in the creator since the spawn are kept as picked; else the body's are.
+        // Implants changed in the creator since the spawn are kept as picked; else the body's are, with the ones
+        // that never went in.
         var carried = ReadImplants(body);
         var implants = WGAugmentRules.ValidateImplants(profile.Species,
             augments,
-            profile.AugmentImplants.SetEquals(played.SpawnedImplants) ? carried : profile.AugmentImplants,
+            profile.AugmentImplants.SetEquals(played.SpawnedImplants)
+                ? carried.Concat(played.SpawnedImplants.Where(played.Unfitted.Contains))
+                : profile.AugmentImplants,
             profile.TraitPreferences,
             _proto,
-            _factory);
+            _factory,
+            profile.Biotype);
 
         // What the body carried and the character keeps is owned now; what it spawned with and lost is not.
         var owned = profile.AugmentUnlocks.Concat(installed.Values.Select(c => c.Augment)).Concat(carried).ToHashSet();
         var unlocks = profile.AugmentUnlocks.ToHashSet();
-        unlocks.ExceptWith(played.Spawned.Values.Select(c => c.Augment).Concat(played.SpawnedImplants));
+        unlocks.ExceptWith(played.Spawned.Values.Select(c => c.Augment)
+            .Concat(played.SpawnedImplants)
+            .Where(a => !played.Unfitted.Contains(a)));
         unlocks.UnionWith(augments.Values.Select(c => c.Augment).Concat(implants)
             .Where(a => owned.Contains(a) && _proto.TryIndex(a, out var augment) && augment.Price > 0));
 
@@ -261,7 +307,8 @@ public sealed partial class WGAugmentSystem
             implants.Where(Kept).ToHashSet(),
             profile.TraitPreferences,
             _proto,
-            _factory);
+            _factory,
+            profile.Biotype);
 
         if (augments.Count == profile.Augments.Count
             && augments.All(a => profile.Augments.TryGetValue(a.Key, out var c) && c == a.Value)
@@ -431,12 +478,15 @@ public sealed partial class WGAugmentSystem
     }
 
     /// <summary>
-    /// The profile without the augments and implants the character spawned with, or their unlocks; null if it has
-    /// none of them to lose.
+    /// The profile without the augments and implants the character's body spawned with, or their unlocks; null if it
+    /// has none of them to lose.
     /// </summary>
     private static HumanoidCharacterProfile? Stripped(HumanoidCharacterProfile profile, PlayedCharacter played)
     {
-        var spawned = played.Spawned.Values.Select(c => c.Augment).Concat(played.SpawnedImplants).ToHashSet();
+        var spawned = played.Spawned.Values.Select(c => c.Augment)
+            .Concat(played.SpawnedImplants)
+            .Where(a => !played.Unfitted.Contains(a))
+            .ToHashSet();
         if (!WGAugmentRules.Picked(profile).Concat(profile.AugmentUnlocks).Any(spawned.Contains))
             return null;
 

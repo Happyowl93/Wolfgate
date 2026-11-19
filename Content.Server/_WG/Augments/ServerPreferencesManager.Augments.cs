@@ -86,7 +86,7 @@ public sealed partial class ServerPreferencesManager
 
         // A limb dropped for want of money takes the implants it had room for.
         var fitting = WGAugmentRules.ValidateImplants(profile.Species, choices, profile.AugmentImplants,
-            profile.TraitPreferences, _protos, _wgFactory);
+            profile.TraitPreferences, _protos, _wgFactory, profile.Biotype);
         var implants = new HashSet<ProtoId<WGAugmentPrototype>>();
         foreach (var id in profile.AugmentImplants.OrderBy(i => i.Id))
         {
