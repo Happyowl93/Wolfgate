@@ -6,7 +6,7 @@ using Content.Server._WG.ReaverCampaign.Components;
 
 namespace Content.Server._WG.ReaverCampaign.Systems;
 
-/// <summary>Hulls boarders took from the campaign: patrols go after each, at any range, until it is broken or taken back.</summary>
+/// <summary>Hulls boarders took from the campaign: patrols go after each, at any range and docked at a station or not, until it is broken or taken back.</summary>
 public sealed partial class WGReaverCampaignSystem
 {
     /// <summary>How many patrols hunt a hull taken from the campaign.</summary>
@@ -46,7 +46,7 @@ public sealed partial class WGReaverCampaignSystem
     public int TryRecover(EntityUid hull)
     {
         if (Campaign is not { } campaign || State(true) is not { Finished: false } || TerminatingOrDeleted(hull)
-            || Transform(hull).MapID != _territory.SectorMap || _status.IsDisabled(hull) || _encounters.DockedAtStation(hull))
+            || Transform(hull).MapID != _territory.SectorMap || _status.IsDisabled(hull))
             return 0;
 
         var at = _transform.GetWorldPosition(hull);

@@ -90,7 +90,7 @@ within three cells, or a fresh one from the nearest stronghold, turned on it to 
 the patrol's bearing and range; the patrol gives up when the ship is disabled or gone, or has been out of held space
 or out of reach for twenty seconds, then flies the rest of its route, and the ship is left alone for `interceptCooldown`.
 How many intercepts run at once is set by tier (`intercepts`). A campaign hull boarders seize goes on the `Stolen` list
-(`.Stolen`): two patrols, at any range and past the leash, are kept after it, made up every 30 s, until it is broken or
+(`.Stolen`): two patrols, at any range, past the leash and even while it is docked at a station, are kept after it, made up every 30 s, until it is broken or
 back in Reaver hands. A ship that hits a stronghold or helps kill a patrol is
 marked for half an hour: raids weigh it three times as heavy and hunt it anywhere on the map.
 

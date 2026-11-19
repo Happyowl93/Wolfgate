@@ -183,7 +183,7 @@ there. A trader whose crew are alerted declines every hail.
 
 A ship docked to a station (a station member without a deed) is in sanctuary (`DockedAtStation`): hunts, extorters,
 `@player` objectives, the Reaver raids and intercepts and the zones never pick it, and a hunter, extorter, raid or
-patrol already on it lets it go when it berths.
+patrol already on it lets it go when it berths. A hull boarders stole from the Reavers has none (`.Stolen`).
 
 Boarders and extorters are stealth ships (`stealth: true`): their IFF label is off for good, so a scope shows an
 unknown contact, and their encounter never comes onto the sector markers unless an admin reveals it. Every hunting

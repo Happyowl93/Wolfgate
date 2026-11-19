@@ -181,9 +181,9 @@ public sealed partial class WGReaverCampaignSystem
                 || TerminatingOrDeleted(lead.Grid))
                 continue;
 
-            // A target that berthed at a station is out of reach.
+            // A target that berthed at a station is out of reach, unless it is a hull stolen from the campaign.
             if (TerminatingOrDeleted(target) || Transform(target).MapID != map || _status.IsDisabled(target)
-                || _encounters.DockedAtStation(target))
+                || !comp.Recovering && _encounters.DockedAtStation(target))
             {
                 EndIntercept(patrol);
                 continue;

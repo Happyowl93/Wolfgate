@@ -260,7 +260,7 @@ out and says he is engaging when the fighters turn (`WGCrewSecuritySystem.Challe
 carrying one of the crew's downed or dead is told to put him down and has ten seconds (`WGCrewConductSystem.Bodies.cs`).
 Crew out of a fight patch their own wounds, one item every eight seconds, and anyone hurt past 40 damage counts as
 calling for a medic (`WGCrewMedicSystem.SelfCare.cs`). Crew out of a fight stop short of a burning tile rather than walk
-through it (`NPCSteeringSystem.Fire.cs`). A downed crewman stops bumping doors open, a dead one's card comes off his ship's allow list and out of
+through it (`NPCSteeringSystem.Fire.cs`), walk rather than run past a puddle a run would slip them on (`NPCSteeringSystem.Walk.cs`), and when stuck stop short of a spot another crewman holds or step aside off the line they were stuck on, since a repath from the same spot runs back into the same body (`NPCSteeringSystem.Unstick.cs`). A guard's next patrol point passes over points another crewman stands on or is headed for, and a crewman at his post walks back only once he strays past `PostLeaveRange` (2.5), wider than `PostRange`, so a crewmate's nudge doesn't send him back and forth. Medics carry the people they take in (`WGCrewMedicSystem.Carry.cs`, through `CarryingSystem.TryCrewCarry`) and pull only when a carry fails. A downed crewman stops bumping doors open, a dead one's card comes off his ship's allow list and out of
 its zone keys, and both come back on revival with the door lists it was on (`WGShipAccessServerSystem.SuspendEntry`); a card
 swapped while he was down replaces the old one. Janitors (`WGCrewJanitor`, duty Janitor) mop puddles on their own ship
 (`WGCrewShipPuddles`, scored by `WGTargetOnHomeGridCon`) and wash dirt off the floor across it with their own hands, as a cleanbot does, and wait at their post when it's clean.
@@ -405,12 +405,15 @@ crew never turns on what it carries, such as the Remade aboard a flesh ship.
 - [`Content.Server/_WG/NpcCrew/HTN/WGTakeHelmOperator.cs`](HTN/WGTakeHelmOperator.cs)
 - [`Content.Server/_WG/NpcCrew/HTN/WGTargetOnHomeGridCon.cs`](HTN/WGTargetOnHomeGridCon.cs)
 - [`Content.Server/_WG/NpcCrew/NPCSystem.Sleep.cs`](NPCSystem.Sleep.cs)
+- [`Content.Server/_WG/NpcCrew/Systems/CarryingSystem.Crew.cs`](Systems/CarryingSystem.Crew.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/FireControlSystem.Crew.cs`](Systems/FireControlSystem.Crew.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/NPCCombatSystem.Crew.cs`](Systems/NPCCombatSystem.Crew.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/NPCRetaliationSystem.Crew.cs`](Systems/NPCRetaliationSystem.Crew.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/NPCSteeringSystem.Access.cs`](Systems/NPCSteeringSystem.Access.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/NPCSteeringSystem.Fire.cs`](Systems/NPCSteeringSystem.Fire.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/NPCSteeringSystem.Shove.cs`](Systems/NPCSteeringSystem.Shove.cs)
+- [`Content.Server/_WG/NpcCrew/Systems/NPCSteeringSystem.Unstick.cs`](Systems/NPCSteeringSystem.Unstick.cs)
+- [`Content.Server/_WG/NpcCrew/Systems/NPCSteeringSystem.Walk.cs`](Systems/NPCSteeringSystem.Walk.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/NuclearReactorSystem.NpcCrew.cs`](Systems/NuclearReactorSystem.NpcCrew.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/PathfindingSystem.Shove.cs`](Systems/PathfindingSystem.Shove.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/PointingSystem.NpcCrew.cs`](Systems/PointingSystem.NpcCrew.cs)
@@ -430,6 +433,7 @@ crew never turns on what it carries, such as the Remade aboard a flesh ship.
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewFriendlyFireSystem.cs`](Systems/WGCrewFriendlyFireSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewGrabberSystem.cs`](Systems/WGCrewGrabberSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewGrenadeSystem.cs`](Systems/WGCrewGrenadeSystem.cs)
+- [`Content.Server/_WG/NpcCrew/Systems/WGCrewMedicSystem.Carry.cs`](Systems/WGCrewMedicSystem.Carry.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewMedicSystem.Cloning.cs`](Systems/WGCrewMedicSystem.Cloning.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewMedicSystem.cs`](Systems/WGCrewMedicSystem.cs)
 - [`Content.Server/_WG/NpcCrew/Systems/WGCrewMedicSystem.SelfCare.cs`](Systems/WGCrewMedicSystem.SelfCare.cs)
@@ -503,6 +507,8 @@ crew never turns on what it carries, such as the Remade aboard a flesh ship.
 
 - [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGBodyToolTest.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGBodyToolTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewMedicTest.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewMedicTest.cs)
+- [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewPostRangeTest.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewPostRangeTest.cs)
+- [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewSidestepPruneTest.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewSidestepPruneTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewSuitHelmetTest.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewSuitHelmetTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewSurgeonTest.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewSurgeonTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Arena.cs`](../../../Content.IntegrationTests/Tests/_WG/NpcCrew/WGCrewTest.Arena.cs)
@@ -640,6 +646,11 @@ crew never turns on what it carries, such as the Remade aboard a flesh ship.
   - compare both bodies for every NPC; the engine helper reads the first fixtures twice.
   - crew out of a fight hold short of a burning tile rather than walk through the fire
   - stop blended input while access-aware crew settle at an obstacle.
+  - stuck crew stop short of a held spot or step aside, as a repath runs back into the same body
+  - a crewman stepping aside reaches that tile before a repath
+- [`Content.Server/NPC/Systems/NPCSteeringSystem.cs`](../../NPC/Systems/NPCSteeringSystem.cs)
+  - crew may have been walking past a puddle
+  - crew walk past a slippery puddle instead of running into it
 - [`Content.Server/NPC/Systems/NPCSteeringSystem.Obstacles.cs`](../../NPC/Systems/NPCSteeringSystem.Obstacles.cs)
   - crew shove a loose crate off their path
   - open authorized doors through normal interaction before considering prying.
