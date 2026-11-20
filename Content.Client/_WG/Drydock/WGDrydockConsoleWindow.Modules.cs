@@ -153,8 +153,13 @@ public sealed partial class WGDrydockConsoleWindow
         foreach (var entry in state.Modules)
         {
             keyText.Append('|').Append(entry.Id).Append(':')
-                .Append(quote?.ModulePrices.GetValueOrDefault(entry.Id, entry.Price) ?? entry.Price).Append(':')
-                .Append(Covers(entry.Materials, state.StoredMaterials));
+                .Append(quote?.ModulePrices.GetValueOrDefault(entry.Id, entry.Price) ?? entry.Price);
+            // Each bill row is red by its own shortage, so the key tracks every material, not just the whole bill.
+            foreach (var (material, amount) in entry.Materials)
+            {
+                keyText.Append(':').Append(material).Append('=').Append(amount)
+                    .Append(state.StoredMaterials.GetValueOrDefault(material) >= amount ? '+' : '-');
+            }
         }
 
         var drawerKey = keyText.ToString();
@@ -219,6 +224,11 @@ public sealed partial class WGDrydockConsoleWindow
             fitKey.Text = Loc.GetString("drydock-ui-modules-fitted-elsewhere", ("slot", fittedAt + 1));
             fitKey.Disabled = true;
             bill.Visible = false;
+        }
+        else if (slot < state.FittedModules.Count && state.FittedModules[slot] != null)
+        {
+            fitKey.Text = Loc.GetString("drydock-ui-modules-slot-taken", ("slot", slot + 1));
+            fitKey.Disabled = true;
         }
         else if (state.Working)
         {

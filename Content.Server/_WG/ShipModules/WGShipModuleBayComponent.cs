@@ -27,6 +27,7 @@ public sealed partial class WGFittedModule
     [DataField(required: true)]
     public int Slot;
 
+    /// <summary>The module fitted in the slot.</summary>
     [DataField(required: true)]
     public ProtoId<WGShipModulePrototype> Module;
 

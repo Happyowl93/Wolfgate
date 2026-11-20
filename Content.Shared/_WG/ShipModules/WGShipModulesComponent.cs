@@ -45,6 +45,7 @@ public enum WGShipModuleLock : byte
 [Serializable, NetSerializable]
 public sealed class WGShipModuleActivateEvent : EntityEventArgs
 {
+    /// <summary>Slot index, from 0.</summary>
     public int Slot;
 
     public WGShipModuleActivateEvent(int slot)

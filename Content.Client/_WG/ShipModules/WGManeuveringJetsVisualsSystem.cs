@@ -173,15 +173,31 @@ public sealed class WGSmokeRing
     /// <summary>How fast the thruster's velocity bleeds off, so rings drift behind a moving ship.</summary>
     private const float DriftDrag = 0.8f;
 
+    /// <summary>Map the ring was puffed on.</summary>
     public MapId Map;
+
+    /// <summary>Where the thruster puffed it, in map space.</summary>
     public Vector2 Origin;
+
+    /// <summary>The thruster's map velocity when it puffed.</summary>
     public Vector2 Drift;
+
+    /// <summary>Unit direction the ring is blown out along.</summary>
     public Vector2 Exhaust;
+
+    /// <summary>Starting exhaust speed, in metres per second.</summary>
     public float Speed;
+
+    /// <summary>Width in metres when puffed; it spreads with age.</summary>
     public float Size;
+
+    /// <summary>Starting opacity, from 0 to 1.</summary>
     public float Opacity;
+
+    /// <summary>Seconds since it was puffed.</summary>
     public float Age;
 
+    /// <summary>Where the ring is now, in map space.</summary>
     public Vector2 Position => Origin
                                + Drift * ((1f - MathF.Exp(-DriftDrag * Age)) / DriftDrag)
                                + Exhaust * (Speed * (1f - MathF.Exp(-ExhaustDrag * Age)) / ExhaustDrag);

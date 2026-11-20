@@ -40,14 +40,14 @@ public sealed partial class WGShipModuleHelmSystem : EntitySystem
         CommandBinds.Unregister<WGShipModuleHelmSystem>();
     }
 
-    /// <summary>Fires a slot of the ship the local player is piloting.</summary>
+    /// <summary>
+    /// Fires a slot of the ship the local player is piloting. The server resolves the ship, since a drone console flies
+    /// a remote grid the client can't see.
+    /// </summary>
     private void FireFlown(int slot)
     {
-        if (_player.LocalEntity is { } user
-            && TryComp<PilotComponent>(user, out var pilot)
-            && pilot.Console is { } console
-            && Transform(console).GridUid is { } ship)
-            Fire(ship, slot);
+        if (_player.LocalEntity is { } user && TryComp<PilotComponent>(user, out var pilot) && pilot.Console != null)
+            RaiseNetworkEvent(new WGShipModuleActivateEvent(slot));
     }
 
     /// <summary>Asks the server to fire one of a ship's module slots; it only obeys that ship's pilots.</summary>
@@ -57,11 +57,13 @@ public sealed partial class WGShipModuleHelmSystem : EntitySystem
             RaiseNetworkEvent(new WGShipModuleActivateEvent(slot));
     }
 
+    /// <summary>Keeps a strip refreshed while it is on screen.</summary>
     public void Track(WGShipModuleBank bank)
     {
         _banks.Add(bank);
     }
 
+    /// <summary>Stops refreshing a strip that left the screen.</summary>
     public void Untrack(WGShipModuleBank bank)
     {
         _banks.Remove(bank);

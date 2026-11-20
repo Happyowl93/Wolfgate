@@ -87,13 +87,13 @@ binds:
 # WOLFGATE(ShipModules) START: ship module hotkeys while piloting
 - function: WGShipModuleFirst
   type: State
-  key: Shift
+  key: Z
 - function: WGShipModuleSecond
   type: State
-  key: Z
+  key: X
 - function: WGShipModuleThird
   type: State
-  key: X
+  key: C
 # WOLFGATE END
 - function: CameraRotateLeft
   type: State

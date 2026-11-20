@@ -228,47 +228,24 @@ public sealed partial class WGShipModuleSystem : EntitySystem
                && !(field.Source is { } source && HasComp<WGShipShieldDeflectorComponent>(source));
     }
 
-    /// <summary>Whether any helm on the grid has power.</summary>
-    public bool HasPoweredHelm(EntityUid grid)
-    {
-        var helms = EntityQueryEnumerator<ShuttleConsoleComponent, TransformComponent>();
-        while (helms.MoveNext(out var uid, out _, out var xform))
-        {
-            if (xform.GridUid == grid && _power.IsPowered(uid))
-                return true;
-        }
-
-        return false;
-    }
-
+    /// <summary>Fires a slot of the ship the sender is piloting; a drone console flies the drone it proxies.</summary>
     private void OnActivateRequest(WGShipModuleActivateEvent msg, EntitySessionEventArgs args)
     {
         if (args.SenderSession.AttachedEntity is not { } user
             || !TryComp<PilotComponent>(user, out var pilot)
-            || pilot.Console is not { } console
-            || FlownGrid(user) is not { } grid)
+            || pilot.Console is not { } console)
             return;
 
-        TryActivate(grid, msg.Slot, user, console);
-    }
-
-    /// <summary>The grid an entity is piloting, if any.</summary>
-    public EntityUid? FlownGrid(EntityUid user)
-    {
-        if (!TryComp<PilotComponent>(user, out var pilot) || pilot.Console is not { } console)
-            return null;
-
-        if (TryComp<DroneConsoleComponent>(console, out var drone) && drone.Entity is { } remote)
-            console = remote;
-
-        return Transform(console).GridUid;
+        var flown = TryComp<DroneConsoleComponent>(console, out var drone) && drone.Entity is { } remote ? remote : console;
+        if (Transform(flown).GridUid is { } grid)
+            TryActivate(grid, msg.Slot, user, console);
     }
 
     /// <summary>
-    /// Spends one charge of the module in a ship's slot and runs its effect; tells the user why not otherwise. A pilot's
-    /// own helm has to be powered; with no helm given, any powered helm on the ship will do.
+    /// Spends one charge of the module in a ship's slot and runs its effect; tells the user why not otherwise. The helm
+    /// it is fired from has to be powered.
     /// </summary>
-    public bool TryActivate(EntityUid grid, int slot, EntityUid? user, EntityUid? helm = null)
+    public bool TryActivate(EntityUid grid, int slot, EntityUid? user, EntityUid helm)
     {
         if (!TryComp<WGShipModuleBayComponent>(grid, out var bay)
             || GetFitted(grid, slot) is not { } fitted
@@ -280,8 +257,7 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         if (now < fitted.ReadyAt)
             return false;
 
-        var powered = helm is { } console ? _power.IsPowered(console) : HasPoweredHelm(grid);
-        var locked = GetLock(grid, bay, module, powered, now);
+        var locked = GetLock(grid, bay, module, _power.IsPowered(helm), now);
         if (locked != WGShipModuleLock.None)
         {
             Refuse(user, $"wg-ship-module-refused-{locked.ToString().ToLowerInvariant()}");

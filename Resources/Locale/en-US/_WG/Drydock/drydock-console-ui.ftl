@@ -123,3 +123,4 @@ drydock-ui-modules-fit = Fit to slot { $slot }
 drydock-ui-modules-book = Book fitting to slot { $slot }
 drydock-ui-modules-fitted = Fitted
 drydock-ui-modules-fitted-elsewhere = Fitted in slot { $slot }
+drydock-ui-modules-slot-taken = Empty slot { $slot } first

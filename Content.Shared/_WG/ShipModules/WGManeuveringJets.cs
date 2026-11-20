@@ -36,7 +36,10 @@ public sealed partial class WGManeuveringJetsEffect : WGShipModuleEffect
 [Serializable, NetSerializable]
 public sealed class WGManeuveringJetsPuffEvent : EntityEventArgs
 {
+    /// <summary>The thrusters that puff, with their share of the burn.</summary>
     public List<WGJetsPuff> Puffs = new();
+
+    /// <summary>Seconds the burn lasts.</summary>
     public float BurnTime;
 }
 

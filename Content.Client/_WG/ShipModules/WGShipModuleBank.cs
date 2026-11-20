@@ -89,11 +89,14 @@ public sealed partial class WGShipModuleBank : GridContainer
                 continue;
 
             var slot = slots[i];
-            if (_slotOf[i] != slot.Slot && slot.Slot < WGShipModuleKeys.Slots.Length)
+            _slotOf[i] = slot.Slot;
+            // Read every refresh, so a key rebound in the options shows at once.
+            if (slot.Slot < WGShipModuleKeys.Slots.Length)
             {
-                _slotOf[i] = slot.Slot;
-                key.ToolTip = Loc.GetString("wg-ship-module-tooltip",
+                var tooltip = Loc.GetString("wg-ship-module-tooltip",
                     ("key", _input.GetKeyFunctionButtonString(WGShipModuleKeys.Slots[slot.Slot])));
+                if (key.ToolTip != tooltip)
+                    key.ToolTip = tooltip;
             }
 
             var label = _prototype.TryIndex(slot.Module, out var module) ? Loc.GetString(module.Label) : slot.Module.Id;

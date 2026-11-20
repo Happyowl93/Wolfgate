@@ -44,12 +44,18 @@ public sealed partial class WGDrydockSystem
                 : Loc.GetString("drydock-module-fitted-elsewhere", ("slot", fittedSlot + 1));
         }
 
-        items.Add(ModuleItem(ship, slot, module));
+        // Fitting replaces the slot's module, so a taken slot is emptied first rather than losing a paid-for module.
+        if (_shipModules.GetFitted(ship, slot) != null)
+            return Loc.GetString("drydock-module-slot-taken", ("slot", slot + 1));
+
+        var item = ModuleItem(ship, slot, module);
+        item.LocalPos = HelmPosition(ship);
+        items.Add(item);
         return null;
     }
 
-    /// <summary>The one work item that fits a module, worked at the ship's helm.</summary>
-    private WGDrydockWorkItem ModuleItem(EntityUid ship, int slot, WGShipModulePrototype module)
+    /// <summary>The one work item that fits a module; the caller places it for the cranes.</summary>
+    private static WGDrydockWorkItem ModuleItem(EntityUid ship, int slot, WGShipModulePrototype module)
     {
         var materials = new Dictionary<string, int>();
         foreach (var (material, amount) in module.Materials)
@@ -65,7 +71,6 @@ public sealed partial class WGDrydockSystem
             Cost = module.Price,
             RefitCost = module.Price,
             RefitMaterials = materials,
-            LocalPos = HelmPosition(ship),
         };
     }
 

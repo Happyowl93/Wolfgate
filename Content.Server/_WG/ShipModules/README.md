@@ -10,7 +10,7 @@ field can step out of a salvo.
 
 Pilots see a module strip under FUEL and CARGO, on the windowed helm's navigation page and in the cockpit
 (`WGShipModuleBank`), with one key per fitted module: its charges and whether it is ready, charging or locked. A module is
-fired by pressing its key or its slot's hotkey while piloting (`WGShipModuleKeys`, Shift, Z and X by default for slots
+fired by pressing its key or its slot's hotkey while piloting (`WGShipModuleKeys`, Z, X and C by default for slots
 1 to 3, rebindable under Shuttle in the controls). The strip is hidden on a ship with no modules.
 
 The fitted modules live on the grid in `WGShipModuleBayComponent`, saved with the ship; charges and timers aren't
@@ -101,7 +101,6 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 
 ### Audio
 
-- [`Resources/Audio/_WG/ShipModules/attributions.yml`](../../../Resources/Audio/_WG/ShipModules/attributions.yml)
 - [`Resources/Audio/_WG/ShipModules/jets_burn.ogg`](../../../Resources/Audio/_WG/ShipModules/jets_burn.ogg)
 
 ### Tools
