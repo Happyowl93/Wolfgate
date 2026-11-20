@@ -37,17 +37,11 @@ public sealed partial class WGDrydockSystem
             || !_prototype.TryIndex<WGShipModulePrototype>(moduleId, out var module))
             return Loc.GetString("drydock-console-unknown-refit");
 
-        if (TryComp<WGShipModuleBayComponent>(ship, out var bay))
+        if (_shipModules.FittedSlot(ship, module.ID) is { } fittedSlot)
         {
-            foreach (var fitted in bay.Fitted)
-            {
-                if (fitted.Module != module.ID)
-                    continue;
-
-                return fitted.Slot == slot
-                    ? Loc.GetString("drydock-module-already-fitted")
-                    : Loc.GetString("drydock-module-fitted-elsewhere", ("slot", fitted.Slot + 1));
-            }
+            return fittedSlot == slot
+                ? Loc.GetString("drydock-module-already-fitted")
+                : Loc.GetString("drydock-module-fitted-elsewhere", ("slot", fittedSlot + 1));
         }
 
         items.Add(ModuleItem(ship, slot, module));

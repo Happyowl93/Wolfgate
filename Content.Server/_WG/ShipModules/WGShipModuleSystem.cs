@@ -153,17 +153,36 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         return null;
     }
 
-    /// <summary>Fits a module into a slot, replacing whatever was there; it starts with full charges.</summary>
-    public void Fit(EntityUid grid, int slot, ProtoId<WGShipModulePrototype> module)
+    /// <summary>
+    /// Fits a module into a slot, replacing whatever was there; it starts with full charges. False when the slot is out
+    /// of range or the module already sits in another slot, since a ship carries each module once.
+    /// </summary>
+    public bool Fit(EntityUid grid, int slot, ProtoId<WGShipModulePrototype> module)
     {
-        if (slot < 0 || slot >= WGShipModulesComponent.SlotCount)
-            return;
+        if (slot < 0 || slot >= WGShipModulesComponent.SlotCount || FittedSlot(grid, module) is { } other && other != slot)
+            return false;
 
         var bay = EnsureComp<WGShipModuleBayComponent>(grid);
         bay.Fitted.RemoveAll(f => f.Slot == slot);
         bay.Fitted.Add(new WGFittedModule { Slot = slot, Module = module });
         bay.Fitted.Sort(static (a, b) => a.Slot.CompareTo(b.Slot));
         UpdateStrip(grid, bay, _timing.CurTime);
+        return true;
+    }
+
+    /// <summary>The slot a module is fitted in on a ship, or null.</summary>
+    public int? FittedSlot(EntityUid grid, ProtoId<WGShipModulePrototype> module)
+    {
+        if (!TryComp<WGShipModuleBayComponent>(grid, out var bay))
+            return null;
+
+        foreach (var fitted in bay.Fitted)
+        {
+            if (fitted.Module == module)
+                return fitted.Slot;
+        }
+
+        return null;
     }
 
     /// <summary>Empties a slot; a ship left with no modules loses its strip.</summary>

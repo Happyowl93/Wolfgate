@@ -56,7 +56,13 @@ public sealed partial class WGShipModuleCommand : LocalizedEntityCommands
             return;
         }
 
-        _modules.Fit(grid, slot, module.ID);
+        if (!_modules.Fit(grid, slot, module.ID))
+        {
+            shell.WriteError(Loc.GetString("cmd-shipmodule-fitted-elsewhere", ("module", Loc.GetString(module.Name)),
+                ("slot", _modules.FittedSlot(grid, module.ID) + 1 ?? 0)));
+            return;
+        }
+
         shell.WriteLine(Loc.GetString("cmd-shipmodule-fitted", ("module", Loc.GetString(module.Name)), ("slot", number)));
         _adminLog.Add(LogType.AdminCommands, LogImpact.Medium,
             $"{who} fitted {module.ID} into module slot {number} of {EntityManager.ToPrettyString(grid):grid}");

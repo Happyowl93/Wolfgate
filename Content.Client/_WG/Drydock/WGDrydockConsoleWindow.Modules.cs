@@ -58,7 +58,8 @@ public sealed partial class WGDrydockConsoleWindow
         _moduleSection = Column(title, keys);
         _moduleSection.SeparationOverride = 3;
 
-        var close = new Button { Text = Loc.GetString("drydock-ui-modules-close") };
+        // The theme clips button text, which leaves a key no wider than its padding without a floor.
+        var close = new Button { Text = Loc.GetString("drydock-ui-modules-close"), MinWidth = 72 };
         close.AddStyleClass("WgCompact");
         close.OnPressed += _ => CloseDrawer();
         _drawerRemove.AddStyleClass("WgCompact");
@@ -71,7 +72,10 @@ public sealed partial class WGDrydockConsoleWindow
 
         var scroll = new ScrollContainer { HScrollEnabled = false, HorizontalExpand = true, VerticalExpand = true };
         scroll.AddChild(_moduleList);
-        var drawer = Panel("drydock-ui-modules-drawer", Column(Row(_drawerSlot, close), _drawerRemove, scroll), expand: true, padding: 10, gap: 4);
+        // The column must expand too, or the list's scroll gets no height.
+        var content = Column(Row(_drawerSlot, close), _drawerRemove, scroll);
+        content.VerticalExpand = true;
+        var drawer = Panel("drydock-ui-modules-drawer", content, expand: true, padding: 10, gap: 4);
         drawer.SetWidth = DrawerWidth;
         drawer.HorizontalExpand = false;
         drawer.Visible = false;

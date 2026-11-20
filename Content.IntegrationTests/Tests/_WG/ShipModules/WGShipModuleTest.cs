@@ -136,19 +136,28 @@ public sealed class WGShipModuleTest
             Assert.That(modules.GetFitted(grid, 1)!.Charges, Is.EqualTo(3));
             Assert.That(entities.GetComponent<WGShipModulesComponent>(grid).Slots[0].Charges, Is.EqualTo(3));
 
-            // A finished drydock fitting fills its slot, replacing what was there.
-            entities.System<WGDrydockSystem>().ApplyItem(grid, new WGDrydockWorkItem
+            // A ship carries each module once: a second slot is refused, by the drydock's finished job too.
+            var drydock = entities.System<WGDrydockSystem>();
+            var fitting = new WGDrydockWorkItem
             {
                 Kind = WGDrydockWorkKind.Upgrade,
                 Target = grid,
                 Upgrade = WGShipModuleFitting.Key(2, Jets),
-            });
-            Assert.That(modules.GetFitted(grid, 2)?.Module.Id, Is.EqualTo(Jets));
-            Assert.That(entities.GetComponent<WGShipModulesComponent>(grid).Slots, Has.Count.EqualTo(2));
+            };
+            Assert.That(modules.Fit(grid, 2, Jets), Is.False, "The same module went into two slots.");
+            drydock.ApplyItem(grid, fitting);
+            Assert.That(modules.GetFitted(grid, 2), Is.Null, "The drydock fitted the same module twice.");
+            Assert.That(modules.Fit(grid, 1, Jets), Is.True, "Refitting a module's own slot was refused.");
+
+            // Emptying the last slot drops the bay; a finished drydock fitting then fills the new slot.
+            modules.Unfit(grid, 1);
+            Assert.That(entities.HasComponent<WGShipModuleBayComponent>(grid), Is.False);
+            drydock.ApplyItem(grid, fitting);
+            Assert.That(modules.FittedSlot(grid, Jets), Is.EqualTo(2));
+            Assert.That(entities.GetComponent<WGShipModulesComponent>(grid).Slots, Has.Count.EqualTo(1));
+            Assert.That(entities.GetComponent<WGShipModulesComponent>(grid).Slots[0].Slot, Is.EqualTo(2));
 
             // With every slot emptied the ship loses its bay and strip.
-            modules.Unfit(grid, 1);
-            Assert.That(entities.GetComponent<WGShipModulesComponent>(grid).Slots, Has.Count.EqualTo(1));
             modules.Unfit(grid, 2);
             Assert.That(entities.HasComponent<WGShipModuleBayComponent>(grid), Is.False);
             Assert.That(entities.HasComponent<WGShipModulesComponent>(grid), Is.False);

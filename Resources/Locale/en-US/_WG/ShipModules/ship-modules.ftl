@@ -30,4 +30,5 @@ cmd-shipmodule-hint-slot = <slot 1-3>
 cmd-shipmodule-hint-module = <module id | none>
 cmd-shipmodule-unknown = "{ $module }" isn't a ship module.
 cmd-shipmodule-fitted = Fitted { $module } into slot { $slot }.
+cmd-shipmodule-fitted-elsewhere = { $module } is already fitted in slot { $slot }; a ship carries each module once.
 cmd-shipmodule-emptied = Emptied slot { $slot }.
