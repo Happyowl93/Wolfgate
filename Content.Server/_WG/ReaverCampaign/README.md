@@ -111,8 +111,10 @@ window. A pause holds every campaign clock (founding, patrols, reinforcements, s
 marks, tier falls, blockades and the timers of campaign encounters), so nothing falls due at once on resuming. The same
 hold applies while the campaign or the Encounters switch is off and while the event runner (the Encounters scheduler) is
 paused, which also holds every running encounter's expiry; `wg_reavers status` says which. A retaken cell pays the
-tier's `retakeBounty` to the crews of the ships that held it, through the encounter bounty path and its hourly cap, and
-the "retaken" announcement says so. The round-end summary lists peak cells held, strongholds founded and broken, patrols destroyed, convoys
+tier's `retakeBounty` to the crews of the ships that held it, through the encounter bounty path, and
+the "retaken" announcement says so. Every Reaver bounty but the citadel's draws on a per-player hourly allowance of its
+own, `wg.reavers.payout_hourly_cap` (450k), apart from the ADS's and from other encounter rewards
+(`WGCampaignPayoutCapTest`). The round-end summary lists peak cells held, strongholds founded and broken, patrols destroyed, convoys
 stopped, raids launched and cells retaken, and how often the Reavers were broken.
 Freed Reaver cells are announced as clearing (on the radio, one line per batch) and breaking the last stronghold with no
 convoy out announces the ending; see `WGSectorCellClearingEvent` in the SectorControl module.

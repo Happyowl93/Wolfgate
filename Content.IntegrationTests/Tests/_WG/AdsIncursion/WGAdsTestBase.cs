@@ -202,18 +202,20 @@ public abstract class WGAdsTestBase : WGReaverTestBase
     - kind: Hold
 ";
 
-    /// <summary>Switches the ADS override back off, so a pooled pair does not run the campaign in other tests.</summary>
+    /// <summary>Switches the ADS override back off and its payout cap to the default, so a pooled pair does not keep either.</summary>
     [TearDown]
     public async Task StopAds()
     {
         await Server.WaitPost(() =>
         {
             Server.System<WGAdsCampaignSystem>().Paused = false;
-            Server.ResolveDependency<IConfigurationManager>().SetCVar(AdsIncursionCVars.Enabled, false);
+            var config = Server.ResolveDependency<IConfigurationManager>();
+            config.SetCVar(AdsIncursionCVars.Enabled, false);
+            config.SetCVar(AdsIncursionCVars.PayoutHourlyCap, AdsIncursionCVars.PayoutHourlyCap.DefaultValue);
         });
     }
 
-    /// <summary>Starts a round with the ADS test campaign in force, the Reavers off unless asked, and the storyteller starting nothing of its own.</summary>
+    /// <summary>Starts a round with the ADS test campaign in force, the Reavers off unless asked, the storyteller starting nothing of its own and no campaign payout caps.</summary>
     protected async Task StartAds(bool reavers = false)
     {
         await StartRound();
@@ -223,6 +225,8 @@ public abstract class WGAdsTestBase : WGReaverTestBase
             config.SetCVar(EncountersCVars.Enabled, true);
             config.SetCVar(AdsIncursionCVars.Enabled, true);
             config.SetCVar(ReaverCampaignCVars.Enabled, reavers);
+            config.SetCVar(AdsIncursionCVars.PayoutHourlyCap, int.MaxValue);
+            config.SetCVar(ReaverCampaignCVars.PayoutHourlyCap, int.MaxValue);
             config.SetCVar(EncountersCVars.Preset, AdsPreset);
             config.SetCVar(EncountersCVars.MaxActive, 0);
         });

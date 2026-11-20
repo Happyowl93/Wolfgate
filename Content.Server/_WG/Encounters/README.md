@@ -114,7 +114,9 @@ gone. The prize is shared equally, into bank accounts, by the players whose ship
 `MinimumHits` times and the players who hurt a target in person (dead or ghosted, they are still paid), and the living
 players aboard the ship or within 200 m when it fell. A share that cannot be paid, and the odd spesos of the split, go
 with the next share. The hourly cap on encounter rewards does not apply to a warrant, since the board promised the
-number. Then the warrant comes off the board and the encounter resolves as destroyed. An encounter that expires,
+number. That cap (`wg.encounters.payout_hourly_cap`) is a per-player allowance whose hour opens at the first payout; a
+reward can draw on a `WGPayoutPool` of its own instead, as the Reaver and ADS campaigns' bounties do, each with its own
+cap and hour. Then the warrant comes off the board and the encounter resolves as destroyed. An encounter that expires,
 completes or is ended, or whose ships are swept up first, takes its warrant down and pays nobody; its clock does not
 run out while players are on the warrant (a ship alerted, or a player aboard, docked or within 200 m).
 `WGEncounterBountySystem.AddToBounty` raises the prize of a live warrant and updates the board entry, for encounters
@@ -282,6 +284,7 @@ stops. Extorters weigh the four nearest crewed ships and go for the richest hold
 - [`Content.Server/_WG/Encounters/Systems/WGSalvageClaimSystem.cs`](Systems/WGSalvageClaimSystem.cs)
 - [`Content.Server/_WG/Encounters/Systems/WGShipDisablerSystem.cs`](Systems/WGShipDisablerSystem.cs)
 - [`Content.Server/_WG/Encounters/WGEncounterEvents.cs`](WGEncounterEvents.cs)
+- [`Content.Server/_WG/Encounters/WGPayoutPool.cs`](WGPayoutPool.cs)
 
 ### Shared
 

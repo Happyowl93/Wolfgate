@@ -64,7 +64,7 @@ public sealed partial class WGReaverCampaignSystem
         if (bounty > 0 && args.Ships is { Count: > 0 } ships)
         {
             paid = _rewards.PayCrews(Loc.GetString("wg-reaver-retake-name", ("callsign", callsign)), $"Reaver cell {callsign}", bounty, ships,
-                "retaking");
+                "retaking", PayoutPool);
         }
 
         if (state != null)

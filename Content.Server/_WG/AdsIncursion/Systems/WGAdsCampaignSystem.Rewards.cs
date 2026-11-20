@@ -2,6 +2,7 @@ using System.Linq;
 using System.Numerics;
 using Content.Server._WG.AdsIncursion.Components;
 using Content.Server._WG.Drydock;
+using Content.Server._WG.Encounters;
 using Content.Server._WG.Encounters.Components;
 using Content.Shared._WG.AdsIncursion;
 using Content.Shared._WG.Encounters;
@@ -12,6 +13,9 @@ namespace Content.Server._WG.AdsIncursion.Systems;
 public sealed partial class WGAdsCampaignSystem
 {
     [Dependency] private WGDrydockSystem _drydock = default!;
+
+    /// <summary>The ADS's own hourly payout allowance, apart from other encounter rewards and the Reavers'.</summary>
+    public static readonly WGPayoutPool PayoutPool = new("ads", AdsIncursionCVars.PayoutHourlyCap);
 
     /// <summary>How near a node's lead a player ship must stand by to count for the support pool.</summary>
     private const float SupportRange = 2500f;
@@ -55,7 +59,7 @@ public sealed partial class WGAdsCampaignSystem
 
         var (reward, extra) = Rewards(campaign, bounty, grant => (int) (grant.Stronghold * factor));
         var helpers = new List<EntityUid>();
-        var paid = _rewards.PayBounty(uid, reward, "breaking the ADS node", supporters, extra, helpers);
+        var paid = _rewards.PayBounty(uid, reward, "breaking the ADS node", supporters, extra, helpers, allowance: PayoutPool);
         _drydock.IssueShipVouchers(campaign.NodeVoucher, helpers);
         return (bounty, paid);
     }
@@ -78,7 +82,7 @@ public sealed partial class WGAdsCampaignSystem
         var bounty = Scaled(campaign, uid, spesos);
         var (reward, extra) = Rewards(campaign, bounty, grant => grant.Patrol);
         var helpers = new List<EntityUid>();
-        var paid = _rewards.PayBounty(uid, reward, deed, null, extra, helpers);
+        var paid = _rewards.PayBounty(uid, reward, deed, null, extra, helpers, allowance: PayoutPool);
         _drydock.IssueShipVouchers(campaign.SweepVoucher, helpers);
         return (bounty, paid);
     }
@@ -89,7 +93,7 @@ public sealed partial class WGAdsCampaignSystem
         var bounty = Scaled(campaign, uid, campaign.DreadnoughtBounty);
         var (reward, extra) = Rewards(campaign, bounty, grant => grant.Stronghold);
         var helpers = new List<EntityUid>();
-        var paid = _rewards.PayBounty(uid, reward, "destroying the ADS dreadnought", null, extra, helpers, uncapped: true);
+        var paid = _rewards.PayBounty(uid, reward, "destroying the ADS dreadnought", null, extra, helpers, uncapped: true, allowance: PayoutPool);
         _drydock.IssueShipVouchers(campaign.NodeVoucher, helpers);
         return (bounty, paid);
     }
@@ -100,7 +104,7 @@ public sealed partial class WGAdsCampaignSystem
         var bounty = Scaled(campaign, deployment, ByTier(campaign.NodeBounty, state.Tier, 0) / 2);
         var (reward, extra) = Rewards(campaign, bounty, grant => grant.Stronghold / 2);
         var helpers = new List<EntityUid>();
-        var paid = _rewards.PayBounty(deployment, reward, "stopping the ADS deployment", null, extra, helpers);
+        var paid = _rewards.PayBounty(deployment, reward, "stopping the ADS deployment", null, extra, helpers, allowance: PayoutPool);
         _drydock.IssueShipVouchers(campaign.NodeVoucher, helpers);
         return (bounty, paid);
     }

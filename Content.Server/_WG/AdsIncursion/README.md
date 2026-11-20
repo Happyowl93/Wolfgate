@@ -20,7 +20,9 @@ after the top attacker and come back three minutes after the last hit. Breaking 
 frees its cells and pays `nodeBounty[tier]` times one plus half a sentinel alive, to those who hit it or its sentinels,
 with a fifth for the ships that stood by. A sweep or sentinel killed pays the sweep bounty, and a sweep frees the cell
 it died in. Every spesos bounty is multiplied by the `population` bracket's `bountyScale` and grows by
-`shipBountyScale` for each paid attacking ship past the first, up to `maxShipBountyScale`; each helping ship gets the
+`shipBountyScale` for each paid attacking ship past the first, up to `maxShipBountyScale`. Every ADS bounty but the
+dreadnought's draws on a per-player hourly allowance of its own, `wg.ads.payout_hourly_cap` (450k), apart from the
+Reavers' and from other encounter rewards (`WGCampaignPayoutCapTest`). Each helping ship gets the
 `nodeVoucher` (node, deployment, dreadnought) or `sweepVoucher` (anything else), unless it still holds one. A crewed ship that stays `interdictDwell` in ADS space has the nearest sweep sent to hold beside it and
 query it.
 
@@ -124,6 +126,7 @@ challenge [q r] | dreadnought | pause | resume | clear`, and see every campaign 
 - [`Content.IntegrationTests/Tests/_WG/AdsIncursion/WGAdsMiningTest.cs`](../../../Content.IntegrationTests/Tests/_WG/AdsIncursion/WGAdsMiningTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/AdsIncursion/WGAdsNodeTest.cs`](../../../Content.IntegrationTests/Tests/_WG/AdsIncursion/WGAdsNodeTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/AdsIncursion/WGAdsTestBase.cs`](../../../Content.IntegrationTests/Tests/_WG/AdsIncursion/WGAdsTestBase.cs)
+- [`Content.IntegrationTests/Tests/_WG/AdsIncursion/WGCampaignPayoutCapTest.cs`](../../../Content.IntegrationTests/Tests/_WG/AdsIncursion/WGCampaignPayoutCapTest.cs)
 
 ### Prototypes
 
