@@ -37,3 +37,4 @@
     AtmosDeviceFanDirectionalFlatpack: 4294967295 # Infinite - Mono
     MaterialSiloFlatpack: 4294967295 # Infinite - Mono
     WGFlatpackShieldDeflector: 4294967295 # WOLFGATE(ShipShields): the Parasol deflector is an off-the-shelf fitting
+    WGFlatpackShipModuleManeuveringJets: 4294967295 # WOLFGATE(ShipModules): maneuvering jets are an off-the-shelf fitting

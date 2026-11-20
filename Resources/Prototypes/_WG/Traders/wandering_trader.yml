@@ -836,6 +836,7 @@
   id: WGTraderSystemsBrokerInventory
   startingInventory:
     WGFlatpackShieldDeflectorBroker: 1
+    WGFlatpackShipModuleManeuveringJetsBroker: 1
     WGFlatpackShieldSentinel: 1
     WGFlatpackShieldAegis: 1
     WGFlatpackShieldTitan: 1

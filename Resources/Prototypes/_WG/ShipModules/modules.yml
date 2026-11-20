@@ -1,0 +1,94 @@
+# Ship modules: hull-mounted systems the pilot fires from the helm's module strip or its hotkeys.
+
+- type: entity
+  abstract: true
+  parent: [ BaseMachinePowered, ConstructibleMachine ]
+  id: WGShipModuleBase
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: Structures/Shuttles/gyroscope.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+  - type: ApcPowerReceiver
+    powerLoad: 2000
+  - type: StaticPrice
+    price: 2000
+
+# Maneuvering jets: a sideways kick for hulls that fly without a shield field.
+- type: entity
+  parent: WGShipModuleBase
+  id: WGShipModuleManeuveringJets
+  name: MJ-3 "Sidestep" Maneuvering Jets
+  description: A ring of cold-gas jets plumbed through the hull. Each burn kicks the ship along whichever way the pilot is steering, hard enough to step a small hull out of a salvo. A raised shield field holds the hull too stiffly for them to fire, though a deflector's light field doesn't, and a heavy or laden ship gets less out of each burn.
+  components:
+  - type: Sprite
+    sprite: Structures/Shuttles/gyroscope.rsi
+    snapCardinals: true
+    layers:
+    - state: base
+      color: "#9FC4FF"
+  - type: WGShipModule
+    label: wg-ship-module-jets-label
+    maxCharges: 3
+    rechargeTime: 8
+    cooldown: 0.75
+    blockedByShields: true
+    shieldLockout: 5
+    activateSound:
+      path: /Audio/_WG/ShipModules/jets_burn.ogg
+      params:
+        volume: -3
+  - type: WGManeuveringJets
+    deltaV: 20
+    burnTime: 0.4
+  - type: Machine
+    board: WGShipModuleManeuveringJetsCircuitboard
+
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: WGShipModuleManeuveringJetsCircuitboard
+  name: MJ-3 maneuvering jets board
+  description: A machine board for a set of maneuvering jets.
+  components:
+  - type: Sprite
+    state: engineering
+  - type: MachineBoard
+    prototype: WGShipModuleManeuveringJets
+    flatpackable: false
+    stackRequirements:
+      Steel: 10
+      Plasma: 10
+    tagRequirements:
+      ComponentBrickEconomy1:
+        amount: 1
+        defaultPrototype: ComponentBrickEconomy1
+      ElectromagnetEconomy1:
+        amount: 1
+        defaultPrototype: ElectromagnetEconomy1
+      MicroprocessorEconomy1:
+        amount: 1
+        defaultPrototype: MicroprocessorEconomy1
+
+- type: entity
+  parent: BaseFlatpack
+  id: WGFlatpackShipModuleManeuveringJets
+  name: MJ-3 Sidestep maneuvering jets flatpack
+  description: A flatpack used for constructing a set of MJ-3 Sidestep maneuvering jets.
+  components:
+  - type: Flatpack
+    entity: WGShipModuleManeuveringJets
+  - type: StaticPrice
+    price: 6000
+    vendPrice: 20000
+
+# The systems broker's copy, priced off the static price like the rest of its stock.
+- type: entity
+  parent: WGFlatpackShipModuleManeuveringJets
+  id: WGFlatpackShipModuleManeuveringJetsBroker
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: StaticPrice
+    vendPrice: 0

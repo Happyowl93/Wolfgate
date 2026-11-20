@@ -84,6 +84,20 @@ binds:
 - function: WGToggleLandingGuide
   type: State
   key: J
+# WOLFGATE(ShipModules) START: ship module hotkeys while piloting
+- function: WGShipModuleFirst
+  type: State
+  key: Shift
+- function: WGShipModuleSecond
+  type: State
+  key: Z
+- function: WGShipModuleThird
+  type: State
+  key: X
+- function: WGShipModuleFourth
+  type: State
+  key: C
+# WOLFGATE END
 - function: CameraRotateLeft
   type: State
   key: NumpadNum7
