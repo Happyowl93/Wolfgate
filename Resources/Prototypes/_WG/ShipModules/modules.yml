@@ -12,10 +12,10 @@
     state: base
   price: 20000
   materials:
-    Steel: 1000
-    Plastic: 500
-    Plasma: 1000
-    Gold: 200
+    Steel: 5000
+    Plastic: 2500
+    Plasma: 5000
+    Gold: 1000
   maxCharges: 3
   rechargeTime: 8
   cooldown: 0.75
