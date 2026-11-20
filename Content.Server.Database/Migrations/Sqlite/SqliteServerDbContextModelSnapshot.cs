@@ -1019,6 +1019,11 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("INTEGER")
                         .HasColumnName("leg_stance");
 
+                    b.Property<string>("MarkingGlow")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("marking_glow");
+
                     b.Property<byte[]>("Markings")
                         .HasColumnType("jsonb")
                         .HasColumnName("markings");

@@ -700,6 +700,7 @@ namespace Content.Client.Lobby.UI
             RefreshFlavorText();
             InitializeHeadshot(); // WOLFGATE(Headshot)
             InitializeCustomMarkings(); // WOLFGATE(CustomMarkings)
+            InitializeMarkingGlow(); // WOLFGATE(MarkingGlow)
             InitializeCompanyCard(); // WOLFGATE(Companies)
             InitializeMismatchedParts(); // WOLFGATE(Species)
             InitializeBiotype(); // WOLFGATE(Biotype)
@@ -1431,6 +1432,7 @@ namespace Content.Client.Lobby.UI
             UpdateFlavorTextEdit();
             UpdateHeadshot(); // WOLFGATE(Headshot)
             UpdateCustomMarkings(); // WOLFGATE(CustomMarkings)
+            UpdateMarkingGlow(); // WOLFGATE(MarkingGlow)
             UpdateCompanyCard(); // WOLFGATE(Companies)
             UpdateMismatchedParts(); // WOLFGATE(Species)
             UpdateBiotype(); // WOLFGATE(Biotype)
@@ -2598,6 +2600,7 @@ namespace Content.Client.Lobby.UI
                 1,
                 HairStyleChoices(MarkingCategories.FacialHair)); // WOLFGATE(Species): the styles the option allows
             HairCard.Visible = HairStylePicker.Visible || FacialHairPicker.Visible; // WOLFGATE(Humanoid): no hair card for species without hair
+            UpdateHairGlow(); // WOLFGATE(MarkingGlow): a switch for each kind of hair the species has
         }
 
         private void UpdateCMarkingsHair()

@@ -113,6 +113,7 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
     private readonly CheckBox _showHair;
     private readonly CheckBox _showClothes;
     private readonly CustomMarkingIconButton _symmetry;
+    private readonly CustomMarkingIconButton _sideMirror;
     private readonly CustomMarkingIconButton _undoButton;
     private readonly CustomMarkingIconButton _redoButton;
     private readonly List<(CustomMarkingIconButton Button, string Direction)> _nudges = new();
@@ -256,6 +257,11 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
         _symmetry.AddStyleClass(StyleWolfgate.StyleClassCreatorToggle);
         _symmetry.OnToggled += args => SetMirror(args.Pressed);
         drawing.AddChild(_symmetry);
+
+        _sideMirror = new CustomMarkingIconButton("sides", Loc.GetString("wg-custom-marking-editor-side-mirror")) { ToggleMode = true };
+        _sideMirror.AddStyleClass(StyleWolfgate.StyleClassCreatorToggle);
+        _sideMirror.OnToggled += args => SetSideMirror(args.Pressed);
+        drawing.AddChild(_sideMirror);
 
         _undoButton = Command("undo", "wg-custom-marking-editor-undo", Undo);
         _redoButton = Command("redo", "wg-custom-marking-editor-redo", Redo);
@@ -770,6 +776,13 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
         UpdateMirror();
     }
 
+    /// <summary>Turns side mirroring on or off: drawing on one side view draws on the other too.</summary>
+    private void SetSideMirror(bool on)
+    {
+        _sketch.SideMirror = on;
+        _sideMirror.Pressed = on;
+    }
+
     /// <summary>Stands the mirror on the middle of the body in the facing shown, read off its torso.</summary>
     private void UpdateMirror()
     {
@@ -1264,6 +1277,9 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
                 return true;
             case Keyboard.Key.M:
                 SetMirror(!_sketch.Mirror);
+                return true;
+            case Keyboard.Key.S:
+                SetSideMirror(!_sketch.SideMirror);
                 return true;
             case Keyboard.Key.Num1:
                 SetLayer(Layer.Drawing);

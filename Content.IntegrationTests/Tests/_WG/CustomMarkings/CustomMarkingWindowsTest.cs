@@ -81,6 +81,8 @@ public sealed class CustomMarkingWindowsTest
             Assert.That(icons.All(icon => !string.IsNullOrEmpty(icon.ToolTip)), Is.True, "every icon button has a tooltip");
             Assert.That(icons.Single(icon => icon.ToolTip == Loc.GetString("wg-custom-marking-editor-symmetry")).ToggleMode,
                 Is.True, "mirror drawing is switched on and off");
+            Assert.That(icons.Single(icon => icon.ToolTip == Loc.GetString("wg-custom-marking-editor-side-mirror")).ToggleMode,
+                Is.True, "side mirroring is switched on and off");
 
             // An animated marking's frames have their controls, and the tools say what they do on the drawing.
             foreach (var loc in FrameControls)

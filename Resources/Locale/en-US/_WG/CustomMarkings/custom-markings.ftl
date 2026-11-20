@@ -43,6 +43,7 @@ wg-custom-marking-editor-group-facing = Facing
 wg-custom-marking-editor-undo = Undo (Ctrl+Z)
 wg-custom-marking-editor-redo = Redo (Ctrl+Y)
 wg-custom-marking-editor-symmetry = Mirror drawing (M): what you draw on one side of the body's middle is drawn on the other side too.
+wg-custom-marking-editor-side-mirror = Side mirror (S): what you draw on one side view is drawn on the other, flipped, so the left and right of the body match.
 wg-custom-marking-editor-nudge = Move this facing's { $layer ->
     [erase] erased body
     *[drawing] drawing

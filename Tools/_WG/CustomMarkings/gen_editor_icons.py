@@ -109,6 +109,25 @@ ICONS = {
         "................",
         "................",
     ],
+    # Two heads seen from the side, back to back across a mirror: drawing on one side view draws on the other.
+    "sides": [
+        "................",
+        "..####.++.####..",
+        ".######..######.",
+        ".######++######.",
+        "#######..#######",
+        "#######++#######",
+        ".######..######.",
+        ".######++######.",
+        "..#####..#####..",
+        "...####++####...",
+        "...####..####...",
+        "..#####++#####..",
+        ".######..######.",
+        ".......++.......",
+        "................",
+        "................",
+    ],
     "undo": [
         "................",
         "................",
@@ -332,7 +351,7 @@ ICONS = {
 
 # The order states are listed in meta.json. Redo mirrors undo; the other arrows turn the up arrow.
 ORDER = [
-    "pencil", "eraser", "fill", "picker", "symmetry", "undo", "redo", "flip", "mirror", "trash",
+    "pencil", "eraser", "fill", "picker", "symmetry", "sides", "undo", "redo", "flip", "mirror", "trash",
     "left", "up", "down", "right", "export", "add", "remove", "play", "reverse", "timeall", "pingpong",
 ]
 

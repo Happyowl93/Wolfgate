@@ -717,6 +717,9 @@ namespace Content.Server.Database
         // WOLFGATE(CustomMarkings): the custom markings worn, as hash:placement pairs; empty for none.
         [Column("custom_markings")] public string CustomMarkings { get; set; } = "";
 
+        // WOLFGATE(MarkingGlow): the markings, eyes and hair made to glow, ;-separated; empty for none.
+        [Column("marking_glow")] public string MarkingGlow { get; set; } = "";
+
         // WOLFGATE(LegStyle): the legs picked in the creator, 0 for the species' own.
         [Column("leg_stance")] public int LegStance { get; set; }
 

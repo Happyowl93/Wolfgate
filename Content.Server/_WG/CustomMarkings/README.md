@@ -17,10 +17,10 @@ stay bright in the dark while the rest of the marking is lit like the body.
 The library shows each marking on the character from all four sides, as it will look, with its name, placement and
 icon actions. The editor (one at a time, opened through `CustomMarkingUIController`) switches over the canvas
 between three layers: Drawing, Erase body and Glow. The tools (pencil, eraser, fill, pick colour), mirror
-drawing and the facing operations (move, flip, copy to the other side, clear) act on the layer picked; in the
+drawing, side mirroring (a stroke on one side view is drawn flipped on the other) and the facing operations (move, flip, copy to the other side, clear) act on the layer picked; in the
 Glow layer the canvas is darkened as in the dark so only what glows shows, outlined. A line under the canvas says
 what the tool does. Shortcuts: Ctrl+Z, Ctrl+Y (or Ctrl+Shift+Z), B, E, F and I for the tools, 1 to 3 for the
-layers, M for mirror drawing, [ and ] for frames, Space to play; Shift+click draws a line from the last stroke and
+layers, M for mirror drawing, S for side mirroring, [ and ] for frames, Space to play; Shift+click draws a line from the last stroke and
 Alt+click picks a colour with any tool. The facing tiles, the frame strip and the view options sit to the right;
 the colours, with the ones already used in the marking, below. A disabled button says why in its tooltip. The
 colour picker reads a drawn pixel or, where there is none, the body under it, which `CustomMarkingBodySampler`

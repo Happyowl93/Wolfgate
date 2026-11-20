@@ -1073,6 +1073,11 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("integer")
                         .HasColumnName("leg_stance");
 
+                    b.Property<string>("MarkingGlow")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("marking_glow");
+
                     b.Property<JsonDocument>("Markings")
                         .HasColumnType("jsonb")
                         .HasColumnName("markings");
