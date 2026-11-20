@@ -416,6 +416,13 @@ public sealed class CustomMarkingLibraryTest
             Assert.That(slots[first.Id], Is.Null);
         });
 
+        // A save that lands after its character was deleted, or names a slot no character holds, is shared.
+        var stale = (await db.SaveCustomMarkingAsync(user, 0, "Stale", 0, FakeHash('4'), art, limit, slot: 1)).Entry!;
+        Assert.That(stale.Slot, Is.Null, "a deleted character's slot isn't kept");
+        Assert.That(await db.SetCustomMarkingSlotAsync(user, shared.Id, 7), Is.True);
+        Assert.That((await db.GetCustomMarkingsAsync(user)).Single(m => m.Id == shared.Id).Slot, Is.Null,
+            "nor is one no character holds");
+
         await pair.CleanReturnAsync();
     }
 

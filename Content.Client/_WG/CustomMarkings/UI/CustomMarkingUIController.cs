@@ -12,6 +12,8 @@ public sealed class CustomMarkingUIController : UIController
     [Dependency] private IConfigurationManager _cfg = default!;
 
     private CustomMarkingEditorWindow? _editor;
+    /// <summary>An editor asked to close for a character switch and left open by its unsaved edits.</summary>
+    private CustomMarkingEditorWindow? _released;
 
     /// <summary>
     /// Opens the editor on a marking, over the character wearing everything but that marking. An editor already open
@@ -45,7 +47,8 @@ public sealed class CustomMarkingUIController : UIController
         var editor = new CustomMarkingEditorWindow(entry, art, name, body) { Slot = slot };
         editor.OnSaved += (before, saved) =>
         {
-            if (profile() is not { } current)
+            // Asked to close for a character switch, it saves to the library but wears nothing on the new character.
+            if (editor == _released || profile() is not { } current)
                 return;
 
             var worn = current.CustomMarkings.ToList();
@@ -58,6 +61,8 @@ public sealed class CustomMarkingUIController : UIController
         {
             if (_editor == editor)
                 _editor = null;
+            if (_released == editor)
+                _released = null;
         };
 
         _editor = editor;
@@ -65,10 +70,15 @@ public sealed class CustomMarkingUIController : UIController
         return true;
     }
 
-    /// <summary>Closes the editor, asking first about unsaved edits.</summary>
+    /// <summary>
+    /// Closes the editor, asking first about unsaved edits. One left open by that question no longer belongs to the
+    /// character it was opened for.
+    /// </summary>
     public void CloseEditor()
     {
         _editor?.Close();
+        if (_editor is { IsOpen: true })
+            _released = _editor;
     }
 
     /// <summary>Swaps a worn marking for another in place. Returns whether the list changed.</summary>

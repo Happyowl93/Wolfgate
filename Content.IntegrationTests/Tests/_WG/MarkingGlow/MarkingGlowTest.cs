@@ -141,7 +141,7 @@ public sealed class MarkingGlowTest
     private static void AssertGlow(IEntityManager entMan, EntityUid doll, bool glowing, string when)
     {
         var sprites = entMan.System<SpriteSystem>();
-        var sprite = new Entity<SpriteComponent?>(doll, entMan.GetComponent<SpriteComponent>(doll));
+        var sprite = new Entity<SpriteComponent>(doll, entMan.GetComponent<SpriteComponent>(doll));
         var expected = glowing ? (ProtoId<ShaderPrototype>?) SpriteSystem.UnshadedId : null;
 
         Assert.That(sprites.LayerMapTryGet(sprite, TattooLayer, out var tattoo, false), Is.True);

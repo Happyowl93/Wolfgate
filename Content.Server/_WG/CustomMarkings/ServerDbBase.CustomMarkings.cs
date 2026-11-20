@@ -96,7 +96,7 @@ public abstract partial class ServerDbBase
 
         if (entry == null)
         {
-            entry = new WolfgateCustomMarking { PlayerUserId = userId, Slot = slot };
+            entry = new WolfgateCustomMarking { PlayerUserId = userId, Slot = await LiveSlot(ctx, userId, slot, cancel) };
             ctx.WolfgateCustomMarking.Add(entry);
         }
 
@@ -136,9 +136,22 @@ public abstract partial class ServerDbBase
         if (entry == null)
             return false;
 
-        entry.Slot = slot;
+        entry.Slot = await LiveSlot(db.DbContext, userId, slot, cancel);
         await db.DbContext.SaveChangesAsync(cancel);
         return true;
+    }
+
+    /// <summary>
+    /// The slot if a character still holds it, else null: a marking saved for a character deleted meanwhile is
+    /// shared rather than left hidden for whoever takes the slot next.
+    /// </summary>
+    private static async Task<int?> LiveSlot(ServerDbContext db, Guid userId, int? slot, CancellationToken cancel)
+    {
+        if (slot is not { } index)
+            return null;
+
+        var held = await db.Profile.AnyAsync(p => p.Preference.UserId == userId && p.Slot == index, cancel);
+        return held ? index : null;
     }
 
     /// <summary>
