@@ -22,7 +22,7 @@ using Robust.Shared.Map;
 
 namespace Content.IntegrationTests.Tests._WG.Cyborgs;
 
-/// <summary>Faction AI cores reopen when abandoned, take the player's AI name, reach linked borgs off-grid and view overwatch feeds.</summary>
+/// <summary>Faction AI cores reopen when abandoned, take the player's AI name, reach linked borgs off-grid and view overwatch feeds; built faction borgs carry their company.</summary>
 [TestFixture]
 [TestOf(typeof(WGAiCoreGhostRoleSystem))]
 public sealed class WGAiCoreTest
@@ -229,6 +229,37 @@ public sealed class WGAiCoreTest
                 }
 
                 entMan.DeleteEntity(core);
+            }
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task FactionBorgChassisCompanyTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var map = await pair.CreateTestMap();
+
+        await server.WaitAssertion(() =>
+        {
+            foreach (var (chassisProto, requisition) in new[]
+                     {
+                         ("BorgChassisSelectableTSF", "VendingMachineTSFMCUplink"),
+                         ("BorgChassisSelectablePDV", "VendingMachinePDVUplink"),
+                     })
+            {
+                var chassis = entMan.SpawnEntity(chassisProto, map.GridCoords);
+                var machine = entMan.SpawnEntity(requisition, map.GridCoords);
+                var required = entMan.GetComponent<CompanyAccessReaderComponent>(machine).RequiredCompanies;
+                Assert.That(entMan.TryGetComponent<CompanyComponent>(chassis, out var company)
+                            && required.Contains(company.CompanyName),
+                    $"A built {chassisProto} doesn't pass the company reader on {requisition}.");
+
+                entMan.DeleteEntity(machine);
+                entMan.DeleteEntity(chassis);
             }
         });
 
