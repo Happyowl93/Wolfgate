@@ -112,11 +112,13 @@ public sealed class CustomMarkingLibraryTest
         var pngB = new byte[] { 4, 5 };
         var artA = new StoredArt(pngA, null, null);
 
-        // Animated art that erases some of the body: its frame times and its mask are stored with the sheet.
+        // Animated art that erases some of the body and glows: its frame times and masks are stored with the sheet.
         var timesB = new byte[] { 200, 0, 44, 1 };
         var eraseB = new byte[CustomMarkingRules.EraseBytes];
         eraseB[7] = 0x10;
-        var artB = new StoredArt(pngB, timesB, eraseB);
+        var glowB = new byte[2 * CustomMarkingRules.EraseBytes];
+        glowB[600] = 0x04;
+        var artB = new StoredArt(pngB, timesB, eraseB, glowB);
         const int limit = 2;
 
         var added = await db.SaveCustomMarkingAsync(user, 0, "One", (int) CustomMarkingPlacement.Skin, HashA, artA, limit);
@@ -155,9 +157,11 @@ public sealed class CustomMarkingLibraryTest
         {
             Assert.That(storedA!.FrameTimes, Is.Null, "a still marking has no frame times");
             Assert.That(storedA.Erase, Is.Null);
+            Assert.That(storedA.Glow, Is.Null);
             Assert.That(storedB!.Png, Is.EqualTo(pngB));
             Assert.That(storedB.FrameTimes, Is.EqualTo(timesB));
             Assert.That(storedB.Erase, Is.EqualTo(eraseB));
+            Assert.That(storedB.Glow, Is.EqualTo(glowB));
         });
 
         // Art another player already saved is shared, not stored twice or overwritten.

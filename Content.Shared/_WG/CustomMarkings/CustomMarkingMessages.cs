@@ -26,7 +26,8 @@ public sealed class CustomMarkingSaveEvent(
     byte[]? pixels,
     int[]? frameTimes = null,
     byte[]? erase = null,
-    bool pingPong = false)
+    bool pingPong = false,
+    byte[]? glow = null)
     : EntityEventArgs
 {
     /// <summary>Echoed in the result, so the editor can tell which save it answers.</summary>
@@ -47,6 +48,9 @@ public sealed class CustomMarkingSaveEvent(
 
     /// <summary>Whether the animation plays back to the first frame at the end.</summary>
     public readonly bool PingPong = pingPong;
+
+    /// <summary>The pixels that glow, as <see cref="CustomMarkingArt.Glow"/> holds them. Null for none.</summary>
+    public readonly byte[]? Glow = glow;
 }
 
 /// <summary>Server to client: the saved entry, or a loc id saying why it wasn't saved.</summary>
@@ -82,7 +86,13 @@ public sealed class CustomMarkingArtRequestEvent(List<string> hashes) : EntityEv
 /// show for that hash.
 /// </summary>
 [Serializable, NetSerializable]
-public sealed class CustomMarkingArtEvent(string hash, byte[]? png, int[]? frameTimes = null, byte[]? erase = null, bool pingPong = false)
+public sealed class CustomMarkingArtEvent(
+    string hash,
+    byte[]? png,
+    int[]? frameTimes = null,
+    byte[]? erase = null,
+    bool pingPong = false,
+    byte[]? glow = null)
     : EntityEventArgs
 {
     public readonly string Hash = hash;
@@ -96,4 +106,7 @@ public sealed class CustomMarkingArtEvent(string hash, byte[]? png, int[]? frame
 
     /// <summary>Whether the animation plays back to the first frame at the end.</summary>
     public readonly bool PingPong = pingPong;
+
+    /// <summary>The pixels that glow, as <see cref="CustomMarkingArt.Glow"/> holds them. Null for none.</summary>
+    public readonly byte[]? Glow = glow;
 }

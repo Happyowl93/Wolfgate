@@ -234,6 +234,25 @@ ICONS = {
         ".....###..#.....",
         "................",
     ],
+    # A sun: the brush that makes drawn pixels glow.
+    "glow": [
+        "................",
+        ".......##.......",
+        ".......##.......",
+        "..#....##....#..",
+        "...#........#...",
+        "......####......",
+        ".....######.....",
+        "###..######..###",
+        "###..######..###",
+        ".....######.....",
+        "......####......",
+        "...#........#...",
+        "..#....##....#..",
+        ".......##.......",
+        ".......##.......",
+        "................",
+    ],
     "play": [
         "................",
         "................",
@@ -387,7 +406,7 @@ ICONS = {
 
 # The order states are listed in meta.json. Redo mirrors undo, previous mirrors next; the other arrows turn the up arrow.
 ORDER = [
-    "pencil", "eraser", "fill", "picker", "bodyeraser", "symmetry", "undo", "redo", "flip", "mirror", "trash",
+    "pencil", "eraser", "fill", "picker", "bodyeraser", "glow", "symmetry", "undo", "redo", "flip", "mirror", "trash",
     "left", "up", "down", "right", "export", "previous", "next", "add", "remove", "play",
     "frameleft", "frameright", "reverse", "timeall", "pingpong",
 ]

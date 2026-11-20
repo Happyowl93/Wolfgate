@@ -78,7 +78,8 @@ wg-custom-marking-tool-pencil = Pencil: left click draws. Right click erases wit
 wg-custom-marking-tool-eraser = Eraser: clears the pixels you drag over.
 wg-custom-marking-tool-fill = Fill: recolors the pixel you click and every same-colored pixel touching it.
 wg-custom-marking-tool-bodyeraser = Erase body: left click hides the character's own sprite under the marking, so what you draw takes its place. Right click brings it back. While this is picked, the move, flip, copy and clear buttons work on what is erased.
-wg-custom-marking-tool-picker = Pick color: takes the color of a pixel you drew, or of the body showing under it.
+wg-custom-marking-tool-glow = Glow: left click makes the pixels you drew glow, so they stay bright in the dark. Right click stops them glowing. Glowing pixels keep their glow when recolored or moved. While this is picked, the clear button only stops the facing glowing.
+wg-custom-marking-tool-picker =Pick color: takes the color of a pixel you drew, or of the body showing under it.
 
 wg-custom-marking-facing-south = Front
 wg-custom-marking-facing-north = Back

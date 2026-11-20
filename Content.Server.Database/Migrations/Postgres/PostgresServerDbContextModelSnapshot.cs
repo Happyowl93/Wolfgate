@@ -2411,6 +2411,10 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("bytea")
                         .HasColumnName("frame_times");
 
+                    b.Property<byte[]>("Glow")
+                        .HasColumnType("bytea")
+                        .HasColumnName("glow");
+
                     b.Property<byte[]>("Png")
                         .IsRequired()
                         .HasColumnType("bytea")

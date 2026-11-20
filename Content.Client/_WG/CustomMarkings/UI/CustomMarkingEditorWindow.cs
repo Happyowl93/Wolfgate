@@ -31,6 +31,9 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
 
         /// <summary>Erases the body under the art instead of the art.</summary>
         BodyEraser,
+
+        /// <summary>Makes drawn pixels glow, or stop glowing.</summary>
+        Glow,
     }
 
     private const int CanvasScale = 12;
@@ -177,7 +180,7 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
         var drawing = ToolGrid();
         foreach (var tool in Enum.GetValues<Tool>())
         {
-            if (tool == Tool.BodyEraser && !_system.EraseEnabled)
+            if (tool == Tool.BodyEraser && !_system.EraseEnabled || tool == Tool.Glow && !_system.GlowEnabled)
                 continue;
 
             var icon = tool.ToString().ToLowerInvariant();
@@ -205,7 +208,8 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
         history.AddChild(_redoButton);
 
         // What can be done to the facing shown: to its art on the frame shown, or with the body eraser picked, to
-        // what is erased there
+        // what is erased there. Glow goes with the pixels it is on; with the glow brush picked, clearing only stops
+        // the facing glowing.
         _mirrorButton = Command("mirror", "wg-custom-marking-editor-mirror", () => Change(art =>
         {
             if (Masking)
@@ -230,6 +234,8 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
         {
             if (Masking)
                 art.ClearErase(Facing);
+            else if (_tool == Tool.Glow)
+                art.ClearGlow(_frame, Facing);
             else
                 art.Clear(_frame, Facing);
         })));
@@ -675,6 +681,7 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
         _tool = tool;
         _sampler.Active = tool == Tool.Picker;
         _canvas.ShowErase = Masking;
+        _canvas.ShowGlow = tool == Tool.Glow;
     }
 
     /// <summary>Goes back to the pencil once a colour is chosen, from the palette or off the canvas.</summary>
@@ -724,6 +731,20 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
             _sketch.EraseLine(Facing, _last ?? pixel, pixel, !erase);
             _last = pixel;
             UpdateErase();
+            return;
+        }
+
+        if (_tool == Tool.Glow)
+        {
+            if (start)
+            {
+                _sketch.Begin();
+                _last = null;
+            }
+
+            // Left makes drawn pixels glow and right stops them.
+            _sketch.GlowLine(_frame, Facing, _last ?? pixel, pixel, !erase);
+            _last = pixel;
             return;
         }
 

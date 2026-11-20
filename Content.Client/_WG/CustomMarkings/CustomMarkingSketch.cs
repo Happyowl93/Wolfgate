@@ -116,6 +116,15 @@ public sealed class CustomMarkingSketch
         });
     }
 
+    /// <summary>
+    /// Makes the drawn pixels along a straight run of a frame glow, or stop glowing, mirrored like <see cref="Line"/>.
+    /// Undrawn pixels are passed over.
+    /// </summary>
+    public void GlowLine(int frame, int facing, Vector2i from, Vector2i to, bool glowing)
+    {
+        Mirrored(from, to, (x, y) => Art.SetGlow(frame, facing, x, y, glowing));
+    }
+
     /// <summary>Fills from a pixel of a frame, and while mirroring from the pixel across the middle too.</summary>
     public void Fill(int frame, int facing, int x, int y, Rgba32 ink)
     {

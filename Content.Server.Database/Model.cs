@@ -1876,6 +1876,9 @@ namespace Content.Server.Database
         /// <summary>The pixels of the body the marking erases, a bit for each pixel of each facing. Null for none.</summary>
         public byte[]? Erase { get; set; }
 
+        /// <summary>The pixels that glow, a bit for each pixel of each facing of each frame. Null for none.</summary>
+        public byte[]? Glow { get; set; }
+
         /// <summary>The player who first saved this art.</summary>
         public Guid UploaderUserId { get; set; }
 

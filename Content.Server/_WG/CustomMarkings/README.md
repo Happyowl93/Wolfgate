@@ -9,18 +9,21 @@ to the wearer's body and other markings, such as a tail or ears, and two pixels 
 A marking can be animated: up to 32 frames, each shown for a time of its own, played round or back and forth
 (ping-pong). The editor can move frames, reverse them, give them all one time, play them and show the frame before
 faintly over the one being drawn (onion skin). And a marking can erase parts of the body under it, so that what is drawn
-takes the body's place instead of lying on top of it.
+takes the body's place instead of lying on top of it. And its pixels can glow: the glow brush marks drawn pixels
+to be drawn unshaded, so they stay bright in the dark while the rest of the marking is lit like the body.
 
 The library shows each marking on the character from all four sides, as it will look, with its name, placement and
 icon actions. The editor keeps the drawing tools beside the canvas, the operations on the shown facing under them,
 the facing tiles, the frame controls and the view options to its right and the colours below. Its colour picker
 reads a drawn pixel or, where there is none, the body under it, which `CustomMarkingBodySampler` renders to a small
 target and copies back. The body eraser is a tool of its own: left click erases the body, right click brings it
-back, and while it is picked the facing operations work on what is erased. Both windows sit on a solid backdrop, as
+back, and while it is picked the facing operations work on what is erased. The glow brush is another: left click
+makes drawn pixels glow and right click stops them, and while it is picked the canvas is darkened as in the dark so
+only what glows shows, outlined. Both windows sit on a solid backdrop, as
 the skin's glass panel is unreadable over the creator. The icons are drawn by
 `Tools/_WG/CustomMarkings/gen_editor_icons.py`.
 
-Art is stored once per drawing, under a hash of its pixels, and of its frame times and erase mask when it has them,
+Art is stored once per drawing, under a hash of its pixels, and of its frame times, erase mask and glow when it has them,
 and sent to a client the first time it sees that hash. A character's profile lists what it wears as hash and
 placement pairs, so a saved character keeps its markings when the library entry is changed or deleted; changing an
 entry updates the character open in the creator.
@@ -28,7 +31,7 @@ entry updates the character open in the creator.
 Entry points: the server `CustomMarkingSystem` (library, saving, art requests, admin controls), the client
 `CustomMarkingSystem` (fetches art, draws the layers), `CustomMarkingResources` (fetched art as in-memory RSIs),
 `CustomMarkingLibraryWindow` and `CustomMarkingEditorWindow` (creator UI), `CustomMarkingArt`,
-`CustomMarkingErase` and `CustomMarkingRules` (the art, its erase mask and the limits, shared).
+`CustomMarkingErase` and `CustomMarkingRules` (the art, its erase and glow masks and the limits, shared).
 
 Admin: saving new art is logged under the Identity log type with its hash. The Remove custom markings verb takes
 them off a live character. The Block custom markings verb, or `custommarkingblock <hash> [true/false]`, blocks the
@@ -37,7 +40,8 @@ art is blocked only asks for it again after reconnecting, so a lifted block show
 `wg.custom_markings.enabled`, `wg.custom_markings.max_worn`, `wg.custom_markings.library_limit`,
 `wg.custom_markings.max_frames` (1 allows only still markings), `wg.custom_markings.body_reach` (off by default;
 on, markings are cut to the wearer's outline), `wg.custom_markings.erase_body` (off, masks are
-dropped from what is saved and those already saved are not applied), `wg.custom_markings.daily_art_limit` (most
+dropped from what is saved and those already saved are not applied), `wg.custom_markings.glow` (off, glow is
+dropped from what is saved and art already saved is drawn lit), `wg.custom_markings.daily_art_limit` (most
 new drawings a player may store in a day, 0 for no limit) and `wg.custom_markings.unused_art_days` (how long art
 nothing uses is kept, 0 to keep it forever).
 
@@ -92,6 +96,13 @@ nothing uses is kept, 0 to keep it forever).
   `wg.custom_markings.unused_art_days` have passed and it is still unused. Blocked art is never deleted, so a block
   holds. Until its time is out, art that has left every library can still be looked up and blocked by its hash. A
   character exported to a file and imported after that keeps its other markings but not the deleted art.
+- Glow is a mask beside the art, a bit for each pixel of each facing of each frame, so an animation can glow in
+  some frames and not others. It belongs to the pixel it is on: recolouring keeps it, clearing a pixel drops it,
+  and moving, flipping and copying a facing or reordering frames take it along. Each client splits the art as it
+  cuts it to the body: the lit pixels are one layer and the glowing ones another, just over it, drawn with the
+  `unshaded` shader. Unshaded only ignores the darkness; it casts no light. An exported PNG loses the glow, as it
+  loses the erase mask. Art that doesn't glow keeps the hash it had before glow existed; glowing art hashes that
+  hash again with its mask.
 - Round replays don't record the art: a replay shows the bodies without their custom markings.
 
 <!-- WOLFGATE-GENERATED START -->
@@ -160,6 +171,7 @@ nothing uses is kept, 0 to keep it forever).
 - [`Content.Tests/_WG/CustomMarkings/CustomMarkingArtTest.cs`](../../../Content.Tests/_WG/CustomMarkings/CustomMarkingArtTest.cs)
 - [`Content.Tests/_WG/CustomMarkings/CustomMarkingColorSpaceTest.cs`](../../../Content.Tests/_WG/CustomMarkings/CustomMarkingColorSpaceTest.cs)
 - [`Content.Tests/_WG/CustomMarkings/CustomMarkingEraseTest.cs`](../../../Content.Tests/_WG/CustomMarkings/CustomMarkingEraseTest.cs)
+- [`Content.Tests/_WG/CustomMarkings/CustomMarkingGlowTest.cs`](../../../Content.Tests/_WG/CustomMarkings/CustomMarkingGlowTest.cs)
 - [`Content.Tests/_WG/CustomMarkings/CustomMarkingRulesTest.cs`](../../../Content.Tests/_WG/CustomMarkings/CustomMarkingRulesTest.cs)
 - [`Content.Tests/_WG/CustomMarkings/CustomMarkingSamplingTest.cs`](../../../Content.Tests/_WG/CustomMarkings/CustomMarkingSamplingTest.cs)
 - [`Content.Tests/_WG/CustomMarkings/CustomMarkingSectionsTest.cs`](../../../Content.Tests/_WG/CustomMarkings/CustomMarkingSectionsTest.cs)

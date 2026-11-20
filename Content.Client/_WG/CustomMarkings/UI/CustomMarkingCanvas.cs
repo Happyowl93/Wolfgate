@@ -26,6 +26,8 @@ public sealed partial class CustomMarkingCanvas : Control
     private static readonly Color ReachEdge = Color.FromHex("#FFC53D");
     private static readonly Color ErasedTint = Color.FromHex("#FF5A5A").WithAlpha(0.3f);
     private static readonly Color ErasedEdge = Color.FromHex("#FF5A5A").WithAlpha(0.9f);
+    private static readonly Color GlowDark = Color.Black.WithAlpha(0.6f);
+    private static readonly Color GlowEdge = Color.FromHex("#FFE066").WithAlpha(0.9f);
     private static readonly Color MirrorHoverLine = Color.White.WithAlpha(0.45f);
     private static readonly Color MirrorGuide = Color.FromHex("#4FD3FF").WithAlpha(0.8f);
     private static readonly Color MirrorColumn = Color.FromHex("#4FD3FF").WithAlpha(0.14f);
@@ -76,6 +78,12 @@ public sealed partial class CustomMarkingCanvas : Control
 
     /// <summary>Whether to mark the pixels <see cref="Art"/> erases, for the tool that changes them.</summary>
     public bool ShowErase;
+
+    /// <summary>
+    /// Whether to show what glows, for the tool that changes it: everything is darkened as in the dark, except the
+    /// glowing pixels of the frame shown, which are outlined.
+    /// </summary>
+    public bool ShowGlow;
 
     /// <summary>
     /// Whether to leave the body's hair and facial hair undrawn, to show what is under them. Only the picture
@@ -147,6 +155,9 @@ public sealed partial class CustomMarkingCanvas : Control
         {
             DrawArt(handle, cell);
         }
+
+        if (ShowGlow && Art is { } glowing)
+            DrawGlowing(handle, glowing, cell);
 
         if (ShowErase && Art is { } marked)
             DrawErased(handle, marked, cell);
@@ -286,6 +297,26 @@ public sealed partial class CustomMarkingCanvas : Control
                 handle.DrawRect(box, ErasedTint);
                 if (MouseFilter == MouseFilterMode.Stop)
                     handle.DrawRect(new UIBox2(box.Left + 1, box.Top + 1, box.Right - 1, box.Bottom - 1), ErasedEdge, false);
+            }
+        }
+    }
+
+    /// <summary>Darkens the canvas as in the dark, then draws the glowing pixels of the frame shown over it, outlined.</summary>
+    private void DrawGlowing(DrawingHandleScreen handle, CustomMarkingArt art, float cell)
+    {
+        handle.DrawRect(PixelSizeBox, GlowDark);
+        var frame = Math.Clamp(ArtFrame, 0, art.Frames - 1);
+        for (var y = 0; y < Frame; y++)
+        {
+            for (var x = 0; x < Frame; x++)
+            {
+                if (!art.IsGlowing(frame, Facing, x, y))
+                    continue;
+
+                var box = Cells(x, y, 1, cell);
+                handle.DrawRect(box, CustomMarkingArt.ToColor(art.GetPixel(frame, Facing, x, y)));
+                if (MouseFilter == MouseFilterMode.Stop)
+                    handle.DrawRect(new UIBox2(box.Left + 1, box.Top + 1, box.Right - 1, box.Bottom - 1), GlowEdge, false);
             }
         }
     }

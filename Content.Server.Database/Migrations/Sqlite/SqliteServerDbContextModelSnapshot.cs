@@ -2301,6 +2301,10 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("BLOB")
                         .HasColumnName("frame_times");
 
+                    b.Property<byte[]>("Glow")
+                        .HasColumnType("BLOB")
+                        .HasColumnName("glow");
+
                     b.Property<byte[]>("Png")
                         .IsRequired()
                         .HasColumnType("BLOB")

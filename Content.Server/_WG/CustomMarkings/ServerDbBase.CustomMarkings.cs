@@ -83,6 +83,7 @@ public abstract partial class ServerDbBase
                     Png = art.Png,
                     FrameTimes = art.FrameTimes,
                     Erase = art.Erase,
+                    Glow = art.Glow,
                     UploaderUserId = userId,
                     UploadedAt = DateTime.UtcNow,
                 });
@@ -130,10 +131,10 @@ public abstract partial class ServerDbBase
 
         var art = await db.DbContext.WolfgateCustomMarkingArt
             .Where(a => a.Hash == hash && !a.Blocked)
-            .Select(a => new { a.Png, a.FrameTimes, a.Erase })
+            .Select(a => new { a.Png, a.FrameTimes, a.Erase, a.Glow })
             .SingleOrDefaultAsync(cancel);
 
-        return art == null ? null : new CustomMarkingStoredArt(art.Png, art.FrameTimes, art.Erase);
+        return art == null ? null : new CustomMarkingStoredArt(art.Png, art.FrameTimes, art.Erase, art.Glow);
     }
 
     public async Task<(int Found, int Deleted)> PurgeUnusedCustomMarkingArtAsync(TimeSpan keep, CancellationToken cancel = default)
