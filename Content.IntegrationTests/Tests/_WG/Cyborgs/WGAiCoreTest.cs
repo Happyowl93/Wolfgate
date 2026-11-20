@@ -11,6 +11,9 @@ using Content.Shared._CorvaxNext.Silicons.Borgs.Components;
 using Content.Shared._Mono.Company;
 using Content.Shared._Rat.Overwatch;
 using Content.Shared.Mind;
+using Content.Shared.Movement.Components;
+using Content.Shared.Movement.Events;
+using Content.Shared.Movement.Systems;
 using Content.Shared.Preferences;
 using Content.Shared.Preferences.Loadouts;
 using Content.Shared.Silicons.StationAi;
@@ -19,7 +22,7 @@ using Robust.Shared.Map;
 
 namespace Content.IntegrationTests.Tests._WG.Cyborgs;
 
-/// <summary>Faction AI cores reopen when abandoned, take the player's AI name and reach linked borgs off-grid.</summary>
+/// <summary>Faction AI cores reopen when abandoned, take the player's AI name, reach linked borgs off-grid and view overwatch feeds.</summary>
 [TestFixture]
 [TestOf(typeof(WGAiCoreGhostRoleSystem))]
 public sealed class WGAiCoreTest
@@ -222,20 +225,59 @@ public sealed class WGAiCoreTest
                                 && required.Contains(company.CompanyName),
                         $"{coreProto} doesn't pass the company reader on {machineProto}.");
 
-                    if (machineProto == overwatch)
-                    {
-                        var view = new BoundUserInterfaceMessageAttempt(brain, machine, OverwatchUiKey.Key,
-                            new OverwatchViewCameraMessage(NetEntity.Invalid));
-                        entMan.EventBus.RaiseLocalEvent(machine, view);
-                        Assert.That(view.Cancelled, Is.True, "An AI was let view an overwatch camera.");
-                    }
-
                     entMan.DeleteEntity(machine);
                 }
 
                 entMan.DeleteEntity(core);
             }
         });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task AiOverwatchViewTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var map = await pair.CreateTestMap();
+
+        EntityUid eye = default;
+        await server.WaitAssertion(() =>
+        {
+            var stationAi = entMan.System<SharedStationAiSystem>();
+            var core = entMan.SpawnEntity("PlayerStationAiTSFMC", map.GridCoords);
+            Assert.That(stationAi.TryGetHeld(new Entity<StationAiCoreComponent?>(core, null), out var brain));
+            Assert.That(entMan.GetComponent<StationAiCoreComponent>(core).RemoteEntity, Is.Not.Null);
+            eye = entMan.GetComponent<StationAiCoreComponent>(core).RemoteEntity!.Value;
+
+            var console = entMan.SpawnEntity("TSFOverwatchComputer", map.GridCoords);
+            var view = new BoundUserInterfaceMessageAttempt(brain, console, OverwatchUiKey.Key,
+                new OverwatchViewCameraMessage(NetEntity.Invalid));
+            entMan.EventBus.RaiseLocalEvent(console, view);
+            Assert.That(view.Cancelled, Is.False, "An AI was refused an overwatch camera.");
+            Assert.That(entMan.TryGetComponent<WGAiOverwatchEyeComponent>(eye, out var marker) && marker.Ai == brain,
+                "The AI's remote eye wasn't marked while it watches.");
+
+            // Stand-in for OverwatchSystem.OnViewCamera, which needs a worn camera on a faction member.
+            var target = entMan.SpawnEntity(null, map.GridCoords);
+            entMan.System<SharedEyeSystem>().SetTarget(brain, target);
+            entMan.AddComponent<RatOverwatchWatchingComponent>(brain).Watching = target;
+
+            var mover = entMan.GetComponent<InputMoverComponent>(eye);
+            mover.HeldMoveButtons = MoveButtons.Up;
+            var move = new MoveInputEvent((eye, mover), MoveButtons.None);
+            entMan.EventBus.RaiseLocalEvent(eye, ref move);
+            mover.HeldMoveButtons = MoveButtons.None;
+
+            Assert.That(entMan.HasComponent<RatOverwatchWatchingComponent>(brain), Is.False,
+                "Moving the AI's eye didn't stop the feed.");
+            Assert.That(entMan.GetComponent<EyeComponent>(brain).Target, Is.EqualTo(eye),
+                "The AI's view didn't return to its remote eye.");
+        });
+        await pair.RunTicksSync(5);
+        await server.WaitAssertion(() => Assert.That(entMan.HasComponent<WGAiOverwatchEyeComponent>(eye), Is.False));
 
         await pair.CleanReturnAsync();
     }
