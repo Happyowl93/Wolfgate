@@ -94,7 +94,7 @@ public sealed partial class WGReaverCampaignPrototype : IPrototype
 
     /// <summary>Spesos for breaking a stronghold, by tier.</summary>
     [DataField]
-    public List<int> StrongholdBounty = new() { 60000, 90000, 120000, 160000, 200000, 450000 };
+    public List<int> StrongholdBounty = new() { 60000, 90000, 120000, 160000, 200000, 250000 };
 
     [DataField]
     public int PatrolBounty = 20000;
