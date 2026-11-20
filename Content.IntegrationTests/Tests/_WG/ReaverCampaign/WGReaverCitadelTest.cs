@@ -264,10 +264,10 @@ public sealed class WGReaverCitadelTest : WGReaverTestBase
 
             // The citadel is a capstone: it pays in full past the hourly cap.
             var config = Server.ResolveDependency<IConfigurationManager>();
-            config.SetCVar(ReaverCampaignCVars.PayoutHourlyCap, 1);
+            config.SetCVar(EncountersCVars.PayoutHourlyCap, 1);
             KillCrew(citadel, "lead");
             campaign.CheckStrongholds();
-            config.SetCVar(ReaverCampaignCVars.PayoutHourlyCap, int.MaxValue);
+            config.SetCVar(EncountersCVars.PayoutHourlyCap, int.MaxValue);
 
             Assert.That(SEntMan.GetComponent<WGEncounterComponent>(citadel).Resolution, Is.EqualTo(WGEncounterResolution.Destroyed));
             Assert.That(campaign.Strongholds().Select(entry => entry.Owner), Is.EqualTo(new[] { stronghold }), "The ordinary hub still stands.");

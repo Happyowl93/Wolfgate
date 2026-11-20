@@ -223,20 +223,18 @@ public abstract class WGReaverTestBase : WGSectorTestBase
     roles: [ WGCrewPilot, WGCrewGunner ]
 ";
 
-    /// <summary>Gives the storyteller its scheduling back and the Reaver payout cap its default, so a pooled pair does not keep either.</summary>
+    /// <summary>Gives the storyteller its scheduling back, so a pooled pair does not keep it held.</summary>
     [TearDown]
     public async Task ResumeScheduler()
     {
         await Server.WaitPost(() =>
         {
             Server.System<WGEncounterSchedulerSystem>().Paused = false;
-            var config = Server.ResolveDependency<IConfigurationManager>();
-            config.SetCVar(EncountersCVars.MaxActive, EncountersCVars.MaxActive.DefaultValue);
-            config.SetCVar(ReaverCampaignCVars.PayoutHourlyCap, ReaverCampaignCVars.PayoutHourlyCap.DefaultValue);
+            Server.ResolveDependency<IConfigurationManager>().SetCVar(EncountersCVars.MaxActive, EncountersCVars.MaxActive.DefaultValue);
         });
     }
 
-    /// <summary>Starts a round with the test campaign in force, the storyteller starting nothing of its own and no Reaver payout cap.</summary>
+    /// <summary>Starts a round with the test campaign in force and the storyteller starting nothing of its own.</summary>
     protected async Task StartCampaign()
     {
         await StartRound();
@@ -245,7 +243,6 @@ public abstract class WGReaverTestBase : WGSectorTestBase
             var config = Server.ResolveDependency<IConfigurationManager>();
             config.SetCVar(EncountersCVars.Enabled, true);
             config.SetCVar(ReaverCampaignCVars.Enabled, true);
-            config.SetCVar(ReaverCampaignCVars.PayoutHourlyCap, int.MaxValue);
             config.SetCVar(EncountersCVars.Preset, TestPreset);
             // Not paused: a paused event runner holds the campaign too. No room for its own encounters keeps it quiet.
             config.SetCVar(EncountersCVars.MaxActive, 0);

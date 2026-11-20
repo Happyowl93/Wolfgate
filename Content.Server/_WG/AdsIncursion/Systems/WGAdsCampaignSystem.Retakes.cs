@@ -64,7 +64,7 @@ public sealed partial class WGAdsCampaignSystem
         if (bounty > 0 && args.Ships is { Count: > 0 } ships)
         {
             paid = _rewards.PayCrews(Loc.GetString("wg-ads-retake-name", ("callsign", callsign)), $"ADS cell {callsign}", bounty, ships,
-                "retaking", PayoutPool);
+                "retaking");
         }
 
         if (state != null)

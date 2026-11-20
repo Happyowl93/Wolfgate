@@ -287,10 +287,10 @@ public sealed class WGAdsDreadnoughtTest : WGAdsTestBase
 
             // The dreadnought is a capstone: it pays in full past the hourly cap.
             var config = Server.ResolveDependency<IConfigurationManager>();
-            config.SetCVar(AdsIncursionCVars.PayoutHourlyCap, 1);
+            config.SetCVar(EncountersCVars.PayoutHourlyCap, 1);
             KillCrew(dreadnought, "lead");
             ads.CheckDreadnoughts();
-            config.SetCVar(AdsIncursionCVars.PayoutHourlyCap, int.MaxValue);
+            config.SetCVar(EncountersCVars.PayoutHourlyCap, int.MaxValue);
 
             var state = AdsState();
             Assert.That(SEntMan.GetComponent<WGEncounterComponent>(dreadnought).Resolution, Is.EqualTo(WGEncounterResolution.Destroyed));

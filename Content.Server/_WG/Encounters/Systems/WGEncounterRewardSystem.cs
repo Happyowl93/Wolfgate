@@ -63,10 +63,7 @@ public sealed partial class WGEncounterRewardSystem : EntitySystem
     private static readonly ProtoId<RadioChannelPrototype> ThanksChannel = "Common";
     private static readonly EntProtoId CashEntity = "SpaceCash";
     private static readonly TimeSpan CapWindow = TimeSpan.FromHours(1);
-    /// <summary>The pool id of the general allowance, which every reward without a pool of its own draws on.</summary>
-    private const string GeneralPool = "";
-
-    private readonly Dictionary<(NetUserId User, string Pool), (TimeSpan Since, int Paid)> _paid = new();
+    private readonly Dictionary<NetUserId, (TimeSpan Since, int Paid)> _paid = new();
 
     public override void Initialize()
     {
@@ -523,11 +520,10 @@ public sealed partial class WGEncounterRewardSystem : EntitySystem
     /// <paramref name="extraCredits"/> are further rewards of which only the faction credits are handed out. Every
     /// player the bounty is shared among is added to <paramref name="helperMobs"/>, paid or capped. An
     /// <paramref name="uncapped"/> bounty, a once-a-round capstone, skips the hourly cap and doesn't count toward it.
-    /// A bounty with an <paramref name="allowance"/> draws on that pool's hourly cap instead of the general one.
     /// </summary>
     public int PayBounty(Entity<WGEncounterComponent?> encounter, WGEncounterReward reward, string deed,
         IReadOnlyList<EntityUid>? supporters = null, IReadOnlyList<WGEncounterReward>? extraCredits = null,
-        List<EntityUid>? helperMobs = null, bool uncapped = false, WGPayoutPool? allowance = null)
+        List<EntityUid>? helperMobs = null, bool uncapped = false)
     {
         if (!Resolve(encounter, ref encounter.Comp, false))
             return 0;
@@ -577,7 +573,7 @@ public sealed partial class WGEncounterRewardSystem : EntitySystem
 
         helpers.AddRange(aids);
         helperMobs?.AddRange(helpers.Select(helper => helper.Mob));
-        return Pay(encounter, comp, reward, helpers, deed, shares, extraCredits, uncapped, allowance);
+        return Pay(encounter, comp, reward, helpers, deed, shares, extraCredits, uncapped);
     }
 
     /// <summary>
@@ -624,18 +620,17 @@ public sealed partial class WGEncounterRewardSystem : EntitySystem
     /// <summary>Pays a reward to the helpers within the hourly cap, equally unless shares are given, and returns how many received anything.</summary>
     private int Pay(EntityUid uid, WGEncounterComponent encounter, WGEncounterReward reward,
         List<(ICommonSession Session, EntityUid Mob)> helpers, string deed, List<int>? shares = null,
-        IReadOnlyList<WGEncounterReward>? extraCredits = null, bool uncapped = false, WGPayoutPool? allowance = null)
+        IReadOnlyList<WGEncounterReward>? extraCredits = null, bool uncapped = false)
     {
-        return Pay(encounter.Name, $"encounter {encounter.Prototype} ({ToPrettyString(uid):entity})", reward, helpers, deed, shares, extraCredits,
-            uncapped, allowance);
+        return Pay(encounter.Name, $"encounter {encounter.Prototype} ({ToPrettyString(uid):entity})", reward, helpers, deed, shares, extraCredits, uncapped);
     }
 
     /// <summary>
     /// Pays spesos to the living players aboard some ships, an equal share to each crewed ship and then to each player
-    /// aboard it, within the hourly cap or <paramref name="allowance"/>'s; returns how many were paid. <paramref name="name"/>
-    /// is what the payment says it is for and <paramref name="subject"/> names the same in the admin log.
+    /// aboard it, within the hourly cap; returns how many were paid. <paramref name="name"/> is what the payment says it
+    /// is for and <paramref name="subject"/> names the same in the admin log.
     /// </summary>
-    public int PayCrews(string name, string subject, int spesos, IEnumerable<EntityUid> ships, string deed, WGPayoutPool? allowance = null)
+    public int PayCrews(string name, string subject, int spesos, IEnumerable<EntityUid> ships, string deed)
     {
         var aboard = new Dictionary<EntityUid, List<(ICommonSession Session, EntityUid Mob)>>();
         foreach (var ship in ships)
@@ -663,21 +658,20 @@ public sealed partial class WGEncounterRewardSystem : EntitySystem
             }
         }
 
-        return helpers.Count == 0 ? 0 : Pay(name, subject, new WGEncounterReward { Spesos = spesos }, helpers, deed, shares, allowance: allowance);
+        return helpers.Count == 0 ? 0 : Pay(name, subject, new WGEncounterReward { Spesos = spesos }, helpers, deed, shares);
     }
 
     private int Pay(string name, string subject, WGEncounterReward reward,
         List<(ICommonSession Session, EntityUid Mob)> helpers, string deed, List<int>? shares = null,
-        IReadOnlyList<WGEncounterReward>? extraCredits = null, bool uncapped = false, WGPayoutPool? allowance = null)
+        IReadOnlyList<WGEncounterReward>? extraCredits = null, bool uncapped = false)
     {
         var received = 0;
-        var cap = _config.GetCVar(allowance?.HourlyCap ?? EncountersCVars.PayoutHourlyCap);
-        var pool = allowance?.Id ?? GeneralPool;
+        var cap = _config.GetCVar(EncountersCVars.PayoutHourlyCap);
         for (var i = 0; i < helpers.Count; i++)
         {
             var (session, mob) = helpers[i];
             var share = shares?[i] ?? reward.Spesos / helpers.Count;
-            var paid = uncapped ? share : Capped(session.UserId, share, cap, pool);
+            var paid = uncapped ? share : Capped(session.UserId, share, cap);
             if (paid < share)
             {
                 _chat.DispatchServerMessage(session, Loc.GetString("wg-encounter-reward-capped", ("name", name), ("cap", cap)));
@@ -690,7 +684,7 @@ public sealed partial class WGEncounterRewardSystem : EntitySystem
             if (paid > 0 && !_bank.TryBankDeposit(mob, paid - cut, false))
             {
                 if (!uncapped)
-                    Refund(session.UserId, paid, pool);
+                    Refund(session.UserId, paid);
                 paid = 0;
             }
             else
@@ -733,11 +727,11 @@ public sealed partial class WGEncounterRewardSystem : EntitySystem
         return reward.Credits;
     }
 
-    /// <summary>What of an amount a player may still be paid within a pool's hourly cap, and counts it. The window opens at the pool's first payout.</summary>
-    private int Capped(NetUserId user, int amount, int cap, string pool = GeneralPool)
+    /// <summary>What of an amount a player may still be paid within the hourly cap, and counts it. The window opens at the first payout.</summary>
+    private int Capped(NetUserId user, int amount, int cap)
     {
         var now = _timing.CurTime;
-        var (since, paid) = _paid.TryGetValue((user, pool), out var entry) ? entry : (now, 0);
+        var (since, paid) = _paid.TryGetValue(user, out var entry) ? entry : (now, 0);
         if (now - since >= CapWindow)
         {
             since = now;
@@ -745,14 +739,14 @@ public sealed partial class WGEncounterRewardSystem : EntitySystem
         }
 
         var allowed = Math.Clamp(cap - paid, 0, amount);
-        _paid[(user, pool)] = (since, paid + allowed);
+        _paid[user] = (since, paid + allowed);
         return allowed;
     }
 
     /// <summary>Gives back an allowance <see cref="Capped"/> counted for a payment that did not go through.</summary>
-    private void Refund(NetUserId user, int amount, string pool = GeneralPool)
+    private void Refund(NetUserId user, int amount)
     {
-        if (_paid.TryGetValue((user, pool), out var entry))
-            _paid[(user, pool)] = (entry.Since, Math.Max(0, entry.Paid - amount));
+        if (_paid.TryGetValue(user, out var entry))
+            _paid[user] = (entry.Since, Math.Max(0, entry.Paid - amount));
     }
 }

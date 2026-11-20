@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Numerics;
 using Content.Server._WG.Drydock;
-using Content.Server._WG.Encounters;
 using Content.Server._WG.Encounters.Components;
 using Content.Server._WG.ReaverCampaign.Components;
 using Content.Shared._WG.Encounters;
@@ -12,9 +11,6 @@ namespace Content.Server._WG.ReaverCampaign.Systems;
 public sealed partial class WGReaverCampaignSystem
 {
     [Dependency] private WGDrydockSystem _drydock = default!;
-
-    /// <summary>The Reavers' own hourly payout allowance, apart from other encounter rewards.</summary>
-    public static readonly WGPayoutPool PayoutPool = new("reavers", ReaverCampaignCVars.PayoutHourlyCap);
 
     /// <summary>How near a stronghold's lead a player ship must stand by to count for the support pool.</summary>
     private const float SupportRange = 2500f;
@@ -57,7 +53,7 @@ public sealed partial class WGReaverCampaignSystem
         var (reward, extra) = Rewards(campaign, bounty, grant => (int) (grant.Stronghold * factor));
         var helpers = new List<EntityUid>();
         var paid = _rewards.PayBounty(uid, reward, comp.Citadel ? "breaking the Reaver citadel" : "breaking the Reaver stronghold", supporters, extra, helpers,
-            uncapped: comp.Citadel, allowance: PayoutPool);
+            uncapped: comp.Citadel);
         _drydock.IssueShipVouchers(campaign.StrongholdVoucher, helpers);
         return (bounty, paid);
     }
@@ -87,7 +83,7 @@ public sealed partial class WGReaverCampaignSystem
         var bounty = ShipScaled(campaign, encounter, (int) (spesos * scale));
         var (reward, extra) = Rewards(campaign, bounty, grant => (int) (grant.Patrol * scale));
         var helpers = new List<EntityUid>();
-        var paid = _rewards.PayBounty(encounter, reward, reason, null, extra, helpers, allowance: PayoutPool);
+        var paid = _rewards.PayBounty(encounter, reward, reason, null, extra, helpers);
         _drydock.IssueShipVouchers(campaign.PatrolVoucher, helpers);
         return (bounty, paid);
     }
@@ -100,8 +96,7 @@ public sealed partial class WGReaverCampaignSystem
         var bounty = ShipScaled(campaign, convoy, (int) (ByTier(campaign.StrongholdBounty, state.Tier, 0) * scale) / 2);
         var (reward, extra) = Rewards(campaign, bounty, grant => (int) (grant.Stronghold * scale) / 2);
         var helpers = new List<EntityUid>();
-        var paid = _rewards.PayBounty(convoy, reward, citadel ? "destroying the Reaver citadel convoy" : "destroying the Reaver convoy", null, extra, helpers,
-            allowance: PayoutPool);
+        var paid = _rewards.PayBounty(convoy, reward, citadel ? "destroying the Reaver citadel convoy" : "destroying the Reaver convoy", null, extra, helpers);
         _drydock.IssueShipVouchers(campaign.StrongholdVoucher, helpers);
         return (bounty, paid);
     }

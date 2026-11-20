@@ -347,7 +347,7 @@ companies and stronghold and patrol amounts per navy; the first grant rides on t
 under attack, meaning within two minutes of the last hit on it, without hitting it (medics, tenders, scouts). The
 campaign tracks supporters on `WGReaverStrongholdComponent`. `PayBounty` returns how many players were paid; the
 announcement says the bounty was paid only when it is above zero. Stronghold bounty: `strongholdBounty[tier]` (Standard 60k, 90k, 120k, 160k, 200k,
-250k) times one plus half the stronghold's level; patrol bounty `patrolBounty` (20k). Paid on `Destroyed` only.
+450k) times one plus half the stronghold's level; patrol bounty `patrolBounty` (20k). Paid on `Destroyed` only.
 
 ## The game mode
 
