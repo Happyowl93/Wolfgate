@@ -101,8 +101,8 @@ fitted; a slot's key opens a drawer beside the column that lists every `wgShipMo
 description and price, and a key to fit it to that slot. A fitting is a refit-kind crane job worked at the ship's
 helm: its work order travels the console, terminal and booking paths as a refit id built by `WGShipModuleFitting`
 (`wg-module:<slot>:<module>`), it is priced at the module's `price` (or billed its `materials` at a mobile drydock)
-times the yard's service price, and the module goes in when the item is done, replacing what the slot held without
-refund. A ship carries one module of each kind. The drawer's free Empty slot key, at a berth console or terminal
+times the yard's service price, and the module goes in when the item is done. A slot must be empty to be fitted, and a
+ship carries one module of each kind. The drawer's free Empty slot key, at a berth console or terminal
 only, takes a module out at once; on a ship with a deed, only the deed holder may.
 
 ## Console
