@@ -18,13 +18,16 @@ public sealed partial class WGManeuveringJetsComponent : Component
     [DataField]
     public float BurnTime = 0.4f;
 
-    /// <summary>Hull mass up to which a burn gives its full kick; heavier hulls get the square root of the ratio.</summary>
+    /// <summary>
+    /// Hull mass up to which a burn gives its full kick, about a 120-tile fighter; a heavier hull gets the same push,
+    /// so its kick falls with the ratio.
+    /// </summary>
     [DataField]
-    public float ReferenceMass = 100f;
+    public float ReferenceMass = 60f;
 
     /// <summary>Smallest share of <see cref="DeltaV"/> a heavy hull still gets.</summary>
     [DataField]
-    public float MinScale = 0.25f;
+    public float MinScale = 0.1f;
 
     /// <summary>Heat one burn adds to the ship's thermal signature.</summary>
     [DataField]

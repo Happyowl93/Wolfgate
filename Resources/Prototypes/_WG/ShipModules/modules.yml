@@ -22,7 +22,7 @@
   parent: WGShipModuleBase
   id: WGShipModuleManeuveringJets
   name: MJ-3 "Sidestep" Maneuvering Jets
-  description: A ring of cold-gas jets plumbed through the hull. Each burn kicks the ship along whichever way the pilot is steering, hard enough to step a small hull out of a salvo. A raised shield field holds the hull too stiffly for them to fire, though a deflector's light field doesn't, and a heavy or laden ship gets less out of each burn.
+  description: A ring of cold-gas jets plumbed through the hull. Each burn kicks the ship along whichever way the pilot is steering, hard enough to step a small hull out of a salvo. A raised shield field holds the hull too stiffly for them to fire, though a deflector's light field doesn't, and they give every hull the same push, so a big ship barely shifts and a laden one shifts less still.
   components:
   - type: Sprite
     sprite: Structures/Shuttles/gyroscope.rsi

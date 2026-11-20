@@ -36,8 +36,9 @@ network request only adds the check that the sender is piloting that ship.
 
 `WGManeuveringJetsSystem`. The burn direction is the pilot's held strafe keys, relative to the hull, fixed in world
 space when the burn starts; with nothing held the use is refused and no charge is spent. The kick is `deltaV` for a
-hull up to `referenceMass` (100, a 200-tile ship), falls with the square root of the mass above it down to
-`minScale`, and is multiplied by CargoLoad's space thrust factor, so a laden hauler gets less. It is applied as
+hull up to `referenceMass` (60, a 120-tile fighter). Above that every hull gets the same push, so the kick falls in
+proportion to mass, down to `minScale`; small ships dodge and big ones barely shift (about 16 m/s for a QJ-271 Heavy
+Fighter, 5 m/s for a Neptune). It is then multiplied by CargoLoad's space thrust factor, so a laden hauler gets less. It is applied as
 impulse over `burnTime`, independent of the ship's thrusters. The jets lock while the ship is docked to anything or
 its body is static, and each burn adds `heat` to the grid's thermal signature. Three charges, eight seconds each.
 

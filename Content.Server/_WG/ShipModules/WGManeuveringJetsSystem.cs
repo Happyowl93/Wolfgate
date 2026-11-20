@@ -117,11 +117,11 @@ public sealed partial class WGManeuveringJetsSystem : EntitySystem
             RaiseNetworkEvent(ev, Filter.BroadcastMap(Transform(grid).MapID));
     }
 
-    /// <summary>Share of the rated kick a hull gets: less for a heavy hull and for a laden one.</summary>
+    /// <summary>Share of the rated kick a hull gets: a fixed push, so less for a heavy hull, and less again for a laden one.</summary>
     public float KickScale(WGManeuveringJetsComponent jets, EntityUid grid, PhysicsComponent body)
     {
         var mass = MathF.Max(body.Mass, jets.ReferenceMass);
-        var scale = MathF.Max(MathF.Sqrt(jets.ReferenceMass / mass), jets.MinScale);
+        var scale = MathF.Max(jets.ReferenceMass / mass, jets.MinScale);
         return scale * _cargo.GetSpaceFactor(grid);
     }
 
