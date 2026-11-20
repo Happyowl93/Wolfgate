@@ -28,14 +28,13 @@ helm window or cockpit holding that strip by a few pixels, and kicks the view of
 
 ## Adding a module
 
-Add a `wgShipModule` prototype (name, description, strip label, drydock icon in `modules.rsi`, price and materials,
+Add a `wgShipModule` prototype (name, description, strip label, drydock icon, price and materials,
 charges, recharge, cooldown, shield rule, sound, jolt) whose `effect` is a new `WGShipModuleEffect` subclass with
 its settings. A server system handles three broadcast events, acting only when `Module.Effect` is its kind:
 `WGShipModuleLockEvent` to lock it for reasons of its own (add a value to `WGShipModuleLock` with
 `wg-ship-module-status-*` and `wg-ship-module-refused-*` strings), `WGShipModuleActivateAttemptEvent` to refuse a use
 before the charge is spent, and `WGShipModuleActivatedEvent` to do the effect. `WGShipModuleSystem.TryActivate` is the
-one entry point; the network request only adds the check that the sender is piloting that ship. Draw the icon in
-`Tools/_WG/ShipModules/gen_module_icons.py`.
+one entry point; the network request only adds the check that the sender is piloting that ship.
 
 ## Maneuvering jets
 
@@ -98,7 +97,6 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 
 ### Textures
 
-- [`Resources/Textures/_WG/ShipModules/modules.rsi/`](../../../Resources/Textures/_WG/ShipModules/modules.rsi/)
 - [`Resources/Textures/_WG/ShipModules/smoke_ring.rsi/`](../../../Resources/Textures/_WG/ShipModules/smoke_ring.rsi/)
 
 ### Audio
@@ -108,7 +106,6 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 
 ### Tools
 
-- [`Tools/_WG/ShipModules/gen_module_icons.py`](../../../Tools/_WG/ShipModules/gen_module_icons.py)
 - [`Tools/_WG/ShipModules/gen_smoke_ring.py`](../../../Tools/_WG/ShipModules/gen_smoke_ring.py)
 
 ## Non-modular edits

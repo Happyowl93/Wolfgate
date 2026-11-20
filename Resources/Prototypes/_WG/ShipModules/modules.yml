@@ -8,8 +8,8 @@
   description: wg-ship-module-jets-description
   label: wg-ship-module-jets-label
   icon:
-    sprite: _WG/ShipModules/modules.rsi
-    state: jets
+    sprite: Structures/Shuttles/thruster.rsi
+    state: base
   price: 20000
   materials:
     Steel: 1000

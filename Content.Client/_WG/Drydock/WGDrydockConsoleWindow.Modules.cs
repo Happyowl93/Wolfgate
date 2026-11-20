@@ -2,13 +2,16 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using Content.Client.Resources;
 using Content.Shared._WG.Drydock;
 using Content.Shared._WG.ShipModules;
 using Robust.Client.GameObjects;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Utility;
 using static Content.Client._WG.CombatConsole.WGInstrumentTheme;
+using static Robust.Client.UserInterface.StylesheetHelpers;
 
 namespace Content.Client._WG.Drydock;
 
@@ -26,6 +29,8 @@ public sealed partial class WGDrydockConsoleWindow
 
     /// <summary>Raised with the slot when a module slot's remove key is pressed.</summary>
     public event Action<int>? OnModuleRemovePressed;
+
+    [Dependency] private IResourceCache _resCache = default!;
 
     private readonly List<Button> _slotKeys = new();
     private readonly BoxContainer _moduleList = new() { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 10 };
@@ -179,7 +184,13 @@ public sealed partial class WGDrydockConsoleWindow
             SetSize = new Vector2(ModuleIconSize, ModuleIconSize),
             VerticalAlignment = VAlignment.Top,
         };
-        var name = new Label { Text = Loc.GetString(module.Name), FontColorOverride = Accent, ClipText = true };
+        // A rich text title wraps a long name; it takes the theme's label font by hand.
+        var name = new RichTextLabel
+        {
+            HorizontalExpand = true,
+            Stylesheet = new Stylesheet(new StyleRule[] { Element<RichTextLabel>().Prop("font", _resCache.GetFont(Skin.MenuFonts, 12)) }),
+        };
+        name.SetMessage(FormattedMessage.FromUnformatted(Loc.GetString(module.Name)), defaultColor: Accent);
         var description = new RichTextLabel { HorizontalExpand = true };
         description.SetMessage(FormattedMessage.FromUnformatted(Loc.GetString(module.Description)), defaultColor: Muted);
 
@@ -222,9 +233,14 @@ public sealed partial class WGDrydockConsoleWindow
             fitKey.OnPressed += _ => OnUpgradePressed?.Invoke(key);
         }
 
-        var details = Column(name, description, bill, fitKey);
-        details.SeparationOverride = 3;
+        var details = Column(name, Row(icon, description), bill, fitKey);
+        details.SeparationOverride = 4;
         details.HorizontalExpand = true;
-        return Row(icon, details);
+        details.Margin = new Thickness(4);
+
+        // The theme frames a plain panel, boxing each module apart from the next.
+        var card = new PanelContainer { HorizontalExpand = true };
+        card.AddChild(details);
+        return card;
     }
 }

@@ -16,7 +16,7 @@ wg-ship-module-refused-anchored = The hull is held fast.
 wg-ship-module-refused-empty = No charge ready.
 
 wg-ship-module-jets-name = MJ-3 "Sidestep" Maneuvering Jets
-wg-ship-module-jets-description = Cold-gas jets plumbed through the hull. Each burn kicks the ship along whichever way the pilot is steering, hard enough to step a small hull out of a salvo. Three charges, one back every 8 seconds. A raised shield field holds the hull too stiffly to fire, though a deflector's light field doesn't. Every hull gets the same push, so a big ship barely shifts and a laden one shifts less still.
+wg-ship-module-jets-description = Kicks the ship whichever way the pilot steers. Three charges, one back every 8 s. Won't fire under a shield field, except a deflector's. Light hulls get the biggest push.
 wg-ship-module-jets-label = JETS
 wg-ship-module-jets-no-direction = Hold a direction to burn along.
 
