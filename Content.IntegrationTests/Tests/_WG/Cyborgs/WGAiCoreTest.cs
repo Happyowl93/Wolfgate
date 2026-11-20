@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Numerics;
 using Content.Server._CorvaxNext.Silicons.Borgs;
-using Content.Server._WG.StationAi;
+using Content.Server._WG.Cyborgs;
 using Content.Server.Ghost;
 using Content.Server.Ghost.Roles;
 using Content.Server.Ghost.Roles.Components;
@@ -17,7 +17,7 @@ using Content.Shared.Silicons.StationAi;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 
-namespace Content.IntegrationTests.Tests._WG.StationAi;
+namespace Content.IntegrationTests.Tests._WG.Cyborgs;
 
 /// <summary>Faction AI cores reopen when abandoned, take the player's AI name and reach linked borgs off-grid.</summary>
 [TestFixture]

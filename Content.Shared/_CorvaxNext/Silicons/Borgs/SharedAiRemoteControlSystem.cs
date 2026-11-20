@@ -30,7 +30,7 @@ public abstract partial class SharedAiRemoteControlSystem : EntitySystem
         if (!TryComp<AiRemoteControllerComponent>(entity, out var remoteComp))
             return;
 
-        // WOLFGATE(StationAi) START: a destroyed core leaves the AI in the borg instead of throwing on the deleted brain
+        // WOLFGATE(Cyborgs) START: a destroyed core leaves the AI in the borg instead of throwing on the deleted brain
         if (remoteComp.AiHolder is { } holder && TerminatingOrDeleted(holder))
             return;
         // WOLFGATE END

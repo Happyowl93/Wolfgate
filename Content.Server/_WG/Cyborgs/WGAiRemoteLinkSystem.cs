@@ -1,6 +1,6 @@
 using Content.Shared._CorvaxNext.Silicons.Borgs.Components;
 
-namespace Content.Server._WG.StationAi;
+namespace Content.Server._WG.Cyborgs;
 
 /// <summary>
 /// Decides which networked borgs an AI can reach: any on its core's grid, plus the ones it has already controlled

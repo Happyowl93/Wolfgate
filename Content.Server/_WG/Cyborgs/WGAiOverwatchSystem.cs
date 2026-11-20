@@ -2,7 +2,7 @@ using Content.Server.Popups;
 using Content.Shared._Rat.Overwatch;
 using Content.Shared.Silicons.StationAi;
 
-namespace Content.Server._WG.StationAi;
+namespace Content.Server._WG.Cyborgs;
 
 /// <summary>
 /// Stops an AI from viewing a camera through an overwatch console. Watching retargets the viewer's eye and drops it

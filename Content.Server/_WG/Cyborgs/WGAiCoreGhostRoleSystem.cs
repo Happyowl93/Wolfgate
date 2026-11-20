@@ -11,7 +11,7 @@ using Content.Shared.Silicons.StationAi;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
-namespace Content.Server._WG.StationAi;
+namespace Content.Server._WG.Cyborgs;
 
 /// <summary>
 /// Reopens the ghost role of an AI core whose player ghosted, and names a player who takes one after the Station AI
