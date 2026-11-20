@@ -50,7 +50,7 @@ public sealed class WGAiCoreTest
         var session = pair.Player!;
         var prefs = server.ResolveDependency<IServerPreferencesManager>();
 
-        var aiLoadout = new RoleLoadout("JobStationAi") { EntityName = AiName };
+        var aiLoadout = new RoleLoadout("JobBorg") { EntityName = AiName };
         var profile = ((HumanoidCharacterProfile) prefs.GetPreferences(session.UserId).SelectedCharacter).WithLoadout(aiLoadout);
         var slot = prefs.GetPreferences(session.UserId).SelectedCharacterIndex;
         Task? save = null;

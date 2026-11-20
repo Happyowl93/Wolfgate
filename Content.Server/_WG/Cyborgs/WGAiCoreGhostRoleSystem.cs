@@ -14,13 +14,13 @@ using Robust.Shared.Timing;
 namespace Content.Server._WG.Cyborgs;
 
 /// <summary>
-/// Reopens the ghost role of an AI core whose player ghosted, and names a player who takes one after the Station AI
-/// name in their character's loadout.
+/// Reopens the ghost role of an AI core whose player ghosted, and names a player who takes one after the cyborg
+/// name in their character's loadout, since the Station AI job and its loadout are hidden from the editor.
 /// </summary>
 public sealed class WGAiCoreGhostRoleSystem : EntitySystem
 {
     private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(5);
-    private static readonly string AiLoadout = LoadoutSystem.GetJobPrototype("StationAi");
+    private static readonly string AiLoadout = LoadoutSystem.GetJobPrototype("Borg");
 
     [Dependency] private IComponentFactory _factory = default!;
     [Dependency] private IGameTiming _timing = default!;

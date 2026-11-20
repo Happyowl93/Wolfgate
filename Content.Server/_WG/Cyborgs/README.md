@@ -51,9 +51,10 @@ and `BorgShipAccessTest` a crew door admitting it.
   round. Every five seconds the system puts the ghost role back, from the brain's prototype, on any brain that sits
   in a core with no mind and isn't out controlling a borg. Brains spawned without a ghost role (job AIs) are left
   alone. Any borg the old AI ghosted out of is released, so it can't hand that player back into the reopened core.
-- **Names**: a player who takes an AI ghost role is named after the Station AI name in their selected character's
-  loadout, if they set one; otherwise the core keeps its themed random name. The brain, its mind and the core are
-  all renamed.
+- **Names**: a player who takes an AI ghost role is named after the Cyborg name in their selected character's
+  loadout (character editor, Jobs tab, Cyborg's loadout button), if they set one; otherwise the core keeps its
+  themed random name. The Station AI job and its loadout are hidden from the editor, so the cyborg name stands in.
+  The brain, its mind and the core are all renamed.
 - **Off-grid borgs** (`WGAiRemoteLinkSystem`): an AI can still only take control of networked borgs on its core's
   grid, but every borg it controls is linked to it (`WGAiRemoteLinkComponent`). It can list and reconnect to a
   linked borg anywhere on the same map. Another AI taking the borg moves the link; pulling the network device
