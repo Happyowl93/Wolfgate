@@ -5,8 +5,8 @@ fit them as a paid crane job and empty slots for free (Drydock module, `WGDrydoc
 or empty any ship's slots with `shipmodule <grid | here> <slot 1-3> <module | none>`. A module (`wgShipModule`,
 `WGShipModulePrototype`) holds charges, refills one at a time while a helm on the ship has power, and can be
 locked by the ship's state. The first one is the MJ-3 Sidestep maneuvering jets (`WGShipModuleManeuveringJets`):
-each burn kicks the hull about 20 m/s along the direction the pilot is holding, so a ship flying without a shield
-field can step out of a salvo.
+each burn kicks the hull about 20 m/s along the direction the pilot is holding, so a ship flying with its shield
+generators off can step out of a salvo.
 
 Pilots see a module strip under FUEL and CARGO, on the windowed helm's navigation page and in the cockpit
 (`WGShipModuleBank`), with one key per fitted module: its charges and whether it is ready, charging or locked. A module is
@@ -17,9 +17,11 @@ The fitted modules live on the grid in `WGShipModuleBayComponent`, saved with th
 saved, so a loaded ship starts full. Without a powered helm (`ShuttleConsole`) aboard, recharging pauses. Every 0.25 s
 `WGShipModuleSystem` writes the strip to the networked `WGShipModulesComponent` on the grid, dirtied only when
 something shown changes. A use is refused, with a popup at the pilot's cursor, while the pilot's helm has no power,
-the ship is in a jump, or (for a module with `blockedByShields`) a shield field is up or dropped less than
-`shieldLockout` ago. A deflector's partial
-field (an emitter with `WGShipShieldDeflector`, such as the MD-10 Parasol) doesn't count.
+the ship is in a jump, or (for a module with `blockedByShields`) a shield generator aboard is on or was switched off
+less than `shieldLockout` ago. A generator counts as on when it is anchored and switched on, at the machine and at
+the ship's field switch, whether or not it has power or a field up, so a field down to recharge or after an overload
+still locks the module. Any field on the hull from another source counts too. A deflector (an emitter with
+`WGShipShieldDeflector`, such as the MD-10 Parasol) doesn't.
 
 Each use plays `activateSound` to everyone aboard and to the pilot, and sends them `WGShipModuleFiredEvent`. On their
 clients `WGShipModuleHelmSystem` lights the module's key red for a moment on every strip showing the ship, shakes the

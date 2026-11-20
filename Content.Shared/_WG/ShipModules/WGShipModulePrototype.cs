@@ -52,11 +52,11 @@ public sealed partial class WGShipModulePrototype : IPrototype
     [DataField]
     public TimeSpan Cooldown = TimeSpan.FromSeconds(1);
 
-    /// <summary>Whether a raised shield field on the ship locks it. A deflector's partial field never does.</summary>
+    /// <summary>Whether a shield generator switched on aboard locks it, field up or not. A deflector never does.</summary>
     [DataField]
     public bool BlockedByShields;
 
-    /// <summary>How long it stays locked after the ship's field drops.</summary>
+    /// <summary>How long it stays locked after the ship's last shield generator is switched off.</summary>
     [DataField]
     public TimeSpan ShieldLockout = TimeSpan.FromSeconds(5);
 

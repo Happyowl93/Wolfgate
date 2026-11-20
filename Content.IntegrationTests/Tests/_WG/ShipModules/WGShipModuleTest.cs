@@ -162,6 +162,38 @@ public sealed class WGShipModuleTest
             Assert.That(entities.HasComponent<WGShipModuleBayComponent>(grid), Is.False);
             Assert.That(entities.HasComponent<WGShipModulesComponent>(grid), Is.False);
         });
+
+        // A shield generator switched on locks the jets with no field up, as while it recharges; switched off, it
+        // frees them once the lockout passes.
+        var sweepTicks = (int) MathF.Ceiling(0.5f / (float) timing.TickPeriod.TotalSeconds);
+        EntityUid generator = default;
+        await server.WaitPost(() =>
+        {
+            modules.Fit(grid, 1, Jets);
+            generator = entities.SpawnEntity("ShieldGenerator", map.GridCoords);
+        });
+        await pair.RunTicksSync(sweepTicks);
+
+        await server.WaitAssertion(() =>
+        {
+            var jets = prototypes.Index<WGShipModulePrototype>(Jets);
+            var bay = entities.GetComponent<WGShipModuleBayComponent>(grid);
+            Assert.That(entities.GetComponent<TransformComponent>(generator).Anchored, Is.True);
+            Assert.That(entities.HasComponent<ShipShieldedComponent>(grid), Is.False, "The unpowered generator raised a field.");
+            Assert.That(modules.GetLock(grid, bay, jets, true, timing.CurTime), Is.EqualTo(WGShipModuleLock.Shields),
+                "A generator switched on left the jets free.");
+            entities.GetComponent<ApcPowerReceiverComponent>(generator).PowerDisabled = true;
+        });
+        await pair.RunTicksSync(sweepTicks);
+
+        await server.WaitAssertion(() =>
+        {
+            var jets = prototypes.Index<WGShipModulePrototype>(Jets);
+            var bay = entities.GetComponent<WGShipModuleBayComponent>(grid);
+            bay.LastShielded = null;
+            Assert.That(modules.GetLock(grid, bay, jets, true, timing.CurTime), Is.EqualTo(WGShipModuleLock.None),
+                "A generator switched off still locked the jets.");
+        });
         await pair.CleanReturnAsync();
     }
 }

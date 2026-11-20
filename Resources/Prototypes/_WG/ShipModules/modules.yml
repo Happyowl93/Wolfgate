@@ -1,7 +1,7 @@
 # Ship modules: systems a drydock fits into a ship's three module slots; the pilot fires them from the helm's module
 # strip or its hotkeys.
 
-# Maneuvering jets: a sideways kick for hulls that fly without a shield field.
+# Maneuvering jets: a sideways kick for hulls that fly with their shield generators off.
 - type: wgShipModule
   id: WGShipModuleManeuveringJets
   name: wg-ship-module-jets-name

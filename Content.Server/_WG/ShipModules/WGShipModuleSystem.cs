@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Server.Power.Components;
 using Content.Server.Shuttles;
 using Content.Server.Shuttles.Components;
 using Content.Shared._Crescent.ShipShields;
@@ -31,6 +32,9 @@ public sealed partial class WGShipModuleSystem : EntitySystem
 
     /// <summary>Grids with a powered helm at the last sweep.</summary>
     private readonly HashSet<EntityUid> _poweredHelms = new();
+
+    /// <summary>Grids with a shield generator switched on at the last sweep.</summary>
+    private readonly HashSet<EntityUid> _shieldsOn = new();
 
     private readonly List<WGShipModuleSlot> _slots = new();
     private TimeSpan _nextSweep;
@@ -82,7 +86,7 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         Sweep(now);
     }
 
-    /// <summary>Notes which ships have a powered helm, then rebuilds every ship's module strip.</summary>
+    /// <summary>Notes which ships have a powered helm or a shield generator on, then rebuilds every ship's module strip.</summary>
     private void Sweep(TimeSpan now)
     {
         _poweredHelms.Clear();
@@ -91,6 +95,19 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         {
             if (xform.GridUid is { } grid && _power.IsPowered(uid))
                 _poweredHelms.Add(grid);
+        }
+
+        // Switched on at the machine and at the ship's field switch counts, with or without power or a field up.
+        _shieldsOn.Clear();
+        var emitters = EntityQueryEnumerator<ShipShieldEmitterComponent, ApcPowerReceiverComponent, TransformComponent>();
+        while (emitters.MoveNext(out var uid, out _, out var power, out var xform))
+        {
+            if (xform.Anchored
+                && xform.GridUid is { } grid
+                && !power.PowerDisabled
+                && !HasComp<WGShipShieldDeflectorComponent>(uid)
+                && (!TryComp<WGShipShieldShuntComponent>(grid, out var shunt) || shunt.Enabled))
+                _shieldsOn.Add(grid);
         }
 
         var bays = EntityQueryEnumerator<WGShipModuleBayComponent>();
@@ -113,7 +130,7 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         if (TerminatingOrDeleted(grid))
             return;
 
-        if (HoldingField(grid))
+        if (ShieldOn(grid))
             bay.LastShielded = now;
 
         _slots.Clear();
@@ -212,7 +229,7 @@ public sealed partial class WGShipModuleSystem : EntitySystem
             return WGShipModuleLock.Ftl;
 
         if (module.BlockedByShields
-            && (HoldingField(grid)
+            && (ShieldOn(grid)
                 || bay.LastShielded is { } seen && now < seen + module.ShieldLockout))
             return WGShipModuleLock.Shields;
 
@@ -221,10 +238,14 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         return ev.Lock;
     }
 
-    /// <summary>Whether the ship has a shield field up that holds its hull; a deflector's partial field doesn't.</summary>
-    public bool HoldingField(EntityUid grid)
+    /// <summary>
+    /// Whether the ship had a shield generator switched on at the last sweep, even one recharging with no field up, or
+    /// has a field up from any source. A deflector, with its partial field, doesn't count.
+    /// </summary>
+    public bool ShieldOn(EntityUid grid)
     {
-        return TryComp<ShipShieldedComponent>(grid, out var field)
+        return _shieldsOn.Contains(grid)
+               || TryComp<ShipShieldedComponent>(grid, out var field)
                && !(field.Source is { } source && HasComp<WGShipShieldDeflectorComponent>(source));
     }
 
