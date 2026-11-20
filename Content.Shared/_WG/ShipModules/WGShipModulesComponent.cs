@@ -1,4 +1,5 @@
 using Robust.Shared.GameStates;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._WG.ShipModules;
@@ -9,27 +10,22 @@ namespace Content.Shared._WG.ShipModules;
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState, UnsavedComponent]
 public sealed partial class WGShipModulesComponent : Component
 {
-    /// <summary>Modules a helm can show and fire, one per hotkey.</summary>
-    public const int MaxSlots = 4;
+    /// <summary>Module slots every ship has, one per hotkey.</summary>
+    public const int SlotCount = 3;
 
-    /// <summary>The ship's modules in hotkey order: one per kind, oldest fitting first.</summary>
+    /// <summary>The ship's fitted modules in slot order; empty slots are left out.</summary>
     [ViewVariables, AutoNetworkedField]
     public List<WGShipModuleSlot> Slots = new();
-
-    /// <summary>Server only: when a shield field was last seen raised on this ship.</summary>
-    [ViewVariables]
-    public TimeSpan? LastShielded;
 }
 
-/// <summary>One module on the helm's strip.</summary>
+/// <summary>One fitted module on the helm's strip.</summary>
 [Serializable, NetSerializable]
 public record struct WGShipModuleSlot(
-    NetEntity Module,
-    string Label,
+    int Slot,
+    ProtoId<WGShipModulePrototype> Module,
     int Charges,
     int MaxCharges,
     TimeSpan NextCharge,
-    TimeSpan RechargeTime,
     TimeSpan ReadyAt,
     WGShipModuleLock Lock);
 
@@ -45,15 +41,15 @@ public enum WGShipModuleLock : byte
     Anchored,
 }
 
-/// <summary>A pilot asks to fire one of the modules of the ship they are flying.</summary>
+/// <summary>A pilot asks to fire one module slot of the ship they are flying.</summary>
 [Serializable, NetSerializable]
 public sealed class WGShipModuleActivateEvent : EntityEventArgs
 {
-    public NetEntity Module;
+    public int Slot;
 
-    public WGShipModuleActivateEvent(NetEntity module)
+    public WGShipModuleActivateEvent(int slot)
     {
-        Module = module;
+        Slot = slot;
     }
 }
 
@@ -62,13 +58,13 @@ public sealed class WGShipModuleActivateEvent : EntityEventArgs
 public sealed class WGShipModuleFiredEvent : EntityEventArgs
 {
     public NetEntity Ship;
-    public NetEntity Module;
+    public int Slot;
     public float Jolt;
 
-    public WGShipModuleFiredEvent(NetEntity ship, NetEntity module, float jolt)
+    public WGShipModuleFiredEvent(NetEntity ship, int slot, float jolt)
     {
         Ship = ship;
-        Module = module;
+        Slot = slot;
         Jolt = jolt;
     }
 }

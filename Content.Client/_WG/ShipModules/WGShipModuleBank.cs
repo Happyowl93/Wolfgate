@@ -4,12 +4,13 @@ using Robust.Client.Input;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Client.UserInterface.CustomControls;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Client._WG.ShipModules;
 
 /// <summary>
-/// Helm strip with one key per ship module: its charges, its state and, in the tooltip, its hotkey. Pressing a key
+/// Helm strip with one key per fitted ship module: its charges, its state and, in the tooltip, its hotkey. Pressing a key
 /// fires the module, and a key lights red for a moment each time its module fires. Hidden on a ship with no modules.
 /// </summary>
 public sealed partial class WGShipModuleBank : GridContainer
@@ -17,6 +18,7 @@ public sealed partial class WGShipModuleBank : GridContainer
     [Dependency] private IEntityManager _entities = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IInputManager _input = default!;
+    [Dependency] private IPrototypeManager _prototype = default!;
 
     /// <summary>How long a key stays lit after its module fires.</summary>
     private static readonly TimeSpan FlashTime = TimeSpan.FromSeconds(0.45);
@@ -28,6 +30,9 @@ public sealed partial class WGShipModuleBank : GridContainer
     private readonly string _prefix;
     private readonly List<Button> _keys = new();
     private readonly List<TimeSpan> _litUntil = new();
+
+    /// <summary>The ship slot each key fires, by key.</summary>
+    private readonly List<int> _slotOf = new();
 
     /// <summary>Tracks the modules of the ship a screen is showing; control names use the fuel bank's prefix.</summary>
     public WGShipModuleBank(Func<EntityUid?> ship, string prefix = "Cockpit")
@@ -84,7 +89,15 @@ public sealed partial class WGShipModuleBank : GridContainer
                 continue;
 
             var slot = slots[i];
-            var text = Loc.GetString("wg-ship-module-key", ("label", Loc.GetString(slot.Label)),
+            if (_slotOf[i] != slot.Slot && slot.Slot < WGShipModuleKeys.Slots.Length)
+            {
+                _slotOf[i] = slot.Slot;
+                key.ToolTip = Loc.GetString("wg-ship-module-tooltip",
+                    ("key", _input.GetKeyFunctionButtonString(WGShipModuleKeys.Slots[slot.Slot])));
+            }
+
+            var label = _prototype.TryIndex(slot.Module, out var module) ? Loc.GetString(module.Label) : slot.Module.Id;
+            var text = Loc.GetString("wg-ship-module-key", ("label", label),
                 ("charges", slot.Charges), ("max", slot.MaxCharges)) + "\n" + Status(slot, now);
             if (key.Text != text)
                 key.Text = text;
@@ -94,8 +107,8 @@ public sealed partial class WGShipModuleBank : GridContainer
         }
     }
 
-    /// <summary>Lights the key of a module that just fired, if this strip shows it.</summary>
-    public bool Flash(EntityUid ship, NetEntity module)
+    /// <summary>Lights the key of a slot that just fired, if this strip shows it.</summary>
+    public bool Flash(EntityUid ship, int slot)
     {
         if (_ship() != ship || Slots is not { } slots)
             return false;
@@ -103,7 +116,7 @@ public sealed partial class WGShipModuleBank : GridContainer
         Refresh();
         for (var i = 0; i < slots.Count && i < _keys.Count; i++)
         {
-            if (slots[i].Module != module)
+            if (slots[i].Slot != slot)
                 continue;
 
             _litUntil[i] = _timing.RealTime + FlashTime;
@@ -140,24 +153,23 @@ public sealed partial class WGShipModuleBank : GridContainer
         WGInstrumentTheme.Switch(key);
     }
 
-    private void AddKey(int slot)
+    private void AddKey(int index)
     {
         var key = new Button
         {
-            Name = _prefix + "Module" + slot,
+            Name = _prefix + "Module" + index,
             HorizontalExpand = true,
             MinHeight = 44,
-            ToolTip = Loc.GetString("wg-ship-module-tooltip",
-                ("key", _input.GetKeyFunctionButtonString(WGShipModuleKeys.Slots[slot]))),
         };
         WGInstrumentTheme.Switch(key);
         key.OnPressed += _ =>
         {
             if (_ship() is { } ship)
-                _entities.System<WGShipModuleHelmSystem>().Fire(ship, slot);
+                _entities.System<WGShipModuleHelmSystem>().Fire(ship, _slotOf[index]);
         };
         _keys.Add(key);
         _litUntil.Add(TimeSpan.Zero);
+        _slotOf.Add(-1);
         AddChild(key);
     }
 

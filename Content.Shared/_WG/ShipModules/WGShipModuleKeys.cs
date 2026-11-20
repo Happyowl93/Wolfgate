@@ -9,11 +9,10 @@ public static class WGShipModuleKeys
     public static readonly BoundKeyFunction WGShipModuleFirst = "WGShipModuleFirst";
     public static readonly BoundKeyFunction WGShipModuleSecond = "WGShipModuleSecond";
     public static readonly BoundKeyFunction WGShipModuleThird = "WGShipModuleThird";
-    public static readonly BoundKeyFunction WGShipModuleFourth = "WGShipModuleFourth";
 
-    /// <summary>The hotkeys in slot order.</summary>
+    /// <summary>The hotkeys in slot order, one per <see cref="WGShipModulesComponent.SlotCount"/>.</summary>
     public static readonly BoundKeyFunction[] Slots =
     {
-        WGShipModuleFirst, WGShipModuleSecond, WGShipModuleThird, WGShipModuleFourth,
+        WGShipModuleFirst, WGShipModuleSecond, WGShipModuleThird,
     };
 }

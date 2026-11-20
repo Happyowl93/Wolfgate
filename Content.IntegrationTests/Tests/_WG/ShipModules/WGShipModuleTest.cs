@@ -1,4 +1,5 @@
 using System.Numerics;
+using Content.Server._WG.Drydock;
 using Content.Server._WG.ShipModules;
 using Content.Server.Power.Components;
 using Content.Shared._Crescent.ShipShields;
@@ -8,15 +9,28 @@ using Content.Shared.Movement.Systems;
 using Content.Shared.Shuttles.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Physics.Components;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.IntegrationTests.Tests._WG.ShipModules;
 
-/// <summary>Checks the helm strip, charges and locks of ship modules, and the maneuvering jets' burn.</summary>
+/// <summary>Checks fitting ship modules into slots, their strip, charges and locks, and the maneuvering jets' burn.</summary>
 [TestFixture]
 public sealed class WGShipModuleTest
 {
     private const string Jets = "WGShipModuleManeuveringJets";
+
+    [Test]
+    public void FittingKeysRoundTrip()
+    {
+        var key = WGShipModuleFitting.Key(2, Jets);
+        Assert.That(WGShipModuleFitting.TryParse(key, out var slot, out var module), Is.True);
+        Assert.That(slot, Is.EqualTo(2));
+        Assert.That(module, Is.EqualTo(Jets));
+        Assert.That(WGShipModuleFitting.TryParse("WGRefitThrusters", out _, out _), Is.False);
+        Assert.That(WGShipModuleFitting.TryParse("wg-module:x:" + Jets, out _, out _), Is.False);
+        Assert.That(WGShipModuleFitting.TryParse(null, out _, out _), Is.False);
+    }
 
     [Test]
     public async Task JetsKickTheHullAndSpendCharges()
@@ -26,46 +40,53 @@ public sealed class WGShipModuleTest
         var map = await pair.CreateTestMap();
         var entities = server.EntMan;
         var timing = server.ResolveDependency<IGameTiming>();
+        var prototypes = server.ResolveDependency<IPrototypeManager>();
         var modules = entities.System<WGShipModuleSystem>();
         var grid = map.Grid.Owner;
-        EntityUid jets = default;
-        EntityUid spare = default;
+        EntityUid helm = default;
         EntityUid pilot = default;
         var burnTime = 0f;
 
         await server.WaitPost(() =>
         {
-            jets = entities.SpawnEntity(Jets, map.GridCoords);
-            spare = entities.SpawnEntity(Jets, map.GridCoords);
-            entities.GetComponent<ApcPowerReceiverComponent>(jets).NeedsPower = false;
-            entities.GetComponent<ApcPowerReceiverComponent>(spare).NeedsPower = false;
+            helm = entities.SpawnEntity("ComputerShuttle", map.GridCoords);
+            entities.GetComponent<ApcPowerReceiverComponent>(helm).NeedsPower = false;
             pilot = entities.SpawnEntity(null, map.GridCoords);
             entities.AddComponent<PilotComponent>(pilot).HeldButtons = ShuttleButtons.StrafeRight;
+            modules.Fit(grid, 1, Jets);
         });
-        await pair.RunTicksSync(15);
+        // The power net updates receivers every 0.5 s and the strip every 0.25 s, so the helm reads powered within 1 s.
+        await pair.RunTicksSync((int) MathF.Ceiling(1f / (float) timing.TickPeriod.TotalSeconds));
 
         await server.WaitAssertion(() =>
         {
-            // One slot per kind: the second set of jets is a spare.
+            var jets = prototypes.Index<WGShipModulePrototype>(Jets);
+            var effect = (WGManeuveringJetsEffect) jets.Effect;
+            burnTime = effect.BurnTime;
+
+            // The strip shows the one filled slot, full and free.
             var ship = entities.GetComponent<WGShipModulesComponent>(grid);
             Assert.That(ship.Slots, Has.Count.EqualTo(1));
-            Assert.That(ship.Slots[0].Module, Is.EqualTo(entities.GetNetEntity(jets)));
+            Assert.That(ship.Slots[0].Slot, Is.EqualTo(1));
+            Assert.That(ship.Slots[0].Module.Id, Is.EqualTo(Jets));
             Assert.That(ship.Slots[0].Charges, Is.EqualTo(3));
             Assert.That(ship.Slots[0].Lock, Is.EqualTo(WGShipModuleLock.None));
-
-            var module = entities.GetComponent<WGShipModuleComponent>(jets);
-            Assert.That(modules.TryActivate((spare, entities.GetComponent<WGShipModuleComponent>(spare)), pilot), Is.False,
-                "A spare module fired.");
+            Assert.That(modules.TryActivate(grid, 0, pilot, helm), Is.False, "An empty slot fired.");
 
             // Nothing held: no burn, no charge spent.
+            var fitted = modules.GetFitted(grid, 1)!;
             entities.GetComponent<PilotComponent>(pilot).HeldButtons = ShuttleButtons.None;
-            Assert.That(modules.TryActivate((jets, module), pilot), Is.False);
-            Assert.That(module.Charges, Is.EqualTo(3));
+            Assert.That(modules.TryActivate(grid, 1, pilot, helm), Is.False);
+            Assert.That(fitted.Charges, Is.EqualTo(3));
+
+            // No powered helm, no firing.
+            var bay = entities.GetComponent<WGShipModuleBayComponent>(grid);
+            Assert.That(modules.GetLock(grid, bay, jets, false, timing.CurTime), Is.EqualTo(WGShipModuleLock.Unpowered));
 
             // A field seen a moment ago still locks the jets.
-            ship.LastShielded = timing.CurTime;
-            Assert.That(modules.GetLock((jets, module), grid, ship, timing.CurTime), Is.EqualTo(WGShipModuleLock.Shields));
-            ship.LastShielded = null;
+            bay.LastShielded = timing.CurTime;
+            Assert.That(modules.GetLock(grid, bay, jets, true, timing.CurTime), Is.EqualTo(WGShipModuleLock.Shields));
+            bay.LastShielded = null;
 
             // A deflector's partial field leaves the jets free; any other field holds the hull.
             var emitter = entities.SpawnEntity(null, map.GridCoords);
@@ -73,19 +94,19 @@ public sealed class WGShipModuleTest
             var field = entities.AddComponent<ShipShieldedComponent>(grid);
             field.Shield = emitter;
             field.Source = emitter;
-            Assert.That(modules.GetLock((jets, module), grid, ship, timing.CurTime), Is.EqualTo(WGShipModuleLock.None),
+            Assert.That(modules.GetLock(grid, bay, jets, true, timing.CurTime), Is.EqualTo(WGShipModuleLock.None),
                 "The deflector locked the jets.");
             entities.RemoveComponent<WGShipShieldDeflectorComponent>(emitter);
-            Assert.That(modules.GetLock((jets, module), grid, ship, timing.CurTime), Is.EqualTo(WGShipModuleLock.Shields));
+            Assert.That(modules.GetLock(grid, bay, jets, true, timing.CurTime), Is.EqualTo(WGShipModuleLock.Shields));
             entities.RemoveComponent<ShipShieldedComponent>(grid);
             entities.DeleteEntity(emitter);
+            bay.LastShielded = null;
 
             entities.GetComponent<PilotComponent>(pilot).HeldButtons = ShuttleButtons.StrafeRight;
-            Assert.That(modules.TryActivate((jets, module), pilot), Is.True);
-            Assert.That(module.Charges, Is.EqualTo(2));
+            Assert.That(modules.TryActivate(grid, 1, pilot, helm), Is.True);
+            Assert.That(fitted.Charges, Is.EqualTo(2));
             Assert.That(entities.GetComponent<WGShipModulesComponent>(grid).Slots[0].Charges, Is.EqualTo(2));
-            Assert.That(modules.TryActivate((jets, module), pilot), Is.False, "The cooldown was ignored.");
-            burnTime = entities.GetComponent<WGManeuveringJetsComponent>(jets).BurnTime;
+            Assert.That(modules.TryActivate(grid, 1, pilot, helm), Is.False, "The cooldown was ignored.");
         });
         // An unmanned grid is braked hard by GridSettle afterwards, so measure as it ends.
         await pair.RunTicksSync((int) MathF.Ceiling(burnTime / (float) timing.TickPeriod.TotalSeconds) + 1);
@@ -96,33 +117,40 @@ public sealed class WGShipModuleTest
             // The one-tile test grid is laden by its own machines, so the kick is the rated one scaled for the hull.
             var body = entities.GetComponent<PhysicsComponent>(grid);
             var velocity = body.LinearVelocity;
-            var jetsComp = entities.GetComponent<WGManeuveringJetsComponent>(jets);
-            var scale = entities.System<WGManeuveringJetsSystem>().KickScale(jetsComp, grid, body);
+            var effect = (WGManeuveringJetsEffect) prototypes.Index<WGShipModulePrototype>(Jets).Effect;
+            var scale = entities.System<WGManeuveringJetsSystem>().KickScale(effect, grid, body);
             Assert.That(scale, Is.InRange(0.1f, 1f));
-            var rated = jetsComp.DeltaV * scale;
+            var rated = effect.DeltaV * scale;
             var along = Vector2.Dot(velocity, entities.System<SharedTransformSystem>().GetWorldRotation(grid).RotateVec(Vector2.UnitX));
             Assert.That(along, Is.InRange(rated * 0.8f, rated * 1.02f));
             Assert.That(velocity.Length(), Is.EqualTo(along).Within(0.5f));
+            Assert.That(entities.HasComponent<WGManeuveringJetsBurningComponent>(grid), Is.False, "The burn never ended.");
 
-            // A powered module refills one charge when its timer runs out.
-            var module = entities.GetComponent<WGShipModuleComponent>(jets);
-            module.NextCharge = timing.CurTime;
+            // A module refills one charge when its timer runs out while the helm has power.
+            modules.GetFitted(grid, 1)!.NextCharge = timing.CurTime;
         });
         await pair.RunTicksSync(15);
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(entities.GetComponent<WGShipModuleComponent>(jets).Charges, Is.EqualTo(3));
+            Assert.That(modules.GetFitted(grid, 1)!.Charges, Is.EqualTo(3));
             Assert.That(entities.GetComponent<WGShipModulesComponent>(grid).Slots[0].Charges, Is.EqualTo(3));
 
-            // With every module gone the ship loses its strip.
-            entities.DeleteEntity(jets);
-            entities.DeleteEntity(spare);
-        });
-        await pair.RunTicksSync(15);
+            // A finished drydock fitting fills its slot, replacing what was there.
+            entities.System<WGDrydockSystem>().ApplyItem(grid, new WGDrydockWorkItem
+            {
+                Kind = WGDrydockWorkKind.Upgrade,
+                Target = grid,
+                Upgrade = WGShipModuleFitting.Key(2, Jets),
+            });
+            Assert.That(modules.GetFitted(grid, 2)?.Module.Id, Is.EqualTo(Jets));
+            Assert.That(entities.GetComponent<WGShipModulesComponent>(grid).Slots, Has.Count.EqualTo(2));
 
-        await server.WaitAssertion(() =>
-        {
+            // With every slot emptied the ship loses its bay and strip.
+            modules.Unfit(grid, 1);
+            Assert.That(entities.GetComponent<WGShipModulesComponent>(grid).Slots, Has.Count.EqualTo(1));
+            modules.Unfit(grid, 2);
+            Assert.That(entities.HasComponent<WGShipModuleBayComponent>(grid), Is.False);
             Assert.That(entities.HasComponent<WGShipModulesComponent>(grid), Is.False);
         });
         await pair.CleanReturnAsync();

@@ -56,7 +56,7 @@ public sealed partial class WGShipModuleHelmSystem
         _jolted.Clear();
         foreach (var bank in _banks)
         {
-            if (!bank.Flash(ship.Value, ev.Module) || ev.Jolt <= 0f || bank.ShakeRoot() is not { } root || !_jolted.Add(root))
+            if (!bank.Flash(ship.Value, ev.Slot) || ev.Jolt <= 0f || bank.ShakeRoot() is not { } root || !_jolted.Add(root))
                 continue;
 
             if (!_shakes.TryGetValue(root, out var shake))

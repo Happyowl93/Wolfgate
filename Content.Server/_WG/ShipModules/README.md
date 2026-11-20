@@ -1,21 +1,24 @@
 # ShipModules
 
-Ship modules are machines bolted to a hull that give its pilot something to fire from the helm. A module holds
-charges, refills one at a time while powered, and can be locked by the ship's state. The first one is the MJ-3
-Sidestep maneuvering jets (`WGShipModuleManeuveringJets`, sold as a flatpack by the FlatpackVend, the FlatpackVend
-Premium and the systems broker): each burn kicks the hull about 20 m/s along the direction the pilot is holding, so
-a ship flying without a shield field can step out of a salvo.
+Ship modules are abilities fitted into a ship's three module slots that its pilot fires from the helm. Drydocks
+fit them as a paid crane job and empty slots for free (Drydock module, `WGDrydockSystem.Modules.cs`); admins fit
+or empty any ship's slots with `shipmodule <grid | here> <slot 1-3> <module | none>`. A module (`wgShipModule`,
+`WGShipModulePrototype`) holds charges, refills one at a time while a helm on the ship has power, and can be
+locked by the ship's state. The first one is the MJ-3 Sidestep maneuvering jets (`WGShipModuleManeuveringJets`):
+each burn kicks the hull about 20 m/s along the direction the pilot is holding, so a ship flying without a shield
+field can step out of a salvo.
 
 Pilots see a module strip under FUEL and CARGO, on the windowed helm's navigation page and in the cockpit
-(`WGShipModuleBank`), with one key per module: its charges and whether it is ready, charging or locked. A module is
-fired by pressing its key or its hotkey while piloting (`WGShipModuleKeys`, Shift, Z, X and C by default, rebindable
-under Shuttle in the controls). The strip is hidden on a ship with no modules.
+(`WGShipModuleBank`), with one key per fitted module: its charges and whether it is ready, charging or locked. A module is
+fired by pressing its key or its slot's hotkey while piloting (`WGShipModuleKeys`, Shift, Z and X by default for slots
+1 to 3, rebindable under Shuttle in the controls). The strip is hidden on a ship with no modules.
 
-A ship shows at most four modules, one per kind: the oldest anchored module of each prototype takes the slot and any
-other of that kind is a spare that only takes over when the first is unbolted. Every 0.25 s `WGShipModuleSystem`
-writes the strip to the networked `WGShipModulesComponent` on the grid, dirtied only when something shown changes.
-A use is refused, with a popup at the pilot's cursor, while the module is unpowered, the ship is in a jump, or (for
-a module with `blockedByShields`) a shield field is up or dropped less than `shieldLockout` ago. A deflector's partial
+The fitted modules live on the grid in `WGShipModuleBayComponent`, saved with the ship; charges and timers aren't
+saved, so a loaded ship starts full. Without a powered helm (`ShuttleConsole`) aboard, recharging pauses. Every 0.25 s
+`WGShipModuleSystem` writes the strip to the networked `WGShipModulesComponent` on the grid, dirtied only when
+something shown changes. A use is refused, with a popup at the pilot's cursor, while the pilot's helm has no power,
+the ship is in a jump, or (for a module with `blockedByShields`) a shield field is up or dropped less than
+`shieldLockout` ago. A deflector's partial
 field (an emitter with `WGShipShieldDeflector`, such as the MD-10 Parasol) doesn't count.
 
 Each use plays `activateSound` to everyone aboard and to the pilot, and sends them `WGShipModuleFiredEvent`. On their
@@ -25,12 +28,14 @@ helm window or cockpit holding that strip by a few pixels, and kicks the view of
 
 ## Adding a module
 
-Give a machine `WGShipModule` (label, charges, recharge, cooldown, shield rule, sound, jolt) and a component of its own,
-parented to `WGShipModuleBase`. Its system handles three events raised on the module: `WGShipModuleLockEvent` to
-lock it for reasons of its own (add a value to `WGShipModuleLock` with `wg-ship-module-status-*` and
-`wg-ship-module-refused-*` strings), `WGShipModuleActivateAttemptEvent` to refuse a use before the charge is spent,
-and `WGShipModuleActivatedEvent` to do the effect. `WGShipModuleSystem.TryActivate` is the one entry point; the
-network request only adds the check that the sender is piloting that ship.
+Add a `wgShipModule` prototype (name, description, strip label, drydock icon in `modules.rsi`, price and materials,
+charges, recharge, cooldown, shield rule, sound, jolt) whose `effect` is a new `WGShipModuleEffect` subclass with
+its settings. A server system handles three broadcast events, acting only when `Module.Effect` is its kind:
+`WGShipModuleLockEvent` to lock it for reasons of its own (add a value to `WGShipModuleLock` with
+`wg-ship-module-status-*` and `wg-ship-module-refused-*` strings), `WGShipModuleActivateAttemptEvent` to refuse a use
+before the charge is spent, and `WGShipModuleActivatedEvent` to do the effect. `WGShipModuleSystem.TryActivate` is the
+one entry point; the network request only adds the check that the sender is piloting that ship. Draw the icon in
+`Tools/_WG/ShipModules/gen_module_icons.py`.
 
 ## Maneuvering jets
 
@@ -39,7 +44,7 @@ space when the burn starts; with nothing held the use is refused and no charge i
 hull up to `referenceMass` (60, a 120-tile fighter). Above that every hull gets the same push, so the kick falls in
 proportion to mass, down to `minScale`; small ships dodge and big ones barely shift (about 16 m/s for a QJ-271 Heavy
 Fighter, 5 m/s for a Neptune). It is then multiplied by CargoLoad's space thrust factor, so a laden hauler gets less. It is applied as
-impulse over `burnTime`, independent of the ship's thrusters. The jets lock while the ship is docked to anything or
+impulse over `burnTime` (`WGManeuveringJetsBurningComponent` on the grid), independent of the ship's thrusters. The jets lock while the ship is docked to anything or
 its body is static, and each burn adds `heat` to the grid's thermal signature. Three charges, eight seconds each.
 
 Each burn also sends `WGManeuveringJetsPuffEvent` to the map, naming the ship's powered thrusters that push along it
@@ -57,14 +62,17 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 ### Server
 
 - [`Content.Server/_WG/ShipModules/WGManeuveringJetsSystem.cs`](WGManeuveringJetsSystem.cs)
+- [`Content.Server/_WG/ShipModules/WGShipModuleBayComponent.cs`](WGShipModuleBayComponent.cs)
+- [`Content.Server/_WG/ShipModules/WGShipModuleCommand.cs`](WGShipModuleCommand.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleEvents.cs`](WGShipModuleEvents.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleSystem.cs`](WGShipModuleSystem.cs)
 
 ### Shared
 
-- [`Content.Shared/_WG/ShipModules/WGManeuveringJetsComponent.cs`](../../../Content.Shared/_WG/ShipModules/WGManeuveringJetsComponent.cs)
-- [`Content.Shared/_WG/ShipModules/WGShipModuleComponent.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModuleComponent.cs)
+- [`Content.Shared/_WG/ShipModules/WGManeuveringJets.cs`](../../../Content.Shared/_WG/ShipModules/WGManeuveringJets.cs)
+- [`Content.Shared/_WG/ShipModules/WGShipModuleFitting.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModuleFitting.cs)
 - [`Content.Shared/_WG/ShipModules/WGShipModuleKeys.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModuleKeys.cs)
+- [`Content.Shared/_WG/ShipModules/WGShipModulePrototype.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModulePrototype.cs)
 - [`Content.Shared/_WG/ShipModules/WGShipModulesComponent.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModulesComponent.cs)
 
 ### Client
@@ -90,6 +98,7 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 
 ### Textures
 
+- [`Resources/Textures/_WG/ShipModules/modules.rsi/`](../../../Resources/Textures/_WG/ShipModules/modules.rsi/)
 - [`Resources/Textures/_WG/ShipModules/smoke_ring.rsi/`](../../../Resources/Textures/_WG/ShipModules/smoke_ring.rsi/)
 
 ### Audio
@@ -99,6 +108,7 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 
 ### Tools
 
+- [`Tools/_WG/ShipModules/gen_module_icons.py`](../../../Tools/_WG/ShipModules/gen_module_icons.py)
 - [`Tools/_WG/ShipModules/gen_smoke_ring.py`](../../../Tools/_WG/ShipModules/gen_smoke_ring.py)
 
 ## Non-modular edits
@@ -106,7 +116,5 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 - [`Content.Client/Options/UI/Tabs/KeyRebindTab.xaml.cs`](../../../Content.Client/Options/UI/Tabs/KeyRebindTab.xaml.cs): ship module hotkeys
 - [`Content.Client/Shuttles/Systems/ShuttleConsoleSystem.cs`](../../../Content.Client/Shuttles/Systems/ShuttleConsoleSystem.cs): the module hotkeys work while piloting
 - [`Resources/keybinds.yml`](../../../Resources/keybinds.yml): ship module hotkeys while piloting
-- [`Resources/Prototypes/_Mono/Catalogs/VendingMachines/Inventories/flatpackvendpremium.yml`](../../../Resources/Prototypes/_Mono/Catalogs/VendingMachines/Inventories/flatpackvendpremium.yml): maneuvering jets are an off-the-shelf fitting
-- [`Resources/Prototypes/_NF/Catalog/VendingMachines/Inventories/flatpackvend.yml`](../../../Resources/Prototypes/_NF/Catalog/VendingMachines/Inventories/flatpackvend.yml): maneuvering jets are an off-the-shelf fitting
 
 <!-- WOLFGATE-GENERATED END -->

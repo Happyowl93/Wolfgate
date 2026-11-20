@@ -1,14 +1,12 @@
-using System.Numerics;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._WG.ShipModules;
 
 /// <summary>
-/// Ship module that kicks the hull sideways, forward or back: each use adds <see cref="DeltaV"/> along the direction
-/// the pilot holds, spread over <see cref="BurnTime"/>.
+/// Maneuvering jets: each use kicks the hull forward, back or sideways along the direction the pilot holds, adding
+/// <see cref="DeltaV"/> over <see cref="BurnTime"/>.
 /// </summary>
-[RegisterComponent]
-public sealed partial class WGManeuveringJetsComponent : Component
+public sealed partial class WGManeuveringJetsEffect : WGShipModuleEffect
 {
     /// <summary>Speed one burn adds to a hull of <see cref="ReferenceMass"/> or less, in metres per second.</summary>
     [DataField]
@@ -32,18 +30,6 @@ public sealed partial class WGManeuveringJetsComponent : Component
     /// <summary>Heat one burn adds to the ship's thermal signature.</summary>
     [DataField]
     public float Heat = 1000000f;
-
-    /// <summary>World direction of the burn under way.</summary>
-    [ViewVariables]
-    public Vector2 BurnDirection;
-
-    /// <summary>Speed the burn under way still has to add.</summary>
-    [ViewVariables]
-    public float BurnLeft;
-
-    /// <summary>Speed the burn under way adds per second.</summary>
-    [ViewVariables]
-    public float BurnRate;
 }
 
 /// <summary>A jets burn started: the ship's thrusters that push along it flare and puff smoke rings.</summary>

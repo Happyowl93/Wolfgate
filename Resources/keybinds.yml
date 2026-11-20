@@ -94,9 +94,6 @@ binds:
 - function: WGShipModuleThird
   type: State
   key: X
-- function: WGShipModuleFourth
-  type: State
-  key: C
 # WOLFGATE END
 - function: CameraRotateLeft
   type: State

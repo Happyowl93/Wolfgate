@@ -31,17 +31,20 @@ public sealed partial class WGManeuveringJetsSystem : EntitySystem
 
     private readonly HashSet<EntityUid> _docked = new();
 
+    /// <summary>World direction of the burn each ship's pilot asked for, between the attempt and the activation.</summary>
+    private readonly Dictionary<EntityUid, Vector2> _pending = new();
+
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<WGManeuveringJetsComponent, WGShipModuleLockEvent>(OnLock);
-        SubscribeLocalEvent<WGManeuveringJetsComponent, WGShipModuleActivateAttemptEvent>(OnAttempt);
-        SubscribeLocalEvent<WGManeuveringJetsComponent, WGShipModuleActivatedEvent>(OnActivated);
+        SubscribeLocalEvent<WGShipModuleLockEvent>(OnLock);
+        SubscribeLocalEvent<WGShipModuleActivateAttemptEvent>(OnAttempt);
+        SubscribeLocalEvent<WGShipModuleActivatedEvent>(OnActivated);
     }
 
-    private void OnLock(Entity<WGManeuveringJetsComponent> ent, ref WGShipModuleLockEvent args)
+    private void OnLock(ref WGShipModuleLockEvent args)
     {
-        if (args.Lock != WGShipModuleLock.None)
+        if (args.Lock != WGShipModuleLock.None || args.Module.Effect is not WGManeuveringJetsEffect)
             return;
 
         if (!TryComp<PhysicsComponent>(args.Grid, out var body) || body.BodyType == BodyType.Static)
@@ -57,9 +60,9 @@ public sealed partial class WGManeuveringJetsSystem : EntitySystem
             args.Lock = WGShipModuleLock.Docked;
     }
 
-    private void OnAttempt(Entity<WGManeuveringJetsComponent> ent, ref WGShipModuleActivateAttemptEvent args)
+    private void OnAttempt(ref WGShipModuleActivateAttemptEvent args)
     {
-        if (args.Cancelled)
+        if (args.Cancelled || args.Module.Effect is not WGManeuveringJetsEffect)
             return;
 
         var held = HeldDirection(args.User);
@@ -70,31 +73,34 @@ public sealed partial class WGManeuveringJetsSystem : EntitySystem
             return;
         }
 
-        ent.Comp.BurnDirection = _transform.GetWorldRotation(args.Grid).RotateVec(held);
+        _pending[args.Grid] = _transform.GetWorldRotation(args.Grid).RotateVec(held);
     }
 
-    private void OnActivated(Entity<WGManeuveringJetsComponent> ent, ref WGShipModuleActivatedEvent args)
+    private void OnActivated(ref WGShipModuleActivatedEvent args)
     {
-        if (!TryComp<PhysicsComponent>(args.Grid, out var body))
+        if (args.Module.Effect is not WGManeuveringJetsEffect jets
+            || !_pending.Remove(args.Grid, out var direction)
+            || !TryComp<PhysicsComponent>(args.Grid, out var body))
             return;
 
-        ent.Comp.BurnLeft = ent.Comp.DeltaV * KickScale(ent.Comp, args.Grid, body);
-        ent.Comp.BurnRate = ent.Comp.BurnLeft / MathF.Max(ent.Comp.BurnTime, 0.05f);
-        EnsureComp<WGManeuveringJetsBurningComponent>(ent);
+        var burn = EnsureComp<WGManeuveringJetsBurningComponent>(args.Grid);
+        burn.Direction = direction;
+        burn.Left = jets.DeltaV * KickScale(jets, args.Grid, body);
+        burn.Rate = burn.Left / MathF.Max(jets.BurnTime, 0.05f);
 
         if (TryComp<ThermalSignatureComponent>(args.Grid, out var heat))
-            heat.StoredHeat += ent.Comp.Heat;
+            heat.StoredHeat += jets.Heat;
 
-        Puff(args.Grid, ent.Comp);
+        Puff(args.Grid, direction, jets);
     }
 
     /// <summary>Tells the map's clients which of the ship's thrusters push along the burn, for their plumes and smoke rings.</summary>
-    private void Puff(EntityUid grid, WGManeuveringJetsComponent jets)
+    private void Puff(EntityUid grid, Vector2 direction, WGManeuveringJetsEffect jets)
     {
         if (!TryComp<ShuttleComponent>(grid, out var shuttle))
             return;
 
-        var local = (-_transform.GetWorldRotation(grid)).RotateVec(jets.BurnDirection);
+        var local = (-_transform.GetWorldRotation(grid)).RotateVec(direction);
         var ev = new WGManeuveringJetsPuffEvent { BurnTime = jets.BurnTime };
         for (var i = 0; i < BucketPush.Length; i++)
         {
@@ -118,7 +124,7 @@ public sealed partial class WGManeuveringJetsSystem : EntitySystem
     }
 
     /// <summary>Share of the rated kick a hull gets: a fixed push, so less for a heavy hull, and less again for a laden one.</summary>
-    public float KickScale(WGManeuveringJetsComponent jets, EntityUid grid, PhysicsComponent body)
+    public float KickScale(WGManeuveringJetsEffect jets, EntityUid grid, PhysicsComponent body)
     {
         var mass = MathF.Max(body.Mass, jets.ReferenceMass);
         var scale = MathF.Max(jets.ReferenceMass / mass, jets.MinScale);
@@ -147,28 +153,38 @@ public sealed partial class WGManeuveringJetsSystem : EntitySystem
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
-        var query = EntityQueryEnumerator<WGManeuveringJetsBurningComponent, WGManeuveringJetsComponent, TransformComponent>();
-        while (query.MoveNext(out var uid, out _, out var jets, out var xform))
+        _pending.Clear();
+        var query = EntityQueryEnumerator<WGManeuveringJetsBurningComponent, PhysicsComponent>();
+        while (query.MoveNext(out var grid, out var burn, out var body))
         {
-            if (!xform.Anchored
-                || xform.GridUid is not { } grid
-                || !TryComp<PhysicsComponent>(grid, out var body)
-                || body.BodyType == BodyType.Static)
+            if (body.BodyType == BodyType.Static)
             {
-                jets.BurnLeft = 0f;
-                RemCompDeferred<WGManeuveringJetsBurningComponent>(uid);
+                RemCompDeferred<WGManeuveringJetsBurningComponent>(grid);
                 continue;
             }
 
-            var step = MathF.Min(jets.BurnLeft, jets.BurnRate * frameTime);
-            jets.BurnLeft -= step;
-            _physics.ApplyLinearImpulse(grid, jets.BurnDirection * step * body.Mass, body: body);
-            if (jets.BurnLeft <= 0f)
-                RemCompDeferred<WGManeuveringJetsBurningComponent>(uid);
+            var step = MathF.Min(burn.Left, burn.Rate * frameTime);
+            burn.Left -= step;
+            _physics.ApplyLinearImpulse(grid, burn.Direction * step * body.Mass, body: body);
+            if (burn.Left <= 0f)
+                RemCompDeferred<WGManeuveringJetsBurningComponent>(grid);
         }
     }
 }
 
-/// <summary>Marks a maneuvering jets module with a burn under way.</summary>
+/// <summary>A maneuvering jets burn under way on a ship's grid.</summary>
 [RegisterComponent]
-public sealed partial class WGManeuveringJetsBurningComponent : Component;
+public sealed partial class WGManeuveringJetsBurningComponent : Component
+{
+    /// <summary>World direction of the burn.</summary>
+    [ViewVariables]
+    public Vector2 Direction;
+
+    /// <summary>Velocity change still to apply, m/s.</summary>
+    [ViewVariables]
+    public float Left;
+
+    /// <summary>Velocity change applied per second.</summary>
+    [ViewVariables]
+    public float Rate;
+}

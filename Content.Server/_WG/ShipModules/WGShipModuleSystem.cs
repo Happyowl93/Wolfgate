@@ -1,81 +1,78 @@
 using System.Linq;
 using Content.Server.Shuttles;
+using Content.Server.Shuttles.Components;
 using Content.Shared._Crescent.ShipShields;
 using Content.Shared._WG.ShipModules;
 using Content.Shared._WG.ShipShields;
-using Content.Shared.Examine;
 using Content.Shared.Popups;
 using Content.Shared.Power.EntitySystems;
 using Content.Shared.Shuttles.Components;
 using Content.Shared.Shuttles.Systems;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Player;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Server._WG.ShipModules;
 
 /// <summary>
-/// Refills every ship module's charges, publishes each ship's modules to its helm and fires them for its pilots.
+/// Holds the modules fitted into ships' slots: refills their charges while the ship has a powered helm, publishes each
+/// ship's strip to its helm and fires them for its pilots.
 /// </summary>
 public sealed partial class WGShipModuleSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private IPrototypeManager _prototype = default!;
     [Dependency] private SharedPowerReceiverSystem _power = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
 
     private static readonly TimeSpan SweepInterval = TimeSpan.FromSeconds(0.25);
 
-    private readonly Dictionary<EntityUid, List<Entity<WGShipModuleComponent>>> _fitted = new();
+    /// <summary>Grids with a powered helm at the last sweep.</summary>
+    private readonly HashSet<EntityUid> _poweredHelms = new();
+
     private readonly List<WGShipModuleSlot> _slots = new();
-    private readonly HashSet<string> _kinds = new();
     private TimeSpan _nextSweep;
 
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<WGShipModuleComponent, MapInitEvent>(OnMapInit);
-        SubscribeLocalEvent<WGShipModuleComponent, ExaminedEvent>(OnExamined);
         SubscribeNetworkEvent<WGShipModuleActivateEvent>(OnActivateRequest);
-    }
-
-    private void OnMapInit(Entity<WGShipModuleComponent> ent, ref MapInitEvent args)
-    {
-        ent.Comp.Charges = ent.Comp.MaxCharges;
-    }
-
-    private void OnExamined(Entity<WGShipModuleComponent> ent, ref ExaminedEvent args)
-    {
-        if (!args.IsInDetailsRange)
-            return;
-
-        args.PushMarkup(Loc.GetString("wg-ship-module-examine", ("charges", ent.Comp.Charges),
-            ("max", ent.Comp.MaxCharges), ("seconds", (int) ent.Comp.RechargeTime.TotalSeconds)));
-        args.PushMarkup(Loc.GetString("wg-ship-module-examine-helm"));
     }
 
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
         var now = _timing.CurTime;
-        var query = EntityQueryEnumerator<WGShipModuleComponent>();
-        while (query.MoveNext(out var uid, out var module))
+        var query = EntityQueryEnumerator<WGShipModuleBayComponent>();
+        while (query.MoveNext(out var grid, out var bay))
         {
-            if (module.Charges >= module.MaxCharges)
-                continue;
-
-            // An unpowered module keeps the progress it had.
-            if (!_power.IsPowered(uid))
+            var powered = _poweredHelms.Contains(grid);
+            foreach (var fitted in bay.Fitted)
             {
-                module.NextCharge += TimeSpan.FromSeconds(frameTime);
-                continue;
+                if (!_prototype.TryIndex(fitted.Module, out var module))
+                    continue;
+
+                if (fitted.Charges < 0)
+                    fitted.Charges = module.MaxCharges;
+
+                if (fitted.Charges >= module.MaxCharges)
+                    continue;
+
+                // Without a powered helm a module keeps the progress it had.
+                if (!powered)
+                {
+                    fitted.NextCharge += TimeSpan.FromSeconds(frameTime);
+                    continue;
+                }
+
+                if (now < fitted.NextCharge)
+                    continue;
+
+                fitted.Charges++;
+                fitted.NextCharge = now + module.RechargeTime;
             }
-
-            if (now < module.NextCharge)
-                continue;
-
-            module.Charges++;
-            module.NextCharge = now + module.RechargeTime;
         }
 
         if (now < _nextSweep)
@@ -85,95 +82,123 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         Sweep(now);
     }
 
-    /// <summary>Rebuilds every ship's module strip and syncs the ones that changed.</summary>
+    /// <summary>Notes which ships have a powered helm, then rebuilds every ship's module strip.</summary>
     private void Sweep(TimeSpan now)
     {
-        foreach (var list in _fitted.Values)
+        _poweredHelms.Clear();
+        var helms = EntityQueryEnumerator<ShuttleConsoleComponent, TransformComponent>();
+        while (helms.MoveNext(out var uid, out _, out var xform))
         {
-            list.Clear();
+            if (xform.GridUid is { } grid && _power.IsPowered(uid))
+                _poweredHelms.Add(grid);
         }
 
-        var modules = EntityQueryEnumerator<WGShipModuleComponent, TransformComponent>();
-        while (modules.MoveNext(out var uid, out var module, out var xform))
+        var bays = EntityQueryEnumerator<WGShipModuleBayComponent>();
+        while (bays.MoveNext(out var grid, out var bay))
         {
-            if (!xform.Anchored || xform.GridUid is not { } grid)
-                continue;
-
-            if (!_fitted.TryGetValue(grid, out var list))
-                _fitted[grid] = list = new List<Entity<WGShipModuleComponent>>();
-
-            list.Add((uid, module));
+            UpdateStrip(grid, bay, now);
         }
 
-        foreach (var (grid, list) in _fitted)
+        var strips = EntityQueryEnumerator<WGShipModulesComponent>();
+        while (strips.MoveNext(out var grid, out _))
         {
-            if (list.Count == 0 || TerminatingOrDeleted(grid))
-                continue;
-
-            var ship = EnsureComp<WGShipModulesComponent>(grid);
-            if (HoldingField(grid))
-                ship.LastShielded = now;
-
-            // Oldest fitting first, so a slot keeps its hotkey; a second module of a kind is a spare.
-            list.Sort(static (a, b) => a.Owner.Id.CompareTo(b.Owner.Id));
-            _slots.Clear();
-            _kinds.Clear();
-            foreach (var module in list)
-            {
-                if (_slots.Count >= WGShipModulesComponent.MaxSlots)
-                    break;
-
-                if (!_kinds.Add(Kind(module)))
-                    continue;
-
-                var locked = GetLock(module, grid, ship, now);
-                var charging = module.Comp.Charges < module.Comp.MaxCharges && locked != WGShipModuleLock.Unpowered;
-                _slots.Add(new WGShipModuleSlot(GetNetEntity(module), module.Comp.Label, module.Comp.Charges,
-                    module.Comp.MaxCharges, charging ? module.Comp.NextCharge : TimeSpan.Zero, module.Comp.RechargeTime,
-                    module.Comp.ReadyAt, locked));
-            }
-
-            if (ship.Slots.SequenceEqual(_slots))
-                continue;
-
-            ship.Slots = new List<WGShipModuleSlot>(_slots);
-            Dirty(grid, ship);
-        }
-
-        var ships = EntityQueryEnumerator<WGShipModulesComponent>();
-        while (ships.MoveNext(out var grid, out _))
-        {
-            if (!_fitted.TryGetValue(grid, out var list) || list.Count == 0)
+            if (!HasComp<WGShipModuleBayComponent>(grid))
                 RemCompDeferred<WGShipModulesComponent>(grid);
-        }
-
-        foreach (var grid in _fitted.Where(pair => pair.Value.Count == 0).Select(pair => pair.Key).ToArray())
-        {
-            _fitted.Remove(grid);
         }
     }
 
-    private string Kind(EntityUid module)
+    /// <summary>Writes a ship's fitted modules to its helm strip, dirtying it only when something shown changed.</summary>
+    private void UpdateStrip(EntityUid grid, WGShipModuleBayComponent bay, TimeSpan now)
     {
-        return MetaData(module).EntityPrototype?.ID ?? module.ToString();
+        if (TerminatingOrDeleted(grid))
+            return;
+
+        if (HoldingField(grid))
+            bay.LastShielded = now;
+
+        _slots.Clear();
+        foreach (var fitted in bay.Fitted)
+        {
+            if (!_prototype.TryIndex(fitted.Module, out var module))
+                continue;
+
+            var charges = fitted.Charges < 0 ? module.MaxCharges : fitted.Charges;
+            var locked = GetLock(grid, bay, module, _poweredHelms.Contains(grid), now);
+            var charging = charges < module.MaxCharges && locked != WGShipModuleLock.Unpowered;
+            _slots.Add(new WGShipModuleSlot(fitted.Slot, fitted.Module, charges, module.MaxCharges,
+                charging ? fitted.NextCharge : TimeSpan.Zero, fitted.ReadyAt, locked));
+        }
+
+        _slots.Sort(static (a, b) => a.Slot.CompareTo(b.Slot));
+        var strip = EnsureComp<WGShipModulesComponent>(grid);
+        if (strip.Slots.SequenceEqual(_slots))
+            return;
+
+        strip.Slots = new List<WGShipModuleSlot>(_slots);
+        Dirty(grid, strip);
+    }
+
+    /// <summary>The module in one of a ship's slots, if any.</summary>
+    public WGFittedModule? GetFitted(EntityUid grid, int slot)
+    {
+        if (!TryComp<WGShipModuleBayComponent>(grid, out var bay))
+            return null;
+
+        foreach (var fitted in bay.Fitted)
+        {
+            if (fitted.Slot == slot)
+                return fitted;
+        }
+
+        return null;
+    }
+
+    /// <summary>Fits a module into a slot, replacing whatever was there; it starts with full charges.</summary>
+    public void Fit(EntityUid grid, int slot, ProtoId<WGShipModulePrototype> module)
+    {
+        if (slot < 0 || slot >= WGShipModulesComponent.SlotCount)
+            return;
+
+        var bay = EnsureComp<WGShipModuleBayComponent>(grid);
+        bay.Fitted.RemoveAll(f => f.Slot == slot);
+        bay.Fitted.Add(new WGFittedModule { Slot = slot, Module = module });
+        bay.Fitted.Sort(static (a, b) => a.Slot.CompareTo(b.Slot));
+        UpdateStrip(grid, bay, _timing.CurTime);
+    }
+
+    /// <summary>Empties a slot; a ship left with no modules loses its strip.</summary>
+    public void Unfit(EntityUid grid, int slot)
+    {
+        if (!TryComp<WGShipModuleBayComponent>(grid, out var bay) || bay.Fitted.RemoveAll(f => f.Slot == slot) == 0)
+            return;
+
+        if (bay.Fitted.Count > 0)
+        {
+            UpdateStrip(grid, bay, _timing.CurTime);
+            return;
+        }
+
+        RemComp<WGShipModuleBayComponent>(grid);
+        RemComp<WGShipModulesComponent>(grid);
     }
 
     /// <summary>Why a fitted module can't be used on its ship right now, whatever its charges.</summary>
-    public WGShipModuleLock GetLock(Entity<WGShipModuleComponent> module, EntityUid grid, WGShipModulesComponent ship, TimeSpan now)
+    public WGShipModuleLock GetLock(EntityUid grid, WGShipModuleBayComponent bay, WGShipModulePrototype module, bool powered,
+        TimeSpan now)
     {
-        if (!_power.IsPowered(module.Owner))
+        if (!powered)
             return WGShipModuleLock.Unpowered;
 
         if (TryComp<FTLComponent>(grid, out var ftl) && ftl.State is FTLState.Travelling or FTLState.Arriving)
             return WGShipModuleLock.Ftl;
 
-        if (module.Comp.BlockedByShields
+        if (module.BlockedByShields
             && (HoldingField(grid)
-                || ship.LastShielded is { } seen && now < seen + module.Comp.ShieldLockout))
+                || bay.LastShielded is { } seen && now < seen + module.ShieldLockout))
             return WGShipModuleLock.Shields;
 
-        var ev = new WGShipModuleLockEvent(grid);
-        RaiseLocalEvent(module, ref ev);
+        var ev = new WGShipModuleLockEvent(grid, module);
+        RaiseLocalEvent(ref ev);
         return ev.Lock;
     }
 
@@ -184,16 +209,28 @@ public sealed partial class WGShipModuleSystem : EntitySystem
                && !(field.Source is { } source && HasComp<WGShipShieldDeflectorComponent>(source));
     }
 
+    /// <summary>Whether any helm on the grid has power.</summary>
+    public bool HasPoweredHelm(EntityUid grid)
+    {
+        var helms = EntityQueryEnumerator<ShuttleConsoleComponent, TransformComponent>();
+        while (helms.MoveNext(out var uid, out _, out var xform))
+        {
+            if (xform.GridUid == grid && _power.IsPowered(uid))
+                return true;
+        }
+
+        return false;
+    }
+
     private void OnActivateRequest(WGShipModuleActivateEvent msg, EntitySessionEventArgs args)
     {
         if (args.SenderSession.AttachedEntity is not { } user
-            || !TryGetEntity(msg.Module, out var uid)
-            || !TryComp<WGShipModuleComponent>(uid, out var module)
-            || FlownGrid(user) is not { } grid
-            || Transform(uid.Value).GridUid != grid)
+            || !TryComp<PilotComponent>(user, out var pilot)
+            || pilot.Console is not { } console
+            || FlownGrid(user) is not { } grid)
             return;
 
-        TryActivate((uid.Value, module), user);
+        TryActivate(grid, msg.Slot, user, console);
     }
 
     /// <summary>The grid an entity is piloting, if any.</summary>
@@ -208,45 +245,41 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         return Transform(console).GridUid;
     }
 
-    /// <summary>Spends one charge of a module on its ship's strip and runs its effect; tells the user why not otherwise.</summary>
-    public bool TryActivate(Entity<WGShipModuleComponent> module, EntityUid? user)
+    /// <summary>
+    /// Spends one charge of the module in a ship's slot and runs its effect; tells the user why not otherwise. A pilot's
+    /// own helm has to be powered; with no helm given, any powered helm on the ship will do.
+    /// </summary>
+    public bool TryActivate(EntityUid grid, int slot, EntityUid? user, EntityUid? helm = null)
     {
-        var xform = Transform(module);
-        if (!xform.Anchored
-            || xform.GridUid is not { } grid
-            || !TryComp<WGShipModulesComponent>(grid, out var ship))
-            return false;
-
-        var net = GetNetEntity(module);
-        var listed = false;
-        foreach (var slot in ship.Slots)
-        {
-            listed |= slot.Module == net;
-        }
-
-        if (!listed)
+        if (!TryComp<WGShipModuleBayComponent>(grid, out var bay)
+            || GetFitted(grid, slot) is not { } fitted
+            || !_prototype.TryIndex(fitted.Module, out var module))
             return false;
 
         var now = _timing.CurTime;
         // A held key repeats; the cooldown answers it without a popup.
-        if (now < module.Comp.ReadyAt)
+        if (now < fitted.ReadyAt)
             return false;
 
-        var locked = GetLock(module, grid, ship, now);
+        var powered = helm is { } console ? _power.IsPowered(console) : HasPoweredHelm(grid);
+        var locked = GetLock(grid, bay, module, powered, now);
         if (locked != WGShipModuleLock.None)
         {
             Refuse(user, $"wg-ship-module-refused-{locked.ToString().ToLowerInvariant()}");
             return false;
         }
 
-        if (module.Comp.Charges <= 0)
+        if (fitted.Charges < 0)
+            fitted.Charges = module.MaxCharges;
+
+        if (fitted.Charges <= 0)
         {
             Refuse(user, "wg-ship-module-refused-empty");
             return false;
         }
 
-        var attempt = new WGShipModuleActivateAttemptEvent(grid, user);
-        RaiseLocalEvent(module, ref attempt);
+        var attempt = new WGShipModuleActivateAttemptEvent(grid, module, user);
+        RaiseLocalEvent(ref attempt);
         if (attempt.Cancelled)
         {
             if (attempt.Reason is { } reason)
@@ -254,21 +287,21 @@ public sealed partial class WGShipModuleSystem : EntitySystem
             return false;
         }
 
-        if (module.Comp.Charges >= module.Comp.MaxCharges)
-            module.Comp.NextCharge = now + module.Comp.RechargeTime;
+        if (fitted.Charges >= module.MaxCharges)
+            fitted.NextCharge = now + module.RechargeTime;
 
-        module.Comp.Charges--;
-        module.Comp.ReadyAt = now + module.Comp.Cooldown;
+        fitted.Charges--;
+        fitted.ReadyAt = now + module.Cooldown;
         // Everyone aboard, and a pilot flying it from elsewhere, hears it through the hull and feels it.
         var crew = Filter.BroadcastGrid(grid);
         if (TryComp<ActorComponent>(user, out var actor))
             crew.AddPlayer(actor.PlayerSession);
-        _audio.PlayGlobal(module.Comp.ActivateSound, crew, true);
-        RaiseNetworkEvent(new WGShipModuleFiredEvent(GetNetEntity(grid), net, module.Comp.Jolt), crew);
+        _audio.PlayGlobal(module.ActivateSound, crew, true);
+        RaiseNetworkEvent(new WGShipModuleFiredEvent(GetNetEntity(grid), slot, module.Jolt), crew);
 
-        var ev = new WGShipModuleActivatedEvent(grid, user);
-        RaiseLocalEvent(module, ref ev);
-        Sweep(now);
+        var ev = new WGShipModuleActivatedEvent(grid, module, user);
+        RaiseLocalEvent(ref ev);
+        UpdateStrip(grid, bay, now);
         return true;
     }
 

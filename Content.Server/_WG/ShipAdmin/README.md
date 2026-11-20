@@ -140,6 +140,7 @@ Entry points: `WGShipAdminSystem` (`Open`, `BuildList`, `BuildDetail`, and one p
 - [`Content.Server/_WG/ShipAdmin/WGShipAdminSystem.Repair.cs`](WGShipAdminSystem.Repair.cs)
 - [`Content.Server/_WG/ShipAdmin/WGShipAdminSystem.Rescue.cs`](WGShipAdminSystem.Rescue.cs)
 - [`Content.Server/_WG/ShipAdmin/WGShipAdminSystem.Systems.cs`](WGShipAdminSystem.Systems.cs)
+- [`Content.Server/_WG/ShipAdmin/WGShipRefitCommand.cs`](WGShipRefitCommand.cs)
 
 ### Shared
 

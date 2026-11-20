@@ -50,11 +50,11 @@ public sealed partial class WGShipModuleHelmSystem : EntitySystem
             Fire(ship, slot);
     }
 
-    /// <summary>Asks the server to fire one slot of a ship's module strip; it only obeys that ship's pilots.</summary>
+    /// <summary>Asks the server to fire one of a ship's module slots; it only obeys that ship's pilots.</summary>
     public void Fire(EntityUid ship, int slot)
     {
-        if (TryComp<WGShipModulesComponent>(ship, out var modules) && slot >= 0 && slot < modules.Slots.Count)
-            RaiseNetworkEvent(new WGShipModuleActivateEvent(modules.Slots[slot].Module));
+        if (TryComp<WGShipModulesComponent>(ship, out var modules) && modules.Slots.Exists(s => s.Slot == slot))
+            RaiseNetworkEvent(new WGShipModuleActivateEvent(slot));
     }
 
     public void Track(WGShipModuleBank bank)
