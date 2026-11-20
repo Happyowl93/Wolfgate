@@ -374,6 +374,52 @@ public sealed class CustomMarkingLibraryTest
     }
 
     /// <summary>
+    /// A marking is kept for the character it was drawn for until it is shared, and deleting that character shares
+    /// it rather than losing it.
+    /// </summary>
+    [Test]
+    public async Task LibraryScopeTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var db = GetDb(pair.Server);
+        var user = new NetUserId(Guid.NewGuid());
+        var art = new StoredArt(new byte[] { 1 }, null, null);
+        const int limit = 24;
+
+        HumanoidCharacterProfile profile = default!;
+        await pair.Server.WaitPost(() => profile = HumanoidCharacterProfile.DefaultWithSpecies());
+        await db.InitPrefsAsync(user, profile);
+        await db.SaveCharacterSlotAsync(user, profile, 1);
+
+        var kept = (await db.SaveCustomMarkingAsync(user, 0, "Kept", 0, FakeHash('1'), art, limit, slot: 1)).Entry!;
+        var shared = (await db.SaveCustomMarkingAsync(user, 0, "Shared", 0, FakeHash('2'), art, limit)).Entry!;
+        var first = (await db.SaveCustomMarkingAsync(user, 0, "First", 0, FakeHash('3'), art, limit, slot: 0)).Entry!;
+        Assert.Multiple(() =>
+        {
+            Assert.That(kept.Slot, Is.EqualTo(1), "a new marking keeps the slot it was saved for");
+            Assert.That(shared.Slot, Is.Null);
+        });
+
+        var renamed = (await db.SaveCustomMarkingAsync(user, kept.Id, "Renamed", 0, null, null, limit)).Entry!;
+        Assert.That(renamed.Slot, Is.EqualTo(1), "editing a marking leaves who it's for alone");
+
+        Assert.That(await db.SetCustomMarkingSlotAsync(user, shared.Id, 0), Is.True);
+        Assert.That(await db.SetCustomMarkingSlotAsync(user, first.Id, null), Is.True);
+        Assert.That(await db.SetCustomMarkingSlotAsync(Guid.NewGuid(), kept.Id, null), Is.False, "nobody else can move it");
+
+        await db.SaveCharacterSlotAsync(user, null, 1);
+        var slots = (await db.GetCustomMarkingsAsync(user)).ToDictionary(m => m.Id, m => m.Slot);
+        Assert.Multiple(() =>
+        {
+            Assert.That(slots[kept.Id], Is.Null, "a deleted character's markings go to every character");
+            Assert.That(slots[shared.Id], Is.EqualTo(0), "another character's stay its own");
+            Assert.That(slots[first.Id], Is.Null);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
     /// Art nothing uses is found, kept a while and then deleted. What a library holds or a saved character wears
     /// stays, and so does what an admin blocked.
     /// </summary>

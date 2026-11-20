@@ -23,13 +23,15 @@ public sealed class CustomMarkingUIController : UIController
     /// A worn marking with no library entry that the art comes from: it is left off the body shown, and the saved
     /// marking takes its place.
     /// </param>
+    /// <param name="slot">The character slot a new marking is offered to, or null for every character.</param>
     public bool OpenEditor(
         CustomMarkingEntry? entry,
         CustomMarkingArt art,
         string name,
         Func<HumanoidCharacterProfile?> profile,
         Action<List<CustomMarking>> wornChanged,
-        CustomMarking? replacing = null)
+        CustomMarking? replacing = null,
+        int? slot = null)
     {
         _editor?.Close();
         if (_editor is { IsOpen: true })
@@ -40,7 +42,7 @@ public sealed class CustomMarkingUIController : UIController
         if (body != null && edited is { } left)
             body = body.WithCustomMarkings(body.CustomMarkings.Where(m => m != left));
 
-        var editor = new CustomMarkingEditorWindow(entry, art, name, body);
+        var editor = new CustomMarkingEditorWindow(entry, art, name, body) { Slot = slot };
         editor.OnSaved += (before, saved) =>
         {
             if (profile() is not { } current)

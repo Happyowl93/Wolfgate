@@ -10,12 +10,15 @@ wg-custom-marking-default-name = Custom marking
 
 wg-custom-marking-library-title = Custom markings
 wg-custom-marking-library-heading = Your marking library
-wg-custom-marking-library-hint = Draw your own markings and keep them here for any of your characters. Everything you save is stored on the server, shown to other players and covered by the server rules.
+wg-custom-marking-library-hint = Draw your own markings and keep them here. A new marking belongs to the character you drew it for; press All characters to offer it to every character. Everything you save is stored on the server, shown to other players and covered by the server rules.
 wg-custom-marking-library-new = Draw new
 wg-custom-marking-library-new-tooltip = Draw a new marking.
 wg-custom-marking-library-import = Import PNG
 wg-custom-marking-library-import-tooltip = A 64x64 image holding the four facings (south and north on top, east and west below), or a 32x32 image of the south facing alone. A sheet exported from an animated marking works too; how long its frames show and what it erases are not in the file.
-wg-custom-marking-library-counts = { $saved } of { $limit } saved, { $worn } of { $max } worn
+wg-custom-marking-library-counts = { $saved } of { $limit } saved, { $worn } of { $max } worn{ $elsewhere ->
+    [0] {""}
+    *[other] , { $elsewhere } kept for other characters
+}
 wg-custom-marking-library-loading = Loading your library...
 wg-custom-marking-library-empty = Nothing here yet. Press Draw new to make your first marking.
 wg-custom-marking-library-wear = Wear
@@ -27,13 +30,20 @@ wg-custom-marking-library-open-folder = Open folder
 wg-custom-marking-library-delete = Delete this marking
 wg-custom-marking-library-delete-confirm = Really delete?
 wg-custom-marking-library-keep = Add to library
-wg-custom-marking-library-keep-tooltip = This character wears a marking that isn't in your library. Add it to keep it for other characters and to edit it.
+wg-custom-marking-library-keep-tooltip = This character wears a marking that isn't in your library here. Add it to keep it for this character and to edit it.
 wg-custom-marking-library-stray = Not in your library
 wg-custom-marking-library-stray-subtitle = { $placement } · Not in your library
+wg-custom-marking-library-subtitle-all = { $placement } · All characters
+wg-custom-marking-library-subtitle-character = { $placement } · This character only
+wg-custom-marking-library-all-characters = All characters
+wg-custom-marking-library-all-characters-tooltip = Pressed, every one of your characters can wear this marking. Up, only this character sees it here.
+wg-custom-marking-scope-all = Offered to all your characters.
+wg-custom-marking-scope-character = Kept for this character only.
 
 wg-custom-marking-reason-loading = Still loading.
 wg-custom-marking-reason-library-full = Your library is full ({ $limit } markings). Delete one to make room.
 wg-custom-marking-reason-worn-full = This character already wears { $max } markings. Take one off first.
+wg-custom-marking-reason-unsaved-character = Save this character first to keep a marking for it alone.
 
 wg-custom-marking-editor-title-new = New custom marking
 wg-custom-marking-editor-title-edit = Edit custom marking

@@ -38,6 +38,16 @@ public partial record struct CustomMarking
     }
 }
 
-/// <summary>One saved marking in a player's library.</summary>
+/// <summary>
+/// One saved marking in a player's library. <see cref="Slot"/> is the character slot it is offered to, or null for
+/// every character.
+/// </summary>
 [Serializable, NetSerializable]
-public readonly record struct CustomMarkingEntry(int Id, string Name, string Hash, CustomMarkingPlacement Placement);
+public readonly record struct CustomMarkingEntry(int Id, string Name, string Hash, CustomMarkingPlacement Placement, int? Slot = null)
+{
+    /// <summary>Whether the character in a slot is offered this marking. A character not saved yet gets the shared ones.</summary>
+    public bool OfferedTo(int? slot)
+    {
+        return Slot == null || Slot == slot;
+    }
+}

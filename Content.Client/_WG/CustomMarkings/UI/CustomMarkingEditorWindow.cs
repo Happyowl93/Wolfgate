@@ -79,6 +79,9 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
     /// <summary>The library entry being changed, or null for a new marking.</summary>
     private readonly CustomMarkingEntry? _entry;
 
+    /// <summary>The character slot a new marking is offered to once saved, or null for every character.</summary>
+    public int? Slot { get; init; }
+
     private readonly CustomMarkingSketch _sketch;
     private readonly CustomMarkingArt _opened;
 
@@ -1450,7 +1453,7 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
 
         // Unchanged art isn't sent again: the server keeps what the entry has.
         var changed = _entry == null || !Art.Same(_opened);
-        _request = _system.Save(_entry?.Id ?? 0, CustomMarkingRules.CleanName(_name.Text), Placement, changed ? Art : null);
+        _request = _system.Save(_entry?.Id ?? 0, CustomMarkingRules.CleanName(_name.Text), Placement, changed ? Art : null, Slot);
         _saveButton.Disabled = true;
         SetStatus(Loc.GetString("wg-custom-marking-editor-saving"), false);
     }

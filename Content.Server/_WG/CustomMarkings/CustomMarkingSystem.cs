@@ -6,6 +6,7 @@ using Content.Server.Administration.Managers;
 using Content.Server.Database;
 using Content.Shared._WG.CustomMarkings;
 using Content.Shared.Administration;
+using Content.Shared.CCVar;
 using Content.Shared.Database;
 using Content.Shared.GameTicking;
 using Content.Shared.Humanoid;
@@ -61,6 +62,7 @@ public sealed partial class CustomMarkingSystem : EntitySystem
         SubscribeNetworkEvent<CustomMarkingLibraryRequestEvent>(OnLibraryRequest);
         SubscribeNetworkEvent<CustomMarkingSaveEvent>(OnSave);
         SubscribeNetworkEvent<CustomMarkingDeleteEvent>(OnDelete);
+        SubscribeNetworkEvent<CustomMarkingScopeEvent>(OnScope);
         SubscribeNetworkEvent<CustomMarkingArtRequestEvent>(OnArtRequest);
         SubscribeLocalEvent<GetVerbsEvent<Verb>>(OnGetVerbs);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
@@ -167,7 +169,7 @@ public sealed partial class CustomMarkingSystem : EntitySystem
     private static CustomMarkingEntry ToEntry(WolfgateCustomMarking row)
     {
         var placement = (CustomMarkingPlacement) row.Placement;
-        return new CustomMarkingEntry(row.Id, row.Name, row.ArtHash, Enum.IsDefined(placement) ? placement : CustomMarkingPlacement.Skin);
+        return new CustomMarkingEntry(row.Id, row.Name, row.ArtHash, Enum.IsDefined(placement) ? placement : CustomMarkingPlacement.Skin, row.Slot);
     }
 
     private async void OnSave(CustomMarkingSaveEvent msg, EntitySessionEventArgs args)
@@ -193,7 +195,7 @@ public sealed partial class CustomMarkingSystem : EntitySystem
         if (_nextSave.TryGetValue(session, out var next) && now < next)
             return CustomMarkingSaveResult.Fail("wg-custom-marking-error-cooldown");
 
-        if (!Enum.IsDefined(msg.Placement))
+        if (!Enum.IsDefined(msg.Placement) || !ValidSlot(msg.Slot))
             return CustomMarkingSaveResult.Fail("wg-custom-marking-error-invalid");
 
         string? hash = null;
@@ -229,7 +231,7 @@ public sealed partial class CustomMarkingSystem : EntitySystem
         try
         {
             result = await _db.SaveCustomMarkingAsync(session.UserId, msg.Id, name, (int) msg.Placement, hash, stored,
-                _cfg.GetCVar(CustomMarkingCVars.LibraryLimit), _cfg.GetCVar(CustomMarkingCVars.DailyArtLimit));
+                _cfg.GetCVar(CustomMarkingCVars.LibraryLimit), _cfg.GetCVar(CustomMarkingCVars.DailyArtLimit), msg.Slot);
         }
         catch (Exception e)
         {
@@ -264,6 +266,30 @@ public sealed partial class CustomMarkingSystem : EntitySystem
         }
 
         await SendLibrary(session);
+    }
+
+    private async void OnScope(CustomMarkingScopeEvent msg, EntitySessionEventArgs args)
+    {
+        var session = args.SenderSession;
+        if (!ValidSlot(msg.Slot) || !Spend(_libraryBudgetFull, session, LibraryRefill, LibraryBudget))
+            return;
+
+        try
+        {
+            await _db.SetCustomMarkingSlotAsync(session.UserId, msg.Id, msg.Slot);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Moving a custom marking of {session.Name} threw: {e}");
+        }
+
+        await SendLibrary(session);
+    }
+
+    /// <summary>Whether a slot could hold a character: null, for every character, or one of the server's slots.</summary>
+    private bool ValidSlot(int? slot)
+    {
+        return slot is not { } index || index >= 0 && index < _cfg.GetCVar(CCVars.GameMaxCharacterSlots);
     }
 
     private async void OnArtRequest(CustomMarkingArtRequestEvent msg, EntitySessionEventArgs args)

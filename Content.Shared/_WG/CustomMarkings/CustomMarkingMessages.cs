@@ -27,7 +27,8 @@ public sealed class CustomMarkingSaveEvent(
     int[]? frameTimes = null,
     byte[]? erase = null,
     bool pingPong = false,
-    byte[]? glow = null)
+    byte[]? glow = null,
+    int? slot = null)
     : EntityEventArgs
 {
     /// <summary>Echoed in the result, so the editor can tell which save it answers.</summary>
@@ -51,6 +52,20 @@ public sealed class CustomMarkingSaveEvent(
 
     /// <summary>The pixels that glow, as <see cref="CustomMarkingArt.Glow"/> holds them. Null for none.</summary>
     public readonly byte[]? Glow = glow;
+
+    /// <summary>
+    /// The character slot a new entry is offered to, or null for every character. A change to an entry keeps its
+    /// own; <see cref="CustomMarkingScopeEvent"/> moves it.
+    /// </summary>
+    public readonly int? Slot = slot;
+}
+
+/// <summary>Client to server: offer an entry of my library to one character slot, or to every character for null.</summary>
+[Serializable, NetSerializable]
+public sealed class CustomMarkingScopeEvent(int id, int? slot) : EntityEventArgs
+{
+    public readonly int Id = id;
+    public readonly int? Slot = slot;
 }
 
 /// <summary>Server to client: the saved entry, or a loc id saying why it wasn't saved.</summary>

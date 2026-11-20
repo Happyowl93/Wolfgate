@@ -2273,6 +2273,10 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("player_user_id");
 
+                    b.Property<int?>("Slot")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("slot");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_at");

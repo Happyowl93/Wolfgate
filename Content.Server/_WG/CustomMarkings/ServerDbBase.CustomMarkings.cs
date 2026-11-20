@@ -32,6 +32,7 @@ public abstract partial class ServerDbBase
         CustomMarkingStoredArt? art,
         int limit,
         int dailyArtLimit = 0,
+        int? slot = null,
         CancellationToken cancel = default)
     {
         await using var db = await GetDb(cancel);
@@ -95,7 +96,7 @@ public abstract partial class ServerDbBase
 
         if (entry == null)
         {
-            entry = new WolfgateCustomMarking { PlayerUserId = userId };
+            entry = new WolfgateCustomMarking { PlayerUserId = userId, Slot = slot };
             ctx.WolfgateCustomMarking.Add(entry);
         }
 
@@ -123,6 +124,37 @@ public abstract partial class ServerDbBase
         db.DbContext.WolfgateCustomMarking.Remove(entry);
         await db.DbContext.SaveChangesAsync(cancel);
         return true;
+    }
+
+    public async Task<bool> SetCustomMarkingSlotAsync(Guid userId, int id, int? slot, CancellationToken cancel = default)
+    {
+        await using var db = await GetDb(cancel);
+
+        var entry = await db.DbContext.WolfgateCustomMarking
+            .SingleOrDefaultAsync(m => m.Id == id && m.PlayerUserId == userId, cancel);
+
+        if (entry == null)
+            return false;
+
+        entry.Slot = slot;
+        await db.DbContext.SaveChangesAsync(cancel);
+        return true;
+    }
+
+    /// <summary>
+    /// Offers a deleted character's markings to every character, so deleting one never loses its drawings. Saved
+    /// with the deletion.
+    /// </summary>
+    private static async Task ReleaseCustomMarkingSlot(ServerDbContext db, Guid userId, int slot)
+    {
+        var entries = await db.WolfgateCustomMarking
+            .Where(m => m.PlayerUserId == userId && m.Slot == slot)
+            .ToListAsync();
+
+        foreach (var entry in entries)
+        {
+            entry.Slot = null;
+        }
     }
 
     public async Task<CustomMarkingStoredArt?> GetCustomMarkingArtAsync(string hash, CancellationToken cancel = default)

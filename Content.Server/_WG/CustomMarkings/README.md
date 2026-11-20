@@ -32,6 +32,12 @@ and sent to a client the first time it sees that hash. A character's profile lis
 placement pairs, so a saved character keeps its markings when the library entry is changed or deleted; changing an
 entry updates the character open in the creator.
 
+A library entry belongs to one character (its profile slot, `WolfgateCustomMarking.Slot`) or to all of them (null).
+A new marking belongs to the character it was drawn for; the library's All characters toggle shares it or takes it
+back (`CustomMarkingScopeEvent`). The creator offers a character only its own and the shared entries
+(`CustomMarkingEntry.OfferedTo`); one not saved yet sees only the shared ones. Deleting a character shares its
+entries, so no drawing is lost. Both kinds count towards the one library limit.
+
 Entry points: the server `CustomMarkingSystem` (library, saving, art requests, admin controls), the client
 `CustomMarkingSystem` (fetches art, draws the layers), `CustomMarkingResources` (fetched art as in-memory RSIs),
 `CustomMarkingQuickList`, `CustomMarkingLibraryWindow`, `CustomMarkingUIController` and
@@ -214,7 +220,9 @@ nothing uses is kept, 0 to keep it forever).
   - player-drawn marking art and each player's library of it
   - a library entry points at its art, which outlives it
   - the custom markings worn, as hash:placement pairs; empty for none.
-- [`Content.Server/Database/ServerDbBase.cs`](../../Database/ServerDbBase.cs): partial, so the module's queries sit in its own folder
+- [`Content.Server/Database/ServerDbBase.cs`](../../Database/ServerDbBase.cs)
+  - partial, so the module's queries sit in its own folder
+  - its own markings go to every character
 - [`Content.Server/Database/ServerDbManager.cs`](../../Database/ServerDbManager.cs): partial, so the module's queries sit in its own folder
 - [`Content.Shared/Content.Shared.csproj`](../../../Content.Shared/Content.Shared.csproj): encodes marking art as PNG on the server and in the editor
 - [`Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs`](../../../Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs)

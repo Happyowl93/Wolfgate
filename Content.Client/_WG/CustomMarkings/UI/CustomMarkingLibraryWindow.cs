@@ -18,7 +18,8 @@ namespace Content.Client._WG.CustomMarkings.UI;
 
 /// <summary>
 /// A player's library of custom markings, opened from the character creator: draw or import new ones, change or
-/// remove old ones, and pick which the character being edited wears.
+/// remove old ones, and pick which the character being edited wears. It lists the character's own markings and the
+/// shared ones; each can be switched between the two.
 /// </summary>
 public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
 {
@@ -32,6 +33,7 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
 
     private readonly CustomMarkingSystem _system;
     private readonly Func<HumanoidCharacterProfile?> _profile;
+    private readonly Func<int?> _slot;
     private readonly BoxContainer _rows;
     private readonly Label _counts;
     private readonly Label _status;
@@ -53,11 +55,13 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
     public Action<List<CustomMarking>>? OnWornChanged;
 
     /// <param name="profile">The character being edited, as it is now.</param>
-    public CustomMarkingLibraryWindow(Func<HumanoidCharacterProfile?> profile)
+    /// <param name="slot">The character's slot; null, for a character not saved yet, lists only shared markings.</param>
+    public CustomMarkingLibraryWindow(Func<HumanoidCharacterProfile?> profile, Func<int?>? slot = null)
     {
         IoCManager.InjectDependencies(this);
         _system = _entMan.System<CustomMarkingSystem>();
         _profile = profile;
+        _slot = slot ?? (() => null);
 
         Title = Loc.GetString("wg-custom-marking-library-title");
         // A set size to open at: sizing itself, the window grows as wide as the screen to fit the hint on one line.
@@ -176,8 +180,11 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
 
         var library = _system.Library;
         var limit = _cfg.GetCVar(CustomMarkingCVars.LibraryLimit);
+        var slot = _slot();
+        var offered = library?.Where(entry => entry.OfferedTo(slot)).ToList() ?? new List<CustomMarkingEntry>();
         _counts.Text = Loc.GetString("wg-custom-marking-library-counts",
-            ("saved", library?.Count ?? 0), ("limit", limit), ("worn", _worn.Count), ("max", MaxWorn));
+            ("saved", library?.Count ?? 0), ("limit", limit), ("worn", _worn.Count), ("max", MaxWorn),
+            ("elsewhere", (library?.Count ?? 0) - offered.Count));
         var full = library == null
             ? Loc.GetString("wg-custom-marking-reason-loading")
             : library.Count >= limit
@@ -192,23 +199,25 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
             return;
         }
 
-        if (library.Count == 0 && _worn.Count == 0)
+        if (offered.Count == 0 && _worn.Count == 0)
             _rows.AddChild(new Label { Text = Loc.GetString("wg-custom-marking-library-empty"), StyleClasses = { "LabelSubText" } });
 
-        foreach (var entry in library)
+        foreach (var entry in offered)
         {
-            _rows.AddChild(EntryRow(entry));
+            _rows.AddChild(EntryRow(entry, slot));
         }
 
-        // Worn markings with no entry behind them: deleted from the library since, or from an imported character.
+        // Worn markings with no entry here: deleted from the library since, kept for another character, or from an
+        // imported character.
         foreach (var marking in _worn)
         {
-            if (!library.Any(entry => entry.Hash == marking.Hash && entry.Placement == marking.Placement))
+            if (!offered.Any(entry => entry.Hash == marking.Hash && entry.Placement == marking.Placement))
                 _rows.AddChild(StrayRow(marking, full));
         }
     }
 
-    private Control EntryRow(CustomMarkingEntry entry)
+    /// <param name="slot">The slot of the character being edited, which a marking is narrowed to.</param>
+    private Control EntryRow(CustomMarkingEntry entry, int? slot)
     {
         var marking = new CustomMarking(entry.Hash, entry.Placement);
         var worn = _worn.Contains(marking);
@@ -261,8 +270,22 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
             };
         }
 
+        // Pressed, every character is offered the marking; up, only this one.
+        var shared = new Button
+        {
+            Text = Loc.GetString("wg-custom-marking-library-all-characters"),
+            ToggleMode = true,
+            Pressed = entry.Slot == null,
+            StyleClasses = { StyleWolfgate.StyleClassCreatorToggle },
+        };
+        Allow(shared, Loc.GetString("wg-custom-marking-library-all-characters-tooltip"),
+            slot == null && entry.Slot == null ? Loc.GetString("wg-custom-marking-reason-unsaved-character") : null);
+        shared.OnToggled += args => _system.SetScope(entry.Id, args.Pressed ? null : slot);
+
         var placement = Loc.GetString(CustomMarkingEditorWindow.PlacementName(entry.Placement));
-        return Row(rsi, entry.Hash, entry.Name, entry.Placement, placement, wear, edit, export, delete);
+        var subtitle = Loc.GetString(entry.Slot == null ? "wg-custom-marking-library-subtitle-all" : "wg-custom-marking-library-subtitle-character",
+            ("placement", placement));
+        return Row(rsi, entry.Hash, entry.Name, entry.Placement, subtitle, wear, shared, edit, export, delete);
     }
 
     /// <param name="full">Why the library can't take the marking, or null when it can.</param>
@@ -279,7 +302,7 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
         keep.OnPressed += _ =>
         {
             if (ReadArt(marking.Hash) is { } art)
-                _system.Save(0, string.Empty, marking.Placement, art);
+                _system.Save(0, string.Empty, marking.Placement, art, _slot());
         };
 
         var subtitle = Loc.GetString("wg-custom-marking-library-stray-subtitle",
@@ -398,7 +421,7 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
     private void OpenEditor(CustomMarkingEntry? entry, CustomMarkingArt art, string name)
     {
         UserInterfaceManager.GetUIController<CustomMarkingUIController>()
-            .OpenEditor(entry, art, name, _profile, worn => OnWornChanged?.Invoke(worn));
+            .OpenEditor(entry, art, name, _profile, worn => OnWornChanged?.Invoke(worn), slot: _slot());
     }
 
     private async void Import()

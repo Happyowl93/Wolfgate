@@ -51,7 +51,11 @@ public sealed class CustomMarkingWindowsTest
 
             var labels = Descendants(library).OfType<Label>().Select(label => label.Text).ToList();
             Assert.That(labels, Does.Contain("Leaf"), "the library lists the saved marking");
-            Assert.That(labels, Does.Contain(Loc.GetString("wg-custom-marking-placement-hair")));
+            Assert.That(labels, Does.Contain(Loc.GetString("wg-custom-marking-library-subtitle-all",
+                ("placement", Loc.GetString("wg-custom-marking-placement-hair")))));
+            var shared = Descendants(library).OfType<Button>()
+                .Single(button => button.Text == Loc.GetString("wg-custom-marking-library-all-characters"));
+            Assert.That(shared.Pressed, Is.True, "saved with no character, the marking is offered to all of them");
             Assert.That(Descendants(editor).OfType<CustomMarkingCanvas>().Count(), Is.EqualTo(2 + CustomMarkingRules.Facings),
                 "the editor shows the drawing, each facing and its one frame");
 

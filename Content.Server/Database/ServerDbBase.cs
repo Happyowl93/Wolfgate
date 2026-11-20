@@ -181,6 +181,7 @@ namespace Content.Server.Database
             }
 
             db.Profile.Remove(profile);
+            await ReleaseCustomMarkingSlot(db, userId.UserId, slot); // WOLFGATE(CustomMarkings): its own markings go to every character
         }
 
         public async Task<PlayerPreferences> InitPrefsAsync(NetUserId userId, ICharacterProfile defaultProfile)

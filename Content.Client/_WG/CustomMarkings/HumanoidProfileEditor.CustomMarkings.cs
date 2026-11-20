@@ -15,7 +15,7 @@ public sealed partial class HumanoidProfileEditor
     private void InitializeCustomMarkings()
     {
         CustomMarkingsButton.OnPressed += _ => OpenCustomMarkings();
-        _customMarkingList = new CustomMarkingQuickList { Profile = () => Profile };
+        _customMarkingList = new CustomMarkingQuickList { Profile = () => Profile, Slot = () => CharacterSlot };
         _customMarkingList.OnWornChanged += SetCustomMarkings;
         CustomMarkingsBody.AddChild(_customMarkingList);
         UpdateCustomMarkings();
@@ -47,7 +47,7 @@ public sealed partial class HumanoidProfileEditor
         if (Profile == null)
             return;
 
-        _customMarkingWindow = new CustomMarkingLibraryWindow(() => Profile);
+        _customMarkingWindow = new CustomMarkingLibraryWindow(() => Profile, () => CharacterSlot);
         _customMarkingWindow.SetWorn(Profile.CustomMarkings);
         _customMarkingWindow.OnWornChanged += SetCustomMarkings;
         _customMarkingWindow.OnClose += () => _customMarkingWindow = null;

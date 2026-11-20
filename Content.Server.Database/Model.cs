@@ -1916,6 +1916,12 @@ namespace Content.Server.Database
         /// <summary>Where the marking is drawn on a body (CustomMarkingPlacement).</summary>
         public int Placement { get; set; }
 
+        /// <summary>
+        /// The character slot the marking is offered to, or null for every character. Deleting the character makes
+        /// it null.
+        /// </summary>
+        public int? Slot { get; set; }
+
         public DateTime UpdatedAt { get; set; }
     }
     // WOLFGATE END

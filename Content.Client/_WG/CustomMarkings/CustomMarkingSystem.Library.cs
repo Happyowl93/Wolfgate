@@ -28,10 +28,11 @@ public sealed partial class CustomMarkingSystem
     }
 
     /// <summary>
-    /// Saves a marking to the library: a new one for id 0, otherwise a change to that entry. Null art keeps the
+    /// Saves a marking to the library: a new one for id 0, offered to the character in <paramref name="slot"/> or
+    /// to every character for null; otherwise a change to that entry, which keeps its own. Null art keeps the
     /// entry's own. Returns the request number its <see cref="SaveAnswered"/> will carry.
     /// </summary>
-    public int Save(int id, string name, CustomMarkingPlacement placement, CustomMarkingArt? art)
+    public int Save(int id, string name, CustomMarkingPlacement placement, CustomMarkingArt? art, int? slot = null)
     {
         var request = ++_lastRequest;
         RaiseNetworkEvent(new CustomMarkingSaveEvent(
@@ -43,8 +44,15 @@ public sealed partial class CustomMarkingSystem
             art?.GetFrameTimes(),
             art != null && art.HasErase() ? art.Erase : null,
             art?.PingPongs ?? false,
-            art != null && art.HasGlow() ? art.Glow : null));
+            art != null && art.HasGlow() ? art.Glow : null,
+            slot));
         return request;
+    }
+
+    /// <summary>Offers an entry to the character in a slot only, or to every character for null.</summary>
+    public void SetScope(int id, int? slot)
+    {
+        RaiseNetworkEvent(new CustomMarkingScopeEvent(id, slot));
     }
 
     public void Delete(int id)

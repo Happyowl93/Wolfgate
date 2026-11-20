@@ -41,6 +41,9 @@ public sealed partial class CustomMarkingQuickList : BoxContainer
     /// <summary>The character being edited, which the editor draws under the art.</summary>
     public Func<HumanoidCharacterProfile?>? Profile;
 
+    /// <summary>The slot of the character being edited: it is offered its own markings and the shared ones.</summary>
+    public Func<int?>? Slot;
+
     public CustomMarkingQuickList()
     {
         IoCManager.InjectDependencies(this);
@@ -126,16 +129,18 @@ public sealed partial class CustomMarkingQuickList : BoxContainer
         _grid.AddChild(NewTile(library));
         if (library != null)
         {
+            var slot = Slot?.Invoke();
             foreach (var entry in library)
             {
-                AddTile(new CustomMarking(entry.Hash, entry.Placement), entry.Name, entry);
+                if (entry.OfferedTo(slot))
+                    AddTile(new CustomMarking(entry.Hash, entry.Placement), entry.Name, entry);
             }
         }
 
-        // Worn markings with no library entry behind them still get a tile, so they can come off.
+        // Worn markings with no library entry offered here still get a tile, so they can come off.
         foreach (var marking in _worn)
         {
-            if (library == null || !library.Any(entry => entry.Hash == marking.Hash && entry.Placement == marking.Placement))
+            if (library == null || !library.Any(entry => entry.OfferedTo(Slot?.Invoke()) && entry.Hash == marking.Hash && entry.Placement == marking.Placement))
                 AddTile(marking, Loc.GetString("wg-custom-marking-default-name"), null);
         }
     }
@@ -206,6 +211,8 @@ public sealed partial class CustomMarkingQuickList : BoxContainer
         };
         if (entry == null)
             lines.Add(Loc.GetString("wg-custom-marking-library-stray"));
+        else
+            lines.Add(Loc.GetString(entry.Value.Slot == null ? "wg-custom-marking-scope-all" : "wg-custom-marking-scope-character"));
         if (full)
             lines.Add(Loc.GetString("wg-custom-marking-reason-worn-full", ("max", MaxWorn)));
         lines.Add(Loc.GetString(loaded ? "wg-custom-marking-tile-edit" : "wg-custom-marking-reason-loading"));
@@ -238,7 +245,7 @@ public sealed partial class CustomMarkingQuickList : BoxContainer
             return;
 
         UserInterfaceManager.GetUIController<CustomMarkingUIController>()
-            .OpenEditor(entry, art, name, Profile, worn => OnWornChanged?.Invoke(worn), replacing);
+            .OpenEditor(entry, art, name, Profile, worn => OnWornChanged?.Invoke(worn), replacing, Slot?.Invoke());
     }
 
     private void Toggle(CustomMarking marking)
