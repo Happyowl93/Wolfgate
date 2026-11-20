@@ -1,27 +1,31 @@
 # CustomMarkings
 
-Markings players draw themselves. The Custom markings card on the creator's Markings tab opens the player's
-library: draw a new marking in the pixel editor or import a PNG, then wear up to four on a character. A marking is
+Markings players draw themselves. The Custom markings card on the creator's Markings tab shows the player's
+markings as tiles: click one to wear it or take it off, right click it to edit it, or press Draw new. Its button
+opens the library, which also imports and exports PNGs. A character wears up to four. A marking is
 four 32x32 facings and a placement, which sets its depth: behind the body, on the skin, on the hands and feet, over
 the hair and ears or over everything. It draws anywhere in its frame, unless `wg.custom_markings.body_reach` holds it
 to the wearer's body and other markings, such as a tail or ears, and two pixels around them.
 
 A marking can be animated: up to 32 frames, each shown for a time of its own, played round or back and forth
-(ping-pong). The editor can move frames, reverse them, give them all one time, play them and show the frame before
-faintly over the one being drawn (onion skin). And a marking can erase parts of the body under it, so that what is drawn
-takes the body's place instead of lying on top of it. And its pixels can glow: the glow brush marks drawn pixels
-to be drawn unshaded, so they stay bright in the dark while the rest of the marking is lit like the body.
+(ping-pong). The editor's frame strip picks a frame by clicking and moves it by dragging; the editor can also
+reverse frames, give them all one time, play them and show the frame before faintly over the one being drawn
+(onion skin). And a marking can erase parts of the body under it, so that what is drawn
+takes the body's place instead of lying on top of it. And its pixels can glow: they are drawn unshaded, so they
+stay bright in the dark while the rest of the marking is lit like the body.
 
 The library shows each marking on the character from all four sides, as it will look, with its name, placement and
-icon actions. The editor keeps the drawing tools beside the canvas, the operations on the shown facing under them,
-the facing tiles, the frame controls and the view options to its right and the colours below. Its colour picker
-reads a drawn pixel or, where there is none, the body under it, which `CustomMarkingBodySampler` renders to a small
-target and copies back. The body eraser is a tool of its own: left click erases the body, right click brings it
-back, and while it is picked the facing operations work on what is erased. The glow brush is another: left click
-makes drawn pixels glow and right click stops them, and while it is picked the canvas is darkened as in the dark so
-only what glows shows, outlined. Both windows sit on a solid backdrop, as
-the skin's glass panel is unreadable over the creator. The icons are drawn by
-`Tools/_WG/CustomMarkings/gen_editor_icons.py`.
+icon actions. The editor (one at a time, opened through `CustomMarkingUIController`) switches over the canvas
+between three layers: Drawing, Erase body and Glow. The tools (pencil, eraser, fill, pick colour), mirror
+drawing and the facing operations (move, flip, copy to the other side, clear) act on the layer picked; in the
+Glow layer the canvas is darkened as in the dark so only what glows shows, outlined. A line under the canvas says
+what the tool does. Shortcuts: Ctrl+Z, Ctrl+Y (or Ctrl+Shift+Z), B, E, F and I for the tools, 1 to 3 for the
+layers, M for mirror drawing, [ and ] for frames, Space to play; Shift+click draws a line from the last stroke and
+Alt+click picks a colour with any tool. The facing tiles, the frame strip and the view options sit to the right;
+the colours, with the ones already used in the marking, below. A disabled button says why in its tooltip. The
+colour picker reads a drawn pixel or, where there is none, the body under it, which `CustomMarkingBodySampler`
+renders to a small target and copies back. Both windows sit on a solid backdrop, as the skin's glass panel is
+unreadable over the creator. The icons are drawn by `Tools/_WG/CustomMarkings/gen_editor_icons.py`.
 
 Art is stored once per drawing, under a hash of its pixels, and of its frame times, erase mask and glow when it has them,
 and sent to a client the first time it sees that hash. A character's profile lists what it wears as hash and
@@ -30,7 +34,8 @@ entry updates the character open in the creator.
 
 Entry points: the server `CustomMarkingSystem` (library, saving, art requests, admin controls), the client
 `CustomMarkingSystem` (fetches art, draws the layers), `CustomMarkingResources` (fetched art as in-memory RSIs),
-`CustomMarkingLibraryWindow` and `CustomMarkingEditorWindow` (creator UI), `CustomMarkingArt`,
+`CustomMarkingQuickList`, `CustomMarkingLibraryWindow`, `CustomMarkingUIController` and
+`CustomMarkingEditorWindow` (creator UI), `CustomMarkingArt`,
 `CustomMarkingErase` and `CustomMarkingRules` (the art, its erase and glow masks and the limits, shared).
 
 Admin: saving new art is logged under the Identity log type with its hash. The Remove custom markings verb takes
@@ -148,10 +153,12 @@ nothing uses is kept, 0 to keep it forever).
 - [`Content.Client/_WG/CustomMarkings/UI/CustomMarkingCloseWindow.cs`](../../../Content.Client/_WG/CustomMarkings/UI/CustomMarkingCloseWindow.cs)
 - [`Content.Client/_WG/CustomMarkings/UI/CustomMarkingEditorWindow.cs`](../../../Content.Client/_WG/CustomMarkings/UI/CustomMarkingEditorWindow.cs)
 - [`Content.Client/_WG/CustomMarkings/UI/CustomMarkingEraseBrush.cs`](../../../Content.Client/_WG/CustomMarkings/UI/CustomMarkingEraseBrush.cs)
+- [`Content.Client/_WG/CustomMarkings/UI/CustomMarkingFrameStrip.cs`](../../../Content.Client/_WG/CustomMarkings/UI/CustomMarkingFrameStrip.cs)
 - [`Content.Client/_WG/CustomMarkings/UI/CustomMarkingIconButton.cs`](../../../Content.Client/_WG/CustomMarkings/UI/CustomMarkingIconButton.cs)
 - [`Content.Client/_WG/CustomMarkings/UI/CustomMarkingLibraryWindow.cs`](../../../Content.Client/_WG/CustomMarkings/UI/CustomMarkingLibraryWindow.cs)
 - [`Content.Client/_WG/CustomMarkings/UI/CustomMarkingQuickList.cs`](../../../Content.Client/_WG/CustomMarkings/UI/CustomMarkingQuickList.cs)
 - [`Content.Client/_WG/CustomMarkings/UI/CustomMarkingSampling.cs`](../../../Content.Client/_WG/CustomMarkings/UI/CustomMarkingSampling.cs)
+- [`Content.Client/_WG/CustomMarkings/UI/CustomMarkingUIController.cs`](../../../Content.Client/_WG/CustomMarkings/UI/CustomMarkingUIController.cs)
 - [`Content.Client/_WG/CustomMarkings/UI/CustomMarkingWindow.cs`](../../../Content.Client/_WG/CustomMarkings/UI/CustomMarkingWindow.cs)
 
 ### Integration tests

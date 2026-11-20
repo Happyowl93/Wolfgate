@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Numerics;
 using Content.Shared._WG.CustomMarkings;
+using Robust.Client.Input;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
@@ -26,7 +27,7 @@ public sealed partial class CustomMarkingCanvas : Control
     private static readonly Color ReachEdge = Color.FromHex("#FFC53D");
     private static readonly Color ErasedTint = Color.FromHex("#FF5A5A").WithAlpha(0.3f);
     private static readonly Color ErasedEdge = Color.FromHex("#FF5A5A").WithAlpha(0.9f);
-    private static readonly Color GlowDark = Color.Black.WithAlpha(0.6f);
+    private static readonly Color GlowDark = Color.Black.WithAlpha(0.4f);
     private static readonly Color GlowEdge = Color.FromHex("#FFE066").WithAlpha(0.9f);
     private static readonly Color MirrorHoverLine = Color.White.WithAlpha(0.45f);
     private static readonly Color MirrorGuide = Color.FromHex("#4FD3FF").WithAlpha(0.8f);
@@ -36,6 +37,7 @@ public sealed partial class CustomMarkingCanvas : Control
     private const float OnionAlpha = 0.3f;
 
     [Dependency] private IEntityManager _entMan = default!;
+    [Dependency] private IInputManager _input = default!;
     [Dependency] private IGameTiming _timing = default!;
 
     private readonly CustomMarkingSystem _system;
@@ -48,6 +50,8 @@ public sealed partial class CustomMarkingCanvas : Control
     private int _hairLayers;
     private bool _drawing;
     private bool _erasing;
+    private bool _alt;
+    private bool _shift;
 
     public CustomMarkingArt? Art;
 
@@ -106,11 +110,8 @@ public sealed partial class CustomMarkingCanvas : Control
     /// <summary>The pixel under the cursor, outlined when the canvas takes input.</summary>
     public Vector2i? Hover { get; private set; }
 
-    /// <summary>
-    /// Raised for each pixel the cursor is pressed on or dragged to: the pixel, whether the erase button is the
-    /// one held, and whether this press started the stroke.
-    /// </summary>
-    public event Action<Vector2i, bool, bool>? Stroke;
+    /// <summary>Raised for each pixel the cursor is pressed on or dragged to.</summary>
+    public event Action<CustomMarkingStroke>? Stroke;
 
     public event Action? StrokeEnded;
 
@@ -449,7 +450,9 @@ public sealed partial class CustomMarkingCanvas : Control
 
         _drawing = true;
         _erasing = erase;
-        Stroke?.Invoke(PixelAt(args.RelativePixelPosition), erase, true);
+        _alt = _input.IsKeyDown(Keyboard.Key.Alt);
+        _shift = _input.IsKeyDown(Keyboard.Key.Shift);
+        Stroke?.Invoke(new CustomMarkingStroke(PixelAt(args.RelativePixelPosition), erase, true, _alt, _shift));
         args.Handle();
     }
 
@@ -471,7 +474,7 @@ public sealed partial class CustomMarkingCanvas : Control
         var pixel = PixelAt(args.RelativePixelPosition);
         Hover = MouseFilter == MouseFilterMode.Stop && CustomMarkingArt.InFrame(pixel.X, pixel.Y) ? pixel : null;
         if (_drawing)
-            Stroke?.Invoke(pixel, _erasing, false);
+            Stroke?.Invoke(new CustomMarkingStroke(pixel, _erasing, false, _alt, _shift));
     }
 
     protected override void MouseExited()
@@ -488,3 +491,10 @@ public sealed partial class CustomMarkingCanvas : Control
         _brush = null;
     }
 }
+
+/// <summary>One step of a stroke on the canvas.</summary>
+/// <param name="Erase">Whether the erase button is the one held.</param>
+/// <param name="Start">Whether this press started the stroke.</param>
+/// <param name="Alt">Whether Alt was held when the stroke started.</param>
+/// <param name="Shift">Whether Shift was held when the stroke started.</param>
+public readonly record struct CustomMarkingStroke(Vector2i Pixel, bool Erase, bool Start, bool Alt, bool Shift);

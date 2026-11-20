@@ -137,6 +137,14 @@ public sealed class CustomMarkingSketch
             Art.Fill(frame, facing, MirrorX(x), y, ink, reach);
     }
 
+    /// <summary>Makes a same-coloured patch of a frame glow or stop glowing, mirrored like <see cref="Fill"/>.</summary>
+    public void GlowFill(int frame, int facing, int x, int y, bool glowing)
+    {
+        Art.FillGlow(frame, facing, x, y, glowing);
+        if (Mirror)
+            Art.FillGlow(frame, facing, MirrorX(x), y, glowing);
+    }
+
     private void Mirrored(Vector2i from, Vector2i to, Action<int, int> plot)
     {
         Run(from, to, plot);

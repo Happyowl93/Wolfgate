@@ -35,6 +35,7 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
     private readonly BoxContainer _rows;
     private readonly Label _counts;
     private readonly Label _status;
+    private readonly Button _openFolder;
     private readonly Button _newButton;
     private readonly Button _importButton;
 
@@ -42,7 +43,6 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
     private EntityUid? _doll;
 
     private List<CustomMarking> _worn = new();
-    private CustomMarkingEditorWindow? _editor;
 
     /// <summary>The entry whose Delete was pressed once and waits for a second press.</summary>
     private int _confirmingDelete;
@@ -74,7 +74,7 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
 
         _newButton = new Button { Text = Loc.GetString("wg-custom-marking-library-new"), StyleClasses = { StyleWolfgate.StyleClassCreatorPrimary } };
         _newButton.OnPressed += _ => OpenEditor(null, new CustomMarkingArt(), string.Empty);
-        _importButton = new Button { Text = Loc.GetString("wg-custom-marking-library-import"), ToolTip = Loc.GetString("wg-custom-marking-library-import-tooltip") };
+        _importButton = new Button { Text = Loc.GetString("wg-custom-marking-library-import") };
         _importButton.OnPressed += _ => Import();
         _counts = new Label
         {
@@ -91,7 +91,9 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
             SeparationOverride = 6,
         };
 
-        _status = new Label { ClipText = true };
+        _status = new Label { ClipText = true, HorizontalExpand = true, VerticalAlignment = VAlignment.Center };
+        _openFolder = new Button { Text = Loc.GetString("wg-custom-marking-library-open-folder"), Visible = false };
+        _openFolder.OnPressed += _ => _res.UserData.OpenOsWindow(ExportFolder);
 
         Contents.AddChild(new BoxContainer
         {
@@ -129,7 +131,12 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
                     HScrollEnabled = false,
                     Children = { _rows },
                 },
-                _status,
+                new BoxContainer
+                {
+                    Orientation = BoxContainer.LayoutOrientation.Horizontal,
+                    SeparationOverride = 6,
+                    Children = { _status, _openFolder },
+                },
             },
         });
 
@@ -139,7 +146,6 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
         {
             _system.LibraryUpdated -= Rebuild;
             _system.ArtLoaded -= OnArtLoaded;
-            _editor?.Close();
             if (_doll is { } doll)
                 _entMan.DeleteEntity(doll);
 
@@ -172,8 +178,13 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
         var limit = _cfg.GetCVar(CustomMarkingCVars.LibraryLimit);
         _counts.Text = Loc.GetString("wg-custom-marking-library-counts",
             ("saved", library?.Count ?? 0), ("limit", limit), ("worn", _worn.Count), ("max", MaxWorn));
-        _newButton.Disabled = library == null || library.Count >= limit;
-        _importButton.Disabled = _newButton.Disabled;
+        var full = library == null
+            ? Loc.GetString("wg-custom-marking-reason-loading")
+            : library.Count >= limit
+                ? Loc.GetString("wg-custom-marking-reason-library-full", ("limit", limit))
+                : null;
+        Allow(_newButton, Loc.GetString("wg-custom-marking-library-new-tooltip"), full);
+        Allow(_importButton, Loc.GetString("wg-custom-marking-library-import-tooltip"), full);
 
         if (library == null)
         {
@@ -193,7 +204,7 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
         foreach (var marking in _worn)
         {
             if (!library.Any(entry => entry.Hash == marking.Hash && entry.Placement == marking.Placement))
-                _rows.AddChild(StrayRow(marking, library.Count < limit));
+                _rows.AddChild(StrayRow(marking, full));
         }
     }
 
@@ -208,20 +219,24 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
             Text = Loc.GetString(worn ? "wg-custom-marking-library-take-off" : "wg-custom-marking-library-wear"),
             ToggleMode = true,
             Pressed = worn,
-            Disabled = !worn && _worn.Count >= MaxWorn,
             MinWidth = 90,
             StyleClasses = { StyleWolfgate.StyleClassCreatorToggle },
         };
+        if (!worn && _worn.Count >= MaxWorn)
+            Allow(wear, string.Empty, Loc.GetString("wg-custom-marking-reason-worn-full", ("max", MaxWorn)));
         wear.OnPressed += _ => SetWorn(marking, !worn);
 
-        var edit = new CustomMarkingIconButton("pencil", Loc.GetString("wg-custom-marking-library-edit")) { Disabled = !loaded };
+        var loading = loaded ? null : Loc.GetString("wg-custom-marking-reason-loading");
+        var edit = new CustomMarkingIconButton("pencil", string.Empty);
+        Allow(edit, Loc.GetString("wg-custom-marking-library-edit"), loading);
         edit.OnPressed += _ =>
         {
             if (ReadArt(entry.Hash) is { } art)
                 OpenEditor(entry, art, entry.Name);
         };
 
-        var export = new CustomMarkingIconButton("export", Loc.GetString("wg-custom-marking-library-export")) { Disabled = !loaded };
+        var export = new CustomMarkingIconButton("export", string.Empty);
+        Allow(export, Loc.GetString("wg-custom-marking-library-export"), loading);
         export.OnPressed += _ => Export(entry);
 
         // Deleting takes two presses: the icon turns into a question, which deletes.
@@ -246,36 +261,44 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
             };
         }
 
-        return Row(rsi, entry.Hash, entry.Name, entry.Placement, wear, edit, export, delete);
+        var placement = Loc.GetString(CustomMarkingEditorWindow.PlacementName(entry.Placement));
+        return Row(rsi, entry.Hash, entry.Name, entry.Placement, placement, wear, edit, export, delete);
     }
 
-    private Control StrayRow(CustomMarking marking, bool room)
+    /// <param name="full">Why the library can't take the marking, or null when it can.</param>
+    private Control StrayRow(CustomMarking marking, string? full)
     {
         _system.TryGetArt(marking.Hash, out var rsi);
 
         var takeOff = new Button { Text = Loc.GetString("wg-custom-marking-library-take-off"), MinWidth = 90 };
         takeOff.OnPressed += _ => SetWorn(marking, false);
 
-        var keep = new Button
-        {
-            Text = Loc.GetString("wg-custom-marking-library-keep"),
-            ToolTip = Loc.GetString("wg-custom-marking-library-keep-tooltip"),
-            Disabled = !room || rsi == null,
-        };
+        var keep = new Button { Text = Loc.GetString("wg-custom-marking-library-keep") };
+        Allow(keep, Loc.GetString("wg-custom-marking-library-keep-tooltip"),
+            full ?? (rsi == null ? Loc.GetString("wg-custom-marking-reason-loading") : null));
         keep.OnPressed += _ =>
         {
             if (ReadArt(marking.Hash) is { } art)
                 _system.Save(0, string.Empty, marking.Placement, art);
         };
 
-        return Row(rsi, marking.Hash, Loc.GetString("wg-custom-marking-library-stray"), marking.Placement, takeOff, keep);
+        var subtitle = Loc.GetString("wg-custom-marking-library-stray-subtitle",
+            ("placement", Loc.GetString(CustomMarkingEditorWindow.PlacementName(marking.Placement))));
+        return Row(rsi, marking.Hash, Loc.GetString("wg-custom-marking-default-name"), marking.Placement, subtitle, takeOff, keep);
+    }
+
+    /// <summary>Enables a button with its tooltip, or disables it with the reason why under the tooltip.</summary>
+    private static void Allow(BaseButton button, string tooltip, string? reason)
+    {
+        button.Disabled = reason != null;
+        button.ToolTip = reason == null ? tooltip : tooltip.Length == 0 ? reason : $"{tooltip}\n{reason}";
     }
 
     /// <summary>
-    /// A row: the marking on the character from each side, as it will look, its name and placement, and its
+    /// A row: the marking on the character from each side, as it will look, its name, a line under it, and its
     /// actions.
     /// </summary>
-    private Control Row(RSI? rsi, string hash, string name, CustomMarkingPlacement placement, params BaseButton[] actions)
+    private Control Row(RSI? rsi, string hash, string name, CustomMarkingPlacement placement, string subtitle, params BaseButton[] actions)
     {
         RSI.State? state = null;
         rsi?.TryGetState(CustomMarkingResources.State, out state);
@@ -327,7 +350,8 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
                         new Label { Text = name, ClipText = true, ToolTip = name, StyleClasses = { StyleWolfgate.StyleClassCreatorCardTitle } },
                         new Label
                         {
-                            Text = Loc.GetString(CustomMarkingEditorWindow.PlacementName(placement)),
+                            Text = subtitle,
+                            ToolTip = subtitle,
                             ClipText = true,
                             StyleClasses = { StyleWolfgate.StyleClassCreatorFieldLabel },
                         },
@@ -370,31 +394,11 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
         return _system.TryReadArt(hash, out var art) ? art : null;
     }
 
+    /// <summary>Opens the editor; saving there puts a new marking on, or swaps a changed one the character wears.</summary>
     private void OpenEditor(CustomMarkingEntry? entry, CustomMarkingArt art, string name)
     {
-        _editor?.Close();
-
-        // The body under the art wears everything else, but not the marking being changed.
-        var body = _profile();
-        if (body != null && entry is { } editing)
-            body = body.WithCustomMarkings(_worn.Where(marking => marking.Hash != editing.Hash || marking.Placement != editing.Placement));
-
-        var editor = new CustomMarkingEditorWindow(entry, art, name, body);
-        editor.OnSaved += OnSaved;
-        editor.OnClose += () =>
-        {
-            if (_editor == editor)
-                _editor = null;
-        };
-        _editor = editor;
-        editor.OpenCentered();
-    }
-
-    /// <summary>A changed marking stays on the character; a new one goes on if there is room.</summary>
-    private void OnSaved(CustomMarkingEntry? before, CustomMarkingEntry saved)
-    {
-        if (CustomMarkingRules.ApplySaved(_worn, before, saved, MaxWorn))
-            WornChanged();
+        UserInterfaceManager.GetUIController<CustomMarkingUIController>()
+            .OpenEditor(entry, art, name, _profile, worn => OnWornChanged?.Invoke(worn));
     }
 
     private async void Import()
@@ -434,8 +438,9 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
     private static readonly ResPath ExportFolder = new("/CustomMarkings");
 
     /// <summary>
-    /// Writes the marking to the user data folder as "name.png" and opens that folder. The native save dialog let a
-    /// name be typed without ".png" and wrote it as a file with no extension; the client can't rename what it picked.
+    /// Writes the marking to the user data folder as "name.png" and offers to open that folder. The native save
+    /// dialog let a name be typed without ".png" and wrote it as a file with no extension; the client can't rename
+    /// what it picked.
     /// </summary>
     private void Export(CustomMarkingEntry entry)
     {
@@ -451,7 +456,7 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
 
             _status.Text = Loc.GetString("wg-custom-marking-exported", ("file", path.Filename));
             _status.StyleClasses.Remove("Danger");
-            _res.UserData.OpenOsWindow(ExportFolder);
+            _openFolder.Visible = true;
         }
         catch (Exception e)
         {
@@ -475,6 +480,7 @@ public sealed partial class CustomMarkingLibraryWindow : CustomMarkingWindow
 
     private void SetStatus(string? loc, bool error)
     {
+        _openFolder.Visible = false;
         _status.Text = loc == null ? string.Empty : Loc.GetString(loc);
         if (error)
             _status.StyleClasses.Add("Danger");

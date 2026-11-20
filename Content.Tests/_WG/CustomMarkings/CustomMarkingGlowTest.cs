@@ -238,4 +238,38 @@ public sealed class CustomMarkingGlowTest
             Assert.That(CustomMarkingRules.IsValidHash(glowHash), Is.True);
         });
     }
+
+    /// <summary>A glow fill reaches the touching pixels of the clicked colour only, and the sketch mirrors it.</summary>
+    [Test]
+    public void GlowFillTest()
+    {
+        var art = new CustomMarkingArt();
+        for (var x = 2; x <= 5; x++)
+        {
+            art.SetPixel(0, South, x, 4, Red);
+        }
+
+        art.SetPixel(0, South, 6, 4, Blue);
+        art.SetPixel(0, South, 8, 4, Red);
+
+        art.FillGlow(0, South, 2, 4, true);
+        Assert.Multiple(() =>
+        {
+            Assert.That(art.IsGlowing(0, South, 5, 4), Is.True, "the touching red run glows");
+            Assert.That(art.IsGlowing(0, South, 6, 4), Is.False, "another colour stops it");
+            Assert.That(art.IsGlowing(0, South, 8, 4), Is.False, "red that doesn't touch stays dark");
+        });
+
+        art.FillGlow(0, South, 3, 4, false);
+        Assert.That(art.HasGlow(), Is.False, "filling again with glow off clears the run");
+
+        art.FillGlow(0, South, 0, 0, true);
+        Assert.That(art.HasGlow(), Is.False, "an undrawn pixel fills nothing");
+
+        var sketch = new CustomMarkingSketch(new CustomMarkingArt()) { Mirror = true, MirrorAxis = CustomMarkingSketch.DefaultMirrorAxis };
+        sketch.Art.SetPixel(0, South, 10, 4, Red);
+        sketch.Art.SetPixel(0, South, sketch.MirrorX(10), 4, Red);
+        sketch.GlowFill(0, South, 10, 4, true);
+        Assert.That(sketch.Art.IsGlowing(0, South, sketch.MirrorX(10), 4), Is.True, "the mirrored pixel glows too");
+    }
 }

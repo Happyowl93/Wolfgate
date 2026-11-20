@@ -20,12 +20,6 @@
       "name": "picker"
     },
     {
-      "name": "bodyeraser"
-    },
-    {
-      "name": "glow"
-    },
-    {
       "name": "symmetry"
     },
     {
@@ -59,12 +53,6 @@
       "name": "export"
     },
     {
-      "name": "previous"
-    },
-    {
-      "name": "next"
-    },
-    {
       "name": "add"
     },
     {
@@ -72,12 +60,6 @@
     },
     {
       "name": "play"
-    },
-    {
-      "name": "frameleft"
-    },
-    {
-      "name": "frameright"
     },
     {
       "name": "reverse"

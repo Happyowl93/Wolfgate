@@ -40,6 +40,7 @@ public sealed class CustomMarkingArt
     /// The pixels that glow, drawn unshaded so they stay bright in the dark: a <see cref="CustomMarkingErase"/> mask
     /// for each frame, one after another. Only a drawn pixel glows, and it keeps glowing when recoloured.
     /// </summary>
+    // A frame's mask is sliced where it is used: the client sandbox rejects a content method returning a span.
     public byte[] Glow { get; private set; }
 
     /// <summary>
@@ -202,7 +203,7 @@ public sealed class CustomMarkingArt
         if (pixel.A == 0)
         {
             pixel = default;
-            CustomMarkingErase.Set(GlowOf(frame), facing, x, y, false);
+            CustomMarkingErase.Set(Glow.AsSpan(frame * EraseBytes, EraseBytes), facing, x, y, false);
         }
 
         var i = Offset(frame, facing, x, y);
@@ -223,7 +224,7 @@ public sealed class CustomMarkingArt
             Pixels.AsSpan(Offset(frame, facing, 0, y), FrameSize * 4).Clear();
         }
 
-        CustomMarkingErase.Clear(GlowOf(frame), facing);
+        CustomMarkingErase.Clear(Glow.AsSpan(frame * EraseBytes, EraseBytes), facing);
     }
 
     /// <summary>
@@ -250,7 +251,7 @@ public sealed class CustomMarkingArt
                 var (fromX, fromY) = from(x, y);
                 var inFrame = InFrame(fromX, fromY);
                 SetPixel(frame, target, x, y, inFrame ? before[fromY * FrameSize + fromX] : default);
-                CustomMarkingErase.Set(GlowOf(frame), target, x, y, inFrame && glowed[fromY * FrameSize + fromX]);
+                CustomMarkingErase.Set(Glow.AsSpan(frame * EraseBytes, EraseBytes), target, x, y, inFrame && glowed[fromY * FrameSize + fromX]);
             }
         }
     }
@@ -305,6 +306,38 @@ public sealed class CustomMarkingArt
                 && GetPixel(frame, facing, nextX, nextY) == target
                 && SetPixel(frame, facing, nextX, nextY, pixel))
                 open.Push((nextX, nextY));
+        }
+    }
+
+    /// <summary>
+    /// Makes the drawn pixel at a point, and every pixel of the same colour joined to it by an edge, glow or stop
+    /// glowing.
+    /// </summary>
+    public void FillGlow(int frame, int facing, int x, int y, bool glowing)
+    {
+        if (!InFrame(x, y) || GetPixel(frame, facing, x, y) is not { A: > 0 } target)
+            return;
+
+        var seen = new bool[FrameSize * FrameSize];
+        seen[y * FrameSize + x] = true;
+        var open = new Stack<(int X, int Y)>();
+        open.Push((x, y));
+        while (open.TryPop(out var at))
+        {
+            SetGlow(frame, facing, at.X, at.Y, glowing);
+            Spread(at.X + 1, at.Y);
+            Spread(at.X - 1, at.Y);
+            Spread(at.X, at.Y + 1);
+            Spread(at.X, at.Y - 1);
+        }
+
+        void Spread(int nextX, int nextY)
+        {
+            if (!InFrame(nextX, nextY) || seen[nextY * FrameSize + nextX] || GetPixel(frame, facing, nextX, nextY) != target)
+                return;
+
+            seen[nextY * FrameSize + nextX] = true;
+            open.Push((nextX, nextY));
         }
     }
 
@@ -599,15 +632,10 @@ public sealed class CustomMarkingArt
         }
     }
 
-    private Span<byte> GlowOf(int frame)
-    {
-        return Glow.AsSpan(frame * EraseBytes, EraseBytes);
-    }
-
     /// <summary>Whether the pixel at a point of a frame glows.</summary>
     public bool IsGlowing(int frame, int facing, int x, int y)
     {
-        return CustomMarkingErase.Get(GlowOf(frame), facing, x, y);
+        return CustomMarkingErase.Get(Glow.AsSpan(frame * EraseBytes, EraseBytes), facing, x, y);
     }
 
     /// <summary>
@@ -618,7 +646,7 @@ public sealed class CustomMarkingArt
         if (glowing && Pixels[Offset(frame, facing, x, y) + 3] == 0)
             return false;
 
-        return CustomMarkingErase.Set(GlowOf(frame), facing, x, y, glowing);
+        return CustomMarkingErase.Set(Glow.AsSpan(frame * EraseBytes, EraseBytes), facing, x, y, glowing);
     }
 
     public bool HasGlow()
@@ -629,7 +657,7 @@ public sealed class CustomMarkingArt
     /// <summary>Stops every pixel of one facing of a frame glowing.</summary>
     public void ClearGlow(int frame, int facing)
     {
-        CustomMarkingErase.Clear(GlowOf(frame), facing);
+        CustomMarkingErase.Clear(Glow.AsSpan(frame * EraseBytes, EraseBytes), facing);
     }
 
     /// <summary>
