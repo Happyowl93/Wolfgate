@@ -127,13 +127,14 @@ public sealed partial class WolfmedShutdownSystem : EntitySystem
     }
 
     /// <summary>
-    /// Burns down the core of a chassis shut down for its pump or its fluid, a full core over
-    /// wolfmed.shutdown_core_seconds. A flat cell drains nothing.
+    /// Burns down the core of a chassis shut down without its pump or its fluid, a full core over
+    /// wolfmed.shutdown_core_seconds. A flat cell alone drains nothing, and pulling the cell doesn't stop the burn.
     /// </summary>
     private void DrainCore(EntityUid body, float seconds)
     {
+        // The pump and fluid are read, not the reason: a flat cell outranks them there.
         if (_coreSeconds <= 0f || !TryComp(body, out WolfmedShutdownComponent? shutdown) ||
-            shutdown.Reason is not (WolfmedCauseSource.Pump or WolfmedCauseSource.Fluid) || _mobState.IsDead(body) ||
+            HasPump(body) && !IsDry(body) || _mobState.IsDead(body) ||
             _life.GetBrainOrgan(body) is not { } core || core.Comp.Health <= FixedPoint2.Zero)
             return;
 

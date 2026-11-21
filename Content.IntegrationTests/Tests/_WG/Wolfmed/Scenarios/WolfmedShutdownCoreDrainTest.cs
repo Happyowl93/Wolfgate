@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Server.Atmos.EntitySystems;
 using Content.Server.Body.Components;
+using Content.Server.Power.EntitySystems;
+using Content.Server.PowerCell;
 using Content.Server._WG.Wolfmed.Life;
 using Content.Shared._Shitmed.Body.Organ;
 using Content.Shared._WG.Wolfmed.Body;
@@ -27,7 +29,7 @@ public sealed class WolfmedShutdownCoreDrainTest : WolfmedGameTest
     private const float CoreSeconds = 20f;
 
     [Test]
-    public async Task PumplessChassisBurnsOutTest()
+    public async Task PumplessChassisBurnsOutTest([Values(false, true)] bool flatCell)
     {
         await OverrideCVar(Side.Server, WolfmedCVars.Consciousness, true);
         await OverrideCVar(Side.Server, WolfmedCVars.ShutdownCoreSeconds, CoreSeconds);
@@ -50,6 +52,16 @@ public sealed class WolfmedShutdownCoreDrainTest : WolfmedGameTest
             Assert.That(graph.RemoveOrgan(organs.First(o => SEntMan.HasComponent<HeartComponent>(o.Id)).Id), Is.True);
             Assert.That(SEntMan.GetComponentOrNull<WolfmedShutdownComponent>(ipc)?.Reason, Is.EqualTo(WolfmedCauseSource.Pump),
                 "pulling the pump did not shut the chassis down.");
+
+            // A flat cell as well puts the chassis on low power; the missing pump still burns the core.
+            if (flatCell)
+            {
+                Assert.That(SEntMan.System<PowerCellSystem>().TryGetBatteryFromSlot(ipc, out var cell, out var battery), Is.True);
+                SEntMan.System<BatterySystem>().SetCharge(cell!.Value, 0f, battery);
+                SEntMan.System<WolfmedShutdownSystem>().Refresh(ipc, false);
+                Assert.That(SEntMan.HasComponent<Content.Shared._WG.Synthetics.WGLowPowerComponent>(ipc), Is.True,
+                    "a flat cell did not put the chassis on low power.");
+            }
         });
 
         // About two fifths of the clock: the core is going, the chassis is not dead yet.
