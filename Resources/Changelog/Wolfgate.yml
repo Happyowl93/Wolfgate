@@ -8452,3 +8452,10 @@ Entries:
   id: 100541
   time: '2026-11-21T11:00:41.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/760
+- author: Gandalf2k15
+  changes:
+    - type: Tweak
+      message: The server runs faster at high population.
+  id: 100542
+  time: '2026-11-21T11:29:54.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/775
