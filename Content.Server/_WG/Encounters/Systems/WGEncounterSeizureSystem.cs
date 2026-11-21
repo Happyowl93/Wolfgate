@@ -2,6 +2,7 @@ using Content.Server._WG.Encounters.Components;
 using Content.Server._WG.NpcCrew.Components;
 using Content.Server._WG.NpcCrew.Systems;
 using Content.Shared._Mono.Company;
+using Content.Shared._Mono.FireControl;
 using Content.Shared._WG.NpcCrew;
 using Content.Shared.Cuffs.Components;
 using Content.Shared.Ghost;
@@ -15,7 +16,8 @@ namespace Content.Server._WG.Encounters.Systems;
 
 /// <summary>
 /// Notices encounter ships that boarders have taken and marks them with <see cref="WGCrewSeizedHullComponent"/>: one
-/// with none of its crew left alive aboard and a stranger on it, or with a stranger its crew is fighting at its helm.
+/// with none of its crew left alive aboard and a stranger on it, or with a stranger at its helm or gunnery whom its crew
+/// is fighting or never gave leave.
 /// Every ship of its own side nearby then takes it for an attacker, and keeps doing so while it stays seized. A crew
 /// back aboard with the boarders gone takes the ship back. Hulks are left to their salvage claim.
 /// </summary>
@@ -28,6 +30,7 @@ public sealed partial class WGEncounterSeizureSystem : EntitySystem
     [Dependency] private WGCrewSecuritySystem _security = default!;
     [Dependency] private WGCrewEscortSystem _escorts = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private SharedUserInterfaceSystem _ui = default!;
 
     /// <summary>How far off the ships of a seized hull's own side learn it is in enemy hands.</summary>
     public const float HijackRange = 15000f;
@@ -92,9 +95,8 @@ public sealed partial class WGEncounterSeizureSystem : EntitySystem
                 continue;
 
             var crew = _crews[grid];
-            var helmsman = Helmsman(grid, strangers);
-            // With its whole crew down, a stranger aboard holds it.
-            if (crew.Count == 0 || helmsman is { } pilot && Fought(grid, crew, pilot))
+            // With its whole crew down, a stranger aboard holds it; with them up, one at its helm or guns does.
+            if (crew.Count == 0 || AtControls(grid, strangers) is { } hand && (Fought(grid, crew, hand) || !Authorized(crew, hand)))
                 Seize(grid);
         }
 
@@ -258,8 +260,8 @@ public sealed partial class WGEncounterSeizureSystem : EntitySystem
         }
     }
 
-    /// <summary>The stranger flying a ship from one of its helms, if any.</summary>
-    private EntityUid? Helmsman(EntityUid grid, List<EntityUid> strangers)
+    /// <summary>The stranger flying a ship from one of its helms or working one of its gunnery consoles, if any.</summary>
+    private EntityUid? AtControls(EntityUid grid, List<EntityUid> strangers)
     {
         foreach (var uid in strangers)
         {
@@ -267,7 +269,32 @@ public sealed partial class WGEncounterSeizureSystem : EntitySystem
                 return uid;
         }
 
+        var consoles = EntityQueryEnumerator<FireControlConsoleComponent, TransformComponent>();
+        while (consoles.MoveNext(out var console, out _, out var xform))
+        {
+            if (xform.GridUid != grid)
+                continue;
+
+            foreach (var actor in _ui.GetActors(console, FireControlConsoleUiKey.Key))
+            {
+                if (strangers.Contains(actor))
+                    return actor;
+            }
+        }
+
         return null;
+    }
+
+    /// <summary>Whether any of a ship's crew gives a visitor leave aboard, as a friend handed the helm has.</summary>
+    private bool Authorized(List<EntityUid> crew, EntityUid visitor)
+    {
+        foreach (var member in crew)
+        {
+            if (_security.IsAuthorized(member, visitor))
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>Whether a ship's crew has turned on someone aboard: a friend given the helm is no boarder.</summary>
