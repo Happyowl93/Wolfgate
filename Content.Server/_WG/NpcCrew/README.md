@@ -256,18 +256,22 @@ another spot, or holds on while the fuse allows. Veterans and
 elites hunt in pairs, sidestep between shots (upstream `NPCJukeComponent`) and, once a minute, fall back out of the
 hostile's sight past 50 damage to patch up for up to eight seconds (`WGCrewFallBackSystem`).
 
-A crew that is losing a boarding fight musters (`WGCrewMusterSystem`). With two of its own down inside two minutes,
-three fighters still on their feet and a veteran or elite aboard to lead (an officer a tier above a regular crew
-counts; so does a captain at his station), the leader calls it aloud and the fighters stop hunting: they pull back to
-the crew post nearest to them that no hostile is within five tiles of or has a line of sight to, take places up to two
-tiles round it, the back of the room first, and hold with weapons up, whatever each man's own skill (`Assess` gives
-`Brace` to every follower, and the muster branch of the HTN root walks him to his place). They still shoot what they
-see and throw grenades round the corner. Once most are in place and nobody has seen a hostile for ten seconds, or
-after 45 s regardless, the leader calls the push and every follower goes after the hostile at once, hunt party or
-not, for 30 s and for as long as they keep seeing him; then they fall back to a fresh rally point. The muster keeps
-the followers' attack memory alive while it stands. It ends when its leader is down with nobody to take over, fewer
-than two fighters stand, no hostile has been aboard for 20 s or none has been seen for 90 s; a new one takes two fresh
-losses. Green and regular crews without such a leader never muster.
+A crew that is losing a boarding fight musters (`WGCrewMusterSystem`). With two of its own down inside two minutes
+(critical, dead, or on the floor conscious under Wolfmed while the mob state still says alive), three fighters still on
+their feet and a regular or better aboard to lead (an officer a tier above a green crew counts; so does a captain at
+his station), the leader calls it aloud and the fighters stop hunting: they pull back to the crew post nearest to them
+that no hostile is within five tiles of or has a line of sight to and that has a place for each of them (failing that,
+the nearest with room for two, and the rest cover from where they stand), take places up to two tiles round it, the
+back of the room first, and hold with weapons up, whatever each man's own skill (`Assess` gives `Brace` to every
+follower, and the muster branch of the HTN root walks him to his place). They still shoot what they see and throw
+grenades round the corner. The pilot, gunners, captain and radio operator stay out of the muster and, while it stands,
+go after nobody they cannot see unless he has just struck them. Once most are in place and nobody has seen a hostile
+for ten seconds, or after 45 s regardless, the leader calls the push and every follower goes after the hostile at
+once, hunt party or not, for 30 s and for as long as they keep seeing him; then they fall back to a fresh rally point.
+The muster keeps the followers' attack memory alive while it stands. It ends when its leader is down with nobody to
+take over, fewer than two fighters stand, no hostile has been aboard for 20 s or none has been seen for 90 s; a new one
+takes two fresh losses, and a crewman already counted is not counted again for going down further. Green crews without
+an officer never muster.
 
 Since the Lupercal's first playtest: a crewman who sees a trespasser on a Warn ship names him and the zone aloud,
 points him out (`PointingSystem.TryNpcPoint`) and gives him his time, gives a last warning ten seconds before it runs

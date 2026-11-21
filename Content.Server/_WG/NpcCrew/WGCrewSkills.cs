@@ -76,7 +76,7 @@ public static class WGCrewSkills
     {
         AimError = 9f, ShootDelay = 0f, ReacquireDelay = 0f, GunneryError = 14f, Leading = 0.7f, Handling = 0.9f,
         Evasion = 0.75f, DodgesFire = true, DamageTaken = 1.15f, DamageDealt = 0.46f,
-        Braces = true, Throws = true, CookTime = 0f, Sidesteps = false, FallsBack = false, HuntParty = 1, Musters = false,
+        Braces = true, Throws = true, CookTime = 0f, Sidesteps = false, FallsBack = false, HuntParty = 1, Musters = true,
     };
 
     private static readonly Profile Veteran = new()

@@ -266,6 +266,9 @@ public sealed partial class WGCrewWeaponSystem
             return hold;
         if (muster != WGCrewMusterPosture.None)
             return muster == WGCrewMusterPosture.Push ? WGCrewEngage.Engage : hold;
+        // While his crew is mustered, a crewman outside the muster, at the helm or a gun, leaves the hunting to it.
+        if (crew != null && _muster.Stands(grid, crew.Group))
+            return RecentlyAttackedBy(uid, target) ? WGCrewEngage.Engage : hold;
 
         // Only a fresh attack sends him straight after someone he cannot see; an old grudge waits its turn in the hunt.
         return RecentlyAttackedBy(uid, target) || AdvanceFree(uid, target) ? WGCrewEngage.Engage : hold;

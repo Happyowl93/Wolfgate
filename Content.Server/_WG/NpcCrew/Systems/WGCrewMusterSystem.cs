@@ -36,9 +36,10 @@ public enum WGCrewMusterPosture : byte
 
 /// <summary>
 /// Mustering: a crew that is losing a boarding fight stops meeting the boarder one or two at a time. With two of its
-/// own down and a crewman aboard whose skill musters, its fighters pull back to a post the hostile is neither near nor
-/// looking at, hold it together, and go after him as one once he leaves them alone. The leader calls both moves aloud
-/// first; with nobody left to call them, each crewman fights by his own skill again.
+/// own down, on the floor conscious or not, and a crewman aboard whose skill musters, its fighters pull back to a post
+/// the hostile is neither near nor looking at, hold it together, and go after him as one once he leaves them alone.
+/// Meanwhile the helm and the guns stay manned. The leader calls both moves aloud first; with nobody left to call
+/// them, each crewman fights by his own skill again.
 /// </summary>
 public sealed class WGCrewMusterSystem : EntitySystem
 {
@@ -84,6 +85,9 @@ public sealed class WGCrewMusterSystem : EntitySystem
 
     private static readonly TimeSpan CheckGap = TimeSpan.FromSeconds(1);
 
+    /// <summary>How long a crew that could not muster waits before trying again.</summary>
+    private static readonly TimeSpan CallRetry = TimeSpan.FromSeconds(5);
+
     /// <summary>The closest a hostile may be to a rally point, in tiles, and how far he is taken to see.</summary>
     private const float Standoff = 5f;
     private const float SightRange = 10f;
@@ -98,14 +102,26 @@ public sealed class WGCrewMusterSystem : EntitySystem
 
     private readonly Dictionary<(EntityUid Grid, string Group), Muster> _musters = new();
     private readonly Dictionary<EntityUid, Muster> _followers = new();
-    private readonly Dictionary<(EntityUid Grid, string Group), Dictionary<EntityUid, TimeSpan>> _losses = new();
+    private readonly Dictionary<(EntityUid Grid, string Group), Losses> _losses = new();
     private readonly List<(EntityUid Grid, string Group)> _keys = new();
     private readonly List<EntityUid> _fighters = new();
     private readonly List<EntityUid> _hostiles = new();
     private readonly List<EntityUid> _gone = new();
+    private readonly List<(EntityCoordinates Post, float Travel)> _posts = new();
     private readonly List<(MapCoordinates Spot, float Clear)> _spots = new();
     private readonly List<MapCoordinates> _picked = new();
     private TimeSpan _nextCheck;
+
+    private sealed class Losses
+    {
+        /// <summary>When each crewman went down. One who is down again, or worse, is not counted twice.</summary>
+        public readonly Dictionary<EntityUid, TimeSpan> Fallen = new();
+
+        /// <summary>Losses up to here went into a muster that has ended; the next takes fresh ones.</summary>
+        public TimeSpan Spent;
+
+        public TimeSpan NextCall;
+    }
 
     private sealed class Muster
     {
@@ -132,6 +148,7 @@ public sealed class WGCrewMusterSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<WGCrewMemberDownEvent>(OnCrewDown);
+        SubscribeLocalEvent<WGCrewComponent, WolfmedConsciousnessChangedEvent>(OnConsciousnessChanged);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(_ =>
         {
             _musters.Clear();
@@ -154,16 +171,34 @@ public sealed class WGCrewMusterSystem : EntitySystem
                && muster.Places.TryGetValue(uid, out place);
     }
 
+    /// <summary>Whether a crew is mustered: those of it who are not in the muster leave the hunting to it.</summary>
+    public bool Stands(EntityUid grid, string group)
+    {
+        return _musters.ContainsKey((grid, group));
+    }
+
     private void OnCrewDown(ref WGCrewMemberDownEvent args)
     {
-        if (!TryComp<WGCrewComponent>(args.Mob, out var crew) || HasComp<ActorComponent>(args.Mob)
-            || _crew.HomeGrid(args.Mob, crew) is not { } grid)
+        if (TryComp<WGCrewComponent>(args.Mob, out var crew))
+            Lost(args.Mob, crew);
+    }
+
+    /// <summary>A crewman on the floor is out of the fight while his mob state still says alive.</summary>
+    private void OnConsciousnessChanged(Entity<WGCrewComponent> ent, ref WolfmedConsciousnessChangedEvent args)
+    {
+        if (args.OldState == WolfmedConsciousness.Up && args.NewState != WolfmedConsciousness.Up)
+            Lost(ent, ent.Comp);
+    }
+
+    private void Lost(EntityUid mob, WGCrewComponent crew)
+    {
+        if (HasComp<ActorComponent>(mob) || _crew.HomeGrid(mob, crew) is not { } grid)
             return;
 
         var key = (grid, crew.Group);
-        if (!_losses.TryGetValue(key, out var fallen))
-            _losses[key] = fallen = new Dictionary<EntityUid, TimeSpan>();
-        fallen[args.Mob] = _timing.CurTime;
+        if (!_losses.TryGetValue(key, out var losses))
+            _losses[key] = losses = new Losses();
+        losses.Fallen.TryAdd(mob, _timing.CurTime);
     }
 
     public override void Update(float frameTime)
@@ -175,22 +210,28 @@ public sealed class WGCrewMusterSystem : EntitySystem
         _nextCheck = now + CheckGap;
 
         _keys.Clear();
-        foreach (var (key, fallen) in _losses)
+        foreach (var (key, losses) in _losses)
         {
-            foreach (var (mob, at) in fallen)
+            var fresh = 0;
+            foreach (var (mob, at) in losses.Fallen)
             {
                 if (now >= at + LossMemory)
-                    fallen.Remove(mob);
+                    losses.Fallen.Remove(mob);
+                else if (at > losses.Spent)
+                    fresh++;
             }
 
-            if (fallen.Count == 0)
+            if (losses.Fallen.Count == 0)
                 _losses.Remove(key);
-            else if (fallen.Count >= LossesToMuster && !_musters.ContainsKey(key))
+            else if (fresh >= LossesToMuster && now >= losses.NextCall && !_musters.ContainsKey(key))
                 _keys.Add(key);
         }
 
         foreach (var key in _keys)
-            Call(key, now);
+        {
+            if (!Call(key, now))
+                _losses[key].NextCall = now + CallRetry;
+        }
 
         _keys.Clear();
         _keys.AddRange(_musters.Keys);
@@ -199,15 +240,18 @@ public sealed class WGCrewMusterSystem : EntitySystem
     }
 
     /// <summary>Calls a muster if the crew has a leader, the fighters and a rally point for one.</summary>
-    private void Call((EntityUid Grid, string Group) key, TimeSpan now)
+    private bool Call((EntityUid Grid, string Group) key, TimeSpan now)
     {
         if (!TryComp<MapGridComponent>(key.Grid, out var grid)
             || Gather(key, null) is not { } leader || _fighters.Count < MinToMuster || !KnowsHostiles(key))
-            return;
+            return false;
 
         var muster = new Muster { Leader = leader, Contact = now, Aboard = now };
-        if (Form(key, grid, muster, now))
-            _musters[key] = muster;
+        if (!Form(key, grid, muster, now))
+            return false;
+
+        _musters[key] = muster;
+        return true;
     }
 
     /// <summary>Keeps a muster's followers, their grudge and its posture current, and ends it when it has no leader, too few fighters or no hostile left.</summary>
@@ -303,7 +347,7 @@ public sealed class WGCrewMusterSystem : EntitySystem
     /// </summary>
     private bool Form((EntityUid Grid, string Group) key, MapGridComponent grid, Muster muster, TimeSpan now)
     {
-        if (!TryPickPoint(key, out var point) || !PickPlaces(key.Grid, grid, point))
+        if (!PickRally(key, grid))
             return false;
 
         muster.Places.Clear();
@@ -350,14 +394,16 @@ public sealed class WGCrewMusterSystem : EntitySystem
             Release(muster, uid);
 
         _musters.Remove(key);
-        // The next muster takes fresh losses.
-        _losses.Remove(key);
+        if (_losses.TryGetValue(key, out var losses))
+            losses.Spent = _timing.CurTime;
     }
 
     private void Release(Muster muster, EntityUid uid)
     {
         muster.Followers.Remove(uid);
-        muster.Places.Remove(uid);
+        // His place is kept for him, or for whoever joins next.
+        if (muster.Places.Remove(uid, out var place))
+            muster.Spare.Add(place);
         if (_followers.TryGetValue(uid, out var followed) && followed == muster)
             _followers.Remove(uid);
         if (!TerminatingOrDeleted(uid))
@@ -442,13 +488,13 @@ public sealed class WGCrewMusterSystem : EntitySystem
     }
 
     /// <summary>
-    /// The rally point: of the crew's posts aboard that no hostile is near or looking at, the one its fighters have
-    /// the least way to go to.
+    /// Picks the rally point and lists its places in <see cref="_picked"/>: of the crew's posts aboard that no hostile
+    /// is near or looking at, the one its fighters have the least way to go to that has a place for each of them.
+    /// Failing that, the nearest with room for a hold; whoever gets no place covers from where he stands.
     /// </summary>
-    private bool TryPickPoint((EntityUid Grid, string Group) key, out EntityCoordinates point)
+    private bool PickRally((EntityUid Grid, string Group) key, MapGridComponent grid)
     {
-        point = default;
-        var best = float.MaxValue;
+        _posts.Clear();
         var query = EntityQueryEnumerator<WGCrewComponent>();
         while (query.MoveNext(out _, out var crew))
         {
@@ -462,14 +508,22 @@ public sealed class WGCrewMusterSystem : EntitySystem
             var travel = 0f;
             foreach (var uid in _fighters)
                 travel += Vector2.Distance(_xform.GetWorldPosition(uid), spot.Position);
-            if (travel >= best)
-                continue;
-
-            best = travel;
-            point = post;
+            _posts.Add((post, travel));
         }
 
-        return best < float.MaxValue;
+        _posts.Sort((a, b) => a.Travel.CompareTo(b.Travel));
+        EntityCoordinates? cramped = null;
+        foreach (var (post, _) in _posts)
+        {
+            if (!PickPlaces(key.Grid, grid, post))
+                continue;
+            if (_picked.Count >= _fighters.Count)
+                return true;
+
+            cramped ??= post;
+        }
+
+        return cramped is { } tight && PickPlaces(key.Grid, grid, tight);
     }
 
     /// <summary>Whether a hostile is within the standoff of a spot or has a line of sight to it.</summary>

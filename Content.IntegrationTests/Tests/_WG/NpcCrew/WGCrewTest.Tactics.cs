@@ -43,8 +43,8 @@ public sealed partial class WGCrewTest
             var veteran = WGCrewSkills.Of(WGCrewSkill.Veteran);
             Assert.That(veteran.Sidesteps && veteran.FallsBack, Is.True);
             Assert.That(veteran.HuntParty, Is.EqualTo(2));
-            Assert.That(green.Musters || regular.Musters, Is.False);
-            Assert.That(veteran.Musters && WGCrewSkills.Of(WGCrewSkill.Elite).Musters, Is.True);
+            Assert.That(green.Musters, Is.False);
+            Assert.That(regular.Musters && veteran.Musters && WGCrewSkills.Of(WGCrewSkill.Elite).Musters, Is.True);
             Assert.That(WGCrewSkills.Of(WGCrewSkill.Elite).CookTime, Is.GreaterThan(veteran.CookTime));
 
             var crew = new WGCrewComponent { Skill = WGCrewSkill.Green, SkillOffset = -1 };
