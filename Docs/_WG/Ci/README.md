@@ -98,9 +98,14 @@ entry ids from 100000).
   - Wolfgate copy that also posts Wolfgate.yml
 - [`.github/workflows/wg-modules.yml`](../../../.github/workflows/wg-modules.yml): checks the module docs and non-modular edits with Tools/_WG/Ci/modules.py (see AGENTS.md)
 - [`.gitignore`](../../../.gitignore): written by Tools/_WG/Ci/test_merge.py in a test merge build; never committed
+- [`Content.Client/Atmos/EntitySystems/AtmosPipeLayersSystem.cs`](../../../Content.Client/Atmos/EntitySystems/AtmosPipeLayersSystem.cs): SetBaseRsi leaves layer bounds stale, tripping the client's bounds assert
+- [`Content.Client/Doors/DoorSystem.cs`](../../../Content.Client/Doors/DoorSystem.cs): SetBaseRsi leaves layer bounds stale, tripping the client's bounds assert
 - [`Content.IntegrationTests/Tests/EntityTest.cs`](../../../Content.IntegrationTests/Tests/EntityTest.cs)
   - in slices, as the different-maps test; all at once ran the 16 GB runner out of memory
   - timed progress of the spawn-all slices, so a slow core shard shows where the time goes
+- [`Content.IntegrationTests/Tests/Networking/SimplePredictReconcileTest.cs`](../../../Content.IntegrationTests/Tests/Networking/SimplePredictReconcileTest.cs)
+  - send states on the tick thread so none reaches the client a tick late and short its buffer
+  - restore for the next test on this pair
 - [`Tools/changelog/changelog.js`](../../../Tools/changelog/changelog.js)
   - was getHighestCLNumber() + 1
   - new entry ids never go below CHANGELOG_START_ID

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using Content.Client._WG.Remade.Dread;
 using Content.IntegrationTests.Pair;
+using Content.Server._WG.Remade.Conversion;
 using Content.Server._WG.Remade.Corruption;
 using Content.Server._WG.Remade.Director;
 using Content.Server._WG.Remade.Dread;
@@ -16,6 +17,7 @@ using Content.Shared.CCVar;
 using Content.Shared.Doors.Components;
 using Content.Shared.Light.Components;
 using Content.Shared.Light.EntitySystems;
+using Content.Shared.Mobs.Systems;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Components;
 using Robust.Shared.Audio.Systems;
@@ -201,6 +203,13 @@ public sealed class DreadTest
     private static async Task<(int Whispers, int Glimpses, int Pulses)> CountOver(
         TestPair pair, float resonance, bool sameMap, float away, float seconds, bool sector = true)
     {
+        return (await CountAndDescribe(pair, resonance, sameMap, away, seconds, sector)).Counts;
+    }
+
+    /// <summary>As <see cref="CountOver"/>, with where the player and the stone ended up, for a failure message.</summary>
+    private static async Task<((int Whispers, int Glimpses, int Pulses) Counts, string State)> CountAndDescribe(
+        TestPair pair, float resonance, bool sameMap, float away, float seconds, bool sector = true)
+    {
         var server = pair.Server;
         var entMan = server.EntMan;
         TestMapData? other = sameMap ? null : await pair.CreateTestMap();
@@ -218,13 +227,22 @@ public sealed class DreadTest
         await pair.RunSeconds(seconds);
 
         var counts = (0, 0, 0);
+        var state = string.Empty;
         await server.WaitPost(() =>
         {
             var subject = entMan.GetComponent<WGDreadSubjectComponent>(crewman);
             counts = (subject.Whispers, subject.Glimpses, subject.Pulses);
+            var transforms = entMan.System<SharedTransformSystem>();
+            var player = transforms.GetMapCoordinates(crewman);
+            var stone = transforms.GetMapCoordinates(scion);
+            var monolith = entMan.GetComponent<WGMonolithComponent>(scion);
+            state = $"player {(player.Position - stone.Position).Length():F1} m from the stone (same map {player.MapId == stone.MapId}), "
+                + $"grid {entMan.GetComponent<TransformComponent>(crewman).GridUid?.ToString() ?? "none"}, "
+                + $"dead {entMan.System<MobStateSystem>().IsDead(crewman)}, remade {entMan.HasComponent<WGRemadeComponent>(crewman)}, "
+                + $"stone at {monolith.Stage} ({monolith.Resonance:F0}), murmurs {subject.Murmurs}";
             entMan.DeleteEntity(scion);
         });
-        return counts;
+        return (counts, state);
     }
 
     [Test]
@@ -263,12 +281,13 @@ public sealed class DreadTest
 
         // Six minutes each: in two the Crescendo's ~10 whispers fell to 5 or fewer about one run in twenty.
         var hymn = await CountOver(pair, 20f, sameMap: true, away: 3f, seconds: 360f);
-        var crescendo = await CountOver(pair, 100f, sameMap: true, away: 3f, seconds: 360f);
+        var (crescendo, state) = await CountAndDescribe(pair, 100f, sameMap: true, away: 3f, seconds: 360f);
         var hymnTotal = hymn.Whispers + hymn.Glimpses + hymn.Pulses;
         var crescendoTotal = crescendo.Whispers + crescendo.Glimpses + crescendo.Pulses;
-        Assert.That(crescendoTotal, Is.GreaterThan(hymnTotal * 2 + 8), $"the Hymn gave {hymnTotal} and the Crescendo only {crescendoTotal}.");
-        Assert.That(crescendo.Glimpses, Is.GreaterThan(2), "the Crescendo showed almost no glimpses.");
-        Assert.That(crescendo.Whispers, Is.GreaterThan(12));
+        Assert.That(crescendoTotal, Is.GreaterThan(hymnTotal * 2 + 8), $"the Hymn gave {hymnTotal} and the Crescendo only {crescendoTotal}; {state}.");
+        Assert.That(crescendo.Glimpses, Is.GreaterThan(2), $"the Crescendo showed almost no glimpses; {state}.");
+        // About 30 are expected in six minutes; 11, seen twice, means they stopped partway, which the state should explain.
+        Assert.That(crescendo.Whispers, Is.GreaterThan(12), $"the Crescendo gave only {crescendo.Whispers} whispers; {state}.");
         await pair.CleanReturnAsync();
     }
 
