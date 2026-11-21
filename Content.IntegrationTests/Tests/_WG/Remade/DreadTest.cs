@@ -14,6 +14,7 @@ using Content.Server.Power.Components;
 using Content.Shared._WG.Remade;
 using Content.Shared._WG.Remade.Dread;
 using Content.Shared.CCVar;
+using Content.Shared.Damage.Systems;
 using Content.Shared.Doors.Components;
 using Content.Shared.Light.Components;
 using Content.Shared.Light.EntitySystems;
@@ -222,6 +223,8 @@ public sealed class DreadTest
             WGRemadeDirectorTest.LayDeck(pair, map);
             scion = SpawnScion(entMan, At(map, 0, 0), resonance);
             crewman = WGRemadeDirectorTest.SpawnCrewman(pair, sameMap ? new EntityCoordinates(map.MapUid, new System.Numerics.Vector2(away, 0f)) : new EntityCoordinates(other!.MapUid, System.Numerics.Vector2.Zero));
+            // A carp can't shed its heat in the vacuum and cooks to death in about four minutes, which ends the count early.
+            entMan.System<SharedGodmodeSystem>().EnableGodmode(crewman);
         });
 
         await pair.RunSeconds(seconds);
@@ -286,7 +289,6 @@ public sealed class DreadTest
         var crescendoTotal = crescendo.Whispers + crescendo.Glimpses + crescendo.Pulses;
         Assert.That(crescendoTotal, Is.GreaterThan(hymnTotal * 2 + 8), $"the Hymn gave {hymnTotal} and the Crescendo only {crescendoTotal}; {state}.");
         Assert.That(crescendo.Glimpses, Is.GreaterThan(2), $"the Crescendo showed almost no glimpses; {state}.");
-        // About 30 are expected in six minutes; 11, seen twice, means they stopped partway, which the state should explain.
         Assert.That(crescendo.Whispers, Is.GreaterThan(12), $"the Crescendo gave only {crescendo.Whispers} whispers; {state}.");
         await pair.CleanReturnAsync();
     }
@@ -374,7 +376,8 @@ public sealed class DreadTest
             WGRemadeDirectorTest.LayDeck(pair, map);
             scion = SpawnScion(entMan, At(other, 0, 0), resonance);
             crewman = WGRemadeDirectorTest.SpawnCrewman(pair, At(map, 0, 0));
-            shard = entMan.SpawnEntity(ShardProto, At(map, shardAway, 0));
+            entMan.System<SharedGodmodeSystem>().EnableGodmode(crewman); // Or it cooks in the vacuum within four minutes.
+            shard =entMan.SpawnEntity(ShardProto, At(map, shardAway, 0));
             entMan.GetComponent<WGMonolithShardComponent>(shard).Parent = scion;
             if (sanctuary)
                 entMan.AddComponent<WGRemadeSanctuaryComponent>(map.Grid.Owner);
