@@ -18,6 +18,11 @@ entry ids from 100000).
 
 ## Files
 
+### Integration tests
+
+- [`Content.IntegrationTests/Tests/_WG/Ci/WGStaleSpriteBounds.cs`](../../../Content.IntegrationTests/Tests/_WG/Ci/WGStaleSpriteBounds.cs)
+- [`Content.IntegrationTests/Tests/_WG/Ci/WGStaleSpriteBoundsTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Ci/WGStaleSpriteBoundsTest.cs)
+
 ### Tools
 
 - [`Tools/_WG/Ci/actions_changelogs_since_last_run.py`](../../../Tools/_WG/Ci/actions_changelogs_since_last_run.py)
