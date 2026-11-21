@@ -112,8 +112,16 @@ namespace Content.Client.Options.UI.Tabs
             _cfg.SaveToFile();
         }
 
-        public KeyRebindTab()
+        // WOLFGATE(Options) START: the Wolfgate options tabs hold a second instance that lists only the fork's keybinds
+        public KeyRebindTab() : this(false)
         {
+        }
+
+        /// <summary>Builds the stock keybind list, or with <paramref name="wgForkOnly"/> only the binds stock SS14 lacks.</summary>
+        public KeyRebindTab(bool wgForkOnly)
+        {
+            _wgForkOnly = wgForkOnly;
+        // WOLFGATE END
             IoCManager.InjectDependencies(this);
             RobustXamlLoader.Load(this);
 
@@ -135,6 +143,7 @@ namespace Content.Client.Options.UI.Tabs
                     _inputManager.SaveToUserData();
                 });
             };
+            WgSetUpButtons();
             // WOLFGATE END
 
             var first = true;
@@ -157,6 +166,9 @@ namespace Content.Client.Options.UI.Tabs
 
             void AddButton(BoundKeyFunction function)
             {
+                if (!WgShows(function)) // WOLFGATE(Options): stock and fork binds sit on different tabs
+                    return; // WOLFGATE(Options)
+
                 var control = new KeyControl(this, function);
                 KeybindsContainer.AddChild(control);
                 _keyControls.Add(function, control);
@@ -164,6 +176,9 @@ namespace Content.Client.Options.UI.Tabs
 
             void AddCheckBox(string checkBoxName, bool currentState, Action<BaseButton.ButtonToggledEventArgs>? callBackOnClick)
             {
+                if (!WgShows(checkBoxName)) // WOLFGATE(Options): stock and fork binds sit on different tabs
+                    return; // WOLFGATE(Options)
+
                 CheckBox newCheckBox = new CheckBox() { Text = Loc.GetString(checkBoxName) };
                 newCheckBox.Pressed = currentState;
                 newCheckBox.OnToggled += callBackOnClick;
@@ -173,6 +188,7 @@ namespace Content.Client.Options.UI.Tabs
 
             AddHeader("ui-options-header-general");
             AddCheckBox("ui-options-hotkey-keymap", _cfg.GetCVar(CVars.DisplayUSQWERTYHotkeys), HandleToggleUSQWERTYCheckbox);
+            AddCheckBox("ui-options-wg-worn-storage-click-opens", _cfg.GetCVar(Content.Shared._WG.WornStorage.WornStorageCVars.ClickOpens), HandleToggleWornStorageClick); // WOLFGATE(WornStorage): SS13 worn storage click
 
             AddHeader("ui-options-header-movement");
             AddButton(EngineKeyFunctions.MoveUp);
@@ -183,6 +199,13 @@ namespace Content.Client.Options.UI.Tabs
             AddCheckBox("ui-options-hotkey-toggle-walk", _cfg.GetCVar(CCVars.ToggleWalk), HandleToggleWalk);
             AddButton(ContentKeyFunctions.ToggleStanding);
             AddCheckBox("ui-options-function-auto-get-up", _cfg.GetCVar(CCVars.AutoGetUp), HandleToggleAutoGetUp); // WD EDIT
+            AddButton(Content.Shared._WG.TurnInPlace.WGTurnInPlaceKeys.WGTurnInPlace); // WOLFGATE(TurnInPlace): hold to turn without moving
+            // WOLFGATE(PixelShift) START: hold keys that shift or tilt your sprite, their speeds and their reset
+            AddButton(Content.Shared._WG.PixelShift.WGPixelShiftKeys.WGPixelShift);
+            AddButton(Content.Shared._WG.PixelShift.WGPixelShiftKeys.WGPixelTilt);
+            AddButton(Content.Shared._WG.PixelShift.WGPixelShiftKeys.WGPixelShiftReset);
+            WgAddPixelShiftSpeeds();
+            // WOLFGATE END
             InitToggleWalk();
 
             AddHeader("ui-options-header-camera");
@@ -206,6 +229,9 @@ namespace Content.Client.Options.UI.Tabs
             AddButton(ContentKeyFunctions.ExamineEntity);
             AddButton(ContentKeyFunctions.SwapHands);
             AddButton(ContentKeyFunctions.SwapHandsPrevious); // Frontier
+            AddButton(Content.Shared._WG.HandSelect.WGHandSelectKeys.WGSelectLeftHand); // WOLFGATE(HandSelect): swap to left hand
+            AddButton(Content.Shared._WG.HandSelect.WGHandSelectKeys.WGSelectRightHand); // WOLFGATE(HandSelect): swap to right hand
+            AddButton(Content.Shared._WG.CancelInteractions.WGCancelInteractionKeys.WGCancelInteractions); // WOLFGATE(CancelInteractions): cancel own do-afters
             AddButton(ContentKeyFunctions.MoveStoredItem);
             AddButton(ContentKeyFunctions.RotateStoredItem);
             AddButton(ContentKeyFunctions.SaveItemLocation);
@@ -345,6 +371,8 @@ namespace Content.Client.Options.UI.Tabs
             AddButton(EngineKeyFunctions.ShowDebugMonitors);
             AddButton(EngineKeyFunctions.HideUI);
             AddButton(ContentKeyFunctions.InspectEntity);
+
+            WgDropEmptySections(); // WOLFGATE(Options): headers whose binds all sit on the other tab
 
             foreach (var control in _keyControls.Values)
             {

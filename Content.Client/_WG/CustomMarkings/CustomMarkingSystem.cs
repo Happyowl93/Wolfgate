@@ -1,7 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
+using Content.Client._WG.Genitals;
 using Content.Shared._WG.CustomMarkings;
 using Content.Shared._WG.Genitals.Events;
 using Content.Shared.Humanoid;
+using Content.Shared.Humanoid.Markings;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
@@ -17,6 +19,7 @@ public sealed partial class CustomMarkingSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IResourceCache _resCache = default!;
+    [Dependency] private GenitalsVisualizerSystem _genitalsVisuals = default!;
     [Dependency] private SpriteSystem _sprite = default!;
 
     /// <summary>Layer keys are numbered, so this is also the most markings one body can show.</summary>
@@ -272,6 +275,16 @@ public sealed partial class CustomMarkingSystem : EntitySystem
             if (ent.Comp.HiddenCustomMarkings.Contains(marking) || !TryGetArt(marking.Hash, out var rsi))
                 continue;
 
+            // Hidden from other viewers: the undergarment was removed and the viewer can't see anatomy.
+            if (marking.Placement is CustomMarkingPlacement.UndergarmentTop or CustomMarkingPlacement.UndergarmentBottom)
+            {
+                var category = marking.Placement == CustomMarkingPlacement.UndergarmentTop
+                    ? MarkingCategories.UndergarmentTop
+                    : MarkingCategories.UndergarmentBottom;
+                if (_genitalsVisuals.IsUndergarmentHidden(ent.Owner, category))
+                    continue;
+            }
+
             // Art on the body goes without the pixels that lay on a hidden body part.
             var depth = GetLayerIndex(sprite, marking.Placement);
             if (ArtFor(sprite, marking, rsi, depth) is not { } shown)
@@ -353,6 +366,16 @@ public sealed partial class CustomMarkingSystem : EntitySystem
                 return GetIndexOverHead(sprite);
             case CustomMarkingPlacement.Front:
                 if (_sprite.LayerMapTryGet(sprite, "helmetcover", out index, false))
+                    return index;
+
+                break;
+            case CustomMarkingPlacement.UndergarmentTop:
+                if (_sprite.LayerMapTryGet(sprite, HumanoidVisualLayers.UndergarmentTop, out index, false))
+                    return index;
+
+                break;
+            case CustomMarkingPlacement.UndergarmentBottom:
+                if (_sprite.LayerMapTryGet(sprite, HumanoidVisualLayers.UndergarmentBottom, out index, false))
                     return index;
 
                 break;

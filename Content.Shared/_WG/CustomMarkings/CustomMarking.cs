@@ -20,6 +20,12 @@ public enum CustomMarkingPlacement : byte
 
     /// <summary>Over clothing.</summary>
     Front,
+
+    /// <summary>On the underwear top layer, under outer clothing.</summary>
+    UndergarmentTop,
+
+    /// <summary>On the underwear bottom layer, under outer clothing.</summary>
+    UndergarmentBottom,
 }
 
 /// <summary>A custom marking a character wears: which art, and where it is drawn.</summary>
