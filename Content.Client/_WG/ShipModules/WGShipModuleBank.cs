@@ -105,7 +105,7 @@ public sealed partial class WGShipModuleBank : GridContainer
             if (key.Text != text)
                 key.Text = text;
 
-            key.Disabled = slot.Lock != WGShipModuleLock.None || slot.Charges <= 0;
+            key.Disabled = slot.Lock != WGShipModuleLock.None || slot.Charges <= 0 || now < slot.ReadyAt;
             Light(i, _timing.RealTime < _litUntil[i]);
         }
     }
@@ -176,14 +176,14 @@ public sealed partial class WGShipModuleBank : GridContainer
         AddChild(key);
     }
 
-    /// <summary>The second line of a module's key: what stops it, how long until a charge, or ready.</summary>
+    /// <summary>The second line of a module's key: what stops it, the cooldown, how long until a charge, or ready.</summary>
     public static string Status(WGShipModuleSlot slot, TimeSpan now)
     {
         if (slot.Lock != WGShipModuleLock.None)
             return Loc.GetString($"wg-ship-module-status-{slot.Lock.ToString().ToLowerInvariant()}");
 
         if (slot.Charges > 0)
-            return Loc.GetString("wg-ship-module-status-ready");
+            return Loc.GetString(now < slot.ReadyAt ? "wg-ship-module-status-cooldown" : "wg-ship-module-status-ready");
 
         var seconds = Math.Max(1, (int) Math.Ceiling((slot.NextCharge - now).TotalSeconds));
         return Loc.GetString("wg-ship-module-status-charging", ("seconds", seconds));

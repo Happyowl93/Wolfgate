@@ -1,6 +1,7 @@
 wg-ship-module-key = { $label } { $charges }/{ $max }
 wg-ship-module-tooltip = Fire with { $key } while piloting, or press this key.
 wg-ship-module-status-ready = READY
+wg-ship-module-status-cooldown = COOLDOWN
 wg-ship-module-status-charging = CHARGING { $seconds }s
 wg-ship-module-status-unpowered = HELM UNPOWERED
 wg-ship-module-status-shields = SHIELDS ON

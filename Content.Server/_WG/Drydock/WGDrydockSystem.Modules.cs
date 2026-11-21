@@ -99,6 +99,22 @@ public sealed partial class WGDrydockSystem
         return true;
     }
 
+    /// <summary>
+    /// Whether a finished fitting can no longer go in: since the job started the slot took another module, or the
+    /// module went into another slot. The job gives it back rather than fit over a paid-for module or fit nothing.
+    /// </summary>
+    private bool ModuleRefused(WGDrydockWorkItem item)
+    {
+        if (item.Kind != WGDrydockWorkKind.Upgrade
+            || !WGShipModuleFitting.TryParse(item.Upgrade, out var slot, out var module)
+            || TerminatingOrDeleted(item.Target))
+            return false;
+
+        return !_prototype.HasIndex<WGShipModulePrototype>(module)
+               || _shipModules.FittedSlot(item.Target, module) is { } other && other != slot
+               || _shipModules.GetFitted(item.Target, slot) is { } there && there.Module.Id != module;
+    }
+
     /// <summary>The service record's name for a work order: the module for a fitting, else the refit id or a repair.</summary>
     private string ServiceName(string? upgrade)
     {

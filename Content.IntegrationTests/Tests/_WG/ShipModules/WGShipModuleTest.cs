@@ -193,6 +193,13 @@ public sealed class WGShipModuleTest
             bay.LastShielded = null;
             Assert.That(modules.GetLock(grid, bay, jets, true, timing.CurTime), Is.EqualTo(WGShipModuleLock.None),
                 "A generator switched off still locked the jets.");
+
+            // Switched back on, it locks the jets at once, before the next sweep reads it.
+            entities.GetComponent<ApcPowerReceiverComponent>(generator).PowerDisabled = false;
+            entities.GetComponent<PilotComponent>(pilot).HeldButtons = ShuttleButtons.StrafeRight;
+            Assert.That(modules.TryActivate(grid, 1, pilot, helm), Is.False,
+                "A generator just switched on left the jets free until the next sweep.");
+            Assert.That(modules.GetFitted(grid, 1)!.Charges, Is.EqualTo(3));
         });
         await pair.CleanReturnAsync();
     }

@@ -90,24 +90,23 @@ public sealed partial class WGShipModuleSystem : EntitySystem
     private void Sweep(TimeSpan now)
     {
         _poweredHelms.Clear();
-        var helms = EntityQueryEnumerator<ShuttleConsoleComponent, TransformComponent>();
-        while (helms.MoveNext(out var uid, out _, out var xform))
-        {
-            if (xform.GridUid is { } grid && _power.IsPowered(uid))
-                _poweredHelms.Add(grid);
-        }
-
-        // Switched on at the machine and at the ship's field switch counts, with or without power or a field up.
         _shieldsOn.Clear();
-        var emitters = EntityQueryEnumerator<ShipShieldEmitterComponent, ApcPowerReceiverComponent, TransformComponent>();
-        while (emitters.MoveNext(out var uid, out _, out var power, out var xform))
+        // With no module fitted anywhere there is nothing to keep current.
+        if (EntityManager.Count<WGShipModuleBayComponent>() > 0)
         {
-            if (xform.Anchored
-                && xform.GridUid is { } grid
-                && !power.PowerDisabled
-                && !HasComp<WGShipShieldDeflectorComponent>(uid)
-                && (!TryComp<WGShipShieldShuntComponent>(grid, out var shunt) || shunt.Enabled))
-                _shieldsOn.Add(grid);
+            var helms = EntityQueryEnumerator<ShuttleConsoleComponent, TransformComponent>();
+            while (helms.MoveNext(out var uid, out _, out var xform))
+            {
+                if (xform.GridUid is { } grid && _power.IsPowered(uid))
+                    _poweredHelms.Add(grid);
+            }
+
+            var emitters = EntityQueryEnumerator<ShipShieldEmitterComponent, ApcPowerReceiverComponent, TransformComponent>();
+            while (emitters.MoveNext(out var uid, out _, out var power, out var xform))
+            {
+                if (xform.GridUid is { } grid && GeneratorOn(uid, power, xform, grid))
+                    _shieldsOn.Add(grid);
+            }
         }
 
         var bays = EntityQueryEnumerator<WGShipModuleBayComponent>();
@@ -122,6 +121,39 @@ public sealed partial class WGShipModuleSystem : EntitySystem
             if (!HasComp<WGShipModuleBayComponent>(grid))
                 RemCompDeferred<WGShipModulesComponent>(grid);
         }
+    }
+
+    /// <summary>
+    /// Whether a shield generator on a ship is switched on, at the machine and at the ship's field switch, with or
+    /// without power or a field up. A deflector never counts.
+    /// </summary>
+    private bool GeneratorOn(EntityUid uid, ApcPowerReceiverComponent power, TransformComponent xform, EntityUid grid)
+    {
+        return xform.Anchored
+               && !power.PowerDisabled
+               && !HasComp<WGShipShieldDeflectorComponent>(uid)
+               && (!TryComp<WGShipShieldShuntComponent>(grid, out var shunt) || shunt.Enabled);
+    }
+
+    /// <summary>
+    /// Reads one ship's shield generators now rather than at the last sweep, so one just switched on locks its
+    /// modules at once.
+    /// </summary>
+    private void RefreshShields(EntityUid grid, WGShipModuleBayComponent bay, TimeSpan now)
+    {
+        _shieldsOn.Remove(grid);
+        var emitters = EntityQueryEnumerator<ShipShieldEmitterComponent, ApcPowerReceiverComponent, TransformComponent>();
+        while (emitters.MoveNext(out var uid, out _, out var power, out var xform))
+        {
+            if (xform.GridUid != grid || !GeneratorOn(uid, power, xform, grid))
+                continue;
+
+            _shieldsOn.Add(grid);
+            break;
+        }
+
+        if (ShieldOn(grid))
+            bay.LastShielded = now;
     }
 
     /// <summary>Writes a ship's fitted modules to its helm strip, dirtying it only when something shown changed.</summary>
@@ -277,6 +309,9 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         // A held key repeats; the cooldown answers it without a popup.
         if (now < fitted.ReadyAt)
             return false;
+
+        if (module.BlockedByShields)
+            RefreshShields(grid, bay, now);
 
         var locked = GetLock(grid, bay, module, _power.IsPowered(helm), now);
         if (locked != WGShipModuleLock.None)
