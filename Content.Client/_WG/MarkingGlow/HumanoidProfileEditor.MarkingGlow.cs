@@ -19,7 +19,17 @@ public sealed partial class HumanoidProfileEditor
         HairGlowCheckBox.OnToggled += args => SetMarkingGlow(MarkingGlowRules.Hair, args.Pressed);
         FacialHairGlowCheckBox.OnToggled += args => SetMarkingGlow(MarkingGlowRules.FacialHair, args.Pressed);
 
-        _cfgManager.OnValueChanged(MarkingGlowCVars.Enabled, _ => UpdateMarkingGlow());
+        _cfgManager.OnValueChanged(MarkingGlowCVars.Enabled, OnMarkingGlowEnabledChanged);
+    }
+
+    private void DisposeMarkingGlow()
+    {
+        _cfgManager.UnsubValueChanged(MarkingGlowCVars.Enabled, OnMarkingGlowEnabledChanged);
+    }
+
+    private void OnMarkingGlowEnabledChanged(bool _)
+    {
+        UpdateMarkingGlow();
     }
 
     private void UpdateMarkingGlow()

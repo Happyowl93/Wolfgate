@@ -402,7 +402,7 @@ public sealed partial class HumanoidAppearanceSystem : SharedHumanoidAppearanceS
 			// impstation edit end
             // WOLFGATE(MarkingGlow): a marking the player made glow
             if (MarkingGlows(humanoid, markingPrototype))
-                sprite.LayerSetShader(layerId, SpriteSystem.UnshadedId.Id);
+                ApplyMarkingGlow(sprite, layerId);
             sprite.LayerSetVisible(layerId, visible);
 
             // WOLFGATE(Species) START: mismatched parts are coloured without a species layer

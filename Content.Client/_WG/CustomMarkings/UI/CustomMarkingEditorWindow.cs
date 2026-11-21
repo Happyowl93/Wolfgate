@@ -1228,7 +1228,8 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
     }
 
     /// <summary>
-    /// Keyboard shortcuts, taken while this is the window in front and no text box or popup has the keyboard.
+    /// Keyboard shortcuts, taken while this is the window in front, the cursor isn't over something else and no
+    /// text box or popup has the keyboard.
     /// </summary>
     private void OnKey(KeyEventArgs key, KeyEventType type)
     {
@@ -1309,6 +1310,10 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
         if (UserInterfaceManager.KeyboardFocused is LineEdit or TextEdit)
             return false;
 
+        // Keys pressed over the game or another window are theirs: in a round these are movement and hotbar keys.
+        if (UserInterfaceManager.CurrentlyHovered is { } hovered && !IsAncestorOf(hovered))
+            return false;
+
         foreach (var popup in UserInterfaceManager.ModalRoot.Children)
         {
             if (popup.Visible)
@@ -1316,6 +1321,17 @@ public sealed partial class CustomMarkingEditorWindow : CustomMarkingWindow
         }
 
         return true;
+    }
+
+    private bool IsAncestorOf(Control control)
+    {
+        for (var at = control; at != null; at = at.Parent)
+        {
+            if (at == this)
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>The server turned the reach limit on or off while the editor is open.</summary>

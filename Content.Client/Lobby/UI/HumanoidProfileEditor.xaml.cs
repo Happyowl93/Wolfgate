@@ -2066,6 +2066,7 @@ namespace Content.Client.Lobby.UI
             CloseHeadshotWindow(); // WOLFGATE(Headshot)
             DisposeCombatMusic(); // WOLFGATE(CombatMusic): stop any preview
             CloseCustomMarkings(); // WOLFGATE(CustomMarkings)
+            DisposeMarkingGlow(); // WOLFGATE(MarkingGlow): drop the cvar subscription
 
             // Mono start
             foreach (var entity in _savedItemEntities)

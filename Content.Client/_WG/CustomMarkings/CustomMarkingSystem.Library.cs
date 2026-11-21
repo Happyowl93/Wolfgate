@@ -60,6 +60,29 @@ public sealed partial class CustomMarkingSystem
         RaiseNetworkEvent(new CustomMarkingDeleteEvent(id));
     }
 
+    /// <summary>
+    /// Offers the markings kept for a slot to every character, as the server does when that slot's character is
+    /// deleted. The server sends no new library for that, so the one held here would go on naming the slot.
+    /// </summary>
+    public void ReleaseSlot(int slot)
+    {
+        if (_library == null)
+            return;
+
+        var released = false;
+        for (var i = 0; i < _library.Count; i++)
+        {
+            if (_library[i].Slot != slot)
+                continue;
+
+            _library[i] = _library[i] with { Slot = null };
+            released = true;
+        }
+
+        if (released)
+            LibraryUpdated?.Invoke();
+    }
+
     private void OnLibrary(CustomMarkingLibraryEvent ev)
     {
         _library = ev.Entries;

@@ -43,9 +43,18 @@ switches, and saved choices are kept.
 
 - [`Content.Tests/_WG/MarkingGlow/MarkingGlowRulesTest.cs`](../../../Content.Tests/_WG/MarkingGlow/MarkingGlowRulesTest.cs)
 
+### Prototypes
+
+- [`Resources/Prototypes/_WG/MarkingGlow/shaders.yml`](../../../Resources/Prototypes/_WG/MarkingGlow/shaders.yml)
+
 ### Localization
 
 - [`Resources/Locale/en-US/_WG/MarkingGlow/marking-glow.ftl`](../../../Resources/Locale/en-US/_WG/MarkingGlow/marking-glow.ftl)
+
+### Textures
+
+- [`Resources/Textures/_WG/MarkingGlow/Shaders/displaced_unshaded.swsl`](../../../Resources/Textures/_WG/MarkingGlow/Shaders/displaced_unshaded.swsl)
+- [`Resources/Textures/_WG/MarkingGlow/Shaders/leg_marking_displaced_unshaded.swsl`](../../../Resources/Textures/_WG/MarkingGlow/Shaders/leg_marking_displaced_unshaded.swsl)
 
 ## Non-modular edits
 
@@ -56,7 +65,9 @@ switches, and saved choices are kept.
 - [`Content.Client/Lobby/UI/HumanoidProfileEditor.xaml`](../../../Content.Client/Lobby/UI/HumanoidProfileEditor.xaml)
   - glow switches, each under its hair picker
   - glowing eyes switch
-- [`Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs`](../../../Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs): a switch for each kind of hair the species has
+- [`Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs`](../../../Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs)
+  - drop the cvar subscription
+  - a switch for each kind of hair the species has
 - [`Content.Server.Database/Model.cs`](../../../Content.Server.Database/Model.cs): the markings, eyes and hair made to glow, ;-separated; empty for none.
 - [`Content.Server/Database/ServerDbBase.cs`](../../../Content.Server/Database/ServerDbBase.cs)
 - [`Content.Shared/Humanoid/SharedHumanoidAppearanceSystem.cs`](../../Humanoid/SharedHumanoidAppearanceSystem.cs)

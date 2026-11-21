@@ -25,8 +25,9 @@ public sealed class CustomMarkingVisualsTest
 {
     private static readonly string Hash = new('a', CustomMarkingRules.HashLength);
     private static readonly string OtherHash = new('b', CustomMarkingRules.HashLength);
-    private static readonly string MixedHash = new('c', CustomMarkingRules.HashLength);
-    private static readonly string GlowHash = new('d', CustomMarkingRules.HashLength);
+    // Hashes no other fixture stores art under: a pooled client keeps what it cut from a hash.
+    private static readonly string MixedHash = new('6', CustomMarkingRules.HashLength);
+    private static readonly string GlowHash = new('8', CustomMarkingRules.HashLength);
 
     [Test]
     public async Task ArtLoadsFromMemoryTest()
