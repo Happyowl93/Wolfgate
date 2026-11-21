@@ -214,6 +214,7 @@ nothing uses is kept, 0 to keep it forever).
   - exact opacity of one pixel, to split a marking along limb outlines
   - see ClickMapManager.IsOpaque.
 - [`Content.Client/Humanoid/HumanoidAppearanceSystem.cs`](../../../Content.Client/Humanoid/HumanoidAppearanceSystem.cs): the doll wears the profile's custom markings
+- [`Content.Client/Lobby/LobbyUIController.cs`](../../../Content.Client/Lobby/LobbyUIController.cs): its own markings go to every character
 - [`Content.Client/Lobby/UI/HumanoidProfileEditor.xaml`](../../../Content.Client/Lobby/UI/HumanoidProfileEditor.xaml): integrates the drawing library with the creator's marking cards
 - [`Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs`](../../../Content.Client/Lobby/UI/HumanoidProfileEditor.xaml.cs): its tiles face that way too
 - [`Content.Server.Database/Model.cs`](../../../Content.Server.Database/Model.cs)
