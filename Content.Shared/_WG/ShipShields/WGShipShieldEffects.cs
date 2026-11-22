@@ -16,6 +16,8 @@ public static class WGShipShieldEffects
     public const float GunResumeHeat = 0.85f;
     /// <summary>Seconds after the field's last hit for which hard heat stays under a raised field.</summary>
     public const float HardHeatHold = 30f;
+    /// <summary>How much faster a vent cools than a generator's fast rate, or a bare hull's.</summary>
+    public const float VentBoost = 2f;
 
     /// <summary>Returns full capacity bounded by overload and power demand limits.</summary>
     public static float EffectiveCapacity(float damageLimit, float maxDraw, float powerModifier, float damageExp)

@@ -200,7 +200,7 @@ public sealed partial class ShipShieldsSystem
     private void CoolWolfgateShip(EntityUid grid, WGShipHeatComponent hull, float amount, float ventBonus, bool keepsHard = true)
     {
         if (hull.Venting)
-            amount *= MathF.Max(1f, ventBonus);
+            amount *= WolfgateVentBonus(ventBonus);
         var most = keepsHard && _wgShieldTiming.CurTime - hull.LastHit < TimeSpan.FromSeconds(WGShipShieldEffects.HardHeatHold) &&
             TryComp<ShipShieldedComponent>(grid, out var shielded) && IsWolfgateShieldLive(shielded.Shield)
             ? hull.Heat - hull.Hard : hull.Heat;

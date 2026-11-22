@@ -78,7 +78,7 @@ public sealed class WGShipHeatTest
             Assert.That(emitter.Damage, Is.EqualTo(held - tick).Within(0.01f), "Left alone long enough, hard heat cools under the field too.");
             var stats = entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!;
             Assert.That(stats.Vents, Is.True);
-            Assert.That(stats.RechargePerSecond, Is.EqualTo(emitter.HealPerSecond * emitter.UnpoweredBonus));
+            Assert.That(stats.RechargePerSecond, Is.EqualTo(emitter.HealPerSecond * ShipShieldsSystem.WolfgateVentBonus(emitter.UnpoweredBonus)));
         });
         await pair.CleanReturnAsync();
     }
@@ -105,12 +105,13 @@ public sealed class WGShipHeatTest
             Assert.That(system.StartWolfgateVent(grid), Is.False, "A cold ship has nothing to vent.");
             Assert.That(controls.GetState(grid).CanVent, Is.False);
 
-            var tick = emitter.HealPerSecond * 1.5f * emitter.UnpoweredBonus;
+            var tick = emitter.HealPerSecond * 1.5f * ShipShieldsSystem.WolfgateVentBonus(emitter.UnpoweredBonus);
             emitter.Damage = tick * 2.5f;
             Assert.That(controls.GetState(grid).CanVent, Is.True);
             Assert.That(system.StartWolfgateVent(grid), Is.True);
             Assert.That(system.IsWolfgateShipVenting(grid), Is.True);
             Assert.That(emitter.Shield, Is.Null, "A vent drops the field.");
+            Assert.That(entities.HasComponent<WGShipVentingComponent>(grid), Is.True, "Radars are told the hull is venting.");
             Assert.That(Refused(entities, gun, user), Is.True, "A venting ship's guns can't fire.");
             Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.Zero, "A vent is not the collapse lock.");
             Assert.That(system.StartWolfgateVent(grid), Is.False);
@@ -136,6 +137,7 @@ public sealed class WGShipHeatTest
                 system.Update(1.5f);
             Assert.That(emitter.Damage, Is.Zero);
             Assert.That(system.IsWolfgateShipVenting(grid), Is.False, "The vent ends when no heat is left.");
+            Assert.That(entities.HasComponent<WGShipVentingComponent>(grid), Is.False);
             Assert.That(emitter.Shield, Is.Not.Null, "The field comes back by itself.");
             Assert.That(Refused(entities, gun, user), Is.False);
             Assert.That(controls.GetState(grid).VentSeconds, Is.Zero);
@@ -305,6 +307,49 @@ public sealed class WGShipHeatTest
             Assert.That(emitter.Damage, Is.EqualTo(before), "Firing through a deflector field adds no heat.");
             emitter.Damage = system.GetWolfgateShipHeat(grid).Capacity * 0.99f;
             Assert.That(Refused(entities, gun, user), Is.False, "A deflector never holds the guns.");
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task BareHullShowsItsHeatAndVentsWithNoGenerator()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var map = await pair.CreateTestMap();
+        await pair.Server.WaitAssertion(() =>
+        {
+            var entities = pair.Server.EntMan;
+            var grid = map.Grid.Owner;
+            var system = entities.System<ShipShieldsSystem>();
+            var controls = entities.System<WGShipShieldShuntSystem>();
+
+            Assert.That(controls.GetState(null).Hull, Is.False, "A console with no ship has no heat to show.");
+            var state = controls.GetState(grid);
+            Assert.That(state.Available, Is.False);
+            Assert.That(state.Hull, Is.True, "A ship with no generator still reports its hull.");
+            Assert.That(state.Heat, Is.Zero);
+            Assert.That(state.CanVent, Is.False, "A cold hull has nothing to vent.");
+
+            system.AddWolfgateShipHeat(grid, WGShipHeatComponent.HullCapacity / 2f);
+            var hull = entities.GetComponent<WGShipHeatComponent>(grid);
+            state = controls.GetState(grid);
+            Assert.That(state.Heat, Is.EqualTo(0.5f).Within(0.001f));
+            Assert.That(state.CanVent, Is.True);
+            Assert.That(system.StartWolfgateVent(grid), Is.True);
+            Assert.That(entities.HasComponent<WGShipVentingComponent>(grid), Is.True);
+            var rate = hull.Dissipation * ShipShieldsSystem.WolfgateVentBonus(hull.VentBonus);
+            Assert.That(rate, Is.GreaterThan(hull.Dissipation * hull.VentBonus), "A vent beats the hull's fast rate.");
+            Assert.That(controls.GetState(grid).VentSeconds, Is.EqualTo((int) MathF.Ceiling(hull.Heat / rate)));
+
+            var before = hull.Heat;
+            system.Update(1f);
+            system.Update(1f);
+            Assert.That(before - hull.Heat, Is.GreaterThanOrEqualTo(MathF.Min(before, rate)), "A venting hull cools at its vent rate.");
+            for (var i = 0; i < 6 && hull.Venting; i++)
+                system.Update(1f);
+            Assert.That(hull.Heat, Is.Zero);
+            Assert.That(system.IsWolfgateShipVenting(grid), Is.False);
+            Assert.That(entities.HasComponent<WGShipVentingComponent>(grid), Is.False, "The radar mark goes with the vent.");
         });
         await pair.CleanReturnAsync();
     }

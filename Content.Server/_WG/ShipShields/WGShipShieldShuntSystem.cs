@@ -10,6 +10,7 @@ using Content.Shared.Access.Systems;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Shuttles.BUIStates;
 using Content.Shared.Shuttles.Components;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Physics.Components;
 using System.Linq;
 using Content.Server.Power.Components;
@@ -133,7 +134,8 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
             WGShipShieldGeneratorStats.Same(previous.Stats, state.Stats) &&
             previous.RecoveryStatus == state.RecoveryStatus && previous.RecoverySeconds == state.RecoverySeconds &&
             previous.GunLockSeconds == state.GunLockSeconds && previous.GunsHeld == state.GunsHeld &&
-            previous.VentSeconds == state.VentSeconds && previous.CanVent == state.CanVent &&
+            previous.VentSeconds == state.VentSeconds && previous.CanVent == state.CanVent && previous.Hull == state.Hull &&
+            MathF.Round(previous.Heat * 100f) == MathF.Round(state.Heat * 100f) &&
             MathF.Round(previous.HardHeat * 100f) == MathF.Round(state.HardHeat * 100f) &&
             MathF.Round(previous.Health * 100f) == MathF.Round(state.Health * 100f) &&
             (previous.Health < 0.1f) == (state.Health < 0.1f) &&
@@ -158,7 +160,7 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
 
     private void OnGunneryVent(Entity<FireControlConsoleComponent> ent, ref WGShipShieldVentMessage args)
     {
-        if (TryGetGunneryGrid(ent.Owner, args.Actor) is { } grid)
+        if (TryGetGunneryGrid(ent.Owner, args.Actor, false) is { } grid)
             _shields.StartWolfgateVent(grid);
     }
 
@@ -168,11 +170,11 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
             _shields.SetWolfgateShieldEnabled(grid, args.Enabled);
     }
 
-    /// <summary>A gunner may work the shields of the ship their powered, anchored console sits on, if it has any.</summary>
-    private EntityUid? TryGetGunneryGrid(EntityUid uid, EntityUid actor)
+    /// <summary>A gunner may work the shields of the ship their powered, anchored console sits on, if it has any; a vent needs none.</summary>
+    private EntityUid? TryGetGunneryGrid(EntityUid uid, EntityUid actor, bool needsGenerator = true)
     {
         return GunneryGrid(uid) is { } grid && _blocker.CanInteract(actor, uid) && _access.IsAllowed(actor, uid) &&
-            HasShieldGenerator(grid) ? grid : null;
+            (!needsGenerator || HasShieldGenerator(grid)) ? grid : null;
     }
 
     private void OnGeneratorOpened(Entity<ShipShieldEmitterComponent> ent, ref BoundUIOpenedEvent args)
@@ -222,7 +224,7 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
 
     private void OnHelmVent(Entity<ShuttleConsoleComponent> ent, ref WGShipShieldVentMessage args)
     {
-        if (TryGetHelmGrid(ent, args.Actor) is { } grid)
+        if (TryGetHelmGrid(ent, args.Actor, false) is { } grid)
             _shields.StartWolfgateVent(grid);
     }
 
@@ -238,7 +240,7 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
             _shields.RequestWolfgateShieldShunt(grid, args.DirectionRadians, args.Concentration, args.ArcRadians);
     }
 
-    private EntityUid? TryGetHelmGrid(Entity<ShuttleConsoleComponent> ent, EntityUid actor)
+    private EntityUid? TryGetHelmGrid(Entity<ShuttleConsoleComponent> ent, EntityUid actor, bool needsGenerator = true)
     {
         if (!TryComp<PilotComponent>(actor, out var pilot) || pilot.Console != ent.Owner ||
             !Transform(ent).Anchored || !this.IsPowered(ent, EntityManager) ||
@@ -247,7 +249,7 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
         var selected = new ConsoleShuttleEvent { Console = ent.Owner };
         RaiseLocalEvent(ent.Owner, ref selected);
         if (selected.Console is not { } console || IsLocked(console) || !Transform(console).Anchored || !this.IsPowered(console, EntityManager) ||
-            Transform(console).GridUid is not { } grid || !HasShieldGenerator(grid))
+            Transform(console).GridUid is not { } grid || needsGenerator && !HasShieldGenerator(grid))
             return null;
         return grid;
     }
@@ -342,6 +344,10 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
             recoveryStatus = WGShipShieldRecoveryStatus.FtlLocked;
             recoverySeconds = -1;
         }
+        var hull = grid is { } hullGrid && !TerminatingOrDeleted(hullGrid) && HasComp<MapGridComponent>(hullGrid);
+        var (held, capacity) = hull ? _shields.GetWolfgateShipHeat(grid!.Value) : (0f, 0f);
+        // With an emitter the gauge reads its damage; a bare hull has only its own heat to show.
+        var heat = installed != null ? 1f - health : capacity > 0f ? Math.Clamp(held / capacity, 0f, 1f) : 0f;
         return new WGShipShieldShuntState(installed != null, active, health,
             allocation?.DirectionRadians ?? MathF.PI / 2f, allocation?.Concentration ?? 0f,
             allocation?.ArcRadians ?? MathF.PI / 2f, allocation?.Enabled ?? true)
@@ -354,16 +360,11 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
             RecoverySeconds = recoverySeconds,
             GunLockSeconds = grid is { } lockedGrid ? _shields.GetWolfgateGunLockSeconds(lockedGrid) : 0,
             GunsHeld = grid is { } heldGrid && _shields.IsWolfgateShipHeatHeld(heldGrid),
-            HardHeat = grid is { } hotGrid ? HardHeat(hotGrid, health) : 0f,
-            VentSeconds = grid is { } ventingGrid ? _shields.GetWolfgateVentSeconds(ventingGrid) : 0,
-            CanVent = grid is { } ventGrid && _shields.CanWolfgateVent(ventGrid),
+            HardHeat = hull && held > 0f ? Math.Clamp(heat * _shields.GetWolfgateShipHardHeat(grid!.Value) / held, 0f, 1f) : 0f,
+            VentSeconds = hull ? _shields.GetWolfgateVentSeconds(grid!.Value) : 0,
+            CanVent = hull && _shields.CanWolfgateVent(grid!.Value),
+            Hull = hull,
+            Heat = heat,
         };
-    }
-
-    /// <summary>The hard part of the heat gauge: the same share of the reading as hard heat is of the hull's heat.</summary>
-    private float HardHeat(EntityUid grid, float health)
-    {
-        var (heat, _) = _shields.GetWolfgateShipHeat(grid);
-        return heat > 0f ? Math.Clamp((1f - health) * _shields.GetWolfgateShipHardHeat(grid) / heat, 0f, 1f) : 0f;
     }
 }

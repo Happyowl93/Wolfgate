@@ -6,6 +6,7 @@ using Content.Server._WG.ShipShields;
 using Content.Server.Shuttles.Components;
 using Content.Shared._Crescent.ShipShields;
 using Content.Shared._Mono.FireControl;
+using Content.Shared._WG.ShipShields;
 using Content.Shared.Popups;
 using Content.Shared.Shuttles.Components;
 using Robust.Shared.Map;
@@ -81,6 +82,8 @@ public sealed partial class ShipShieldsSystem
         hull.Venting = true;
         hull.NextPlume = _wgShieldTiming.CurTime;
         _wgVenting.Add(grid);
+        // Clients draw the vent on radar from this.
+        EnsureComp<WGShipVentingComponent>(grid);
         LowerWolfgateShield(grid, "vent");
         FindWolfgatePlumes(grid, hull);
         PlayWolfgateHullSound(grid, hull.VentSound);
@@ -93,6 +96,13 @@ public sealed partial class ShipShieldsSystem
         hull.Venting = false;
         hull.Plumes.Clear();
         _wgVenting.Remove(grid);
+        RemComp<WGShipVentingComponent>(grid);
+    }
+
+    /// <summary>How many times its plain rate a venting hull cools at, from its generator's fast-cooling bonus or its own.</summary>
+    public static float WolfgateVentBonus(float bonus)
+    {
+        return MathF.Max(1f, bonus) * WGShipShieldEffects.VentBoost;
     }
 
     /// <summary>Whole seconds a venting ship still needs; 0 when it isn't venting.</summary>
@@ -101,10 +111,10 @@ public sealed partial class ShipShieldsSystem
         if (!IsWolfgateShipVenting(grid))
             return 0;
         var hull = Comp<WGShipHeatComponent>(grid);
-        var rate = hull.Dissipation * MathF.Max(1f, hull.VentBonus);
+        var rate = hull.Dissipation * WolfgateVentBonus(hull.VentBonus);
         if (hull.Cooler is { } cooler && _wgHeatSinks.TryGetValue(cooler, out var sink) && sink.Grid == grid &&
             TryComp<ShipShieldEmitterComponent>(cooler, out var emitter))
-            rate = emitter.HealPerSecond * MathF.Max(1f, emitter.UnpoweredBonus);
+            rate = emitter.HealPerSecond * WolfgateVentBonus(emitter.UnpoweredBonus);
         return rate > 0f && float.IsFinite(rate) ? Math.Max(1, (int) MathF.Ceiling(hull.Heat / rate)) : -1;
     }
 

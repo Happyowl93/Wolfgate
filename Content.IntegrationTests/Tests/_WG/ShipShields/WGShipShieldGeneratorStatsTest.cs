@@ -36,7 +36,8 @@ public sealed class WGShipShieldGeneratorStatsTest
             Assert.That(stats.Capacity, Is.EqualTo(85037.55f).Within(1f), "Power demand forces recharge below the damage overload threshold.");
             Assert.That(stats.DamageLimit, Is.EqualTo(180000f));
             Assert.That(stats.HealPerSecond, Is.EqualTo(emitter.HealPerSecond));
-            Assert.That(stats.RechargePerSecond, Is.EqualTo(emitter.HealPerSecond * emitter.UnpoweredBonus));
+            Assert.That(stats.RechargePerSecond, Is.EqualTo(emitter.HealPerSecond * ShipShieldsSystem.WolfgateVentBonus(emitter.UnpoweredBonus)),
+                "A ship generator vents at its fast rate, boosted.");
             Assert.That(stats.BasePowerWatts, Is.EqualTo(emitter.BaseDraw));
             Assert.That(stats.MaximumPowerWatts, Is.EqualTo(emitter.BaseDraw + emitter.MaxDraw));
             Assert.That(stats.OverloadSeconds, Is.EqualTo(emitter.DamageOverloadTimePunishment));

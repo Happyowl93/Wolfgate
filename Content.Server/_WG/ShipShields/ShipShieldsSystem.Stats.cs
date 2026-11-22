@@ -13,7 +13,8 @@ public sealed partial class ShipShieldsSystem
         var cost = CompOrNull<WGShipShieldCostComponent>(uid);
         return new WGShipShieldGeneratorStats(Name(uid),
             WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp),
-            emitter.DamageLimit, emitter.HealPerSecond, emitter.HealPerSecond * emitter.UnpoweredBonus,
+            emitter.DamageLimit, emitter.HealPerSecond,
+            emitter.HealPerSecond * (cost == null ? emitter.UnpoweredBonus : WolfgateVentBonus(emitter.UnpoweredBonus)),
             emitter.BaseDraw, emitter.BaseDraw + emitter.MaxDraw, emitter.DamageOverloadTimePunishment)
         {
             ThrustFactor = cost == null ? 1f : Math.Clamp(cost.ThrustFactor, MinShieldMobility, 1f),

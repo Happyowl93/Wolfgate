@@ -40,7 +40,7 @@ public sealed partial class ShipShieldsSystem
                 overload -= EmitterUpdateRate;
             var healed = emitter.HealPerSecond * EmitterUpdateRate;
             if (ship ? venting : recharging)
-                healed *= emitter.UnpoweredBonus;
+                healed *= ship ? WolfgateVentBonus(emitter.UnpoweredBonus) : emitter.UnpoweredBonus;
             var ventedThisTick = venting;
             damage -= healed;
             if (damage <= 0f)

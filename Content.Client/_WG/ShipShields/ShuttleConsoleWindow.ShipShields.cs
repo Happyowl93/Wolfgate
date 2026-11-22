@@ -43,7 +43,9 @@ public sealed partial class ShuttleConsoleWindow
     private void WgShieldUpdateState(WGShipShieldShuntState? state, Angle? helmRotation)
     {
         _wgShieldHelmRotation = helmRotation;
-        _shieldModeButton.Visible = state is { Available: true };
+        // A ship with no generator keeps the page for its heat and vent.
+        _shieldModeButton.Visible = state is { Available: true } or { Hull: true };
+        _shieldModeButton.Text = Loc.GetString(state is { Available: false, Hull: true } ? "wg-shield-helm-tab-heat" : "wg-shield-helm-tab");
         if (!_shieldModeButton.Visible && _mode == ShuttleConsoleMode.Shields && !WgCockpitActive)
         {
             NavModeButton.Pressed = true;

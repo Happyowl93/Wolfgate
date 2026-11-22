@@ -147,6 +147,10 @@ public sealed class WGShipShieldShuntState
     public int VentSeconds;
     /// <summary>Whether the ship could start a vent now.</summary>
     public bool CanVent;
+    /// <summary>The console speaks for a ship, which holds heat and can vent it with or without an emitter.</summary>
+    public bool Hull;
+    /// <summary>The ship's heat as a share of what it can hold.</summary>
+    public float Heat;
 
     /// <summary>Creates an authoritative snapshot for all helms on the ship.</summary>
     public WGShipShieldShuntState(bool available, bool active, float health, float directionRadians, float concentration, float arcRadians, bool enabled = true)
