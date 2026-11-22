@@ -36,7 +36,7 @@ public sealed partial class WGShipShieldShuntScreen : IWGCockpitOptionalPage
             arc.Name = originalName;
             _wgCockpitCompact = false;
         });
-        var controls = InstrumentTheme.Column(lease.Take(_enabled),
+        var controls = InstrumentTheme.Column(lease.Take(_enabled), lease.Take(_vent),
             InstrumentTheme.Row(InstrumentTheme.Label("wg-cockpit-shield-arc"), arc),
             allocation, lease.Take(_concentration), lease.Take(_heat), lease.Take(_gunLock, restoreVisibility: false));
         controls.HorizontalExpand = true;

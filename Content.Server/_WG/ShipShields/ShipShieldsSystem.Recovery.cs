@@ -6,11 +6,12 @@ namespace Content.Server._Crescent.ShipShields;
 public sealed partial class ShipShieldsSystem
 {
     /// <summary>
-    /// Estimates automatic startup with unchanged power and no further damage. A generator that vents sheds heat at its
-    /// fast rate for as long as its field is down.
+    /// Estimates automatic startup with unchanged power and no further damage. A ship's generator cools at its fast
+    /// rate only while the ship vents, and a vent holds the field down until no heat is left.
     /// </summary>
     public static (WGShipShieldRecoveryStatus Status, int Seconds) EstimateWolfgateShieldRecovery(
-        ShipShieldEmitterComponent emitter, bool powered, bool enabled = true, bool disabled = false, bool vents = false)
+        ShipShieldEmitterComponent emitter, bool powered, bool enabled = true, bool disabled = false, bool ship = false,
+        bool venting = false)
     {
         if (!enabled)
             return (WGShipShieldRecoveryStatus.Lowered, -1);
@@ -38,28 +39,30 @@ public sealed partial class ShipShieldsSystem
             if (overload > 0f)
                 overload -= EmitterUpdateRate;
             var healed = emitter.HealPerSecond * EmitterUpdateRate;
-            if (recharging || vents && emitter.Shield is null)
+            if (ship ? venting : recharging)
                 healed *= emitter.UnpoweredBonus;
+            var ventedThisTick = venting;
             damage -= healed;
             if (damage <= 0f)
             {
                 damage = 0f;
                 recharging = false;
+                venting = false;
             }
             if (damage > emitter.DamageLimit)
                 overload = emitter.DamageOverloadTimePunishment;
             if (tick == 0)
             {
                 var overloaded = overload >= 1f;
-                status = rechargeThisTick
+                status = ventedThisTick ? WGShipShieldRecoveryStatus.Venting : rechargeThisTick
                     ? overloaded ? WGShipShieldRecoveryStatus.RechargingAndOverloaded : WGShipShieldRecoveryStatus.Recharging
                     : overloaded ? WGShipShieldRecoveryStatus.Overloaded : WGShipShieldRecoveryStatus.Ready;
             }
             if (!float.IsFinite(damage) || !float.IsFinite(overload) || !float.IsFinite(healed))
                 return (status, -1);
-            if (!recharging && overload < 1f)
+            if (!recharging && !venting && overload < 1f)
                 return (status, (int) Math.Ceiling(elapsed));
-            if (damage > 0f && healed <= 0f && (recharging || damage > emitter.DamageLimit))
+            if (damage > 0f && healed <= 0f && (recharging || venting || damage > emitter.DamageLimit))
                 return (status, -1);
             elapsed += EmitterUpdateRate;
         }

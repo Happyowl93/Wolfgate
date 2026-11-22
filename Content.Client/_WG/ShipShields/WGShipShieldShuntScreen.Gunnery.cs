@@ -30,6 +30,7 @@ public sealed partial class WGShipShieldShuntScreen
         _heat.MinHeight = 12;
         AddChild(dial);
         AddChild(lease.Take(_enabled));
+        AddChild(lease.Take(_vent));
         AddChild(InstrumentTheme.Row(InstrumentTheme.Label("wg-cockpit-shield-arc"), arc));
         AddChild(allocation);
         AddChild(lease.Take(_concentration));

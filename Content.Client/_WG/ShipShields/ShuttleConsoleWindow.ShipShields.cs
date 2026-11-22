@@ -11,6 +11,8 @@ public sealed partial class ShuttleConsoleWindow
     private Button _shieldModeButton = default!;
     /// <summary>The pilot changes shield deployment.</summary>
     public event Action<bool>? ShieldEnabledRequested;
+    /// <summary>The pilot vents the ship's heat.</summary>
+    public event Action? ShieldVentRequested;
     /// <summary>The pilot commits a shield allocation.</summary>
     public event Action<float, float, float>? ShieldShuntRequested;
 
@@ -28,6 +30,7 @@ public sealed partial class ShuttleConsoleWindow
         _shieldScreen.AllocationRequested += (direction, concentration, arc) =>
             ShieldShuntRequested?.Invoke(direction, concentration, arc);
         _shieldScreen.OnSetEnabled += enabled => ShieldEnabledRequested?.Invoke(enabled);
+        _shieldScreen.OnVent += () => ShieldVentRequested?.Invoke();
         Contents.AddChild(_shieldScreen);
     }
 

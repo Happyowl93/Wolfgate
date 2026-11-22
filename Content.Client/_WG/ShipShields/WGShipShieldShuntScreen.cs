@@ -29,6 +29,7 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
     private readonly Button _reset;
     private readonly ShieldDial _dial;
     private readonly Button _enabled;
+    private readonly Button _vent;
     private readonly Button _stats;
     private WGShipShieldStatsWindow? _statsWindow;
     private float _warningTime;
@@ -48,6 +49,9 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
 
     /// <summary>Requests a change to shield deployment.</summary>
     public event Action<bool>? OnSetEnabled;
+
+    /// <summary>Requests a vent of the ship's heat.</summary>
+    public event Action? OnVent;
 
     /// <summary>Creates a helm-relative bearing dial, allocation slider and protected-arc controls.</summary>
     public WGShipShieldShuntScreen()
@@ -80,11 +84,21 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
             if (_state is { Available: true })
                 OnSetEnabled?.Invoke(!_state.Enabled);
         };
+        heading.AddChild(_vent = new Button
+        {
+            Text = Loc.GetString("wg-shield-helm-vent"), ToolTip = Loc.GetString("wg-shield-helm-vent-help"),
+            MinHeight = 36, Disabled = true,
+        });
+        _vent.OnPressed += _ =>
+        {
+            if (_state is { Available: true, CanVent: true })
+                OnVent?.Invoke();
+        };
         header.AddChild(heading);
         header.AddChild(_status = new RichTextLabel());
-        header.AddChild(_heat = new ProgressBar
+        header.AddChild(_heat = new HeatGauge
         {
-            MinValue = 0f, MaxValue = 1f, MinHeight = 22,
+            MinValue = 0f, MaxValue = 1f, MinHeight = 22, ToolTip = Loc.GetString("wg-shield-helm-hard-heat-help", ("hold", WGShipShieldEffects.HardHeatHold)),
             BackgroundStyleBoxOverride = new StyleBoxFlat { BackgroundColor = Color.FromHex("#1B303C") },
             ForegroundStyleBoxOverride = new StyleBoxFlat { BackgroundColor = Color.FromHex("#58D6EC") },
         });
@@ -231,6 +245,8 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
         _helmRotation = helmRotation;
         _dial.Available = state is { Available: true };
         _heat.Value = state is { Available: true } ? 1f - Math.Clamp(state.Health, 0f, 1f) : 0f;
+        ((HeatGauge) _heat).Hard = state is { Available: true } ? Math.Clamp(state.HardHeat, 0f, _heat.Value) : 0f;
+        _vent.Disabled = state is not { Available: true, CanVent: true };
         _enabled.Disabled = state is not { Available: true };
         _enabled.Text = Loc.GetString(state is { Enabled: true } ? "wg-shield-helm-disable" : "wg-shield-helm-enable");
         UpdateHealthAppearance();
@@ -244,11 +260,13 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
                 : Loc.GetString("wg-shield-helm-unavailable");
         UpdateRecovery(state);
         var locked = state is { Available: true, GunLockSeconds: > 0 };
-        _gunLock.Visible = locked || state is { Available: true, GunsHeld: true };
+        var venting = state is { Available: true } && state.VentSeconds != 0;
+        _gunLock.Visible = locked || venting || state is { Available: true, GunsHeld: true };
         if (_gunLock.Visible)
         {
-            _gunLock.Text = locked ? Loc.GetString("wg-shield-gun-lock", ("seconds", state!.GunLockSeconds)) : Loc.GetString("wg-shield-gun-hold");
-            _gunLock.ToolTip = Loc.GetString(locked ? "wg-shield-gun-lock-help" : "wg-shield-gun-hold-help");
+            _gunLock.Text = locked ? Loc.GetString("wg-shield-gun-lock", ("seconds", state!.GunLockSeconds))
+                : venting ? VentCaption(state!.VentSeconds) : Loc.GetString("wg-shield-gun-hold");
+            _gunLock.ToolTip = Loc.GetString(locked ? "wg-shield-gun-lock-help" : venting ? "wg-shield-venting-help" : "wg-shield-gun-hold-help");
         }
         var acknowledged = state != null && !_queued &&
             MathF.Abs(MathF.Atan2(MathF.Sin(state.TargetDirectionRadians - DesiredDirection),
@@ -281,6 +299,12 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
         Refresh();
     }
 
+    /// <summary>The warning shown while the ship vents, with the time left when the server could tell it.</summary>
+    public static string VentCaption(int seconds)
+    {
+        return seconds > 0 ? Loc.GetString("wg-shield-venting", ("seconds", seconds)) : Loc.GetString("wg-shield-venting-untimed");
+    }
+
     /// <summary>Shows the server's estimate or the condition preventing automatic recovery.</summary>
     private void UpdateRecovery(WGShipShieldShuntState? state)
     {
@@ -305,6 +329,7 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
             WGShipShieldRecoveryStatus.Recharging => "wg-shield-recovery-recharging",
             WGShipShieldRecoveryStatus.Overloaded => "wg-shield-recovery-overloaded",
             WGShipShieldRecoveryStatus.RechargingAndOverloaded => "wg-shield-recovery-both",
+            WGShipShieldRecoveryStatus.Venting => "wg-shield-recovery-venting",
             _ => "wg-shield-recovery-ready",
         };
         var time = Loc.GetString("wg-shield-recovery-time", ("minutes", state.RecoverySeconds / 60),
@@ -353,6 +378,8 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
                 ? Color.InterpolateBetween(WGInstrumentTheme.Skin.Ink, WGInstrumentTheme.Red, 0.3f + 0.7f * pulse)
                 : Color.InterpolateBetween(new Color(0.4f, 0.02f, 0.03f), new Color(1f, 0.05f, 0.08f), pulse);
         }
+        // Hard heat, which stays while the field is up, shows brighter than the soft heat that goes by itself.
+        ((HeatGauge) _heat).HardColor = Color.InterpolateBetween(tint, Color.White, 0.45f);
         if (_heat.ForegroundStyleBoxOverride is StyleBoxFlat fill)
             fill.BackgroundColor = tint;
         if (_heat.BackgroundStyleBoxOverride is StyleBoxFlat background)
@@ -418,6 +445,27 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
         _draft.Text = Loc.GetString(adjusting ? "wg-shield-helm-adjusting-help" : "wg-shield-helm-live");
         _previewStatus.Text = Loc.GetString(adjusting ? "wg-shield-helm-adjusting" : "wg-shield-helm-current");
         _previewStatus.Modulate = adjusting ? Color.Orange : Color.FromHex("#83DCEB");
+    }
+
+    /// <summary>A heat gauge whose hard part, the heat that stays while the field is up, is drawn brighter and ends in a notch.</summary>
+    private sealed class HeatGauge : ProgressBar
+    {
+        /// <summary>The hard part of the reading, on the gauge's own scale.</summary>
+        public float Hard;
+
+        /// <summary>The colour of the hard part.</summary>
+        public Color HardColor = Color.White;
+
+        protected override void Draw(DrawingHandleScreen handle)
+        {
+            base.Draw(handle);
+            var width = PixelWidth * Math.Clamp(Hard, 0f, 1f);
+            if (width < 1f)
+                return;
+            handle.DrawRect(UIBox2.FromDimensions(0, 0, width, PixelHeight), HardColor);
+            var notch = MathF.Max(1f, MathF.Round(2 * UIScale));
+            handle.DrawRect(UIBox2.FromDimensions(MathF.Max(0f, width - notch), 0, notch, PixelHeight), Color.White);
+        }
     }
 
     /// <summary>Stacks the allocation panels, or splits the last one into a second column when given enough width.</summary>

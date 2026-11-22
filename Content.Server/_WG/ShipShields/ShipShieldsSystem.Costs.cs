@@ -31,6 +31,7 @@ public sealed partial class ShipShieldsSystem
         SubscribeLocalEvent<ShipShieldedComponent, GetThermalSignatureEvent>(OnWolfgateShieldSignature);
         SubscribeLocalEvent<FireControllableComponent, AttemptShootEvent>(OnWolfgateLockedGunShoot);
         InitializeWolfgateShipHeat();
+        InitializeWolfgateVents();
     }
 
     /// <summary>The cost component of the generator holding a ship's raised field, if it has one.</summary>
@@ -89,25 +90,8 @@ public sealed partial class ShipShieldsSystem
             }
         }
 
-        var message = Loc.GetString("wg-shield-gun-lock-popup", ("seconds", MathF.Round(cost.GunLockout, 1)));
-        var consoles = EntityQueryEnumerator<FireControlConsoleComponent, TransformComponent>();
-        while (consoles.MoveNext(out var uid, out _, out var transform))
-        {
-            if (transform.GridUid != grid)
-                continue;
-            foreach (var actor in _wgShieldUi.GetActors(uid, FireControlConsoleUiKey.Key))
-                _wgShieldPopup.PopupEntity(message, uid, actor, PopupType.LargeCaution);
-        }
-
-        // Pilots fire from the helm in the cockpit view, so they are told too.
-        var helms = EntityQueryEnumerator<ShuttleConsoleComponent, TransformComponent>();
-        while (helms.MoveNext(out var uid, out _, out var transform))
-        {
-            if (transform.GridUid != grid)
-                continue;
-            foreach (var actor in _wgShieldUi.GetActors(uid, ShuttleConsoleUiKey.Key))
-                _wgShieldPopup.PopupEntity(message, uid, actor, PopupType.LargeCaution);
-        }
+        PopupWolfgateShipConsoles(grid,
+            Loc.GetString("wg-shield-gun-lock-popup", ("seconds", MathF.Round(cost.GunLockout, 1))), PopupType.LargeCaution);
     }
 
     /// <summary>Whole seconds until a ship's guns unlock after a field collapse; 0 when they are free.</summary>
@@ -126,7 +110,7 @@ public sealed partial class ShipShieldsSystem
     {
         if (args.Cancelled || Transform(gun).GridUid is not { } grid)
             return;
-        if (_wgGunLocks.Count > 0 && GetWolfgateGunLockSeconds(grid) > 0 || IsWolfgateShipHeatHeld(grid))
+        if (IsWolfgateShipVenting(grid) || _wgGunLocks.Count > 0 && GetWolfgateGunLockSeconds(grid) > 0 || IsWolfgateShipHeatHeld(grid))
             args.Cancelled = true;
     }
 }

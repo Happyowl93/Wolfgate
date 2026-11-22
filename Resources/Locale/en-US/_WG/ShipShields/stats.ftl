@@ -7,5 +7,5 @@ wg-shield-examine-deflector = Deflector field: solid rounds pass through with { 
 wg-shield-examine-arc = Field arc: { $arc }° at most. Everything outside the arc is open.
 wg-shield-examine-cost = While raised: { $thrust }% less thrust, { $turn }% slower turning, and a hotter trace on long-range sensors that flares with every hit.
 wg-shield-examine-gun-lock = A field overrun by heat collapses and locks the ship's guns for { $seconds } seconds. Lowering it yourself does not.
-wg-shield-examine-cooling = Cooling: { $online } heat/s with the field raised; { $offline } heat/s with it down.
+wg-shield-examine-cooling = Cooling: { $online } heat/s, or { $offline } heat/s while venting. Heat the raised field absorbed stays until { $hold } seconds pass without a hit, the field is lowered or the ship vents.
 wg-shield-examine-fire-heat = Firing through the raised field heats the ship by { $percent }% of each shot's damage. Guns hold fire while the ship is too hot.

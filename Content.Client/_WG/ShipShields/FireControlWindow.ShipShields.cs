@@ -22,6 +22,7 @@ public sealed partial class FireControlWindow
         _wgShieldScreen.AllocationRequested += (direction, concentration, arc) =>
             CombatMessage?.Invoke(new WGShipShieldSetShuntMessage(direction, concentration, arc));
         _wgShieldScreen.OnSetEnabled += enabled => CombatMessage?.Invoke(new WGShipShieldSetEnabledMessage(enabled));
+        _wgShieldScreen.OnVent += () => CombatMessage?.Invoke(new WGShipShieldVentMessage());
 
         var panel = WGInstrumentTheme.Panel("wg-shield-helm-tab", _wgShieldScreen.WgGunneryShield(), true);
         panel.Name = "WgGunneryShields";

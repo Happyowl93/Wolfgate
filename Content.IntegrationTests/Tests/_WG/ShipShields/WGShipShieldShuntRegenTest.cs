@@ -27,7 +27,9 @@ public sealed class WGShipShieldShuntRegenTest
 
             float Heal()
             {
-                emitter.Damage = 10000f;
+                // Heat from the ship itself; what the field absorbs would stay while it is up.
+                emitter.Damage = 0f;
+                shields.AddWolfgateShipHeat(map.Grid.Owner, 10000f);
                 emitter.Accumulator = 0f;
                 shields.Update(1.5f);
                 return 10000f - emitter.Damage;

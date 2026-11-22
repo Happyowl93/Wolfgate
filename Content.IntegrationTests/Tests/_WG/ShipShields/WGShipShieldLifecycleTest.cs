@@ -110,13 +110,14 @@ public sealed class WGShipShieldLifecycleTest
             power.Powered = true;
             if (exactZero)
             {
-                emitter.Damage = emitter.HealPerSecond * 1.5f * emitter.UnpoweredBonus;
+                emitter.Damage = emitter.HealPerSecond * 1.5f;
                 system.Update(1.5f);
                 Assert.That(emitter.Damage, Is.Zero);
                 Assert.That(emitter.Recharging, Is.False, "Exact zero completes recharge immediately.");
                 Assert.That(emitter.Shield, Is.Not.Null);
             }
-            for (var i = 0; i < 40 && emitter.Shield == null; i++)
+            // With no vent called, a ship generator cools at its plain rate.
+            for (var i = 0; i < 80 && emitter.Shield == null; i++)
                 system.Update(1.5f);
             Assert.That(emitter.Damage, Is.Zero);
             Assert.That(emitter.Recharging, Is.False);

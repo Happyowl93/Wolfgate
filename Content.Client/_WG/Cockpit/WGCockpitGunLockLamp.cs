@@ -10,15 +10,15 @@ using Robust.Shared.Timing;
 
 namespace Content.Client._WG.Cockpit;
 
-/// <summary>A flashing lamp over the cockpit view while a shield collapse has the ship's guns locked, or heat has them holding fire.</summary>
+/// <summary>A flashing lamp over the cockpit view while the ship's guns can't fire: locked by a shield collapse, silent for a vent, or held by heat.</summary>
 public sealed partial class WGCockpitGunLockLamp : Control
 {
     /// <summary>The size the cockpit gives the lamp when there is room.</summary>
     public static readonly Vector2 Size = new(240, 44);
 
     [Dependency] private IGameTiming _timing = default!;
-    private readonly Func<(int Seconds, bool Held)> _read;
-    private (int Seconds, bool Held) _shown;
+    private readonly Func<(int Seconds, bool Held, int Vent)> _read;
+    private (int Seconds, bool Held, int Vent) _shown;
     private string _caption = string.Empty;
     private string? _fontSkin;
     private Font _font = default!;
@@ -29,8 +29,11 @@ public sealed partial class WGCockpitGunLockLamp : Control
     /// <summary>Whether the ship is too hot to fire through its raised field.</summary>
     public bool Held => _read().Held;
 
+    /// <summary>Whether the ship is venting.</summary>
+    public bool Venting => _read().Vent != 0;
+
     /// <summary>Creates a lamp that never takes the mouse, so aiming and firing pass through it.</summary>
-    public WGCockpitGunLockLamp(Func<(int Seconds, bool Held)> read)
+    public WGCockpitGunLockLamp(Func<(int Seconds, bool Held, int Vent)> read)
     {
         IoCManager.InjectDependencies(this);
         _read = read;
@@ -44,12 +47,14 @@ public sealed partial class WGCockpitGunLockLamp : Control
     public void Refresh()
     {
         var warning = _read();
-        Visible = warning.Seconds > 0 || warning.Held;
+        Visible = warning.Seconds > 0 || warning.Held || warning.Vent != 0;
         if (warning == _shown)
             return;
         _shown = warning;
         if (warning.Seconds > 0)
             _caption = Loc.GetString("wg-shield-gun-lock", ("seconds", warning.Seconds));
+        else if (warning.Vent != 0)
+            _caption = Content.Client._WG.ShipShields.WGShipShieldShuntScreen.VentCaption(warning.Vent);
         else if (warning.Held)
             _caption = Loc.GetString("wg-shield-gun-hold");
     }
@@ -66,7 +71,7 @@ public sealed partial class WGCockpitGunLockLamp : Control
             _fontSkin = skin.Id;
         }
         var lit = _timing.RealTime.TotalSeconds % 0.5 < 0.3;
-        // A lock is a fault and shows red; a heat hold clears itself and shows amber.
+        // A lock is a fault and shows red; a vent or a heat hold clears itself and shows amber.
         var lamp = _shown.Seconds > 0 ? skin.Danger : skin.Caution;
         var inner = WGConsoleAnnunciator.Face(handle, PixelSizeBox, UIScale, lamp, lit);
         var color = lit ? WGInstrumentTheme.Digital ? lamp : skin.Ink : skin.Text;

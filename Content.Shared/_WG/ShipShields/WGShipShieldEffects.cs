@@ -14,6 +14,8 @@ public static class WGShipShieldEffects
     public const float GunHoldHeat = 0.95f;
     /// <summary>Share of its heat capacity a held ship must cool below before its guns fire again.</summary>
     public const float GunResumeHeat = 0.85f;
+    /// <summary>Seconds after the field's last hit for which hard heat stays under a raised field.</summary>
+    public const float HardHeatHold = 30f;
 
     /// <summary>Returns full capacity bounded by overload and power demand limits.</summary>
     public static float EffectiveCapacity(float damageLimit, float maxDraw, float powerModifier, float damageExp)

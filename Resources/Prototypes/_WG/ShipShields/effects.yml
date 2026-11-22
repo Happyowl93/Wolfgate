@@ -20,3 +20,27 @@
   - type: Tag
     tags:
     - HideContextMenu
+
+# A plume of heat leaving the edge of a venting hull. It drifts the way the entity faces and is gone when its animation ends.
+- type: entity
+  id: WGEffectShipHeatVent
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+    gridTraversal: false # it sits past the hull's edge and must stay with the ship
+  - type: Sprite
+    drawdepth: Effects
+    sprite: _WG/ShipShields/heat_vent.rsi
+    layers:
+    - state: plume
+      shader: unshaded
+  - type: PointLight
+    radius: 2.5
+    energy: 1.2
+    color: "#FF8A1E"
+    castShadows: false
+  - type: TimedDespawn
+    lifetime: 0.88
+  - type: Tag
+    tags:
+    - HideContextMenu

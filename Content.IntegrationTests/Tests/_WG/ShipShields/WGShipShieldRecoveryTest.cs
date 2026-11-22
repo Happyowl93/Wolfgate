@@ -34,7 +34,7 @@ public sealed class WGShipShieldRecoveryTest
             emitter.OverloadAccumulator = overload;
             emitter.Accumulator = accumulator;
             var estimate = ShipShieldsSystem.EstimateWolfgateShieldRecovery(emitter, true,
-                vents: entities.HasComponent<WGShipShieldCostComponent>(uid));
+                ship: entities.HasComponent<WGShipShieldCostComponent>(uid));
             Assert.That(estimate.Seconds, Is.GreaterThanOrEqualTo(0));
             Assert.That(emitter.Damage, Is.EqualTo(damage), "Forecasting must not mutate emitter state.");
             Assert.That(emitter.OverloadAccumulator, Is.EqualTo(overload));
@@ -94,8 +94,9 @@ public sealed class WGShipShieldRecoveryTest
             var fast = entities.GetComponent<ShipShieldEmitterComponent>(fastUid);
             slow.BaseDraw = 12345f;
             fast.BaseDraw = 23456f;
-            slow.Damage = 4500f;
-            fast.Damage = 2250f;
+            // Both read the same hull's heat; the one further into its update cycle comes back first.
+            slow.Damage = fast.Damage = 2250f;
+            fast.Accumulator = 0.6f;
             slow.Recharging = fast.Recharging = true;
             entities.GetComponent<ApcPowerReceiverComponent>(slowUid).Powered = true;
             var fastPower = entities.GetComponent<ApcPowerReceiverComponent>(fastUid);
@@ -104,17 +105,17 @@ public sealed class WGShipShieldRecoveryTest
             var state = controls.GetState(map.Grid.Owner);
             Assert.That(state.Available, Is.True);
             Assert.That(state.RecoveryStatus, Is.EqualTo(WGShipShieldRecoveryStatus.Recharging));
-            Assert.That(state.RecoverySeconds, Is.EqualTo(2));
+            Assert.That(state.RecoverySeconds, Is.EqualTo(4));
             Assert.That(state.Health, Is.EqualTo(ShipShieldsSystem.GetWolfgateShieldHealth(fast)));
             Assert.That(state.Stats!.BasePowerWatts, Is.EqualTo(fast.BaseDraw), "Offline stats belong to the earliest recovery emitter.");
             var actor = entities.SpawnEntity("MobHuman", map.GridCoords);
             var ui = entities.System<SharedUserInterfaceSystem>();
             ui.OpenUi(fastUid, WGShipShieldUiKey.Key, actor);
             Assert.That(ui.TryGetUiState<WGShipShieldGeneratorUiState>(fastUid, WGShipShieldUiKey.Key, out var opened), Is.True);
-            fast.Accumulator = 1.2f;
+            fast.Accumulator = 1.5f;
             controls.Update(0.21f);
             Assert.That(ui.TryGetUiState<WGShipShieldGeneratorUiState>(fastUid, WGShipShieldUiKey.Key, out var countdown), Is.True);
-            Assert.That(countdown!.ShieldShunt.RecoverySeconds, Is.EqualTo(1));
+            Assert.That(countdown!.ShieldShunt.RecoverySeconds, Is.EqualTo(3));
             Assert.That(countdown, Is.Not.SameAs(opened), "A changed recovery second must refresh an otherwise unchanged panel.");
             controls.Update(0.21f);
             Assert.That(ui.TryGetUiState<WGShipShieldGeneratorUiState>(fastUid, WGShipShieldUiKey.Key, out var unchanged), Is.True);
@@ -122,7 +123,7 @@ public sealed class WGShipShieldRecoveryTest
             fast.Accumulator = 0f;
             fastPower.Powered = false;
             state = controls.GetState(map.Grid.Owner);
-            Assert.That(state.RecoverySeconds, Is.EqualTo(3));
+            Assert.That(state.RecoverySeconds, Is.EqualTo(5));
             Assert.That(state.Health, Is.EqualTo(ShipShieldsSystem.GetWolfgateShieldHealth(slow)));
             Assert.That(state.Stats!.BasePowerWatts, Is.EqualTo(slow.BaseDraw));
             entities.GetComponent<ApcPowerReceiverComponent>(slowUid).Powered = false;

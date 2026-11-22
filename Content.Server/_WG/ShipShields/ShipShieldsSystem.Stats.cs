@@ -32,7 +32,8 @@ public sealed partial class ShipShieldsSystem
         if (stats.Capacity < stats.DamageLimit)
             args.PushMarkup(Loc.GetString("wg-shield-examine-capacity-note"));
         args.PushMarkup(Loc.GetString(stats.Vents ? "wg-shield-examine-cooling" : "wg-shield-examine-recharge",
-            ("online", MathF.Round(stats.HealPerSecond, 1)), ("offline", MathF.Round(stats.RechargePerSecond, 1))));
+            ("online", MathF.Round(stats.HealPerSecond, 1)), ("offline", MathF.Round(stats.RechargePerSecond, 1)),
+            ("hold", WGShipShieldEffects.HardHeatHold)));
         args.PushMarkup(Loc.GetString("wg-shield-examine-power", ("idle", MathF.Round(stats.BasePowerWatts / 1000f, 1)), ("maximum", MathF.Round(stats.MaximumPowerWatts / 1000f, 1))));
         args.PushMarkup(Loc.GetString("wg-shield-examine-overload", ("seconds", MathF.Round(stats.OverloadSeconds, 1))));
         if (stats.ThrustFactor < 1f || stats.TurnFactor < 1f)
