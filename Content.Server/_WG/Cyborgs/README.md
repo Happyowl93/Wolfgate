@@ -135,16 +135,28 @@ borg-bound AI, the overwatch view and the chassis company.
   - a feed is seen at the default zoom limit, not an AI's
   - an AI's view returns to its remote eye
   - the client sees the feed end, so an AI's static returns
+- [`Content.Server/_Rat/Overwatch/OverwatchSystem.cs`](../../_Rat/Overwatch/OverwatchSystem.cs): an AI's view returns to its remote eye
+- [`Content.Server/Chat/Systems/ChatSystem.Emote.cs`](../../Chat/Systems/ChatSystem.Emote.cs)
+  - resolve shared typed emotes against entity restrictions
+  - grants on shared trigger words bypass availability, not entity restrictions
 - [`Content.Server/Silicons/Borgs/BorgSystem.cs`](../../Silicons/Borgs/BorgSystem.cs)
   - the charge changes every tick with the headlight on
   - an empty cell raises this on every failed draw
 - [`Content.Shared/_CorvaxNext/Silicons/Borgs/SharedAiRemoteControlSystem.cs`](../../../Content.Shared/_CorvaxNext/Silicons/Borgs/SharedAiRemoteControlSystem.cs): a destroyed core leaves the AI in the borg instead of throwing on the deleted brain
+- [`Resources/Prototypes/_DV/Voice/speech_emotes.yml`](../../../Resources/Prototypes/_DV/Voice/speech_emotes.yml)
+  - share honk triggers while restricting the emote by entity
+  - give borgs a separate Harpy-voiced honk emote
+  - share beep triggers while restricting the emote by entity
+  - give borgs a separate Harpy-voiced beep emote
 - [`Resources/Prototypes/_Mono/borg_types.yml`](../../../Resources/Prototypes/_Mono/borg_types.yml)
   - was 2, too few to fit a printed kit
   - the treatment module carries the defibrillator
 - [`Resources/Prototypes/_Mono/Entities/Mobs/Cyborgs/base_borg_chassis.yml`](../../../Resources/Prototypes/_Mono/Entities/Mobs/Cyborgs/base_borg_chassis.yml)
   - built and ghost-role borgs pass TSF company readers, not only job-spawned ones
+  - Harpy noise emotes for TSF cyborgs
   - built and ghost-role borgs pass PDV company readers, not only job-spawned ones
+  - Harpy noise emotes for PDV cyborgs
+  - Harpy noise emotes for xenoborgs
 - [`Resources/Prototypes/_Mono/Entities/Mobs/Player/silicon.yml`](../../../Resources/Prototypes/_Mono/Entities/Mobs/Player/silicon.yml)
   - passes TSF company readers (requisition station, overwatch console)
   - passes PDV company readers (requisition station, overwatch console)
@@ -159,7 +171,9 @@ borg-bound AI, the overwatch view and the chassis company.
   - buckle into seats and climb onto tables
   - a built-in PDA with a vagrant's apps, opened from an action
   - the headlight Monolith commented out, back as a toggle
+  - Harpy noise emotes for cyborgs
   - the action that opens the built-in PDA
+  - Harpy noise emotes for syndicate, faction, and xenoborgs
 - [`Resources/Prototypes/Entities/Mobs/Player/silicon.yml`](../../../Resources/Prototypes/Entities/Mobs/Player/silicon.yml): was PowerCellMedium, half an hour of work per charge
 - [`Resources/Prototypes/Entities/Objects/Specific/Robotics/borg_modules.yml`](../../../Resources/Prototypes/Entities/Objects/Specific/Robotics/borg_modules.yml)
   - gripper hands for cells, tanks, fuel, flatpacks and materials, and one holding an ID card
@@ -169,5 +183,8 @@ borg-bound AI, the overwatch view and the chassis company.
   - the refilling WGSutureBorg above replaces it
   - to tell the beakers apart
   - four beakers, two were not enough to mix anything
+- [`Resources/Prototypes/Voice/speech_emote_sounds.yml`](../../../Resources/Prototypes/Voice/speech_emote_sounds.yml)
+  - Harpy noise emotes for cyborgs
+  - Harpy noise emotes for syndicate, faction, and xenoborgs
 
 <!-- WOLFGATE-GENERATED END -->

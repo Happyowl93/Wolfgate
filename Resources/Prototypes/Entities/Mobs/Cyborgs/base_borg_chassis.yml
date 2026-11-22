@@ -253,6 +253,32 @@
     - Sigh
     - Crying
     - Whistle
+    # WOLFGATE(Cyborgs) START: Harpy noise emotes for cyborgs
+    - Meow
+    - Hiss
+    - Mew
+    - Purr
+    - Growl
+    - Bark
+    - Snarl
+    - Whine
+    - Howl
+    - Awoo
+    - BorgHarpyHonk
+    - HarpyRing
+    - HarpyPew
+    - HarpyBang
+    - BorgHarpyBeep
+    - HarpyRev
+    - HarpyCaw
+    - Squish
+    - Chitter
+    - Squeak
+    - Click
+    - Belch
+    - Bagawk
+    # WOLFGATE END
+
   - type: Vocal
     sounds:
       Unsexed: UnisexSilicon
@@ -502,6 +528,32 @@
     - Crying
     - Whistle
     # end Goobstation - Cyborg emote sounds
+
+    # WOLFGATE(Cyborgs) START: Harpy noise emotes for syndicate, faction, and xenoborgs
+    - Meow
+    - Hiss
+    - Mew
+    - Purr
+    - Growl
+    - Bark
+    - Snarl
+    - Whine
+    - Howl
+    - Awoo
+    - BorgHarpyHonk
+    - HarpyRing
+    - HarpyPew
+    - HarpyBang
+    - BorgHarpyBeep
+    - HarpyRev
+    - HarpyCaw
+    - Squish
+    - Chitter
+    - Squeak
+    - Click
+    - Belch
+    - Bagawk
+    # WOLFGATE END
   - type: Vocal
     sounds:
       Unsexed: UnisexSiliconSyndicate
