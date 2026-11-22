@@ -1,3 +1,5 @@
+using System.Linq;
+using Content.Server._WG.Cockpit;
 using Content.Server._WG.Encounters.Components;
 using Content.Server._WG.NpcCrew.Components;
 using Content.Server._WG.NpcCrew.Systems;
@@ -31,6 +33,7 @@ public sealed partial class WGEncounterSeizureSystem : EntitySystem
     [Dependency] private WGCrewEscortSystem _escorts = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
+    [Dependency] private WGCockpitGunnerySystem _cockpitGunnery = default!;
 
     /// <summary>How far off the ships of a seized hull's own side learn it is in enemy hands.</summary>
     public const float HijackRange = 15000f;
@@ -50,6 +53,9 @@ public sealed partial class WGEncounterSeizureSystem : EntitySystem
 
     private readonly Dictionary<EntityUid, List<EntityUid>> _strangers = new();
     private readonly Dictionary<EntityUid, List<EntityUid>> _crews = new();
+
+    /// <summary>Who works each boarded ship's gunnery, by console window or from the cockpit.</summary>
+    private readonly Dictionary<EntityUid, HashSet<EntityUid>> _gunners = new();
     private readonly List<EntityUid> _held = new();
     private readonly HashSet<EntityUid> _due = new();
     private readonly List<EntityUid> _stale = new();
@@ -88,6 +94,7 @@ public sealed partial class WGEncounterSeizureSystem : EntitySystem
         }
 
         FindCrews();
+        FindGunners();
         _due.Clear();
         foreach (var (grid, strangers) in _strangers)
         {
@@ -95,9 +102,21 @@ public sealed partial class WGEncounterSeizureSystem : EntitySystem
                 continue;
 
             var crew = _crews[grid];
-            // With its whole crew down, a stranger aboard holds it; with them up, one at its helm or guns does.
-            if (crew.Count == 0 || AtControls(grid, strangers) is { } hand && (Fought(grid, crew, hand) || !Authorized(crew, hand)))
+            // With its whole crew down, a stranger aboard holds it.
+            if (crew.Count == 0)
+            {
                 Seize(grid);
+                continue;
+            }
+
+            // With them up, one at its helm or guns does, unless they fight beside him or gave him leave.
+            if (Hijacker(grid, crew, strangers) is not { } hijacker)
+                continue;
+
+            var fought = Fought(grid, crew, hijacker);
+            // A crew that let him reach the controls turns on him now.
+            if (Seize(grid) && !fought && State(grid) is { } state)
+                _crew.AnswerAttack(grid, state.Group, hijacker);
         }
 
         foreach (var grid in _held)
@@ -260,29 +279,47 @@ public sealed partial class WGEncounterSeizureSystem : EntitySystem
         }
     }
 
-    /// <summary>The stranger flying a ship from one of its helms or working one of its gunnery consoles, if any.</summary>
-    private EntityUid? AtControls(EntityUid grid, List<EntityUid> strangers)
+    /// <summary>Every stranger working a boarded ship's gunnery consoles, by window or from a cockpit seat.</summary>
+    private void FindGunners()
     {
-        foreach (var uid in strangers)
-        {
-            if (TryComp<PilotComponent>(uid, out var pilot) && pilot.Console is { } console && Transform(console).GridUid == grid)
-                return uid;
-        }
-
+        _gunners.Clear();
         var consoles = EntityQueryEnumerator<FireControlConsoleComponent, TransformComponent>();
         while (consoles.MoveNext(out var console, out _, out var xform))
         {
-            if (xform.GridUid != grid)
+            if (xform.GridUid is not { } grid || !_strangers.ContainsKey(grid))
                 continue;
 
-            foreach (var actor in _ui.GetActors(console, FireControlConsoleUiKey.Key))
+            foreach (var actor in _ui.GetActors(console, FireControlConsoleUiKey.Key).Concat(_cockpitGunnery.GetActors(console)))
             {
-                if (strangers.Contains(actor))
-                    return actor;
+                if (!_gunners.TryGetValue(grid, out var gunners))
+                    _gunners[grid] = gunners = new HashSet<EntityUid>();
+                gunners.Add(actor);
             }
+        }
+    }
+
+    /// <summary>
+    /// A stranger at a ship's helm or guns whom its crew is fighting or never gave leave, if any; a friend handed the
+    /// controls is no boarder, and doesn't cover for another who is.
+    /// </summary>
+    private EntityUid? Hijacker(EntityUid grid, List<EntityUid> crew, List<EntityUid> strangers)
+    {
+        foreach (var uid in strangers)
+        {
+            if (AtControls(grid, uid) && (Fought(grid, crew, uid) || !Authorized(crew, uid)))
+                return uid;
         }
 
         return null;
+    }
+
+    /// <summary>Whether someone flies a ship from one of its helms or works one of its gunnery consoles.</summary>
+    private bool AtControls(EntityUid grid, EntityUid uid)
+    {
+        if (TryComp<PilotComponent>(uid, out var pilot) && pilot.Console is { } console && Transform(console).GridUid == grid)
+            return true;
+
+        return _gunners.TryGetValue(grid, out var gunners) && gunners.Contains(uid);
     }
 
     /// <summary>Whether any of a ship's crew gives a visitor leave aboard, as a friend handed the helm has.</summary>
