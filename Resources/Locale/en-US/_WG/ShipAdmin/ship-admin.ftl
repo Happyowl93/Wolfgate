@@ -8,6 +8,12 @@ cmd-shipmaster-desc = Opens Shipmaster, the admin ship panel, on a ship when one
 cmd-shipmaster-help = Usage: { $command } [grid entity | here | spawn]
 cmd-shipmaster-not-grid = "{ $grid }" isn't a grid.
 cmd-shipmaster-hint-grid = [grid entity | here | spawn]
+
+cmd-shiprefit-desc = Brings a refit line of any ship up to a tier, free, as Shipmaster's refit does.
+cmd-shiprefit-help = Usage: { $command } <grid entity | here> <refit id> <tier>
+cmd-shiprefit-hint-grid = <grid entity | here>
+cmd-shiprefit-hint-refit = <refit id>
+cmd-shiprefit-hint-tier = <tier>
 ent-WGActionShipmaster = Shipmaster
     .desc = Open Shipmaster on the ship you are over.
 

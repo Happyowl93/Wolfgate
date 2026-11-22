@@ -20,7 +20,7 @@
   name: pool table kit
   categories: [ HideSpawnMenu ]
   components:
-  # The table's footprint: a flatpack checks the tile is free against its target's fixtures and won't unpack without one.
+  # The table's fixture, which never collides: flatpacks only unpack what has fixtures, and check the tile is free for it.
   - type: Physics
     bodyType: Static
     canCollide: false
@@ -30,12 +30,10 @@
         shape:
           !type:PhysShapeAabb
           bounds: "-0.45,-0.45,0.45,0.45"
-        density: 55
         mask:
         - TableMask
         layer:
         - TableLayer
-        - BulletImpassable
   - type: EntityTableSpawner
     offset: 0
     table: !type:AllSelector
