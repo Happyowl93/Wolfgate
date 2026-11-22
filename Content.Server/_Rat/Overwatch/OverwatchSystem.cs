@@ -517,6 +517,7 @@ public sealed class OverwatchSystem : EntitySystem
         _watchingPairs[actor] = target;
 
         _eyeSystem.SetTarget(actor, target);
+        _wgAiOverwatch.LimitZoom(actor); // WOLFGATE(Cyborgs): a feed is seen at the default zoom limit, not an AI's
         _viewSubscriberSystem.AddViewSubscriber(target, actorComp.PlayerSession);
     }
 

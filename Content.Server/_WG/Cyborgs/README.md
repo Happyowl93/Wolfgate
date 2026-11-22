@@ -89,6 +89,7 @@ borg-bound AI, the overwatch view and the chassis company.
 - [`Content.Server/_WG/Cyborgs/WGBorgPdaSystem.cs`](WGBorgPdaSystem.cs)
 - [`Content.Server/_WG/Cyborgs/WGBorgPowerSystem.cs`](WGBorgPowerSystem.cs)
 - [`Content.Server/_WG/Cyborgs/WGBorgStackRefillSystem.cs`](WGBorgStackRefillSystem.cs)
+- [`Content.Server/_WG/Cyborgs/WGOverwatchZoomLimitComponent.cs`](WGOverwatchZoomLimitComponent.cs)
 
 ### Shared
 
@@ -129,7 +130,9 @@ borg-bound AI, the overwatch view and the chassis company.
   - a borg the AI already controlled stays reachable off the core's grid
   - lets this AI reconnect once the borg leaves the grid
   - list linked borgs off the core's grid too
-- [`Content.Server/_Rat/Overwatch/OverwatchSystem.cs`](../../_Rat/Overwatch/OverwatchSystem.cs): an AI's view returns to its remote eye
+- [`Content.Server/_Rat/Overwatch/OverwatchSystem.cs`](../../_Rat/Overwatch/OverwatchSystem.cs)
+  - a feed is seen at the default zoom limit, not an AI's
+  - an AI's view returns to its remote eye
 - [`Content.Server/Silicons/Borgs/BorgSystem.cs`](../../Silicons/Borgs/BorgSystem.cs)
   - the charge changes every tick with the headlight on
   - an empty cell raises this on every failed draw

@@ -295,6 +295,11 @@ public sealed class WGAiCoreTest
             var target = entMan.SpawnEntity(null, map.GridCoords);
             entMan.System<SharedEyeSystem>().SetTarget(brain, target);
             entMan.AddComponent<RatOverwatchWatchingComponent>(brain).Watching = target;
+            var ownZoom = entMan.GetComponent<ContentEyeComponent>(brain).MaxZoom;
+            Assert.That(ownZoom.X, Is.GreaterThan(1f), "The AI's own zoom limit should be wider than a player's.");
+            entMan.System<WGAiOverwatchSystem>().LimitZoom(brain);
+            Assert.That(entMan.GetComponent<ContentEyeComponent>(brain).MaxZoom, Is.EqualTo(SharedContentEyeSystem.DefaultZoom),
+                "An AI watching a feed kept its wide zoom.");
 
             var mover = entMan.GetComponent<InputMoverComponent>(eye);
             mover.HeldMoveButtons = MoveButtons.Up;
@@ -306,6 +311,8 @@ public sealed class WGAiCoreTest
                 "Moving the AI's eye didn't stop the feed.");
             Assert.That(entMan.GetComponent<EyeComponent>(brain).Target, Is.EqualTo(eye),
                 "The AI's view didn't return to its remote eye.");
+            Assert.That(entMan.GetComponent<ContentEyeComponent>(brain).MaxZoom, Is.EqualTo(ownZoom),
+                "The AI's zoom limit wasn't restored after the feed.");
         });
         await pair.RunTicksSync(5);
         await server.WaitAssertion(() => Assert.That(entMan.HasComponent<WGAiOverwatchEyeComponent>(eye), Is.False));
