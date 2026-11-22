@@ -131,8 +131,10 @@ borg-bound AI, the overwatch view and the chassis company.
   - lets this AI reconnect once the borg leaves the grid
   - list linked borgs off the core's grid too
 - [`Content.Server/_Rat/Overwatch/OverwatchSystem.cs`](../../_Rat/Overwatch/OverwatchSystem.cs)
+  - a reused component must send its new target to the client
   - a feed is seen at the default zoom limit, not an AI's
   - an AI's view returns to its remote eye
+  - the client sees the feed end, so an AI's static returns
 - [`Content.Server/Silicons/Borgs/BorgSystem.cs`](../../Silicons/Borgs/BorgSystem.cs)
   - the charge changes every tick with the headlight on
   - an empty cell raises this on every failed draw
