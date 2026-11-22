@@ -8,6 +8,7 @@ using Content.Shared.Weapons.Hitscan.Components;
 using Content.Shared.Weapons.Ranged;
 using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Systems;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._Crescent.ShipShields;
@@ -36,6 +37,27 @@ public sealed partial class ShipShieldsSystem
     private void InitializeWolfgateShipHeat()
     {
         SubscribeLocalEvent<FireControllableComponent, GunShotEvent>(OnWolfgateShipGunShot);
+        SubscribeLocalEvent<WGShipHeatComponent, ComponentStartup>(OnWolfgateHullHeatStartup);
+    }
+
+    private void OnWolfgateHullHeatStartup(Entity<WGShipHeatComponent> grid, ref ComponentStartup args)
+    {
+        SizeWolfgateHull(grid, grid.Comp);
+    }
+
+    /// <summary>Sets what a hull holds and sheds with no generator from its tiles: a bigger hull holds more and cools faster.</summary>
+    private void SizeWolfgateHull(EntityUid grid, WGShipHeatComponent hull)
+    {
+        hull.Sized = true;
+        var count = 0;
+        if (TryComp<MapGridComponent>(grid, out var map))
+        {
+            var tiles = _wgShieldMap.GetAllTilesEnumerator(grid, map);
+            while (tiles.MoveNext(out _))
+                count++;
+        }
+        hull.Capacity = MathF.Max(0f, MathF.Min(hull.BaseCapacity + count * hull.CapacityPerTile, hull.MaxCapacity));
+        hull.Dissipation = hull.CoolSeconds > 0f ? hull.Capacity / hull.CoolSeconds : 0f;
     }
 
     /// <summary>
@@ -136,7 +158,12 @@ public sealed partial class ShipShieldsSystem
         var generator = SyncWolfgateShipHeat(grid);
         var hull = CompOrNull<WGShipHeatComponent>(grid);
         if (generator is not { } uid)
+        {
+            // A bare hull's capacity comes from its size, so it is measured the first time anything asks.
+            if (hull == null && !TerminatingOrDeleted(grid) && HasComp<MapGridComponent>(grid))
+                hull = AddComp<WGShipHeatComponent>(grid);
             return (hull?.Heat ?? 0f, hull?.Capacity ?? WGShipHeatComponent.HullCapacity);
+        }
         var emitter = Comp<ShipShieldEmitterComponent>(uid);
         return (hull?.Heat ?? 0f,
             WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp));
@@ -201,8 +228,9 @@ public sealed partial class ShipShieldsSystem
     {
         if (hull.Venting)
             amount *= WolfgateVentBonus(ventBonus);
-        var most = keepsHard && _wgShieldTiming.CurTime - hull.LastHit < TimeSpan.FromSeconds(WGShipShieldEffects.HardHeatHold) &&
-            TryComp<ShipShieldedComponent>(grid, out var shielded) && IsWolfgateShieldLive(shielded.Shield)
+        // How long hard heat stays is the raised generator's own number.
+        var most = keepsHard && GetWolfgateRaisedCost(grid) is { } cost &&
+            _wgShieldTiming.CurTime - hull.LastHit < TimeSpan.FromSeconds(cost.HardHeatHold)
             ? hull.Heat - hull.Hard : hull.Heat;
         if (float.IsFinite(amount) && amount > 0f && most > 0f)
             hull.Heat = MathF.Max(0f, hull.Heat - MathF.Min(amount, most));
@@ -310,6 +338,8 @@ public sealed partial class ShipShieldsSystem
         var query = EntityQueryEnumerator<WGShipHeatComponent>();
         while (query.MoveNext(out var grid, out var hull))
         {
+            if (!hull.Sized)
+                SizeWolfgateHull(grid, hull);
             if ((hull.Heat > 0f || hull.Venting) && !_wgHeatSunkHulls.Contains(grid))
                 CoolWolfgateShip(grid, hull, hull.Dissipation * elapsed, hull.VentBonus);
         }

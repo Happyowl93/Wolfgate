@@ -28,6 +28,8 @@ public sealed class WGShipShieldGeneratorStats
     public float TurnFactor = 1f;
     /// <summary>Seconds the ship's guns stay locked after damage beats the field down.</summary>
     public float GunLockSeconds;
+    /// <summary>Seconds the raised field must go unhit before the heat it absorbed starts to cool; 0 for an outpost's generator.</summary>
+    public float HardHeatHold;
     /// <summary>Whether the generator sheds heat at its fast rate whenever its field is down, not only in recharge mode.</summary>
     public bool Vents;
 
@@ -55,6 +57,6 @@ public sealed class WGShipShieldGeneratorStats
             left.RechargePerSecond == right.RechargePerSecond && left.BasePowerWatts == right.BasePowerWatts &&
             left.MaximumPowerWatts == right.MaximumPowerWatts && left.OverloadSeconds == right.OverloadSeconds &&
             left.ThrustFactor == right.ThrustFactor && left.TurnFactor == right.TurnFactor &&
-            left.GunLockSeconds == right.GunLockSeconds && left.Vents == right.Vents;
+            left.GunLockSeconds == right.GunLockSeconds && left.HardHeatHold == right.HardHeatHold && left.Vents == right.Vents;
     }
 }

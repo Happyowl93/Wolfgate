@@ -12,13 +12,12 @@
     maxDraw: 12000
     powerModifier: 0.1
     shieldColor: "#FFFFFF"
-  # A thin field costs the ship nothing: this clears the costs inherited from the MS-100.
+  # A thin field costs the ship about half what the MS-100's does; the gun lock on collapse is the same.
   - type: WGShipShieldCost
-    thrustFactor: 1
-    turnFactor: 1
-    signature: 0
-    hitSignature: 0
-    gunLockout: 0
+    thrustFactor: 0.93
+    turnFactor: 0.95
+    signature: 300000
+    hitSignature: 200
   - type: WGShipShieldDeflector
     reduction: 0.7
     maxArc: 180

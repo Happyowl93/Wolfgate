@@ -8,8 +8,8 @@ namespace Content.Server._WG.ShipShields;
 [RegisterComponent, UnsavedComponent]
 public sealed partial class WGShipHeatComponent : Component
 {
-    /// <summary>Heat a hull with no generator holds unless its grid says otherwise.</summary>
-    public const float HullCapacity = 20000f;
+    /// <summary>Heat a hull with no generator holds before its tiles are counted in.</summary>
+    public const float HullCapacity = 8000f;
 
     /// <summary>Heat the hull holds now.</summary>
     [DataField]
@@ -19,13 +19,33 @@ public sealed partial class WGShipHeatComponent : Component
     [DataField]
     public float Hard;
 
-    /// <summary>Most heat the hull can hold with no generator; with one, the generator's capacity applies.</summary>
+    /// <summary>Heat a hull with no generator holds whatever its size.</summary>
     [DataField]
+    public float BaseCapacity = HullCapacity;
+
+    /// <summary>Heat each hull tile adds to what a hull with no generator holds.</summary>
+    [DataField]
+    public float CapacityPerTile = 30f;
+
+    /// <summary>Most heat a hull with no generator holds, however large.</summary>
+    [DataField]
+    public float MaxCapacity = 50000f;
+
+    /// <summary>Seconds a hull with no generator takes to shed a full load of heat. No field traps it, so it beats any generator.</summary>
+    [DataField]
+    public float CoolSeconds = 20f;
+
+    /// <summary>Most heat the hull can hold with no generator, from its size; with one, the generator's capacity applies.</summary>
+    [ViewVariables]
     public float Capacity = HullCapacity;
 
-    /// <summary>Heat the hull sheds each second with no generator to cool it.</summary>
-    [DataField]
-    public float Dissipation = 500f;
+    /// <summary>Heat the hull sheds each second with no generator to cool it, from its size.</summary>
+    [ViewVariables]
+    public float Dissipation = HullCapacity / 20f;
+
+    /// <summary>Whether capacity and cooling match the hull's tiles; cleared when the hull gains or loses one.</summary>
+    [ViewVariables]
+    public bool Sized;
 
     /// <summary>Share of each shot's damage the ship's own guns add to its heat.</summary>
     [DataField]
@@ -33,7 +53,7 @@ public sealed partial class WGShipHeatComponent : Component
 
     /// <summary>How much faster a hull with no generator cools while venting; a generator uses its own bonus.</summary>
     [DataField]
-    public float VentBonus = 3f;
+    public float VentBonus = 1.5f;
 
     /// <summary>Thermal signature a venting hull adds for long-range sensors.</summary>
     [DataField]

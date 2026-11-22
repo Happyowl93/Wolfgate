@@ -14,6 +14,7 @@ using Content.Shared._WG.ShipShields;
 using Content.Shared.Weapons.Ranged.Systems;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Physics.Components;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._WG.ShipShields;
 
@@ -164,7 +165,45 @@ public sealed class WGShipShieldCostTest
     }
 
     [Test]
-    public async Task DeflectorFieldIsFree()
+    public async Task TitanIsTheCheapestFieldToLose()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var map = await pair.CreateTestMap();
+        await pair.Server.WaitAssertion(() =>
+        {
+            var entities = pair.Server.EntMan;
+            var grid = map.Grid.Owner;
+            var system = entities.System<ShipShieldsSystem>();
+            var emitterUid = entities.SpawnEntity("ShieldGenerator", map.GridCoords);
+            var emitter = entities.GetComponent<ShipShieldEmitterComponent>(emitterUid);
+            var cost = entities.GetComponent<WGShipShieldCostComponent>(emitterUid);
+            entities.GetComponent<ApcPowerReceiverComponent>(emitterUid).Powered = true;
+            system.Update(1.5f);
+            Assert.That(emitter.Shield, Is.Not.Null);
+
+            var prototypes = pair.Server.ResolveDependency<IPrototypeManager>();
+            foreach (var id in new[] { "ShieldGeneratorSmall", "ShieldGeneratorMedium", "ShieldGeneratorTSFCapital", "WGShieldGeneratorDeflector" })
+            {
+                var other = prototypes.Index<EntityPrototype>(id);
+                Assert.That(other.TryGetComponent<WGShipShieldCostComponent>(out var otherCost, entities.ComponentFactory), Is.True);
+                Assert.That(other.TryGetComponent<ShipShieldEmitterComponent>(out var otherEmitter, entities.ComponentFactory), Is.True);
+                Assert.That(cost.GunLockout, Is.LessThan(otherCost!.GunLockout), $"The Titan's guns come back sooner than {id}'s.");
+                Assert.That(emitter.DamageOverloadTimePunishment, Is.LessThan(otherEmitter!.DamageOverloadTimePunishment),
+                    $"The Titan's field comes back sooner than {id}'s.");
+                Assert.That(cost.ThrustFactor, Is.LessThan(otherCost.ThrustFactor), $"It slows the ship more than {id}.");
+            }
+
+            emitter.Damage = emitter.DamageLimit + 5000f;
+            system.Update(1.5f);
+            Assert.That(emitter.Shield, Is.Null);
+            Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.InRange(1, (int) cost.GunLockout));
+            Assert.That(entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!.OverloadSeconds, Is.EqualTo(20f));
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task DeflectorFieldCostsLessThanASentinels()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
         var map = await pair.CreateTestMap();
@@ -178,20 +217,27 @@ public sealed class WGShipShieldCostTest
             entities.GetComponent<ApcPowerReceiverComponent>(emitterUid).Powered = true;
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Not.Null);
-            Assert.That(system.GetWolfgateShieldThrustFactor(grid), Is.EqualTo(1f));
-            Assert.That(system.GetWolfgateShieldTurnFactor(grid), Is.EqualTo(1f));
-            Assert.That(Signature(entities, grid), Is.Zero);
+            var cost = entities.GetComponent<WGShipShieldCostComponent>(emitterUid);
+            Assert.That(pair.Server.ResolveDependency<IPrototypeManager>().Index<EntityPrototype>("ShieldGeneratorSmall")
+                .TryGetComponent<WGShipShieldCostComponent>(out var sentinel, entities.ComponentFactory), Is.True);
+            Assert.That(system.GetWolfgateShieldThrustFactor(grid), Is.EqualTo(cost.ThrustFactor));
+            Assert.That(cost.ThrustFactor, Is.GreaterThan(sentinel!.ThrustFactor).And.LessThan(1f), "A deflector's field slows the ship, less than a Sentinel's.");
+            Assert.That(system.GetWolfgateShieldTurnFactor(grid), Is.EqualTo(cost.TurnFactor));
+            Assert.That(cost.TurnFactor, Is.GreaterThan(sentinel.TurnFactor).And.LessThan(1f));
+            Assert.That(Signature(entities, grid), Is.EqualTo(cost.Signature));
+            Assert.That(cost.Signature, Is.GreaterThan(0f).And.LessThan(sentinel.Signature), "It shows on sensors, less than a Sentinel.");
+            Assert.That(cost.HitSignature, Is.GreaterThan(0f).And.LessThan(sentinel.HitSignature));
 
             var heat = entities.EnsureComponent<ThermalSignatureComponent>(grid);
             var stored = heat.StoredHeat;
             typeof(ShipShieldsSystem).GetMethod("AddWolfgateShieldHitHeat", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .Invoke(system, new object[] { entities.GetComponent<ShipShieldComponent>(emitter.Shield!.Value), 100f });
-            Assert.That(heat.StoredHeat, Is.EqualTo(stored));
+            Assert.That(heat.StoredHeat, Is.EqualTo(stored + 100f * cost.HitSignature), "Hits on a deflector flare the ship's trace.");
 
             emitter.Damage = emitter.DamageLimit + 5000f;
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Null);
-            Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.Zero, "A deflector beaten down leaves the guns free.");
+            Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.InRange(1, 6), "A deflector beaten down locks the guns like any shield.");
         });
         await pair.CleanReturnAsync();
     }

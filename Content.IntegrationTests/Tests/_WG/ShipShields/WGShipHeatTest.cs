@@ -15,6 +15,8 @@ using Content.Shared.Weapons.Ranged;
 using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Systems;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Map;
+using Robust.Shared.Maths;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Spawners;
 using Robust.Shared.Timing;
@@ -298,9 +300,11 @@ public sealed class WGShipHeatTest
             var grid = map.Grid.Owner;
             var system = entities.System<ShipShieldsSystem>();
 
-            Assert.That(system.GetWolfgateShipHeat(grid), Is.EqualTo((0f, WGShipHeatComponent.HullCapacity)));
-            system.AddWolfgateShipHeat(grid, 1500f);
+            var (cold, capacity) = system.GetWolfgateShipHeat(grid);
             var hull = entities.GetComponent<WGShipHeatComponent>(grid);
+            Assert.That(cold, Is.Zero);
+            Assert.That(capacity, Is.EqualTo(hull.Capacity), "A hull with no generator holds what its size allows.");
+            system.AddWolfgateShipHeat(grid, 1500f);
             Assert.That(system.GetWolfgateShipHeat(grid), Is.EqualTo((1500f, hull.Capacity)), "A hull with no generator keeps its own heat.");
             system.Update(1f);
             // The hull cools once a second on a clock shared with earlier ticks, so up to two seconds may have passed.
@@ -369,6 +373,89 @@ public sealed class WGShipHeatTest
     }
 
     [Test]
+    public async Task BareHullHoldsAndShedsMoreTheBiggerItIs()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var map = await pair.CreateTestMap();
+        await pair.Server.WaitAssertion(() =>
+        {
+            var entities = pair.Server.EntMan;
+            var grid = map.Grid.Owner;
+            var system = entities.System<ShipShieldsSystem>();
+            var maps = entities.System<SharedMapSystem>();
+            var tiles = maps.GetAllTiles(grid, map.Grid.Comp).Count();
+
+            system.GetWolfgateShipHeat(grid);
+            var hull = entities.GetComponent<WGShipHeatComponent>(grid);
+            Assert.That(hull.Capacity, Is.EqualTo(hull.BaseCapacity + tiles * hull.CapacityPerTile).Within(0.01f));
+            Assert.That(hull.Dissipation, Is.EqualTo(hull.Capacity / hull.CoolSeconds).Within(0.01f));
+            var small = hull.Capacity;
+
+            var plating = new Tile(pair.Server.ResolveDependency<ITileDefinitionManager>()["Plating"].TileId);
+            for (var x = 20; x < 30; x++)
+            {
+                for (var y = 20; y < 24; y++)
+                    maps.SetTile(grid, map.Grid.Comp, new Vector2i(x, y), plating);
+            }
+            // Hulls are measured again on the once-a-second pass.
+            system.Update(1.01f);
+            Assert.That(hull.Capacity, Is.EqualTo(small + 40 * hull.CapacityPerTile).Within(0.01f), "A bigger hull holds more heat.");
+            Assert.That(hull.Dissipation, Is.EqualTo(hull.Capacity / hull.CoolSeconds).Within(0.01f), "And sheds it faster.");
+            Assert.That(system.GetWolfgateShipHeat(grid).Capacity, Is.EqualTo(hull.Capacity));
+
+            hull.MaxCapacity = small;
+            maps.SetTile(grid, map.Grid.Comp, new Vector2i(40, 40), plating);
+            system.Update(1.01f);
+            Assert.That(hull.Capacity, Is.EqualTo(small), "However large, a bare hull stops at its ceiling.");
+
+            // No generator cools a ship as fast for its size as a bare hull.
+            var prototypes = pair.Server.ResolveDependency<IPrototypeManager>();
+            foreach (var id in new[] { "ShieldGeneratorSmall", "ShieldGeneratorMedium", "ShieldGenerator", "ShieldGeneratorTSFCapital", "WGShieldGeneratorDeflector" })
+            {
+                Assert.That(prototypes.Index<EntityPrototype>(id).TryGetComponent<ShipShieldEmitterComponent>(out var emitter, entities.ComponentFactory), Is.True);
+                var stats = WGShipShieldEffects.EffectiveCapacity(emitter!.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp);
+                Assert.That(stats / emitter.HealPerSecond, Is.GreaterThan(hull.CoolSeconds), $"{id} sheds a full load slower than a bare hull.");
+                Assert.That(stats, Is.GreaterThan(new WGShipHeatComponent().MaxCapacity), $"{id} holds more than any bare hull.");
+            }
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [TestCase("ShieldGeneratorTSFCapital", 15f)]
+    [TestCase("ShieldGeneratorSmall", 30f)]
+    [TestCase("ShieldGeneratorMedium", 45f)]
+    public async Task EachGeneratorHoldsHardHeatForItsOwnTime(string generator, float hold)
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var map = await pair.CreateTestMap();
+        await pair.Server.WaitAssertion(() =>
+        {
+            var entities = pair.Server.EntMan;
+            var grid = map.Grid.Owner;
+            var system = entities.System<ShipShieldsSystem>();
+            var timing = pair.Server.ResolveDependency<IGameTiming>();
+            var emitterUid = entities.SpawnEntity(generator, map.GridCoords);
+            var emitter = entities.GetComponent<ShipShieldEmitterComponent>(emitterUid);
+            entities.GetComponent<ApcPowerReceiverComponent>(emitterUid).Powered = true;
+            system.Update(1.5f);
+            Assert.That(emitter.Shield, Is.Not.Null);
+            Assert.That(entities.GetComponent<WGShipShieldCostComponent>(emitterUid).HardHeatHold, Is.EqualTo(hold));
+            Assert.That(entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!.HardHeatHold, Is.EqualTo(hold));
+
+            emitter.Damage = 20000f;
+            Assert.That(system.GetWolfgateShipHardHeat(grid), Is.EqualTo(20000f));
+            var hull = entities.GetComponent<WGShipHeatComponent>(grid);
+            hull.LastHit = timing.CurTime - TimeSpan.FromSeconds(hold - 2f);
+            system.Update(1.5f);
+            Assert.That(emitter.Damage, Is.EqualTo(20000f), "Inside its hold the field keeps its hard heat.");
+            hull.LastHit = timing.CurTime - TimeSpan.FromSeconds(hold + 1f);
+            system.Update(1.5f);
+            Assert.That(emitter.Damage, Is.EqualTo(20000f - emitter.HealPerSecond * 1.5f).Within(0.01f), "Past its hold the hard heat cools.");
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
     public async Task BareHullShowsItsHeatAndVentsWithNoGenerator()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
@@ -387,8 +474,8 @@ public sealed class WGShipHeatTest
             Assert.That(state.Heat, Is.Zero);
             Assert.That(state.CanVent, Is.False, "A cold hull has nothing to vent.");
 
-            system.AddWolfgateShipHeat(grid, WGShipHeatComponent.HullCapacity / 2f);
             var hull = entities.GetComponent<WGShipHeatComponent>(grid);
+            system.AddWolfgateShipHeat(grid, hull.Capacity / 2f);
             state = controls.GetState(grid);
             Assert.That(state.Heat, Is.EqualTo(0.5f).Within(0.001f));
             Assert.That(state.CanVent, Is.True);

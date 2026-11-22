@@ -20,6 +20,7 @@ public sealed partial class ShipShieldsSystem
             ThrustFactor = cost == null ? 1f : Math.Clamp(cost.ThrustFactor, MinShieldMobility, 1f),
             TurnFactor = cost == null ? 1f : Math.Clamp(cost.TurnFactor, MinShieldMobility, 1f),
             GunLockSeconds = MathF.Max(0f, cost?.GunLockout ?? 0f),
+            HardHeatHold = MathF.Max(0f, cost?.HardHeatHold ?? 0f),
             Vents = cost != null,
         };
     }
@@ -33,7 +34,7 @@ public sealed partial class ShipShieldsSystem
             args.PushMarkup(Loc.GetString("wg-shield-examine-capacity-note"));
         args.PushMarkup(Loc.GetString(stats.Vents ? "wg-shield-examine-cooling" : "wg-shield-examine-recharge",
             ("online", MathF.Round(stats.HealPerSecond, 1)), ("offline", MathF.Round(stats.RechargePerSecond, 1)),
-            ("hold", WGShipShieldEffects.HardHeatHold)));
+            ("hold", MathF.Round(stats.HardHeatHold, 1))));
         args.PushMarkup(Loc.GetString("wg-shield-examine-power", ("idle", MathF.Round(stats.BasePowerWatts / 1000f, 1)), ("maximum", MathF.Round(stats.MaximumPowerWatts / 1000f, 1))));
         args.PushMarkup(Loc.GetString("wg-shield-examine-overload", ("seconds", MathF.Round(stats.OverloadSeconds, 1))));
         if (stats.ThrustFactor < 1f || stats.TurnFactor < 1f)

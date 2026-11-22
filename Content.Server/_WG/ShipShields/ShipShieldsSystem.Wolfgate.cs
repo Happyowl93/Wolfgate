@@ -56,8 +56,13 @@ public sealed partial class ShipShieldsSystem
     }
     private void OnWolfgateShieldTileChanged(ref TileChangedEvent args)
     {
-        if (HasComp<ShipShieldedComponent>(args.Entity) && args.Changes.Any(c => c.OldTile.IsEmpty != c.NewTile.IsEmpty))
+        if (!args.Changes.Any(c => c.OldTile.IsEmpty != c.NewTile.IsEmpty))
+            return;
+        if (HasComp<ShipShieldedComponent>(args.Entity))
             _wgChangedShieldHulls.Add(args.Entity);
+        // A hull's own heat capacity follows its size.
+        if (TryComp<WGShipHeatComponent>(args.Entity, out var hull))
+            hull.Sized = false;
     }
 
     /// <summary>Refreshes changing hulls and emitter health.</summary>

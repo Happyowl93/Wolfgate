@@ -54,7 +54,7 @@ public sealed class WGShipShieldStatsWindow : DefaultWindow
         _capacity.Text = Loc.GetString("wg-shield-stats-capacity", ("value", MathF.Round(stats.Capacity, 0)));
         _limit.Text = Loc.GetString("wg-shield-stats-overload-limit", ("value", MathF.Round(stats.DamageLimit, 0)));
         _repair.Text = Loc.GetString(stats.Vents ? "wg-shield-stats-cooling" : "wg-shield-stats-online-repair",
-            ("value", MathF.Round(stats.HealPerSecond, 1)), ("hold", WGShipShieldEffects.HardHeatHold));
+            ("value", MathF.Round(stats.HealPerSecond, 1)), ("hold", MathF.Round(stats.HardHeatHold, 1)));
         _recharge.Text = Loc.GetString(stats.Vents ? "wg-shield-stats-vent" : "wg-shield-stats-offline-repair",
             ("value", MathF.Round(stats.RechargePerSecond, 1)));
         _idle.Text = Loc.GetString("wg-shield-stats-idle-power", ("value", MathF.Round(stats.BasePowerWatts / 1000f, 1)));

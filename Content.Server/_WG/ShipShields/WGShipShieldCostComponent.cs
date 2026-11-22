@@ -1,3 +1,4 @@
+using Content.Shared._WG.ShipShields;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._WG.ShipShields;
@@ -21,6 +22,10 @@ public sealed partial class WGShipShieldCostComponent : Component
     /// <summary>Signature heat added to the ship at once for each point of damage the field absorbs.</summary>
     [DataField]
     public float HitSignature = 400f;
+
+    /// <summary>Seconds this generator's raised field must go unhit before the heat it absorbed starts to cool.</summary>
+    [DataField]
+    public float HardHeatHold = WGShipShieldEffects.HardHeatHold;
 
     /// <summary>Seconds the ship's guns stay locked after damage beats the field down.</summary>
     [DataField]

@@ -37,6 +37,7 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
     private float _warningTime;
     private WGShipShieldShuntState? _state;
     private float _helmRotation;
+    private float _hardHold = WGShipShieldEffects.HardHeatHold;
     private bool _updating;
     private bool _pending;
     private bool _queued;
@@ -107,7 +108,7 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
         header.AddChild(_heat = new HeatGauge
         {
             MinValue = 0f, MaxValue = 1f, MinHeight = HeatGauge.FullHeight, Legend = true, MouseFilter = MouseFilterMode.Pass,
-            ToolTip = Loc.GetString("wg-shield-helm-hard-heat-help", ("hold", WGShipShieldEffects.HardHeatHold)),
+            ToolTip = Loc.GetString("wg-shield-helm-hard-heat-help", ("hold", _hardHold)),
             BackgroundStyleBoxOverride = new StyleBoxFlat { BackgroundColor = Color.FromHex("#1B303C") },
             ForegroundStyleBoxOverride = new StyleBoxFlat { BackgroundColor = Color.FromHex("#58D6EC") },
         });
@@ -250,6 +251,13 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
     {
         _state = state;
         _stats.Disabled = state?.Stats == null;
+        // Each generator holds hard heat for its own time, so the gauge's help follows the one installed.
+        var hardHold = state?.Stats is { HardHeatHold: > 0f } held ? held.HardHeatHold : WGShipShieldEffects.HardHeatHold;
+        if (hardHold != _hardHold)
+        {
+            _hardHold = hardHold;
+            _heat.ToolTip = Loc.GetString("wg-shield-helm-hard-heat-help", ("hold", MathF.Round(hardHold, 1)));
+        }
         if (state?.Stats is { } stats)
             _statsWindow?.UpdateStats(stats);
         else
