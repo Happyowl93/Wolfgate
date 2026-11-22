@@ -9,5 +9,5 @@ public sealed partial class WGShipShieldShuntScreen
 
     /// <summary>Seconds of gun lock left after a shield collapse, whether heat has the guns holding fire, and the seconds a vent still needs, from the current server snapshot.</summary>
     public (int Seconds, bool Held, int Vent) WgCockpitGunWarning() =>
-        (_state?.GunLockSeconds ?? 0, _state is { Available: true, GunsHeld: true }, _state?.VentSeconds ?? 0);
+        (_state?.GunLockSeconds ?? 0, _state is { GunsHeld: true }, _state?.VentSeconds ?? 0);
 }

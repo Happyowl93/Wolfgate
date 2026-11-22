@@ -283,7 +283,7 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
         UpdateRecovery(state);
         var locked = state is { Available: true, GunLockSeconds: > 0 };
         var venting = state != null && state.VentSeconds != 0;
-        _gunLock.Visible = locked || venting || state is { Available: true, GunsHeld: true };
+        _gunLock.Visible = locked || venting || state is { GunsHeld: true };
         if (_gunLock.Visible)
         {
             _gunLock.Text = locked ? Loc.GetString("wg-shield-gun-lock", ("seconds", state!.GunLockSeconds))

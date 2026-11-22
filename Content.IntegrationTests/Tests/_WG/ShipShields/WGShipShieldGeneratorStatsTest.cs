@@ -45,7 +45,7 @@ public sealed class WGShipShieldGeneratorStatsTest
             var description = entities.System<ExamineSystemShared>().GetExamineText(active, examiner).ToString();
             Assert.That(description, Does.Contain("Heat capacity:"));
             Assert.That(description, Does.Contain("heat/s while venting"), "A ship generator's fast rate is its vent.");
-            Assert.That(description, Does.Contain("Firing through the raised field"));
+            Assert.That(description, Does.Not.Contain("Firing through"), "Gun heat is the hull's, not a generator's.");
         });
         await pair.RunTicksSync(1);
         await pair.CleanReturnAsync();

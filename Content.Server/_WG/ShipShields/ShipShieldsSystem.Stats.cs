@@ -20,7 +20,6 @@ public sealed partial class ShipShieldsSystem
             ThrustFactor = cost == null ? 1f : Math.Clamp(cost.ThrustFactor, MinShieldMobility, 1f),
             TurnFactor = cost == null ? 1f : Math.Clamp(cost.TurnFactor, MinShieldMobility, 1f),
             GunLockSeconds = MathF.Max(0f, cost?.GunLockout ?? 0f),
-            FireHeat = MathF.Max(0f, cost?.FireHeat ?? 0f),
             Vents = cost != null,
         };
     }
@@ -42,8 +41,6 @@ public sealed partial class ShipShieldsSystem
             args.PushMarkup(Loc.GetString("wg-shield-examine-cost",
                 ("thrust", MathF.Round((1f - stats.ThrustFactor) * 100f)), ("turn", MathF.Round((1f - stats.TurnFactor) * 100f))));
         }
-        if (stats.FireHeat > 0f)
-            args.PushMarkup(Loc.GetString("wg-shield-examine-fire-heat", ("percent", MathF.Round(stats.FireHeat * 100f))));
         if (stats.GunLockSeconds > 0f)
             args.PushMarkup(Loc.GetString("wg-shield-examine-gun-lock", ("seconds", MathF.Round(stats.GunLockSeconds, 1))));
     }

@@ -27,6 +27,10 @@ public sealed partial class WGShipHeatComponent : Component
     [DataField]
     public float Dissipation = 500f;
 
+    /// <summary>Share of each shot's damage the ship's own guns add to its heat.</summary>
+    [DataField]
+    public float FireHeat = 0.1f;
+
     /// <summary>How much faster a hull with no generator cools while venting; a generator uses its own bonus.</summary>
     [DataField]
     public float VentBonus = 3f;

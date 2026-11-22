@@ -16,7 +16,7 @@ namespace Content.Server._Crescent.ShipShields;
 // see it: whatever raises or sets the damage (absorbed hits, other systems) is carried to the hull, and every
 // generator on the hull reads the same heat back. A generator sets how much the hull can hold and how fast it cools.
 // Heat that came through a ship's shield is hard: it stays while the field is up and taking hits. The rest is soft
-// and cools anyway.
+// and cools anyway; a ship's own guns add it with every shot, with or without a shield.
 public sealed partial class ShipShieldsSystem
 {
     [Dependency] private IComponentFactory _wgHeatFactory = default!;
@@ -24,7 +24,7 @@ public sealed partial class ShipShieldsSystem
     /// <summary>Shield damage of one shot of each projectile prototype.</summary>
     private readonly Dictionary<string, float> _wgShotDamage = new();
 
-    /// <summary>Ships too hot to fire through their raised field.</summary>
+    /// <summary>Ships too hot to fire.</summary>
     private readonly HashSet<EntityUid> _wgHeatHeld = new();
 
     /// <summary>The hull each generator reads its heat from and the heat it last read, so a later change to its damage can be told apart.</summary>
@@ -211,10 +211,17 @@ public sealed partial class ShipShieldsSystem
             StopWolfgateVent(grid, hull);
     }
 
-    /// <summary>Whether a ship is too hot to fire through its raised field. It holds from the hold mark down to the resume mark.</summary>
+    /// <summary>Whether a hull's guns heat it and hold when it is hot: every hull but one an outpost generator rules.</summary>
+    private bool HasWolfgateShipHeatRules(EntityUid grid)
+    {
+        return SyncWolfgateShipHeat(grid) is not { } generator || HasComp<WGShipShieldCostComponent>(generator);
+    }
+
+    /// <summary>Whether a ship is too hot to fire, with or without a shield. It holds from the hold mark down to the resume mark.</summary>
     public bool IsWolfgateShipHeatHeld(EntityUid grid)
     {
-        if (GetWolfgateRaisedCost(grid) is not { FireHeat: > 0f })
+        // A hull nothing has heated yet has no heat to hold for.
+        if (!HasComp<WGShipHeatComponent>(grid) || !HasWolfgateShipHeatRules(grid))
         {
             _wgHeatHeld.Remove(grid);
             return false;
@@ -227,16 +234,20 @@ public sealed partial class ShipShieldsSystem
         return _wgHeatHeld.Contains(grid);
     }
 
-    /// <summary>A gun fired through its ship's raised field heats the ship by a share of the shot's damage.</summary>
+    /// <summary>A ship gun heats its hull by a share of each shot's damage, whether or not the ship has a shield.</summary>
     private void OnWolfgateShipGunShot(Entity<FireControllableComponent> gun, ref GunShotEvent args)
     {
         var transform = Transform(gun);
-        if (!transform.Anchored || transform.GridUid is not { } grid || GetWolfgateRaisedCost(grid) is not { FireHeat: > 0f } cost)
+        if (!transform.Anchored || transform.GridUid is not { } grid || TerminatingOrDeleted(grid) || !HasWolfgateShipHeatRules(grid))
+            return;
+        var hull = EnsureComp<WGShipHeatComponent>(grid);
+        if (hull.FireHeat <= 0f)
             return;
         var damage = 0f;
         foreach (var (uid, shootable) in args.Ammo)
             damage += WolfgateShotDamage(gun, uid, shootable);
-        AddWolfgateShipHeat(grid, damage * cost.FireHeat, WGShipShieldEffects.GunHoldHeat);
+        // It stops at the hold mark, so a ship's own fire never collapses its field.
+        AddWolfgateShipHeat(grid, damage * hull.FireHeat, WGShipShieldEffects.GunHoldHeat);
     }
 
     /// <summary>What one shot would cost a shield that absorbed it.</summary>

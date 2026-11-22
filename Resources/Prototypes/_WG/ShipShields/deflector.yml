@@ -18,7 +18,6 @@
     turnFactor: 1
     signature: 0
     hitSignature: 0
-    fireHeat: 0
     gunLockout: 0
   - type: WGShipShieldDeflector
     reduction: 0.7

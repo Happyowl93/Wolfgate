@@ -12,5 +12,3 @@ wg-shield-stats-costs = Raised field: -{ $thrust }% thrust, -{ $turn }% turning,
 wg-shield-stats-no-costs = Raised field: no cost to thrust, turning or guns.
 wg-shield-stats-vent = Cooling, venting: { $value } heat/s. Shields stay down and guns silent until no heat is left.
 wg-shield-stats-cooling = Cooling: { $value } heat/s. Under a raised field, heat it absorbed stays until { $hold } seconds pass without a hit, the field is lowered or the ship vents.
-wg-shield-stats-fire-heat = Firing through the raised field: { $percent }% of each shot's damage comes back as heat. Guns hold fire at { $hold }% heat until the ship cools to { $resume }%.
-wg-shield-stats-no-fire-heat = Firing through the raised field adds no heat.

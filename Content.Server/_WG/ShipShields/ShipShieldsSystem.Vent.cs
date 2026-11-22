@@ -237,6 +237,9 @@ public sealed partial class ShipShieldsSystem
             return false;
         if (!fighting)
             return heat >= capacity * NpcIdleVentHeat;
+        // A bare hull has no field to win back, so its crew fights on until the guns hold.
+        if (SyncWolfgateShipHeat(grid) == null)
+            return IsWolfgateShipHeatHeld(grid);
         var quiet = _wgShieldTiming.CurTime - hull.LastHit;
         // With the field up only hard heat is worth dropping it for; soft heat goes by itself.
         if (TryComp<ShipShieldedComponent>(grid, out var shielded) && IsWolfgateShieldLive(shielded.Shield))

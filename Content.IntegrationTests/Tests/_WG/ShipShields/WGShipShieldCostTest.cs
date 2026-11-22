@@ -131,8 +131,10 @@ public sealed class WGShipShieldCostTest
         await pair.Server.WaitAssertion(() =>
         {
             Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.Zero);
-            Assert.That(Refused(entities, gun, user), Is.False, "The guns come back when the lock runs out.");
             Assert.That(Sparking(entities, gun), Is.False, "The sparks go with the lock.");
+            Assert.That(Refused(entities, gun, user), Is.True, "The collapse left the ship at full heat, which holds its guns after the lock.");
+            entities.GetComponent<WGShipHeatComponent>(grid).Heat = 0f;
+            Assert.That(Refused(entities, gun, user), Is.False, "Cooled, the guns come back.");
         });
         await pair.CleanReturnAsync();
     }
