@@ -311,6 +311,12 @@
   description: A heavy capital shield. Good durability, quick recharge and anti-collison built in one.
   suffix: TSF CAPITAL ONLY
   components:
+  # WOLFGATE(ShipShields) START: a raised field costs thrust, turning and stealth, and locks the guns when beaten down
+  - type: WGShipShieldCost
+    thrustFactor: 0.8
+    turnFactor: 0.85
+    signature: 2000000
+  # WOLFGATE END
   - type: ShipShieldEmitter
     damageLimit: 85000
     healPerSecond: 800
@@ -385,6 +391,12 @@
   description: The Titan. Advanced shielding, with a quick recharge time, and excels against colisions.
   suffix: ADS ONLY
   components:
+  # WOLFGATE(ShipShields) START: a raised field costs thrust, turning and stealth, and locks the guns when beaten down
+  - type: WGShipShieldCost
+    thrustFactor: 0.75
+    turnFactor: 0.8
+    signature: 2000000
+  # WOLFGATE END
   - type: ShipShieldEmitter
     damageLimit: 75000
     damageOverloadTimePunishment: 40
@@ -411,6 +423,12 @@
   description: The Aegis. Advanced shielding, with a long recharge time, with very high durability.
   suffix: ADS/TSF ONLY, SCI VOUCHER SHIPS ONLY
   components:
+  # WOLFGATE(ShipShields) START: a raised field costs thrust, turning and stealth, and locks the guns when beaten down
+  - type: WGShipShieldCost
+    thrustFactor: 0.8
+    turnFactor: 0.85
+    signature: 1200000
+  # WOLFGATE END
   - type: ShipShieldEmitter
     damageLimit: 180000
     healPerSecond: 750 # Base is 250
@@ -498,6 +516,12 @@
   name: MS-100 "Sentinel" Shield Generator
   description: The Sentinel. A good, reliable shield.
   components:
+  # WOLFGATE(ShipShields) START: a raised field costs thrust, turning and stealth, and locks the guns when beaten down
+  - type: WGShipShieldCost
+    thrustFactor: 0.85
+    turnFactor: 0.9
+    signature: 600000
+  # WOLFGATE END
   - type: ShipShieldEmitter
     damageLimit: 65000 # Mono
     healPerSecond: 500 # Mono

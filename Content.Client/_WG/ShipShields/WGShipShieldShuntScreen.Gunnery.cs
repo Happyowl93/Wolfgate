@@ -34,6 +34,7 @@ public sealed partial class WGShipShieldShuntScreen
         AddChild(allocation);
         AddChild(lease.Take(_concentration));
         AddChild(lease.Take(_health));
+        AddChild(lease.Take(_gunLock, restoreVisibility: false));
         return this;
     }
 }

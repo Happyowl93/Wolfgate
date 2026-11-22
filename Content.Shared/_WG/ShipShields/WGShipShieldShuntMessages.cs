@@ -132,6 +132,9 @@ public sealed class WGShipShieldShuntState
     /// <summary>Requested reinforced sector width.</summary>
     public float TargetArcRadians;
 
+    /// <summary>Whole seconds the ship's guns stay locked after its field was beaten down; 0 when they are free.</summary>
+    public int GunLockSeconds;
+
     /// <summary>Creates an authoritative snapshot for all helms on the ship.</summary>
     public WGShipShieldShuntState(bool available, bool active, float health, float directionRadians, float concentration, float arcRadians, bool enabled = true)
     {

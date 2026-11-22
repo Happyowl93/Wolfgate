@@ -430,7 +430,7 @@ public sealed partial class MoverController : SharedMoverController
     /// </summary>
     public float GetTorque(ShuttleComponent shuttle)
     {
-        return shuttle.AngularThrust * shuttle.AngularMultiplier;
+        return shuttle.AngularThrust * shuttle.AngularMultiplier * WgShieldTurnFactor(shuttle.Owner); // WOLFGATE(ShipShields): a raised shield field slows the turn
     }
 
     /// <summary>

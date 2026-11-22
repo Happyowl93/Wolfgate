@@ -113,6 +113,7 @@ public sealed partial class ShipShieldsSystem : EntitySystem
                 // WOLFGATE END
                 emitter.Shield = null;
                 emitter.Shielded = null;
+                if (removed && power.Powered && !HasComp<ShipShieldDisabledGridComponent>(parent.Value)) LockWolfgateShieldGuns(parent.Value, uid); // WOLFGATE(ShipShields): a field beaten down by damage locks the ship's guns
                 // WOLFGATE(ShipShields) START: share the startup cooldown and use shutdown audio parameters
                 if (removed && !HasComp<ShipShieldDisabledGridComponent>(Transform(uid).GridUid)) // WOLFGATE(ShipShields): announce only actual shutdown
                 {

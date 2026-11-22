@@ -17,6 +17,7 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
     private readonly Slider _concentration;
     private readonly RichTextLabel _status;
     private readonly RichTextLabel _recovery;
+    private readonly RichTextLabel _gunLock;
     private readonly RichTextLabel _amount;
     private readonly RichTextLabel _strength;
     private readonly RichTextLabel _outside;
@@ -91,6 +92,12 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
         {
             Modulate = Color.FromHex("#FFCC80"),
             ToolTip = Loc.GetString("wg-shield-recovery-help"),
+        });
+        header.AddChild(_gunLock = new RichTextLabel
+        {
+            Modulate = Color.FromHex("#FF6B6B"),
+            ToolTip = Loc.GetString("wg-shield-gun-lock-help"),
+            Visible = false,
         });
         AddChild(Card(header));
 
@@ -236,6 +243,9 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
                 ? Loc.GetString("wg-shield-helm-offline", ("health", MathF.Round(state.Health * 100f)))
                 : Loc.GetString("wg-shield-helm-unavailable");
         UpdateRecovery(state);
+        _gunLock.Visible = state is { Available: true, GunLockSeconds: > 0 };
+        if (_gunLock.Visible)
+            _gunLock.Text = Loc.GetString("wg-shield-gun-lock", ("seconds", state!.GunLockSeconds));
         var acknowledged = state != null && !_queued &&
             MathF.Abs(MathF.Atan2(MathF.Sin(state.TargetDirectionRadians - DesiredDirection),
                 MathF.Cos(state.TargetDirectionRadians - DesiredDirection))) < 0.002f &&

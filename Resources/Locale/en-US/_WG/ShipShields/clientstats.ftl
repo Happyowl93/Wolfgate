@@ -8,3 +8,5 @@ wg-shield-stats-idle-power = Idle power: { $value } kW
 wg-shield-stats-max-power = Configured maximum power: { $value } kW
 wg-shield-stats-overload-lockout = Overload lockout: { $value } seconds after damage falls below the threshold.
 wg-shield-stats-recovery-note = Power demand rises with damage. Actual recovery also depends on damage, power and recharge. The shield panel shows the current recovery estimate.
+wg-shield-stats-costs = Raised field: -{ $thrust }% thrust, -{ $turn }% turning, hotter on long-range sensors. Beaten down by damage, it locks ship guns for { $seconds } seconds.
+wg-shield-stats-no-costs = Raised field: no cost to thrust, turning or guns.

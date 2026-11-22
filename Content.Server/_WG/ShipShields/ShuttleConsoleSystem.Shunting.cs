@@ -37,6 +37,7 @@ public sealed partial class ShuttleConsoleSystem
                 previous.Available == current.Available && previous.Active == current.Active && previous.Enabled == current.Enabled &&
                 WGShipShieldGeneratorStats.Same(previous.Stats, current.Stats) &&
                 previous.RecoveryStatus == current.RecoveryStatus && previous.RecoverySeconds == current.RecoverySeconds &&
+                previous.GunLockSeconds == current.GunLockSeconds &&
                 MathF.Round(previous.Health * 100f) == MathF.Round(current.Health * 100f) &&
                 (previous.Health < 0.1f) == (current.Health < 0.1f) &&
                 previous.DirectionRadians == current.DirectionRadians &&

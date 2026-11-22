@@ -1,0 +1,22 @@
+# The crackle round a ship gun while a shield collapse has it locked. The server sets how long it lasts.
+- type: entity
+  id: WGEffectShieldGunLock
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    drawdepth: Effects
+    noRot: true
+    sprite: _WG/ShipShields/gun_lock.rsi
+    layers:
+    - state: sparks
+      shader: unshaded
+  - type: PointLight
+    radius: 2.5
+    energy: 1.5
+    color: "#00F0FF"
+    castShadows: false
+  - type: TimedDespawn
+    lifetime: 6
+  - type: Tag
+    tags:
+    - HideContextMenu

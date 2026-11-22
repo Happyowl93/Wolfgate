@@ -129,6 +129,7 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
         return previous.Available == state.Available && previous.Active == state.Active && previous.Enabled == state.Enabled &&
             WGShipShieldGeneratorStats.Same(previous.Stats, state.Stats) &&
             previous.RecoveryStatus == state.RecoveryStatus && previous.RecoverySeconds == state.RecoverySeconds &&
+            previous.GunLockSeconds == state.GunLockSeconds &&
             MathF.Round(previous.Health * 100f) == MathF.Round(state.Health * 100f) &&
             (previous.Health < 0.1f) == (state.Health < 0.1f) &&
             previous.DirectionRadians == state.DirectionRadians && previous.Concentration == state.Concentration &&
@@ -327,6 +328,7 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
             Stats = statsEmitter is { } selected ? _shields.GetWolfgateGeneratorStats(selected, Comp<ShipShieldEmitterComponent>(selected)) : null,
             RecoveryStatus = recoveryStatus,
             RecoverySeconds = recoverySeconds,
+            GunLockSeconds = grid is { } lockedGrid ? _shields.GetWolfgateGunLockSeconds(lockedGrid) : 0,
         };
     }
 }

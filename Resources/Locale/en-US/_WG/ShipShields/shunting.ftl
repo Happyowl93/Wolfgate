@@ -45,3 +45,6 @@ wg-shield-recovery-help = Estimate assumes power remains available. Further dama
 wg-shield-helm-adjusting = REDISTRIBUTING SHIELD POWER
 wg-shield-helm-adjusting-help = Power is flowing toward the white target. Current protection is shown by the coloured ring.
 wg-shield-recovery-ftl-locked = FTL lockout · Waiting for jump cooldown to finish.
+wg-shield-gun-lock = GUNS LOCKED · { $seconds } s
+wg-shield-gun-lock-help = Damage beat the shield field down, and the surge locked the ship's guns. Lowering shields yourself never locks them.
+wg-shield-gun-lock-popup = Shield field collapsed! Ship guns locked for { $seconds } seconds.

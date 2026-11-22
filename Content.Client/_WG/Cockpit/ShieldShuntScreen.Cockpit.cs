@@ -38,7 +38,7 @@ public sealed partial class WGShipShieldShuntScreen : IWGCockpitOptionalPage
         });
         var controls = InstrumentTheme.Column(lease.Take(_enabled),
             InstrumentTheme.Row(InstrumentTheme.Label("wg-cockpit-shield-arc"), arc),
-            allocation, lease.Take(_concentration), lease.Take(_health));
+            allocation, lease.Take(_concentration), lease.Take(_health), lease.Take(_gunLock, restoreVisibility: false));
         controls.HorizontalExpand = true;
         // The thin shield panel is sized from this column, so it fixes the narrowest usable power slider.
         controls.MinWidth = 150;

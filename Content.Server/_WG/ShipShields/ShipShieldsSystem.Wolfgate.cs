@@ -39,6 +39,7 @@ public sealed partial class ShipShieldsSystem
         SubscribeLocalEvent<ShipShieldedComponent, MoveEvent>(OnWolfgateShieldGridMove);
         SubscribeLocalEvent<ShipShieldedComponent, EntityTerminatingEvent>(OnWolfgateShieldGridTerminating);
         InitializeWolfgateDeflectors();
+        InitializeWolfgateShieldCosts();
     }
 
     private void OnWolfgateShieldGridMove(EntityUid uid, ShipShieldedComponent component, ref MoveEvent args)

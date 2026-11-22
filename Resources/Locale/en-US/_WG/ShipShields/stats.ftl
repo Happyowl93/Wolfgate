@@ -5,3 +5,5 @@ wg-shield-examine-power = Power demand: { $idle } kW idle; capped at { $maximum 
 wg-shield-examine-overload = Overload cooldown: { $seconds } seconds.
 wg-shield-examine-deflector = Deflector field: solid rounds pass through with { $reduction }% less damage. Missiles and energy weapons are stopped outright.
 wg-shield-examine-arc = Field arc: { $arc }° at most. Everything outside the arc is open.
+wg-shield-examine-cost = While raised: { $thrust }% less thrust, { $turn }% slower turning, and a hotter trace on long-range sensors that flares with every hit.
+wg-shield-examine-gun-lock = A field beaten down by damage locks the ship's guns for { $seconds } seconds. Lowering it yourself does not.

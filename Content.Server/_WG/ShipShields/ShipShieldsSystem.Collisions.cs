@@ -72,7 +72,10 @@ public sealed partial class ShipShieldsSystem
         if (emitter.Damage >= emitter.DamageLimit)
             emitter.OverloadAccumulator = MathF.Max(emitter.OverloadAccumulator, emitter.DamageOverloadTimePunishment);
         if (RemoveWolfgateEmitterShield(source, emitter, "collision capacity exhausted"))
+        {
             PlayWolfgateShieldPowerSound(source, grid, false);
+            LockWolfgateShieldGuns(grid, source);
+        }
         emitter.Shield = null;
         emitter.Shielded = null;
     }
