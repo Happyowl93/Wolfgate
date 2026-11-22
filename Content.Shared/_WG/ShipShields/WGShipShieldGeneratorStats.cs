@@ -8,13 +8,13 @@ public sealed class WGShipShieldGeneratorStats
 {
     /// <summary>The selected generator's display name.</summary>
     public string Name;
-    /// <summary>Usable damage capacity before power or overload forces recharge.</summary>
+    /// <summary>Heat the ship can hold before power or overload forces recharge.</summary>
     public float Capacity;
-    /// <summary>Damage threshold that triggers overload punishment.</summary>
+    /// <summary>Heat that triggers overload punishment.</summary>
     public float DamageLimit;
-    /// <summary>Damage restored per second while online.</summary>
+    /// <summary>Heat shed per second with the field up.</summary>
     public float HealPerSecond;
-    /// <summary>Damage restored per second while recharging.</summary>
+    /// <summary>Heat shed per second at the fast rate.</summary>
     public float RechargePerSecond;
     /// <summary>Idle power demand in watts.</summary>
     public float BasePowerWatts;
@@ -28,6 +28,10 @@ public sealed class WGShipShieldGeneratorStats
     public float TurnFactor = 1f;
     /// <summary>Seconds the ship's guns stay locked after damage beats the field down.</summary>
     public float GunLockSeconds;
+    /// <summary>Share of a shot's damage the ship takes as heat when it fires through the raised field.</summary>
+    public float FireHeat;
+    /// <summary>Whether the generator sheds heat at its fast rate whenever its field is down, not only in recharge mode.</summary>
+    public bool Vents;
 
     /// <summary>Creates one runtime generator specification.</summary>
     public WGShipShieldGeneratorStats(string name, float capacity, float damageLimit, float healPerSecond,
@@ -53,6 +57,6 @@ public sealed class WGShipShieldGeneratorStats
             left.RechargePerSecond == right.RechargePerSecond && left.BasePowerWatts == right.BasePowerWatts &&
             left.MaximumPowerWatts == right.MaximumPowerWatts && left.OverloadSeconds == right.OverloadSeconds &&
             left.ThrustFactor == right.ThrustFactor && left.TurnFactor == right.TurnFactor &&
-            left.GunLockSeconds == right.GunLockSeconds;
+            left.GunLockSeconds == right.GunLockSeconds && left.FireHeat == right.FireHeat && left.Vents == right.Vents;
     }
 }

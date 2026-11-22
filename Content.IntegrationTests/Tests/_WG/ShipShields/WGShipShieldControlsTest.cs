@@ -39,7 +39,7 @@ public sealed class WGShipShieldControlsTest
                 var body = Tree(panel).Single(control => control.GetType().Name == "ShieldColumns");
                 Assert.That(body.Size.Y, Is.GreaterThan(100f), "Preview and settings must receive remaining height instead of collapsing inside a scroll container.");
                 Assert.That(body.Size.X, Is.GreaterThan(500f));
-                var health = Field<ProgressBar>(panel, "_health");
+                var health = Field<ProgressBar>(panel, "_heat");
                 Assert.That(health.Size.Y, Is.GreaterThanOrEqualTo(22f), "Integrity must have a readable thick bar.");
                 foreach (var action in new Control[] { Field<Button>(panel, "_reset"), Field<Button>(panel, "_enabled"), health })
                 {
@@ -81,7 +81,7 @@ public sealed class WGShipShieldControlsTest
             Assert.That(recovery.Text, Does.Contain("Manually lowered"));
             panel.UpdateState(State(), 0f);
             Assert.That(recovery.Visible, Is.False);
-            var bar = Field<ProgressBar>(panel, "_health");
+            var bar = Field<ProgressBar>(panel, "_heat");
             var dial = Field<Control>(panel, "_dial");
             Color Tint() => ((StyleBoxFlat)bar.ForegroundStyleBoxOverride!).BackgroundColor;
             Assert.That(Tint(), Is.EqualTo(WGShipShieldEffects.HealthColor(0.6f)));
@@ -126,7 +126,7 @@ public sealed class WGShipShieldControlsTest
                 helm.Arrange(UIBox2.FromDimensions(Vector2.Zero, size));
                 var body = Tree(screen).Single(control => control.GetType().Name == "ShieldColumns");
                 Assert.That(body.Height, Is.GreaterThan(100), "The instrument layout must reserve space for the coverage dial.");
-                foreach (var action in new Control[] { Field<Button>(screen, "_enabled"), Field<Button>(screen, "_reset"), Field<ProgressBar>(screen, "_health") })
+                foreach (var action in new Control[] { Field<Button>(screen, "_enabled"), Field<Button>(screen, "_reset"), Field<ProgressBar>(screen, "_heat") })
                 {
                     Assert.That(action.Height, Is.GreaterThan(0));
                     Assert.That(action.GlobalPosition.Y, Is.GreaterThanOrEqualTo(screen.GlobalPosition.Y));

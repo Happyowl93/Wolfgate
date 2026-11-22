@@ -1,9 +1,11 @@
-wg-shield-examine-capacity = Usable capacity: { $capacity } damage. Overload threshold: { $overload } damage.
-wg-shield-examine-capacity-note = Usable capacity may be limited by power demand before the overload threshold.
-wg-shield-examine-recharge = Normal repair: { $online } damage/s; recharge-mode repair: { $offline } damage/s.
+wg-shield-examine-capacity = Absorbed damage becomes heat. Heat capacity: { $capacity }. Overload threshold: { $overload } heat.
+wg-shield-examine-capacity-note = Heat capacity may be limited by power demand before the overload threshold.
+wg-shield-examine-recharge = Cooling: { $online } heat/s; in recharge mode: { $offline } heat/s.
 wg-shield-examine-power = Power demand: { $idle } kW idle; capped at { $maximum } kW total.
 wg-shield-examine-overload = Overload cooldown: { $seconds } seconds.
 wg-shield-examine-deflector = Deflector field: solid rounds pass through with { $reduction }% less damage. Missiles and energy weapons are stopped outright.
 wg-shield-examine-arc = Field arc: { $arc }° at most. Everything outside the arc is open.
 wg-shield-examine-cost = While raised: { $thrust }% less thrust, { $turn }% slower turning, and a hotter trace on long-range sensors that flares with every hit.
-wg-shield-examine-gun-lock = A field beaten down by damage locks the ship's guns for { $seconds } seconds. Lowering it yourself does not.
+wg-shield-examine-gun-lock = A field overrun by heat collapses and locks the ship's guns for { $seconds } seconds. Lowering it yourself does not.
+wg-shield-examine-cooling = Cooling: { $online } heat/s with the field raised; { $offline } heat/s with it down.
+wg-shield-examine-fire-heat = Firing through the raised field heats the ship by { $percent }% of each shot's damage. Guns hold fire while the ship is too hot.

@@ -2,7 +2,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Server._WG.ShipShields;
 
-/// <summary>What a generator's raised field costs its ship: thrust, turning, stealth, and its guns when the field is beaten down.</summary>
+/// <summary>What a generator's raised field costs its ship: thrust, turning, stealth, heat for firing through it, and its guns when it is beaten down.</summary>
 [RegisterComponent]
 public sealed partial class WGShipShieldCostComponent : Component
 {
@@ -18,9 +18,13 @@ public sealed partial class WGShipShieldCostComponent : Component
     [DataField]
     public float Signature = 1000000f;
 
-    /// <summary>Heat added to the ship at once for each point of damage the field absorbs.</summary>
+    /// <summary>Signature heat added to the ship at once for each point of damage the field absorbs.</summary>
     [DataField]
-    public float HitHeat = 400f;
+    public float HitSignature = 400f;
+
+    /// <summary>Share of a shot's damage the ship takes as heat when it fires through this generator's raised field.</summary>
+    [DataField]
+    public float FireHeat = 0.1f;
 
     /// <summary>Seconds the ship's guns stay locked after damage beats the field down.</summary>
     [DataField]

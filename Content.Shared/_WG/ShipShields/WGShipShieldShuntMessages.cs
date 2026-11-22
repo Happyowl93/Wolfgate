@@ -134,6 +134,8 @@ public sealed class WGShipShieldShuntState
 
     /// <summary>Whole seconds the ship's guns stay locked after its field was beaten down; 0 when they are free.</summary>
     public int GunLockSeconds;
+    /// <summary>Whether the ship is too hot to fire through its raised field.</summary>
+    public bool GunsHeld;
 
     /// <summary>Creates an authoritative snapshot for all helms on the ship.</summary>
     public WGShipShieldShuntState(bool available, bool active, float health, float directionRadians, float concentration, float arcRadians, bool enabled = true)

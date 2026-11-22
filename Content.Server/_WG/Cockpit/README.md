@@ -164,6 +164,7 @@ NAV plot (`WGCockpitAimLines`) and the ship cam (`WGCockpitAimOverlay`, added wh
 - [`Content.Client/_WG/Cockpit/WGCockpitFireInput.cs`](../../../Content.Client/_WG/Cockpit/WGCockpitFireInput.cs)
 - [`Content.Client/_WG/Cockpit/WGCockpitFuelBank.cs`](../../../Content.Client/_WG/Cockpit/WGCockpitFuelBank.cs)
 - [`Content.Client/_WG/Cockpit/WGCockpitFuelLamp.cs`](../../../Content.Client/_WG/Cockpit/WGCockpitFuelLamp.cs)
+- [`Content.Client/_WG/Cockpit/WGCockpitGunLockLamp.cs`](../../../Content.Client/_WG/Cockpit/WGCockpitGunLockLamp.cs)
 - [`Content.Client/_WG/Cockpit/WGCockpitGunneryMemorySystem.cs`](../../../Content.Client/_WG/Cockpit/WGCockpitGunneryMemorySystem.cs)
 - [`Content.Client/_WG/Cockpit/WGCockpitGunneryPanel.cs`](../../../Content.Client/_WG/Cockpit/WGCockpitGunneryPanel.cs)
 - [`Content.Client/_WG/Cockpit/WGCockpitInstrumentSizing.cs`](../../../Content.Client/_WG/Cockpit/WGCockpitInstrumentSizing.cs)

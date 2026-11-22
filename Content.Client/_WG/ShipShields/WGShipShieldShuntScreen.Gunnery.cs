@@ -27,13 +27,13 @@ public sealed partial class WGShipShieldShuntScreen
         allocation.Visible = true;
         var arc = lease.Take(_arc);
         _wgCockpitCompact = true;
-        _health.MinHeight = 12;
+        _heat.MinHeight = 12;
         AddChild(dial);
         AddChild(lease.Take(_enabled));
         AddChild(InstrumentTheme.Row(InstrumentTheme.Label("wg-cockpit-shield-arc"), arc));
         AddChild(allocation);
         AddChild(lease.Take(_concentration));
-        AddChild(lease.Take(_health));
+        AddChild(lease.Take(_heat));
         AddChild(lease.Take(_gunLock, restoreVisibility: false));
         return this;
     }

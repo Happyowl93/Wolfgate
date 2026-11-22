@@ -10,6 +10,9 @@ public sealed partial class ShuttleConsoleWindow
     /// <summary>Updates only the authoritative autopilot lamp without disrupting the current MFD.</summary>
     public void WgUpdateCockpitAutopilot(bool? active) => _wgCockpitAutopilotActive = active;
 
+    /// <summary>Gun lock seconds and heat hold, for the cockpit's warning lamp.</summary>
+    public (int Seconds, bool Held) WgCockpitGunWarning() => _shieldScreen.WgCockpitGunWarning();
+
     /// <summary>Builds the permanent status bank from the console's existing live telemetry.</summary>
     public Control WgCockpitStatus() => new WGCockpitStatusLights(
         ("wg-cockpit-status-autopilot", () => WGCockpitStatusReading.Autopilot(_wgCockpitAutopilotActive)),

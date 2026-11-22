@@ -33,7 +33,8 @@ public sealed class WGShipShieldRecoveryTest
             emitter.Recharging = recharging;
             emitter.OverloadAccumulator = overload;
             emitter.Accumulator = accumulator;
-            var estimate = ShipShieldsSystem.EstimateWolfgateShieldRecovery(emitter, true);
+            var estimate = ShipShieldsSystem.EstimateWolfgateShieldRecovery(emitter, true,
+                vents: entities.HasComponent<WGShipShieldCostComponent>(uid));
             Assert.That(estimate.Seconds, Is.GreaterThanOrEqualTo(0));
             Assert.That(emitter.Damage, Is.EqualTo(damage), "Forecasting must not mutate emitter state.");
             Assert.That(emitter.OverloadAccumulator, Is.EqualTo(overload));

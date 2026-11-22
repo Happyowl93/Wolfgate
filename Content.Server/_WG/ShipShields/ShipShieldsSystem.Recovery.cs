@@ -5,9 +5,12 @@ namespace Content.Server._Crescent.ShipShields;
 
 public sealed partial class ShipShieldsSystem
 {
-    /// <summary>Estimates automatic startup with unchanged power and no further damage.</summary>
+    /// <summary>
+    /// Estimates automatic startup with unchanged power and no further damage. A generator that vents sheds heat at its
+    /// fast rate for as long as its field is down.
+    /// </summary>
     public static (WGShipShieldRecoveryStatus Status, int Seconds) EstimateWolfgateShieldRecovery(
-        ShipShieldEmitterComponent emitter, bool powered, bool enabled = true, bool disabled = false)
+        ShipShieldEmitterComponent emitter, bool powered, bool enabled = true, bool disabled = false, bool vents = false)
     {
         if (!enabled)
             return (WGShipShieldRecoveryStatus.Lowered, -1);
@@ -35,7 +38,7 @@ public sealed partial class ShipShieldsSystem
             if (overload > 0f)
                 overload -= EmitterUpdateRate;
             var healed = emitter.HealPerSecond * EmitterUpdateRate;
-            if (recharging)
+            if (recharging || vents && emitter.Shield is null)
                 healed *= emitter.UnpoweredBonus;
             damage -= healed;
             if (damage <= 0f)

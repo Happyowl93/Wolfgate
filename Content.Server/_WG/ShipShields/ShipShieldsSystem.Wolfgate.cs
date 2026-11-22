@@ -51,6 +51,7 @@ public sealed partial class ShipShieldsSystem
     private void OnWolfgateShieldGridTerminating(EntityUid uid, ShipShieldedComponent component, ref EntityTerminatingEvent args)
     {
         _wgChangedShieldHulls.Remove(uid);
+        _wgHeatHeld.Remove(uid);
         TryQueueDel(component.Shield);
     }
     private void OnWolfgateShieldTileChanged(ref TileChangedEvent args)
@@ -65,6 +66,7 @@ public sealed partial class ShipShieldsSystem
         UpdateWolfgateFtlShields();
         UpdateWolfgateShieldTails();
         UpdateWolfgateShieldPvs(frameTime);
+        UpdateWolfgateHullHeat(frameTime);
         var query = EntityQueryEnumerator<WGShipShieldVisualsComponent, ShipShieldComponent>();
         while (query.MoveNext(out var uid, out var visuals, out var shield))
             UpdateWolfgateShieldHealth(uid, visuals, shield.Source);

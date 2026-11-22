@@ -129,7 +129,7 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
         return previous.Available == state.Available && previous.Active == state.Active && previous.Enabled == state.Enabled &&
             WGShipShieldGeneratorStats.Same(previous.Stats, state.Stats) &&
             previous.RecoveryStatus == state.RecoveryStatus && previous.RecoverySeconds == state.RecoverySeconds &&
-            previous.GunLockSeconds == state.GunLockSeconds &&
+            previous.GunLockSeconds == state.GunLockSeconds && previous.GunsHeld == state.GunsHeld &&
             MathF.Round(previous.Health * 100f) == MathF.Round(state.Health * 100f) &&
             (previous.Health < 0.1f) == (state.Health < 0.1f) &&
             previous.DirectionRadians == state.DirectionRadians && previous.Concentration == state.Concentration &&
@@ -265,7 +265,7 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
                 continue;
             var hasReceiver = TryComp<ApcPowerReceiverComponent>(uid, out var receiver);
             var estimate = ShipShieldsSystem.EstimateWolfgateShieldRecovery(emitter,
-                hasReceiver && receiver!.Powered, enabled, disabled);
+                hasReceiver && receiver!.Powered, enabled, disabled, HasComp<WGShipShieldCostComponent>(uid));
             if (selected != null && (estimate.Seconds < 0 || seconds >= 0 && estimate.Seconds >= seconds))
                 continue;
             selected = uid;
@@ -329,6 +329,7 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
             RecoveryStatus = recoveryStatus,
             RecoverySeconds = recoverySeconds,
             GunLockSeconds = grid is { } lockedGrid ? _shields.GetWolfgateGunLockSeconds(lockedGrid) : 0,
+            GunsHeld = grid is { } heldGrid && _shields.IsWolfgateShipHeatHeld(heldGrid),
         };
     }
 }

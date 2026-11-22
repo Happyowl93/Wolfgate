@@ -21,7 +21,7 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
     private readonly RichTextLabel _amount;
     private readonly RichTextLabel _strength;
     private readonly RichTextLabel _outside;
-    private readonly ProgressBar _health;
+    private readonly ProgressBar _heat;
     private readonly Label _previewStatus;
     private readonly BoxContainer _settings;
     private readonly RichTextLabel _draft;
@@ -82,7 +82,7 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
         };
         header.AddChild(heading);
         header.AddChild(_status = new RichTextLabel());
-        header.AddChild(_health = new ProgressBar
+        header.AddChild(_heat = new ProgressBar
         {
             MinValue = 0f, MaxValue = 1f, MinHeight = 22,
             BackgroundStyleBoxOverride = new StyleBoxFlat { BackgroundColor = Color.FromHex("#1B303C") },
@@ -230,7 +230,7 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
             _statsWindow?.Close();
         _helmRotation = helmRotation;
         _dial.Available = state is { Available: true };
-        _health.Value = Math.Clamp(state?.Health ?? 0f, 0f, 1f);
+        _heat.Value = state is { Available: true } ? 1f - Math.Clamp(state.Health, 0f, 1f) : 0f;
         _enabled.Disabled = state is not { Available: true };
         _enabled.Text = Loc.GetString(state is { Enabled: true } ? "wg-shield-helm-disable" : "wg-shield-helm-enable");
         UpdateHealthAppearance();
@@ -238,14 +238,18 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
         _reset.Disabled = state is not { Available: true };
         _concentration.Disabled = state is not { Available: true };
         _status.Text = state is { Active: true }
-            ? Loc.GetString("wg-shield-helm-health", ("health", MathF.Round(state.Health * 100f)))
+            ? Loc.GetString("wg-shield-helm-online", ("heat", MathF.Round((1f - state.Health) * 100f)))
             : state is { Available: true }
-                ? Loc.GetString("wg-shield-helm-offline", ("health", MathF.Round(state.Health * 100f)))
+                ? Loc.GetString("wg-shield-helm-offline", ("heat", MathF.Round((1f - state.Health) * 100f)))
                 : Loc.GetString("wg-shield-helm-unavailable");
         UpdateRecovery(state);
-        _gunLock.Visible = state is { Available: true, GunLockSeconds: > 0 };
+        var locked = state is { Available: true, GunLockSeconds: > 0 };
+        _gunLock.Visible = locked || state is { Available: true, GunsHeld: true };
         if (_gunLock.Visible)
-            _gunLock.Text = Loc.GetString("wg-shield-gun-lock", ("seconds", state!.GunLockSeconds));
+        {
+            _gunLock.Text = locked ? Loc.GetString("wg-shield-gun-lock", ("seconds", state!.GunLockSeconds)) : Loc.GetString("wg-shield-gun-hold");
+            _gunLock.ToolTip = Loc.GetString(locked ? "wg-shield-gun-lock-help" : "wg-shield-gun-hold-help");
+        }
         var acknowledged = state != null && !_queued &&
             MathF.Abs(MathF.Atan2(MathF.Sin(state.TargetDirectionRadians - DesiredDirection),
                 MathF.Cos(state.TargetDirectionRadians - DesiredDirection))) < 0.002f &&
@@ -331,27 +335,28 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
         }
     }
 
-    /// <summary>Keeps the ring and integrity bar on the same health and warning pulse.</summary>
+    /// <summary>Keeps the ring and heat gauge on the same colour and warning pulse; both redden as the ship heats.</summary>
     private void UpdateHealthAppearance()
     {
-        var tint = WGShipShieldEffects.HealthColor(_health.Value);
+        var health = Math.Clamp(_state?.Health ?? 0f, 0f, 1f);
+        var tint = WGShipShieldEffects.HealthColor(health);
         if (_dial.GlassFace)
         {
             var skin = WGInstrumentTheme.Skin;
-            tint = _health.Value < 0.5f ? Color.InterpolateBetween(skin.Danger, skin.Caution, _health.Value * 2) :
-                Color.InterpolateBetween(skin.Caution, skin.Good, (_health.Value - 0.5f) * 2);
+            tint = health < 0.5f ? Color.InterpolateBetween(skin.Danger, skin.Caution, health * 2) :
+                Color.InterpolateBetween(skin.Caution, skin.Good, (health - 0.5f) * 2);
         }
-        if (_state is { Available: true } && _health.Value < 0.1f)
+        if (_state is { Available: true } && health < 0.1f)
         {
             var pulse = 0.5f + 0.5f * MathF.Cos(_warningTime * MathF.Tau);
             tint = _dial.GlassFace
                 ? Color.InterpolateBetween(WGInstrumentTheme.Skin.Ink, WGInstrumentTheme.Red, 0.3f + 0.7f * pulse)
                 : Color.InterpolateBetween(new Color(0.4f, 0.02f, 0.03f), new Color(1f, 0.05f, 0.08f), pulse);
         }
-        if (_health.ForegroundStyleBoxOverride is StyleBoxFlat fill)
+        if (_heat.ForegroundStyleBoxOverride is StyleBoxFlat fill)
             fill.BackgroundColor = tint;
-        if (_health.BackgroundStyleBoxOverride is StyleBoxFlat background)
-            background.BackgroundColor = _state is { Available: true } && _health.Value < 0.1f
+        if (_heat.BackgroundStyleBoxOverride is StyleBoxFlat background)
+            background.BackgroundColor = _state is { Available: true } && health < 0.1f
                 ? tint.WithAlpha(0.35f) : _dial.GlassFace ? WGInstrumentTheme.Skin.GlassLight : Color.FromHex("#1B303C");
         _dial.HealthTint = tint;
     }

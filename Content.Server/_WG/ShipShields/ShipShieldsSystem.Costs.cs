@@ -3,10 +3,12 @@ using System.Numerics;
 using Content.Server._Mono.Detection;
 using Content.Server._Mono.FireControl;
 using Content.Server._WG.ShipShields;
+using Content.Server.Shuttles.Components;
 using Content.Shared._Crescent.ShipShields;
 using Content.Shared._Mono.Detection;
 using Content.Shared._Mono.FireControl;
 using Content.Shared.Popups;
+using Content.Shared.Shuttles.Components;
 using Content.Shared.Weapons.Ranged.Systems;
 using Robust.Shared.Map;
 using Robust.Shared.Spawners;
@@ -28,6 +30,7 @@ public sealed partial class ShipShieldsSystem
     {
         SubscribeLocalEvent<ShipShieldedComponent, GetThermalSignatureEvent>(OnWolfgateShieldSignature);
         SubscribeLocalEvent<FireControllableComponent, AttemptShootEvent>(OnWolfgateLockedGunShoot);
+        InitializeWolfgateShipHeat();
     }
 
     /// <summary>The cost component of the generator holding a ship's raised field, if it has one.</summary>
@@ -59,9 +62,9 @@ public sealed partial class ShipShieldsSystem
     /// <summary>Flares the protected ship's thermal signature for damage its field absorbed.</summary>
     private void AddWolfgateShieldHitHeat(ShipShieldComponent shield, float damage)
     {
-        if (shield.Source is { } source && TryComp<WGShipShieldCostComponent>(source, out var cost) && cost.HitHeat > 0f &&
+        if (shield.Source is { } source && TryComp<WGShipShieldCostComponent>(source, out var cost) && cost.HitSignature > 0f &&
             TryComp<ThermalSignatureComponent>(shield.Shielded, out var heat))
-            heat.StoredHeat += damage * cost.HitHeat;
+            heat.StoredHeat += damage * cost.HitSignature;
     }
 
     /// <summary>Locks a ship's guns after damage beat its field down, sets them sparking, and tells whoever is at its gunnery consoles.</summary>
@@ -95,6 +98,16 @@ public sealed partial class ShipShieldsSystem
             foreach (var actor in _wgShieldUi.GetActors(uid, FireControlConsoleUiKey.Key))
                 _wgShieldPopup.PopupEntity(message, uid, actor, PopupType.LargeCaution);
         }
+
+        // Pilots fire from the helm in the cockpit view, so they are told too.
+        var helms = EntityQueryEnumerator<ShuttleConsoleComponent, TransformComponent>();
+        while (helms.MoveNext(out var uid, out _, out var transform))
+        {
+            if (transform.GridUid != grid)
+                continue;
+            foreach (var actor in _wgShieldUi.GetActors(uid, ShuttleConsoleUiKey.Key))
+                _wgShieldPopup.PopupEntity(message, uid, actor, PopupType.LargeCaution);
+        }
     }
 
     /// <summary>Whole seconds until a ship's guns unlock after a field collapse; 0 when they are free.</summary>
@@ -111,9 +124,9 @@ public sealed partial class ShipShieldsSystem
 
     private void OnWolfgateLockedGunShoot(Entity<FireControllableComponent> gun, ref AttemptShootEvent args)
     {
-        if (args.Cancelled || _wgGunLocks.Count == 0 || Transform(gun).GridUid is not { } grid)
+        if (args.Cancelled || Transform(gun).GridUid is not { } grid)
             return;
-        if (GetWolfgateGunLockSeconds(grid) > 0)
+        if (_wgGunLocks.Count > 0 && GetWolfgateGunLockSeconds(grid) > 0 || IsWolfgateShipHeatHeld(grid))
             args.Cancelled = true;
     }
 }

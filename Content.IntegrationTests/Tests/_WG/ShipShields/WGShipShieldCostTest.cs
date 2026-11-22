@@ -66,7 +66,7 @@ public sealed class WGShipShieldCostTest
             var stored = heat.StoredHeat;
             typeof(ShipShieldsSystem).GetMethod("AddWolfgateShieldHitHeat", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .Invoke(system, new object[] { entities.GetComponent<ShipShieldComponent>(emitter.Shield!.Value), 100f });
-            Assert.That(heat.StoredHeat - stored, Is.EqualTo(100f * cost.HitHeat).Within(0.01f), "Absorbed damage flares the signature.");
+            Assert.That(heat.StoredHeat - stored, Is.EqualTo(100f * cost.HitSignature).Within(0.01f), "Absorbed damage flares the signature.");
 
             Assert.That(system.SetWolfgateShieldEnabled(grid, false), Is.True);
             Assert.That(system.GetWolfgateShieldThrustFactor(grid), Is.EqualTo(1f));

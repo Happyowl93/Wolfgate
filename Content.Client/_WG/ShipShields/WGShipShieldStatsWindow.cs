@@ -20,6 +20,7 @@ public sealed class WGShipShieldStatsWindow : DefaultWindow
     private readonly RichTextLabel _maximum = new();
     private readonly RichTextLabel _lockout = new();
     private readonly RichTextLabel _costs = new();
+    private readonly RichTextLabel _fireHeat = new();
 
     /// <summary>Creates a compact scrolling generator specification panel, with instrument chrome only for instrument consoles.</summary>
     public WGShipShieldStatsWindow(bool instruments = true)
@@ -35,7 +36,7 @@ public sealed class WGShipShieldStatsWindow : DefaultWindow
             Margin = new Thickness(8),
             HorizontalExpand = true,
         };
-        foreach (var label in new[] { _name, _capacity, _limit, _repair, _recharge, _idle, _maximum, _lockout, _costs })
+        foreach (var label in new[] { _name, _capacity, _limit, _repair, _recharge, _idle, _maximum, _lockout, _costs, _fireHeat })
         {
             label.HorizontalExpand = true;
             values.AddChild(instruments ? (Control) new WGGlassReadout(label) : label);
@@ -54,7 +55,8 @@ public sealed class WGShipShieldStatsWindow : DefaultWindow
         _capacity.Text = Loc.GetString("wg-shield-stats-capacity", ("value", MathF.Round(stats.Capacity, 0)));
         _limit.Text = Loc.GetString("wg-shield-stats-overload-limit", ("value", MathF.Round(stats.DamageLimit, 0)));
         _repair.Text = Loc.GetString("wg-shield-stats-online-repair", ("value", MathF.Round(stats.HealPerSecond, 1)));
-        _recharge.Text = Loc.GetString("wg-shield-stats-offline-repair", ("value", MathF.Round(stats.RechargePerSecond, 1)));
+        _recharge.Text = Loc.GetString(stats.Vents ? "wg-shield-stats-vent" : "wg-shield-stats-offline-repair",
+            ("value", MathF.Round(stats.RechargePerSecond, 1)));
         _idle.Text = Loc.GetString("wg-shield-stats-idle-power", ("value", MathF.Round(stats.BasePowerWatts / 1000f, 1)));
         _maximum.Text = Loc.GetString("wg-shield-stats-max-power", ("value", MathF.Round(stats.MaximumPowerWatts / 1000f, 1)));
         _lockout.Text = Loc.GetString("wg-shield-stats-overload-lockout", ("value", MathF.Round(stats.OverloadSeconds, 1)));
@@ -62,5 +64,9 @@ public sealed class WGShipShieldStatsWindow : DefaultWindow
             ? Loc.GetString("wg-shield-stats-costs", ("thrust", MathF.Round((1f - stats.ThrustFactor) * 100f)),
                 ("turn", MathF.Round((1f - stats.TurnFactor) * 100f)), ("seconds", MathF.Round(stats.GunLockSeconds, 1)))
             : Loc.GetString("wg-shield-stats-no-costs");
+        _fireHeat.Text = stats.FireHeat > 0f
+            ? Loc.GetString("wg-shield-stats-fire-heat", ("percent", MathF.Round(stats.FireHeat * 100f)),
+                ("hold", MathF.Round(WGShipShieldEffects.GunHoldHeat * 100f)), ("resume", MathF.Round(WGShipShieldEffects.GunResumeHeat * 100f)))
+            : Loc.GetString("wg-shield-stats-no-fire-heat");
     }
 }

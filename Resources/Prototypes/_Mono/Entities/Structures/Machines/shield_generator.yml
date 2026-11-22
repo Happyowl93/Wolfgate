@@ -313,8 +313,8 @@
   components:
   # WOLFGATE(ShipShields) START: a raised field costs thrust, turning and stealth, and locks the guns when beaten down
   - type: WGShipShieldCost
-    thrustFactor: 0.8
-    turnFactor: 0.85
+    thrustFactor: 0.7
+    turnFactor: 0.75
     signature: 2000000
   # WOLFGATE END
   - type: ShipShieldEmitter
@@ -393,8 +393,8 @@
   components:
   # WOLFGATE(ShipShields) START: a raised field costs thrust, turning and stealth, and locks the guns when beaten down
   - type: WGShipShieldCost
-    thrustFactor: 0.75
-    turnFactor: 0.8
+    thrustFactor: 0.65
+    turnFactor: 0.7
     signature: 2000000
   # WOLFGATE END
   - type: ShipShieldEmitter
@@ -425,8 +425,8 @@
   components:
   # WOLFGATE(ShipShields) START: a raised field costs thrust, turning and stealth, and locks the guns when beaten down
   - type: WGShipShieldCost
-    thrustFactor: 0.8
-    turnFactor: 0.85
+    thrustFactor: 0.75
+    turnFactor: 0.8
     signature: 1200000
   # WOLFGATE END
   - type: ShipShieldEmitter

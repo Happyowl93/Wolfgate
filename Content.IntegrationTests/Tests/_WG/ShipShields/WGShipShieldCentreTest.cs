@@ -80,7 +80,7 @@ public sealed class WGShipShieldCentreTest
                     Assert.That(dial.Width, Is.GreaterThan(panels[0].Width), $"{context}: the dial is the widest element of the page body.");
                     Assert.That(dial.Height, Is.GreaterThan(180f), context);
 
-                    foreach (var name in new[] { "_enabled", "_stats", "_reset", "_health", "_direction", "_arc", "_concentration" })
+                    foreach (var name in new[] { "_enabled", "_stats", "_reset", "_heat", "_direction", "_arc", "_concentration" })
                         AssertWithin(Field<Control>(screen, name), screen);
                     AssertWithin(dial, screen);
                     if (scrolls)

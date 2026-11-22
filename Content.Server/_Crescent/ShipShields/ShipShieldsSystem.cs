@@ -59,7 +59,10 @@ public sealed partial class ShipShieldsSystem : EntitySystem
 
             float healed = emitter.HealPerSecond * EmitterUpdateRate;
 
-            if (emitter.Recharging)
+            // WOLFGATE(ShipShields) START: a ship generator sheds heat at the fast rate while its ship has no field up
+            // if (emitter.Recharging)
+            if (emitter.Recharging || IsWolfgateShieldVenting(uid, emitter))
+            // WOLFGATE END
                 healed *= emitter.UnpoweredBonus;
 
             emitter.Damage -= healed;

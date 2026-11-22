@@ -42,8 +42,9 @@ public sealed class WGShipShieldGeneratorStatsTest
             Assert.That(stats.OverloadSeconds, Is.EqualTo(emitter.DamageOverloadTimePunishment));
             var examiner = entities.SpawnEntity("MobHuman", map.GridCoords);
             var description = entities.System<ExamineSystemShared>().GetExamineText(active, examiner).ToString();
-            Assert.That(description, Does.Contain("Usable capacity:"));
-            Assert.That(description, Does.Contain("recharge-mode repair:"));
+            Assert.That(description, Does.Contain("Heat capacity:"));
+            Assert.That(description, Does.Contain("heat/s with it down"), "A ship generator's fast rate is its field-down cooling.");
+            Assert.That(description, Does.Contain("Firing through the raised field"));
         });
         await pair.RunTicksSync(1);
         await pair.CleanReturnAsync();
