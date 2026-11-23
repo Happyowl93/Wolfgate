@@ -60,6 +60,48 @@ public sealed class WGShipShieldRecoveryTest
         await pair.CleanReturnAsync();
     }
 
+    [TestCase("ShieldGeneratorSmall", 30f)]
+    [TestCase("ShieldGeneratorMedium", 45f)]
+    public async Task CollapsedShipFieldReturnsAfterItsOverloadWaitWithHeatLeft(string generator, float wait)
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        await server.WaitAssertion(() =>
+        {
+            var shields = entities.System<ShipShieldsSystem>();
+            var grid = map.Grid.Owner;
+            var uid = entities.SpawnEntity(generator, map.GridCoords);
+            var emitter = entities.GetComponent<ShipShieldEmitterComponent>(uid);
+            entities.GetComponent<ApcPowerReceiverComponent>(uid).Powered = true;
+            shields.Update(1.5f);
+            Assert.That(emitter.Shield, Is.Not.Null);
+            Assert.That(emitter.DamageOverloadTimePunishment, Is.EqualTo(wait));
+
+            // The Sentinel collapses past its overload limit, the Aegis at its power cap; both wait out the same rule.
+            shields.AddWolfgateShipHeat(grid, shields.GetWolfgateShipHeat(grid).Capacity * 1.05f);
+            shields.Update(1.5f);
+            Assert.That(emitter.Shield, Is.Null);
+            Assert.That(emitter.OverloadAccumulator, Is.GreaterThan(wait - 2f), "Any collapse of a ship generator starts its overload wait.");
+            var estimate = ShipShieldsSystem.EstimateWolfgateShieldRecovery(emitter, true, ship: true,
+                share: shields.WolfgateGeneratorShare(uid, emitter), hullCooling: shields.WolfgateHullCooling(uid));
+
+            var elapsed = 0f;
+            for (var tick = 0; tick < 200 && emitter.Shield == null; tick++)
+            {
+                elapsed += 1.5f;
+                shields.Update(1.5f);
+            }
+            Assert.That(emitter.Shield, Is.Not.Null);
+            Assert.That(elapsed, Is.InRange(wait - 3f, wait + 4.5f), "The field returns after the overload wait.");
+            Assert.That(estimate.Seconds, Is.EqualTo((int) Math.Ceiling(elapsed)), "The panel's countdown follows the same rule.");
+            Assert.That(shields.GetWolfgateShipHeat(grid).Heat, Is.GreaterThan(0f), "The field comes back with its heat left, not at zero.");
+        });
+        await pair.RunTicksSync(1);
+        await pair.CleanReturnAsync();
+    }
+
     [Test]
     public void WaitingConditionsDoNotPromiseAutomaticRecovery()
     {
@@ -96,19 +138,17 @@ public sealed class WGShipShieldRecoveryTest
             var fast = entities.GetComponent<ShipShieldEmitterComponent>(fastUid);
             slow.BaseDraw = 12345f;
             fast.BaseDraw = 23456f;
-            // Both read the same hull's heat; the one further into its update cycle comes back first.
-            // Four seconds of cooling, so three update cycles, whatever share of it the generators see.
-            var shields = entities.System<ShipShieldsSystem>();
-            slow.Damage = fast.Damage = (fast.HealPerSecond + shields.WolfgateHullCooling(fastUid)) * 4f * shields.WolfgateGeneratorShare(fastUid, fast);
+            // Both wait out the same overload; the one further into its update cycle comes back first.
+            // Five seconds of overload, so three update cycles.
+            slow.OverloadAccumulator = fast.OverloadAccumulator = 5f;
             fast.Accumulator = 0.6f;
-            slow.Recharging = fast.Recharging = true;
             entities.GetComponent<ApcPowerReceiverComponent>(slowUid).Powered = true;
             var fastPower = entities.GetComponent<ApcPowerReceiverComponent>(fastUid);
             fastPower.Powered = true;
             var controls = entities.System<WGShipShieldShuntSystem>();
             var state = controls.GetState(map.Grid.Owner);
             Assert.That(state.Available, Is.True);
-            Assert.That(state.RecoveryStatus, Is.EqualTo(WGShipShieldRecoveryStatus.Recharging));
+            Assert.That(state.RecoveryStatus, Is.EqualTo(WGShipShieldRecoveryStatus.Overloaded));
             Assert.That(state.RecoverySeconds, Is.EqualTo(4));
             Assert.That(state.Health, Is.EqualTo(ShipShieldsSystem.GetWolfgateShieldHealth(fast)));
             Assert.That(state.Stats!.BasePowerWatts, Is.EqualTo(fast.BaseDraw), "Offline stats belong to the earliest recovery emitter.");

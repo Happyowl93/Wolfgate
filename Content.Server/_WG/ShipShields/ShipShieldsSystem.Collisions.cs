@@ -1,6 +1,7 @@
 using System.Numerics;
 using Content.Shared._Crescent.ShipShields;
 using Content.Server._Crescent.ShipShields.Components;
+using Content.Server._WG.ShipShields;
 using Content.Shared._WG.ShipShields;
 using Content.Server.Power.Components;
 using Robust.Shared.Physics.Components;
@@ -71,7 +72,8 @@ public sealed partial class ShipShieldsSystem
     private void ExhaustWolfgateCollisionShield(EntityUid grid, EntityUid source, ShipShieldEmitterComponent emitter)
     {
         emitter.Recharging = true;
-        if (emitter.Damage >= emitter.DamageLimit)
+        // A ship generator always waits out an overload; its recharge mode ends as soon as it cools a little.
+        if (emitter.Damage >= emitter.DamageLimit || HasComp<WGShipShieldCostComponent>(source))
             emitter.OverloadAccumulator = MathF.Max(emitter.OverloadAccumulator, emitter.DamageOverloadTimePunishment);
         if (RemoveWolfgateEmitterShield(source, emitter, "collision capacity exhausted"))
         {

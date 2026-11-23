@@ -441,7 +441,7 @@
     baseDraw: 30000 # Base is 50000
     maxDraw: 75000 # Base is 150000
     unpoweredBonus: 4 # Base is 6
-    damageOverloadTimePunishment: 100
+    damageOverloadTimePunishment: 45 # WOLFGATE(ShipShields): the field returns after this wait with its heat left (Mono: 100)
     shieldColor: "#9933FF"
     collisionResistanceMultiplier: 0.6
   - type: Sprite
@@ -534,7 +534,7 @@
     baseDraw: 20000
     maxDraw: 60000
     unpoweredBonus: 3 # Mono
-    damageOverloadTimePunishment: 80
+    damageOverloadTimePunishment: 30 # WOLFGATE(ShipShields): the field returns after this wait with its heat left (Mono: 80)
     shieldColor: "#3399FF"
     collisionResistanceMultiplier: 0.5
   - type: Sprite

@@ -1,10 +1,28 @@
+using Content.Server._WG.ShipShields;
 using Content.Shared._Crescent.ShipShields;
 using Content.Shared._WG.ShipShields;
 
 namespace Content.Server._Crescent.ShipShields;
 
+// A ship generator recovers by Starsector's overload rule: heat overrunning the field, past its overload limit or at its
+// power cap, holds it down for the generator's overload wait, and then it comes back with whatever heat is left. Losing
+// power holds it down only until power returns. Outpost generators keep the upstream rule of recharging to zero.
 public sealed partial class ShipShieldsSystem
 {
+    /// <summary>Starts a ship generator's overload wait when its heat has reached its power cap.</summary>
+    private void OverloadWolfgateAtPowerCap(EntityUid uid, ShipShieldEmitterComponent emitter)
+    {
+        if (CalculateLoadDamage(emitter) >= emitter.MaxDraw && HasComp<WGShipShieldCostComponent>(uid))
+            emitter.OverloadAccumulator = MathF.Max(emitter.OverloadAccumulator, emitter.DamageOverloadTimePunishment);
+    }
+
+    /// <summary>Takes a powered ship generator out of recharge mode once its heat is below its power cap, so only the overload wait holds its field down.</summary>
+    private void ReleaseWolfgateRecharge(EntityUid uid, ShipShieldEmitterComponent emitter, bool powered)
+    {
+        if (emitter.Recharging && powered && CalculateLoadDamage(emitter) < emitter.MaxDraw && HasComp<WGShipShieldCostComponent>(uid))
+            emitter.Recharging = false;
+    }
+
     /// <summary>
     /// Estimates automatic startup with unchanged power and no further damage. A ship's generator cools at its fast
     /// rate only while the ship vents, and a vent holds the field down until no heat is left. Cooling is the ship's, so
@@ -34,9 +52,12 @@ public sealed partial class ShipShieldsSystem
         // Bound malformed or impractically long configurations without blocking UI updates.
         for (var tick = 0; tick < 2400; tick++)
         {
-            var load = (float) Math.Clamp(Math.Pow(damage, emitter.DamageExp) * emitter.PowerModifier, 0d, emitter.MaxDraw);
-            if (load >= emitter.MaxDraw)
+            if (WolfgateLoadAt(damage, emitter) >= emitter.MaxDraw)
+            {
                 recharging = true;
+                if (ship)
+                    overload = MathF.Max(overload, emitter.DamageOverloadTimePunishment);
+            }
             var rechargeThisTick = recharging;
             if (overload > 0f)
                 overload -= EmitterUpdateRate;
@@ -52,6 +73,8 @@ public sealed partial class ShipShieldsSystem
                 recharging = false;
                 venting = false;
             }
+            if (ship && WolfgateLoadAt(damage, emitter) < emitter.MaxDraw)
+                recharging = false;
             if (damage > emitter.DamageLimit)
                 overload = emitter.DamageOverloadTimePunishment;
             if (tick == 0)
@@ -70,5 +93,11 @@ public sealed partial class ShipShieldsSystem
             elapsed += EmitterUpdateRate;
         }
         return (status, -1);
+    }
+
+    /// <summary>The power a generator would draw for its damage at the given heat.</summary>
+    private static float WolfgateLoadAt(float damage, ShipShieldEmitterComponent emitter)
+    {
+        return (float) Math.Clamp(Math.Pow(damage, emitter.DamageExp) * emitter.PowerModifier, 0d, emitter.MaxDraw);
     }
 }

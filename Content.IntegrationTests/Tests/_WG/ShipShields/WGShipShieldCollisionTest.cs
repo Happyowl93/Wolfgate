@@ -81,8 +81,8 @@ public sealed class WGShipShieldCollisionTest
                 Is.EqualTo(100f - 10f / system.WolfgateGeneratorShare(emitterUid, emitter)).Within(0.01f));
             Assert.That(emitter.Damage, Is.EqualTo(capacity).Within(0.001f));
             Assert.That(emitter.Recharging, Is.True);
-            Assert.That(emitter.OverloadAccumulator, Is.EqualTo(capacity >= emitter.DamageLimit
-                ? emitter.DamageOverloadTimePunishment : 0f).Within(0.001f));
+            Assert.That(emitter.OverloadAccumulator, Is.EqualTo(emitter.DamageOverloadTimePunishment).Within(0.001f),
+                "A ship generator emptied by a ram waits out its overload.");
             Assert.That(emitter.Shield, Is.Null);
             Assert.That(system.AbsorbWolfgateCollision(map.Grid.Owner, point, 100f, 2f), Is.EqualTo(100f));
             Assert.That(emitter.Damage, Is.EqualTo(capacity).Within(0.001f));

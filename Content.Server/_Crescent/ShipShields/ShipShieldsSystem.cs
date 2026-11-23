@@ -48,6 +48,7 @@ public sealed partial class ShipShieldsSystem : EntitySystem
 
             if (CalculateLoadDamage(emitter) >= emitter.MaxDraw)
                 emitter.Recharging = true;
+            OverloadWolfgateAtPowerCap(uid, emitter); // WOLFGATE(ShipShields): a ship generator at its power cap overloads like one past its limit
             if (!power.Powered)
                 emitter.Recharging = true;
 
@@ -74,6 +75,7 @@ public sealed partial class ShipShieldsSystem : EntitySystem
                 if (power.Powered)
                     emitter.Recharging = false;
             }
+            ReleaseWolfgateRecharge(uid, emitter, power.Powered); // WOLFGATE(ShipShields): a powered ship generator waits out its overload, not zero heat
 
             AdjustEmitterLoad(uid, emitter, power);
 
