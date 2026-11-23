@@ -743,7 +743,7 @@ public sealed partial class MoverController : SharedMoverController
 
                 if (angularBrakeInput > 0f && body.AngularVelocity != 0f)
                 {
-                    var torque = shuttle.AngularThrust * angularBrakeInput * (body.AngularVelocity > 0f ? -1f : 1f) * ShuttleComponent.BrakeCoefficient;
+                    var torque = shuttle.AngularThrust * angularBrakeInput * (body.AngularVelocity > 0f ? -1f : 1f) * ShuttleComponent.BrakeCoefficient * WgShieldTurnFactor(uid); // WOLFGATE(ShipShields): a raised shield field slows the turn brake too
                     var torqueMul = body.InvI * frameTime;
 
                     if (body.AngularVelocity > 0f)

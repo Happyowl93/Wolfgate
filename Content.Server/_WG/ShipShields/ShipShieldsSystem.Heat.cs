@@ -452,6 +452,8 @@ public sealed partial class ShipShieldsSystem
         }
         // It stops at the hold mark, so a ship's own fire never collapses its field.
         AddWolfgateShipHeat(grid, damage * hull.FireHeat, WGShipShieldEffects.GunHoldHeat);
+        // Latch the hold now; cooling before the next shot would otherwise drop it under the mark unlatched.
+        IsWolfgateShipHeatHeld(grid);
     }
 
     /// <summary>What one shot would cost a shield that absorbed it.</summary>
