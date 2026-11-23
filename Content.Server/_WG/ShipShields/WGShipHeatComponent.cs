@@ -31,21 +31,20 @@ public sealed partial class WGShipHeatComponent : Component
     [DataField]
     public float MaxCapacity = 50000f;
 
-    /// <summary>Seconds a hull with no generator takes to shed a full load of heat. No field traps it, so it beats any generator.</summary>
+    /// <summary>
+    /// Seconds a hull's own plain rate takes to shed a full load of heat. A generator adds its rate on top; with no
+    /// field up the ship cools at <c>WGShipShieldEffects.FieldDownCooling</c> times that.
+    /// </summary>
     [DataField]
-    public float CoolSeconds = 40f;
-
-    /// <summary>Share of its own cooling a hull keeps under a ship generator, on top of the generator's rate.</summary>
-    [DataField]
-    public float GeneratorCooling = 0.25f;
+    public float CoolSeconds = 80f;
 
     /// <summary>Heat the hull holds by its size. A ship generator adds its capacity to this; an outpost generator's replaces it.</summary>
     [ViewVariables]
     public float Capacity = HullCapacity;
 
-    /// <summary>Heat the hull sheds each second with no generator to cool it, from its size.</summary>
+    /// <summary>Heat the hull itself sheds each second at the plain rate, from its size.</summary>
     [ViewVariables]
-    public float Dissipation = HullCapacity / 40f;
+    public float Dissipation = HullCapacity / 80f;
 
     /// <summary>Whether capacity and cooling match the hull's tiles; cleared when the hull gains or loses one.</summary>
     [ViewVariables]
@@ -54,10 +53,6 @@ public sealed partial class WGShipHeatComponent : Component
     /// <summary>Share of each shot's damage the ship's own guns add to its heat.</summary>
     [DataField]
     public float FireHeat = 0.15f;
-
-    /// <summary>How much faster a hull with no generator cools while venting; a generator uses its own bonus.</summary>
-    [DataField]
-    public float VentBonus = 1.5f;
 
     /// <summary>Thermal signature each point of heat the hull holds adds for long-range sensors.</summary>
     [DataField]

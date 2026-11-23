@@ -42,10 +42,10 @@ public sealed class WGShipShieldGeneratorStatsTest
             Assert.That(entities.System<ShipShieldsSystem>().GetWolfgateShipHeat(map.Grid.Owner).Capacity,
                 Is.EqualTo(stats.Capacity + hull.Capacity).Within(0.01f));
             Assert.That(stats.DamageLimit, Is.EqualTo(180000f));
-            Assert.That(stats.HullCooling, Is.EqualTo(hull.Dissipation * hull.GeneratorCooling).And.GreaterThan(0f), "The hull keeps part of its own cooling.");
+            Assert.That(stats.HullCooling, Is.EqualTo(hull.Dissipation).And.GreaterThan(0f), "The hull keeps its own cooling.");
             Assert.That(stats.HealPerSecond, Is.EqualTo(emitter.HealPerSecond + stats.HullCooling));
-            Assert.That(stats.RechargePerSecond, Is.EqualTo(stats.HealPerSecond * ShipShieldsSystem.WolfgateVentBonus(emitter.UnpoweredBonus)),
-                "A ship generator vents at its fast rate, boosted.");
+            Assert.That(stats.RechargePerSecond, Is.EqualTo(stats.HealPerSecond * WGShipShieldEffects.VentCooling),
+                "A ship vents at the same multiple of its plain rate as every other ship.");
             Assert.That(stats.BasePowerWatts, Is.EqualTo(emitter.BaseDraw));
             Assert.That(stats.MaximumPowerWatts, Is.EqualTo(emitter.BaseDraw + emitter.MaxDraw));
             Assert.That(stats.OverloadSeconds, Is.EqualTo(emitter.DamageOverloadTimePunishment));

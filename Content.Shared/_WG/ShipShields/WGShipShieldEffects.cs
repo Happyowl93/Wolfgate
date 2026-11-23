@@ -16,14 +16,20 @@ public static class WGShipShieldEffects
     public const float GunResumeHeat = 0.85f;
     /// <summary>Seconds after the field's last hit for which hard heat stays under a raised field.</summary>
     public const float HardHeatHold = 30f;
-    /// <summary>How much faster a vent cools than a generator's fast rate, or a bare hull's.</summary>
-    public const float VentBoost = 2f;
-    /// <summary>How much faster a ship with a generator cools while its field is down and it isn't venting.</summary>
+    /// <summary>How many times its plain rate a ship cools with no field up, a bare hull included.</summary>
     public const float FieldDownCooling = 2f;
+    /// <summary>How many times its plain rate a venting ship cools.</summary>
+    public const float VentCooling = 6f;
     /// <summary>Heat each point of damage a ship generator's field absorbs adds, unless the generator sets its own.</summary>
     public const float HitHeat = 0.5f;
     /// <summary>Most of a ship's heat capacity one hit absorbed by its field can add.</summary>
     public const float HitHeatCap = 0.2f;
+
+    /// <summary>How many times its plain rate a ship cools in its state; every ship, with or without a generator, uses this.</summary>
+    public static float CoolingMultiplier(bool raised, bool venting)
+    {
+        return venting ? VentCooling : raised ? 1f : FieldDownCooling;
+    }
 
     /// <summary>Returns full capacity bounded by overload and power demand limits.</summary>
     public static float EffectiveCapacity(float damageLimit, float maxDraw, float powerModifier, float damageExp)

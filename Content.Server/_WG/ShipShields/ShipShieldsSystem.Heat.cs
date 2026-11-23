@@ -18,8 +18,10 @@ namespace Content.Server._Crescent.ShipShields;
 // A ship's heat lives on its hull (WGShipHeatComponent). A generator's damage is that heat as the upstream shield rules
 // see it: whatever raises or sets the damage (absorbed hits, other systems) is carried to the hull, and every
 // generator on the hull reads the same heat back. A ship generator adds its capacity to what the hull holds by its
-// size, and its cooling to a share of what the hull sheds by its size. Its damage is the heat scaled to its own range (WolfgateGeneratorShare), so
+// size, and its cooling to what the hull sheds by its size. Its damage is the heat scaled to its own range (WolfgateGeneratorShare), so
 // the upstream limits are reached when the whole ship is full.
+// Every ship cools the same way: a plain rate (hull, plus a powered generator) times one multiplier for its state,
+// field raised, field down or venting (WGShipShieldEffects.CoolingMultiplier). A bare hull has no field, so it is down.
 // Heat that came through a ship's shield is hard: it stays while the field is up and taking hits. The rest is soft
 // and cools anyway; a ship's own guns add it with every shot, with or without a shield.
 public sealed partial class ShipShieldsSystem
@@ -162,7 +164,7 @@ public sealed partial class ShipShieldsSystem
         return capacity > 0f ? MathF.Min(charged, capacity * WGShipShieldEffects.HitHeatCap) : charged;
     }
 
-    /// <summary>Heat per second a hull sheds by its own size under this generator, on top of the generator's rate; 0 for an outpost generator.</summary>
+    /// <summary>Heat per second the hull under this generator sheds by its own size at the plain rate; 0 for an outpost generator.</summary>
     public float WolfgateHullCooling(EntityUid uid)
     {
         if (!HasComp<WGShipShieldCostComponent>(uid))
@@ -172,18 +174,26 @@ public sealed partial class ShipShieldsSystem
             return 0f;
         var hull = EnsureComp<WGShipHeatComponent>(grid);
         WolfgateHullCapacity(grid, hull);
-        var cooling = hull.Dissipation * hull.GeneratorCooling;
-        return float.IsFinite(cooling) ? MathF.Max(0f, cooling) : 0f;
+        return float.IsFinite(hull.Dissipation) ? MathF.Max(0f, hull.Dissipation) : 0f;
     }
 
     /// <summary>
-    /// Heat per second a ship generator sheds for its hull: its own rate while it has power, plus the hull's share.
+    /// A ship's plain cooling under a generator: the generator's own rate while it has power, plus the hull's.
     /// A dead generator is no radiator.
     /// </summary>
     public float WolfgateGeneratorCooling(EntityUid uid, ShipShieldEmitterComponent emitter)
     {
         var own = TryComp<ApcPowerReceiverComponent>(uid, out var power) && !power.Powered ? 0f : emitter.HealPerSecond;
         return own + WolfgateHullCooling(uid);
+    }
+
+    /// <summary>A ship's plain cooling: its cooling generator's rate with the hull's, or the hull's alone.</summary>
+    private float WolfgatePlainCooling(EntityUid grid, WGShipHeatComponent hull)
+    {
+        if (hull.Cooler is { } cooler && _wgHeatSinks.TryGetValue(cooler, out var sink) && sink.Grid == grid &&
+            TryComp<ShipShieldEmitterComponent>(cooler, out var emitter) && HasComp<WGShipShieldCostComponent>(cooler))
+            return WolfgateGeneratorCooling(cooler, emitter);
+        return hull.Dissipation;
     }
 
     /// <summary>Most heat a hull holds under a generator: a ship generator's capacity on top of the hull's own, an outpost generator's alone.</summary>
@@ -370,15 +380,13 @@ public sealed partial class ShipShieldsSystem
         if (IsWolfgateHullCooler(uid, sink.Grid, hull))
         {
             if (HasComp<WGShipShieldCostComponent>(uid))
-            {
-                var cooling = WolfgateGeneratorCooling(uid, emitter) * EmitterUpdateRate;
-                // A vent has its own bonus; this is the gain from simply lowering the field.
-                if (!hull.Venting && GetWolfgateRaisedCost(sink.Grid) == null)
-                    cooling *= WGShipShieldEffects.FieldDownCooling;
-                CoolWolfgateShip(sink.Grid, hull, cooling, emitter.UnpoweredBonus);
-            }
+                CoolWolfgateShip(sink.Grid, hull, WolfgateGeneratorCooling(uid, emitter), EmitterUpdateRate);
             else
-                CoolWolfgateShip(sink.Grid, hull, healed, 1f, false);
+            {
+                // An outpost keeps the upstream amount: no hard heat, no vent, no ship multipliers.
+                hull.Heat = MathF.Max(0f, hull.Heat - (float.IsFinite(healed) ? MathF.Max(0f, healed) : 0f));
+                hull.Hard = Math.Clamp(hull.Hard, 0f, hull.Heat);
+            }
         }
         emitter.Damage = hull.Heat * WolfgateGeneratorShare(uid, emitter);
         _wgHeatSinks[uid] = (sink.Grid, emitter.Damage);
@@ -386,16 +394,16 @@ public sealed partial class ShipShieldsSystem
     }
 
     /// <summary>
-    /// Cools a hull by a ship's rules: under a raised field that was hit lately only soft heat goes, otherwise all of
-    /// it does, and a vent multiplies the rate until no heat is left.
+    /// Cools a ship for <paramref name="seconds"/> at its plain <paramref name="rate"/> times the multiplier for its
+    /// state (<see cref="WGShipShieldEffects.CoolingMultiplier"/>). Under a raised field that was hit lately only soft
+    /// heat goes; a vent runs until no heat is left.
     /// </summary>
-    private void CoolWolfgateShip(EntityUid grid, WGShipHeatComponent hull, float amount, float ventBonus, bool keepsHard = true)
+    private void CoolWolfgateShip(EntityUid grid, WGShipHeatComponent hull, float rate, float seconds)
     {
-        if (hull.Venting)
-            amount *= WolfgateVentBonus(ventBonus);
+        var raised = GetWolfgateRaisedCost(grid);
+        var amount = rate * seconds * WGShipShieldEffects.CoolingMultiplier(raised != null, hull.Venting);
         // How long hard heat stays is the raised generator's own number.
-        var most = keepsHard && GetWolfgateRaisedCost(grid) is { } cost &&
-            _wgShieldTiming.CurTime - hull.LastHit < TimeSpan.FromSeconds(cost.HardHeatHold)
+        var most = raised is { } cost && _wgShieldTiming.CurTime - hull.LastHit < TimeSpan.FromSeconds(cost.HardHeatHold)
             ? hull.Heat - hull.Hard : hull.Heat;
         if (float.IsFinite(amount) && amount > 0f && most > 0f)
             hull.Heat = MathF.Max(0f, hull.Heat - MathF.Min(amount, most));
@@ -524,7 +532,7 @@ public sealed partial class ShipShieldsSystem
             if (!hull.Sized)
                 SizeWolfgateHull(grid, hull);
             if ((hull.Heat > 0f || hull.Venting) && !_wgHeatSunkHulls.Contains(grid))
-                CoolWolfgateShip(grid, hull, hull.Dissipation * elapsed, hull.VentBonus);
+                CoolWolfgateShip(grid, hull, hull.Dissipation, elapsed);
         }
         UpdateWolfgateNpcVents();
     }

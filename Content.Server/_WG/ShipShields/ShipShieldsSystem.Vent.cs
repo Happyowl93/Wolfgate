@@ -114,22 +114,13 @@ public sealed partial class ShipShieldsSystem
         RemComp<WGShipVentingComponent>(grid);
     }
 
-    /// <summary>How many times its plain rate a venting hull cools at, from its generator's fast-cooling bonus or its own.</summary>
-    public static float WolfgateVentBonus(float bonus)
-    {
-        return MathF.Max(1f, bonus) * WGShipShieldEffects.VentBoost;
-    }
-
     /// <summary>Whole seconds a venting ship still needs; 0 when it isn't venting.</summary>
     public int GetWolfgateVentSeconds(EntityUid grid)
     {
         if (!IsWolfgateShipVenting(grid))
             return 0;
         var hull = Comp<WGShipHeatComponent>(grid);
-        var rate = hull.Dissipation * WolfgateVentBonus(hull.VentBonus);
-        if (hull.Cooler is { } cooler && _wgHeatSinks.TryGetValue(cooler, out var sink) && sink.Grid == grid &&
-            TryComp<ShipShieldEmitterComponent>(cooler, out var emitter))
-            rate = WolfgateGeneratorCooling(cooler, emitter) * WolfgateVentBonus(emitter.UnpoweredBonus);
+        var rate = WolfgatePlainCooling(grid, hull) * WGShipShieldEffects.VentCooling;
         return rate > 0f && float.IsFinite(rate) ? Math.Max(1, (int) MathF.Ceiling(hull.Heat / rate)) : -1;
     }
 
