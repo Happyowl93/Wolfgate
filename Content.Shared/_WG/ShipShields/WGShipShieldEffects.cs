@@ -18,6 +18,8 @@ public static class WGShipShieldEffects
     public const float HardHeatHold = 30f;
     /// <summary>How much faster a vent cools than a generator's fast rate, or a bare hull's.</summary>
     public const float VentBoost = 2f;
+    /// <summary>Most of a ship's heat capacity one hit absorbed by its field can add.</summary>
+    public const float HitHeatCap = 0.5f;
 
     /// <summary>Returns full capacity bounded by overload and power demand limits.</summary>
     public static float EffectiveCapacity(float damageLimit, float maxDraw, float powerModifier, float damageExp)

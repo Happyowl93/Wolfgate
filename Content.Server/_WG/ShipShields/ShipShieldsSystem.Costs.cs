@@ -73,6 +73,8 @@ public sealed partial class ShipShieldsSystem
     {
         if (!TryComp<WGShipShieldCostComponent>(emitter, out var cost))
             return;
+        if (TryComp<WGShipHeatComponent>(grid, out var hull))
+            hull.Collapsed = true;
         // The guns stay locked through the whole overload, as an overloaded ship can't fire in Starsector, unless the
         // generator sets a lock of its own.
         var seconds = cost.GunLockout ??
@@ -126,7 +128,8 @@ public sealed partial class ShipShieldsSystem
     {
         if (args.Cancelled || Transform(gun).GridUid is not { } grid)
             return;
-        if (IsWolfgateShipVenting(grid) || GetWolfgateGunLockSeconds(grid) > 0 || IsWolfgateShipHeatHeld(grid))
+        if (IsWolfgateShipVenting(grid) || GetWolfgateGunLockSeconds(grid) > 0 || IsWolfgateShipHeatHeld(grid) ||
+            _wgNpcHulls.ContainsKey(grid) && WantsWolfgateNpcHoldFire(grid))
             args.Cancelled = true;
     }
 }

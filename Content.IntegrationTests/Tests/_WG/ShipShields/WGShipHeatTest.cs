@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Content.Server._Crescent.ShipShields;
 using Content.Server._Mono.Detection;
 using Content.Server._Mono.FireControl;
@@ -9,8 +10,11 @@ using Content.Server._WG.ShipShields;
 using Content.Server.Power.Components;
 using Content.Shared._Crescent.ShipShields;
 using Content.Shared._WG.ShipShields;
+using Content.Shared.Damage;
 using Content.Shared.Explosion.Components;
+using Content.Shared.FixedPoint;
 using Content.Shared.Projectiles;
+using Content.Shared.Weapons.Hitscan.Components;
 using Content.Shared.Weapons.Ranged;
 using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Systems;
@@ -190,6 +194,92 @@ public sealed class WGShipHeatTest
             system.Update(1.01f);
             Assert.That(system.IsWolfgateShipVenting(grid), Is.True, "A ship an NPC is flying vents without being told.");
             entities.DeleteEntity(pilot);
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task NpcCrewHoldsFireUnderAHotFieldAndVentsAfterAnOverload()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var map = await pair.CreateTestMap();
+        await pair.Server.WaitAssertion(() =>
+        {
+            var entities = pair.Server.EntMan;
+            var grid = map.Grid.Owner;
+            var system = entities.System<ShipShieldsSystem>();
+            var timing = pair.Server.ResolveDependency<IGameTiming>();
+            var emitterUid = entities.SpawnEntity("ShieldGeneratorSmall", map.GridCoords);
+            var emitter = entities.GetComponent<ShipShieldEmitterComponent>(emitterUid);
+            entities.GetComponent<ApcPowerReceiverComponent>(emitterUid).Powered = true;
+            system.Update(1.5f);
+            Assert.That(emitter.Shield, Is.Not.Null);
+            var capacity = system.GetWolfgateShipHeat(grid).Capacity;
+            var gun = entities.SpawnEntity("WeaponTurretL85Autocannon", map.GridCoords);
+            var user = entities.SpawnEntity(null, map.GridCoords);
+            var pilot = entities.SpawnEntity(null, map.GridCoords);
+            entities.AddComponent<ShipSteererComponent>(pilot);
+            entities.AddComponent<ShipTargetingComponent>(pilot).Target = map.GridCoords;
+
+            system.AddWolfgateShipHeat(grid, capacity * (ShipShieldsSystem.NpcHoldFireHeat + 0.1f));
+            // The crews are asked once a second.
+            system.Update(1.01f);
+            var hull = entities.GetComponent<WGShipHeatComponent>(grid);
+            Assert.That(system.IsWolfgateShipVenting(grid), Is.False, "Soft heat goes by itself, so the crew keeps its field.");
+            Assert.That(Refused(entities, gun, user), Is.True, "An NPC crew stops firing before its own guns fill a raised field.");
+            entities.DeleteEntity(pilot);
+            system.Update(1.01f);
+            Assert.That(system.WantsWolfgateNpcHoldFire(grid), Is.True);
+            Assert.That(Refused(entities, gun, user), Is.False, "A player crew makes that call itself.");
+
+            hull.Hard = hull.Heat;
+            Assert.That(system.WantsWolfgateNpcVent(grid, true), Is.True, "Hard heat past that mark can't be waited out, so it vents under fire.");
+
+            system.AddWolfgateShipHeat(grid, capacity * 2f);
+            system.Update(1.5f);
+            Assert.That(emitter.Shield, Is.Null);
+            Assert.That(hull.Collapsed, Is.True);
+            Assert.That(system.WantsWolfgateNpcVent(grid, true), Is.False, "An overloaded ship can't vent.");
+            emitter.OverloadAccumulator = 0f;
+            hull.LastHit = timing.CurTime;
+            Assert.That(system.WantsWolfgateNpcVent(grid, true), Is.True, "Once the overload ends it vents before fighting on, hit or not.");
+            Assert.That(system.WantsWolfgateNpcVent(grid, true), Is.False, "It makes that call once.");
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task OneHitAddsNoMoreThanHalfTheShipsCapacity()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var map = await pair.CreateTestMap();
+        await pair.Server.WaitAssertion(() =>
+        {
+            var entities = pair.Server.EntMan;
+            var grid = map.Grid.Owner;
+            var system = entities.System<ShipShieldsSystem>();
+            var emitterUid = entities.SpawnEntity("ShieldGeneratorSmall", map.GridCoords);
+            var emitter = entities.GetComponent<ShipShieldEmitterComponent>(emitterUid);
+            entities.GetComponent<ApcPowerReceiverComponent>(emitterUid).Powered = true;
+            system.Update(1.5f);
+            Assert.That(emitter.Shield, Is.Not.Null);
+            var capacity = system.GetWolfgateShipHeat(grid).Capacity;
+
+            // A warhead many times the ship's capacity.
+            var beam = entities.SpawnEntity(null, map.GridCoords);
+            var damage = entities.EnsureComponent<HitscanBasicDamageComponent>(beam);
+            damage.Damage = new DamageSpecifier();
+            damage.Damage.DamageDict.Add("Heat", FixedPoint2.New(capacity * 8f));
+
+            system.ApplyWolfgateHitscanImpact(emitter.Shield!.Value, beam, Vector2.Zero, 1f);
+            system.Update(1.5f);
+            Assert.That(emitter.Shield, Is.Not.Null, "One hit, however big, doesn't overrun a cool field.");
+            Assert.That(Heat(entities, grid), Is.EqualTo(capacity * WGShipShieldEffects.HitHeatCap).Within(capacity * 0.01f));
+
+            SetHeat(entities, emitterUid, capacity * (WGShipShieldEffects.HitHeatCap + 0.1f));
+            system.ApplyWolfgateHitscanImpact(emitter.Shield!.Value, beam, Vector2.Zero, 1f);
+            system.Update(1.5f);
+            Assert.That(emitter.Shield, Is.Null, "The same hit breaks a field that is already past half its heat.");
         });
         await pair.CleanReturnAsync();
     }

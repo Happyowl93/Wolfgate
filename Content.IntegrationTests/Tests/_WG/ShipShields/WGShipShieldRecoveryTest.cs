@@ -60,8 +60,8 @@ public sealed class WGShipShieldRecoveryTest
         await pair.CleanReturnAsync();
     }
 
-    [TestCase("ShieldGeneratorSmall", 30f)]
-    [TestCase("ShieldGeneratorMedium", 45f)]
+    [TestCase("ShieldGeneratorSmall", 12f)]
+    [TestCase("ShieldGeneratorMedium", 15f)]
     public async Task CollapsedShipFieldReturnsAfterItsOverloadWaitWithHeatLeft(string generator, float wait)
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });

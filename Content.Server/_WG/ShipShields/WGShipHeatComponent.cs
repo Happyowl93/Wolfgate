@@ -83,6 +83,10 @@ public sealed partial class WGShipHeatComponent : Component
     [ViewVariables]
     public bool Venting;
 
+    /// <summary>Whether damage beat the field down and an NPC crew has yet to make its call on it, once the overload ends.</summary>
+    [ViewVariables]
+    public bool Collapsed;
+
     /// <summary>When the field last took a hit.</summary>
     [ViewVariables]
     public TimeSpan LastHit;

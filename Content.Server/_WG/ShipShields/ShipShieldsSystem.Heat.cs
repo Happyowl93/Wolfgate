@@ -146,6 +146,19 @@ public sealed partial class ShipShieldsSystem
         return own > 0f && float.IsFinite(all) && all > own ? own / all : 1f;
     }
 
+    /// <summary>
+    /// What a hit its field absorbed charges a generator: its share of the damage, and on a ship no more than
+    /// <see cref="WGShipShieldEffects.HitHeatCap"/> of its capacity, so one warhead can't overrun a cool field.
+    /// </summary>
+    private float WolfgateHitCharge(EntityUid uid, ShipShieldEmitterComponent emitter, float damage)
+    {
+        var charged = damage * WolfgateGeneratorShare(uid, emitter);
+        if (!HasComp<WGShipShieldCostComponent>(uid))
+            return charged;
+        var capacity = WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp);
+        return capacity > 0f ? MathF.Min(charged, capacity * WGShipShieldEffects.HitHeatCap) : charged;
+    }
+
     /// <summary>Heat per second a hull sheds by its own size under this generator, on top of the generator's rate; 0 for an outpost generator.</summary>
     public float WolfgateHullCooling(EntityUid uid)
     {

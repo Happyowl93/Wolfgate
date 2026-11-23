@@ -25,6 +25,12 @@ public sealed partial class ShipShieldsSystem
     /// <summary>Share of capacity an NPC crew vents at with no field to lose or nothing to fight.</summary>
     public const float NpcIdleVentHeat = 0.15f;
 
+    /// <summary>Share of capacity at which an NPC crew stops firing under a raised field, to leave the field room for hits.</summary>
+    public const float NpcHoldFireHeat = 0.7f;
+
+    /// <summary>Share of capacity an NPC crew vents at once an overload ends, before it fights on.</summary>
+    public const float NpcOverloadVentHeat = 0.5f;
+
     /// <summary>How long the field must go unhit before an NPC crew drops it to vent.</summary>
     public static readonly TimeSpan NpcVentQuiet = TimeSpan.FromSeconds(6);
 
@@ -238,12 +244,17 @@ public sealed partial class ShipShieldsSystem
         }
     }
 
-    /// <summary>Whether an NPC crew would vent this ship now.</summary>
+    /// <summary>
+    /// Whether an NPC crew would vent this ship now. The first time it is asked after an overload ends it makes its
+    /// call on that collapse.
+    /// </summary>
     public bool WantsWolfgateNpcVent(EntityUid grid, bool fighting)
     {
         if (!CanWolfgateVent(grid))
             return false;
         var hull = Comp<WGShipHeatComponent>(grid);
+        var recovered = hull.Collapsed;
+        hull.Collapsed = false;
         var (heat, capacity) = GetWolfgateShipHeat(grid);
         if (capacity <= 0f)
             return false;
@@ -252,10 +263,23 @@ public sealed partial class ShipShieldsSystem
         // A bare hull has no field to win back, so its crew fights on until the guns hold.
         if (SyncWolfgateShipHeat(grid) == null)
             return IsWolfgateShipHeatHeld(grid);
+        // A field back from an overload is close to full and a hit or two from the next one, so the crew clears it first.
+        if (recovered && heat >= capacity * NpcOverloadVentHeat)
+            return true;
         var quiet = _wgShieldTiming.CurTime - hull.LastHit;
-        // With the field up only hard heat is worth dropping it for; soft heat goes by itself.
+        // With the field up only hard heat is worth dropping it for; soft heat goes by itself. Hard heat past the mark
+        // where the crew holds fire can't be waited out under fire, so it vents without waiting for quiet.
         if (TryComp<ShipShieldedComponent>(grid, out var shielded) && IsWolfgateShieldLive(shielded.Shield))
-            return hull.Hard >= capacity * NpcVentHeat && quiet >= NpcVentQuiet;
+            return hull.Hard >= capacity * NpcHoldFireHeat || hull.Hard >= capacity * NpcVentHeat && quiet >= NpcVentQuiet;
         return heat >= capacity * NpcIdleVentHeat && quiet >= NpcDownedVentQuiet;
+    }
+
+    /// <summary>Whether an NPC crew holds its fire: its raised field is hot enough that its own guns would leave it no room for hits.</summary>
+    public bool WantsWolfgateNpcHoldFire(EntityUid grid)
+    {
+        if (GetWolfgateRaisedCost(grid) == null)
+            return false;
+        var (heat, capacity) = GetWolfgateShipHeat(grid);
+        return capacity > 0f && heat >= capacity * NpcHoldFireHeat;
     }
 }

@@ -122,6 +122,9 @@ public sealed class WGShipDuelTest
                     var aim = new EntityCoordinates(entities.GetComponent<TransformComponent>(target.Grid).MapUid!.Value,
                         Vector2.Transform(entities.GetComponent<MapGridComponent>(target.Grid).LocalAABB.Center,
                             transform.GetWorldMatrix(target.Grid)));
+                    // The NPC crew rule: no firing into a raised field that is nearly full.
+                    if (shields.WantsWolfgateNpcHoldFire(ship.Grid))
+                        continue;
                     foreach (var gun in ship.Guns)
                     {
                         if (!entities.Deleted(gun) && fire.AttemptFire(gun, gun, aim, noServer: true))

@@ -212,7 +212,7 @@ public sealed class WGShipShieldCostTest
                 "Its guns come back after its own short lock, before its field does.");
             var stats = entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!;
             Assert.That(stats.GunLockSeconds, Is.EqualTo(lockout));
-            Assert.That(stats.OverloadSeconds, Is.EqualTo(20f));
+            Assert.That(stats.OverloadSeconds, Is.EqualTo(10f));
         });
         await pair.CleanReturnAsync();
     }
