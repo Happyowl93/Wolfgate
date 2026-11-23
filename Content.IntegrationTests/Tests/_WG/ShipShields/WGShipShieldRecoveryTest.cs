@@ -11,8 +11,8 @@ namespace Content.IntegrationTests.Tests._WG.ShipShields;
 [TestFixture]
 public sealed class WGShipShieldRecoveryTest
 {
-    [TestCase(2250f, true, 0f, 0f)]
-    [TestCase(2250f, true, 80f, 0.5f)]
+    [TestCase(2000f, true, 0f, 0f)]
+    [TestCase(2000f, true, 80f, 0.5f)]
     [TestCase(70000f, false, 0f, 0f)]
     [TestCase(66000f, false, 0f, 0.75f)]
     [TestCase(0f, false, 80f, 1f)]
@@ -33,13 +33,14 @@ public sealed class WGShipShieldRecoveryTest
             emitter.Recharging = recharging;
             emitter.OverloadAccumulator = overload;
             emitter.Accumulator = accumulator;
+            var system = entities.System<ShipShieldsSystem>();
             var estimate = ShipShieldsSystem.EstimateWolfgateShieldRecovery(emitter, true,
-                ship: entities.HasComponent<WGShipShieldCostComponent>(uid));
+                ship: entities.HasComponent<WGShipShieldCostComponent>(uid), share: system.WolfgateGeneratorShare(uid, emitter),
+                hullCooling: system.WolfgateHullCooling(uid));
             Assert.That(estimate.Seconds, Is.GreaterThanOrEqualTo(0));
             Assert.That(emitter.Damage, Is.EqualTo(damage), "Forecasting must not mutate emitter state.");
             Assert.That(emitter.OverloadAccumulator, Is.EqualTo(overload));
             Assert.That(emitter.Recharging, Is.EqualTo(recharging));
-            var system = entities.System<ShipShieldsSystem>();
             var elapsed = 0f;
             for (var tick = 0; tick < 200 && emitter.Shield == null; tick++)
             {
@@ -95,7 +96,9 @@ public sealed class WGShipShieldRecoveryTest
             slow.BaseDraw = 12345f;
             fast.BaseDraw = 23456f;
             // Both read the same hull's heat; the one further into its update cycle comes back first.
-            slow.Damage = fast.Damage = 2250f;
+            // Four seconds of cooling, so three update cycles, whatever share of it the generators see.
+            var shields = entities.System<ShipShieldsSystem>();
+            slow.Damage = fast.Damage = (fast.HealPerSecond + shields.WolfgateHullCooling(fastUid)) * 4f * shields.WolfgateGeneratorShare(fastUid, fast);
             fast.Accumulator = 0.6f;
             slow.Recharging = fast.Recharging = true;
             entities.GetComponent<ApcPowerReceiverComponent>(slowUid).Powered = true;

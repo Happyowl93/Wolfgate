@@ -7,11 +7,13 @@ public sealed partial class ShipShieldsSystem
 {
     /// <summary>
     /// Estimates automatic startup with unchanged power and no further damage. A ship's generator cools at its fast
-    /// rate only while the ship vents, and a vent holds the field down until no heat is left.
+    /// rate only while the ship vents, and a vent holds the field down until no heat is left. Cooling is the ship's, so
+    /// the generator's damage falls by its <paramref name="share"/> of it, and <paramref name="hullCooling"/> is what
+    /// the hull adds to the generator's rate.
     /// </summary>
     public static (WGShipShieldRecoveryStatus Status, int Seconds) EstimateWolfgateShieldRecovery(
         ShipShieldEmitterComponent emitter, bool powered, bool enabled = true, bool disabled = false, bool ship = false,
-        bool venting = false)
+        bool venting = false, float share = 1f, float hullCooling = 0f)
     {
         if (!enabled)
             return (WGShipShieldRecoveryStatus.Lowered, -1);
@@ -38,9 +40,10 @@ public sealed partial class ShipShieldsSystem
             var rechargeThisTick = recharging;
             if (overload > 0f)
                 overload -= EmitterUpdateRate;
-            var healed = emitter.HealPerSecond * EmitterUpdateRate;
+            var healed = (emitter.HealPerSecond + hullCooling) * EmitterUpdateRate;
             if (ship ? venting : recharging)
                 healed *= ship ? WolfgateVentBonus(emitter.UnpoweredBonus) : emitter.UnpoweredBonus;
+            healed *= share;
             var ventedThisTick = venting;
             damage -= healed;
             if (damage <= 0f)

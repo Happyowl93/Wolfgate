@@ -1,5 +1,8 @@
 wg-shield-examine-capacity = Absorbed damage becomes heat. Heat capacity: { $capacity }. Overload threshold: { $overload } heat.
 wg-shield-examine-capacity-note = Heat capacity may be limited by power demand before the overload threshold.
+wg-shield-examine-adds-capacity = On a ship, its capacity adds to the heat the hull holds by its own size, and its cooling to part of what the hull sheds.
+wg-shield-examine-hull-cooling = Of that cooling, { $hull } heat/s is the hull's own by its size.
+wg-shield-examine-hull-capacity = This hull holds { $hull } heat by its own size, so the ship holds { $total } in all.
 wg-shield-examine-recharge = Cooling: { $online } heat/s; in recharge mode: { $offline } heat/s.
 wg-shield-examine-power = Power demand: { $idle } kW idle; capped at { $maximum } kW total.
 wg-shield-examine-overload = Overload cooldown: { $seconds } seconds.

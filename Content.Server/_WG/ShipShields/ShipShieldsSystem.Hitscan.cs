@@ -23,8 +23,9 @@ public sealed partial class ShipShieldsSystem
         var impactStrength = actualDamage > 0f ? 1f : 0f;
         if (component.Source is { } source && TryComp<ShipShieldEmitterComponent>(source, out var emitter))
         {
-            emitter.Damage += actualDamage;
-            impactStrength = WGShipShieldEffects.ImpactStrength(actualDamage,
+            var charged = actualDamage * WolfgateGeneratorShare(source, emitter);
+            emitter.Damage += charged;
+            impactStrength = WGShipShieldEffects.ImpactStrength(charged,
                 WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp));
             if (TryComp<WGShipShieldVisualsComponent>(shield, out var visuals))
                 UpdateWolfgateShieldHealth(shield, visuals, source);

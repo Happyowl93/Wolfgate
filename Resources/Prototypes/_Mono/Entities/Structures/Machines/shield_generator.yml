@@ -319,7 +319,7 @@
     hardHeatHold: 15 # a gun line: it fights on under its field
   # WOLFGATE END
   - type: ShipShieldEmitter
-    damageLimit: 85000
+    damageLimit: 50000 # WOLFGATE(ShipShields): the hull's own heat capacity adds to the generator's (Mono: 85000)
     healPerSecond: 800
     damageExp: 1
     baseDraw: 60000
@@ -400,7 +400,7 @@
     gunLockout: 3 # a brawler: losing its field costs it the least
   # WOLFGATE END
   - type: ShipShieldEmitter
-    damageLimit: 75000
+    damageLimit: 40000 # WOLFGATE(ShipShields): the hull's own heat capacity adds to the generator's (Mono: 75000)
     damageOverloadTimePunishment: 20 # WOLFGATE(ShipShields): the Titan is back from an overload in half the time (Mono: 40)
     healPerSecond: 950 # Base is 250
     damageExp: 1.05 # Base is 1.1
@@ -434,6 +434,8 @@
   # WOLFGATE END
   - type: ShipShieldEmitter
     damageLimit: 180000
+    # WOLFGATE(ShipShields): the hull's own heat capacity adds to the generator's 50000, which the power cap sets (was 85000 at 0.5)
+    powerModifier: 0.873
     healPerSecond: 750 # Base is 250
     damageExp: 1.05 # Base is 1.1
     baseDraw: 30000 # Base is 50000
@@ -526,7 +528,7 @@
     signature: 600000
   # WOLFGATE END
   - type: ShipShieldEmitter
-    damageLimit: 65000 # Mono
+    damageLimit: 30000 # WOLFGATE(ShipShields): the hull's own heat capacity adds to the generator's (Mono: 65000)
     healPerSecond: 500 # Mono
     damageExp: 1.05 # Mono
     baseDraw: 20000

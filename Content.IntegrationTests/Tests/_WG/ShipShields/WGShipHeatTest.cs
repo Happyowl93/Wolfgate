@@ -43,21 +43,26 @@ public sealed class WGShipHeatTest
             entities.GetComponent<ApcPowerReceiverComponent>(emitterUid).Powered = true;
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Not.Null);
-            var tick = emitter.HealPerSecond * 1.5f;
+            var tick = Cooling(entities, emitterUid) * 1.5f;
 
-            emitter.Damage = 20000f;
-            Assert.That(system.GetWolfgateShipHeat(grid).Heat, Is.EqualTo(20000f), "What the generator absorbs is the ship's heat.");
+            SetHeat(entities, emitterUid, 20000f);
+            Assert.That(system.GetWolfgateShipHeat(grid).Heat, Is.EqualTo(20000f).Within(0.05f), "What the generator absorbs is the ship's heat.");
             var hull = entities.GetComponent<WGShipHeatComponent>(grid);
-            Assert.That(hull.Heat, Is.EqualTo(20000f), "The heat is held by the hull.");
-            Assert.That(system.GetWolfgateShipHardHeat(grid), Is.EqualTo(20000f), "Heat that came through the field is hard.");
+            Assert.That(hull.Heat, Is.EqualTo(20000f).Within(0.05f), "The heat is held by the hull.");
+            Assert.That(system.WolfgateHullCooling(emitterUid), Is.EqualTo(hull.Dissipation * hull.GeneratorCooling).And.GreaterThan(0f),
+                "Under a generator the hull keeps part of its own cooling.");
+            Assert.That(system.GetWolfgateShipHardHeat(grid), Is.EqualTo(20000f).Within(0.05f), "Heat that came through the field is hard.");
             system.Update(1.5f);
-            Assert.That(emitter.Damage, Is.EqualTo(20000f), "Under a raised field that was just hit, hard heat stays.");
+            Assert.That(Heat(entities, grid), Is.EqualTo(20000f).Within(0.05f), "Under a raised field that was just hit, hard heat stays.");
 
             system.AddWolfgateShipHeat(grid, tick * 3f);
-            Assert.That(hull.Hard, Is.EqualTo(20000f), "Heat from the ship itself is soft.");
+            Assert.That(hull.Hard, Is.EqualTo(20000f).Within(0.05f), "Heat from the ship itself is soft.");
             system.Update(1.5f);
-            Assert.That(emitter.Damage, Is.EqualTo(20000f + tick * 2f).Within(0.01f), "Soft heat cools under the raised field.");
-            Assert.That(hull.Heat, Is.EqualTo(emitter.Damage), "The generator's cooling comes off the hull's heat.");
+            Assert.That(Heat(entities, grid), Is.EqualTo(20000f + tick * 2f).Within(0.01f), "Soft heat cools under the raised field.");
+            Assert.That(emitter.Damage, Is.EqualTo(hull.Heat * system.WolfgateGeneratorShare(emitterUid, emitter)).Within(0.05f),
+                "The generator reads the hull's heat scaled to its own share of the ship's capacity.");
+            Assert.That(ShipShieldsSystem.GetWolfgateShieldHealth(emitter), Is.EqualTo(1f - hull.Heat / system.GetWolfgateShipHeat(grid).Capacity).Within(0.001f),
+                "So the field is as worn as the whole ship is hot.");
             var state = entities.System<WGShipShieldShuntSystem>().GetState(grid);
             Assert.That(state.HardHeat, Is.EqualTo((1f - state.Health) * 20000f / hull.Heat).Within(0.001f), "The panel shows the hard part of the gauge.");
 
@@ -66,21 +71,21 @@ public sealed class WGShipHeatTest
             system.Update(1.5f);
             system.Update(1.5f);
             system.Update(1.5f);
-            Assert.That(emitter.Damage, Is.EqualTo(20000f - tick).Within(0.01f), "With the field down everything cools at the plain rate, soft heat first.");
+            Assert.That(Heat(entities, grid), Is.EqualTo(20000f - tick).Within(0.01f), "With the field down everything cools at the plain rate, soft heat first.");
             Assert.That(hull.Hard, Is.EqualTo(hull.Heat));
 
             Assert.That(system.SetWolfgateShieldEnabled(grid, true), Is.True);
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Not.Null);
-            var held = emitter.Damage;
+            var held = Heat(entities, grid);
             system.Update(1.5f);
-            Assert.That(emitter.Damage, Is.EqualTo(held), "Raised again, the field holds its hard heat.");
+            Assert.That(Heat(entities, grid), Is.EqualTo(held).Within(0.05f), "Raised again, the field holds its hard heat.");
             hull.LastHit = timing.CurTime - TimeSpan.FromSeconds(WGShipShieldEffects.HardHeatHold + 1f);
             system.Update(1.5f);
-            Assert.That(emitter.Damage, Is.EqualTo(held - tick).Within(0.01f), "Left alone long enough, hard heat cools under the field too.");
+            Assert.That(Heat(entities, grid), Is.EqualTo(held - tick).Within(0.01f), "Left alone long enough, hard heat cools under the field too.");
             var stats = entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!;
             Assert.That(stats.Vents, Is.True);
-            Assert.That(stats.RechargePerSecond, Is.EqualTo(emitter.HealPerSecond * ShipShieldsSystem.WolfgateVentBonus(emitter.UnpoweredBonus)));
+            Assert.That(stats.RechargePerSecond, Is.EqualTo(Cooling(entities, emitterUid) * ShipShieldsSystem.WolfgateVentBonus(emitter.UnpoweredBonus)).Within(0.01f));
         });
         await pair.CleanReturnAsync();
     }
@@ -107,8 +112,8 @@ public sealed class WGShipHeatTest
             Assert.That(system.StartWolfgateVent(grid), Is.False, "A cold ship has nothing to vent.");
             Assert.That(controls.GetState(grid).CanVent, Is.False);
 
-            var tick = emitter.HealPerSecond * 1.5f * ShipShieldsSystem.WolfgateVentBonus(emitter.UnpoweredBonus);
-            emitter.Damage = tick * 2.5f;
+            var tick = Cooling(entities, emitterUid) * 1.5f * ShipShieldsSystem.WolfgateVentBonus(emitter.UnpoweredBonus);
+            SetHeat(entities, emitterUid, tick * 2.5f);
             Assert.That(controls.GetState(grid).CanVent, Is.True);
             Assert.That(system.StartWolfgateVent(grid), Is.True);
             Assert.That(system.IsWolfgateShipVenting(grid), Is.True);
@@ -127,7 +132,7 @@ public sealed class WGShipHeatTest
                 "A venting hull shows hot on long-range sensors.");
 
             system.Update(1.5f);
-            Assert.That(emitter.Damage, Is.EqualTo(tick * 1.5f).Within(0.01f), "A vent cools at the generator's fast rate.");
+            Assert.That(Heat(entities, grid), Is.EqualTo(tick * 1.5f).Within(0.01f), "A vent cools at the generator's fast rate.");
             Assert.That(emitter.Shield, Is.Null, "The field stays down for as long as the vent runs.");
             Assert.That(Plumes(entities, grid), Is.GreaterThan(0), "Heat leaves the hull's edge where everyone can see it.");
             Assert.That(system.SetWolfgateShieldEnabled(grid, true), Is.True);
@@ -137,7 +142,7 @@ public sealed class WGShipHeatTest
 
             for (var i = 0; i < 4 && emitter.Shield == null; i++)
                 system.Update(1.5f);
-            Assert.That(emitter.Damage, Is.Zero);
+            Assert.That(Heat(entities, grid), Is.Zero);
             Assert.That(system.IsWolfgateShipVenting(grid), Is.False, "The vent ends when no heat is left.");
             Assert.That(entities.HasComponent<WGShipVentingComponent>(grid), Is.False);
             Assert.That(emitter.Shield, Is.Not.Null, "The field comes back by itself.");
@@ -166,13 +171,13 @@ public sealed class WGShipHeatTest
             var capacity = system.GetWolfgateShipHeat(grid).Capacity;
             var longAgo = TimeSpan.FromSeconds(-600);
 
-            emitter.Damage = capacity * (ShipShieldsSystem.NpcVentHeat + 0.1f);
+            SetHeat(entities, emitterUid, capacity * (ShipShieldsSystem.NpcVentHeat + 0.1f));
             var hull = entities.GetComponent<WGShipHeatComponent>(grid);
             Assert.That(system.WantsWolfgateNpcVent(grid, true), Is.False, "A crew under fire keeps its field up.");
             Assert.That(system.WantsWolfgateNpcVent(grid, false), Is.True, "With nothing to fight it vents.");
             hull.LastHit = timing.CurTime + longAgo;
             Assert.That(system.WantsWolfgateNpcVent(grid, true), Is.True, "Hot and left alone, it drops the field to vent.");
-            emitter.Damage = capacity * (ShipShieldsSystem.NpcVentHeat - 0.1f);
+            SetHeat(entities, emitterUid, capacity * (ShipShieldsSystem.NpcVentHeat - 0.1f));
             hull.LastHit = timing.CurTime + longAgo;
             Assert.That(system.WantsWolfgateNpcVent(grid, true), Is.False, "It doesn't drop the field for a little heat.");
             Assert.That(system.SetWolfgateShieldEnabled(grid, false), Is.True);
@@ -205,22 +210,23 @@ public sealed class WGShipHeatTest
             entities.GetComponent<ApcPowerReceiverComponent>(emitterUid).Powered = true;
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Not.Null);
-            emitter.Damage = 20000f;
+            SetHeat(entities, emitterUid, 20000f);
             Assert.That(system.SetWolfgateShieldEnabled(grid, false), Is.True);
             Assert.That(emitter.Shield, Is.Null);
             system.Update(1.5f);
-            Assert.That(20000f - emitter.Damage, Is.EqualTo(emitter.HealPerSecond * 1.5f).Within(0.01f),
+            Assert.That(20000f - Heat(entities, grid), Is.EqualTo(emitter.HealPerSecond * 1.5f).Within(0.01f),
                 "A generator with no ship costs only cools fast in recharge mode.");
             Assert.That(entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!.Vents, Is.False);
+            Assert.That(system.WolfgateHullCooling(emitterUid), Is.Zero, "An outpost's hull adds no cooling of its own.");
             Assert.That(system.StartWolfgateVent(grid), Is.False, "An outpost's generator has no vent.");
 
             var gun = entities.SpawnEntity("WeaponTurretL85Autocannon", map.GridCoords);
             var user = entities.SpawnEntity(null, map.GridCoords);
             var (round, _) = Round(pair.Server.ResolveDependency<IPrototypeManager>(), entities.ComponentFactory);
-            var before = emitter.Damage;
+            var before = Heat(entities, grid);
             Fire(entities, gun, user, entities.SpawnEntity(round, map.GridCoords));
-            Assert.That(emitter.Damage, Is.EqualTo(before), "An outpost's guns don't heat it.");
-            emitter.Damage = system.GetWolfgateShipHeat(grid).Capacity * 0.99f;
+            Assert.That(Heat(entities, grid), Is.EqualTo(before), "An outpost's guns don't heat it.");
+            SetHeat(entities, emitterUid, system.GetWolfgateShipHeat(grid).Capacity * 0.99f);
             Assert.That(Refused(entities, gun, user), Is.False, "An outpost never holds its guns for heat.");
         });
         await pair.CleanReturnAsync();
@@ -249,34 +255,34 @@ public sealed class WGShipHeatTest
             Fire(entities, gun, user, cartridge);
             var hull = entities.GetComponent<WGShipHeatComponent>(grid);
             Assert.That(hull.FireHeat, Is.GreaterThan(0f));
-            Assert.That(emitter.Damage, Is.EqualTo(damage * hull.FireHeat).Within(0.01f),
+            Assert.That(Heat(entities, grid), Is.EqualTo(damage * hull.FireHeat).Within(0.01f),
                 "With no field up a shot still heats the ship by a share of its damage.");
             Assert.That(hull.Hard, Is.Zero, "A ship's own fire is soft heat.");
 
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Not.Null);
-            var cooled = emitter.Damage;
+            var cooled = Heat(entities, grid);
             Fire(entities, gun, user, cartridge);
-            Assert.That(emitter.Damage - cooled, Is.EqualTo(damage * hull.FireHeat).Within(0.01f),
+            Assert.That(Heat(entities, grid) - cooled, Is.EqualTo(damage * hull.FireHeat).Within(0.01f),
                 "A shot under the raised field heats the ship the same.");
             Assert.That(Refused(entities, gun, user), Is.False);
 
             var capacity = system.GetWolfgateShipHeat(grid).Capacity;
-            emitter.Damage = capacity * WGShipShieldEffects.GunHoldHeat - 1f;
+            SetHeat(entities, emitterUid, capacity * WGShipShieldEffects.GunHoldHeat - damage * hull.FireHeat / 2f);
             Fire(entities, gun, user, cartridge);
-            Assert.That(emitter.Damage, Is.EqualTo(capacity * WGShipShieldEffects.GunHoldHeat), "A ship's own fire stops short of collapsing its field.");
+            Assert.That(Heat(entities, grid), Is.EqualTo(capacity * WGShipShieldEffects.GunHoldHeat).Within(0.05f), "A ship's own fire stops short of collapsing its field.");
             Assert.That(emitter.Shield, Is.Not.Null);
             Assert.That(Refused(entities, gun, user), Is.True, "Too hot, the guns hold fire.");
             Assert.That(controls.GetState(grid).GunsHeld, Is.True);
             Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.Zero, "A heat hold is not the collapse lock.");
 
-            emitter.Damage = capacity * 0.9f;
+            SetHeat(entities, emitterUid, capacity * 0.9f);
             Assert.That(Refused(entities, gun, user), Is.True, "The guns stay held until the ship cools to the resume mark.");
-            emitter.Damage = capacity * WGShipShieldEffects.GunResumeHeat - 1f;
+            SetHeat(entities, emitterUid, capacity * WGShipShieldEffects.GunResumeHeat - 1f);
             Assert.That(Refused(entities, gun, user), Is.False);
             Assert.That(controls.GetState(grid).GunsHeld, Is.False);
 
-            emitter.Damage = capacity * WGShipShieldEffects.GunHoldHeat;
+            SetHeat(entities, emitterUid, capacity * WGShipShieldEffects.GunHoldHeat + 1f);
             Assert.That(Refused(entities, gun, user), Is.True);
             Assert.That(system.SetWolfgateShieldEnabled(grid, false), Is.True);
             Assert.That(Refused(entities, gun, user), Is.True, "Lowering the field doesn't cool the ship.");
@@ -317,16 +323,16 @@ public sealed class WGShipHeatTest
             entities.GetComponent<ApcPowerReceiverComponent>(emitterUid).Powered = true;
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Not.Null);
-            Assert.That(emitter.Damage, Is.GreaterThan(hull.Capacity / 2f), "A generator installed on a hot hull takes on the hull's heat.");
-            Assert.That(system.GetWolfgateShipHeat(grid).Heat, Is.EqualTo(emitter.Damage));
-            Assert.That(hull.Heat, Is.EqualTo(emitter.Damage), "Reading the ship's heat carries the generator's cooling to the hull.");
+            Assert.That(Heat(entities, grid), Is.GreaterThan(hull.Capacity / 2f), "A generator installed on a hot hull takes on the hull's heat.");
+            Assert.That(emitter.Damage, Is.EqualTo(hull.Heat * system.WolfgateGeneratorShare(emitterUid, emitter)).Within(0.05f));
+            Assert.That(hull.Heat, Is.EqualTo(Heat(entities, grid)), "Reading the ship's heat carries the generator's cooling to the hull.");
             var gun = entities.SpawnEntity("WeaponTurretL85Autocannon", map.GridCoords);
             var user = entities.SpawnEntity(null, map.GridCoords);
             var (round, shot) = Round(pair.Server.ResolveDependency<IPrototypeManager>(), entities.ComponentFactory);
-            var before = emitter.Damage;
+            var before = Heat(entities, grid);
             Fire(entities, gun, user, entities.SpawnEntity(round, map.GridCoords));
-            Assert.That(emitter.Damage - before, Is.EqualTo(shot * hull.FireHeat).Within(0.01f), "A deflector's ship heats from its guns like any other.");
-            emitter.Damage = system.GetWolfgateShipHeat(grid).Capacity * 0.99f;
+            Assert.That(Heat(entities, grid) - before, Is.EqualTo(shot * hull.FireHeat).Within(0.01f), "A deflector's ship heats from its guns like any other.");
+            SetHeat(entities, emitterUid, system.GetWolfgateShipHeat(grid).Capacity * 0.99f);
             Assert.That(Refused(entities, gun, user), Is.True, "Too hot, a deflector's ship holds its guns too.");
         });
         await pair.CleanReturnAsync();
@@ -415,7 +421,6 @@ public sealed class WGShipHeatTest
                 Assert.That(prototypes.Index<EntityPrototype>(id).TryGetComponent<ShipShieldEmitterComponent>(out var emitter, entities.ComponentFactory), Is.True);
                 var stats = WGShipShieldEffects.EffectiveCapacity(emitter!.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp);
                 Assert.That(stats / emitter.HealPerSecond, Is.GreaterThan(hull.CoolSeconds), $"{id} sheds a full load slower than a bare hull.");
-                Assert.That(stats, Is.GreaterThan(new WGShipHeatComponent().MaxCapacity), $"{id} holds more than any bare hull.");
             }
         });
         await pair.CleanReturnAsync();
@@ -442,15 +447,15 @@ public sealed class WGShipHeatTest
             Assert.That(entities.GetComponent<WGShipShieldCostComponent>(emitterUid).HardHeatHold, Is.EqualTo(hold));
             Assert.That(entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!.HardHeatHold, Is.EqualTo(hold));
 
-            emitter.Damage = 20000f;
-            Assert.That(system.GetWolfgateShipHardHeat(grid), Is.EqualTo(20000f));
+            SetHeat(entities, emitterUid, 20000f);
+            Assert.That(system.GetWolfgateShipHardHeat(grid), Is.EqualTo(20000f).Within(0.05f));
             var hull = entities.GetComponent<WGShipHeatComponent>(grid);
             hull.LastHit = timing.CurTime - TimeSpan.FromSeconds(hold - 2f);
             system.Update(1.5f);
-            Assert.That(emitter.Damage, Is.EqualTo(20000f), "Inside its hold the field keeps its hard heat.");
+            Assert.That(Heat(entities, grid), Is.EqualTo(20000f).Within(0.05f), "Inside its hold the field keeps its hard heat.");
             hull.LastHit = timing.CurTime - TimeSpan.FromSeconds(hold + 1f);
             system.Update(1.5f);
-            Assert.That(emitter.Damage, Is.EqualTo(20000f - emitter.HealPerSecond * 1.5f).Within(0.01f), "Past its hold the hard heat cools.");
+            Assert.That(Heat(entities, grid), Is.EqualTo(20000f - Cooling(entities, emitterUid) * 1.5f).Within(0.01f), "Past its hold the hard heat cools.");
         });
         await pair.CleanReturnAsync();
     }
@@ -489,7 +494,7 @@ public sealed class WGShipHeatTest
             system.Update(1f);
             system.Update(1f);
             Assert.That(before - hull.Heat, Is.GreaterThanOrEqualTo(MathF.Min(before, rate)), "A venting hull cools at its vent rate.");
-            for (var i = 0; i < 6 && hull.Venting; i++)
+            for (var i = 0; i < 10 && hull.Venting; i++)
                 system.Update(1f);
             Assert.That(hull.Heat, Is.Zero);
             Assert.That(system.IsWolfgateShipVenting(grid), Is.False);
@@ -520,20 +525,41 @@ public sealed class WGShipHeatTest
             system.AddWolfgateShipHeat(grid, 20000f);
             var hull = entities.GetComponent<WGShipHeatComponent>(grid);
             Assert.That(hull.Heat, Is.EqualTo(20000f));
-            Assert.That(active.Damage, Is.EqualTo(20000f), "The generator holding the field reads the hull's heat.");
+            var share = system.WolfgateGeneratorShare(activeUid, active);
+            Assert.That(share, Is.InRange(0.1f, 0.99f), "A ship generator supplies part of the ship's capacity; the hull supplies the rest.");
+            Assert.That(active.Damage, Is.EqualTo(20000f * share).Within(0.05f), "The generator holding the field reads the hull's heat in its own range.");
             system.Update(1.5f);
             system.Update(0.01f);
-            Assert.That(hull.Heat, Is.EqualTo(20000f - active.HealPerSecond * 1.5f).Within(0.01f),
+            Assert.That(hull.Heat, Is.EqualTo(20000f - Cooling(entities, activeUid) * 1.5f).Within(0.01f),
                 "A spare generator is no second heat sink: only the one holding the field cools the hull.");
-            Assert.That(active.Damage, Is.EqualTo(hull.Heat));
-            Assert.That(spare.Damage, Is.EqualTo(hull.Heat), "Every generator on the hull reads the same heat.");
+            Assert.That(active.Damage, Is.EqualTo(hull.Heat * share).Within(0.05f));
+            Assert.That(spare.Damage, Is.EqualTo(active.Damage).Within(0.05f), "Every generator on the hull reads the same heat.");
 
             entities.System<SharedTransformSystem>().Unanchor(spareUid, entities.GetComponent<TransformComponent>(spareUid));
             system.Update(0.01f);
             Assert.That(spare.Damage, Is.Zero, "A generator taken off the hull leaves the heat behind.");
-            Assert.That(hull.Heat, Is.EqualTo(active.Damage));
+            Assert.That(active.Damage, Is.EqualTo(hull.Heat * share).Within(0.05f));
         });
         await pair.CleanReturnAsync();
+    }
+
+    /// <summary>A ship's heat in heat points, however its generator scales it.</summary>
+    private static float Heat(IEntityManager entities, EntityUid grid)
+    {
+        return entities.System<ShipShieldsSystem>().GetWolfgateShipHeat(grid).Heat;
+    }
+
+    /// <summary>Heat per second a generator's ship sheds: the generator's rate plus the hull's part.</summary>
+    private static float Cooling(IEntityManager entities, EntityUid uid)
+    {
+        return entities.GetComponent<ShipShieldEmitterComponent>(uid).HealPerSecond + entities.System<ShipShieldsSystem>().WolfgateHullCooling(uid);
+    }
+
+    /// <summary>Sets a ship's heat through its generator's damage, the way outside tools reach it.</summary>
+    private static void SetHeat(IEntityManager entities, EntityUid uid, float heat)
+    {
+        var emitter = entities.GetComponent<ShipShieldEmitterComponent>(uid);
+        emitter.Damage = heat * entities.System<ShipShieldsSystem>().WolfgateGeneratorShare(uid, emitter);
     }
 
     /// <summary>A plain cartridge and the damage of the round it fires.</summary>

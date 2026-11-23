@@ -114,7 +114,7 @@ public sealed partial class ShipShieldsSystem
         var rate = hull.Dissipation * WolfgateVentBonus(hull.VentBonus);
         if (hull.Cooler is { } cooler && _wgHeatSinks.TryGetValue(cooler, out var sink) && sink.Grid == grid &&
             TryComp<ShipShieldEmitterComponent>(cooler, out var emitter))
-            rate = emitter.HealPerSecond * WolfgateVentBonus(emitter.UnpoweredBonus);
+            rate = (emitter.HealPerSecond + WolfgateHullCooling(cooler)) * WolfgateVentBonus(emitter.UnpoweredBonus);
         return rate > 0f && float.IsFinite(rate) ? Math.Max(1, (int) MathF.Ceiling(hull.Heat / rate)) : -1;
     }
 

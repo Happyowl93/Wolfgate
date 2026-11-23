@@ -114,11 +114,12 @@ public sealed partial class ShipShieldsSystem
         }
 
         var charged = removed / strength;
-        emitter.Damage += charged;
+        var share = WolfgateGeneratorShare(source, emitter);
+        emitter.Damage += charged * share;
         EnsureComp<WGShipShieldDeflectedComponent>(uid).Shields.Add(shield);
         ReportWolfgateShieldAttack(field, charged, CompOrNull<ProjectileGridPhaseComponent>(uid)?.SourceGrid,
             projectile.Weapon, projectile.Shooter);
-        WolfgateShieldImpact(shield, WolfgateShieldImpactPosition(shield, uid), WGShipShieldEffects.ImpactStrength(charged,
+        WolfgateShieldImpact(shield, WolfgateShieldImpactPosition(shield, uid), WGShipShieldEffects.ImpactStrength(charged * share,
             WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp)));
         return true;
     }

@@ -2,6 +2,7 @@ using Content.Server._Crescent.ShipShields;
 using Content.Server._WG.ShipShields;
 using Content.Server.Power.Components;
 using Content.Shared._Crescent.ShipShields;
+using Content.Shared._WG.ShipShields;
 using Content.Shared.Examine;
 using Robust.Shared.GameObjects;
 
@@ -33,10 +34,16 @@ public sealed class WGShipShieldGeneratorStatsTest
             Assert.That(shielded.Source, Is.EqualTo(active));
             var stats = entities.System<WGShipShieldShuntSystem>().GetState(map.Grid.Owner).Stats!;
             Assert.That(stats.Name, Is.EqualTo(entities.GetComponent<MetaDataComponent>(active).EntityName));
-            Assert.That(stats.Capacity, Is.EqualTo(85037.55f).Within(1f), "Power demand forces recharge below the damage overload threshold.");
+            Assert.That(stats.Capacity, Is.EqualTo(WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp)));
+            Assert.That(stats.Capacity, Is.EqualTo(50000f).Within(100f), "Power demand forces recharge below the damage overload threshold.");
+            var hull = entities.GetComponent<WGShipHeatComponent>(map.Grid.Owner);
+            Assert.That(stats.HullCapacity, Is.EqualTo(hull.Capacity), "An installed ship generator reports what its hull adds.");
+            Assert.That(entities.System<ShipShieldsSystem>().GetWolfgateShipHeat(map.Grid.Owner).Capacity,
+                Is.EqualTo(stats.Capacity + hull.Capacity).Within(0.01f));
             Assert.That(stats.DamageLimit, Is.EqualTo(180000f));
-            Assert.That(stats.HealPerSecond, Is.EqualTo(emitter.HealPerSecond));
-            Assert.That(stats.RechargePerSecond, Is.EqualTo(emitter.HealPerSecond * ShipShieldsSystem.WolfgateVentBonus(emitter.UnpoweredBonus)),
+            Assert.That(stats.HullCooling, Is.EqualTo(hull.Dissipation * hull.GeneratorCooling).And.GreaterThan(0f), "The hull keeps part of its own cooling.");
+            Assert.That(stats.HealPerSecond, Is.EqualTo(emitter.HealPerSecond + stats.HullCooling));
+            Assert.That(stats.RechargePerSecond, Is.EqualTo(stats.HealPerSecond * ShipShieldsSystem.WolfgateVentBonus(emitter.UnpoweredBonus)),
                 "A ship generator vents at its fast rate, boosted.");
             Assert.That(stats.BasePowerWatts, Is.EqualTo(emitter.BaseDraw));
             Assert.That(stats.MaximumPowerWatts, Is.EqualTo(emitter.BaseDraw + emitter.MaxDraw));

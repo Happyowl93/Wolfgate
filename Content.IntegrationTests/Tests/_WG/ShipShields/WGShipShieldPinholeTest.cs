@@ -114,7 +114,8 @@ public sealed class WGShipShieldPinholeTest
             {
                 absorbedExplosive = explosive;
                 Assert.That(projectile.ProjectileSpent, Is.True);
-                Assert.That(emitter.Damage, Is.EqualTo(expectedDamage).Within(0.01f), "Direct and explosive damage must charge exactly once.");
+                Assert.That(system.GetWolfgateShipHeat(map.Grid.Owner).Heat, Is.EqualTo(expectedDamage).Within(MathF.Max(0.01f, expectedDamage * 0.00001f)),
+                    "Direct and explosive damage must charge exactly once.");
             }
             else
                 Assert.That(emitter.Damage, Is.Zero);

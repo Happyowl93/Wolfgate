@@ -291,7 +291,7 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
             var hasReceiver = TryComp<ApcPowerReceiverComponent>(uid, out var receiver);
             var estimate = ShipShieldsSystem.EstimateWolfgateShieldRecovery(emitter,
                 hasReceiver && receiver!.Powered, enabled, disabled, HasComp<WGShipShieldCostComponent>(uid),
-                _shields.IsWolfgateShipVenting(grid));
+                _shields.IsWolfgateShipVenting(grid), _shields.WolfgateGeneratorShare(uid, emitter), _shields.WolfgateHullCooling(uid));
             if (selected != null && (estimate.Seconds < 0 || seconds >= 0 && estimate.Seconds >= seconds))
                 continue;
             selected = uid;

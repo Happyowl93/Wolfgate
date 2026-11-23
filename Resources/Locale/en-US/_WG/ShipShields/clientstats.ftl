@@ -1,6 +1,7 @@
 wg-shield-stats-title = Generator stats
 wg-shield-stats-generator = Generator: { $name }
 wg-shield-stats-capacity = Heat capacity: { $value } (limited by power or overload)
+wg-shield-stats-ship-capacity = Heat capacity: { $total } ({ $value } from the generator, { $hull } from the hull's size)
 wg-shield-stats-overload-limit = Overload threshold: { $value } heat
 wg-shield-stats-online-repair = Cooling, field raised: { $value } heat/s
 wg-shield-stats-offline-repair = Cooling, recharge mode: { $value } heat/s
@@ -11,4 +12,5 @@ wg-shield-stats-recovery-note = Damage the field absorbs becomes heat, point for
 wg-shield-stats-costs = Raised field: -{ $thrust }% thrust, -{ $turn }% turning, hotter on long-range sensors. Overrun by heat, it collapses and locks ship guns for { $seconds } seconds.
 wg-shield-stats-no-costs = Raised field: no cost to thrust, turning or guns.
 wg-shield-stats-vent = Cooling, venting: { $value } heat/s. Shields stay down and guns silent until no heat is left.
+wg-shield-stats-ship-cooling = Cooling: { $value } heat/s, { $hull } of it the hull's own by its size. Under a raised field, heat it absorbed stays until { $hold } seconds pass without a hit, the field is lowered or the ship vents.
 wg-shield-stats-cooling = Cooling: { $value } heat/s. Under a raised field, heat it absorbed stays until { $hold } seconds pass without a hit, the field is lowered or the ship vents.

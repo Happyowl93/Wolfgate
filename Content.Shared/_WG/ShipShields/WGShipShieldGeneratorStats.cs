@@ -8,12 +8,16 @@ public sealed class WGShipShieldGeneratorStats
 {
     /// <summary>The selected generator's display name.</summary>
     public string Name;
-    /// <summary>Heat the ship can hold before power or overload forces recharge.</summary>
+    /// <summary>Heat the generator holds before power or overload forces recharge; a ship's hull adds its own.</summary>
     public float Capacity;
+    /// <summary>Heat the hull it is installed on holds by its size, added to a ship generator's capacity; 0 otherwise.</summary>
+    public float HullCapacity;
     /// <summary>Heat that triggers overload punishment.</summary>
     public float DamageLimit;
-    /// <summary>Heat shed per second with the field up.</summary>
+    /// <summary>Heat shed per second with the field up, the hull's part included.</summary>
     public float HealPerSecond;
+    /// <summary>The part of that cooling the hull it is installed on does by its size; 0 off a ship.</summary>
+    public float HullCooling;
     /// <summary>Heat shed per second at the fast rate.</summary>
     public float RechargePerSecond;
     /// <summary>Idle power demand in watts.</summary>
@@ -53,6 +57,7 @@ public sealed class WGShipShieldGeneratorStats
         if (ReferenceEquals(left, right))
             return true;
         return left != null && right != null && left.Name == right.Name && left.Capacity == right.Capacity &&
+            left.HullCapacity == right.HullCapacity && left.HullCooling == right.HullCooling &&
             left.DamageLimit == right.DamageLimit && left.HealPerSecond == right.HealPerSecond &&
             left.RechargePerSecond == right.RechargePerSecond && left.BasePowerWatts == right.BasePowerWatts &&
             left.MaximumPowerWatts == right.MaximumPowerWatts && left.OverloadSeconds == right.OverloadSeconds &&

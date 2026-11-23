@@ -27,7 +27,9 @@ public sealed partial class ShipShieldsSystem
             return energy;
 
         var capacity = WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp);
-        var remaining = MathF.Max(0f, capacity - emitter.Damage);
+        // The generator is charged its share of the damage, so the ship still takes the rest of its own capacity too.
+        var share = WolfgateGeneratorShare(source, emitter);
+        var remaining = MathF.Max(0f, capacity - emitter.Damage) / share;
         if (remaining <= 0f)
         {
             ExhaustWolfgateCollisionShield(grid, source, emitter);
@@ -47,10 +49,10 @@ public sealed partial class ShipShieldsSystem
         if (absorbed <= 0d)
             return energy;
         var damage = (float)(absorbed * damagePerEnergy / strength);
-        emitter.Damage = absorbed >= availableEnergy ? capacity : Math.Min(capacity, emitter.Damage + damage);
+        emitter.Damage = absorbed >= availableEnergy ? capacity : Math.Min(capacity, emitter.Damage + damage * share);
         UpdateWolfgateShieldHealth(shielded.Shield, visuals, source);
         var position = GetWolfgateCollisionImpactPosition(shielded.Shield, worldPoint);
-        WolfgateShieldImpact(shielded.Shield, position, WGShipShieldEffects.ImpactStrength(damage, capacity));
+        WolfgateShieldImpact(shielded.Shield, position, WGShipShieldEffects.ImpactStrength(damage * share, capacity));
         if (emitter.Damage >= capacity)
             ExhaustWolfgateCollisionShield(grid, source, emitter);
         return MathF.Max(0f, energy - (float)absorbed);

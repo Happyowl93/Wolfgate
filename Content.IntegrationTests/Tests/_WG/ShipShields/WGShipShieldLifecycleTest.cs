@@ -110,7 +110,8 @@ public sealed class WGShipShieldLifecycleTest
             power.Powered = true;
             if (exactZero)
             {
-                emitter.Damage = emitter.HealPerSecond * 1.5f;
+                emitter.Damage = 0f;
+                system.AddWolfgateShipHeat(map.Grid.Owner, (emitter.HealPerSecond + system.WolfgateHullCooling(uid)) * 1.5f);
                 system.Update(1.5f);
                 Assert.That(emitter.Damage, Is.Zero);
                 Assert.That(emitter.Recharging, Is.False, "Exact zero completes recharge immediately.");
