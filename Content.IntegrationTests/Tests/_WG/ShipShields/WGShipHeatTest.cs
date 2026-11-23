@@ -11,6 +11,7 @@ using Content.Server.Power.Components;
 using Content.Shared._Crescent.ShipShields;
 using Content.Shared._WG.ShipShields;
 using Content.Shared.Damage;
+using Content.Shared.Explosion;
 using Content.Shared.Explosion.Components;
 using Content.Shared.FixedPoint;
 using Content.Shared.Projectiles;
@@ -449,16 +450,17 @@ public sealed class WGShipHeatTest
             var (cold, capacity) = system.GetWolfgateShipHeat(grid);
             var hull = entities.GetComponent<WGShipHeatComponent>(grid);
             Assert.That(cold, Is.Zero);
-            Assert.That(capacity, Is.EqualTo(hull.Capacity), "A hull with no generator holds what its size allows.");
+            Assert.That(hull.SinkCapacity, Is.GreaterThan(0f));
+            Assert.That(capacity, Is.EqualTo(hull.Capacity + hull.SinkCapacity), "A hull with no generator holds its size plus its built-in sink.");
             system.AddWolfgateShipHeat(grid, 1500f);
-            Assert.That(system.GetWolfgateShipHeat(grid), Is.EqualTo((1500f, hull.Capacity)), "A hull with no generator keeps its own heat.");
+            Assert.That(system.GetWolfgateShipHeat(grid), Is.EqualTo((1500f, hull.BareCapacity)), "A hull with no generator keeps its own heat.");
             system.Update(1f);
             // The hull cools once a second on a clock shared with earlier ticks, so up to two seconds may have passed.
             // A bare hull has no field, so it cools at the field-down rate like any ship with its field down.
-            var cooled = hull.Dissipation * WGShipShieldEffects.FieldDownCooling;
+            var cooled = hull.BareDissipation * WGShipShieldEffects.FieldDownCooling;
             Assert.That(hull.Heat, Is.InRange(1500f - cooled * 2f, 1500f - cooled));
-            system.AddWolfgateShipHeat(grid, hull.Capacity * 2f);
-            Assert.That(hull.Heat, Is.EqualTo(hull.Capacity), "A bare hull never holds more than its capacity.");
+            system.AddWolfgateShipHeat(grid, hull.BareCapacity * 2f);
+            Assert.That(hull.Heat, Is.EqualTo(hull.BareCapacity), "A bare hull never holds more than its capacity.");
 
             var emitterUid = entities.SpawnEntity("WGShieldGeneratorDeflector", map.GridCoords);
             var emitter = entities.GetComponent<ShipShieldEmitterComponent>(emitterUid);
@@ -468,6 +470,9 @@ public sealed class WGShipHeatTest
             Assert.That(Heat(entities, grid), Is.GreaterThan(hull.Capacity / 2f), "A generator installed on a hot hull takes on the hull's heat.");
             Assert.That(emitter.Damage, Is.EqualTo(hull.Heat * system.WolfgateGeneratorShare(emitterUid, emitter)).Within(0.05f));
             Assert.That(hull.Heat, Is.EqualTo(Heat(entities, grid)), "Reading the ship's heat carries the generator's cooling to the hull.");
+            Assert.That(system.GetWolfgateShipHeat(grid).Capacity, Is.EqualTo(hull.Capacity +
+                WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp)).Within(0.01f),
+                "An installed generator takes the built-in sink's place.");
             var gun = entities.SpawnEntity("WeaponTurretL85Autocannon", map.GridCoords);
             var user = entities.SpawnEntity(null, map.GridCoords);
             var (round, shot) = Round(pair.Server.ResolveDependency<IPrototypeManager>(), entities.ComponentFactory);
@@ -502,20 +507,47 @@ public sealed class WGShipHeatTest
             Assert.That(hull.Heat, Is.EqualTo(damage * hull.FireHeat).Within(0.01f), "A ship with no shield heats from its own guns.");
             Assert.That(controls.GetState(grid).CanVent, Is.True);
 
-            hull.Heat = hull.Capacity * WGShipShieldEffects.GunHoldHeat - 1f;
+            hull.Heat = hull.BareCapacity * WGShipShieldEffects.GunHoldHeat - 1f;
             Fire(entities, gun, user, cartridge);
-            Assert.That(hull.Heat, Is.EqualTo(hull.Capacity * WGShipShieldEffects.GunHoldHeat), "Gun heat stops at the hold mark.");
+            Assert.That(hull.Heat, Is.EqualTo(hull.BareCapacity * WGShipShieldEffects.GunHoldHeat), "Gun heat stops at the hold mark.");
             Assert.That(Refused(entities, gun, user), Is.True, "Too hot, a bare hull holds its guns.");
             Assert.That(controls.GetState(grid).GunsHeld, Is.True);
             Assert.That(system.WantsWolfgateNpcVent(grid, true), Is.True, "An NPC crew vents a bare hull once its guns hold.");
 
-            hull.Heat = hull.Capacity * WGShipShieldEffects.GunResumeHeat - 1f;
+            hull.Heat = hull.BareCapacity * WGShipShieldEffects.GunResumeHeat - 1f;
             Assert.That(Refused(entities, gun, user), Is.False, "Cooled to the resume mark, it fires again.");
             Assert.That(system.WantsWolfgateNpcVent(grid, true), Is.False, "In a fight its crew keeps firing while the guns still can.");
             Assert.That(system.WantsWolfgateNpcVent(grid, false), Is.True, "With nothing to fight it vents.");
 
             Assert.That(system.StartWolfgateVent(grid), Is.True);
             Assert.That(Refused(entities, gun, user), Is.True, "A venting hull's guns are silent.");
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ShellBlastHeatsAtItsPeakTile()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var map = await pair.CreateTestMap();
+        await pair.Server.WaitAssertion(() =>
+        {
+            var entities = pair.Server.EntMan;
+            var prototypes = pair.Server.ResolveDependency<IPrototypeManager>();
+            var gun = entities.SpawnEntity("WeaponTurretHydra", map.GridCoords);
+            var user = entities.SpawnEntity(null, map.GridCoords);
+            var shell = entities.SpawnEntity("220mmBulletHE", map.GridCoords);
+            var explosive = entities.GetComponent<ExplosiveComponent>(shell);
+            var perIntensity = (float) prototypes.Index<ExplosionPrototype>(explosive.ExplosionType).DamagePerIntensity.GetTotal();
+            var hit = (float) entities.GetComponent<ProjectileComponent>(shell).Damage.GetTotal();
+            Assert.That(explosive.MaxIntensity, Is.LessThan(explosive.TotalIntensity));
+
+            var ammo = new List<(EntityUid? Uid, IShootable Shootable)> { (shell, entities.GetComponent<AmmoComponent>(shell)) };
+            var ev = new GunShotEvent(user, ammo, entities.GetComponent<TransformComponent>(gun).Coordinates);
+            entities.EventBus.RaiseLocalEvent(gun, ref ev);
+            var hull = entities.GetComponent<WGShipHeatComponent>(map.Grid.Owner);
+            Assert.That(hull.Heat, Is.EqualTo((hit + explosive.MaxIntensity * perIntensity) * hull.FireHeat).Within(0.01f),
+                "A shell's blast heats its ship at the damage of its peak tile, not its whole spread.");
         });
         await pair.CleanReturnAsync();
     }
@@ -549,7 +581,7 @@ public sealed class WGShipHeatTest
             system.Update(1.01f);
             Assert.That(hull.Capacity, Is.EqualTo(small + 40 * hull.CapacityPerTile).Within(0.01f), "A bigger hull holds more heat.");
             Assert.That(hull.Dissipation, Is.EqualTo(hull.Capacity / hull.CoolSeconds).Within(0.01f), "And sheds it faster.");
-            Assert.That(system.GetWolfgateShipHeat(grid).Capacity, Is.EqualTo(hull.Capacity));
+            Assert.That(system.GetWolfgateShipHeat(grid).Capacity, Is.EqualTo(hull.BareCapacity));
 
             hull.MaxCapacity = small;
             maps.SetTile(grid, map.Grid.Comp, new Vector2i(40, 40), plating);
@@ -625,7 +657,7 @@ public sealed class WGShipHeatTest
             var hull = entities.GetComponent<WGShipHeatComponent>(grid);
             var cold = new GetThermalSignatureEvent();
             entities.EventBus.RaiseLocalEvent(grid, ref cold);
-            system.AddWolfgateShipHeat(grid, hull.Capacity / 2f);
+            system.AddWolfgateShipHeat(grid, hull.BareCapacity / 2f);
             state = controls.GetState(grid);
             Assert.That(state.Heat, Is.EqualTo(0.5f).Within(0.001f));
             Assert.That(state.CanVent, Is.True);
@@ -639,8 +671,8 @@ public sealed class WGShipHeatTest
             var venting = new GetThermalSignatureEvent();
             entities.EventBus.RaiseLocalEvent(grid, ref venting);
             Assert.That(venting.Signature - hot.Signature, Is.EqualTo(hull.VentSignature).Within(1f), "A vent flares on top of the heat.");
-            var rate = hull.Dissipation * WGShipShieldEffects.CoolingMultiplier(false, true);
-            Assert.That(rate, Is.GreaterThan(hull.Dissipation * WGShipShieldEffects.FieldDownCooling), "A vent beats a bare hull's field-down rate.");
+            var rate = hull.BareDissipation * WGShipShieldEffects.CoolingMultiplier(false, true);
+            Assert.That(rate, Is.GreaterThan(hull.BareDissipation * WGShipShieldEffects.FieldDownCooling), "A vent beats a bare hull's field-down rate.");
             Assert.That(controls.GetState(grid).VentSeconds, Is.EqualTo((int) MathF.Ceiling(hull.Heat / rate)));
 
             var before = hull.Heat;

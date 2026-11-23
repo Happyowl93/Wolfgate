@@ -17,8 +17,8 @@ namespace Content.Server._Crescent.ShipShields;
 
 // A ship's heat lives on its hull (WGShipHeatComponent). A generator's damage is that heat as the upstream shield rules
 // see it: whatever raises or sets the damage (absorbed hits, other systems) is carried to the hull, and every
-// generator on the hull reads the same heat back. A ship generator adds its capacity to what the hull holds by its
-// size, and its cooling to what the hull sheds by its size. Its damage is the heat scaled to its own range (WolfgateGeneratorShare), so
+// generator on the hull reads the same heat back. A hull holds and sheds heat by its size, plus a built-in sink; a
+// ship generator takes the sink's place with its own capacity and cooling. Its damage is the heat scaled to its own range (WolfgateGeneratorShare), so
 // the upstream limits are reached when the whole ship is full.
 // Every ship cools the same way: a plain rate (hull, plus a powered generator) times one multiplier for its state,
 // field raised, field down or venting (WGShipShieldEffects.CoolingMultiplier). A bare hull has no field, so it is down.
@@ -109,7 +109,7 @@ public sealed partial class ShipShieldsSystem
         return _wgHullGenerators.GetValueOrDefault(grid);
     }
 
-    /// <summary>Sets what a hull holds and sheds with no generator from its tiles: a bigger hull holds more and cools faster.</summary>
+    /// <summary>Sets what a hull holds and sheds by its tiles, before its sink or generator: a bigger hull holds more and cools faster.</summary>
     private void SizeWolfgateHull(EntityUid grid, WGShipHeatComponent hull)
     {
         hull.Sized = true;
@@ -193,7 +193,7 @@ public sealed partial class ShipShieldsSystem
         if (hull.Cooler is { } cooler && _wgHeatSinks.TryGetValue(cooler, out var sink) && sink.Grid == grid &&
             TryComp<ShipShieldEmitterComponent>(cooler, out var emitter) && HasComp<WGShipShieldCostComponent>(cooler))
             return WolfgateGeneratorCooling(cooler, emitter);
-        return hull.Dissipation;
+        return hull.BareDissipation;
     }
 
     /// <summary>Most heat a hull holds under a generator: a ship generator's capacity on top of the hull's own, an outpost generator's alone.</summary>
@@ -317,7 +317,7 @@ public sealed partial class ShipShieldsSystem
         return largest;
     }
 
-    /// <summary>A ship's heat and the most it can hold: the hull's own capacity, plus its generator's on a ship.</summary>
+    /// <summary>A ship's heat and the most it can hold: the hull's own capacity, plus its generator's on a ship or its built-in sink's on a bare hull.</summary>
     public (float Heat, float Capacity) GetWolfgateShipHeat(EntityUid grid)
     {
         var generator = SyncWolfgateShipHeat(grid);
@@ -328,12 +328,12 @@ public sealed partial class ShipShieldsSystem
             if (hull == null && !TerminatingOrDeleted(grid) && HasComp<MapGridComponent>(grid))
                 hull = AddComp<WGShipHeatComponent>(grid);
             // A hull that lost tiles holds less; what no longer fits is lost.
-            if (hull != null && hull.Heat > WolfgateHullCapacity(grid, hull))
+            if (hull != null && hull.Heat > WolfgateHullCapacity(grid, hull) + hull.SinkCapacity)
             {
-                hull.Heat = hull.Capacity;
+                hull.Heat = hull.BareCapacity;
                 hull.Hard = MathF.Min(hull.Hard, hull.Heat);
             }
-            return (hull?.Heat ?? 0f, hull?.Capacity ?? WGShipHeatComponent.HullCapacity);
+            return (hull?.Heat ?? 0f, hull?.BareCapacity ?? WGShipHeatComponent.HullCapacity);
         }
         return (hull?.Heat ?? 0f, WolfgateShipCapacity(grid, uid, Comp<ShipShieldEmitterComponent>(uid)));
     }
@@ -357,7 +357,7 @@ public sealed partial class ShipShieldsSystem
         var hull = EnsureComp<WGShipHeatComponent>(grid);
         var most = float.PositiveInfinity;
         if (generator is not { } uid)
-            most = hull.Capacity * MathF.Min(limit, 1f);
+            most = hull.BareCapacity * MathF.Min(limit, 1f);
         else if (float.IsFinite(limit) && TryComp<ShipShieldEmitterComponent>(uid, out var emitter))
             most = limit * WolfgateShipCapacity(grid, uid, emitter);
         var heated = MathF.Max(hull.Heat, MathF.Min(hull.Heat + amount, most));
@@ -486,7 +486,7 @@ public sealed partial class ShipShieldsSystem
         return missile;
     }
 
-    /// <summary>Projectile, beam and explosive damage of one shot of a prototype, times its pellets.</summary>
+    /// <summary>Projectile, beam and peak blast damage of one shot of a prototype, times its pellets.</summary>
     private float WolfgatePrototypeShotDamage(string id)
     {
         if (_wgShotDamage.TryGetValue(id, out var cached))
@@ -498,9 +498,10 @@ public sealed partial class ShipShieldsSystem
                 damage += (float) projectile.Damage.GetTotal();
             if (prototype.TryGetComponent<HitscanBasicDamageComponent>(out var beam, _wgHeatFactory))
                 damage += (float) beam.Damage.GetTotal();
+            // A blast counts at its peak tile, not summed over every tile it spreads to.
             if (prototype.TryGetComponent<ExplosiveComponent>(out var explosive, _wgHeatFactory) &&
                 _prototypeManager.TryIndex(explosive.ExplosionType, out var type))
-                damage += explosive.TotalIntensity * (float) type.DamagePerIntensity.GetTotal();
+                damage += MathF.Min(explosive.MaxIntensity, explosive.TotalIntensity) * (float) type.DamagePerIntensity.GetTotal();
             if (prototype.TryGetComponent<ProjectileSpreadComponent>(out var spread, _wgHeatFactory))
                 damage *= Math.Max(1, spread.Count);
         }
@@ -534,7 +535,7 @@ public sealed partial class ShipShieldsSystem
             if (!hull.Sized)
                 SizeWolfgateHull(grid, hull);
             if ((hull.Heat > 0f || hull.Venting) && !_wgHeatSunkHulls.Contains(grid))
-                CoolWolfgateShip(grid, hull, hull.Dissipation, elapsed);
+                CoolWolfgateShip(grid, hull, hull.BareDissipation, elapsed);
         }
         UpdateWolfgateNpcVents();
     }

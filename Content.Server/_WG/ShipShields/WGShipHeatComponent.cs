@@ -46,6 +46,16 @@ public sealed partial class WGShipHeatComponent : Component
     [ViewVariables]
     public float Dissipation = HullCapacity / 80f;
 
+    /// <summary>Heat the hull's built-in sink holds; it sheds it in <see cref="CoolSeconds"/>. An installed ship generator takes its place.</summary>
+    [DataField]
+    public float SinkCapacity = 20000f;
+
+    /// <summary>Heat the hull holds with no generator: its size plus its built-in sink.</summary>
+    public float BareCapacity => Capacity + SinkCapacity;
+
+    /// <summary>Heat the hull sheds each second at the plain rate with no generator.</summary>
+    public float BareDissipation => Dissipation + (CoolSeconds > 0f ? SinkCapacity / CoolSeconds : 0f);
+
     /// <summary>Whether capacity and cooling match the hull's tiles; cleared when the hull gains or loses one.</summary>
     [ViewVariables]
     public bool Sized;
