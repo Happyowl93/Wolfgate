@@ -36,6 +36,10 @@ public sealed class WGShipShieldGeneratorStats
     public float HardHeatHold;
     /// <summary>Whether the generator sheds heat at its fast rate whenever its field is down, not only in recharge mode.</summary>
     public bool Vents;
+    /// <summary>Heat each point of damage the field absorbs adds.</summary>
+    public float HitHeat = 1f;
+    /// <summary>Share of the ship's capacity its heat drops to when damage beats the field down; 0 when a collapse sheds nothing.</summary>
+    public float CollapseHeat;
 
     /// <summary>Creates one runtime generator specification.</summary>
     public WGShipShieldGeneratorStats(string name, float capacity, float damageLimit, float healPerSecond,
@@ -62,6 +66,7 @@ public sealed class WGShipShieldGeneratorStats
             left.RechargePerSecond == right.RechargePerSecond && left.BasePowerWatts == right.BasePowerWatts &&
             left.MaximumPowerWatts == right.MaximumPowerWatts && left.OverloadSeconds == right.OverloadSeconds &&
             left.ThrustFactor == right.ThrustFactor && left.TurnFactor == right.TurnFactor &&
-            left.GunLockSeconds == right.GunLockSeconds && left.HardHeatHold == right.HardHeatHold && left.Vents == right.Vents;
+            left.GunLockSeconds == right.GunLockSeconds && left.HardHeatHold == right.HardHeatHold && left.Vents == right.Vents &&
+            left.HitHeat == right.HitHeat && left.CollapseHeat == right.CollapseHeat;
     }
 }

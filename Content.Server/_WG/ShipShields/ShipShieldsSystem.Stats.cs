@@ -25,6 +25,8 @@ public sealed partial class ShipShieldsSystem
             GunLockSeconds = cost == null ? 0f : MathF.Max(0f, cost.GunLockout ?? emitter.DamageOverloadTimePunishment),
             HardHeatHold = MathF.Max(0f, cost?.HardHeatHold ?? 0f),
             Vents = cost != null,
+            HitHeat = cost == null ? 1f : MathF.Max(0f, cost.HitHeat),
+            CollapseHeat = Math.Clamp(cost?.CollapseHeat ?? 0f, 0f, 1f),
             HullCooling = hullCooling,
             HullCapacity = cost != null && Transform(uid) is { Anchored: true, GridUid: { } grid } &&
                 TryComp<WGShipHeatComponent>(grid, out var hull) ? WolfgateHullCapacity(grid, hull) : 0f,
@@ -35,7 +37,8 @@ public sealed partial class ShipShieldsSystem
     private void ExamineWolfgateGeneratorStats(EntityUid uid, ShipShieldEmitterComponent emitter, ExaminedEvent args)
     {
         var stats = GetWolfgateGeneratorStats(uid, emitter);
-        args.PushMarkup(Loc.GetString("wg-shield-examine-capacity", ("capacity", MathF.Round(stats.Capacity, 0)), ("overload", MathF.Round(stats.DamageLimit, 0))));
+        args.PushMarkup(Loc.GetString("wg-shield-examine-capacity", ("rate", MathF.Round(stats.HitHeat, 2)),
+            ("capacity", MathF.Round(stats.Capacity, 0)), ("overload", MathF.Round(stats.DamageLimit, 0))));
         if (stats.Capacity < stats.DamageLimit)
             args.PushMarkup(Loc.GetString("wg-shield-examine-capacity-note"));
         if (stats.HullCapacity > 0f)
@@ -59,6 +62,8 @@ public sealed partial class ShipShieldsSystem
         }
         if (stats.GunLockSeconds > 0f)
             args.PushMarkup(Loc.GetString("wg-shield-examine-gun-lock", ("seconds", MathF.Round(stats.GunLockSeconds, 1))));
+        if (stats.CollapseHeat > 0f)
+            args.PushMarkup(Loc.GetString("wg-shield-collapse-heat", ("share", MathF.Round(stats.CollapseHeat * 100f))));
         if (HasComp<WGShipShieldCostComponent>(uid))
             args.PushMarkup(Loc.GetString("wg-shield-examine-one-per-ship"));
     }

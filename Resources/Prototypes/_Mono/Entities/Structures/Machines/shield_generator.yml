@@ -398,6 +398,7 @@
     turnFactor: 0.7
     signature: 2000000
     gunLockout: 3 # a brawler: losing its field costs it the least
+    collapseHeat: 0.8 # under the mark where hot guns resume, so the lock is all that silences them
   # WOLFGATE END
   - type: ShipShieldEmitter
     damageLimit: 40000 # WOLFGATE(ShipShields): the hull's own heat capacity adds to the generator's (Mono: 75000)

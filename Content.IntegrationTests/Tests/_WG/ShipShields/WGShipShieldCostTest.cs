@@ -11,6 +11,7 @@ using Content.Server.Shuttles.Components;
 using Content.Shared._Crescent.ShipShields;
 using Content.Shared._Mono.Detection;
 using Content.Shared._WG.ShipShields;
+using Content.Shared.Power.EntitySystems;
 using Content.Shared.Weapons.Ranged.Systems;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Physics.Components;
@@ -131,6 +132,8 @@ public sealed class WGShipShieldCostTest
             Assert.That(entities.System<WGShipShieldShuntSystem>().GetState(grid).GunLockSeconds, Is.EqualTo(locked));
             Assert.That(Refused(entities, gun, user), Is.True);
             Assert.That(Sparking(entities, gun), Is.True, "A locked gun is wreathed in sparks.");
+            // The wait runs on real ticks, where a generator on no power network would go dark and cool nothing.
+            entities.System<SharedPowerReceiverSystem>().SetNeedsPower(emitterUid, false, power);
         });
         await pair.RunSeconds(wait + 3f);
         await pair.Server.WaitAssertion(() =>
@@ -210,6 +213,12 @@ public sealed class WGShipShieldCostTest
             Assert.That(emitter.OverloadAccumulator, Is.GreaterThan(lockout), "Its field is still waiting out the overload.");
             Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.EqualTo((int) MathF.Ceiling(lockout)),
                 "Its guns come back after its own short lock, before its field does.");
+            Assert.That(cost.CollapseHeat, Is.Not.Null);
+            Assert.That(cost.CollapseHeat!.Value, Is.LessThan(WGShipShieldEffects.GunResumeHeat));
+            var (heat, capacity) = system.GetWolfgateShipHeat(grid);
+            Assert.That(heat, Is.GreaterThan(0f).And.LessThanOrEqualTo(capacity * cost.CollapseHeat.Value + 0.05f),
+                "The collapse sheds its heat below the mark where hot guns resume.");
+            Assert.That(system.IsWolfgateShipHeatHeld(grid), Is.False, "So the short lock is all that silences its guns.");
             var stats = entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!;
             Assert.That(stats.GunLockSeconds, Is.EqualTo(lockout));
             Assert.That(stats.OverloadSeconds, Is.EqualTo(10f));

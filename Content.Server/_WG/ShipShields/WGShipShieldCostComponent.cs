@@ -23,6 +23,14 @@ public sealed partial class WGShipShieldCostComponent : Component
     [DataField]
     public float HitSignature = 400f;
 
+    /// <summary>Heat each point of damage the field absorbs adds to the ship; hull collisions are charged in full.</summary>
+    [DataField]
+    public float HitHeat = WGShipShieldEffects.HitHeat;
+
+    /// <summary>Share of the ship's capacity its heat drops to when damage beats the field down; left out, the collapse sheds nothing.</summary>
+    [DataField]
+    public float? CollapseHeat;
+
     /// <summary>Seconds this generator's raised field must go unhit before the heat it absorbed starts to cool.</summary>
     [DataField]
     public float HardHeatHold = WGShipShieldEffects.HardHeatHold;

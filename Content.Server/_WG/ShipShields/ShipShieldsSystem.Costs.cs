@@ -74,7 +74,20 @@ public sealed partial class ShipShieldsSystem
         if (!TryComp<WGShipShieldCostComponent>(emitter, out var cost))
             return;
         if (TryComp<WGShipHeatComponent>(grid, out var hull))
+        {
             hull.Collapsed = true;
+            // Shed below the mark where hot guns resume, a collapse leaves the guns to the lock alone.
+            if (cost.CollapseHeat is { } left)
+            {
+                var most = GetWolfgateShipHeat(grid).Capacity * Math.Clamp(left, 0f, 1f);
+                if (hull.Heat > most)
+                {
+                    hull.Heat = most;
+                    hull.Hard = MathF.Min(hull.Hard, most);
+                    SyncWolfgateShipHeat(grid);
+                }
+            }
+        }
         // The guns stay locked through the whole overload, as an overloaded ship can't fire in Starsector, unless the
         // generator sets a lock of its own.
         var seconds = cost.GunLockout ??

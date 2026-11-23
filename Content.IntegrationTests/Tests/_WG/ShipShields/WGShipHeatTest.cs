@@ -249,7 +249,7 @@ public sealed class WGShipHeatTest
     }
 
     [Test]
-    public async Task OneHitAddsNoMoreThanHalfTheShipsCapacity()
+    public async Task AbsorbedHitsAddPartOfTheirDamageAndNoMoreThanAShareOfCapacity()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
         var map = await pair.CreateTestMap();
@@ -264,22 +264,71 @@ public sealed class WGShipHeatTest
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Not.Null);
             var capacity = system.GetWolfgateShipHeat(grid).Capacity;
+            var cost = entities.GetComponent<WGShipShieldCostComponent>(emitterUid);
+            var rate = cost.HitHeat;
+            Assert.That(rate, Is.EqualTo(WGShipShieldEffects.HitHeat).And.GreaterThan(0f).And.LessThan(1f));
 
-            // A warhead many times the ship's capacity.
             var beam = entities.SpawnEntity(null, map.GridCoords);
             var damage = entities.EnsureComponent<HitscanBasicDamageComponent>(beam);
             damage.Damage = new DamageSpecifier();
-            damage.Damage.DamageDict.Add("Heat", FixedPoint2.New(capacity * 8f));
+            damage.Damage.DamageDict.Add("Heat", FixedPoint2.New(1000));
+            cost.HitHeat = 1f;
+            system.ApplyWolfgateHitscanImpact(emitter.Shield!.Value, beam, Vector2.Zero, 1f);
+            var full = Heat(entities, grid);
+            Assert.That(full, Is.GreaterThan(0f));
+            cost.HitHeat = rate;
+            system.ApplyWolfgateHitscanImpact(emitter.Shield!.Value, beam, Vector2.Zero, 1f);
+            Assert.That(Heat(entities, grid) - full, Is.EqualTo(full * rate).Within(0.05f), "A field turns only part of what it absorbs into heat.");
 
+            // A warhead many times the ship's capacity.
+            damage.Damage = new DamageSpecifier();
+            damage.Damage.DamageDict.Add("Heat", FixedPoint2.New(capacity * 8f));
+            var before = Heat(entities, grid);
             system.ApplyWolfgateHitscanImpact(emitter.Shield!.Value, beam, Vector2.Zero, 1f);
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Not.Null, "One hit, however big, doesn't overrun a cool field.");
-            Assert.That(Heat(entities, grid), Is.EqualTo(capacity * WGShipShieldEffects.HitHeatCap).Within(capacity * 0.01f));
+            Assert.That(Heat(entities, grid) - before, Is.EqualTo(capacity * WGShipShieldEffects.HitHeatCap).Within(capacity * 0.01f));
 
-            SetHeat(entities, emitterUid, capacity * (WGShipShieldEffects.HitHeatCap + 0.1f));
+            SetHeat(entities, emitterUid, capacity * (1.05f - WGShipShieldEffects.HitHeatCap));
             system.ApplyWolfgateHitscanImpact(emitter.Shield!.Value, beam, Vector2.Zero, 1f);
             system.Update(1.5f);
-            Assert.That(emitter.Shield, Is.Null, "The same hit breaks a field that is already past half its heat.");
+            Assert.That(emitter.Shield, Is.Null, "The same hit breaks a field that has less room left than one hit adds.");
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task GeneratorWithoutPowerCoolsNothingOfItsOwn()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var map = await pair.CreateTestMap();
+        await pair.Server.WaitAssertion(() =>
+        {
+            var entities = pair.Server.EntMan;
+            var grid = map.Grid.Owner;
+            var system = entities.System<ShipShieldsSystem>();
+            var emitterUid = entities.SpawnEntity("ShieldGeneratorSmall", map.GridCoords);
+            var emitter = entities.GetComponent<ShipShieldEmitterComponent>(emitterUid);
+            var power = entities.GetComponent<ApcPowerReceiverComponent>(emitterUid);
+            power.Powered = true;
+            system.Update(1.5f);
+            Assert.That(emitter.Shield, Is.Not.Null);
+            Assert.That(system.SetWolfgateShieldEnabled(grid, false), Is.True);
+            var capacity = system.GetWolfgateShipHeat(grid).Capacity;
+            var own = system.WolfgateHullCooling(emitterUid);
+            Assert.That(own, Is.GreaterThan(0f));
+
+            system.AddWolfgateShipHeat(grid, 20000f);
+            system.Update(1.5f);
+            Assert.That(20000f - Heat(entities, grid), Is.EqualTo((emitter.HealPerSecond + own) * 1.5f).Within(0.01f),
+                "With power, a lowered generator still cools the ship.");
+
+            power.Powered = false;
+            var before = Heat(entities, grid);
+            system.Update(1.5f);
+            Assert.That(before - Heat(entities, grid), Is.EqualTo(own * 1.5f).Within(0.01f),
+                "Without power the generator cools nothing; the hull sheds only its own share.");
+            Assert.That(system.GetWolfgateShipHeat(grid).Capacity, Is.EqualTo(capacity), "It still holds the heat.");
         });
         await pair.CleanReturnAsync();
     }

@@ -1,4 +1,4 @@
-wg-shield-examine-capacity = Absorbed damage becomes heat. Heat capacity: { $capacity }. Overload threshold: { $overload } heat.
+wg-shield-examine-capacity = Each point of damage the field absorbs adds { $rate } heat. Heat capacity: { $capacity }. Overload threshold: { $overload } heat.
 wg-shield-examine-capacity-note = Heat capacity may be limited by power demand before the overload threshold.
 wg-shield-examine-adds-capacity = On a ship, its capacity adds to the heat the hull holds by its own size, and its cooling to part of what the hull sheds.
 wg-shield-examine-hull-cooling = Of that cooling, { $hull } heat/s is the hull's own by its size.
@@ -11,5 +11,6 @@ wg-shield-examine-arc = Field arc: { $arc }° at most. Everything outside the ar
 wg-shield-examine-cost = While raised: { $thrust }% less thrust, { $turn }% slower turning, and a hotter trace on long-range sensors that flares with every hit.
 wg-shield-examine-gun-lock = A field overrun by heat collapses and locks the ship's guns for { $seconds } seconds. Lowering it yourself does not.
 wg-shield-examine-cooling = Cooling: { $online } heat/s, or { $offline } heat/s while venting. Heat the raised field absorbed stays until { $hold } seconds pass without a hit, the field is lowered or the ship vents.
+wg-shield-collapse-heat = The collapse sheds the ship's heat down to { $share }%, so hot guns are not held past the lock.
 wg-shield-examine-one-per-ship = A ship takes one shield generator; it will not bolt down beside another.
 wg-shield-limit-anchor-fail = This ship already has { $generator } bolted down. A ship takes one shield generator.

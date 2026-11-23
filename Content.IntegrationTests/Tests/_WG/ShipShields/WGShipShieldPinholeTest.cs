@@ -116,7 +116,7 @@ public sealed class WGShipShieldPinholeTest
                 Assert.That(projectile.ProjectileSpent, Is.True);
                 // One hit adds no more than a share of the ship's capacity, so a big warhead can't overrun a cool field.
                 var heat = system.GetWolfgateShipHeat(map.Grid.Owner);
-                var expectedHeat = MathF.Min(expectedDamage, heat.Capacity * WGShipShieldEffects.HitHeatCap);
+                var expectedHeat = MathF.Min(expectedDamage * WGShipShieldEffects.HitHeat, heat.Capacity * WGShipShieldEffects.HitHeatCap);
                 Assert.That(heat.Heat, Is.EqualTo(expectedHeat).Within(MathF.Max(0.01f, expectedHeat * 0.00001f)),
                     "Direct and explosive damage must charge exactly once, up to the most one hit adds.");
                 Assert.That(emitter.OverloadAccumulator, Is.Zero, "One hit doesn't overload a cool field.");

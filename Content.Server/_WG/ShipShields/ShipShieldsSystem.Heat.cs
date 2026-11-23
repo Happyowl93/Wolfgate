@@ -1,5 +1,6 @@
 using Content.Server._Mono.FireControl;
 using Content.Server._WG.ShipShields;
+using Content.Server.Power.Components;
 using Content.Shared._Crescent.ShipShields;
 using Content.Shared._WG.ShipShields;
 using Content.Shared.Explosion.Components;
@@ -147,14 +148,16 @@ public sealed partial class ShipShieldsSystem
     }
 
     /// <summary>
-    /// What a hit its field absorbed charges a generator: its share of the damage, and on a ship no more than
-    /// <see cref="WGShipShieldEffects.HitHeatCap"/> of its capacity, so one warhead can't overrun a cool field.
+    /// What a hit its field absorbed charges a generator: its share of the damage, and on a ship that damage at the
+    /// generator's <c>hitHeat</c> and no more than <see cref="WGShipShieldEffects.HitHeatCap"/> of its capacity, so one
+    /// warhead can't overrun a cool field.
     /// </summary>
     private float WolfgateHitCharge(EntityUid uid, ShipShieldEmitterComponent emitter, float damage)
     {
         var charged = damage * WolfgateGeneratorShare(uid, emitter);
-        if (!HasComp<WGShipShieldCostComponent>(uid))
+        if (!TryComp<WGShipShieldCostComponent>(uid, out var cost))
             return charged;
+        charged *= MathF.Max(0f, cost.HitHeat);
         var capacity = WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp);
         return capacity > 0f ? MathF.Min(charged, capacity * WGShipShieldEffects.HitHeatCap) : charged;
     }
@@ -171,6 +174,16 @@ public sealed partial class ShipShieldsSystem
         WolfgateHullCapacity(grid, hull);
         var cooling = hull.Dissipation * hull.GeneratorCooling;
         return float.IsFinite(cooling) ? MathF.Max(0f, cooling) : 0f;
+    }
+
+    /// <summary>
+    /// Heat per second a ship generator sheds for its hull: its own rate while it has power, plus the hull's share.
+    /// A dead generator is no radiator.
+    /// </summary>
+    public float WolfgateGeneratorCooling(EntityUid uid, ShipShieldEmitterComponent emitter)
+    {
+        var own = TryComp<ApcPowerReceiverComponent>(uid, out var power) && !power.Powered ? 0f : emitter.HealPerSecond;
+        return own + WolfgateHullCooling(uid);
     }
 
     /// <summary>Most heat a hull holds under a generator: a ship generator's capacity on top of the hull's own, an outpost generator's alone.</summary>
@@ -357,7 +370,7 @@ public sealed partial class ShipShieldsSystem
         if (IsWolfgateHullCooler(uid, sink.Grid, hull))
         {
             if (HasComp<WGShipShieldCostComponent>(uid))
-                CoolWolfgateShip(sink.Grid, hull, (emitter.HealPerSecond + WolfgateHullCooling(uid)) * EmitterUpdateRate, emitter.UnpoweredBonus);
+                CoolWolfgateShip(sink.Grid, hull, WolfgateGeneratorCooling(uid, emitter) * EmitterUpdateRate, emitter.UnpoweredBonus);
             else
                 CoolWolfgateShip(sink.Grid, hull, healed, 1f, false);
         }

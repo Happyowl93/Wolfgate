@@ -20,6 +20,7 @@ public sealed class WGShipShieldStatsWindow : DefaultWindow
     private readonly RichTextLabel _maximum = new();
     private readonly RichTextLabel _lockout = new();
     private readonly RichTextLabel _costs = new();
+    private readonly RichTextLabel _note = new();
 
     /// <summary>Creates a compact scrolling generator specification panel, with instrument chrome only for instrument consoles.</summary>
     public WGShipShieldStatsWindow(bool instruments = true)
@@ -40,7 +41,7 @@ public sealed class WGShipShieldStatsWindow : DefaultWindow
             label.HorizontalExpand = true;
             values.AddChild(instruments ? (Control) new WGGlassReadout(label) : label);
         }
-        values.AddChild(new RichTextLabel { Text = Loc.GetString("wg-shield-stats-recovery-note") });
+        values.AddChild(_note);
         scroll.AddChild(values);
         Contents.AddChild(scroll);
         if (instruments)
@@ -65,9 +66,13 @@ public sealed class WGShipShieldStatsWindow : DefaultWindow
         _idle.Text = Loc.GetString("wg-shield-stats-idle-power", ("value", MathF.Round(stats.BasePowerWatts / 1000f, 1)));
         _maximum.Text = Loc.GetString("wg-shield-stats-max-power", ("value", MathF.Round(stats.MaximumPowerWatts / 1000f, 1)));
         _lockout.Text = Loc.GetString("wg-shield-stats-overload-lockout", ("value", MathF.Round(stats.OverloadSeconds, 1)));
-        _costs.Text = stats.ThrustFactor < 1f || stats.TurnFactor < 1f || stats.GunLockSeconds > 0f
+        var costs = stats.ThrustFactor < 1f || stats.TurnFactor < 1f || stats.GunLockSeconds > 0f
             ? Loc.GetString("wg-shield-stats-costs", ("thrust", MathF.Round((1f - stats.ThrustFactor) * 100f)),
                 ("turn", MathF.Round((1f - stats.TurnFactor) * 100f)), ("seconds", MathF.Round(stats.GunLockSeconds, 1)))
             : Loc.GetString("wg-shield-stats-no-costs");
+        _costs.Text = stats.CollapseHeat > 0f
+            ? $"{costs} {Loc.GetString("wg-shield-collapse-heat", ("share", MathF.Round(stats.CollapseHeat * 100f)))}"
+            : costs;
+        _note.Text = Loc.GetString("wg-shield-stats-recovery-note", ("rate", MathF.Round(stats.HitHeat, 2)));
     }
 }
