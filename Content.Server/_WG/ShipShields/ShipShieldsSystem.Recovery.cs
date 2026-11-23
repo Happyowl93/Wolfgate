@@ -102,10 +102,10 @@ public sealed partial class ShipShieldsSystem
     /// <summary>Seconds until an overloaded generator's wait ends at an update tick; 0 when it isn't overloaded.</summary>
     public static float WolfgateOverloadSeconds(ShipShieldEmitterComponent emitter)
     {
-        if (!(emitter.OverloadAccumulator > 0f) || !float.IsFinite(emitter.OverloadAccumulator))
+        // The wait drops by one tick's worth each tick and is over once below a second, when the field may rise.
+        if (!(emitter.OverloadAccumulator >= 1f) || !float.IsFinite(emitter.OverloadAccumulator))
             return 0f;
-        // The wait drops by one tick's worth each tick and is over once below a second.
-        var ticks = emitter.OverloadAccumulator < 1f ? 1f : MathF.Floor((emitter.OverloadAccumulator - 1f) / EmitterUpdateRate) + 1f;
+        var ticks = MathF.Floor((emitter.OverloadAccumulator - 1f) / EmitterUpdateRate) + 1f;
         return MathF.Max(0f, EmitterUpdateRate - emitter.Accumulator) + (ticks - 1f) * EmitterUpdateRate;
     }
 

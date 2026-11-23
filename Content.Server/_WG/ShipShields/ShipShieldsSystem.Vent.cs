@@ -73,10 +73,10 @@ public sealed partial class ShipShieldsSystem
             (generator is not { } uid || HasComp<WGShipShieldCostComponent>(uid) && !IsWolfgateOverloaded(uid));
     }
 
-    /// <summary>Whether a generator is waiting out an overload; as in Starsector, an overloaded ship can't vent.</summary>
+    /// <summary>Whether a generator is waiting out an overload, which ends once below a second; as in Starsector, an overloaded ship can't vent.</summary>
     public bool IsWolfgateOverloaded(EntityUid generator)
     {
-        return TryComp<ShipShieldEmitterComponent>(generator, out var emitter) && emitter.OverloadAccumulator > 0f;
+        return TryComp<ShipShieldEmitterComponent>(generator, out var emitter) && emitter.OverloadAccumulator >= 1f;
     }
 
     /// <summary>
