@@ -59,7 +59,11 @@ public sealed partial class WGShipHeatComponent : Component
     [DataField]
     public float VentBonus = 1.5f;
 
-    /// <summary>Thermal signature a venting hull adds for long-range sensors.</summary>
+    /// <summary>Thermal signature each point of heat the hull holds adds for long-range sensors.</summary>
+    [DataField]
+    public float HeatSignature = 25f;
+
+    /// <summary>Thermal signature a venting hull adds for long-range sensors, on top of its heat's.</summary>
     [DataField]
     public float VentSignature = 1500000f;
 

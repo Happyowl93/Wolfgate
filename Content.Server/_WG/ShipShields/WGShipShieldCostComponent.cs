@@ -27,9 +27,9 @@ public sealed partial class WGShipShieldCostComponent : Component
     [DataField]
     public float HardHeatHold = WGShipShieldEffects.HardHeatHold;
 
-    /// <summary>Fewest seconds the ship's guns stay locked after damage beats the field down; they also stay locked through the overload wait.</summary>
+    /// <summary>Seconds the ship's guns stay locked after damage beats the field down; left out, they stay locked through the overload wait.</summary>
     [DataField]
-    public float GunLockout = 6f;
+    public float? GunLockout;
 
     /// <summary>Effect spawned on each of the ship's mounted guns for as long as they are locked.</summary>
     [DataField]

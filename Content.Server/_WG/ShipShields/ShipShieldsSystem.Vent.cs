@@ -51,7 +51,7 @@ public sealed partial class ShipShieldsSystem
 
     private void InitializeWolfgateVents()
     {
-        SubscribeLocalEvent<WGShipHeatComponent, GetThermalSignatureEvent>(OnWolfgateVentSignature);
+        SubscribeLocalEvent<WGShipHeatComponent, GetThermalSignatureEvent>(OnWolfgateHullSignature);
     }
 
     /// <summary>Whether a ship is venting: its field stays down and its guns stay silent until no heat is left.</summary>
@@ -127,8 +127,11 @@ public sealed partial class ShipShieldsSystem
         return rate > 0f && float.IsFinite(rate) ? Math.Max(1, (int) MathF.Ceiling(hull.Heat / rate)) : -1;
     }
 
-    private void OnWolfgateVentSignature(Entity<WGShipHeatComponent> grid, ref GetThermalSignatureEvent args)
+    /// <summary>A hot hull glows on long-range sensors by the heat it holds, and a venting one flares on top of that.</summary>
+    private void OnWolfgateHullSignature(Entity<WGShipHeatComponent> grid, ref GetThermalSignatureEvent args)
     {
+        if (float.IsFinite(grid.Comp.Heat) && grid.Comp.Heat > 0f)
+            args.Signature += grid.Comp.Heat * MathF.Max(0f, grid.Comp.HeatSignature);
         if (grid.Comp.Venting)
             args.Signature += MathF.Max(0f, grid.Comp.VentSignature);
     }

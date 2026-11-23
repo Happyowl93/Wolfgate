@@ -56,15 +56,15 @@ public sealed partial class ShipShieldsSystem
         // Bound malformed or impractically long configurations without blocking UI updates.
         for (var tick = 0; tick < 2400; tick++)
         {
-            if (WolfgateLoadAt(damage, emitter) >= emitter.MaxDraw)
-            {
+            var capped = WolfgateLoadAt(damage, emitter) >= emitter.MaxDraw;
+            if (capped)
                 recharging = true;
-                if (ship)
-                    overload = MathF.Max(overload, emitter.DamageOverloadTimePunishment);
-            }
             var rechargeThisTick = recharging;
             if (overload > 0f)
                 overload -= EmitterUpdateRate;
+            // A ship generator at its power cap starts its full wait after this tick's countdown, as the update does.
+            if (ship && capped)
+                overload = MathF.Max(overload, emitter.DamageOverloadTimePunishment);
             var healed = (emitter.HealPerSecond + hullCooling) * EmitterUpdateRate;
             if (ship ? venting : recharging)
                 healed *= ship ? WolfgateVentBonus(emitter.UnpoweredBonus) : emitter.UnpoweredBonus;

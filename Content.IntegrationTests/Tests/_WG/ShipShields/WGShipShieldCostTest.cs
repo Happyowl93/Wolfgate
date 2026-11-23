@@ -61,8 +61,9 @@ public sealed class WGShipShieldCostTest
             var stats = entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!;
             Assert.That(stats.ThrustFactor, Is.EqualTo(cost.ThrustFactor));
             Assert.That(stats.TurnFactor, Is.EqualTo(cost.TurnFactor));
-            Assert.That(stats.GunLockSeconds, Is.EqualTo(MathF.Max(cost.GunLockout, emitter.DamageOverloadTimePunishment)),
-                "The guns stay locked through the overload wait.");
+            Assert.That(cost.GunLockout, Is.Null);
+            Assert.That(stats.GunLockSeconds, Is.EqualTo(emitter.DamageOverloadTimePunishment),
+                "With no lock of its own, the guns stay locked through the overload wait.");
 
             var heat = entities.EnsureComponent<ThermalSignatureComponent>(grid);
             var stored = heat.StoredHeat;
@@ -194,7 +195,7 @@ public sealed class WGShipShieldCostTest
                 var other = prototypes.Index<EntityPrototype>(id);
                 Assert.That(other.TryGetComponent<WGShipShieldCostComponent>(out var otherCost, entities.ComponentFactory), Is.True);
                 Assert.That(other.TryGetComponent<ShipShieldEmitterComponent>(out var otherEmitter, entities.ComponentFactory), Is.True);
-                Assert.That(cost.GunLockout, Is.LessThan(otherCost!.GunLockout), $"The Titan's guns come back sooner than {id}'s.");
+                Assert.That(otherCost!.GunLockout, Is.Null, $"{id}'s guns stay locked through its whole overload.");
                 Assert.That(emitter.DamageOverloadTimePunishment, Is.LessThan(otherEmitter!.DamageOverloadTimePunishment),
                     $"The Titan's field comes back sooner than {id}'s.");
                 Assert.That(cost.ThrustFactor, Is.LessThan(otherCost.ThrustFactor), $"It slows the ship more than {id}.");
@@ -203,9 +204,15 @@ public sealed class WGShipShieldCostTest
             emitter.Damage = emitter.DamageLimit + 5000f;
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Null);
-            Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.InRange((int) emitter.DamageOverloadTimePunishment - 2,
-                (int) emitter.DamageOverloadTimePunishment + 1), "Its guns are locked through its short overload.");
-            Assert.That(entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!.OverloadSeconds, Is.EqualTo(20f));
+            Assert.That(cost.GunLockout, Is.Not.Null);
+            var lockout = cost.GunLockout!.Value;
+            Assert.That(lockout, Is.GreaterThan(0f).And.LessThan(emitter.DamageOverloadTimePunishment));
+            Assert.That(emitter.OverloadAccumulator, Is.GreaterThan(lockout), "Its field is still waiting out the overload.");
+            Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.EqualTo((int) MathF.Ceiling(lockout)),
+                "Its guns come back after its own short lock, before its field does.");
+            var stats = entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!;
+            Assert.That(stats.GunLockSeconds, Is.EqualTo(lockout));
+            Assert.That(stats.OverloadSeconds, Is.EqualTo(20f));
         });
         await pair.CleanReturnAsync();
     }

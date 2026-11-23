@@ -10,6 +10,7 @@ using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Systems;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Server._Crescent.ShipShields;
 
@@ -39,15 +40,70 @@ public sealed partial class ShipShieldsSystem
     private readonly List<EntityUid> _wgHeatGone = new();
     private float _wgHullHeatAccumulator;
 
+    /// <summary>The generators bolted down on each hull, listed once a tick and again after one is bolted down.</summary>
+    private readonly Dictionary<EntityUid, List<EntityUid>> _wgHullGenerators = new();
+    private readonly Stack<List<EntityUid>> _wgGeneratorLists = new();
+    private GameTick _wgHullGeneratorsTick;
+    private bool _wgHullGeneratorsStale = true;
+
     private void InitializeWolfgateShipHeat()
     {
         SubscribeLocalEvent<FireControllableComponent, GunShotEvent>(OnWolfgateShipGunShot);
         SubscribeLocalEvent<WGShipHeatComponent, ComponentStartup>(OnWolfgateHullHeatStartup);
+        SubscribeLocalEvent<WGShipHeatComponent, ComponentShutdown>(OnWolfgateHullHeatShutdown);
+        SubscribeLocalEvent<ShipShieldEmitterComponent, ComponentStartup>(OnWolfgateGeneratorStartup);
+        SubscribeLocalEvent<ShipShieldEmitterComponent, AnchorStateChangedEvent>(OnWolfgateGeneratorAnchor);
     }
 
     private void OnWolfgateHullHeatStartup(Entity<WGShipHeatComponent> grid, ref ComponentStartup args)
     {
         SizeWolfgateHull(grid, grid.Comp);
+    }
+
+    private void OnWolfgateHullHeatShutdown(Entity<WGShipHeatComponent> grid, ref ComponentShutdown args)
+    {
+        _wgHeatHeld.Remove(grid);
+        _wgGunLocks.Remove(grid);
+    }
+
+    private void OnWolfgateGeneratorStartup(Entity<ShipShieldEmitterComponent> generator, ref ComponentStartup args)
+    {
+        _wgHullGeneratorsStale = true;
+    }
+
+    private void OnWolfgateGeneratorAnchor(Entity<ShipShieldEmitterComponent> generator, ref AnchorStateChangedEvent args)
+    {
+        _wgHullGeneratorsStale = true;
+    }
+
+    /// <summary>
+    /// The generators bolted down on a hull, if any. Every emitter is looked at once a tick, not once for each gun,
+    /// panel and shot that asks; one taken off its hull since is still listed, so check each before use.
+    /// </summary>
+    private List<EntityUid>? WolfgateHullGenerators(EntityUid grid)
+    {
+        var tick = _wgShieldTiming.CurTick;
+        if (_wgHullGeneratorsStale || _wgHullGeneratorsTick != tick)
+        {
+            foreach (var used in _wgHullGenerators.Values)
+            {
+                used.Clear();
+                _wgGeneratorLists.Push(used);
+            }
+            _wgHullGenerators.Clear();
+            var query = EntityQueryEnumerator<ShipShieldEmitterComponent, TransformComponent>();
+            while (query.MoveNext(out var uid, out _, out var transform))
+            {
+                if (!transform.Anchored || transform.GridUid is not { } hull)
+                    continue;
+                if (!_wgHullGenerators.TryGetValue(hull, out var list))
+                    _wgHullGenerators[hull] = list = _wgGeneratorLists.TryPop(out var spare) ? spare : new List<EntityUid>();
+                list.Add(uid);
+            }
+            _wgHullGeneratorsTick = tick;
+            _wgHullGeneratorsStale = false;
+        }
+        return _wgHullGenerators.GetValueOrDefault(grid);
     }
 
     /// <summary>Sets what a hull holds and sheds with no generator from its tiles: a bigger hull holds more and cools faster.</summary>
@@ -208,10 +264,12 @@ public sealed partial class ShipShieldsSystem
         }
         EntityUid? largest = null;
         var most = -1f;
-        var query = EntityQueryEnumerator<ShipShieldEmitterComponent, TransformComponent>();
-        while (query.MoveNext(out var uid, out var emitter, out var transform))
+        if (WolfgateHullGenerators(grid) is not { } generators)
+            return null;
+        foreach (var uid in generators)
         {
-            if (transform.GridUid != grid || !transform.Anchored)
+            if (!TryComp<ShipShieldEmitterComponent>(uid, out var emitter) || Transform(uid) is not { Anchored: true } transform ||
+                transform.GridUid != grid)
                 continue;
             SyncWolfgateGeneratorHeat(uid, emitter);
             var capacity = WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp);

@@ -73,9 +73,10 @@ public sealed partial class ShipShieldsSystem
     {
         if (!TryComp<WGShipShieldCostComponent>(emitter, out var cost))
             return;
-        // The guns stay locked through the whole overload, as an overloaded ship can't fire in Starsector.
-        var seconds = MathF.Max(cost.GunLockout,
-            TryComp<ShipShieldEmitterComponent>(emitter, out var shield) ? WolfgateOverloadSeconds(shield) : 0f);
+        // The guns stay locked through the whole overload, as an overloaded ship can't fire in Starsector, unless the
+        // generator sets a lock of its own.
+        var seconds = cost.GunLockout ??
+            (TryComp<ShipShieldEmitterComponent>(emitter, out var shield) ? WolfgateOverloadSeconds(shield) : 0f);
         if (seconds <= 0f)
             return;
         var now = _wgShieldTiming.CurTime;
@@ -101,7 +102,7 @@ public sealed partial class ShipShieldsSystem
 
     /// <summary>
     /// Whole seconds until a ship's guns unlock after a field collapse; 0 when they are free. They stay locked for as
-    /// long as the ship's generator waits out its overload, and at least its <c>gunLockout</c>.
+    /// long as the ship's generator waits out its overload, or for its <c>gunLockout</c> if it sets one.
     /// </summary>
     public int GetWolfgateGunLockSeconds(EntityUid grid)
     {
@@ -114,7 +115,8 @@ public sealed partial class ShipShieldsSystem
             else
                 _wgGunLocks.Remove(grid);
         }
-        if (TryComp<WGShipHeatComponent>(grid, out var hull) && hull.Cooler is { } cooler && HasComp<WGShipShieldCostComponent>(cooler) &&
+        if (TryComp<WGShipHeatComponent>(grid, out var hull) && hull.Cooler is { } cooler &&
+            TryComp<WGShipShieldCostComponent>(cooler, out var cost) && cost.GunLockout == null &&
             TryComp<ShipShieldEmitterComponent>(cooler, out var emitter) && Transform(cooler).GridUid == grid)
             seconds = Math.Max(seconds, WolfgateOverloadSeconds(emitter));
         return (int) Math.Ceiling(seconds);

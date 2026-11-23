@@ -480,12 +480,22 @@ public sealed class WGShipHeatTest
             Assert.That(state.CanVent, Is.False, "A cold hull has nothing to vent.");
 
             var hull = entities.GetComponent<WGShipHeatComponent>(grid);
+            var cold = new GetThermalSignatureEvent();
+            entities.EventBus.RaiseLocalEvent(grid, ref cold);
             system.AddWolfgateShipHeat(grid, hull.Capacity / 2f);
             state = controls.GetState(grid);
             Assert.That(state.Heat, Is.EqualTo(0.5f).Within(0.001f));
             Assert.That(state.CanVent, Is.True);
+            var hot = new GetThermalSignatureEvent();
+            entities.EventBus.RaiseLocalEvent(grid, ref hot);
+            Assert.That(hull.HeatSignature, Is.GreaterThan(0f));
+            Assert.That(hot.Signature - cold.Signature, Is.EqualTo(hull.Heat * hull.HeatSignature).Within(1f),
+                "A hot hull glows on long-range sensors by the heat it holds.");
             Assert.That(system.StartWolfgateVent(grid), Is.True);
             Assert.That(entities.HasComponent<WGShipVentingComponent>(grid), Is.True);
+            var venting = new GetThermalSignatureEvent();
+            entities.EventBus.RaiseLocalEvent(grid, ref venting);
+            Assert.That(venting.Signature - hot.Signature, Is.EqualTo(hull.VentSignature).Within(1f), "A vent flares on top of the heat.");
             var rate = hull.Dissipation * ShipShieldsSystem.WolfgateVentBonus(hull.VentBonus);
             Assert.That(rate, Is.GreaterThan(hull.Dissipation * hull.VentBonus), "A vent beats the hull's fast rate.");
             Assert.That(controls.GetState(grid).VentSeconds, Is.EqualTo((int) MathF.Ceiling(hull.Heat / rate)));
