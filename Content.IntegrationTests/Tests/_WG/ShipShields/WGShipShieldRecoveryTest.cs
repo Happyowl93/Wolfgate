@@ -88,7 +88,8 @@ public sealed class WGShipShieldRecoveryTest
         await server.WaitAssertion(() =>
         {
             var slowUid = entities.SpawnEntity("ShieldGeneratorSmall", map.GridCoords);
-            var fastUid = entities.SpawnEntity("ShieldGeneratorSmall", map.GridCoords);
+            // Nothing new bolts down beside a generator; a hull saved with two still carries both.
+            var fastUid = WGShipShieldLimitTest.SpawnSavedGenerator(entities, "ShieldGeneratorSmall", map.GridCoords);
             Assert.That(entities.GetComponent<TransformComponent>(slowUid).Anchored, Is.True);
             Assert.That(entities.GetComponent<TransformComponent>(fastUid).Anchored, Is.True);
             var slow = entities.GetComponent<ShipShieldEmitterComponent>(slowUid);

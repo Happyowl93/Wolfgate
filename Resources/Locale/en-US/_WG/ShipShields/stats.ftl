@@ -11,3 +11,5 @@ wg-shield-examine-arc = Field arc: { $arc }° at most. Everything outside the ar
 wg-shield-examine-cost = While raised: { $thrust }% less thrust, { $turn }% slower turning, and a hotter trace on long-range sensors that flares with every hit.
 wg-shield-examine-gun-lock = A field overrun by heat collapses and locks the ship's guns for { $seconds } seconds. Lowering it yourself does not.
 wg-shield-examine-cooling = Cooling: { $online } heat/s, or { $offline } heat/s while venting. Heat the raised field absorbed stays until { $hold } seconds pass without a hit, the field is lowered or the ship vents.
+wg-shield-examine-one-per-ship = A ship takes one shield generator; it will not bolt down beside another.
+wg-shield-limit-anchor-fail = This ship already has { $generator } bolted down. A ship takes one shield generator.

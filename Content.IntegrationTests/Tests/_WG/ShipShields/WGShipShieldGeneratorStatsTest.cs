@@ -22,7 +22,8 @@ public sealed class WGShipShieldGeneratorStatsTest
         {
             var entities = server.EntMan;
             var standby = entities.SpawnEntity("ShieldGeneratorSmall", map.GridCoords);
-            var active = entities.SpawnEntity("ShieldGeneratorMedium", map.GridCoords);
+            // Nothing new bolts down beside a generator; a hull saved with two still carries both.
+            var active = WGShipShieldLimitTest.SpawnSavedGenerator(entities, "ShieldGeneratorMedium", map.GridCoords);
             var standbyEmitter = entities.GetComponent<ShipShieldEmitterComponent>(standby);
             standbyEmitter.Recharging = true;
             standbyEmitter.Damage = 1000f;
@@ -53,6 +54,7 @@ public sealed class WGShipShieldGeneratorStatsTest
             Assert.That(description, Does.Contain("Heat capacity:"));
             Assert.That(description, Does.Contain("heat/s while venting"), "A ship generator's fast rate is its vent.");
             Assert.That(description, Does.Not.Contain("Firing through"), "Gun heat is the hull's, not a generator's.");
+            Assert.That(description, Does.Contain("one shield generator"), "A ship generator says it is the only one a ship takes.");
         });
         await pair.RunTicksSync(1);
         await pair.CleanReturnAsync();

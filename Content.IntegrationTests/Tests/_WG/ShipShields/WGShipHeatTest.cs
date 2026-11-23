@@ -518,7 +518,8 @@ public sealed class WGShipHeatTest
             entities.GetComponent<ApcPowerReceiverComponent>(activeUid).Powered = true;
             system.Update(1.5f);
             Assert.That(active.Shield, Is.Not.Null);
-            var spareUid = entities.SpawnEntity("ShieldGeneratorSmall", map.GridCoords);
+            // Nothing new bolts down beside a generator; a hull saved with two still carries both.
+            var spareUid = WGShipShieldLimitTest.SpawnSavedGenerator(entities, "ShieldGeneratorSmall", map.GridCoords);
             var spare = entities.GetComponent<ShipShieldEmitterComponent>(spareUid);
             entities.GetComponent<ApcPowerReceiverComponent>(spareUid).Powered = false;
 

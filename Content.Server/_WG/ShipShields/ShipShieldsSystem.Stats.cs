@@ -58,5 +58,7 @@ public sealed partial class ShipShieldsSystem
         }
         if (stats.GunLockSeconds > 0f)
             args.PushMarkup(Loc.GetString("wg-shield-examine-gun-lock", ("seconds", MathF.Round(stats.GunLockSeconds, 1))));
+        if (HasComp<WGShipShieldCostComponent>(uid))
+            args.PushMarkup(Loc.GetString("wg-shield-examine-one-per-ship"));
     }
 }
