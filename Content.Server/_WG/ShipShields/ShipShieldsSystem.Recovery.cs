@@ -44,10 +44,14 @@ public sealed partial class ShipShieldsSystem
         var overload = emitter.OverloadAccumulator;
         var recharging = emitter.Recharging;
         var elapsed = Math.Max(0f, EmitterUpdateRate - emitter.Accumulator);
+        var capacity = WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp);
         var status = WGShipShieldRecoveryStatus.Ready;
         if (!float.IsFinite(damage) || !float.IsFinite(overload) || !float.IsFinite(elapsed) ||
             !float.IsFinite(emitter.MaxDraw) || emitter.MaxDraw < 0f)
             return (WGShipShieldRecoveryStatus.Ready, -1);
+        // The hull's heat stops at the ship's capacity, which is the generator's own in its range; with the field down the excess is lost.
+        if (ship)
+            damage = MathF.Min(damage, capacity);
 
         // Bound malformed or impractically long configurations without blocking UI updates.
         for (var tick = 0; tick < 2400; tick++)
@@ -93,6 +97,16 @@ public sealed partial class ShipShieldsSystem
             elapsed += EmitterUpdateRate;
         }
         return (status, -1);
+    }
+
+    /// <summary>Seconds until an overloaded generator's wait ends at an update tick; 0 when it isn't overloaded.</summary>
+    public static float WolfgateOverloadSeconds(ShipShieldEmitterComponent emitter)
+    {
+        if (!(emitter.OverloadAccumulator > 0f) || !float.IsFinite(emitter.OverloadAccumulator))
+            return 0f;
+        // The wait drops by one tick's worth each tick and is over once below a second.
+        var ticks = emitter.OverloadAccumulator < 1f ? 1f : MathF.Floor((emitter.OverloadAccumulator - 1f) / EmitterUpdateRate) + 1f;
+        return MathF.Max(0f, EmitterUpdateRate - emitter.Accumulator) + (ticks - 1f) * EmitterUpdateRate;
     }
 
     /// <summary>The power a generator would draw for its damage at the given heat.</summary>

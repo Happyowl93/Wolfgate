@@ -563,6 +563,33 @@ public sealed class WGShipHeatTest
         emitter.Damage = heat * entities.System<ShipShieldsSystem>().WolfgateGeneratorShare(uid, emitter);
     }
 
+    [TestCase("SandboxHEMissile")]
+    [TestCase("MissileCartridge250mm")]
+    [TestCase("VanykCartridgeUnguided")]
+    public async Task FiringMissilesHeatsNothing(string missile)
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var map = await pair.CreateTestMap();
+        await pair.Server.WaitAssertion(() =>
+        {
+            var entities = pair.Server.EntMan;
+            var grid = map.Grid.Owner;
+            var gun = entities.SpawnEntity("WeaponTurretL85Autocannon", map.GridCoords);
+            var user = entities.SpawnEntity(null, map.GridCoords);
+            var cartridge = entities.SpawnEntity(missile, map.GridCoords);
+            var shot = entities.GetComponent<CartridgeAmmoComponent>(cartridge).Prototype;
+            Assert.That(pair.Server.ResolveDependency<IPrototypeManager>().Index(shot).TryGetComponent<WGShipMissileComponent>(out _, entities.ComponentFactory),
+                Is.True, $"{shot} is marked as a missile.");
+
+            Fire(entities, gun, user, cartridge);
+            Assert.That(Heat(entities, grid), Is.Zero, "A ship's own missiles add no heat.");
+            var (round, _) = Round(pair.Server.ResolveDependency<IPrototypeManager>(), entities.ComponentFactory);
+            Fire(entities, gun, user, entities.SpawnEntity(round, map.GridCoords));
+            Assert.That(Heat(entities, grid), Is.GreaterThan(0f), "Its guns still do.");
+        });
+        await pair.CleanReturnAsync();
+    }
+
     /// <summary>A plain cartridge and the damage of the round it fires.</summary>
     private static (string Cartridge, float Damage) Round(IPrototypeManager prototypes, IComponentFactory factory)
     {

@@ -71,12 +71,17 @@ public sealed partial class ShipShieldsSystem
     /// <summary>Locks a ship's guns after damage beat its field down, sets them sparking, and tells whoever is at its gunnery consoles.</summary>
     private void LockWolfgateShieldGuns(EntityUid grid, EntityUid emitter)
     {
-        if (!TryComp<WGShipShieldCostComponent>(emitter, out var cost) || cost.GunLockout <= 0f)
+        if (!TryComp<WGShipShieldCostComponent>(emitter, out var cost))
+            return;
+        // The guns stay locked through the whole overload, as an overloaded ship can't fire in Starsector.
+        var seconds = MathF.Max(cost.GunLockout,
+            TryComp<ShipShieldEmitterComponent>(emitter, out var shield) ? WolfgateOverloadSeconds(shield) : 0f);
+        if (seconds <= 0f)
             return;
         var now = _wgShieldTiming.CurTime;
         foreach (var expired in _wgGunLocks.Where(l => l.Value <= now).Select(l => l.Key).ToArray())
             _wgGunLocks.Remove(expired);
-        _wgGunLocks[grid] = now + TimeSpan.FromSeconds(cost.GunLockout);
+        _wgGunLocks[grid] = now + TimeSpan.FromSeconds(seconds);
 
         if (cost.GunLockEffect is { } effect)
         {
@@ -86,31 +91,40 @@ public sealed partial class ShipShieldsSystem
                 if (gunTransform.GridUid != grid || !gunTransform.Anchored)
                     continue;
                 var sparks = Spawn(effect, new EntityCoordinates(gun, Vector2.Zero));
-                EnsureComp<TimedDespawnComponent>(sparks).Lifetime = cost.GunLockout;
+                EnsureComp<TimedDespawnComponent>(sparks).Lifetime = seconds;
             }
         }
 
         PopupWolfgateShipConsoles(grid,
-            Loc.GetString("wg-shield-gun-lock-popup", ("seconds", MathF.Round(cost.GunLockout, 1))), PopupType.LargeCaution);
+            Loc.GetString("wg-shield-gun-lock-popup", ("seconds", MathF.Ceiling(seconds))), PopupType.LargeCaution);
     }
 
-    /// <summary>Whole seconds until a ship's guns unlock after a field collapse; 0 when they are free.</summary>
+    /// <summary>
+    /// Whole seconds until a ship's guns unlock after a field collapse; 0 when they are free. They stay locked for as
+    /// long as the ship's generator waits out its overload, and at least its <c>gunLockout</c>.
+    /// </summary>
     public int GetWolfgateGunLockSeconds(EntityUid grid)
     {
-        if (!_wgGunLocks.TryGetValue(grid, out var until))
-            return 0;
-        var left = until - _wgShieldTiming.CurTime;
-        if (left > TimeSpan.Zero)
-            return (int) Math.Ceiling(left.TotalSeconds);
-        _wgGunLocks.Remove(grid);
-        return 0;
+        var seconds = 0d;
+        if (_wgGunLocks.TryGetValue(grid, out var until))
+        {
+            var left = until - _wgShieldTiming.CurTime;
+            if (left > TimeSpan.Zero)
+                seconds = left.TotalSeconds;
+            else
+                _wgGunLocks.Remove(grid);
+        }
+        if (TryComp<WGShipHeatComponent>(grid, out var hull) && hull.Cooler is { } cooler && HasComp<WGShipShieldCostComponent>(cooler) &&
+            TryComp<ShipShieldEmitterComponent>(cooler, out var emitter) && Transform(cooler).GridUid == grid)
+            seconds = Math.Max(seconds, WolfgateOverloadSeconds(emitter));
+        return (int) Math.Ceiling(seconds);
     }
 
     private void OnWolfgateLockedGunShoot(Entity<FireControllableComponent> gun, ref AttemptShootEvent args)
     {
         if (args.Cancelled || Transform(gun).GridUid is not { } grid)
             return;
-        if (IsWolfgateShipVenting(grid) || _wgGunLocks.Count > 0 && GetWolfgateGunLockSeconds(grid) > 0 || IsWolfgateShipHeatHeld(grid))
+        if (IsWolfgateShipVenting(grid) || GetWolfgateGunLockSeconds(grid) > 0 || IsWolfgateShipHeatHeld(grid))
             args.Cancelled = true;
     }
 }

@@ -80,10 +80,14 @@ public sealed class WGShipShieldRecoveryTest
             Assert.That(emitter.DamageOverloadTimePunishment, Is.EqualTo(wait));
 
             // The Sentinel collapses past its overload limit, the Aegis at its power cap; both wait out the same rule.
-            shields.AddWolfgateShipHeat(grid, shields.GetWolfgateShipHeat(grid).Capacity * 1.05f);
+            // A hit many times the ship's capacity costs one overload; the heat stops at capacity.
+            var capacity = shields.GetWolfgateShipHeat(grid).Capacity;
+            shields.AddWolfgateShipHeat(grid, capacity * 18f);
             shields.Update(1.5f);
             Assert.That(emitter.Shield, Is.Null);
+            Assert.That(shields.GetWolfgateShipHeat(grid).Heat, Is.LessThanOrEqualTo(capacity * 1.001f), "Heat stops at the ship's capacity.");
             Assert.That(emitter.OverloadAccumulator, Is.GreaterThan(wait - 2f), "Any collapse of a ship generator starts its overload wait.");
+            Assert.That(shields.StartWolfgateVent(grid), Is.False, "An overloaded ship can't vent its heat away during the wait.");
             var estimate = ShipShieldsSystem.EstimateWolfgateShieldRecovery(emitter, true, ship: true,
                 share: shields.WolfgateGeneratorShare(uid, emitter), hullCooling: shields.WolfgateHullCooling(uid));
 
@@ -97,6 +101,7 @@ public sealed class WGShipShieldRecoveryTest
             Assert.That(elapsed, Is.InRange(wait - 3f, wait + 4.5f), "The field returns after the overload wait.");
             Assert.That(estimate.Seconds, Is.EqualTo((int) Math.Ceiling(elapsed)), "The panel's countdown follows the same rule.");
             Assert.That(shields.GetWolfgateShipHeat(grid).Heat, Is.GreaterThan(0f), "The field comes back with its heat left, not at zero.");
+            Assert.That(shields.CanWolfgateVent(grid), Is.True, "Once the overload ends the ship can vent again.");
         });
         await pair.RunTicksSync(1);
         await pair.CleanReturnAsync();

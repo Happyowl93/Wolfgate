@@ -21,7 +21,8 @@ public sealed partial class ShipShieldsSystem
         {
             ThrustFactor = cost == null ? 1f : Math.Clamp(cost.ThrustFactor, MinShieldMobility, 1f),
             TurnFactor = cost == null ? 1f : Math.Clamp(cost.TurnFactor, MinShieldMobility, 1f),
-            GunLockSeconds = MathF.Max(0f, cost?.GunLockout ?? 0f),
+            // A ship generator's collapse always waits out its overload, and the guns stay locked through it.
+            GunLockSeconds = cost == null ? 0f : MathF.Max(0f, MathF.Max(cost.GunLockout, emitter.DamageOverloadTimePunishment)),
             HardHeatHold = MathF.Max(0f, cost?.HardHeatHold ?? 0f),
             Vents = cost != null,
             HullCooling = hullCooling,

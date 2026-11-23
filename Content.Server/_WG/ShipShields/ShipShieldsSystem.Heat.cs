@@ -27,6 +27,9 @@ public sealed partial class ShipShieldsSystem
     /// <summary>Shield damage of one shot of each projectile prototype.</summary>
     private readonly Dictionary<string, float> _wgShotDamage = new();
 
+    /// <summary>Whether each projectile prototype is a missile.</summary>
+    private readonly Dictionary<string, bool> _wgMissiles = new();
+
     /// <summary>Ships too hot to fire.</summary>
     private readonly HashSet<EntityUid> _wgHeatHeld = new();
 
@@ -157,8 +160,25 @@ public sealed partial class ShipShieldsSystem
                 hull.Hard += damage / share - hull.Heat;
             hull.Heat = damage / share;
         }
+        if (ship)
+            CapWolfgateShipHeat(grid, hull, uid, emitter);
         emitter.Damage = hull.Heat * share;
         _wgHeatSinks[uid] = (grid, emitter.Damage);
+    }
+
+    /// <summary>
+    /// Stops a ship's heat at its capacity, as Starsector stops flux. A raised field taken past it overloads, however
+    /// big the hit; with the field already down the excess is simply lost.
+    /// </summary>
+    private void CapWolfgateShipHeat(EntityUid grid, WGShipHeatComponent hull, EntityUid uid, ShipShieldEmitterComponent emitter)
+    {
+        var capacity = WolfgateShipCapacity(grid, uid, emitter);
+        if (capacity <= 0f || hull.Heat <= capacity)
+            return;
+        hull.Heat = capacity;
+        hull.Hard = MathF.Min(hull.Hard, hull.Heat);
+        if (emitter.Shield != null)
+            emitter.OverloadAccumulator = MathF.Max(emitter.OverloadAccumulator, emitter.DamageOverloadTimePunishment);
     }
 
     /// <summary>
@@ -213,6 +233,12 @@ public sealed partial class ShipShieldsSystem
             // A bare hull's capacity comes from its size, so it is measured the first time anything asks.
             if (hull == null && !TerminatingOrDeleted(grid) && HasComp<MapGridComponent>(grid))
                 hull = AddComp<WGShipHeatComponent>(grid);
+            // A hull that lost tiles holds less; what no longer fits is lost.
+            if (hull != null && hull.Heat > WolfgateHullCapacity(grid, hull))
+            {
+                hull.Heat = hull.Capacity;
+                hull.Hard = MathF.Min(hull.Hard, hull.Heat);
+            }
             return (hull?.Heat ?? 0f, hull?.Capacity ?? WGShipHeatComponent.HullCapacity);
         }
         return (hull?.Heat ?? 0f, WolfgateShipCapacity(grid, uid, Comp<ShipShieldEmitterComponent>(uid)));
@@ -322,7 +348,10 @@ public sealed partial class ShipShieldsSystem
             return;
         var damage = 0f;
         foreach (var (uid, shootable) in args.Ammo)
-            damage += WolfgateShotDamage(gun, uid, shootable);
+        {
+            if (!IsWolfgateMissileShot(uid, shootable))
+                damage += WolfgateShotDamage(gun, uid, shootable);
+        }
         // It stops at the hold mark, so a ship's own fire never collapses its field.
         AddWolfgateShipHeat(grid, damage * hull.FireHeat, WGShipShieldEffects.GunHoldHeat);
     }
@@ -340,6 +369,21 @@ public sealed partial class ShipShieldsSystem
         }
         return uid is { } shot && !Deleted(shot) && MetaData(shot).EntityPrototype is { } prototype
             ? WolfgatePrototypeShotDamage(prototype.ID) : 0f;
+    }
+
+    /// <summary>Whether a shot is a missile or rocket, which heats nothing when fired.</summary>
+    private bool IsWolfgateMissileShot(EntityUid? uid, IShootable shootable)
+    {
+        var id = shootable is CartridgeAmmoComponent cartridge ? cartridge.Prototype.Id
+            : uid is { } shot && !Deleted(shot) ? MetaData(shot).EntityPrototype?.ID : null;
+        if (id == null)
+            return false;
+        if (!_wgMissiles.TryGetValue(id, out var missile))
+        {
+            missile = _prototypeManager.TryIndex<EntityPrototype>(id, out var prototype) && prototype.TryGetComponent<WGShipMissileComponent>(out _, _wgHeatFactory);
+            _wgMissiles[id] = missile;
+        }
+        return missile;
     }
 
     /// <summary>Projectile, beam and explosive damage of one shot of a prototype, times its pellets.</summary>

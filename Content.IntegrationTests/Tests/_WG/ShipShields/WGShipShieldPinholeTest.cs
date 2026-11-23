@@ -114,8 +114,18 @@ public sealed class WGShipShieldPinholeTest
             {
                 absorbedExplosive = explosive;
                 Assert.That(projectile.ProjectileSpent, Is.True);
-                Assert.That(system.GetWolfgateShipHeat(map.Grid.Owner).Heat, Is.EqualTo(expectedDamage).Within(MathF.Max(0.01f, expectedDamage * 0.00001f)),
-                    "Direct and explosive damage must charge exactly once.");
+                // Heat stops at the ship's capacity, and a raised field taken past it overloads.
+                var heat = system.GetWolfgateShipHeat(map.Grid.Owner);
+                if (expectedDamage > heat.Capacity)
+                {
+                    Assert.That(heat.Heat, Is.EqualTo(heat.Capacity).Within(heat.Capacity * 0.00001f), "Heat stops at the ship's capacity.");
+                    Assert.That(emitter.OverloadAccumulator, Is.GreaterThan(0f), "A hit past capacity overloads the field.");
+                }
+                else
+                {
+                    Assert.That(heat.Heat, Is.EqualTo(expectedDamage).Within(MathF.Max(0.01f, expectedDamage * 0.00001f)),
+                        "Direct and explosive damage must charge exactly once.");
+                }
             }
             else
                 Assert.That(emitter.Damage, Is.Zero);

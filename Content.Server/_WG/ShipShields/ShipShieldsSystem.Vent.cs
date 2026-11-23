@@ -60,14 +60,23 @@ public sealed partial class ShipShieldsSystem
         return _wgVenting.Contains(grid) && TryComp<WGShipHeatComponent>(grid, out var hull) && hull.Venting;
     }
 
-    /// <summary>Whether a ship's crew can start a vent: it holds heat, isn't venting, and no outpost generator rules its hull.</summary>
+    /// <summary>
+    /// Whether a ship's crew can start a vent: it holds heat, isn't venting, no outpost generator rules its hull and
+    /// its generator isn't waiting out an overload.
+    /// </summary>
     public bool CanWolfgateVent(EntityUid grid)
     {
         if (TerminatingOrDeleted(grid) || !HasComp<MapGridComponent>(grid))
             return false;
         var generator = SyncWolfgateShipHeat(grid);
         return TryComp<WGShipHeatComponent>(grid, out var hull) && !hull.Venting && hull.Heat > 0f &&
-            (generator is not { } uid || HasComp<WGShipShieldCostComponent>(uid));
+            (generator is not { } uid || HasComp<WGShipShieldCostComponent>(uid) && !IsWolfgateOverloaded(uid));
+    }
+
+    /// <summary>Whether a generator is waiting out an overload; as in Starsector, an overloaded ship can't vent.</summary>
+    public bool IsWolfgateOverloaded(EntityUid generator)
+    {
+        return TryComp<ShipShieldEmitterComponent>(generator, out var emitter) && emitter.OverloadAccumulator > 0f;
     }
 
     /// <summary>
