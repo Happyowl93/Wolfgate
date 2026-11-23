@@ -32,12 +32,45 @@ public sealed class WGShipDuelTest
     private const float Step = 0.25f;
     private const float Gap = 40f;
 
-    [TestCase("TSF/banshee", "TSF/cinquedea")]
-    [TestCase("TSF/mercury", "PDV/layak")]
-    [TestCase("TSF/polaris", "TSF/luda")]
-    [TestCase("PDV/kresta", "TSF/dagger")]
-    [TestCase("PDV/osa", "TSF/paladin")]
-    public async Task Duel(string first, string second)
+    private static readonly object[] Pairs =
+    {
+        new object[] { "TSF/banshee", "TSF/cinquedea" },
+        new object[] { "TSF/mercury", "PDV/layak" },
+        new object[] { "TSF/polaris", "TSF/luda" },
+        new object[] { "PDV/kresta", "TSF/dagger" },
+        new object[] { "PDV/osa", "TSF/paladin" },
+        // Faction matchups by class: TSF against PDV, and the civilian military hulls.
+        new object[] { "TSF/qj271", "PDV/kynda" },
+        new object[] { "TSF/seax", "PDV/gadfly" },
+        new object[] { "TSF/paladin", "PDV/ontos" },
+        new object[] { "TSF/ocelot", "PDV/kresta" },
+        new object[] { "CivilianMil/qj270", "CivilianMil/qj490" },
+        new object[] { "CivilianMil/talon", "TSF/shiv" },
+        new object[] { "CivilianMil/sellsword", "TSF/xiphos" },
+        new object[] { "TSF/banshee", "PDV/tethys" },
+        new object[] { "TSF/fracture", "CivilianMil/femur" },
+        new object[] { "TSF/dagger", "CivilianMil/kunai" },
+        new object[] { "TSF/mercury", "PDV/neptune" },
+        new object[] { "TSF/polaris", "PDV/kortik_r" },
+        new object[] { "CivilianMil/xinhua", "PDV/osa" },
+        new object[] { "TSF/luda", "PDV/scorpion" },
+    };
+
+    [TestCaseSource(nameof(Pairs))]
+    public Task Duel(string first, string second)
+    {
+        return Run(first, second, 0f);
+    }
+
+    /// <summary>The same duels with a bare hull's built-in sink scaled by its tiles instead of flat.</summary>
+    [TestCaseSource(nameof(Pairs))]
+    public Task DuelTileSink(string first, string second)
+    {
+        return Run(first, second, 70f);
+    }
+
+    /// <summary>Runs one duel; a <paramref name="sinkPerTile"/> above 0 sets each hull's sink to that much per tile.</summary>
+    private static async Task Run(string first, string second, float sinkPerTile)
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
         var server = pair.Server;
@@ -100,7 +133,12 @@ public sealed class WGShipDuelTest
         await server.WaitPost(() =>
         {
             foreach (var ship in ships)
+            {
                 ship.Tiles = CountTiles(entities, ship.Grid);
+                if (sinkPerTile > 0f)
+                    entities.EnsureComponent<WGShipHeatComponent>(ship.Grid).SinkCapacity = ship.Tiles * sinkPerTile;
+                ship.Capacity = shields.GetWolfgateShipHeat(ship.Grid).Capacity;
+            }
         });
 
         var log = new StringBuilder("t,ship,heat,hard,field,venting,held,locked\n");
@@ -155,12 +193,13 @@ public sealed class WGShipDuelTest
                 ship.TilesLeft = entities.Deleted(ship.Grid) ? 0 : CountTiles(entities, ship.Grid);
         });
 
-        var summary = new StringBuilder($"{ships[0].Name} vs {ships[1].Name}, {Seconds} s\n");
+        var variant = sinkPerTile > 0f ? $"sink {sinkPerTile}/tile" : "flat sink";
+        var summary = new StringBuilder($"{ships[0].Name} vs {ships[1].Name}, {Seconds} s, {variant}\n");
         foreach (var ship in ships)
             summary.AppendLine(ship.Summary());
         var dir = Path.Combine(TestContext.CurrentContext.WorkDirectory, "ship_duels");
         Directory.CreateDirectory(dir);
-        var stem = Path.Combine(dir, $"{ships[0].Name}_vs_{ships[1].Name}");
+        var stem = Path.Combine(dir, $"{ships[0].Name}_vs_{ships[1].Name}{(sinkPerTile > 0f ? "_tilesink" : "")}");
         await File.WriteAllTextAsync(stem + ".csv", log.ToString());
         await File.WriteAllTextAsync(stem + ".txt", summary.ToString());
         TestContext.Out.WriteLine(summary.ToString());
@@ -209,7 +248,10 @@ public sealed class WGShipDuelTest
         if (venting)
             ship.VentSeconds++;
         if (held)
+        {
             ship.HeldSeconds++;
+            ship.FirstHeld ??= time;
+        }
         if (locked)
             ship.LockedSeconds++;
         if (!venting && !held && !locked)
@@ -226,7 +268,8 @@ public sealed class WGShipDuelTest
         public readonly List<float> Returns = new();
         public EntityUid? Generator;
         public int Tiles, TilesLeft, Volleys, Collapses, Lowered, Vents, VentSeconds, HeldSeconds, LockedSeconds, FreeSeconds, FieldDown;
-        public float? FirstCollapse;
+        public float? FirstCollapse, FirstHeld;
+        public float Capacity;
         public float PeakHeat;
         public bool Field = true, Venting;
 
@@ -241,7 +284,8 @@ public sealed class WGShipDuelTest
             var returns = Returns.Count == 0 ? "none" : string.Join(" ", Returns.Select(r => $"{r:P0}"));
             return $"  {Name}: {Guns.Count} guns, {Volleys} trigger pulls; generator {(Generator == null ? "none" : "yes")}; " +
                 $"first collapse {(FirstCollapse is { } t ? $"{t:0} s" : "never")}, {Collapses} collapses, {Lowered} lowered to vent, field down {FieldDown} s, " +
-                $"returned at heat {returns}; {Vents} vents ({VentSeconds} s); guns held by heat {HeldSeconds} s, locked {LockedSeconds} s, " +
+                $"returned at heat {returns}; {Vents} vents ({VentSeconds} s); capacity {Capacity:0}; guns held by heat {HeldSeconds} s " +
+                $"(first {(FirstHeld is { } h ? $"{h:0} s" : "never")}), locked {LockedSeconds} s, " +
                 $"free {FreeSeconds} s; peak heat {PeakHeat:P0}; tiles {Tiles} -> {TilesLeft}";
         }
     }

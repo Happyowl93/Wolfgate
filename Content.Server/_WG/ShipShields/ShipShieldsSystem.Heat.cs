@@ -498,16 +498,22 @@ public sealed partial class ShipShieldsSystem
                 damage += (float) projectile.Damage.GetTotal();
             if (prototype.TryGetComponent<HitscanBasicDamageComponent>(out var beam, _wgHeatFactory))
                 damage += (float) beam.Damage.GetTotal();
-            // A blast counts at its peak tile, not summed over every tile it spreads to.
-            if (prototype.TryGetComponent<ExplosiveComponent>(out var explosive, _wgHeatFactory) &&
-                _prototypeManager.TryIndex(explosive.ExplosionType, out var type))
-                damage += MathF.Min(explosive.MaxIntensity, explosive.TotalIntensity) * (float) type.DamagePerIntensity.GetTotal();
+            if (prototype.TryGetComponent<ExplosiveComponent>(out var explosive, _wgHeatFactory))
+                damage += WolfgateBlastDamage(explosive);
             if (prototype.TryGetComponent<ProjectileSpreadComponent>(out var spread, _wgHeatFactory))
                 damage *= Math.Max(1, spread.Count);
         }
         damage = float.IsFinite(damage) ? MathF.Max(0f, damage) : 0f;
         _wgShotDamage[id] = damage;
         return damage;
+    }
+
+    /// <summary>A blast's damage as ship heat counts it, fired or absorbed (<see cref="WGShipShieldEffects.BlastDamage"/>).</summary>
+    public float WolfgateBlastDamage(ExplosiveComponent explosive)
+    {
+        return _prototypeManager.TryIndex(explosive.ExplosionType, out var type)
+            ? WGShipShieldEffects.BlastDamage(explosive.TotalIntensity, explosive.MaxIntensity, (float) type.DamagePerIntensity.GetTotal())
+            : 0f;
     }
 
     /// <summary>Cools hulls with no generator at their own rate; a generator does the cooling for the hull it sits on.</summary>

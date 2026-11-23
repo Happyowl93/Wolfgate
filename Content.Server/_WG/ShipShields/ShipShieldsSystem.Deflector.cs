@@ -102,8 +102,7 @@ public sealed partial class ShipShieldsSystem
         projectile.Damage = projectile.Damage * (1f - reduction);
         if (TryComp<ExplosiveComponent>(uid, out var explosive))
         {
-            if (_prototypeManager.TryIndex(explosive.ExplosionType, out var type))
-                removed += explosive.TotalIntensity * (float) type.DamagePerIntensity.GetTotal() * reduction;
+            removed += WolfgateBlastDamage(explosive) * reduction;
             // Scaling all three weakens the blast on every tile over the same footprint; the total alone only shrinks it.
             explosive.TotalIntensity *= 1f - reduction;
             if (reduction < 1f)

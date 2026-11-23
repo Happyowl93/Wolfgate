@@ -63,7 +63,7 @@ public sealed class WGShipShieldDeflectorTest
             var intensity = explosive.TotalIntensity;
             var peak = explosive.MaxIntensity;
             var slope = explosive.IntensitySlope;
-            var blast = intensity * (float) prototypes.Index<ExplosionPrototype>(explosive.ExplosionType).DamagePerIntensity.GetTotal();
+            var blast = WGShipShieldEffects.BlastDamage(intensity, peak, (float) prototypes.Index<ExplosionPrototype>(explosive.ExplosionType).DamagePerIntensity.GetTotal());
             projectiles.ProjectileCollide((shellUid, shell, shellBody), shield);
             Assert.That(shell.ProjectileSpent, Is.False);
             Assert.That(entities.IsQueuedForDeletion(shellUid), Is.False);

@@ -58,7 +58,10 @@ public partial class ShipShieldsSystem
 
         if (TryComp<ExplosiveComponent>(args.Deflected, out var exp) && _prototypeManager.TryIndex(exp.ExplosionType, out var type))
         {
-            component.Damage += exp.TotalIntensity * (float)type.DamagePerIntensity.GetTotal();
+            // WOLFGATE(ShipShields) START: a blast charges the field at its peak tile, as it heats the ship that fired it
+            // component.Damage += exp.TotalIntensity * (float)type.DamagePerIntensity.GetTotal();
+            component.Damage += WolfgateBlastDamage(exp);
+            // WOLFGATE END
         }
 
         component.Damage += (float)args.Projectile.Damage.GetTotal();
