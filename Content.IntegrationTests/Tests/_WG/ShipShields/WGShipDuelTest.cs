@@ -141,7 +141,7 @@ public sealed class WGShipDuelTest
             }
         });
 
-        var log = new StringBuilder("t,ship,heat,hard,field,venting,held,locked\n");
+        var log = new StringBuilder("t,ship,heat,hard,field,venting,held,locked,generator,tiles\n");
         var steps = (int) (Seconds / Step);
         for (var step = 0; step < steps; step++)
         {
@@ -257,7 +257,13 @@ public sealed class WGShipDuelTest
         if (!venting && !held && !locked)
             ship.FreeSeconds++;
         ship.PeakHeat = MathF.Max(ship.PeakHeat, share);
-        log.Append($"{time:0},{ship.Name},{share:0.000},{(capacity > 0f ? hard / capacity : 0f):0.000},{(field ? 1 : 0)},{(venting ? 1 : 0)},{(held ? 1 : 0)},{(locked ? 1 : 0)}\n");
+        // A generator shot off its hull or destroyed no longer reads as a collapse, so it is logged on its own.
+        var generatorAlive = ship.Generator is { } installed && !entities.Deleted(installed) &&
+            entities.GetComponent<TransformComponent>(installed) is { Anchored: true } placed && placed.GridUid == ship.Grid;
+        if (ship.Generator != null && !generatorAlive)
+            ship.GeneratorLost ??= time;
+        var tiles = CountTiles(entities, ship.Grid);
+        log.Append($"{time:0},{ship.Name},{share:0.000},{(capacity > 0f ? hard / capacity : 0f):0.000},{(field ? 1 : 0)},{(venting ? 1 : 0)},{(held ? 1 : 0)},{(locked ? 1 : 0)},{(generatorAlive ? 1 : 0)},{tiles}\n");
     }
 
     private sealed class Ship
@@ -268,7 +274,7 @@ public sealed class WGShipDuelTest
         public readonly List<float> Returns = new();
         public EntityUid? Generator;
         public int Tiles, TilesLeft, Volleys, Collapses, Lowered, Vents, VentSeconds, HeldSeconds, LockedSeconds, FreeSeconds, FieldDown;
-        public float? FirstCollapse, FirstHeld;
+        public float? FirstCollapse, FirstHeld, GeneratorLost;
         public float Capacity;
         public float PeakHeat;
         public bool Field = true, Venting;
@@ -282,7 +288,7 @@ public sealed class WGShipDuelTest
         public string Summary()
         {
             var returns = Returns.Count == 0 ? "none" : string.Join(" ", Returns.Select(r => $"{r:P0}"));
-            return $"  {Name}: {Guns.Count} guns, {Volleys} trigger pulls; generator {(Generator == null ? "none" : "yes")}; " +
+            return $"  {Name}: {Guns.Count} guns, {Volleys} trigger pulls; generator {(Generator == null ? "none" : GeneratorLost is { } lost ? $"lost at {lost:0} s" : "yes")}; " +
                 $"first collapse {(FirstCollapse is { } t ? $"{t:0} s" : "never")}, {Collapses} collapses, {Lowered} lowered to vent, field down {FieldDown} s, " +
                 $"returned at heat {returns}; {Vents} vents ({VentSeconds} s); capacity {Capacity:0}; guns held by heat {HeldSeconds} s " +
                 $"(first {(FirstHeld is { } h ? $"{h:0} s" : "never")}), locked {LockedSeconds} s, " +
