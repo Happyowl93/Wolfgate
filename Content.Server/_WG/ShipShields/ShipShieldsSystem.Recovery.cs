@@ -25,7 +25,8 @@ public sealed partial class ShipShieldsSystem
 
     /// <summary>
     /// Estimates automatic startup with unchanged power and no further damage. A ship's generator cools at its fast
-    /// rate only while the ship vents, and a vent holds the field down until no heat is left. Cooling is the ship's, so
+    /// rate only while the ship vents, and a vent holds the field down until no heat is left; otherwise its field is
+    /// down while it waits, so it cools at the field-down rate. Cooling is the ship's, so
     /// the generator's damage falls by its <paramref name="share"/> of it, and <paramref name="hullCooling"/> is what
     /// the hull adds to the generator's rate.
     /// </summary>
@@ -66,8 +67,11 @@ public sealed partial class ShipShieldsSystem
             if (ship && capped)
                 overload = MathF.Max(overload, emitter.DamageOverloadTimePunishment);
             var healed = (emitter.HealPerSecond + hullCooling) * EmitterUpdateRate;
-            if (ship ? venting : recharging)
-                healed *= ship ? WolfgateVentBonus(emitter.UnpoweredBonus) : emitter.UnpoweredBonus;
+            // A ship generator still waiting has its field down, so it cools at the field-down rate when not venting.
+            if (ship)
+                healed *= venting ? WolfgateVentBonus(emitter.UnpoweredBonus) : WGShipShieldEffects.FieldDownCooling;
+            else if (recharging)
+                healed *= emitter.UnpoweredBonus;
             healed *= share;
             var ventedThisTick = venting;
             damage -= healed;

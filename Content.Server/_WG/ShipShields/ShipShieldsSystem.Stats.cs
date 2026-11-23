@@ -50,6 +50,7 @@ public sealed partial class ShipShieldsSystem
             args.PushMarkup(Loc.GetString("wg-shield-examine-adds-capacity"));
         args.PushMarkup(Loc.GetString(stats.Vents ? "wg-shield-examine-cooling" : "wg-shield-examine-recharge",
             ("online", MathF.Round(stats.HealPerSecond, 1)), ("offline", MathF.Round(stats.RechargePerSecond, 1)),
+            ("down", MathF.Round(stats.HealPerSecond * WGShipShieldEffects.FieldDownCooling, 1)),
             ("hold", MathF.Round(stats.HardHeatHold, 1))));
         if (stats.HullCooling > 0f)
             args.PushMarkup(Loc.GetString("wg-shield-examine-hull-cooling", ("hull", MathF.Round(stats.HullCooling, 1))));

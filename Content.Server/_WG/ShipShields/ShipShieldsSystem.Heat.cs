@@ -370,7 +370,13 @@ public sealed partial class ShipShieldsSystem
         if (IsWolfgateHullCooler(uid, sink.Grid, hull))
         {
             if (HasComp<WGShipShieldCostComponent>(uid))
-                CoolWolfgateShip(sink.Grid, hull, WolfgateGeneratorCooling(uid, emitter) * EmitterUpdateRate, emitter.UnpoweredBonus);
+            {
+                var cooling = WolfgateGeneratorCooling(uid, emitter) * EmitterUpdateRate;
+                // A vent has its own bonus; this is the gain from simply lowering the field.
+                if (!hull.Venting && GetWolfgateRaisedCost(sink.Grid) == null)
+                    cooling *= WGShipShieldEffects.FieldDownCooling;
+                CoolWolfgateShip(sink.Grid, hull, cooling, emitter.UnpoweredBonus);
+            }
             else
                 CoolWolfgateShip(sink.Grid, hull, healed, 1f, false);
         }

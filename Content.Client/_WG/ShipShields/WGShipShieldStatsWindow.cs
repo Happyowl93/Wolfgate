@@ -60,6 +60,7 @@ public sealed class WGShipShieldStatsWindow : DefaultWindow
         _repair.Text = Loc.GetString(
             stats.HullCooling > 0f ? "wg-shield-stats-ship-cooling" : stats.Vents ? "wg-shield-stats-cooling" : "wg-shield-stats-online-repair",
             ("value", MathF.Round(stats.HealPerSecond, 1)), ("hull", MathF.Round(stats.HullCooling, 1)),
+            ("down", MathF.Round(stats.HealPerSecond * WGShipShieldEffects.FieldDownCooling, 1)),
             ("hold", MathF.Round(stats.HardHeatHold, 1)));
         _recharge.Text = Loc.GetString(stats.Vents ? "wg-shield-stats-vent" : "wg-shield-stats-offline-repair",
             ("value", MathF.Round(stats.RechargePerSecond, 1)));

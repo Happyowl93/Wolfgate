@@ -75,7 +75,8 @@ public sealed class WGShipHeatTest
             system.Update(1.5f);
             system.Update(1.5f);
             system.Update(1.5f);
-            Assert.That(Heat(entities, grid), Is.EqualTo(20000f - tick).Within(0.01f), "With the field down everything cools at the plain rate, soft heat first.");
+            Assert.That(Heat(entities, grid), Is.EqualTo(20000f + tick * 2f - tick * 3f * WGShipShieldEffects.FieldDownCooling).Within(0.01f),
+                "With the field down everything cools, soft heat first, at the field-down rate.");
             Assert.That(hull.Hard, Is.EqualTo(hull.Heat));
 
             Assert.That(system.SetWolfgateShieldEnabled(grid, true), Is.True);
@@ -320,13 +321,13 @@ public sealed class WGShipHeatTest
 
             system.AddWolfgateShipHeat(grid, 20000f);
             system.Update(1.5f);
-            Assert.That(20000f - Heat(entities, grid), Is.EqualTo((emitter.HealPerSecond + own) * 1.5f).Within(0.01f),
-                "With power, a lowered generator still cools the ship.");
+            Assert.That(20000f - Heat(entities, grid), Is.EqualTo((emitter.HealPerSecond + own) * 1.5f * WGShipShieldEffects.FieldDownCooling).Within(0.01f),
+                "With power, a lowered generator cools the ship at the field-down rate.");
 
             power.Powered = false;
             var before = Heat(entities, grid);
             system.Update(1.5f);
-            Assert.That(before - Heat(entities, grid), Is.EqualTo(own * 1.5f).Within(0.01f),
+            Assert.That(before - Heat(entities, grid), Is.EqualTo(own * 1.5f * WGShipShieldEffects.FieldDownCooling).Within(0.01f),
                 "Without power the generator cools nothing; the hull sheds only its own share.");
             Assert.That(system.GetWolfgateShipHeat(grid).Capacity, Is.EqualTo(capacity), "It still holds the heat.");
         });

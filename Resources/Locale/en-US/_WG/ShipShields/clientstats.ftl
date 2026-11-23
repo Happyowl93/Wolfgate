@@ -12,5 +12,5 @@ wg-shield-stats-recovery-note = Each point of damage the field absorbs adds { $r
 wg-shield-stats-costs = Raised field: -{ $thrust }% thrust, -{ $turn }% turning, hotter on long-range sensors. Overrun by heat, it collapses and locks ship guns for { $seconds } seconds.
 wg-shield-stats-no-costs = Raised field: no cost to thrust, turning or guns.
 wg-shield-stats-vent = Cooling, venting: { $value } heat/s. Shields stay down and guns silent until no heat is left.
-wg-shield-stats-ship-cooling = Cooling: { $value } heat/s, { $hull } of it the hull's own by its size. Under a raised field, heat it absorbed stays until { $hold } seconds pass without a hit, the field is lowered or the ship vents.
-wg-shield-stats-cooling = Cooling: { $value } heat/s. Under a raised field, heat it absorbed stays until { $hold } seconds pass without a hit, the field is lowered or the ship vents.
+wg-shield-stats-ship-cooling = Cooling: { $value } heat/s, { $hull } of it the hull's own by its size; { $down } heat/s with the field down. Under a raised field, heat it absorbed stays until { $hold } seconds pass without a hit, the field is lowered or the ship vents.
+wg-shield-stats-cooling = Cooling: { $value } heat/s; { $down } heat/s with the field down. Under a raised field, heat it absorbed stays until { $hold } seconds pass without a hit, the field is lowered or the ship vents.
