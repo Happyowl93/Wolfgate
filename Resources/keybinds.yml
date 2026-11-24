@@ -78,16 +78,28 @@ binds:
 - function: WGShuttleFaceCursor
   type: State
   key: Shift
-# WOLFGATE(ShipShields): raise or lower the ship's shields while piloting
+# WOLFGATE(ShipShields) START: shield and vent hotkeys while piloting
+# They only exist at the helm, so F and V on foot are unchanged.
 - function: WGToggleShipShields
   type: State
+  key: F
+- function: WGVentShipHeat
+  type: State
   key: V
+# WOLFGATE END
 - function: ShuttleAscend
   type: State
   key: R
+# WOLFGATE(ShipShields) START: Descend moves from F to G, since F raises the shields at the helm
+#- function: ShuttleDescend
+#  type: State
+#  key: F
+# Below crafting's G on foot, so it only takes G at the helm.
 - function: ShuttleDescend
   type: State
-  key: F
+  key: G
+  priority: -1
+# WOLFGATE END
 # WOLFGATE(LandingGuide): landing guide toggle while piloting
 - function: WGToggleLandingGuide
   type: State

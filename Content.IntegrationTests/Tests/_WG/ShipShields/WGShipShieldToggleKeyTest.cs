@@ -4,16 +4,37 @@ using Content.Server._WG.ShipShields;
 using Content.Server.Power.Components;
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Systems;
+using Content.Shared._Crescent.ShipShields;
+using Content.Shared._WG.ShipShields;
 using Content.Shared.Access.Components;
 using Content.Shared.Shuttles.Components;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Map;
 
 namespace Content.IntegrationTests.Tests._WG.ShipShields;
 
-/// <summary>The pilot's shield hotkey raises and lowers the flown ship's shields, under the helm switch's checks.</summary>
+/// <summary>The pilot's shield and vent hotkeys work the flown ship under the helm's checks, and radars learn of an overload.</summary>
 [TestFixture]
 public sealed class WGShipShieldToggleKeyTest
 {
+    /// <summary>Spawns a raised shield generator, a powered helm with a pilot, and a bystander on the grid.</summary>
+    private static (EntityUid Generator, EntityUid Helm, EntityUid Pilot, EntityUid Bystander) Spawn(IEntityManager entities,
+        EntityCoordinates at)
+    {
+        var generator = entities.SpawnEntity("ShieldGeneratorSmall", at);
+        entities.GetComponent<ApcPowerReceiverComponent>(generator).Powered = true;
+        entities.System<ShipShieldsSystem>().Update(1.5f);
+
+        var helm = entities.SpawnEntity("ComputerShuttle", at);
+        entities.RemoveComponent<AccessReaderComponent>(helm);
+        entities.GetComponent<ApcPowerReceiverComponent>(helm).Powered = true;
+        var bystander = entities.SpawnEntity("MobHuman", at);
+        var pilot = entities.SpawnEntity("MobHuman", at);
+        entities.EnsureComponent<PilotComponent>(pilot);
+        entities.System<ShuttleConsoleSystem>().AddPilot(helm, pilot, entities.GetComponent<ShuttleConsoleComponent>(helm));
+        return (generator, helm, pilot, bystander);
+    }
+
     [Test]
     public async Task ThePilotsKeyFlipsTheShields()
     {
@@ -24,19 +45,9 @@ public sealed class WGShipShieldToggleKeyTest
         await server.WaitAssertion(() =>
         {
             var grid = map.Grid.Owner;
-            var generator = entities.SpawnEntity("ShieldGeneratorSmall", map.GridCoords);
-            entities.GetComponent<ApcPowerReceiverComponent>(generator).Powered = true;
-            entities.System<ShipShieldsSystem>().Update(1.5f);
+            var (_, helm, pilot, bystander) = Spawn(entities, map.GridCoords);
             var controls = entities.System<WGShipShieldShuntSystem>();
             Assert.That(controls.GetState(grid).Enabled, Is.True, "Shields start enabled.");
-
-            var helm = entities.SpawnEntity("ComputerShuttle", map.GridCoords);
-            entities.RemoveComponent<AccessReaderComponent>(helm);
-            entities.GetComponent<ApcPowerReceiverComponent>(helm).Powered = true;
-            var bystander = entities.SpawnEntity("MobHuman", map.GridCoords);
-            var pilot = entities.SpawnEntity("MobHuman", map.GridCoords);
-            entities.EnsureComponent<PilotComponent>(pilot);
-            entities.System<ShuttleConsoleSystem>().AddPilot(helm, pilot, entities.GetComponent<ShuttleConsoleComponent>(helm));
 
             Assert.That(controls.TryToggleFromHelm(bystander), Is.False, "Someone not at the helm can't use the key.");
             Assert.That(controls.GetState(grid).Enabled, Is.True);
@@ -49,6 +60,60 @@ public sealed class WGShipShieldToggleKeyTest
             entities.GetComponent<ApcPowerReceiverComponent>(helm).Powered = false;
             Assert.That(controls.TryToggleFromHelm(pilot), Is.False, "A dead helm can't work the shields.");
             Assert.That(controls.GetState(grid).Enabled, Is.True);
+        });
+        await pair.RunTicksSync(1);
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ThePilotsKeyVentsTheShip()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        await server.WaitAssertion(() =>
+        {
+            var grid = map.Grid.Owner;
+            var (_, _, pilot, bystander) = Spawn(entities, map.GridCoords);
+            var controls = entities.System<WGShipShieldShuntSystem>();
+            var shields = entities.System<ShipShieldsSystem>();
+            shields.AddWolfgateShipHeat(grid, 1000f);
+
+            Assert.That(controls.TryVentFromHelm(bystander), Is.False, "Someone not at the helm can't use the key.");
+            Assert.That(shields.IsWolfgateShipVenting(grid), Is.False);
+
+            Assert.That(controls.TryVentFromHelm(pilot), Is.True);
+            Assert.That(shields.IsWolfgateShipVenting(grid), Is.True, "The key vents the ship.");
+            Assert.That(controls.TryVentFromHelm(pilot), Is.False, "A vent already running can't be started again.");
+        });
+        await pair.RunTicksSync(1);
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task AnOverloadIsMarkedForRadars()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        await server.WaitAssertion(() =>
+        {
+            var grid = map.Grid.Owner;
+            var (generator, _, _, _) = Spawn(entities, map.GridCoords);
+            var shields = entities.System<ShipShieldsSystem>();
+            Assert.That(entities.HasComponent<WGShipOverloadedComponent>(grid), Is.False, "A healthy ship isn't marked.");
+
+            var emitter = entities.GetComponent<ShipShieldEmitterComponent>(generator);
+            emitter.OverloadAccumulator = 10f;
+            shields.Update(0.3f);
+            Assert.That(shields.IsWolfgateShipOverloaded(grid), Is.True);
+            Assert.That(entities.HasComponent<WGShipOverloadedComponent>(grid), Is.True, "An overloaded ship is marked.");
+
+            emitter.OverloadAccumulator = 0f;
+            shields.Update(0.3f);
+            Assert.That(entities.HasComponent<WGShipOverloadedComponent>(grid), Is.False, "The mark goes once the overload ends.");
         });
         await pair.RunTicksSync(1);
         await pair.CleanReturnAsync();

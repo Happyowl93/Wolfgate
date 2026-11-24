@@ -354,6 +354,7 @@ namespace Content.Client.Options.UI.Tabs
             AddButton(ContentKeyFunctions.ShuttleRotateRight);
             AddButton(Content.Shared._WG.ShipFacing.WGShipFacingKeys.WGShuttleFaceCursor); // WOLFGATE(ShipFacing): turn toward the cursor
             AddButton(Content.Shared._WG.ShipShields.WGShipShieldKeys.WGToggleShipShields); // WOLFGATE(ShipShields): shield hotkey
+            AddButton(Content.Shared._WG.ShipShields.WGShipShieldKeys.WGVentShipHeat); // WOLFGATE(ShipShields): vent hotkey
             AddButton(ContentKeyFunctions.ShuttleBrake);
             AddButton(ContentKeyFunctions.ShuttleAscend); // Mono
             AddButton(ContentKeyFunctions.ShuttleDescend); // Mono

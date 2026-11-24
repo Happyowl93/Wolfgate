@@ -34,6 +34,7 @@ namespace Content.Client.Shuttles.Systems
             shuttle.AddFunction(WGLandingGuideKeys.WGToggleLandingGuide); // WOLFGATE(LandingGuide): the landing guide toggle works while piloting
             shuttle.AddFunction(Content.Shared._WG.ShipFacing.WGShipFacingKeys.WGShuttleFaceCursor); // WOLFGATE(ShipFacing): the facing key works while piloting
             shuttle.AddFunction(Content.Shared._WG.ShipShields.WGShipShieldKeys.WGToggleShipShields); // WOLFGATE(ShipShields): the shield hotkey works while piloting
+            shuttle.AddFunction(Content.Shared._WG.ShipShields.WGShipShieldKeys.WGVentShipHeat); // WOLFGATE(ShipShields): the vent hotkey works while piloting
             // WOLFGATE(Cockpit) START: the fire-group hotkeys work while piloting
             foreach (var key in Content.Shared._WG.Cockpit.WGCockpitKeys.WeaponGroups)
                 shuttle.AddFunction(key);

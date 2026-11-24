@@ -72,6 +72,7 @@ public sealed partial class ShipShieldsSystem
         UpdateWolfgateShieldPvs(frameTime);
         UpdateWolfgateHullHeat(frameTime);
         UpdateWolfgateVents();
+        UpdateWolfgateOverloadMarks(frameTime);
         var query = EntityQueryEnumerator<WGShipShieldVisualsComponent, ShipShieldComponent>();
         while (query.MoveNext(out var uid, out var visuals, out var shield))
             UpdateWolfgateShieldHealth(uid, visuals, shield.Source);
