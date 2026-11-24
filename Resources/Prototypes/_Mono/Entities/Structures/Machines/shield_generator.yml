@@ -313,8 +313,8 @@
   components:
   # WOLFGATE(ShipShields) START: a raised field costs thrust, turning and stealth, and locks the guns when beaten down
   - type: WGShipShieldCost
-    thrustFactor: 0.7
-    turnFactor: 0.75
+    thrustFactor: 0.6
+    turnFactor: 0.65
     signature: 2000000
     hardHeatHold: 15 # a gun line: it fights on under its field
   # WOLFGATE END
@@ -394,8 +394,8 @@
   components:
   # WOLFGATE(ShipShields) START: a raised field costs thrust, turning and stealth, and locks the guns when beaten down
   - type: WGShipShieldCost
-    thrustFactor: 0.65
-    turnFactor: 0.7
+    thrustFactor: 0.55
+    turnFactor: 0.6
     signature: 2000000
     gunLockout: 3 # a brawler: losing its field costs it the least
     collapseHeat: 0.8 # under the mark where hot guns resume, so the lock is all that silences them
@@ -428,8 +428,8 @@
   components:
   # WOLFGATE(ShipShields) START: a raised field costs thrust, turning and stealth, and locks the guns when beaten down
   - type: WGShipShieldCost
-    thrustFactor: 0.75
-    turnFactor: 0.8
+    thrustFactor: 0.65
+    turnFactor: 0.7
     signature: 1200000
     hardHeatHold: 45 # a wall: it soaks one long fight, then has to leave
   # WOLFGATE END
@@ -524,8 +524,8 @@
   components:
   # WOLFGATE(ShipShields) START: a raised field costs thrust, turning and stealth, and locks the guns when beaten down
   - type: WGShipShieldCost
-    thrustFactor: 0.85
-    turnFactor: 0.9
+    thrustFactor: 0.75
+    turnFactor: 0.8
     signature: 600000
   # WOLFGATE END
   - type: ShipShieldEmitter
