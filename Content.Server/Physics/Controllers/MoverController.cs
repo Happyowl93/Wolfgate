@@ -479,6 +479,7 @@ public sealed partial class MoverController : SharedMoverController
             dir = dir - dirCompVel + scaledComp;
         }
 
+        dir *= WgShieldThrustFactor(xform.Owner); // WOLFGATE(ShipShields): a raised shield field cuts linear thrust
         return dir * shuttle.AccelerationMultiplier * WgAtmosphereManeuvering(xform.Owner); // WOLFGATE(Planets): planet lift and cargo load scale thrust
     }
 
