@@ -151,6 +151,10 @@ public sealed partial class WGTradeMarketSystem : EntitySystem
             || basePrice <= 0)
             return null;
 
+        // A station pays no more for a good than its own vendors charge, listed or not.
+        if (VendorCap(grid, good) is { } cap)
+            basePrice = Math.Min(basePrice, cap);
+
         var restocking = BasePrice(dispenser, good) == null;
         var profile = Profile(grid);
         var ev = new WGTradeQuoteEvent(grid, chute, good, crate, seller);
@@ -310,11 +314,15 @@ public sealed partial class WGTradeMarketSystem : EntitySystem
         }
     }
 
-    /// <summary>One line per good a chute buys, highest price first.</summary>
+    /// <summary>One line per good a chute buys, listed or taken to restock, highest price first.</summary>
     private List<string> PriceLines(EntityUid chute, DispenserComponent dispenser)
     {
         var lines = new List<(int Amount, string Text)>();
-        foreach (var good in dispenser.Inventory.Keys)
+        var goods = dispenser.Inventory.Keys.ToList();
+        if (Transform(chute).GridUid is { } grid)
+            goods.AddRange(ScarceGoods(grid).Where(good => !dispenser.Inventory.ContainsKey(good)));
+
+        foreach (var good in goods)
         {
             if (Quote(chute, good) is not { } quote)
                 continue;

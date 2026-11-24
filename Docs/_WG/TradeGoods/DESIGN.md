@@ -115,6 +115,9 @@ level >= 1: factor = 1 - 1.2 x min(level - 1, 0.5)  level 1.25 = 0.7x, 1.5 = 0.4
 - Chutes keep refusing crates bought on their own station, so nothing can be bought and resold on the spot.
 - A chute takes a good off its table only below level 0.3, at the best rate any open chute lists. This keeps the approved rule that
   anyone can bring a dry station what it needs.
+- For a good a station's own vendors sell, listed or not, the chute's table price is at most 0.9 of the vendor's base price. Both read
+  the same curve, so the station never pays more for a crate than it charges for one. Without this a crate from elsewhere sold to a
+  dry station and one bought back off its shelf left the shelf where it was, and two stations could swap crates at a profit forever.
 
 The squared curve keeps prices near normal for small dips and steep near empty, which keeps the spirit of the old rule that scarcity
 only bites when stock runs low, without a hard edge at 20%. The glut side is steeper than first drafted (1.2 against 0.6), so a sale

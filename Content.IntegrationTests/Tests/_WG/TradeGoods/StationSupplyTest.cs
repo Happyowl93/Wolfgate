@@ -186,7 +186,6 @@ public sealed class StationSupplyTest
             var chute = TradeTestWorld.MarketChute(entMan, map);
             var grid = map.Grid.Owner;
             var (far, payer) = TradeTestWorld.Station(entMan, map, new Vector2(0f, 60f), "WG test payer", "CargoChuteBaikal");
-            entMan.SpawnEntity(Vendor, map.GridCoords);
             var profile = market.Profile(grid);
             var start = (int) MathF.Ceiling(profile.StockTarget * profile.ScarceLevel);
 
@@ -197,6 +196,12 @@ public sealed class StationSupplyTest
             var quote = market.Quote(chute, Luxuries)!.Value;
             Assert.That(quote.Reason, Is.EqualTo((LocId) "wg-trade-reason-restock"));
             Assert.That(quote.Base, Is.EqualTo(market.Quote(payer, Luxuries)!.Value.Base), "A dry station should pay the best listed rate.");
+
+            // A station that sells the good itself pays its vendor's rate, or the crate could be bought back at a profit.
+            var vendor = entMan.SpawnEntity(Vendor, map.GridCoords);
+            quote = market.Quote(chute, Luxuries)!.Value;
+            Assert.That(quote.Base, Is.EqualTo((int) MathF.Round(market.BuyQuote(vendor, Luxuries)!.Value.Base * profile.ChuteTableRate)),
+                "A dry station shouldn't pay more than its own vendor charges.");
 
             var crate = TradeTestWorld.Hauled(entMan, far, map.GridCoords, Luxuries);
             Assert.That(market.TakesToRestock(chute, crate), Is.True);

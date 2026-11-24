@@ -223,7 +223,8 @@ public sealed partial class WGTradeMarketSystem
 
     /// <summary>
     /// What a chute pays for a good its table doesn't list but its station is scarce of, or has an open order for: the
-    /// best any open table lists. An order keeps the chute taking the good after the first crates end the shortage.
+    /// best any open table lists, before <see cref="VendorCap"/>. An order keeps the chute taking the good after the first
+    /// crates end the shortage.
     /// </summary>
     private int? RestockBase(EntityUid grid, string good)
     {
@@ -243,6 +244,31 @@ public sealed partial class WGTradeMarketSystem
         }
 
         return best > 0 ? best : null;
+    }
+
+    /// <summary>
+    /// The most a station's chutes pay, before the curve, for a good its own vendors sell: the cheapest vendor's base price
+    /// at the chute rate. Chutes and vendors read one curve, so a crate sold there and bought back never profits. Null
+    /// where no vendor on the grid sells the good.
+    /// </summary>
+    private int? VendorCap(EntityUid grid, string good)
+    {
+        if (!HasLimitedStock(good))
+            return null;
+
+        var proto = _proto.Index<EntityPrototype>(good);
+        int? lowest = null;
+        var query = EntityQueryEnumerator<WGTradeVendorComponent, VendingMachineComponent, TransformComponent>();
+        while (query.MoveNext(out var uid, out _, out var machine, out var xform))
+        {
+            if (xform.GridUid == grid
+                && machine.Inventory.ContainsKey(good)
+                && VendorBasePrice(uid, proto) is { } price
+                && (lowest == null || price < lowest))
+                lowest = price;
+        }
+
+        return lowest is { } charged ? (int) MathF.Round(charged * Profile(grid).ChuteTableRate) : null;
     }
 
     /// <summary>Whether a chute would take a crate only because its station's vendors are scarce of it.</summary>
