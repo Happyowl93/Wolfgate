@@ -1,11 +1,16 @@
 #nullable enable
 using System.Numerics;
-using Content.Server._WG.ShipFacing;
+using System.Reflection;
 using Content.Server.Power.Components;
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Systems;
+using Content.Server._WG.ShipFacing;
 using Content.Shared.Shuttles.Components;
+using Content.Shared._WG.ShipFacing;
+using Robust.Client.GameObjects;
+using Robust.Client.Input;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Input;
 using Robust.Shared.Map;
 using Robust.Shared.Maths;
 using Robust.Shared.Physics.Components;
@@ -72,6 +77,36 @@ public sealed class WGShipFacingTest
             Assert.That(facing.TryGetTarget((pilot, em.GetComponent<PilotComponent>(pilot)), out _), Is.False,
                 "A point nobody resends lapses."));
 
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task AShiftComboKeepsSteering()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true, Dirty = true });
+        var client = pair.Client;
+        var input = client.ResolveDependency<IInputManager>();
+        var inputs = client.System<InputSystem>();
+        var facing = client.System<Content.Client._WG.ShipFacing.WGShipFacingSystem>();
+        var function = WGShipFacingKeys.WGShuttleFaceCursor;
+        await client.WaitAssertion(() =>
+        {
+            var pressed = (bool[]) input.GetType().GetField("_keysPressed", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(input)!;
+            void Send(BoundKeyState state) => inputs.HandleInputCommand(null, function,
+                new ClientFullInputCmdMessage(client.ResolveDependency<IGameTiming>().CurTick, 0, input.NetworkBindMap.KeyFunctionID(function)) { State = state });
+
+            pressed[(int) Keyboard.Key.Shift] = true;
+            Send(BoundKeyState.Down);
+            Assert.That(facing.Held, Is.True, "Shift steers.");
+
+            // A combo such as Shift+click or Shift+1 lifts the Shift-only binding while Shift is still down.
+            Send(BoundKeyState.Up);
+            Assert.That(facing.Held, Is.True, "A Shift combo keeps steering.");
+
+            pressed[(int) Keyboard.Key.Shift] = false;
+            facing.FrameUpdate(0.016f);
+            Assert.That(facing.Held, Is.False, "Letting go of Shift stops steering.");
+        });
         await pair.CleanReturnAsync();
     }
 }

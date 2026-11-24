@@ -15,48 +15,40 @@ public partial class ShuttleNavControl
     private readonly Dictionary<EntityUid, WGShipShieldRadarGeometry> _wgRadarShields = new();
     private readonly HashSet<EntityUid> _wgRadarShieldSeen = new();
     private readonly List<EntityUid> _wgRadarShieldRemoved = new();
+    private readonly HashSet<EntityUid> _wgRadarShieldGrids = new();
 
-    /// <summary>Draws detected hull shields on navigation and fire-control maps, including shunted gaps.</summary>
+    /// <summary>
+    /// Draws detected hull shields on navigation and fire-control maps, including shunted gaps: from the field itself
+    /// where this client has it, and from the grid's <see cref="WGShipShieldRadarComponent"/> for ships too far off.
+    /// </summary>
     private void DrawWolfgateShields(DrawingHandleScreen handle, TransformComponent consoleXform, Matrix3x2 worldToView)
     {
         _wgRadarShieldSeen.Clear();
+        _wgRadarShieldGrids.Clear();
         var shields = EntManager.AllEntityQueryEnumerator<WGShipShieldVisualsComponent, TransformComponent>();
         while (shields.MoveNext(out var uid, out var visuals, out var xform))
         {
             if (xform.MapID != consoleXform.MapID || visuals.Grid is not { } grid ||
                 !EntManager.TryGetComponent<PhysicsComponent>(uid, out var physics) || !physics.CanCollide ||
-                !EntManager.TryGetComponent<TransformComponent>(grid, out var gridXform) ||
-                gridXform.MapID != consoleXform.MapID || EntManager.HasComponent<FTLComponent>(grid))
-                continue;
-            if (_consoleEntity != null && GetGridDetected(grid) != DetectionLevel.Detected)
+                !CanDrawWolfgateShield(grid, consoleXform, out var gridXform))
                 continue;
 
-            _wgRadarShieldSeen.Add(uid);
-            if (!_wgRadarShields.TryGetValue(uid, out var outline))
-            {
-                outline = new WGShipShieldRadarGeometry();
-                _wgRadarShields.Add(uid, outline);
-            }
+            _wgRadarShieldGrids.Add(grid);
             EntManager.TryGetComponent<WGShipShieldShuntComponent>(uid, out var allocation);
-            outline.Update(visuals.Contours, allocation?.Center ?? Vector2.Zero,
-                allocation?.DirectionRadians ?? 0f, allocation?.Concentration ?? 0f,
-                allocation?.ArcRadians ?? MathF.Tau);
-            // Match the hull pose instead of the separately replicated collision field.
-            var localToView = _transform.GetWorldMatrix(gridXform) * worldToView;
             var tint = EntManager.TryGetComponent<ShipShieldVisualsComponent>(uid, out var generatorVisuals)
                 ? WGShipShieldEffects.HealthColor(visuals.Health, generatorVisuals.ShieldColor)
                 : WGShipShieldEffects.HealthColor(visuals.Health);
-            foreach (var segment in outline.Segments)
-            {
-                var start = Vector2.Transform(segment.Start, localToView);
-                var end = Vector2.Transform(segment.End, localToView);
-                // Reject off-screen lines without losing segments crossing the viewport.
-                if (MathF.Max(start.X, end.X) < 0f || MathF.Min(start.X, end.X) > PixelSize.X ||
-                    MathF.Max(start.Y, end.Y) < 0f || MathF.Min(start.Y, end.Y) > PixelSize.Y)
-                    continue;
-                var alpha = Math.Clamp(0.25f + segment.Strength * 0.5f, 0.25f, 1f);
-                handle.DrawLine(start, end, tint.WithAlpha(alpha));
-            }
+            DrawWolfgateShieldOutline(handle, uid, visuals.Contours, allocation, tint, gridXform, worldToView);
+        }
+
+        var far = EntManager.AllEntityQueryEnumerator<WGShipShieldRadarComponent>();
+        while (far.MoveNext(out var grid, out var radar))
+        {
+            if (_wgRadarShieldGrids.Contains(grid) || !CanDrawWolfgateShield(grid, consoleXform, out var gridXform))
+                continue;
+            EntManager.TryGetComponent<WGShipShieldShuntComponent>(grid, out var allocation);
+            DrawWolfgateShieldOutline(handle, grid, radar.Contours, allocation,
+                WGShipShieldEffects.HealthColor(radar.Health, radar.Color), gridXform, worldToView);
         }
         _wgRadarShieldRemoved.Clear();
         foreach (var uid in _wgRadarShields.Keys)
@@ -68,6 +60,42 @@ public partial class ShuttleNavControl
             _wgRadarShields.Remove(uid);
         DrawWolfgateVents(handle, consoleXform, worldToView);
         DrawWolfgateOverloads(handle, consoleXform, worldToView);
+    }
+
+    /// <summary>Whether a shielded grid shares this radar's map, isn't in FTL and is fully detected.</summary>
+    private bool CanDrawWolfgateShield(EntityUid grid, TransformComponent consoleXform, out TransformComponent gridXform)
+    {
+        return EntManager.TryGetComponent(grid, out gridXform!) && gridXform.MapID == consoleXform.MapID &&
+            !EntManager.HasComponent<FTLComponent>(grid) &&
+            (_consoleEntity == null || GetGridDetected(grid) == DetectionLevel.Detected);
+    }
+
+    /// <summary>Draws one field's outline, posed on its hull, with shunted sectors brighter and open ones gone.</summary>
+    private void DrawWolfgateShieldOutline(DrawingHandleScreen handle, EntityUid key, Vector2[][] contours,
+        WGShipShieldShuntComponent? allocation, Color tint, TransformComponent gridXform, Matrix3x2 worldToView)
+    {
+        _wgRadarShieldSeen.Add(key);
+        if (!_wgRadarShields.TryGetValue(key, out var outline))
+        {
+            outline = new WGShipShieldRadarGeometry();
+            _wgRadarShields.Add(key, outline);
+        }
+        outline.Update(contours, allocation?.Center ?? Vector2.Zero,
+            allocation?.DirectionRadians ?? 0f, allocation?.Concentration ?? 0f,
+            allocation?.ArcRadians ?? MathF.Tau);
+        // Match the hull pose instead of the separately replicated collision field.
+        var localToView = _transform.GetWorldMatrix(gridXform) * worldToView;
+        foreach (var segment in outline.Segments)
+        {
+            var start = Vector2.Transform(segment.Start, localToView);
+            var end = Vector2.Transform(segment.End, localToView);
+            // Reject off-screen lines without losing segments crossing the viewport.
+            if (MathF.Max(start.X, end.X) < 0f || MathF.Min(start.X, end.X) > PixelSize.X ||
+                MathF.Max(start.Y, end.Y) < 0f || MathF.Min(start.Y, end.Y) > PixelSize.Y)
+                continue;
+            var alpha = Math.Clamp(0.25f + segment.Strength * 0.5f, 0.25f, 1f);
+            handle.DrawLine(start, end, tint.WithAlpha(alpha));
+        }
     }
 
     private static readonly Color WgOverloadColor = Color.FromHex("#9FE8FF");

@@ -36,11 +36,11 @@ public sealed partial class WGShipFacingSystem : EntitySystem
 
     private bool _held;
     private MapCoordinates? _target;
+    private MapCoordinates? _sent;
+    private TimeSpan _sentAt;
 
     /// <summary>Whether the pilot is holding the facing key, so Shift there means steering, not a modified click.</summary>
     public bool Held => _held;
-    private MapCoordinates? _sent;
-    private TimeSpan _sentAt;
 
     public override void Initialize()
     {
@@ -49,7 +49,11 @@ public sealed partial class WGShipFacingSystem : EntitySystem
 
         CommandBinds.Builder
             .Bind(WGShipFacingKeys.WGShuttleFaceCursor,
-                InputCmdHandler.FromDelegate(_ => _held = true, _ => Release(), handle: true, outsidePrediction: true))
+                InputCmdHandler.FromDelegate(_ => _held = true, _ =>
+                {
+                    if (!KeyDown())
+                        Release();
+                }, handle: true, outsidePrediction: true))
             .Register<WGShipFacingSystem>();
     }
 
@@ -73,7 +77,7 @@ public sealed partial class WGShipFacingSystem : EntitySystem
         if (!_held)
             return;
 
-        if (_player.LocalEntity is not { } user || !TryComp<PilotComponent>(user, out var pilot) || pilot.Console == null)
+        if (!KeyDown() || _player.LocalEntity is not { } user || !TryComp<PilotComponent>(user, out var pilot) || pilot.Console == null)
         {
             Release();
             return;
@@ -96,6 +100,20 @@ public sealed partial class WGShipFacingSystem : EntitySystem
         RaiseNetworkEvent(new WGShipFacingTargetEvent(target));
         _sent = target;
         _sentAt = now;
+    }
+
+    /// <summary>
+    /// Whether a key bound to facing is physically down. A combo containing it, such as Shift+click or Shift+1, lifts
+    /// the binding while the key is still held, and the engine never reports that key's later release.
+    /// </summary>
+    private bool KeyDown()
+    {
+        foreach (var binding in _input.GetKeyBindings(WGShipFacingKeys.WGShuttleFaceCursor))
+        {
+            if (_input.IsKeyDown(binding.BaseKey))
+                return true;
+        }
+        return false;
     }
 
     private void Release()

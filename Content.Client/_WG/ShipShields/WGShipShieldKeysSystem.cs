@@ -1,6 +1,4 @@
 using Content.Shared._WG.ShipShields;
-using Content.Shared.Shuttles.Components;
-using Robust.Client.Player;
 using Robust.Shared.Input.Binding;
 
 namespace Content.Client._WG.ShipShields;
@@ -8,15 +6,14 @@ namespace Content.Client._WG.ShipShields;
 /// <summary>Sends the pilot's shield and vent hotkeys to the server, which checks the helm and acts on the ship.</summary>
 public sealed partial class WGShipShieldKeysSystem : EntitySystem
 {
-    [Dependency] private IPlayerManager _player = default!;
-
     public override void Initialize()
     {
         base.Initialize();
+        // The keys only exist in the shuttle context, and the server checks the sender is piloting.
         CommandBinds.Builder
-            .Bind(WGShipShieldKeys.WGToggleShipShields, InputCmdHandler.FromDelegate(_ => Send(new WGShipShieldToggleEvent()),
+            .Bind(WGShipShieldKeys.WGToggleShipShields, InputCmdHandler.FromDelegate(_ => RaiseNetworkEvent(new WGShipShieldToggleEvent()),
                 handle: true, outsidePrediction: true))
-            .Bind(WGShipShieldKeys.WGVentShipHeat, InputCmdHandler.FromDelegate(_ => Send(new WGShipVentKeyEvent()),
+            .Bind(WGShipShieldKeys.WGVentShipHeat, InputCmdHandler.FromDelegate(_ => RaiseNetworkEvent(new WGShipVentKeyEvent()),
                 handle: true, outsidePrediction: true))
             .Register<WGShipShieldKeysSystem>();
     }
@@ -25,11 +22,5 @@ public sealed partial class WGShipShieldKeysSystem : EntitySystem
     {
         base.Shutdown();
         CommandBinds.Unregister<WGShipShieldKeysSystem>();
-    }
-
-    private void Send(EntityEventArgs message)
-    {
-        if (_player.LocalEntity is { } user && TryComp<PilotComponent>(user, out var pilot) && pilot.Console != null)
-            RaiseNetworkEvent(message);
     }
 }
