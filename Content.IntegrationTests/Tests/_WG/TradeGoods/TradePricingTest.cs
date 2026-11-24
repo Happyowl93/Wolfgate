@@ -191,7 +191,9 @@ public sealed class TradePricingTest
 
     /// <summary>
     /// A station paying more for a crate than its own vendors charge pays out on every crate swapped with another station,
-    /// with neither shelf moving. Every chute beside every trade vendor, at any shelf level, listed or restocking.
+    /// with neither shelf moving. Every chute beside every trade vendor, at any shelf level, listed or restocking, and
+    /// again under a rush order, which raises what chutes pay and not what vendors charge: the chute pays less than the
+    /// vendor charges, or the station is short and its vendors keep the crate.
     /// </summary>
     [Test]
     public async Task ChutesNeverPayMoreThanTheirVendorsCharge()
@@ -206,7 +208,8 @@ public sealed class TradePricingTest
         {
             entMan.EnsureComponent<WGTradeMarketMapComponent>(map.MapUid);
             entMan.System<WGTradeShortageSystem>().Clear();
-            entMan.System<WGTradeRushSystem>().Clear();
+            var rushes = entMan.System<WGTradeRushSystem>();
+            rushes.Clear();
             var grid = map.Grid.Owner;
             var profile = market.Profile(grid);
             var factory = entMan.ComponentFactory;
@@ -231,30 +234,48 @@ public sealed class TradePricingTest
             var levels = new[] { 0, 1, scarce - 1, scarce, (int) profile.StockTarget / 2, (int) profile.StockTarget, profile.VendorStock };
             var listed = 0;
             var restocked = 0;
-            foreach (var good in market.StockedGoods(grid))
+            var rushed = 0;
+            void Check()
             {
-                foreach (var stock in levels)
+                foreach (var good in market.StockedGoods(grid))
                 {
-                    market.SetVendorStock(grid, good, stock);
-                    var charged = vendors.Min(vendor => market.BuyQuote(vendor, good)!.Value.Amount);
-                    foreach (var chute in chutes)
+                    foreach (var stock in levels)
                     {
-                        if (market.Quote(chute, good) is not { } quote)
-                            continue;
+                        market.SetVendorStock(grid, good, stock + 1);
+                        var kept = market.ForSale(grid, good) == 0;
+                        market.SetVendorStock(grid, good, stock);
+                        var charged = vendors.Min(vendor => market.BuyQuote(vendor, good)!.Value.Amount);
+                        foreach (var chute in chutes)
+                        {
+                            if (market.Quote(chute, good) is not { } quote)
+                                continue;
 
-                        if (entMan.GetComponent<DispenserComponent>(chute).Inventory.ContainsKey(good))
-                            listed++;
-                        else
-                            restocked++;
+                            if (quote.Reason == (LocId) "wg-trade-reason-rush")
+                                rushed++;
+                            else if (entMan.GetComponent<DispenserComponent>(chute).Inventory.ContainsKey(good))
+                                listed++;
+                            else
+                                restocked++;
 
-                        Assert.That(quote.Amount, Is.LessThan(charged),
-                            $"{entMan.ToPrettyString(chute)} pays {quote.Amount} for {good} at a shelf of {stock}, and the vendor beside it charges {charged}.");
+                            if (kept)
+                                continue;
+
+                            Assert.That(quote.Amount, Is.LessThan(charged),
+                                $"{entMan.ToPrettyString(chute)} pays {quote.Amount} ({quote.Reason}) for {good} at a shelf of {stock}, and the vendor beside it sells one for {charged}.");
+                        }
                     }
                 }
             }
 
+            Check();
             Assert.That(listed, Is.GreaterThan(0), "No chute lists a good a trade vendor sells, so the listed price isn't tested.");
             Assert.That(restocked, Is.GreaterThan(0), "No chute took a good to restock, so the restock price isn't tested.");
+
+            var rush = rushes.Start(new ProtoId<WGTradeRushPrototype>("WGTradeRushIndustrial"));
+            Assert.That(rush?.Grid, Is.EqualTo(grid), "No rush opened at the test's station.");
+            Check();
+            rushes.Clear();
+            Assert.That(rushed, Is.GreaterThan(0), "No chute quoted a rush price, so a raise only chutes get isn't tested.");
         });
 
         await pair.CleanReturnAsync();

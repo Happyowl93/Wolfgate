@@ -151,10 +151,6 @@ public sealed partial class WGTradeMarketSystem : EntitySystem
             || basePrice <= 0)
             return null;
 
-        // A station pays no more for a good than its own vendors charge, listed or not.
-        if (VendorCap(grid, good) is { } cap)
-            basePrice = Math.Min(basePrice, cap);
-
         var restocking = BasePrice(dispenser, good) == null;
         var profile = Profile(grid);
         var ev = new WGTradeQuoteEvent(grid, chute, good, crate, seller);
@@ -199,7 +195,17 @@ public sealed partial class WGTradeMarketSystem : EntitySystem
         }
 
         raise = Math.Min(raise, profile.ModifierCap);
-        var amount = (int) MathF.Round(MathF.Min(price * raise, basePrice * profile.PriceCap) * lower);
+        var raised = MathF.Min(price * raise, basePrice * profile.PriceCap);
+
+        // A station short of a good keeps it off its vendors and pays in full. Past that its vendors sell it, and its
+        // chutes pay no more than they charge, whatever raises the chute.
+        if (!Restocking(grid, good) && VendorCeiling(grid, good) is { } ceiling && raised > ceiling.Amount)
+        {
+            basePrice = ceiling.Base;
+            raised = ceiling.Amount;
+        }
+
+        var amount = (int) MathF.Round(raised * lower);
         var reason = lowerReason
                      ?? raiseReason
                      ?? (restocking ? "wg-trade-reason-restock"

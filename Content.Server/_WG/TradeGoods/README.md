@@ -52,10 +52,12 @@ kind (`DepotKindsTest`).
 
 Players fill shelves too. Every crate a chute takes goes on the station's shelf. Once a good is scarce, the station's chutes take it
 even if they don't list it, at the best rate any open chute lists, and rush and bulk orders go to the station furthest under target
-for their goods. A chute still refuses a crate bought on its own station, and for a good its station's vendors sell, listed or not,
-its table price is at most `chuteTableRate` of the vendor's base price (`VendorCap`). Chutes and vendors read one curve, so a station
-never pays more for a crate than it charges for one, and swapping crates between two stations loses money
-(`ChutesNeverPayMoreThanTheirVendorsCharge`). The chute's examine text and paper list what it is restocking too.
+for their goods. A chute still refuses a crate bought on its own station. A station short of a good also keeps it: its vendors sell
+only what it holds over the scarce level (`ForSale`), so a crate its chutes paid the full rate for can't be bought back. Past that
+level the vendors sell the good, and the chutes pay at most `chuteTableRate` of what the cheapest of them charges (`VendorCeiling`),
+after every event. That limit falls on the goods a chute lists that its own vendors sell (seven at Caelestinus, Chemical Supplies at
+the alt depot) and on an order still open after its shortage has ended. A station never buys a crate for more than it sells one, so
+swapping crates between two stations loses money (`ChutesNeverPayMoreThanTheirVendorsCharge`). The chute's examine text and paper list what it is restocking too.
 
 Stopping the freighters is one blockade: a station they don't reach runs down, and a lost run leaves its stops short. Players do it
 by intercepting freighters, outside the 256 m that Conflict Rule 4 protects. Freighters also stay away from a station under a faction

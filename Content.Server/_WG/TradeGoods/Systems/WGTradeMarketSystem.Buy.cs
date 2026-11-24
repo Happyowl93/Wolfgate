@@ -78,8 +78,8 @@ public sealed partial class WGTradeMarketSystem
         return new WGTradeBuyQuote(basePrice, (int) MathF.Round(basePrice * factor), factor, reason);
     }
 
-    /// <summary>The share of base a station's vendors charge for a good now, never below 1.</summary>
-    private float BuyFactor(EntityUid grid, string good, out LocId reason)
+    /// <summary>The share of base a station's vendors charge for a good now, or with its shelf at a given level, never below 1.</summary>
+    private float BuyFactor(EntityUid grid, string good, out LocId reason, float? level = null)
     {
         var profile = Profile(grid);
 
@@ -90,7 +90,7 @@ public sealed partial class WGTradeMarketSystem
             return 1f;
         }
 
-        var stock = MathF.Max(1f, LevelFactor(profile, PricedLevel(grid, good)));
+        var stock = MathF.Max(1f, LevelFactor(profile, level ?? PricedLevel(grid, good)));
 
         var ev = new WGTradeBuyQuoteEvent(grid, good);
         RaiseLocalEvent(ev);
@@ -187,7 +187,7 @@ public sealed partial class WGTradeMarketSystem
                && !_proto.Index(DefaultProfile).ContrabandGoods.Contains(good);
     }
 
-    /// <summary>Shows a station's shared stock on one of its vendors, replacing the machine's infinite trade goods.</summary>
+    /// <summary>Shows what a station has for sale on one of its vendors, replacing the machine's infinite trade goods.</summary>
     private void SyncStock(EntityUid vendor, VendingMachineComponent machine, EntityUid? grid)
     {
         if (grid is not { } onGrid)
@@ -199,7 +199,7 @@ public sealed partial class WGTradeMarketSystem
             if (!HasLimitedStock(good))
                 continue;
 
-            var stock = (uint) VendorStock(onGrid, good);
+            var stock = (uint) ForSale(onGrid, good);
             if (entry.Amount == stock)
                 continue;
 
@@ -223,8 +223,8 @@ public sealed partial class WGTradeMarketSystem
 
     /// <summary>
     /// What a chute pays for a good its table doesn't list but its station is scarce of, or has an open order for: the
-    /// best any open table lists, before <see cref="VendorCap"/>. An order keeps the chute taking the good after the first
-    /// crates end the shortage.
+    /// best any open table lists. An order keeps the chute taking the good after the first crates end the shortage, by
+    /// when <see cref="VendorCeiling"/> applies.
     /// </summary>
     private int? RestockBase(EntityUid grid, string good)
     {
@@ -247,11 +247,11 @@ public sealed partial class WGTradeMarketSystem
     }
 
     /// <summary>
-    /// The most a station's chutes pay, before the curve, for a good its own vendors sell: the cheapest vendor's base price
-    /// at the chute rate. Chutes and vendors read one curve, so a crate sold there and bought back never profits. Null
-    /// where no vendor on the grid sells the good.
+    /// The most a station's chutes pay for a good its own vendors have for sale: the cheapest vendor's base price, and what
+    /// it charges with the shelf at the level chutes pay by, both at the chute rate. A crate sold there and bought back
+    /// never profits, and a haul still walks down the curve. Null where no vendor on the grid sells the good.
     /// </summary>
-    private int? VendorCap(EntityUid grid, string good)
+    private (int Base, int Amount)? VendorCeiling(EntityUid grid, string good)
     {
         if (!HasLimitedStock(good))
             return null;
@@ -268,7 +268,12 @@ public sealed partial class WGTradeMarketSystem
                 lowest = price;
         }
 
-        return lowest is { } charged ? (int) MathF.Round(charged * Profile(grid).ChuteTableRate) : null;
+        if (lowest is not { } charged)
+            return null;
+
+        var rate = Profile(grid).ChuteTableRate;
+        var factor = BuyFactor(grid, good, out _, ChuteLevel(grid, good));
+        return ((int) MathF.Round(charged * rate), (int) MathF.Round(charged * factor * rate));
     }
 
     /// <summary>Whether a chute would take a crate only because its station's vendors are scarce of it.</summary>
