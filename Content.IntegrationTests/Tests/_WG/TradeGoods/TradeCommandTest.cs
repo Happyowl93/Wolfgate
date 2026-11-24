@@ -30,9 +30,6 @@ public sealed class TradeCommandTest
 
         await server.WaitAssertion(() =>
         {
-            // An earlier test on this server may have left events on grids that are gone, which status can't name.
-            shortages.Clear();
-            rushes.Clear();
             TradeTestWorld.MarketChute(entMan, map);
             var other = TradeTestWorld.Station(entMan, map, new Vector2(5000f, 0f), "WG command test depot");
             var stations = new[] { map.Grid.Owner, other.Grid };

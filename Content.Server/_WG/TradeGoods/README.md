@@ -14,7 +14,7 @@ would refuse it; a hidden market is named only to an underground company's membe
 tab groups stations by faction (`marketFactions`, matched by chute). Hidden markets (`hiddenChutes`: PDV Helios and the
 Underground fence) go to a separate Underground tab, and only holders of an `undergroundCompanies` company (PDV and the
 Underground's godfathers and fugitives) are sent them, along with alerts naming them. UI state reaches every client near a PDA, so for those holders the networked state is a public stand-in and the
-full state goes to the viewers alone (`WGMarketPrivateStateEvent`, kept by the client `WGMarketSystem`). Radio lines
+full state goes to the viewers alone (`WGMarketPrivateStateEvent`, kept by the client `WGMarketSystem`). The Sector Exchange speaks on the cargo channel (`Supply`), heard on a headset with the cargo key; lines
 naming a hidden market go only to the underground companies (`WGTradeMarketSystem.Announce`), and a low sale's "best now"
 hint never names one.
 A chute offered something it doesn't buy says so instead of only buzzing.
@@ -54,8 +54,8 @@ Players fill shelves too. Every crate a chute takes goes on the station's shelf.
 even if they don't list it, at the best rate any open chute lists, and rush and bulk orders go to the station furthest under target
 for their goods. A chute still refuses a crate bought on its own station. A station short of a good also keeps it: its vendors sell
 only what it holds over the scarce level (`ForSale`), so a crate its chutes paid the full rate for can't be bought back. Past that
-level the vendors sell the good, and the chutes pay at most `chuteTableRate` of what the cheapest of them charges (`VendorCeiling`),
-after every event. That limit falls on the goods a chute lists that its own vendors sell (seven at Caelestinus, Chemical Supplies at
+level the vendors sell the good, and the chutes pay at most `chuteTableRate` of the cheapest one's base price (`VendorCeiling`),
+with the events vendors charge for and nothing for scarcity, since a vendor's price trails its stock. That limit falls on the goods a chute lists that its own vendors sell (seven at Caelestinus, Chemical Supplies at
 the alt depot) and on an order still open after its shortage has ended. A station never buys a crate for more than it sells one, so
 swapping crates between two stations loses money (`ChutesNeverPayMoreThanTheirVendorsCharge`). The chute's examine text and paper list what it is restocking too.
 

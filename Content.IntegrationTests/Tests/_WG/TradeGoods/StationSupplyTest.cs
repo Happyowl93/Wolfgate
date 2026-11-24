@@ -223,6 +223,8 @@ public sealed class StationSupplyTest
             Assert.That(market.VendorStock(grid, Luxuries), Is.EqualTo(start), "A delivery should go on the shelf.");
             Assert.That(shelf.Amount, Is.Zero, "The crate that ends a shortage shouldn't be for sale.");
             Assert.That(market.Quote(chute, Luxuries), Is.Not.Null, "An open order keeps taking its goods once the shortage ends.");
+            Assert.That(market.Unlisted(grid, entMan.GetComponent<DispenserComponent>(chute)), Does.Contain(Luxuries),
+                "A good only an order takes should still be on the chute's price list.");
 
             // Past the shortage the vendor sells again, so the order pays no more than the vendor charges.
             market.SetVendorStock(grid, Luxuries, start + 1);

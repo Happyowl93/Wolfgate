@@ -193,7 +193,7 @@ public sealed class TradePricingTest
     /// A station paying more for a crate than its own vendors charge pays out on every crate swapped with another station,
     /// with neither shelf moving. Every chute beside every trade vendor, at any shelf level, listed or restocking, and
     /// again under a rush order, which raises what chutes pay and not what vendors charge: the chute pays less than the
-    /// vendor charges, or the station is short and its vendors keep the crate.
+    /// vendor charges and less than its base price, or the station is short and its vendors keep the crate.
     /// </summary>
     [Test]
     public async Task ChutesNeverPayMoreThanTheirVendorsCharge()
@@ -245,6 +245,7 @@ public sealed class TradePricingTest
                         var kept = market.ForSale(grid, good) == 0;
                         market.SetVendorStock(grid, good, stock);
                         var charged = vendors.Min(vendor => market.BuyQuote(vendor, good)!.Value.Amount);
+                        var cheapest = vendors.Min(vendor => market.BuyQuote(vendor, good)!.Value.Base);
                         foreach (var chute in chutes)
                         {
                             if (market.Quote(chute, good) is not { } quote)
@@ -262,6 +263,10 @@ public sealed class TradePricingTest
 
                             Assert.That(quote.Amount, Is.LessThan(charged),
                                 $"{entMan.ToPrettyString(chute)} pays {quote.Amount} ({quote.Reason}) for {good} at a shelf of {stock}, and the vendor beside it sells one for {charged}.");
+
+                            // A vendor's price trails its stock, so the crate may have been bought before the price rose.
+                            Assert.That(quote.Amount, Is.LessThan(cheapest),
+                                $"{entMan.ToPrettyString(chute)} pays {quote.Amount} ({quote.Reason}) for {good} at a shelf of {stock}, and the vendor beside it sold one for {cheapest} before its price caught up.");
                         }
                     }
                 }

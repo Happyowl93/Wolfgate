@@ -117,8 +117,9 @@ level >= 1: factor = 1 - 1.2 x min(level - 1, 0.5)  level 1.25 = 0.7x, 1.5 = 0.4
   anyone can bring a dry station what it needs.
 - A station never buys a crate for more than it sells one. Below level 0.3 its chutes pay in full and its vendors sell none of the
   good, so a crate brought to a dry station can't be bought back. From 0.3 up the vendors sell it, and a chute pays at most 0.9 of
-  what the cheapest of them charges. That limit is on the final price, after events, so a rush, war or relief rate that vendors
-  don't share can't lift it, and it reads the vendor's price at the level chutes pay by, so a haul still walks down the curve. It
+  the cheapest one's base price, times the events its vendors charge for. That limit is on the final price, so a rush, war or relief
+  rate that vendors don't share can't lift it. It has no scarcity in it: a vendor's price trails its stock, so a shelf bought down
+  at the old price could otherwise be sold back for more once the price caught up. It
   falls on the goods a chute lists that its own vendors sell (seven at Caelestinus, Chemical Supplies at the alt depot) and on an
   order still open after its shortage ended. Without the two halves a crate from elsewhere sold to a dry station and one bought back
   off its shelf left the shelf where it was, and two stations could swap crates at a profit forever. Capping the dry station's price

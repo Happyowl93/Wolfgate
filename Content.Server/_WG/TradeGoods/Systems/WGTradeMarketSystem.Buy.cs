@@ -247,9 +247,10 @@ public sealed partial class WGTradeMarketSystem
     }
 
     /// <summary>
-    /// The most a station's chutes pay for a good its own vendors have for sale: the cheapest vendor's base price, and what
-    /// it charges with the shelf at the level chutes pay by, both at the chute rate. A crate sold there and bought back
-    /// never profits, and a haul still walks down the curve. Null where no vendor on the grid sells the good.
+    /// The most a station's chutes pay for a good its own vendors have for sale: the cheapest vendor's base price, and
+    /// that with the events its vendors charge for, both at the chute rate. Scarcity adds nothing, since a vendor's price
+    /// trails its stock: a shelf bought down at the old price could be sold back once the price caught up. Null where no
+    /// vendor on the grid sells the good.
     /// </summary>
     private (int Base, int Amount)? VendorCeiling(EntityUid grid, string good)
     {
@@ -272,7 +273,7 @@ public sealed partial class WGTradeMarketSystem
             return null;
 
         var rate = Profile(grid).ChuteTableRate;
-        var factor = BuyFactor(grid, good, out _, ChuteLevel(grid, good));
+        var factor = BuyFactor(grid, good, out _, 1f);
         return ((int) MathF.Round(charged * rate), (int) MathF.Round(charged * factor * rate));
     }
 
@@ -284,6 +285,12 @@ public sealed partial class WGTradeMarketSystem
                && MetaData(crate).EntityPrototype?.ID is { } good
                && BasePrice(dispenser, good) == null
                && RestockBase(grid, good) != null;
+    }
+
+    /// <summary>The goods a chute takes that its table doesn't list: those its station is scarce of or has an open order for.</summary>
+    public List<string> Unlisted(EntityUid grid, DispenserComponent chute)
+    {
+        return ScarceGoods(grid).Concat(_rush.Wanted(grid)).Distinct().Where(good => !chute.Inventory.ContainsKey(good)).ToList();
     }
 
     /// <summary>The trade goods with finite stock that a station's vendors sell.</summary>

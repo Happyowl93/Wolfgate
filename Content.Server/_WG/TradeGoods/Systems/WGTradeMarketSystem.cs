@@ -198,11 +198,12 @@ public sealed partial class WGTradeMarketSystem : EntitySystem
         var raised = MathF.Min(price * raise, basePrice * profile.PriceCap);
 
         // A station short of a good keeps it off its vendors and pays in full. Past that its vendors sell it, and its
-        // chutes pay no more than they charge, whatever raises the chute.
+        // chutes pay less than a crate there ever cost, whatever raises the chute.
         if (!Restocking(grid, good) && VendorCeiling(grid, good) is { } ceiling && raised > ceiling.Amount)
         {
             basePrice = ceiling.Base;
             raised = ceiling.Amount;
+            stock = 1f;
         }
 
         var amount = (int) MathF.Round(raised * lower);
@@ -320,13 +321,13 @@ public sealed partial class WGTradeMarketSystem : EntitySystem
         }
     }
 
-    /// <summary>One line per good a chute buys, listed or taken to restock, highest price first.</summary>
+    /// <summary>One line per good a chute buys, listed or taken to restock or for an order, highest price first.</summary>
     private List<string> PriceLines(EntityUid chute, DispenserComponent dispenser)
     {
         var lines = new List<(int Amount, string Text)>();
         var goods = dispenser.Inventory.Keys.ToList();
         if (Transform(chute).GridUid is { } grid)
-            goods.AddRange(ScarceGoods(grid).Where(good => !dispenser.Inventory.ContainsKey(good)));
+            goods.AddRange(Unlisted(grid, dispenser));
 
         foreach (var good in goods)
         {
