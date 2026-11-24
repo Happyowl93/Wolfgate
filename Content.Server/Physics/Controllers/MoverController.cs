@@ -175,6 +175,7 @@ public sealed partial class MoverController : SharedMoverController
             return;
 
         var input = GetPilotVelocityInput(entity.Comp);
+        WgFaceCursor(entity, args.ShuttleUid, args.FrameTime, ref input); // WOLFGATE(ShipFacing): the facing key turns the ship toward the cursor
         // don't slow down the ship if we're just looking at the console with zero input
         if (input.Brakes == 0f && input.Rotation == 0f && input.Strafe.LengthSquared() == 0f)
             return;

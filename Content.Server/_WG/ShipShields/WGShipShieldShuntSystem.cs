@@ -58,6 +58,7 @@ public sealed partial class WGShipShieldShuntSystem : EntitySystem
             subs.Event<WGShipShieldSetEnabledMessage>(OnGunnerySetEnabled);
             subs.Event<WGShipShieldVentMessage>(OnGunneryVent);
         });
+        InitializeToggle();
     }
 
     public override void Update(float frameTime)

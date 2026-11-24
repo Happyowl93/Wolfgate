@@ -65,3 +65,4 @@ wg-shield-heat-hard = HARD { $heat }%
 wg-shield-heat-key-hard = Hard: held under shields
 wg-shield-heat-key-soft = Soft: always cools
 wg-shield-radar-venting = VENTING
+ui-options-function-wg-toggle-ship-shields = Raise or lower ship shields
