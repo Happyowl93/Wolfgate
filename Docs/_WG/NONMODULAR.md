@@ -525,6 +525,7 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
 - [`Resources/Prototypes/_Mono/Entities/Objects/Electronics/mech.yml`](../../Resources/Prototypes/_Mono/Entities/Objects/Electronics/mech.yml): restore the licence header removed by Kill Spdx
 - [`Resources/Prototypes/_Mono/Entities/Objects/Specific/Mechs/mech_construction.yml`](../../Resources/Prototypes/_Mono/Entities/Objects/Specific/Mechs/mech_construction.yml): restore the licence header removed by Kill Spdx
 - [`Resources/Prototypes/_Mono/Entities/Objects/Specific/Robotics/borg_modules.yml`](../../Resources/Prototypes/_Mono/Entities/Objects/Specific/Robotics/borg_modules.yml): its own id; the shared Security id made every faction weapon module a duplicate of the rest
+- [`Resources/Prototypes/_Mono/Entities/Objects/Tools/repair.yml`](../../Resources/Prototypes/_Mono/Entities/Objects/Tools/repair.yml): was 2000, about three times its print cost
 - [`Resources/Prototypes/_Mono/Entities/Objects/Weapons/Guns/Launchers/mpssm.yml`](../../Resources/Prototypes/_Mono/Entities/Objects/Weapons/Guns/Launchers/mpssm.yml): restore the licence header removed by Kill Spdx
 - [`Resources/Prototypes/_Mono/Entities/Objects/Weapons/Guns/Snipers/snipers.yml`](../../Resources/Prototypes/_Mono/Entities/Objects/Weapons/Guns/Snipers/snipers.yml): low-cap 7.62x51 mags fit like every other 7.62x51 rifle
 - [`Resources/Prototypes/_Mono/Entities/SpaceArtillery/SpaceArtillery/base_launcher.yml`](../../Resources/Prototypes/_Mono/Entities/SpaceArtillery/SpaceArtillery/base_launcher.yml): restore the licence header removed by Kill Spdx
@@ -607,6 +608,7 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
   - PDV pack, TSF pod report 2 min later
   - PDV pack, tighter PDV pod coordinates
 - [`Resources/Prototypes/_Obelisk/Species/hydrakin.yml`](../../Resources/Prototypes/_Obelisk/Species/hydrakin.yml): hydrakin is not selectable in character creation
+- [`Resources/Prototypes/_Shitmed/Body/Organs/cybernetic.yml`](../../Resources/Prototypes/_Shitmed/Body/Organs/cybernetic.yml): priced as a printed part, not the 4500 harvested organ it inherits
 - [`Resources/Prototypes/_Shitmed/Entities/Objects/Devices/Circuitboards/Machine/production.yml`](../../Resources/Prototypes/_Shitmed/Entities/Objects/Devices/Circuitboards/Machine/production.yml): a machine part under stackRequirements can't be inserted; the frame reads parts from requirements
 - [`Resources/Prototypes/_StarLight/Entities/Mobs/Species/felionoid.yml`](../../Resources/Prototypes/_StarLight/Entities/Mobs/Species/felionoid.yml): OwO accent removed
 - [`Resources/Prototypes/Atmospherics/gases.yml`](../../Resources/Prototypes/Atmospherics/gases.yml): a tritium is worth the same as frezon or as nitrium, 10 -> 5 (Mono 1\<10)
