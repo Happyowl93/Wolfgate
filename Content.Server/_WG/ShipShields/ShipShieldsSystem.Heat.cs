@@ -508,11 +508,19 @@ public sealed partial class ShipShieldsSystem
         return damage;
     }
 
-    /// <summary>A blast's damage as ship heat counts it, fired or absorbed (<see cref="WGShipShieldEffects.BlastDamage"/>).</summary>
+    /// <summary>A blast's damage as the firing ship's heat counts it (<see cref="WGShipShieldEffects.BlastDamage"/>).</summary>
     public float WolfgateBlastDamage(ExplosiveComponent explosive)
     {
         return _prototypeManager.TryIndex(explosive.ExplosionType, out var type)
             ? WGShipShieldEffects.BlastDamage(explosive.TotalIntensity, explosive.MaxIntensity, (float) type.DamagePerIntensity.GetTotal())
+            : 0f;
+    }
+
+    /// <summary>A blast's damage as a field that stops or slows it is charged (<see cref="WGShipShieldEffects.AbsorbedBlastDamage"/>).</summary>
+    public float WolfgateAbsorbedBlastDamage(ExplosiveComponent explosive)
+    {
+        return _prototypeManager.TryIndex(explosive.ExplosionType, out var type)
+            ? WGShipShieldEffects.AbsorbedBlastDamage(explosive.TotalIntensity, (float) type.DamagePerIntensity.GetTotal())
             : 0f;
     }
 

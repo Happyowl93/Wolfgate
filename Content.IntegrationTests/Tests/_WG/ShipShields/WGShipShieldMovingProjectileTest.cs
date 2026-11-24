@@ -73,7 +73,7 @@ public sealed class WGShipShieldMovingProjectileTest
                 totalDamage += (float)projectile.Damage.GetTotal();
                 if (entities.TryGetComponent<ExplosiveComponent>(projectileUid, out var explosive) &&
                     prototypes.TryIndex(explosive.ExplosionType, out var explosion))
-                    totalDamage += WGShipShieldEffects.BlastDamage(explosive.TotalIntensity, explosive.MaxIntensity, (float)explosion.DamagePerIntensity.GetTotal());
+                    totalDamage += WGShipShieldEffects.AbsorbedBlastDamage(explosive.TotalIntensity, (float)explosion.DamagePerIntensity.GetTotal());
                 physics.SetLinearVelocity(projectileUid, Vector2.Normalize(ahead.Position - start.Position) * (pulser ? 20f : prototype == "ShipPinholeProjectile" ? 600f : 300f));
                 physics.WakeBody(projectileUid);
             });
@@ -123,7 +123,7 @@ public sealed class WGShipShieldMovingProjectileTest
 
             var expectedDamage = (float) projectile.Damage.GetTotal();
             if (entities.TryGetComponent<ExplosiveComponent>(projectileUid, out var explosive))
-                expectedDamage += WGShipShieldEffects.BlastDamage(explosive.TotalIntensity, explosive.MaxIntensity,
+                expectedDamage += WGShipShieldEffects.AbsorbedBlastDamage(explosive.TotalIntensity,
                     (float) server.ResolveDependency<IPrototypeManager>().Index(explosive.ExplosionType).DamagePerIntensity.GetTotal());
             entities.System<ProjectileSystem>().SweepProjectiles(1f / 30f);
 

@@ -67,7 +67,7 @@ public sealed class WGShipShieldPinholeTest
             var body = entities.GetComponent<PhysicsComponent>(shell);
             var expectedDamage = (float) projectile.Damage.GetTotal();
             if (explosive != null)
-                expectedDamage += WGShipShieldEffects.BlastDamage(explosive.TotalIntensity, explosive.MaxIntensity,
+                expectedDamage += WGShipShieldEffects.AbsorbedBlastDamage(explosive.TotalIntensity,
                     (float) pair.Server.ResolveDependency<IPrototypeManager>().Index(explosive.ExplosionType).DamagePerIntensity.GetTotal());
             BatteryComponent? empObserver = null;
             if (entities.TryGetComponent<EmpOnTriggerComponent>(shell, out var emp))

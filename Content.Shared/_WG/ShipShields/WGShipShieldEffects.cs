@@ -21,17 +21,23 @@ public static class WGShipShieldEffects
     /// <summary>How many times its plain rate a venting ship cools.</summary>
     public const float VentCooling = 6f;
     /// <summary>Heat each point of damage a ship generator's field absorbs adds, unless the generator sets its own.</summary>
-    public const float HitHeat = 0.5f;
+    public const float HitHeat = 0.8f;
     /// <summary>Most of a ship's heat capacity one hit absorbed by its field can add.</summary>
     public const float HitHeatCap = 0.2f;
 
     /// <summary>
-    /// What a shell's blast counts as for ship heat, fired or absorbed: the damage of its peak tile, not the sum over
-    /// every tile it spreads to.
+    /// What a shell's blast counts as for the heat of the ship that fires it: the damage of its peak tile, not the sum
+    /// over every tile it spreads to.
     /// </summary>
     public static float BlastDamage(float totalIntensity, float maxIntensity, float damagePerIntensity)
     {
         return MathF.Max(0f, MathF.Min(maxIntensity, totalIntensity) * damagePerIntensity);
+    }
+
+    /// <summary>What a shell's blast charges a field that stops or slows it: the whole blast, every tile it would reach.</summary>
+    public static float AbsorbedBlastDamage(float totalIntensity, float damagePerIntensity)
+    {
+        return MathF.Max(0f, totalIntensity * damagePerIntensity);
     }
 
     /// <summary>How many times its plain rate a ship cools in its state; every ship, with or without a generator, uses this.</summary>

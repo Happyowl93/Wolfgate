@@ -25,7 +25,7 @@ public sealed partial class WGShipHeatComponent : Component
 
     /// <summary>Heat each hull tile adds to what the hull holds.</summary>
     [DataField]
-    public float CapacityPerTile = 30f;
+    public float CapacityPerTile = 15f;
 
     /// <summary>Most heat a hull holds by its size, however large.</summary>
     [DataField]
@@ -62,7 +62,7 @@ public sealed partial class WGShipHeatComponent : Component
 
     /// <summary>Share of each shot's damage the ship's own guns add to its heat.</summary>
     [DataField]
-    public float FireHeat = 0.15f;
+    public float FireHeat = 0.5f;
 
     /// <summary>Thermal signature each point of heat the hull holds adds for long-range sensors.</summary>
     [DataField]
