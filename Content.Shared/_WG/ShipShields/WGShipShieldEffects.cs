@@ -40,6 +40,12 @@ public static class WGShipShieldEffects
         return MathF.Max(0f, totalIntensity * damagePerIntensity);
     }
 
+    /// <summary>
+    /// A value for display, at most two decimals. Rounded as a double: a rounded float still prints its binary tail
+    /// (1417.9000244140625) once Fluent widens it.
+    /// </summary>
+    public static double Display(float value) => Math.Round((double) value, 2);
+
     /// <summary>How many times its plain rate a ship cools in its state; every ship, with or without a generator, uses this.</summary>
     public static float CoolingMultiplier(bool raised, bool venting)
     {

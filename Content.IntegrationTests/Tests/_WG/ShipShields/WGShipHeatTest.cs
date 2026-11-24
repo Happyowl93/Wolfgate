@@ -748,6 +748,50 @@ public sealed class WGShipHeatTest
         emitter.Damage = heat * entities.System<ShipShieldsSystem>().WolfgateGeneratorShare(uid, emitter);
     }
 
+    [Test]
+    public async Task AGunsOwnHeatReplacesTheDamageShare()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var map = await pair.CreateTestMap();
+        await pair.Server.WaitAssertion(() =>
+        {
+            var entities = pair.Server.EntMan;
+            var prototypes = pair.Server.ResolveDependency<IPrototypeManager>();
+            var grid = map.Grid.Owner;
+            var gun = entities.SpawnEntity("WeaponTurretL85Autocannon", map.GridCoords);
+            var user = entities.SpawnEntity(null, map.GridCoords);
+            var (round, damage) = Round(prototypes, entities.ComponentFactory);
+            var own = entities.AddComponent<WGShipGunHeatComponent>(gun);
+            own.DamageShare = 0.1f;
+            Assert.That(entities.EnsureComponent<WGShipHeatComponent>(grid).FireHeat, Is.Not.EqualTo(own.DamageShare));
+
+            Fire(entities, gun, user, entities.SpawnEntity(round, map.GridCoords));
+            Assert.That(Heat(entities, grid), Is.EqualTo(damage * 0.1f).Within(0.01f), "A gun with its own share heats by that, not the hull's.");
+
+            own.HeatPerShot = 7f;
+            var before = Heat(entities, grid);
+            Fire(entities, gun, user, entities.SpawnEntity(round, map.GridCoords));
+            Assert.That(Heat(entities, grid) - before, Is.EqualTo(7f).Within(0.01f), "A gun's own heat per shot wins over any share.");
+
+            // The Polaris guns carry their own heat; the Flutter, a Phalanx child, sets its own instead of the PD value.
+            foreach (var (id, heat) in new[] { ("WeaponLaserTurretL1Phalanx", 3f), ("WeaponTurretAk820", 140f), ("WeaponTurretAk800", 140f),
+                         ("WeaponTurretHades", 1500f), ("WGAsfTurretFlutter", 62.5f) })
+            {
+                Assert.That(prototypes.Index<EntityPrototype>(id).TryGetComponent<WGShipGunHeatComponent>(out var set, entities.ComponentFactory), Is.True, id);
+                Assert.That(set!.HeatPerShot, Is.EqualTo(heat), id);
+            }
+
+            // Rapid-fire cannons heat at a lower share of their damage.
+            foreach (var id in new[] { "WeaponTurretRAC30", "WeaponTurretAC-35" })
+            {
+                Assert.That(prototypes.Index<EntityPrototype>(id).TryGetComponent<WGShipGunHeatComponent>(out var set, entities.ComponentFactory), Is.True, id);
+                Assert.That(set!.DamageShare, Is.EqualTo(0.15f), id);
+                Assert.That(set.HeatPerShot, Is.Null, id);
+            }
+        });
+        await pair.CleanReturnAsync();
+    }
+
     [TestCase("SandboxHEMissile")]
     [TestCase("MissileCartridge250mm")]
     [TestCase("VanykCartridgeUnguided")]

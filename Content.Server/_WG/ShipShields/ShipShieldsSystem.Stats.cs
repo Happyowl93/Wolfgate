@@ -37,7 +37,7 @@ public sealed partial class ShipShieldsSystem
     private void ExamineWolfgateGeneratorStats(EntityUid uid, ShipShieldEmitterComponent emitter, ExaminedEvent args)
     {
         var stats = GetWolfgateGeneratorStats(uid, emitter);
-        args.PushMarkup(Loc.GetString("wg-shield-examine-capacity", ("rate", MathF.Round(stats.HitHeat, 2)),
+        args.PushMarkup(Loc.GetString("wg-shield-examine-capacity", ("rate", WGShipShieldEffects.Display(stats.HitHeat)),
             ("capacity", MathF.Round(stats.Capacity, 0)), ("overload", MathF.Round(stats.DamageLimit, 0))));
         if (stats.Capacity < stats.DamageLimit)
             args.PushMarkup(Loc.GetString("wg-shield-examine-capacity-note"));
@@ -49,20 +49,20 @@ public sealed partial class ShipShieldsSystem
         else if (stats.Vents)
             args.PushMarkup(Loc.GetString("wg-shield-examine-adds-capacity"));
         args.PushMarkup(Loc.GetString(stats.Vents ? "wg-shield-examine-cooling" : "wg-shield-examine-recharge",
-            ("online", MathF.Round(stats.HealPerSecond, 1)), ("offline", MathF.Round(stats.RechargePerSecond, 1)),
-            ("down", MathF.Round(stats.HealPerSecond * WGShipShieldEffects.FieldDownCooling, 1)),
-            ("hold", MathF.Round(stats.HardHeatHold, 1))));
+            ("online", WGShipShieldEffects.Display(stats.HealPerSecond)), ("offline", WGShipShieldEffects.Display(stats.RechargePerSecond)),
+            ("down", WGShipShieldEffects.Display(stats.HealPerSecond * WGShipShieldEffects.FieldDownCooling)),
+            ("hold", WGShipShieldEffects.Display(stats.HardHeatHold))));
         if (stats.HullCooling > 0f)
-            args.PushMarkup(Loc.GetString("wg-shield-examine-hull-cooling", ("hull", MathF.Round(stats.HullCooling, 1))));
-        args.PushMarkup(Loc.GetString("wg-shield-examine-power", ("idle", MathF.Round(stats.BasePowerWatts / 1000f, 1)), ("maximum", MathF.Round(stats.MaximumPowerWatts / 1000f, 1))));
-        args.PushMarkup(Loc.GetString("wg-shield-examine-overload", ("seconds", MathF.Round(stats.OverloadSeconds, 1))));
+            args.PushMarkup(Loc.GetString("wg-shield-examine-hull-cooling", ("hull", WGShipShieldEffects.Display(stats.HullCooling))));
+        args.PushMarkup(Loc.GetString("wg-shield-examine-power", ("idle", WGShipShieldEffects.Display(stats.BasePowerWatts / 1000f)), ("maximum", WGShipShieldEffects.Display(stats.MaximumPowerWatts / 1000f))));
+        args.PushMarkup(Loc.GetString("wg-shield-examine-overload", ("seconds", WGShipShieldEffects.Display(stats.OverloadSeconds))));
         if (stats.ThrustFactor < 1f || stats.TurnFactor < 1f)
         {
             args.PushMarkup(Loc.GetString("wg-shield-examine-cost",
                 ("thrust", MathF.Round((1f - stats.ThrustFactor) * 100f)), ("turn", MathF.Round((1f - stats.TurnFactor) * 100f))));
         }
         if (stats.GunLockSeconds > 0f)
-            args.PushMarkup(Loc.GetString("wg-shield-examine-gun-lock", ("seconds", MathF.Round(stats.GunLockSeconds, 1))));
+            args.PushMarkup(Loc.GetString("wg-shield-examine-gun-lock", ("seconds", WGShipShieldEffects.Display(stats.GunLockSeconds))));
         if (stats.CollapseHeat > 0f)
             args.PushMarkup(Loc.GetString("wg-shield-collapse-heat", ("share", MathF.Round(stats.CollapseHeat * 100f))));
         if (HasComp<WGShipShieldCostComponent>(uid))

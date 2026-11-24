@@ -59,21 +59,21 @@ public sealed class WGShipShieldStatsWindow : DefaultWindow
         _limit.Text = Loc.GetString("wg-shield-stats-overload-limit", ("value", MathF.Round(stats.DamageLimit, 0)));
         _repair.Text = Loc.GetString(
             stats.HullCooling > 0f ? "wg-shield-stats-ship-cooling" : stats.Vents ? "wg-shield-stats-cooling" : "wg-shield-stats-online-repair",
-            ("value", MathF.Round(stats.HealPerSecond, 1)), ("hull", MathF.Round(stats.HullCooling, 1)),
-            ("down", MathF.Round(stats.HealPerSecond * WGShipShieldEffects.FieldDownCooling, 1)),
-            ("hold", MathF.Round(stats.HardHeatHold, 1)));
+            ("value", WGShipShieldEffects.Display(stats.HealPerSecond)), ("hull", WGShipShieldEffects.Display(stats.HullCooling)),
+            ("down", WGShipShieldEffects.Display(stats.HealPerSecond * WGShipShieldEffects.FieldDownCooling)),
+            ("hold", WGShipShieldEffects.Display(stats.HardHeatHold)));
         _recharge.Text = Loc.GetString(stats.Vents ? "wg-shield-stats-vent" : "wg-shield-stats-offline-repair",
-            ("value", MathF.Round(stats.RechargePerSecond, 1)));
-        _idle.Text = Loc.GetString("wg-shield-stats-idle-power", ("value", MathF.Round(stats.BasePowerWatts / 1000f, 1)));
-        _maximum.Text = Loc.GetString("wg-shield-stats-max-power", ("value", MathF.Round(stats.MaximumPowerWatts / 1000f, 1)));
-        _lockout.Text = Loc.GetString("wg-shield-stats-overload-lockout", ("value", MathF.Round(stats.OverloadSeconds, 1)));
+            ("value", WGShipShieldEffects.Display(stats.RechargePerSecond)));
+        _idle.Text = Loc.GetString("wg-shield-stats-idle-power", ("value", WGShipShieldEffects.Display(stats.BasePowerWatts / 1000f)));
+        _maximum.Text = Loc.GetString("wg-shield-stats-max-power", ("value", WGShipShieldEffects.Display(stats.MaximumPowerWatts / 1000f)));
+        _lockout.Text = Loc.GetString("wg-shield-stats-overload-lockout", ("value", WGShipShieldEffects.Display(stats.OverloadSeconds)));
         var costs = stats.ThrustFactor < 1f || stats.TurnFactor < 1f || stats.GunLockSeconds > 0f
             ? Loc.GetString("wg-shield-stats-costs", ("thrust", MathF.Round((1f - stats.ThrustFactor) * 100f)),
-                ("turn", MathF.Round((1f - stats.TurnFactor) * 100f)), ("seconds", MathF.Round(stats.GunLockSeconds, 1)))
+                ("turn", MathF.Round((1f - stats.TurnFactor) * 100f)), ("seconds", WGShipShieldEffects.Display(stats.GunLockSeconds)))
             : Loc.GetString("wg-shield-stats-no-costs");
         _costs.Text = stats.CollapseHeat > 0f
             ? $"{costs} {Loc.GetString("wg-shield-collapse-heat", ("share", MathF.Round(stats.CollapseHeat * 100f)))}"
             : costs;
-        _note.Text = Loc.GetString("wg-shield-stats-recovery-note", ("rate", MathF.Round(stats.HitHeat, 2)));
+        _note.Text = Loc.GetString("wg-shield-stats-recovery-note", ("rate", WGShipShieldEffects.Display(stats.HitHeat)));
     }
 }

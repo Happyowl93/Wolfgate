@@ -256,7 +256,7 @@ public sealed partial class WGShipShieldShuntScreen : BoxContainer
         if (hardHold != _hardHold)
         {
             _hardHold = hardHold;
-            _heat.ToolTip = Loc.GetString("wg-shield-helm-hard-heat-help", ("hold", MathF.Round(hardHold, 1)));
+            _heat.ToolTip = Loc.GetString("wg-shield-helm-hard-heat-help", ("hold", WGShipShieldEffects.Display(hardHold)));
         }
         if (state?.Stats is { } stats)
             _statsWindow?.UpdateStats(stats);

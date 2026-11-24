@@ -60,9 +60,9 @@ public sealed partial class WGShipHeatComponent : Component
     [ViewVariables]
     public bool Sized;
 
-    /// <summary>Share of each shot's damage the ship's own guns add to its heat.</summary>
+    /// <summary>Share of each shot's damage the ship's own guns add to its heat, unless a gun sets its own (<see cref="WGShipGunHeatComponent"/>).</summary>
     [DataField]
-    public float FireHeat = 0.5f;
+    public float FireHeat = 0.25f;
 
     /// <summary>Thermal signature each point of heat the hull holds adds for long-range sensors.</summary>
     [DataField]

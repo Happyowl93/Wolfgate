@@ -444,14 +444,16 @@ public sealed partial class ShipShieldsSystem
         var hull = EnsureComp<WGShipHeatComponent>(grid);
         if (hull.FireHeat <= 0f)
             return;
-        var damage = 0f;
+        var own = CompOrNull<WGShipGunHeatComponent>(gun);
+        var share = own?.DamageShare ?? hull.FireHeat;
+        var heat = 0f;
         foreach (var (uid, shootable) in args.Ammo)
         {
             if (!IsWolfgateMissileShot(uid, shootable))
-                damage += WolfgateShotDamage(gun, uid, shootable);
+                heat += own?.HeatPerShot ?? WolfgateShotDamage(gun, uid, shootable) * share;
         }
         // It stops at the hold mark, so a ship's own fire never collapses its field.
-        AddWolfgateShipHeat(grid, damage * hull.FireHeat, WGShipShieldEffects.GunHoldHeat);
+        AddWolfgateShipHeat(grid, MathF.Max(0f, heat), WGShipShieldEffects.GunHoldHeat);
         // Latch the hold now; cooling before the next shot would otherwise drop it under the mark unlatched.
         IsWolfgateShipHeatHeld(grid);
     }

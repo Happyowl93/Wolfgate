@@ -39,8 +39,24 @@ public sealed partial class WGShipFacingSystem : EntitySystem
     private MapCoordinates? _sent;
     private TimeSpan _sentAt;
 
+    private readonly WGHeldAngle _eyeRotation = new();
+
     /// <summary>Whether the pilot is holding the facing key, so Shift there means steering, not a modified click.</summary>
     public bool Held => _held;
+
+    /// <summary>Whether the local player is at a helm holding the facing key.</summary>
+    private bool Steering => _held && _player.LocalEntity is { } user &&
+                             TryComp<PilotComponent>(user, out var pilot) && pilot.Console != null;
+
+    /// <summary>
+    /// The rotation a view that turns with the ship draws with: held still while steering, since a view that turns with
+    /// the hull makes a still cursor a point on the hull, which the nose never reaches.
+    /// </summary>
+    public Angle HoldRotation(WGHeldAngle angle, Angle live) => angle.Apply(live, Steering, _timing.RealTime);
+
+    /// <summary>The local player's camera rotation, held still while steering.</summary>
+    public Angle HoldEyeRotation(EntityUid eye, Angle live) =>
+        eye == _player.LocalEntity ? HoldRotation(_eyeRotation, live) : live;
 
     public override void Initialize()
     {
