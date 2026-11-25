@@ -1,5 +1,6 @@
 wg-settlers-verb-play = Play
 wg-settlers-examine-running = [color=yellow]A game is in progress on this board.[/color]
+guide-entry-wg-games = Games
 guide-entry-wg-settlers = Settlers of Colossus
 wg-settlers-window-title = Settlers of Colossus
 
