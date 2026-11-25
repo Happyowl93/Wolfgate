@@ -1,17 +1,21 @@
+using System.Numerics;
 using Content.Shared._WG.Settlers;
+using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 
 namespace Content.Client._WG.Settlers;
 
 /// <summary>
-/// One cell per resource: its icon and a count. With buttons the counts can be set, each up to its limit;
-/// without, the row just shows them, as for a hand.
+/// One stepper per resource, each up to its limit, after an optional label. The icons sit in a separate
+/// <see cref="Header"/> row above, so stacked rows line up and stay narrow.
 /// </summary>
 public sealed class SettlersCounterRow : BoxContainer
 {
+    public const float LabelWidth = 56f;
+
     private readonly Label[] _labels = new Label[SettlersRules.ResourceCount];
-    private readonly Button?[] _less = new Button?[SettlersRules.ResourceCount];
-    private readonly Button?[] _more = new Button?[SettlersRules.ResourceCount];
+    private readonly Button[] _less = new Button[SettlersRules.ResourceCount];
+    private readonly Button[] _more = new Button[SettlersRules.ResourceCount];
 
     public readonly int[] Counts = new int[SettlersRules.ResourceCount];
 
@@ -20,11 +24,12 @@ public sealed class SettlersCounterRow : BoxContainer
 
     public event Action? OnChanged;
 
-    public SettlersCounterRow(bool editable)
+    public SettlersCounterRow(string? label = null)
     {
         Orientation = LayoutOrientation.Horizontal;
         SeparationOverride = 4;
         Array.Fill(Limits, SettlersRules.BankStock);
+        AddLabel(this, label);
 
         for (var resource = 0; resource < SettlersRules.ResourceCount; resource++)
         {
@@ -33,41 +38,61 @@ public sealed class SettlersCounterRow : BoxContainer
             {
                 Orientation = LayoutOrientation.Horizontal,
                 HorizontalExpand = true,
+                Align = AlignMode.Center,
+                SeparationOverride = 2,
                 ToolTip = SettlersArt.ResourceName(resource),
                 MouseFilter = MouseFilterMode.Pass,
             };
 
-            cell.AddChild(new TextureRect
-            {
-                Texture = SettlersArt.ResourceTexture(resource),
-                Stretch = TextureRect.StretchMode.KeepAspectCentered,
-                MinSize = new System.Numerics.Vector2(28f, 28f),
-            });
-
+            _less[resource] = new Button { Text = "-", MinWidth = 20f };
+            _more[resource] = new Button { Text = "+", MinWidth = 20f };
             _labels[resource] = new Label { MinWidth = 18f, Align = Label.AlignMode.Center, VerticalAlignment = VAlignment.Center };
-
-            if (editable)
-            {
-                var less = new Button { Text = "-", MinWidth = 18f };
-                var more = new Button { Text = "+", MinWidth = 18f };
-                less.OnPressed += _ => Set(index, Counts[index] - 1);
-                more.OnPressed += _ => Set(index, Counts[index] + 1);
-                _less[resource] = less;
-                _more[resource] = more;
-                cell.AddChild(less);
-                cell.AddChild(_labels[resource]);
-                cell.AddChild(more);
-            }
-            else
-            {
-                _labels[resource].StyleClasses.Add("LabelHeading");
-                cell.AddChild(_labels[resource]);
-            }
-
+            _less[resource].OnPressed += _ => Set(index, Counts[index] - 1);
+            _more[resource].OnPressed += _ => Set(index, Counts[index] + 1);
+            cell.AddChild(_less[resource]);
+            cell.AddChild(_labels[resource]);
+            cell.AddChild(_more[resource]);
             AddChild(cell);
         }
 
         Refresh();
+    }
+
+    /// <summary>The resource icons, spaced to sit over the steppers of rows below.</summary>
+    public static BoxContainer Header(bool labelled)
+    {
+        var row = new BoxContainer { Orientation = LayoutOrientation.Horizontal, SeparationOverride = 4 };
+        if (labelled)
+            AddLabel(row, string.Empty);
+
+        for (var resource = 0; resource < SettlersRules.ResourceCount; resource++)
+        {
+            row.AddChild(new TextureRect
+            {
+                Texture = SettlersArt.ResourceTexture(resource),
+                Stretch = TextureRect.StretchMode.KeepAspectCentered,
+                MinSize = new Vector2(24f, 24f),
+                HorizontalExpand = true,
+                ToolTip = SettlersArt.ResourceName(resource),
+                MouseFilter = MouseFilterMode.Pass,
+            });
+        }
+
+        return row;
+    }
+
+    private static void AddLabel(BoxContainer row, string? text)
+    {
+        if (text == null)
+            return;
+
+        row.AddChild(new Label
+        {
+            Text = text,
+            MinWidth = LabelWidth,
+            VerticalAlignment = VAlignment.Center,
+            FontColorOverride = SettlersArt.Muted,
+        });
     }
 
     private void Set(int resource, int count)
@@ -79,13 +104,6 @@ public sealed class SettlersCounterRow : BoxContainer
         Counts[resource] = count;
         Refresh();
         OnChanged?.Invoke();
-    }
-
-    /// <summary>Shows these counts.</summary>
-    public void Show(int[] counts)
-    {
-        Array.Copy(counts, Counts, Counts.Length);
-        Refresh();
     }
 
     public void Clear()
@@ -111,11 +129,9 @@ public sealed class SettlersCounterRow : BoxContainer
         for (var resource = 0; resource < Counts.Length; resource++)
         {
             _labels[resource].Text = Counts[resource].ToString();
-            if (_less[resource] is not { } less || _more[resource] is not { } more)
-                continue;
-
-            less.Disabled = Counts[resource] <= 0;
-            more.Disabled = Counts[resource] >= Limits[resource];
+            _labels[resource].FontColorOverride = Counts[resource] > 0 ? null : SettlersArt.Muted;
+            _less[resource].Disabled = Counts[resource] <= 0;
+            _more[resource].Disabled = Counts[resource] >= Limits[resource];
         }
     }
 }

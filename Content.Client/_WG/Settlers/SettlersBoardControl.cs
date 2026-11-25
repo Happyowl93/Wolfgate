@@ -31,8 +31,35 @@ public sealed class SettlersBoardControl : Control
 
     private readonly Vector2[] _hex = new Vector2[6];
     private readonly Vector2[] _quad = new Vector2[4];
+    private readonly Vector2[] _shape = new Vector2[7];
     private readonly Vector2[] _stars = new Vector2[90];
     private readonly float[] _starAlpha = new float[90];
+    private readonly Vector2[] _debris = new Vector2[9];
+
+    /// <summary>Faint nebulae behind the board: centre and radius as fractions of the control, and colour.</summary>
+    private static readonly (Vector2 Center, float Radius, Color Color)[] Nebulae =
+    {
+        (new Vector2(0.18f, 0.22f), 0.34f, Color.FromHex("#6B3FA0")),
+        (new Vector2(0.86f, 0.78f), 0.38f, Color.FromHex("#1F6F8B")),
+        (new Vector2(0.78f, 0.12f), 0.22f, Color.FromHex("#8B2F5F")),
+    };
+
+    /// <summary>An outpost's outline in building radii: a hut with a pointed roof.</summary>
+    private static readonly Vector2[] OutpostShape =
+    {
+        new(0f, -1.1f), new(0.9f, -0.3f), new(0.9f, 0.8f), new(-0.9f, 0.8f), new(-0.9f, -0.3f),
+    };
+
+    /// <summary>A colony's outline in building radii: a tower beside a lower hall, fanned from the first corner.</summary>
+    private static readonly Vector2[] ColonyShape =
+    {
+        new(-1f, 0.8f), new(-1f, -0.6f), new(-0.5f, -1.1f), new(0f, -0.6f), new(0f, -0.1f), new(1f, -0.1f), new(1f, 0.8f),
+    };
+
+    private static readonly Vector2[] OutlineOffsets =
+    {
+        new(-1f, 0f), new(1f, 0f), new(0f, -1f), new(0f, 1f), new(-0.7f, -0.7f), new(0.7f, -0.7f), new(-0.7f, 0.7f), new(0.7f, 0.7f),
+    };
     private readonly Texture[] _icons = new Texture[SettlersRules.ResourceCount];
     private readonly Texture _pirate;
     private readonly Font _numberFont;
@@ -70,6 +97,12 @@ public sealed class SettlersBoardControl : Control
         {
             _stars[i] = new Vector2(random.NextSingle(), random.NextSingle());
             _starAlpha[i] = 0.15f + random.NextSingle() * 0.5f;
+        }
+
+        for (var i = 0; i < _debris.Length; i++)
+        {
+            var angle = random.NextSingle() * MathF.Tau;
+            _debris[i] = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (0.2f + random.NextSingle() * 0.5f);
         }
     }
 
@@ -158,10 +191,20 @@ public sealed class SettlersBoardControl : Control
     {
         base.Draw(handle);
 
-        handle.DrawRect(new UIBox2(0f, 0f, PixelWidth, PixelHeight), SettlersArt.Space);
+        var size = new Vector2(PixelWidth, PixelHeight);
+        handle.DrawRect(new UIBox2(Vector2.Zero, size), SettlersArt.Space);
+        var span = MathF.Max(PixelWidth, PixelHeight);
+        foreach (var (center, extent, tint) in Nebulae)
+        {
+            for (var layer = 0; layer < 6; layer++)
+            {
+                Circle(handle, center * size, extent * span * (1f - layer * 0.15f), tint.WithAlpha(0.03f));
+            }
+        }
+
         for (var i = 0; i < _stars.Length; i++)
         {
-            handle.DrawCircle(_stars[i] * new Vector2(PixelWidth, PixelHeight), 1f, Color.White.WithAlpha(_starAlpha[i]));
+            Circle(handle, _stars[i] * new Vector2(PixelWidth, PixelHeight), 1f, Color.White.WithAlpha(_starAlpha[i]));
         }
 
         if (State is not { } state)
@@ -172,7 +215,12 @@ public sealed class SettlersBoardControl : Control
 
         for (var tile = 0; tile < SettlersBoard.TileCount; tile++)
         {
-            DrawHex(handle, SettlersBoard.TileCenter[tile], 1.1f, SettlersArt.Rim);
+            DrawHex(handle, SettlersBoard.TileCenter[tile], 1.18f, SettlersArt.Coast);
+        }
+
+        for (var tile = 0; tile < SettlersBoard.TileCount; tile++)
+        {
+            DrawHex(handle, SettlersBoard.TileCenter[tile], 1.08f, SettlersArt.Rim);
         }
 
         DrawDocks(handle, state, radius);
@@ -207,7 +255,7 @@ public sealed class SettlersBoardControl : Control
             _hex[i] = ToPixel(center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * scale);
         }
 
-        handle.DrawPrimitives(DrawPrimitiveTopology.TriangleFan, _hex, color);
+        handle.DrawPrimitives(DrawPrimitiveTopology.TriangleFan, _hex, Color.ToSrgb(color));
     }
 
     private void DrawTile(DrawingHandleScreen handle, SettlersState state, int tile, float radius)
@@ -215,8 +263,18 @@ public sealed class SettlersBoardControl : Control
         var center = SettlersBoard.TileCenter[tile];
         var sector = state.Sectors[tile];
         var color = SettlersArt.SectorColors[(int) sector];
-        DrawHex(handle, center, 0.97f, Color.InterpolateBetween(color, Color.Black, 0.4f));
-        DrawHex(handle, center, 0.88f, color);
+        DrawHex(handle, center, 0.97f, Color.InterpolateBetween(color, Color.Black, 0.45f));
+        DrawHex(handle, center, 0.9f, Color.InterpolateBetween(color, Color.White, 0.14f));
+        DrawHex(handle, center, 0.85f, color);
+
+        if (sector == SettlersSector.DeadZone)
+        {
+            var rock = Color.InterpolateBetween(color, Color.White, 0.25f);
+            for (var i = 0; i < _debris.Length; i++)
+            {
+                Circle(handle, ToPixel(center + _debris[i]), (0.025f + 0.012f * (i % 3)) * radius, rock);
+            }
+        }
 
         if (SettlersRules.Yield(sector) is { } yield)
         {
@@ -231,10 +289,12 @@ public sealed class SettlersBoardControl : Control
 
         var token = ToPixel(center + new Vector2(0f, 0.32f));
         var produced = state.Rolled && state.Die1 + state.Die2 == number;
+        Circle(handle, token + new Vector2(0f, 0.04f * radius), 0.29f * radius, Color.Black.WithAlpha(0.45f));
         if (produced)
-            handle.DrawCircle(token, 0.33f * radius, SettlersArt.Rolled);
+            Circle(handle, token, 0.34f * radius, SettlersArt.Rolled);
 
-        handle.DrawCircle(token, 0.27f * radius, SettlersArt.Token);
+        Circle(handle, token, 0.29f * radius, SettlersArt.Outline);
+        Circle(handle, token, 0.27f * radius, SettlersArt.Token);
         var text = number.ToString();
         var textColor = SettlersRules.IsHot(number) ? SettlersArt.TokenHot : SettlersArt.TokenText;
         var dimensions = handle.GetDimensions(_numberFont, text, UIScale);
@@ -244,7 +304,7 @@ public sealed class SettlersBoardControl : Control
         var gap = 0.065f * radius;
         for (var pip = 0; pip < pips; pip++)
         {
-            handle.DrawCircle(token + new Vector2((pip - (pips - 1) * 0.5f) * gap, 0.15f * radius), 0.022f * radius + 0.5f, textColor);
+            Circle(handle, token + new Vector2((pip - (pips - 1) * 0.5f) * gap, 0.15f * radius), 0.022f * radius + 0.5f, textColor);
         }
     }
 
@@ -259,12 +319,14 @@ public sealed class SettlersBoardControl : Control
             var pixel = ToPixel(at);
             var resource = state.Docks[dock];
 
-            DrawThickLine(handle, pixel, ToPixel(SettlersBoard.VertexPos[SettlersBoard.EdgeA[edge]]), 0.05f * radius, DockLine);
-            DrawThickLine(handle, pixel, ToPixel(SettlersBoard.VertexPos[SettlersBoard.EdgeB[edge]]), 0.05f * radius, DockLine);
-
             var fill = resource == SettlersRules.AnyDock ? SettlersArt.AnyDockColor : SettlersArt.SectorColors[resource];
-            handle.DrawCircle(pixel, 0.3f * radius, SettlersArt.Outline);
-            handle.DrawCircle(pixel, 0.26f * radius, fill);
+            var pier = Color.InterpolateBetween(fill, DockLine, 0.5f);
+            DrawThickLine(handle, pixel, ToPixel(SettlersBoard.VertexPos[SettlersBoard.EdgeA[edge]]), 0.07f * radius, pier);
+            DrawThickLine(handle, pixel, ToPixel(SettlersBoard.VertexPos[SettlersBoard.EdgeB[edge]]), 0.07f * radius, pier);
+
+            Circle(handle, pixel, 0.31f * radius, SettlersArt.Outline);
+            Circle(handle, pixel, 0.28f * radius, Color.InterpolateBetween(fill, Color.White, 0.2f));
+            Circle(handle, pixel, 0.25f * radius, fill);
 
             var ratio = resource == SettlersRules.AnyDock ? SettlersRules.AnyDockRatio : SettlersRules.ResourceDockRatio;
             var text = Loc.GetString("wg-settlers-ratio", ("ratio", ratio));
@@ -292,26 +354,37 @@ public sealed class SettlersBoardControl : Control
         DrawThickLine(handle, from, to, 0.12f * radius, color);
     }
 
-    private static void DrawBuilding(DrawingHandleScreen handle, Vector2 at, Color color, bool colony, float radius)
+    /// <summary>An outpost or colony silhouette in the owner's colour, outlined and lit along its roof.</summary>
+    private void DrawBuilding(DrawingHandleScreen handle, Vector2 at, Color color, bool colony, float radius)
     {
-        if (!colony)
+        var shape = colony ? ColonyShape : OutpostShape;
+        var scale = (colony ? 0.2f : 0.16f) * radius;
+        var outline = MathF.Max(1.5f, 0.035f * radius);
+
+        foreach (var offset in OutlineOffsets)
         {
-            handle.DrawCircle(at, 0.2f * radius, SettlersArt.Outline);
-            handle.DrawCircle(at, 0.15f * radius, color);
-            return;
+            DrawShape(handle, shape, at + offset * outline, scale, SettlersArt.Outline.WithAlpha(color.A));
         }
 
-        var outer = 0.27f * radius;
-        var inner = 0.21f * radius;
-        handle.DrawRect(new UIBox2(at - new Vector2(outer), at + new Vector2(outer)), SettlersArt.Outline);
-        handle.DrawRect(new UIBox2(at - new Vector2(inner), at + new Vector2(inner)), color);
-        handle.DrawCircle(at, 0.08f * radius, SettlersArt.Outline);
+        DrawShape(handle, shape, at, scale, color);
+        DrawShape(handle, shape, at + new Vector2(0f, scale * 0.15f), scale * 0.8f, Color.InterpolateBetween(color, Color.Black, 0.2f).WithAlpha(color.A));
+    }
+
+    private void DrawShape(DrawingHandleScreen handle, Vector2[] shape, Vector2 at, float scale, Color color)
+    {
+        var points = new Span<Vector2>(_shape, 0, shape.Length);
+        for (var i = 0; i < shape.Length; i++)
+        {
+            points[i] = at + shape[i] * scale;
+        }
+
+        handle.DrawPrimitives(DrawPrimitiveTopology.TriangleFan, points, Color.ToSrgb(color));
     }
 
     private void DrawPirates(DrawingHandleScreen handle, Vector2 at, float radius)
     {
-        handle.DrawCircle(at, 0.36f * radius, Color.Black.WithAlpha(0.8f));
-        handle.DrawCircle(at, 0.36f * radius, SettlersArt.TokenHot, false);
+        Circle(handle, at, 0.4f * radius, SettlersArt.TokenHot);
+        Circle(handle, at, 0.36f * radius, Color.FromHex("#120A0C"));
         var size = 0.52f * radius;
         handle.DrawTextureRect(_pirate, UIBox2.FromDimensions(at - new Vector2(size * 0.5f), new Vector2(size)));
     }
@@ -340,7 +413,7 @@ public sealed class SettlersBoardControl : Control
 
                 case SettlersPick.Pirates:
                     var center = ToPixel(SettlersBoard.TileCenter[target]);
-                    handle.DrawCircle(center, 0.5f * radius, hovered ? SettlersArt.TokenHot.WithAlpha(0.45f) : Color.White.WithAlpha(0.12f));
+                    Circle(handle, center, 0.5f * radius, hovered ? SettlersArt.TokenHot.WithAlpha(0.45f) : Color.White.WithAlpha(0.12f));
                     break;
 
                 default:
@@ -348,7 +421,7 @@ public sealed class SettlersBoardControl : Control
                     if (hovered)
                         DrawBuilding(handle, at, color.WithAlpha(0.85f), Pick == SettlersPick.Colony, radius);
                     else
-                        handle.DrawCircle(at, 0.13f * radius, Color.White.WithAlpha(0.6f), false);
+                        Circle(handle, at, 0.13f * radius, Color.White.WithAlpha(0.6f), false);
                     break;
             }
         }
@@ -368,32 +441,53 @@ public sealed class SettlersBoardControl : Control
 
     private static void DrawDie(DrawingHandleScreen handle, Vector2 at, float size, int value)
     {
-        handle.DrawRect(UIBox2.FromDimensions(at, new Vector2(size)), SettlersArt.Token);
-        handle.DrawRect(UIBox2.FromDimensions(at, new Vector2(size)), SettlersArt.Outline, false);
+        var corner = size * 0.18f;
+        DrawRoundRect(handle, UIBox2.FromDimensions(at + new Vector2(size * 0.06f), new Vector2(size)), corner, Color.Black.WithAlpha(0.5f));
+        DrawRoundRect(handle, UIBox2.FromDimensions(at, new Vector2(size)), corner, SettlersArt.Token);
 
         var center = at + new Vector2(size * 0.5f);
         var step = size * 0.27f;
         var pip = size * 0.08f;
         var color = SettlersArt.TokenText;
         if (value % 2 == 1)
-            handle.DrawCircle(center, pip, color);
+            Circle(handle, center, pip, color);
         if (value >= 2)
         {
-            handle.DrawCircle(center + new Vector2(-step, -step), pip, color);
-            handle.DrawCircle(center + new Vector2(step, step), pip, color);
+            Circle(handle, center + new Vector2(-step, -step), pip, color);
+            Circle(handle, center + new Vector2(step, step), pip, color);
         }
 
         if (value >= 4)
         {
-            handle.DrawCircle(center + new Vector2(step, -step), pip, color);
-            handle.DrawCircle(center + new Vector2(-step, step), pip, color);
+            Circle(handle, center + new Vector2(step, -step), pip, color);
+            Circle(handle, center + new Vector2(-step, step), pip, color);
         }
 
         if (value == 6)
         {
-            handle.DrawCircle(center + new Vector2(-step, 0f), pip, color);
-            handle.DrawCircle(center + new Vector2(step, 0f), pip, color);
+            Circle(handle, center + new Vector2(-step, 0f), pip, color);
+            Circle(handle, center + new Vector2(step, 0f), pip, color);
         }
+    }
+
+    /// <summary>
+    /// Polygon draws convert their colour from sRGB twice and come out too dark, so shapes pass theirs through
+    /// <see cref="Color.ToSrgb"/> first; rects and textures are drawn as given.
+    /// </summary>
+    private static void Circle(DrawingHandleScreen handle, Vector2 at, float radius, Color color, bool filled = true)
+    {
+        handle.DrawCircle(at, radius, Color.ToSrgb(color), filled);
+    }
+
+    private static void DrawRoundRect(DrawingHandleScreen handle, UIBox2 box, float corner, Color color)
+    {
+        handle.DrawRect(new UIBox2(box.Left + corner, box.Top, box.Right - corner, box.Bottom), color);
+        handle.DrawRect(new UIBox2(box.Left, box.Top + corner, box.Left + corner, box.Bottom - corner), color);
+        handle.DrawRect(new UIBox2(box.Right - corner, box.Top + corner, box.Right, box.Bottom - corner), color);
+        Circle(handle, new Vector2(box.Left + corner, box.Top + corner), corner, color);
+        Circle(handle, new Vector2(box.Right - corner, box.Top + corner), corner, color);
+        Circle(handle, new Vector2(box.Left + corner, box.Bottom - corner), corner, color);
+        Circle(handle, new Vector2(box.Right - corner, box.Bottom - corner), corner, color);
     }
 
     private void DrawThickLine(DrawingHandleScreen handle, Vector2 from, Vector2 to, float width, Color color)
@@ -407,6 +501,6 @@ public sealed class SettlersBoardControl : Control
         _quad[1] = to + side;
         _quad[2] = to - side;
         _quad[3] = from - side;
-        handle.DrawPrimitives(DrawPrimitiveTopology.TriangleFan, _quad, color);
+        handle.DrawPrimitives(DrawPrimitiveTopology.TriangleFan, _quad, Color.ToSrgb(color));
     }
 }

@@ -6,10 +6,10 @@ wg-settlers-seat-open = Seat { $number } (open)
 wg-settlers-seat-vacant = Seat { $number } (left the game)
 wg-settlers-seat-waiting = Waiting for the game to start.
 wg-settlers-seat-not-playing = Not in this game.
-wg-settlers-seat-stats = { $points } pts · { $cards } cards · { $contracts } contracts · { $escorts } escorts · route { $route }
-wg-settlers-badge-route = [Longest route]
-wg-settlers-badge-fleet = [Largest fleet]
-wg-settlers-badge-discarding = [Discarding { $count }]
+wg-settlers-seat-stats = { $cards } cards · { $contracts } contracts · { $escorts } escorts · route { $route }
+wg-settlers-badge-route = Longest route
+wg-settlers-badge-fleet = Largest fleet
+wg-settlers-badge-discarding = Discarding { $count }
 wg-settlers-join = Join
 wg-settlers-leave = Leave
 wg-settlers-start = Start game
@@ -23,6 +23,7 @@ wg-settlers-section-log = Log
 
 wg-settlers-points = { $points } points
 wg-settlers-points-hidden = { $points } points ({ $hidden } hidden)
+wg-settlers-points-tooltip = Victory points. Ten on your own turn wins.
 
 wg-settlers-resource-scrap = Scrap
 wg-settlers-resource-ice = Ice
@@ -65,14 +66,14 @@ wg-settlers-rob = Rob:
 wg-settlers-discard = Discard
 wg-settlers-discard-count = Discard { $count } cards ({ $chosen } chosen).
 
-wg-settlers-bank-give = Give
+wg-settlers-bank-give = Bank
 wg-settlers-bank-get = for
 wg-settlers-bank-trade = Trade { $ratio }:1
-wg-settlers-offer-give = You give:
-wg-settlers-offer-want = You want:
+wg-settlers-offer-give = Give
+wg-settlers-offer-want = Want
 wg-settlers-post-offer = Offer to the table
 wg-settlers-withdraw-offer = Withdraw my offer
-wg-settlers-offer-line = { $player } gives { $give } for { $want }
+wg-settlers-offer-for = for
 wg-settlers-accept = Accept
 
 wg-settlers-status-lobby = Take a seat, then start the game.

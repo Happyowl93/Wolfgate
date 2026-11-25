@@ -21,9 +21,12 @@ namespace Content.Client._WG.Settlers;
 public sealed class SettlersWindow : DefaultWindow
 {
     private static readonly Color TurnColor = Color.FromHex("#E8C020");
-    private static readonly Color CardColor = Color.FromHex("#1D1D21");
-    private static readonly Color CardEdge = Color.FromHex("#3A3A42");
-    private static readonly Color SectionColor = Color.FromHex("#9AA0B4");
+    private static readonly Color CardColor = Color.FromHex("#1A1C24");
+    private static readonly Color CardEdge = Color.FromHex("#2E3240");
+    private static readonly Color BannerColor = Color.FromHex("#1C1F2A");
+    private static readonly Color BadgeRoute = Color.FromHex("#C08A2E");
+    private static readonly Color BadgeFleet = Color.FromHex("#3E7CB1");
+    private static readonly Color BadgeDiscard = Color.FromHex("#B3261E");
     private static readonly ResolvedSoundSpecifier DiceSound = new ResolvedPathSpecifier("/Audio/Items/Dice/dice3.ogg");
 
     private readonly IEntityManager _entMan;
@@ -32,27 +35,31 @@ public sealed class SettlersWindow : DefaultWindow
 
     private readonly SettlersBoardControl _board = new();
 
+    private readonly PanelContainer[] _seatCards = new PanelContainer[SettlersRules.MaxPlayers];
     private readonly StyleBoxFlat[] _seatStyles = new StyleBoxFlat[SettlersRules.MaxPlayers];
     private readonly Label[] _seatNames = new Label[SettlersRules.MaxPlayers];
     private readonly Label[] _seatStats = new Label[SettlersRules.MaxPlayers];
+    private readonly Label[] _seatPoints = new Label[SettlersRules.MaxPlayers];
+    private readonly BoxContainer[] _seatBadges = new BoxContainer[SettlersRules.MaxPlayers];
     private readonly Button[] _seatButtons = new Button[SettlersRules.MaxPlayers];
 
+    private readonly StyleBoxFlat _bannerStyle = SettlersArt.Box(BannerColor, TurnColor, 0f, 10f, 6f);
     private readonly Label _status = new();
     private readonly Label _hint = new();
     private readonly Button _start = new() { Text = Loc.GetString("wg-settlers-start") };
     private readonly Button _newGame = new() { Text = Loc.GetString("wg-settlers-new-game") };
 
-    private readonly BoxContainer _playArea = new() { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 6 };
+    private readonly BoxContainer _playArea = new() { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 8 };
     private readonly Label _points = new();
-    private readonly SettlersCounterRow _hand = new(false);
+    private readonly SettlersHandRow _hand = new();
 
-    private readonly Button _roll = new() { Text = Loc.GetString("wg-settlers-roll") };
-    private readonly Button _endTurn = new() { Text = Loc.GetString("wg-settlers-end-turn") };
-    private readonly Button _endSurvey = new() { Text = Loc.GetString("wg-settlers-end-survey") };
-    private readonly Button _buildLane = new() { Text = Loc.GetString("wg-settlers-build-lane"), ToggleMode = true };
-    private readonly Button _buildOutpost = new() { Text = Loc.GetString("wg-settlers-build-outpost"), ToggleMode = true };
-    private readonly Button _buildColony = new() { Text = Loc.GetString("wg-settlers-build-colony"), ToggleMode = true };
-    private readonly Button _buyCard = new() { Text = Loc.GetString("wg-settlers-buy-card") };
+    private readonly Button _roll = new() { Text = Loc.GetString("wg-settlers-roll"), HorizontalExpand = true, MinHeight = 30f };
+    private readonly Button _endTurn = new() { Text = Loc.GetString("wg-settlers-end-turn"), HorizontalExpand = true, MinHeight = 30f };
+    private readonly Button _endSurvey = new() { Text = Loc.GetString("wg-settlers-end-survey"), HorizontalExpand = true, MinHeight = 30f };
+    private readonly SettlersCostButton _buildLane = new(Loc.GetString("wg-settlers-build-lane"), SettlersRules.LaneCost) { ToggleMode = true };
+    private readonly SettlersCostButton _buildOutpost = new(Loc.GetString("wg-settlers-build-outpost"), SettlersRules.OutpostCost) { ToggleMode = true };
+    private readonly SettlersCostButton _buildColony = new(Loc.GetString("wg-settlers-build-colony"), SettlersRules.ColonyCost) { ToggleMode = true };
+    private readonly SettlersCostButton _buyCard = new(Loc.GetString("wg-settlers-buy-card"), SettlersRules.CardCost);
 
     private readonly GridContainer _cards = new() { Columns = 2, HorizontalExpand = true };
     private readonly BoxContainer _choice = new() { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 4 };
@@ -60,21 +67,21 @@ public sealed class SettlersWindow : DefaultWindow
 
     private readonly BoxContainer _steal = new() { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 4 };
 
-    private readonly BoxContainer _discardBox = new() { Orientation = BoxContainer.LayoutOrientation.Vertical };
+    private readonly BoxContainer _discardBox = new() { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 4 };
     private readonly Label _discardLabel = new();
-    private readonly SettlersCounterRow _discard = new(true);
+    private readonly SettlersCounterRow _discard = new();
     private readonly Button _discardButton = new() { Text = Loc.GetString("wg-settlers-discard") };
 
     private readonly OptionButton _bankGive = new() { HorizontalExpand = true };
     private readonly OptionButton _bankGet = new() { HorizontalExpand = true };
     private readonly Button _bankTrade = new();
-    private readonly SettlersCounterRow _offerGive = new(true);
-    private readonly SettlersCounterRow _offerWant = new(true);
-    private readonly Button _postOffer = new() { Text = Loc.GetString("wg-settlers-post-offer") };
-    private readonly Button _withdrawOffer = new() { Text = Loc.GetString("wg-settlers-withdraw-offer") };
-    private readonly BoxContainer _offers = new() { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 2 };
+    private readonly SettlersCounterRow _offerGive = new(Loc.GetString("wg-settlers-offer-give"));
+    private readonly SettlersCounterRow _offerWant = new(Loc.GetString("wg-settlers-offer-want"));
+    private readonly Button _postOffer = new() { Text = Loc.GetString("wg-settlers-post-offer"), HorizontalExpand = true };
+    private readonly Button _withdrawOffer = new() { Text = Loc.GetString("wg-settlers-withdraw-offer"), HorizontalExpand = true };
+    private readonly BoxContainer _offers = new() { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 4 };
 
-    private readonly BoxContainer _log = new() { Orientation = BoxContainer.LayoutOrientation.Vertical };
+    private readonly BoxContainer _log = new() { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 1 };
 
     private SettlersStateMessage? _message;
     private int? _seat;
@@ -97,31 +104,35 @@ public sealed class SettlersWindow : DefaultWindow
         _cfg = IoCManager.Resolve<IConfigurationManager>();
 
         Title = Loc.GetString("wg-settlers-window-title");
-        SetSize = new Vector2(1040f, 720f);
-        MinSize = new Vector2(900f, 600f);
+        SetSize = new Vector2(1080f, 740f);
+        MinSize = new Vector2(940f, 600f);
 
-        var side = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 6, HorizontalExpand = true };
+        var side = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
+            SeparationOverride = 8,
+            HorizontalExpand = true,
+            Margin = new Thickness(0f, 0f, 6f, 0f),
+        };
+
+        var seats = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 4 };
         for (var seat = 0; seat < SettlersRules.MaxPlayers; seat++)
         {
-            side.AddChild(MakeSeat(seat));
+            seats.AddChild(MakeSeat(seat));
         }
 
-        _status.StyleClasses.Add("LabelHeading");
-        _hint.StyleClasses.Add("LabelSubText");
-        side.AddChild(_status);
-        side.AddChild(_hint);
-        side.AddChild(Row(_start, _newGame));
+        side.AddChild(seats);
+        side.AddChild(MakeBanner());
 
         BuildPlayArea();
         side.AddChild(_playArea);
 
-        side.AddChild(Section("wg-settlers-section-log"));
-        side.AddChild(_log);
+        side.AddChild(Section("wg-settlers-section-log", null, _log));
 
-        var scroll = new ScrollContainer { HScrollEnabled = false, MinWidth = 440f, VerticalExpand = true };
+        var scroll = new ScrollContainer { HScrollEnabled = false, MinWidth = 450f, VerticalExpand = true };
         scroll.AddChild(side);
 
-        var root = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 8 };
+        var root = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 10 };
         root.AddChild(_board);
         root.AddChild(scroll);
         Contents.AddChild(root);
@@ -133,16 +144,18 @@ public sealed class SettlersWindow : DefaultWindow
 
     private void BuildPlayArea()
     {
-        _playArea.AddChild(Row(Section("wg-settlers-section-hand"), _points));
-        _playArea.AddChild(_hand);
+        _points.FontOverride = SettlersArt.Font(12);
+        _points.FontColorOverride = SettlersArt.Heading;
+        _playArea.AddChild(Section("wg-settlers-section-hand", _points, _hand));
 
-        _playArea.AddChild(Section("wg-settlers-section-turn"));
-        _playArea.AddChild(Row(_roll, _endTurn, _endSurvey));
-        _playArea.AddChild(Row(_buildLane, _buildOutpost, _buildColony, _buyCard));
-        _buildLane.ToolTip = Cost(SettlersRules.LaneCost);
-        _buildOutpost.ToolTip = Cost(SettlersRules.OutpostCost);
-        _buildColony.ToolTip = Cost(SettlersRules.ColonyCost);
-        _buyCard.ToolTip = Cost(SettlersRules.CardCost);
+        var turn = Column(4);
+        turn.AddChild(Row(_roll, _endTurn, _endSurvey));
+        var builds = Row(_buildLane, _buildOutpost, _buildColony, _buyCard);
+        builds.SeparationOverride = 4;
+        turn.AddChild(builds);
+        turn.AddChild(_steal);
+        turn.AddChild(_discardBox);
+        _playArea.AddChild(Section("wg-settlers-section-turn", null, turn));
 
         _roll.OnPressed += _ => Act(SettlersActionKind.Roll);
         _endTurn.OnPressed += _ => Act(SettlersActionKind.EndTurn);
@@ -153,17 +166,16 @@ public sealed class SettlersWindow : DefaultWindow
         _buildColony.OnToggled += args => ToggleBuild(SettlersPick.Colony, args.Pressed);
 
         _steal.Visible = false;
-        _playArea.AddChild(_steal);
 
+        _discardLabel.FontColorOverride = BadgeDiscard;
         _discardBox.AddChild(_discardLabel);
+        _discardBox.AddChild(SettlersCounterRow.Header(false));
         _discardBox.AddChild(_discard);
         _discardBox.AddChild(_discardButton);
         _discard.OnChanged += Refresh;
         _discardButton.OnPressed += _ => SendCounts(SettlersActionKind.Discard, _discard.Counts, Array.Empty<int>());
-        _playArea.AddChild(_discardBox);
 
-        _playArea.AddChild(Section("wg-settlers-section-contracts"));
-        _playArea.AddChild(_cards);
+        _choiceLabel.VerticalAlignment = VAlignment.Center;
         _choice.AddChild(_choiceLabel);
         for (var resource = 0; resource < SettlersRules.ResourceCount; resource++)
         {
@@ -183,9 +195,11 @@ public sealed class SettlersWindow : DefaultWindow
         cancel.OnPressed += _ => CancelCard();
         _choice.AddChild(cancel);
         _choice.Visible = false;
-        _playArea.AddChild(_choice);
+        var contracts = Column(4);
+        contracts.AddChild(_cards);
+        contracts.AddChild(_choice);
+        _playArea.AddChild(Section("wg-settlers-section-contracts", null, contracts));
 
-        _playArea.AddChild(Section("wg-settlers-section-trade"));
         for (var resource = 0; resource < SettlersRules.ResourceCount; resource++)
         {
             _bankGive.AddItem(SettlersArt.ResourceName(resource), resource);
@@ -204,29 +218,52 @@ public sealed class SettlersWindow : DefaultWindow
             Refresh();
         };
         _bankTrade.OnPressed += _ => OnAction?.Invoke(new SettlersAction(SettlersActionKind.BankTrade, 0, _bankGive.SelectedId, _bankGet.SelectedId));
-        _playArea.AddChild(Row(new Label { Text = Loc.GetString("wg-settlers-bank-give") }, _bankGive,
-            new Label { Text = Loc.GetString("wg-settlers-bank-get") }, _bankGet, _bankTrade));
 
-        _playArea.AddChild(new Label { Text = Loc.GetString("wg-settlers-offer-give"), FontColorOverride = SectionColor });
-        _playArea.AddChild(_offerGive);
-        _playArea.AddChild(new Label { Text = Loc.GetString("wg-settlers-offer-want"), FontColorOverride = SectionColor });
-        _playArea.AddChild(_offerWant);
-        _playArea.AddChild(Row(_postOffer, _withdrawOffer));
+        var trade = Column(4);
+        trade.AddChild(Row(Muted("wg-settlers-bank-give", SettlersCounterRow.LabelWidth), _bankGive,
+            Muted("wg-settlers-bank-get"), _bankGet, _bankTrade));
+        trade.AddChild(Divider());
+        trade.AddChild(SettlersCounterRow.Header(true));
+        trade.AddChild(_offerGive);
+        trade.AddChild(_offerWant);
+        trade.AddChild(Row(_postOffer, _withdrawOffer));
+        trade.AddChild(_offers);
+        _playArea.AddChild(Section("wg-settlers-section-trade", null, trade));
+
         _offerGive.OnChanged += Refresh;
         _offerWant.OnChanged += Refresh;
         _postOffer.OnPressed += _ => SendCounts(SettlersActionKind.Offer, _offerGive.Counts, _offerWant.Counts);
         _withdrawOffer.OnPressed += _ => SendCounts(SettlersActionKind.Offer, new int[SettlersRules.ResourceCount], new int[SettlersRules.ResourceCount]);
-        _playArea.AddChild(_offers);
     }
 
-    private static Label Section(string loc)
+    /// <summary>A boxed section: a gold heading, something on its right, and its contents below.</summary>
+    private static PanelContainer Section(string loc, Control? right, Control body)
     {
-        return new Label { Text = Loc.GetString(loc), FontColorOverride = SectionColor, HorizontalExpand = true };
+        var heading = new Label
+        {
+            Text = Loc.GetString(loc).ToUpperInvariant(),
+            FontOverride = SettlersArt.Font(10),
+            FontColorOverride = SettlersArt.Heading,
+            HorizontalExpand = true,
+            VerticalAlignment = VAlignment.Center,
+        };
+
+        var header = Row(heading);
+        if (right != null)
+            header.AddChild(right);
+
+        var column = Column(6);
+        column.AddChild(header);
+        column.AddChild(body);
+
+        var panel = new PanelContainer { PanelOverride = SettlersArt.Box(SettlersArt.PanelColor, SettlersArt.PanelEdge) };
+        panel.AddChild(column);
+        return panel;
     }
 
     private static BoxContainer Row(params Control[] children)
     {
-        var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 4 };
+        var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 6 };
         foreach (var child in children)
         {
             row.AddChild(child);
@@ -235,41 +272,128 @@ public sealed class SettlersWindow : DefaultWindow
         return row;
     }
 
-    private static string Cost(int[] cost)
+    private static BoxContainer Column(int separation)
     {
-        return Loc.GetString("wg-settlers-cost", ("cost", SettlersArt.Counts(cost)));
+        return new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = separation };
     }
 
-    /// <summary>A seat's card: the player's colour, name and public numbers, and the button to join or leave.</summary>
+    private static Label Muted(string loc, float minWidth = 0f)
+    {
+        return new Label
+        {
+            Text = Loc.GetString(loc),
+            MinWidth = minWidth,
+            VerticalAlignment = VAlignment.Center,
+            FontColorOverride = SettlersArt.Muted,
+        };
+    }
+
+    private static PanelContainer Divider()
+    {
+        return new PanelContainer
+        {
+            PanelOverride = new StyleBoxFlat { BackgroundColor = SettlersArt.PanelEdge },
+            MinHeight = 1f,
+            Margin = new Thickness(0f, 2f),
+        };
+    }
+
+    /// <summary>Counts as a strip of icons with numbers, as on a table offer.</summary>
+    private static BoxContainer Chips(int[] counts)
+    {
+        var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 2 };
+        row.ToolTip = SettlersArt.Counts(counts);
+        for (var resource = 0; resource < counts.Length; resource++)
+        {
+            if (counts[resource] == 0)
+                continue;
+
+            row.AddChild(new TextureRect
+            {
+                Texture = SettlersArt.ResourceTexture(resource),
+                Stretch = TextureRect.StretchMode.KeepAspectCentered,
+                MinSize = new Vector2(20f, 20f),
+            });
+            row.AddChild(new Label { Text = counts[resource].ToString(), VerticalAlignment = VAlignment.Center, Margin = new Thickness(0f, 0f, 4f, 0f) });
+        }
+
+        return row;
+    }
+
+    /// <summary>The status line under the seats, edged in the colour of the player whose turn it is.</summary>
+    private PanelContainer MakeBanner()
+    {
+        _status.FontOverride = SettlersArt.Font(14);
+        _hint.StyleClasses.Add("LabelSubText");
+        _hint.FontColorOverride = SettlersArt.Muted;
+
+        var text = Column(0);
+        text.HorizontalExpand = true;
+        text.AddChild(_status);
+        text.AddChild(_hint);
+
+        _start.VerticalAlignment = VAlignment.Center;
+        _newGame.VerticalAlignment = VAlignment.Center;
+        var banner = new PanelContainer { PanelOverride = _bannerStyle };
+        banner.AddChild(Row(text, _start, _newGame));
+        return banner;
+    }
+
+    /// <summary>A seat's card: the player's colour, name, public numbers and badges, points, and the button to join or leave.</summary>
     private PanelContainer MakeSeat(int seat)
     {
-        var style = new StyleBoxFlat { BackgroundColor = CardColor, BorderColor = CardEdge, BorderThickness = new Thickness(2) };
-        style.SetContentMarginOverride(StyleBox.Margin.Horizontal, 6);
-        style.SetContentMarginOverride(StyleBox.Margin.Vertical, 3);
+        var style = SettlersArt.Box(CardColor, CardEdge, 1f, 8f, 4f);
         _seatStyles[seat] = style;
 
         var swatch = new PanelContainer
         {
             PanelOverride = new StyleBoxFlat { BackgroundColor = SettlersArt.SeatColors[seat] },
-            MinSize = new Vector2(12f, 28f),
-            VerticalAlignment = VAlignment.Center,
+            MinSize = new Vector2(6f, 32f),
+            VerticalExpand = true,
         };
 
-        _seatNames[seat] = new Label { ClipText = true };
-        _seatStats[seat] = new Label { ClipText = true };
+        _seatNames[seat] = new Label { ClipText = true, FontOverride = SettlersArt.Font(12) };
+        _seatStats[seat] = new Label { ClipText = true, FontColorOverride = SettlersArt.Muted };
         _seatStats[seat].StyleClasses.Add("LabelSubText");
-        var text = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, HorizontalExpand = true };
-        text.AddChild(_seatNames[seat]);
+        _seatBadges[seat] = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 4 };
+
+        var nameRow = Row(_seatNames[seat], _seatBadges[seat]);
+        var text = Column(0);
+        text.HorizontalExpand = true;
+        text.AddChild(nameRow);
         text.AddChild(_seatStats[seat]);
+
+        _seatPoints[seat] = new Label
+        {
+            FontOverride = SettlersArt.Font(20),
+            VerticalAlignment = VAlignment.Center,
+            MinWidth = 28f,
+            Align = Label.AlignMode.Right,
+            ToolTip = Loc.GetString("wg-settlers-points-tooltip"),
+        };
 
         _seatButtons[seat] = new Button { VerticalAlignment = VAlignment.Center };
         _seatButtons[seat].OnPressed += _ => OnSeat?.Invoke(_seat == seat ? -1 : seat);
 
-        var box = Row(swatch, text, _seatButtons[seat]);
+        var box = Row(swatch, text, _seatPoints[seat], _seatButtons[seat]);
         box.SeparationOverride = 8;
         var card = new PanelContainer { PanelOverride = style, HorizontalExpand = true };
         card.AddChild(box);
+        _seatCards[seat] = card;
         return card;
+    }
+
+    private static PanelContainer Badge(string text, Color color)
+    {
+        var badge = new PanelContainer
+        {
+            PanelOverride = SettlersArt.Box(Color.InterpolateBetween(color, Color.Black, 0.55f), color, 1f, 4f, 0f),
+            VerticalAlignment = VAlignment.Center,
+        };
+        var label = new Label { Text = text, FontColorOverride = Color.InterpolateBetween(color, Color.White, 0.5f) };
+        label.StyleClasses.Add("LabelSubText");
+        badge.AddChild(label);
+        return badge;
     }
 
     public void UpdateState(SettlersStateMessage message)
@@ -400,30 +524,34 @@ public sealed class SettlersWindow : DefaultWindow
             var player = state.Players[seat];
             var taken = seat < message.Seats.Length && message.Seats[seat] != null;
             var lit = state.Phase == SettlersPhase.Finished ? state.Winner == seat : state.Running && state.Turn == seat;
+            _seatCards[seat].Visible = state.Phase == SettlersPhase.Lobby || player.InGame;
             _seatStyles[seat].BorderColor = lit ? TurnColor : CardEdge;
-            _seatNames[seat].FontColorOverride = lit ? TurnColor : null;
+            _seatStyles[seat].BackgroundColor = lit ? Color.InterpolateBetween(CardColor, TurnColor, 0.08f) : CardColor;
+            _seatNames[seat].FontColorOverride = lit ? TurnColor : taken ? null : SettlersArt.Muted;
 
             if (taken)
                 _seatNames[seat].Text = SeatName(seat);
             else
                 _seatNames[seat].Text = Loc.GetString(player.InGame ? "wg-settlers-seat-vacant" : "wg-settlers-seat-open", ("number", seat + 1));
 
+            _seatBadges[seat].RemoveAllChildren();
             if (player.InGame)
             {
-                var points = seat == _seat ? state.Points(seat) : state.PublicPoints(seat);
-                var stats = Loc.GetString("wg-settlers-seat-stats", ("points", points), ("cards", state.HandSize(seat)),
+                _seatPoints[seat].Text = (seat == _seat ? state.Points(seat) : state.PublicPoints(seat)).ToString();
+                _seatPoints[seat].FontColorOverride = lit ? TurnColor : null;
+                _seatStats[seat].Text = Loc.GetString("wg-settlers-seat-stats", ("cards", state.HandSize(seat)),
                     ("contracts", player.CardCount), ("escorts", player.Escorts), ("route", player.Route));
-                if (state.RouteHolder == seat)
-                    stats += " " + Loc.GetString("wg-settlers-badge-route");
-                if (state.FleetHolder == seat)
-                    stats += " " + Loc.GetString("wg-settlers-badge-fleet");
-                if (state.Discard[seat] > 0)
-                    stats += " " + Loc.GetString("wg-settlers-badge-discarding", ("count", state.Discard[seat]));
 
-                _seatStats[seat].Text = stats;
+                if (state.RouteHolder == seat)
+                    _seatBadges[seat].AddChild(Badge(Loc.GetString("wg-settlers-badge-route"), BadgeRoute));
+                if (state.FleetHolder == seat)
+                    _seatBadges[seat].AddChild(Badge(Loc.GetString("wg-settlers-badge-fleet"), BadgeFleet));
+                if (state.Discard[seat] > 0)
+                    _seatBadges[seat].AddChild(Badge(Loc.GetString("wg-settlers-badge-discarding", ("count", state.Discard[seat])), BadgeDiscard));
             }
             else
             {
+                _seatPoints[seat].Text = string.Empty;
                 _seatStats[seat].Text = Loc.GetString(state.Running ? "wg-settlers-seat-not-playing" : "wg-settlers-seat-waiting");
             }
 
@@ -460,9 +588,20 @@ public sealed class SettlersWindow : DefaultWindow
             hint = Loc.GetString($"wg-settlers-hint-{state.Phase.ToString().ToLowerInvariant()}", ("count", state.FreeLanes));
 
         _hint.Text = hint;
+
+        int? edge = state.Phase switch
+        {
+            SettlersPhase.Lobby => null,
+            SettlersPhase.Finished => state.Winner,
+            _ => state.Turn,
+        };
+
+        _bannerStyle.BorderColor = edge is { } lit ? SettlersArt.SeatColors[lit] : SettlersArt.PanelEdge;
+        _bannerStyle.BorderThickness = edge != null ? new Thickness(4f, 0f, 0f, 0f) : new Thickness(1f);
+        _status.FontColorOverride = myTurn || state.Phase == SettlersPhase.Finished ? TurnColor : null;
     }
 
-    private void SetBuild(Button button, SettlersPick pick, bool enabled)
+    private void SetBuild(BaseButton button, SettlersPick pick, bool enabled)
     {
         button.Disabled = !enabled;
         if (!enabled && _buildPick == pick)
@@ -507,7 +646,7 @@ public sealed class SettlersWindow : DefaultWindow
         }
 
         if (_cards.ChildCount == 0)
-            _cards.AddChild(new Label { Text = Loc.GetString("wg-settlers-no-cards"), FontColorOverride = SectionColor });
+            _cards.AddChild(new Label { Text = Loc.GetString("wg-settlers-no-cards"), FontColorOverride = SettlersArt.Muted });
     }
 
     private static int Count(List<SettlersCard> cards, SettlersCard kind)
@@ -609,22 +748,34 @@ public sealed class SettlersWindow : DefaultWindow
             if (state.Offers[offerer] is not { } offer)
                 continue;
 
-            var text = Loc.GetString("wg-settlers-offer-line", ("player", SeatName(offerer)),
-                ("give", SettlersArt.Counts(offer.Give)), ("want", SettlersArt.Counts(offer.Want)));
-            var label = new Label { Text = text, HorizontalExpand = true, ClipText = true, ToolTip = text };
-            label.StyleClasses.Add("LabelSubText");
+            var swatch = new PanelContainer
+            {
+                PanelOverride = new StyleBoxFlat { BackgroundColor = SettlersArt.SeatColors[offerer] },
+                MinWidth = 4f,
+                VerticalExpand = true,
+            };
 
-            var row = Row(label);
+            var name = new Label { Text = SeatName(offerer), ClipText = true, FontColorOverride = SettlersArt.Muted };
+            name.StyleClasses.Add("LabelSubText");
+            var terms = Row(Chips(offer.Give), Muted("wg-settlers-offer-for"), Chips(offer.Want));
+            var text = Column(0);
+            text.HorizontalExpand = true;
+            text.AddChild(name);
+            text.AddChild(terms);
+
+            var row = Row(swatch, text);
             var mayAccept = offerer != seat && (offerer == state.Turn || seat == state.Turn) && state.CanAfford(seat, offer.Want);
             if (offerer != seat && trading)
             {
                 var from = offerer;
-                var accept = new Button { Text = Loc.GetString("wg-settlers-accept"), Disabled = !mayAccept };
+                var accept = new Button { Text = Loc.GetString("wg-settlers-accept"), Disabled = !mayAccept, VerticalAlignment = VAlignment.Center };
                 accept.OnPressed += _ => OnAction?.Invoke(new SettlersAction(SettlersActionKind.Accept, from));
                 row.AddChild(accept);
             }
 
-            _offers.AddChild(row);
+            var card = new PanelContainer { PanelOverride = SettlersArt.Box(CardColor, CardEdge, 1f, 6f, 4f) };
+            card.AddChild(row);
+            _offers.AddChild(card);
         }
     }
 
@@ -636,6 +787,7 @@ public sealed class SettlersWindow : DefaultWindow
             var entry = state.Log[i];
             var label = new Label { Text = LogLine(entry), ClipText = true };
             label.StyleClasses.Add("LabelSubText");
+            label.FontColorOverride = i == state.Log.Count - 1 ? null : SettlersArt.Muted;
             _log.AddChild(label);
         }
     }

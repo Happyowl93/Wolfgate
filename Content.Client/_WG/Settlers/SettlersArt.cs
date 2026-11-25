@@ -25,7 +25,7 @@ public static class SettlersArt
         Color.FromHex("#C77DBA"),
         Color.FromHex("#6AA84F"),
         Color.FromHex("#7C8390"),
-        Color.FromHex("#2B2436"),
+        Color.FromHex("#3A3152"),
     };
 
     public static readonly Color AnyDockColor = Color.FromHex("#3A4260");
@@ -36,6 +36,14 @@ public static class SettlersArt
     public static readonly Color TokenHot = Color.FromHex("#B3261E");
     public static readonly Color Rolled = Color.FromHex("#FFD54A");
     public static readonly Color Outline = Color.FromHex("#0B0B0E");
+    public static readonly Color Coast = Color.FromHex("#1B2544");
+
+    /// <summary>The side panel: section boxes, their headings and quiet text.</summary>
+    public static readonly Color PanelColor = Color.FromHex("#14161D");
+    public static readonly Color PanelEdge = Color.FromHex("#2A2E3B");
+    public static readonly Color Heading = Color.FromHex("#D9B45A");
+    public static readonly Color Muted = Color.FromHex("#8C93A8");
+    public static readonly Color Dim = new(1f, 1f, 1f, 0.4f);
 
     private static readonly SpriteSpecifier.Rsi[] ResourceIcons =
     {
@@ -56,6 +64,20 @@ public static class SettlersArt
     public static Texture PirateTexture()
     {
         return IoCManager.Resolve<IEntityManager>().System<SpriteSystem>().Frame0(PirateIcon);
+    }
+
+    /// <summary>The colour of the sector that yields this resource.</summary>
+    public static Color ResourceColor(int resource)
+    {
+        return SectorColors[resource];
+    }
+
+    public static StyleBoxFlat Box(Color background, Color border, float thickness = 1f, float marginX = 8f, float marginY = 6f)
+    {
+        var box = new StyleBoxFlat { BackgroundColor = background, BorderColor = border, BorderThickness = new Thickness(thickness) };
+        box.SetContentMarginOverride(StyleBox.Margin.Horizontal, marginX);
+        box.SetContentMarginOverride(StyleBox.Margin.Vertical, marginY);
+        return box;
     }
 
     public static Font Font(int size, bool bold = true)

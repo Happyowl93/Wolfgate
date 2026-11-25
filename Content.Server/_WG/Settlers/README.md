@@ -52,7 +52,9 @@ it opens.
 - [`Content.Client/_WG/Settlers/SettlersArt.cs`](../../../Content.Client/_WG/Settlers/SettlersArt.cs)
 - [`Content.Client/_WG/Settlers/SettlersBoardControl.cs`](../../../Content.Client/_WG/Settlers/SettlersBoardControl.cs)
 - [`Content.Client/_WG/Settlers/SettlersBoundUserInterface.cs`](../../../Content.Client/_WG/Settlers/SettlersBoundUserInterface.cs)
+- [`Content.Client/_WG/Settlers/SettlersCostButton.cs`](../../../Content.Client/_WG/Settlers/SettlersCostButton.cs)
 - [`Content.Client/_WG/Settlers/SettlersCounterRow.cs`](../../../Content.Client/_WG/Settlers/SettlersCounterRow.cs)
+- [`Content.Client/_WG/Settlers/SettlersHandRow.cs`](../../../Content.Client/_WG/Settlers/SettlersHandRow.cs)
 - [`Content.Client/_WG/Settlers/SettlersWindow.cs`](../../../Content.Client/_WG/Settlers/SettlersWindow.cs)
 
 ### Integration tests
