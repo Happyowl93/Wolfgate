@@ -353,7 +353,7 @@ client partial of `WolfmedSyntheticHudOverlaySystem`. Sticks are in `Resources/P
   - grades of Reagents
   - grades of BufferReagents
 - [`Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs`](../../../Content.Shared/MedicalScanner/HealthAnalyzerScannedUserMessage.cs): drug levels, held effects and dependence
-- [`Resources/Locale/en-US/_Mono/reagents/narcotics.ftl`](../../../Resources/Locale/en-US/_Mono/reagents/narcotics.ftl): the crystal takes 25u since Monolith's fent buff
+- [`Resources/Locale/en-US/_Mono/reagents/narcotics.ftl`](../../../Resources/Locale/en-US/_Mono/reagents/narcotics.ftl): the crystal takes 25u since Monolith's fent buff, and leftover fent explodes
 - [`Resources/Prototypes/_EinsteinEngines/Entities/Mobs/Player/silicon_base.yml`](../../../Resources/Prototypes/_EinsteinEngines/Entities/Mobs/Player/silicon_base.yml): neuroware twins apply these to a synthetic's own body
 - [`Resources/Prototypes/_ES/Reagents/gases.yml`](../../../Resources/Prototypes/_ES/Reagents/gases.yml): thin haze from smoking is harmless; fire-thick smoke still chokes
 - [`Resources/Prototypes/_Impstation/Reagents/biological.yml`](../../../Resources/Prototypes/_Impstation/Reagents/biological.yml): held while it is in the blood instead of piling up each tick
