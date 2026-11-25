@@ -425,7 +425,7 @@ public sealed class SettlersWindow : DefaultWindow
         if (_seat is not { } mine || state.Phase != SettlersPhase.Discard || state.Discard[mine] == 0)
             _discard.Clear();
 
-        if (state.Phase != SettlersPhase.Main || _seat != state.Turn)
+        if (state.Phase is not (SettlersPhase.Roll or SettlersPhase.Main) || _seat != state.Turn)
             CancelCard();
 
         Refresh();
@@ -776,7 +776,9 @@ public sealed class SettlersWindow : DefaultWindow
             {
                 var from = offerer;
                 var accept = new Button { Text = Loc.GetString("wg-settlers-accept"), Disabled = !mayAccept, VerticalAlignment = VAlignment.Center };
-                accept.OnPressed += _ => OnAction?.Invoke(new SettlersAction(SettlersActionKind.Accept, from));
+                var seenGive = (int[]) offer.Give.Clone();
+                var seenWant = (int[]) offer.Want.Clone();
+                accept.OnPressed += _ => OnAction?.Invoke(new SettlersAction(SettlersActionKind.Accept, from) { Give = seenGive, Want = seenWant });
                 row.AddChild(accept);
             }
 
@@ -843,6 +845,7 @@ public sealed class SettlersWindow : DefaultWindow
         {
             _offerGive.Clear();
             _offerWant.Clear();
+            Refresh();
         }
     }
 }

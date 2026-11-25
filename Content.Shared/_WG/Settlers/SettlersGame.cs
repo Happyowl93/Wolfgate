@@ -166,7 +166,7 @@ public sealed class SettlersGame
             SettlersActionKind.Discard => Discard(seat, action.Give),
             SettlersActionKind.BankTrade => turn && BankTrade(action.First, action.Second),
             SettlersActionKind.Offer => Offer(seat, action.Give, action.Want),
-            SettlersActionKind.Accept => Accept(seat, action.Target),
+            SettlersActionKind.Accept => Accept(seat, action.Target, action.Give, action.Want),
             SettlersActionKind.EndTurn => turn && State.Phase == SettlersPhase.Main && EndTurn(),
             _ => false,
         };
@@ -636,10 +636,16 @@ public sealed class SettlersGame
         return true;
     }
 
-    /// <summary>Takes an offer. Every trade has the player whose turn it is on one side.</summary>
-    private bool Accept(int seat, int offerer)
+    /// <summary>
+    /// Takes an offer on the terms the player saw, so an offer changed in the meantime is refused. Every trade has
+    /// the player whose turn it is on one side.
+    /// </summary>
+    private bool Accept(int seat, int offerer, int[] give, int[] want)
     {
         if (State.Phase != SettlersPhase.Main || offerer == seat || !State.Seated(offerer) || State.Offers[offerer] is not { } offer)
+            return false;
+
+        if (!SameCounts(give, offer.Give) || !SameCounts(want, offer.Want))
             return false;
 
         if (offerer != State.Turn && seat != State.Turn)
@@ -785,10 +791,23 @@ public sealed class SettlersGame
 
             switch (State.Phase)
             {
+                // An empty seat still gets its setup pieces, so whoever takes it later can build from them.
                 case SettlersPhase.SetupOutpost:
+                    if (!BuildAtRandom(SettlersBoard.VertexCount, v => State.CanPlaceOutpost(turn, v), BuildOutpost))
+                    {
+                        Log(SettlersLogKind.Skipped, turn);
+                        AdvanceSetup();
+                    }
+
+                    break;
+
                 case SettlersPhase.SetupLane:
-                    Log(SettlersLogKind.Skipped, turn);
-                    AdvanceSetup();
+                    if (!BuildAtRandom(SettlersBoard.EdgeCount, e => State.CanPlaceLane(turn, e), BuildLane))
+                    {
+                        Log(SettlersLogKind.Skipped, turn);
+                        AdvanceSetup();
+                    }
+
                     break;
 
                 case SettlersPhase.Roll:
@@ -817,9 +836,36 @@ public sealed class SettlersGame
         }
     }
 
+    /// <summary>Builds at a random spot that <paramref name="legal"/> allows; false if there is none.</summary>
+    private bool BuildAtRandom(int count, Func<int, bool> legal, Func<int, bool> build)
+    {
+        var spots = new List<int>();
+        for (var spot = 0; spot < count; spot++)
+        {
+            if (legal(spot))
+                spots.Add(spot);
+        }
+
+        return spots.Count > 0 && build(spots[_random.Next(spots.Count)]);
+    }
+
     private static bool IsResource(int resource)
     {
         return resource >= 0 && resource < SettlersRules.ResourceCount;
+    }
+
+    private static bool SameCounts(int[] a, int[] b)
+    {
+        if (a.Length != b.Length)
+            return false;
+
+        for (var i = 0; i < a.Length; i++)
+        {
+            if (a[i] != b[i])
+                return false;
+        }
+
+        return true;
     }
 
     private static bool ValidCounts(int[] counts)

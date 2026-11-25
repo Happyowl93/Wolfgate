@@ -227,7 +227,12 @@ public sealed class SettlersState
         Array.Copy(VertexOwner, copy.VertexOwner, VertexOwner.Length);
         Array.Copy(Colony, copy.Colony, Colony.Length);
         Array.Copy(EdgeOwner, copy.EdgeOwner, EdgeOwner.Length);
-        Array.Copy(Bank, copy.Bank, Bank.Length);
+        // Only whether the bank has a resource: exact counts would give away the other hands.
+        for (var resource = 0; resource < Bank.Length; resource++)
+        {
+            copy.Bank[resource] = Math.Min(Bank[resource], 1);
+        }
+
         Array.Copy(Discard, copy.Discard, Discard.Length);
         copy.Log.AddRange(Log);
 

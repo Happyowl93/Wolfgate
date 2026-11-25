@@ -20,6 +20,12 @@ public sealed class SettlersGameTest
         return new SettlersAction(kind) { Give = give, Want = want ?? new int[SettlersRules.ResourceCount] };
     }
 
+    /// <summary>Accepts an offer on the terms the player saw.</summary>
+    private static SettlersAction Take(int offerer, int[] give, int[] want)
+    {
+        return new SettlersAction(SettlersActionKind.Accept, offerer) { Give = give, Want = want };
+    }
+
     private static int[] Res(int scrap = 0, int ice = 0, int gas = 0, int biomass = 0, int ore = 0)
     {
         return new[] { scrap, ice, gas, biomass, ore };
@@ -463,20 +469,37 @@ public sealed class SettlersGameTest
 
         Assert.That(game.TryAct(0, Counts(SettlersActionKind.Offer, Res(ore: 3), Res(ice: 1))), Is.False, "Not held.");
         Assert.That(game.TryAct(0, Counts(SettlersActionKind.Offer, Res(ore: 1), Res(ice: 1))), Is.True);
-        Assert.That(game.TryAct(0, Act(SettlersActionKind.Accept, 0)), Is.False, "Your own offer.");
-        Assert.That(game.TryAct(1, Act(SettlersActionKind.Accept, 0)), Is.True);
+        Assert.That(game.TryAct(0, Take(0, Res(ore: 1), Res(ice: 1))), Is.False, "Your own offer.");
+        Assert.That(game.TryAct(1, Take(0, Res(ore: 1), Res(ice: 1))), Is.True);
         Assert.That(state.Players[0].Hand, Is.EqualTo(Res(ice: 1, ore: 1)));
         Assert.That(state.Players[1].Hand, Is.EqualTo(Res(ore: 1)));
         Assert.That(state.Offers[0], Is.Null);
 
         Assert.That(game.TryAct(2, Counts(SettlersActionKind.Offer, Res(gas: 1), Res(ore: 1))), Is.True);
-        Assert.That(game.TryAct(1, Act(SettlersActionKind.Accept, 2)), Is.False, "Two players off turn can't trade.");
-        Assert.That(game.TryAct(0, Act(SettlersActionKind.Accept, 2)), Is.True);
+        Assert.That(game.TryAct(1, Take(2, Res(gas: 1), Res(ore: 1))), Is.False, "Two players off turn can't trade.");
+        Assert.That(game.TryAct(0, Take(2, Res(gas: 1), Res(ore: 1))), Is.True);
         Assert.That(state.Players[0].Hand, Is.EqualTo(Res(ice: 1, gas: 1)));
 
         Assert.That(game.TryAct(1, Counts(SettlersActionKind.Offer, Res(ore: 1), Res(gas: 1))), Is.True);
         Assert.That(game.TryAct(0, Act(SettlersActionKind.EndTurn)), Is.True);
         Assert.That(state.Offers.All(o => o == null), Is.True, "Offers end with the turn.");
+    }
+
+    [Test]
+    public void AcceptingAChangedOfferIsRefused()
+    {
+        var game = Bare(2);
+        var state = game.State;
+        state.Players[0].Hand = Res(ore: 1);
+        state.Players[1].Hand = Res(ice: 3);
+
+        Assert.That(game.TryAct(0, Counts(SettlersActionKind.Offer, Res(ore: 1), Res(ice: 1))), Is.True);
+        Assert.That(game.TryAct(0, Counts(SettlersActionKind.Offer, Res(ore: 1), Res(ice: 3))), Is.True);
+        Assert.That(game.TryAct(1, Take(0, Res(ore: 1), Res(ice: 1))), Is.False, "The offer changed after it was seen.");
+        Assert.That(state.Players[1].Hand, Is.EqualTo(Res(ice: 3)));
+
+        Assert.That(game.TryAct(1, Take(0, Res(ore: 1), Res(ice: 3))), Is.True);
+        Assert.That(state.Players[1].Hand, Is.EqualTo(Res(ore: 1)));
     }
 
     [Test]
@@ -541,6 +564,27 @@ public sealed class SettlersGameTest
     }
 
     [Test]
+    public void AnEmptySeatStillGetsItsSetupPieces()
+    {
+        var game = new SettlersGame(new Random(1));
+        game.SetPresent(0, true);
+        game.SetPresent(1, true);
+        Assert.That(game.Start(), Is.True);
+        var state = game.State;
+
+        var absent = state.Turn;
+        game.SetPresent(absent, false);
+        Assert.That(state.Turn, Is.Not.EqualTo(absent), "The empty seat's setup turn is played for it.");
+        Assert.That(state.Count(absent, false), Is.EqualTo(1));
+        Assert.That(state.Lanes(absent), Is.EqualTo(1));
+
+        PlaySetup(game);
+        Assert.That(state.Phase, Is.EqualTo(SettlersPhase.Roll));
+        Assert.That(state.Count(absent, false), Is.EqualTo(2), "Whoever takes the seat has outposts to build from.");
+        Assert.That(state.Lanes(absent), Is.EqualTo(2));
+    }
+
+    [Test]
     public void ViewersOnlySeeTheirOwnHand()
     {
         var game = Bare(2);
@@ -548,8 +592,10 @@ public sealed class SettlersGameTest
         state.Players[0].Hand = Res(ore: 2);
         state.Players[0].Cards.Add(SettlersCard.Charter);
         state.Players[1].Hand = Res(ice: 3);
+        state.Bank[4] = 0;
 
         var mine = state.CopyFor(0);
+        Assert.That(mine.Bank, Is.EqualTo(Res(1, 1, 1, 1, 0)), "Only whether the bank has each resource.");
         Assert.That(mine.Players[0].Hand, Is.EqualTo(Res(ore: 2)));
         Assert.That(mine.Players[0].HiddenPoints, Is.EqualTo(1));
         Assert.That(mine.Players[1].Hand, Is.EqualTo(Res()));
@@ -557,6 +603,7 @@ public sealed class SettlersGameTest
         Assert.That(mine.HandSize(1), Is.EqualTo(3));
 
         var spectator = state.CopyFor(null);
+        Assert.That(spectator.Bank, Is.EqualTo(Res(1, 1, 1, 1, 0)));
         Assert.That(spectator.Players[0].Cards, Is.Empty);
         Assert.That(spectator.Players[0].CardCount, Is.EqualTo(1));
         Assert.That(spectator.Points(0), Is.Zero, "A hidden charter stays hidden.");
