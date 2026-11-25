@@ -1,63 +1,88 @@
 <Document>
   # Settlers of Colossus
 
-  A board game for one to four players about claiming the Colossus sector: run lanes between the stars, raise outposts and colonies, and trade your way to ten points. The boxed board is sold at the Wolfgate vendor.
+  Settlers of Colossus is a board game for one to four players. Each player builds lanes, outposts and colonies in the Colossus sector. The first player to get ten points wins. You can buy the game box at the Wolfgate vendor.
 
   <Box>
     <GuideEntityEmbed Entity="WGSettlersBoard" Caption="Settlers of Colossus"/>
   </Box>
 
-  ## Sitting down
-  Use the box in hand, on a table, or through its [bold]Play[/bold] verb to open the board. Take a seat and anyone seated can start the game; everyone else in reach can watch. Examining the box shows whether a game is being played on it.
+  ## Start a game
+  To open the board, use the box in your hand or on a table. You can also use the [bold]Play[/bold] verb.
 
-  Closing the window or walking away gives up your seat, but your pieces and cards stay in the game. Anyone can sit in a vacant seat and carry it on. While a seat is vacant its turns pass and anything it owes is played at random, and if every player leaves, the game waits for them.
+  Join an open seat. A seated player can then start the game. Other persons near the board can watch the game.
+
+  To see if a game is in progress, examine the box.
+
+  ## Leave a game
+  If you close the window or move away from the board, you leave your seat. Your pieces and cards stay in the game. Any player can join your empty seat and continue the game for you.
+
+  When a seat is empty, the turns of that seat pass. The game discards cards and moves the pirates for that seat at random. If all players leave, the game stops until a player joins again.
 
   ## The board
-  Nineteen sectors, each with a number from 2 to 12. When that number is rolled, every outpost on a corner of the sector earns one card and every colony two.
-  - [bold]Salvage yard[/bold]: scrap
-  - [bold]Ice field[/bold]: ice
-  - [bold]Gas giant[/bold]: gas
-  - [bold]Farm world[/bold]: biomass
-  - [bold]Ore belt[/bold]: ore
-  - [bold]Dead zone[/bold]: nothing; the pirates start here.
+  The board has nineteen sectors. Each sector has a number from 2 to 12. When the dice show that number, the sector gives resources:
+  - An outpost on a corner of the sector gets one card.
+  - A colony on a corner of the sector gets two cards.
 
-  The dots under a number show how often it comes up. A 6 or an 8, in red, comes up the most.
+  Each type of sector gives one resource:
+  - [bold]Salvage yard[/bold]: scrap.
+  - [bold]Ice field[/bold]: ice.
+  - [bold]Gas giant[/bold]: gas.
+  - [bold]Farm world[/bold]: biomass.
+  - [bold]Ore belt[/bold]: ore.
+  - [bold]Dead zone[/bold]: no resource. The pirates start here.
 
-  ## Setting up
-  Each player places an outpost and a lane next to it, in turn order, and then a second pair in reverse order. The second outpost pays one card for each sector around it. Outposts can never sit on neighbouring corners.
+  The dots below a number show how frequently the dice show that number. The red numbers, 6 and 8, occur most frequently.
 
-  ## A turn
-  Roll the dice; every sector with that number pays out. Then build, trade and play a contract in any order, and end your turn.
-  - [bold]Lane[/bold] (scrap, ice): along a side joined to your lanes or buildings.
-  - [bold]Outpost[/bold] (scrap, ice, gas, biomass): one point, on a corner your lanes reach.
-  - [bold]Colony[/bold] (two biomass, three ore): upgrades an outpost to two points and doubles its income.
-  - [bold]Contract[/bold] (gas, biomass, ore): a card drawn from the deck.
+  ## Setup
+  Each player builds one outpost and one lane next to it. The players do this in turn order. Then each player builds a second outpost and lane, in the reverse order.
 
-  Lit corners and sides on the board show where you can build.
+  The second outpost gives one card for each sector around it. An outpost cannot be on a corner next to a different outpost.
+
+  ## Your turn
+  1. Roll the dice. Each sector with that number gives resources.
+  2. Build, trade and play a contract. You can do these in any order.
+  3. End your turn.
+
+  Each item has a cost:
+  - [bold]Lane[/bold]: 1 scrap and 1 ice. Build it on a side next to your lanes or buildings.
+  - [bold]Outpost[/bold]: 1 scrap, 1 ice, 1 gas and 1 biomass. Build it on a corner that your lanes touch.
+  - [bold]Colony[/bold]: 2 biomass and 3 ore. It replaces one of your outposts. It gets two cards for each roll.
+  - [bold]Contract[/bold]: 1 gas, 1 biomass and 1 ore. You get the top card of the deck.
+
+  The lit corners and sides on the board show where you can build.
 
   ## Pirates
-  A 7 pays nobody. Anyone holding more than seven cards discards half of them, then the roller moves the pirates to another sector and robs a player with a building beside it. The sector under the pirates earns nothing until they move on.
+  A roll of 7 gives no resources. Each player with more than seven cards must discard half of the cards.
+
+  Then the player who rolled moves the pirates to a different sector. That player takes one card from a player with a building next to the pirates. The sector with the pirates gives no resources until the pirates move.
 
   ## Contracts
-  You can play one contract a turn, before or after rolling, but not on the turn you bought it.
-  - [bold]Escort[/bold]: move the pirates and rob, as on a 7.
-  - [bold]Charter[/bold]: a hidden point.
-  - [bold]Survey[/bold]: lay two lanes for free.
-  - [bold]Windfall[/bold]: take any two resources from the bank.
-  - [bold]Embargo[/bold]: name a resource; every other player hands you all of theirs.
+  You can play one contract in each turn, before or after you roll. You cannot play a contract in the turn that you buy it.
+  - [bold]Escort[/bold]: move the pirates and take a card, as for a roll of 7.
+  - [bold]Charter[/bold]: one point. The other players cannot see it.
+  - [bold]Survey[/bold]: build two lanes at no cost.
+  - [bold]Windfall[/bold]: take two resources from the bank. You select the resources.
+  - [bold]Embargo[/bold]: select one resource. All other players give you all their cards of that resource.
 
-  ## Trading
-  On your turn, trade four of one resource to the bank for one of another. A dock on your outpost or colony makes it better: [bold]3:1[/bold] docks take any resource, [bold]2:1[/bold] docks only the one they show.
+  ## Trade
+  In your turn, you can trade with the bank. Give four cards of one resource to get one card of a different resource.
 
-  Any player can post an offer to the table, and any player who can pay it can accept. A trade always includes the player whose turn it is.
+  A dock gives a better rate if you have an outpost or a colony on it:
+  - [bold]3:1[/bold] dock: give three cards of one resource.
+  - [bold]2:1[/bold] dock: give two cards of the resource that the dock shows.
 
-  ## Points and winning
-  The first player to reach ten points on their own turn wins. Points come from:
-  - [bold]Outposts[/bold]: one point each.
-  - [bold]Colonies[/bold]: two points each, in place of the outpost they replaced.
-  - [bold]Charters[/bold]: one point each. They stay hidden in your hand, so the others can't see them coming.
-  - [bold]Longest route[/bold]: two points for the first player with five or more lanes in an unbroken line. It passes to anyone who builds a longer one.
-  - [bold]Largest fleet[/bold]: two points for the first player to play three escorts. It passes to anyone who plays more.
+  All players can post an offer to the table. A player who has the cards can accept an offer. Each trade must include the player whose turn it is.
 
-  The two setup outposts give everyone two points to start with. You have five outposts, four colonies and fifteen lanes to build with, so upgrading outposts to colonies frees them to be built again.
+  ## Points
+  The first player with ten points in their own turn wins. You get points from these items:
+  - [bold]Outpost[/bold]: 1 point.
+  - [bold]Colony[/bold]: 2 points. A colony replaces an outpost, thus you get one more point.
+  - [bold]Charter[/bold]: 1 point. It stays hidden until the game ends.
+  - [bold]Longest route[/bold]: 2 points. The first player with a line of five or more lanes gets it. If a different player builds a longer line, that player gets it.
+  - [bold]Largest fleet[/bold]: 2 points. The first player to play three escorts gets it. If a different player plays more escorts, that player gets it.
+
+  Each player starts with two points from the two setup outposts.
+
+  Each player has 5 outposts, 4 colonies and 15 lanes. When you replace an outpost with a colony, you can build that outpost again.
 </Document>

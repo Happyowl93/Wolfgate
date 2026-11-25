@@ -3,7 +3,7 @@
   parent: [BaseItem, RecyclableItemCardboard]
   id: WGSettlersBoard
   name: Settlers of Colossus
-  description: A boxed board game of claiming the Colossus sector, one outpost and trade lane at a time. Two to four players, or one to learn.
+  description: A board game for one to four players. Build outposts and lanes in the Colossus sector, trade resources and get ten points to win.
   components:
   - type: Sprite
     sprite: _WG/Settlers/board.rsi
