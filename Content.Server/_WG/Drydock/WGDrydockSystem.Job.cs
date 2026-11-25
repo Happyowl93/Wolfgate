@@ -433,7 +433,7 @@ public sealed partial class WGDrydockSystem
         var stranded = -1;
         var strandedDistance = float.MaxValue;
 
-        // Bug report 1435: hull grows out from what is left of it, as with the SRD. A tile touching no hull splits off
+        // Hull grows out from what is left of it, as with the SRD. A tile touching no hull splits off
         // as debris and leaves the parts meant for it over space. Such a tile is laid only once no other can be.
         Entity<MapGridComponent>? hull = null;
         if (job.Pending.Any(item => item.Kind == WGDrydockWorkKind.Tile && Rank(item) == rank) &&

@@ -110,8 +110,8 @@ public sealed class WGRadCollectorTest : WolfmedGameTest
     }
 
     /// <summary>
-    /// Bug report 1467: radiation that reached the body past the collector stayed for good. A collector with room draws
-    /// it into its charge, and a full one leaves it until it is vented or replaced.
+    /// Radiation that reached the body past the collector is drawn into a collector with room; a full one leaves it
+    /// until it is vented or replaced.
     /// </summary>
     [Test]
     public async Task CollectorDrawsBodyRadiationTest()

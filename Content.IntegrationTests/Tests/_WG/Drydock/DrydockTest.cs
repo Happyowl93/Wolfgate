@@ -1135,8 +1135,8 @@ public sealed class DrydockTest
     }
 
     /// <summary>
-    /// Bug report 1435: on a wreck the hull is laid outward from what is left of it. With grid splitting on, a tile laid
-    /// clear of the hull broke straight off, and the parts meant for it spawned over space.
+    /// On a wreck the hull is laid outward from what is left of it. With grid splitting on, a tile laid clear of the
+    /// hull would break straight off, and the parts meant for it would spawn over space.
     /// </summary>
     [Test]
     public async Task WreckHullGrowsFromWhatIsLeft()

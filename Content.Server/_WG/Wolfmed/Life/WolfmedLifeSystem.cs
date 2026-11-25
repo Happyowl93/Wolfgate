@@ -760,7 +760,7 @@ public sealed partial class WolfmedLifeSystem : EntitySystem
         if (temperature.ParentColdDamageThreshold == null && _temperature.GetCore(body) is { } core)
             kelvin = MathF.Max(kelvin, core);
 
-        // Bug report 1372: read against the species' own normal, or an Avali at 261 K is always cryo-cold.
+        // Read against the species' own normal, or an Avali at 261 K is always cryo-cold.
         if (TryComp(body, out ThermalRegulatorComponent? regulator) && regulator.NormalBodyTemperature > 0f)
             kelvin += brain.Comp.ColdStepsNormal - regulator.NormalBodyTemperature;
 

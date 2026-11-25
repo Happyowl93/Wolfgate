@@ -30,7 +30,7 @@ public sealed class WGFeedbackBatch1125Test : WolfmedGameTest
 {
     private static readonly EntProtoId MobileDrydockConsole = "WGComputerMobileDrydock";
 
-    /// <summary>Report 1473: a fentanyl crystal takes 25 u; less waits in the beaker instead of turning to dylovene.</summary>
+    /// <summary>A fentanyl crystal takes 25 u; less waits in the beaker instead of turning to dylovene.</summary>
     [Test]
     public async Task FentanylCrystalNeedsTheWholeBatchTest()
     {
@@ -64,8 +64,7 @@ public sealed class WGFeedbackBatch1125Test : WolfmedGameTest
     }
 
     /// <summary>
-    /// Report 1447: a moth's stomach cleared ethanol as fast as a drink made it, so a moth never got drunk. It now
-    /// gets about as drunk as a human on the same drink.
+    /// A moth's stomach clears ethanol slowly enough that it gets about as drunk as a human on the same drink.
     /// </summary>
     [Test]
     public async Task MothGetsDrunkTest()
@@ -102,8 +101,8 @@ public sealed class WGFeedbackBatch1125Test : WolfmedGameTest
     }
 
     /// <summary>
-    /// Report 1372: the brain's cold protection read absolute temperature, so an Avali at its normal 261 K counted as
-    /// cryo-cold and its arrest clock all but stopped. At its own normal it runs about as a human's.
+    /// The brain's cold protection reads against the species' normal, so an Avali at its normal 261 K is not
+    /// cryo-cold and its arrest clock runs about as a human's.
     /// </summary>
     [Test]
     public async Task AvaliBrainClockRunsTest()
@@ -127,7 +126,7 @@ public sealed class WGFeedbackBatch1125Test : WolfmedGameTest
         });
     }
 
-    /// <summary>Report 1446: the mobile drydock console is in its ship's repair snapshot, so an SRD or drydock rebuilds it.</summary>
+    /// <summary>The mobile drydock console is in its ship's repair snapshot, so an SRD or drydock rebuilds it.</summary>
     [Test]
     public async Task MobileDrydockConsoleIsRepairableTest()
     {
@@ -139,7 +138,7 @@ public sealed class WGFeedbackBatch1125Test : WolfmedGameTest
         });
     }
 
-    /// <summary>Report 1453: every law the Bench app lists is on the Common Writ page.</summary>
+    /// <summary>Every law the Bench app lists is on the Common Writ page.</summary>
     [Test]
     public async Task CommonWritPageListsEveryLawTest()
     {
@@ -160,8 +159,8 @@ public sealed class WGFeedbackBatch1125Test : WolfmedGameTest
     }
 
     /// <summary>
-    /// Report 1378: an in-hand layer with a map key gets the same key in both hands, and two held at once crashed a Resomi
-    /// client. No item may map its in-hand layers.
+    /// An in-hand layer with a map key gets the same key in both hands, and two held at once crash a Resomi client.
+    /// No item may map its in-hand layers.
     /// </summary>
     [Test]
     public async Task NoInhandLayerIsMappedTest()

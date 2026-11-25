@@ -176,8 +176,8 @@ public sealed partial class WGRadCollectorSystem : EntitySystem
     }
 
     /// <summary>
-    /// Bug report 1467: radiation that reached a chassis past the collector (an explosion, a reagent) stayed for good.
-    /// A working collector with room draws it into its charge, so venting or replacing the collector clears it.
+    /// Draws radiation that reached a chassis past the collector (an explosion, a reagent) into a working collector
+    /// with room, so venting or replacing the collector clears it.
     /// </summary>
     public void Draw(EntityUid body, Entity<WGRadCollectorComponent> collector, float seconds)
     {
