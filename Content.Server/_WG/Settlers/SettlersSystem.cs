@@ -1,4 +1,5 @@
 using Content.Shared._WG.Settlers;
+using Content.Shared.Examine;
 using Content.Shared.IdentityManagement;
 using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
@@ -23,6 +24,7 @@ public sealed class SettlersSystem : EntitySystem
         SubscribeLocalEvent<WGSettlersBoardComponent, ActivateInWorldEvent>(OnActivate);
         SubscribeLocalEvent<WGSettlersBoardComponent, UseInHandEvent>(OnUseInHand);
         SubscribeLocalEvent<WGSettlersBoardComponent, GetVerbsEvent<ActivationVerb>>(OnGetVerbs);
+        SubscribeLocalEvent<WGSettlersBoardComponent, ExaminedEvent>(OnExamined);
 
         Subs.BuiEvents<WGSettlersBoardComponent>(WGSettlersUiKey.Key, subs =>
         {
@@ -64,6 +66,13 @@ public sealed class SettlersSystem : EntitySystem
             Text = Loc.GetString("wg-settlers-verb-play"),
             Act = () => Open(ent, user),
         });
+    }
+
+    /// <summary>Tells an examiner when a game is being played on the board.</summary>
+    private void OnExamined(Entity<WGSettlersBoardComponent> ent, ref ExaminedEvent args)
+    {
+        if (ent.Comp.Game is { State.Running: true })
+            args.PushMarkup(Loc.GetString("wg-settlers-examine-running"));
     }
 
     /// <summary>Opens the board's window. The window asks for the board once it is up.</summary>

@@ -42,7 +42,7 @@ public sealed class SettlersCostButton : ContainerButton
                 {
                     Texture = SettlersArt.ResourceTexture(resource),
                     Stretch = TextureRect.StretchMode.KeepAspectCentered,
-                    MinSize = new Vector2(16f, 16f),
+                    MinSize = new Vector2(14f, 14f),
                 });
             }
         }

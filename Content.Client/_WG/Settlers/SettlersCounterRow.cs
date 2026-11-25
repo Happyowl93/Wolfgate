@@ -1,4 +1,5 @@
 using System.Numerics;
+using Content.Client.Stylesheets;
 using Content.Shared._WG.Settlers;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
@@ -11,7 +12,7 @@ namespace Content.Client._WG.Settlers;
 /// </summary>
 public sealed class SettlersCounterRow : BoxContainer
 {
-    public const float LabelWidth = 56f;
+    public const float LabelWidth = 44f;
 
     private readonly Label[] _labels = new Label[SettlersRules.ResourceCount];
     private readonly Button[] _less = new Button[SettlersRules.ResourceCount];
@@ -39,14 +40,14 @@ public sealed class SettlersCounterRow : BoxContainer
                 Orientation = LayoutOrientation.Horizontal,
                 HorizontalExpand = true,
                 Align = AlignMode.Center,
-                SeparationOverride = 2,
+                SeparationOverride = 1,
                 ToolTip = SettlersArt.ResourceName(resource),
                 MouseFilter = MouseFilterMode.Pass,
             };
 
-            _less[resource] = new Button { Text = "-", MinWidth = 20f };
-            _more[resource] = new Button { Text = "+", MinWidth = 20f };
-            _labels[resource] = new Label { MinWidth = 18f, Align = Label.AlignMode.Center, VerticalAlignment = VAlignment.Center };
+            _less[resource] = new Button { Text = "-", MinWidth = 18f, StyleClasses = { StyleBase.ButtonSquare } };
+            _more[resource] = new Button { Text = "+", MinWidth = 18f, StyleClasses = { StyleBase.ButtonSquare } };
+            _labels[resource] = new Label { MinWidth = 16f, Align = Label.AlignMode.Center, VerticalAlignment = VAlignment.Center };
             _less[resource].OnPressed += _ => Set(index, Counts[index] - 1);
             _more[resource].OnPressed += _ => Set(index, Counts[index] + 1);
             cell.AddChild(_less[resource]);

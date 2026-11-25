@@ -5,7 +5,8 @@ Settlers of Colossus, a board game of claiming the Colossus sector for one to fo
 Play verb. Players take seats and anyone seated starts the game; everyone else within reach can watch. Leaving the
 board or closing the window gives up the seat, but the player's pieces and cards stay in the game, and anyone may sit
 in a vacant seat to carry it on. While a seat is vacant its turns pass and its discards and pirate moves are played at
-random. A game pauses if every player leaves.
+random. A game pauses if every player leaves. Examining the box says when a game is being played on it, and its
+guidebook page (`WGSettlers`, under Service) explains the rules.
 
 Rules: nineteen hex sectors (salvage yard, ice field, gas giant, farm world and ore belt, which yield scrap, ice, gas,
 biomass and ore, plus one dead zone) carry the numbers 2-12 without 7; no 6 or 8 sits beside another. Setup places an
@@ -68,6 +69,7 @@ it opens.
 ### Prototypes
 
 - [`Resources/Prototypes/_WG/Settlers/board.yml`](../../../Resources/Prototypes/_WG/Settlers/board.yml)
+- [`Resources/Prototypes/_WG/Settlers/guidebook.yml`](../../../Resources/Prototypes/_WG/Settlers/guidebook.yml)
 
 ### Localization
 
@@ -77,8 +79,12 @@ it opens.
 
 - [`Resources/Textures/_WG/Settlers/board.rsi/`](../../../Resources/Textures/_WG/Settlers/board.rsi/)
 
+### Guidebook
+
+- [`Resources/ServerInfo/_WG/Settlers/Guidebook/Settlers.xml`](../../../Resources/ServerInfo/_WG/Settlers/Guidebook/Settlers.xml)
+
 ## Non-modular edits
 
-None.
+- [`Resources/Prototypes/Guidebook/service.yml`](../../../Resources/Prototypes/Guidebook/service.yml): board game guide
 
 <!-- WOLFGATE-GENERATED END -->

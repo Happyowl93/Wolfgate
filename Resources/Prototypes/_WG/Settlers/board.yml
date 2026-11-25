@@ -17,3 +17,6 @@
         type: SettlersBoundUserInterface
   - type: StaticPrice
     price: 250
+  - type: GuideHelp
+    guides:
+    - WGSettlers

@@ -1,0 +1,4 @@
+- type: guideEntry
+  id: WGSettlers
+  name: guide-entry-wg-settlers
+  text: "/ServerInfo/_WG/Settlers/Guidebook/Settlers.xml"

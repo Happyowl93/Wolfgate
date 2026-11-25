@@ -35,6 +35,7 @@ public sealed class SettlersBoardControl : Control
     private readonly Vector2[] _stars = new Vector2[90];
     private readonly float[] _starAlpha = new float[90];
     private readonly Vector2[] _debris = new Vector2[9];
+    private const int NebulaLayers = 16;
 
     /// <summary>Faint nebulae behind the board: centre and radius as fractions of the control, and colour.</summary>
     private static readonly (Vector2 Center, float Radius, Color Color)[] Nebulae =
@@ -196,9 +197,9 @@ public sealed class SettlersBoardControl : Control
         var span = MathF.Max(PixelWidth, PixelHeight);
         foreach (var (center, extent, tint) in Nebulae)
         {
-            for (var layer = 0; layer < 6; layer++)
+            for (var layer = 0; layer < NebulaLayers; layer++)
             {
-                Circle(handle, center * size, extent * span * (1f - layer * 0.15f), tint.WithAlpha(0.03f));
+                Circle(handle, center * size, extent * span * (1f - layer / (float) NebulaLayers), tint.WithAlpha(0.012f));
             }
         }
 

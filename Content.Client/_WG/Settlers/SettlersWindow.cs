@@ -51,6 +51,7 @@ public sealed class SettlersWindow : DefaultWindow
 
     private readonly BoxContainer _playArea = new() { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 8 };
     private readonly Label _points = new();
+    private readonly Label _deck = new();
     private readonly SettlersHandRow _hand = new();
 
     private readonly Button _roll = new() { Text = Loc.GetString("wg-settlers-roll"), HorizontalExpand = true, MinHeight = 30f };
@@ -104,8 +105,8 @@ public sealed class SettlersWindow : DefaultWindow
         _cfg = IoCManager.Resolve<IConfigurationManager>();
 
         Title = Loc.GetString("wg-settlers-window-title");
-        SetSize = new Vector2(1080f, 740f);
-        MinSize = new Vector2(940f, 600f);
+        SetSize = new Vector2(1120f, 760f);
+        MinSize = new Vector2(980f, 620f);
 
         var side = new BoxContainer
         {
@@ -129,7 +130,7 @@ public sealed class SettlersWindow : DefaultWindow
 
         side.AddChild(Section("wg-settlers-section-log", null, _log));
 
-        var scroll = new ScrollContainer { HScrollEnabled = false, MinWidth = 450f, VerticalExpand = true };
+        var scroll = new ScrollContainer { HScrollEnabled = false, MinWidth = 470f, VerticalExpand = true };
         scroll.AddChild(side);
 
         var root = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 10 };
@@ -150,8 +151,11 @@ public sealed class SettlersWindow : DefaultWindow
 
         var turn = Column(4);
         turn.AddChild(Row(_roll, _endTurn, _endSurvey));
-        var builds = Row(_buildLane, _buildOutpost, _buildColony, _buyCard);
-        builds.SeparationOverride = 4;
+        var builds = new GridContainer { Columns = 2, HorizontalExpand = true, HSeparationOverride = 4, VSeparationOverride = 4 };
+        builds.AddChild(_buildLane);
+        builds.AddChild(_buildOutpost);
+        builds.AddChild(_buildColony);
+        builds.AddChild(_buyCard);
         turn.AddChild(builds);
         turn.AddChild(_steal);
         turn.AddChild(_discardBox);
@@ -198,7 +202,9 @@ public sealed class SettlersWindow : DefaultWindow
         var contracts = Column(4);
         contracts.AddChild(_cards);
         contracts.AddChild(_choice);
-        _playArea.AddChild(Section("wg-settlers-section-contracts", null, contracts));
+        _deck.FontColorOverride = SettlersArt.Muted;
+        _deck.StyleClasses.Add("LabelSubText");
+        _playArea.AddChild(Section("wg-settlers-section-contracts", _deck, contracts));
 
         for (var resource = 0; resource < SettlersRules.ResourceCount; resource++)
         {
@@ -327,15 +333,16 @@ public sealed class SettlersWindow : DefaultWindow
         _hint.StyleClasses.Add("LabelSubText");
         _hint.FontColorOverride = SettlersArt.Muted;
 
-        var text = Column(0);
-        text.HorizontalExpand = true;
+        var buttons = Row(_start, _newGame);
+        buttons.HorizontalAlignment = HAlignment.Right;
+
+        var text = Column(2);
         text.AddChild(_status);
         text.AddChild(_hint);
+        text.AddChild(buttons);
 
-        _start.VerticalAlignment = VAlignment.Center;
-        _newGame.VerticalAlignment = VAlignment.Center;
         var banner = new PanelContainer { PanelOverride = _bannerStyle };
-        banner.AddChild(Row(text, _start, _newGame));
+        banner.AddChild(text);
         return banner;
     }
 
@@ -352,7 +359,7 @@ public sealed class SettlersWindow : DefaultWindow
             VerticalExpand = true,
         };
 
-        _seatNames[seat] = new Label { ClipText = true, FontOverride = SettlersArt.Font(12) };
+        _seatNames[seat] = new Label { ClipText = true, HorizontalExpand = true, FontOverride = SettlersArt.Font(12) };
         _seatStats[seat] = new Label { ClipText = true, FontColorOverride = SettlersArt.Muted };
         _seatStats[seat].StyleClasses.Add("LabelSubText");
         _seatBadges[seat] = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 4 };
@@ -485,7 +492,7 @@ public sealed class SettlersWindow : DefaultWindow
         SetBuild(_buildOutpost, SettlersPick.Outpost, main && state.CanAfford(seat, SettlersRules.OutpostCost) && state.Count(seat, false) < SettlersRules.MaxOutposts);
         SetBuild(_buildColony, SettlersPick.Colony, main && state.CanAfford(seat, SettlersRules.ColonyCost) && state.Count(seat, true) < SettlersRules.MaxColonies);
         _buyCard.Disabled = !main || state.DeckCount == 0 || !state.CanAfford(seat, SettlersRules.CardCost);
-        _buyCard.Text = Loc.GetString("wg-settlers-buy-card-left", ("count", state.DeckCount));
+        _deck.Text = Loc.GetString("wg-settlers-deck", ("count", state.DeckCount));
 
         _board.State = state;
         _board.Seat = seat;

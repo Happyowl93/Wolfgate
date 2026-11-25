@@ -1,9 +1,12 @@
 #nullable enable annotations
 
 using Content.Shared._WG.Settlers;
+using Content.Shared.Examine;
 using Content.Shared.Interaction;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Localization;
 using Robust.Shared.Map;
+using Robust.Shared.Utility;
 
 namespace Content.IntegrationTests.Tests._WG.Settlers;
 
@@ -19,6 +22,8 @@ public sealed class SettlersBoardTest
         var em = server.EntMan;
         var ui = em.System<SharedUserInterfaceSystem>();
         var xforms = em.System<SharedTransformSystem>();
+        var examine = em.System<ExamineSystemShared>();
+        var loc = server.ResolveDependency<ILocalizationManager>();
 
         EntityUid board = default;
         EntityUid alice = default;
@@ -63,9 +68,16 @@ public sealed class SettlersBoardTest
             Send(bob, new SettlersSeatMessage(2));
             Assert.That(comp.Seats[2], Is.EqualTo(bob));
 
+            string Plain(string key) => FormattedMessage.FromMarkupOrThrow(loc.GetString(key)).ToString();
+            Assert.That(examine.GetExamineText(board, carol).ToString(), Does.Not.Contain(Plain("wg-settlers-examine-running")),
+                "No game is being played yet.");
+
             Send(bob, new SettlersStartMessage());
             Assert.That(game.State.Phase, Is.EqualTo(SettlersPhase.SetupOutpost));
             Assert.That(game.State.Players[0].InGame && game.State.Players[2].InGame, Is.True);
+
+            Assert.That(examine.GetExamineText(board, carol).ToString(), Does.Contain(Plain("wg-settlers-examine-running")),
+                "Examining the board shows the game in progress.");
 
             Send(carol, new SettlersSeatMessage(1));
             Assert.That(comp.Seats[1], Is.Null, "Seat 1 isn't in this game.");

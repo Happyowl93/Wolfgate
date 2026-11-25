@@ -1,4 +1,6 @@
 wg-settlers-verb-play = Play
+wg-settlers-examine-running = [color=yellow]A game is being played on this board.[/color]
+guide-entry-wg-settlers = Settlers of Colossus
 wg-settlers-window-title = Settlers of Colossus
 
 wg-settlers-seat = Seat { $number }
@@ -41,8 +43,8 @@ wg-settlers-end-survey = Finish survey
 wg-settlers-build-lane = Lane
 wg-settlers-build-outpost = Outpost
 wg-settlers-build-colony = Colony
-wg-settlers-buy-card = Buy contract
-wg-settlers-buy-card-left = Contract ({ $count } left)
+wg-settlers-buy-card = Contract
+wg-settlers-deck = { $count } in the deck
 
 wg-settlers-card-escort = Escort
 wg-settlers-card-charter = Charter
