@@ -1,8 +1,10 @@
 #nullable enable annotations
 
+using Content.Client._WG.Settlers;
 using Content.Shared._WG.Settlers;
 using Content.Shared.Examine;
 using Content.Shared.Interaction;
+using Robust.Client.GameObjects;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Localization;
 using Robust.Shared.Map;
@@ -114,6 +116,25 @@ public sealed class SettlersBoardTest
             Assert.That(ui.IsUiOpen(board, WGSettlersUiKey.Key, alice), Is.False, "Alice walked away.");
             Assert.That(comp.Seats[0], Is.Null);
             Assert.That(comp.Game!.State.Running, Is.True, "The game stays on the board.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ResourceIconsLoad()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true });
+        var client = pair.Client;
+        var sprites = client.EntMan.System<SpriteSystem>();
+
+        await client.WaitAssertion(() =>
+        {
+            var error = sprites.GetFallbackState().Frame0;
+            for (var resource = 0; resource < SettlersRules.ResourceCount; resource++)
+            {
+                Assert.That(SettlersArt.ResourceTexture(resource), Is.Not.SameAs(error), $"Resource {resource} has no icon.");
+            }
         });
 
         await pair.CleanReturnAsync();

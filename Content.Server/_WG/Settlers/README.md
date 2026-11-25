@@ -78,6 +78,7 @@ it opens.
 ### Textures
 
 - [`Resources/Textures/_WG/Settlers/board.rsi/`](../../../Resources/Textures/_WG/Settlers/board.rsi/)
+- [`Resources/Textures/_WG/Settlers/resources.rsi/`](../../../Resources/Textures/_WG/Settlers/resources.rsi/)
 
 ### Guidebook
 

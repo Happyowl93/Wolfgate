@@ -45,13 +45,16 @@ public static class SettlersArt
     public static readonly Color Muted = Color.FromHex("#8C93A8");
     public static readonly Color Dim = new(1f, 1f, 1f, 0.4f);
 
+    private static readonly ResPath ResourcesRsi = new("/Textures/_WG/Settlers/resources.rsi");
+
+    /// <summary>Resource icons, each in its sector's colour.</summary>
     private static readonly SpriteSpecifier.Rsi[] ResourceIcons =
     {
-        new(new ResPath("/Textures/Objects/Materials/Scrap/generic.rsi"), "metal-1"),
-        new(new ResPath("/Textures/Objects/Materials/ore.rsi"), "spacequartz"),
-        new(new ResPath("/Textures/Structures/Storage/canister.rsi"), "orange"),
-        new(new ResPath("/Textures/Objects/Specific/Hydroponics/wheat.rsi"), "produce"),
-        new(new ResPath("/Textures/Objects/Materials/ore.rsi"), "iron"),
+        new(ResourcesRsi, "scrap"),
+        new(ResourcesRsi, "ice"),
+        new(ResourcesRsi, "gas"),
+        new(ResourcesRsi, "biomass"),
+        new(ResourcesRsi, "ore"),
     };
 
     private static readonly SpriteSpecifier.Rsi PirateIcon = new(new ResPath("/Textures/Clothing/Head/Bandanas/skull.rsi"), "icon");
