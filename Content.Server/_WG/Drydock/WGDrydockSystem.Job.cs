@@ -432,10 +432,23 @@ public sealed partial class WGDrydockSystem
         var reachDistance = float.MaxValue;
         var stranded = -1;
         var strandedDistance = float.MaxValue;
+
+        // Bug report 1435: hull grows out from what is left of it, as with the SRD. A tile touching no hull splits off
+        // as debris and leaves the parts meant for it over space. Such a tile is laid only once no other can be.
+        Entity<MapGridComponent>? hull = null;
+        if (job.Pending.Any(item => item.Kind == WGDrydockWorkKind.Tile && Rank(item) == rank) &&
+            TryComp(job.Ship, out MapGridComponent? grid) &&
+            (job.Slots.Any(other => other != slot && other.Item is { Kind: WGDrydockWorkKind.Tile }) ||
+             job.Pending.Any(item => item.Kind == WGDrydockWorkKind.Tile && !_hull.WouldSplitOff((job.Ship, grid), item.TileIndex))))
+            hull = (job.Ship, grid);
+
         for (var i = 0; i < job.Pending.Count; i++)
         {
             var candidate = job.Pending[i];
             if (Rank(candidate) != rank || TileBusy(job, slot, candidate))
+                continue;
+
+            if (hull is { } joined && candidate.Kind == WGDrydockWorkKind.Tile && _hull.WouldSplitOff(joined, candidate.TileIndex))
                 continue;
 
             var distance = (candidate.LocalPos - slot.ToolPos).LengthSquared();
