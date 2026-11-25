@@ -63,7 +63,7 @@ public sealed class WGShipShieldCostTest
             Assert.That(stats.ThrustFactor, Is.EqualTo(cost.ThrustFactor));
             Assert.That(stats.TurnFactor, Is.EqualTo(cost.TurnFactor));
             Assert.That(cost.GunLockout, Is.Null);
-            Assert.That(stats.GunLockSeconds, Is.EqualTo(emitter.DamageOverloadTimePunishment),
+            Assert.That(stats.GunLockSeconds, Is.EqualTo(system.WolfgateOverloadWait(emitterUid, emitter)),
                 "With no lock of its own, the guns stay locked through the overload wait.");
 
             var heat = entities.EnsureComponent<ThermalSignatureComponent>(grid);
@@ -127,7 +127,7 @@ public sealed class WGShipShieldCostTest
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Null);
             var locked = system.GetWolfgateGunLockSeconds(grid);
-            wait = emitter.DamageOverloadTimePunishment;
+            wait = system.WolfgateOverloadWait(emitterUid, emitter);
             Assert.That(locked, Is.InRange((int) wait - 2, (int) wait + 1), "A field beaten down by damage locks the guns through its overload.");
             Assert.That(entities.System<WGShipShieldShuntSystem>().GetState(grid).GunLockSeconds, Is.EqualTo(locked));
             Assert.That(Refused(entities, gun, user), Is.True);
@@ -169,8 +169,8 @@ public sealed class WGShipShieldCostTest
             var point = entities.System<SharedTransformSystem>().GetWorldPosition(grid);
             system.AbsorbWolfgateCollision(grid, point, 100f, 2f);
             Assert.That(emitter.Shield, Is.Null);
-            Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.InRange((int) emitter.DamageOverloadTimePunishment - 2,
-                (int) emitter.DamageOverloadTimePunishment + 1), "A field a collision uses up locks the guns too, through its overload.");
+            Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.InRange((int) system.WolfgateOverloadWait(emitterUid, emitter) - 2,
+                (int) system.WolfgateOverloadWait(emitterUid, emitter) + 1), "A field a collision uses up locks the guns too, through its overload.");
         });
         await pair.CleanReturnAsync();
     }
@@ -221,7 +221,8 @@ public sealed class WGShipShieldCostTest
             Assert.That(system.IsWolfgateShipHeatHeld(grid), Is.False, "So the short lock is all that silences its guns.");
             var stats = entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!;
             Assert.That(stats.GunLockSeconds, Is.EqualTo(lockout));
-            Assert.That(stats.OverloadSeconds, Is.EqualTo(10f));
+            Assert.That(stats.OverloadSeconds, Is.EqualTo(system.WolfgateOverloadWait(emitterUid, emitter)));
+            Assert.That(emitter.DamageOverloadTimePunishment, Is.EqualTo(14f));
         });
         await pair.CleanReturnAsync();
     }
@@ -261,8 +262,8 @@ public sealed class WGShipShieldCostTest
             emitter.Damage = emitter.DamageLimit + 5000f;
             system.Update(1.5f);
             Assert.That(emitter.Shield, Is.Null);
-            Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.InRange((int) emitter.DamageOverloadTimePunishment - 2,
-                (int) emitter.DamageOverloadTimePunishment + 1), "A deflector beaten down locks the guns like any shield.");
+            Assert.That(system.GetWolfgateGunLockSeconds(grid), Is.InRange((int) system.WolfgateOverloadWait(emitterUid, emitter) - 2,
+                (int) system.WolfgateOverloadWait(emitterUid, emitter) + 1), "A deflector beaten down locks the guns like any shield.");
         });
         await pair.CleanReturnAsync();
     }

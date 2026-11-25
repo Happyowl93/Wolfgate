@@ -8,12 +8,16 @@ wg-ship-module-status-shields = SHIELDS ON
 wg-ship-module-status-ftl = IN FTL
 wg-ship-module-status-docked = DOCKED
 wg-ship-module-status-anchored = ANCHORED
+wg-ship-module-status-venting = VENTING
+wg-ship-module-status-overloaded = OVERLOADED
 
 wg-ship-module-refused-unpowered = The helm has no power to fire it.
 wg-ship-module-refused-shields = A shield generator is on. Switch it off and give the field a few seconds to clear.
 wg-ship-module-refused-ftl = Not during a jump.
 wg-ship-module-refused-docked = Not while docked.
 wg-ship-module-refused-anchored = The hull is held fast.
+wg-ship-module-refused-venting = Not while the ship vents its heat.
+wg-ship-module-refused-overloaded = Not while the shield generator is overloaded.
 wg-ship-module-refused-empty = No charge ready.
 
 wg-ship-module-jets-name = MJ-3 "Sidestep" Maneuvering Jets

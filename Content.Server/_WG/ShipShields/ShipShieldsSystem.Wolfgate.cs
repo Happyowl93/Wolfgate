@@ -252,9 +252,10 @@ public sealed partial class ShipShieldsSystem
             var previousDamage = emitter.Damage;
             var ev = new ShieldDeflectedEvent(args.ProjUid, projectile);
             RaiseLocalEvent(source, ref ev);
-            var absorbed = (emitter.Damage - previousDamage) / strength;
+            var hit = emitter.Damage - previousDamage;
+            var absorbed = hit / strength;
             // The generator is charged its share of the hit; the hull's own capacity takes the rest.
-            emitter.Damage = previousDamage + WolfgateHitCharge(source, emitter, absorbed);
+            emitter.Damage = previousDamage + WolfgateHitCharge(source, emitter, absorbed, hit);
             ReportWolfgateShieldAttack(component, absorbed, launchGrid, projectile.Weapon, projectile.Shooter);
             var impactStrength = WGShipShieldEffects.ImpactStrength(emitter.Damage - previousDamage,
                 WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp));

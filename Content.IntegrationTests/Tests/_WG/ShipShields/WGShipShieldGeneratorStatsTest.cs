@@ -44,11 +44,11 @@ public sealed class WGShipShieldGeneratorStatsTest
             Assert.That(stats.DamageLimit, Is.EqualTo(180000f));
             Assert.That(stats.HullCooling, Is.EqualTo(hull.Dissipation).And.GreaterThan(0f), "The hull keeps its own cooling.");
             Assert.That(stats.HealPerSecond, Is.EqualTo(emitter.HealPerSecond + stats.HullCooling));
-            Assert.That(stats.RechargePerSecond, Is.EqualTo(stats.HealPerSecond * WGShipShieldEffects.VentCooling),
-                "A ship vents at the same multiple of its plain rate as every other ship.");
+            Assert.That(stats.RechargePerSecond, Is.EqualTo(WGShipShieldEffects.VentRate(stats.HealPerSecond, stats.Capacity + hull.Capacity)).Within(0.01f),
+                "A ship vents by the same rule as every other ship.");
             Assert.That(stats.BasePowerWatts, Is.EqualTo(emitter.BaseDraw));
             Assert.That(stats.MaximumPowerWatts, Is.EqualTo(emitter.BaseDraw + emitter.MaxDraw));
-            Assert.That(stats.OverloadSeconds, Is.EqualTo(emitter.DamageOverloadTimePunishment));
+            Assert.That(stats.OverloadSeconds, Is.EqualTo(entities.System<ShipShieldsSystem>().WolfgateOverloadWait(active, emitter)));
             var examiner = entities.SpawnEntity("MobHuman", map.GridCoords);
             var description = entities.System<ExamineSystemShared>().GetExamineText(active, examiner).ToString();
             Assert.That(description, Does.Contain("Heat capacity:"));

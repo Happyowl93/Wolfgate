@@ -13,16 +13,17 @@ public sealed partial class ShipShieldsSystem
         var cost = CompOrNull<WGShipShieldCostComponent>(uid);
         var hullCooling = WolfgateHullCooling(uid);
         var cooling = emitter.HealPerSecond + hullCooling;
-        return new WGShipShieldGeneratorStats(Name(uid),
-            WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp),
-            emitter.DamageLimit, cooling,
-            cooling * (cost == null ? emitter.UnpoweredBonus : WGShipShieldEffects.VentCooling),
-            emitter.BaseDraw, emitter.BaseDraw + emitter.MaxDraw, emitter.DamageOverloadTimePunishment)
+        var capacity = WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp);
+        var shipCapacity = Transform(uid) is { Anchored: true, GridUid: { } shipGrid } ? WolfgateShipCapacity(shipGrid, uid, emitter) : capacity;
+        var wait = WolfgateOverloadWait(uid, emitter);
+        return new WGShipShieldGeneratorStats(Name(uid), capacity, emitter.DamageLimit, cooling,
+            cost == null ? cooling * emitter.UnpoweredBonus : WGShipShieldEffects.VentRate(cooling, shipCapacity),
+            emitter.BaseDraw, emitter.BaseDraw + emitter.MaxDraw, wait)
         {
             ThrustFactor = cost == null ? 1f : Math.Clamp(cost.ThrustFactor, MinShieldMobility, 1f),
             TurnFactor = cost == null ? 1f : Math.Clamp(cost.TurnFactor, MinShieldMobility, 1f),
             // A ship generator's collapse always waits out its overload, and the guns stay locked through it unless it sets its own lock.
-            GunLockSeconds = cost == null ? 0f : MathF.Max(0f, cost.GunLockout ?? emitter.DamageOverloadTimePunishment),
+            GunLockSeconds = cost == null ? 0f : MathF.Max(0f, cost.GunLockout ?? wait),
             HardHeatHold = MathF.Max(0f, cost?.HardHeatHold ?? 0f),
             Vents = cost != null,
             HitHeat = cost == null ? 1f : MathF.Max(0f, cost.HitHeat),

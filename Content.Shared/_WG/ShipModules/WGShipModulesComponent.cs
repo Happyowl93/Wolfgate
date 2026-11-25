@@ -39,6 +39,8 @@ public enum WGShipModuleLock : byte
     Ftl,
     Docked,
     Anchored,
+    Venting,
+    Overloaded,
 }
 
 /// <summary>A pilot asks to fire one module slot of the ship they are flying.</summary>

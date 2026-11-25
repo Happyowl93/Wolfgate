@@ -23,13 +23,13 @@ public sealed partial class WGShipHeatComponent : Component
     [DataField]
     public float BaseCapacity = HullCapacity;
 
-    /// <summary>Heat each hull tile adds to what the hull holds.</summary>
+    /// <summary>Heat each of a small hull's tiles adds to what it holds; each further tile adds less (<c>WGShipShieldEffects.HullCapacity</c>).</summary>
     [DataField]
     public float CapacityPerTile = 15f;
 
-    /// <summary>Most heat a hull holds by its size, however large.</summary>
+    /// <summary>Heat a hull's size-based capacity tapers toward, however large.</summary>
     [DataField]
-    public float MaxCapacity = 50000f;
+    public float MaxCapacity = 30000f;
 
     /// <summary>
     /// Seconds a hull's own plain rate takes to shed a full load of heat. A generator adds its rate on top; with no
@@ -87,6 +87,10 @@ public sealed partial class WGShipHeatComponent : Component
     /// <summary>Whether the hull is venting: field down, guns silent, cooling at the fast rate until no heat is left.</summary>
     [ViewVariables]
     public bool Venting;
+
+    /// <summary>Seconds of cooling the current vent still runs for however little heat is left (<c>WGShipShieldEffects.MinVentSeconds</c> at its start).</summary>
+    [ViewVariables]
+    public float VentHold;
 
     /// <summary>Whether damage beat the field down and an NPC crew has yet to make its call on it, once the overload ends.</summary>
     [ViewVariables]

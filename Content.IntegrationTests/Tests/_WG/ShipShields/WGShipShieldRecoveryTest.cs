@@ -60,8 +60,8 @@ public sealed class WGShipShieldRecoveryTest
         await pair.CleanReturnAsync();
     }
 
-    [TestCase("ShieldGeneratorSmall", 12f)]
-    [TestCase("ShieldGeneratorMedium", 15f)]
+    [TestCase("ShieldGeneratorSmall", 16f)]
+    [TestCase("ShieldGeneratorMedium", 20f)]
     public async Task CollapsedShipFieldReturnsAfterItsOverloadWaitWithHeatLeft(string generator, float wait)
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
@@ -78,6 +78,8 @@ public sealed class WGShipShieldRecoveryTest
             shields.Update(1.5f);
             Assert.That(emitter.Shield, Is.Not.Null);
             Assert.That(emitter.DamageOverloadTimePunishment, Is.EqualTo(wait));
+            // The configured wait is scaled by the ship's size.
+            wait = shields.WolfgateOverloadWait(uid, emitter);
 
             // The Sentinel collapses past its overload limit, the Aegis at its power cap; both wait out the same rule.
             // A hit many times the ship's capacity costs one overload; the heat stops at capacity.

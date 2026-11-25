@@ -87,7 +87,10 @@ public sealed partial class ShipShieldsSystem : EntitySystem
             // var filter = _station.GetInOwningStation(uid); // WOLFGATE(Performance): unused, and the lookup is costly
 
             if (emitter.Damage > emitter.DamageLimit)
-                emitter.OverloadAccumulator = emitter.DamageOverloadTimePunishment;
+                // WOLFGATE(ShipShields) START: a ship generator's overload wait grows with its ship's capacity
+                // emitter.OverloadAccumulator = emitter.DamageOverloadTimePunishment;
+                emitter.OverloadAccumulator = WolfgateOverloadWait(uid, emitter);
+                // WOLFGATE END
 
             // WOLFGATE(ShipShields) START: respect the ship's manual field switch
             // if (!emitter.Recharging && emitter.Shield is null && emitter.OverloadAccumulator < 1)

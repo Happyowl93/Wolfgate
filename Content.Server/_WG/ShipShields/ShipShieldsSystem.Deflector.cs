@@ -98,11 +98,12 @@ public sealed partial class ShipShieldsSystem
             return false;
 
         var reduction = Math.Clamp(deflector.Reduction, 0f, 1f);
-        var removed = (float) projectile.Damage.GetTotal() * reduction;
+        // The whole round decides how much of it the field feels; the field is charged for the part it takes off.
+        var hit = (float) projectile.Damage.GetTotal();
         projectile.Damage = projectile.Damage * (1f - reduction);
         if (TryComp<ExplosiveComponent>(uid, out var explosive))
         {
-            removed += WolfgateAbsorbedBlastDamage(explosive) * reduction;
+            hit += WolfgateAbsorbedBlastDamage(explosive);
             // Scaling all three weakens the blast on every tile over the same footprint; the total alone only shrinks it.
             explosive.TotalIntensity *= 1f - reduction;
             if (reduction < 1f)
@@ -112,8 +113,8 @@ public sealed partial class ShipShieldsSystem
             }
         }
 
-        var charged = removed / strength;
-        var heat = WolfgateHitCharge(source, emitter, charged);
+        var charged = hit * reduction / strength;
+        var heat = WolfgateHitCharge(source, emitter, charged, hit);
         emitter.Damage += heat;
         EnsureComp<WGShipShieldDeflectedComponent>(uid).Shields.Add(shield);
         ReportWolfgateShieldAttack(field, charged, CompOrNull<ProjectileGridPhaseComponent>(uid)?.SourceGrid,

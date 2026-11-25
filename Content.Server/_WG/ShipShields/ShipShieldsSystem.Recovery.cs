@@ -13,7 +13,7 @@ public sealed partial class ShipShieldsSystem
     private void OverloadWolfgateAtPowerCap(EntityUid uid, ShipShieldEmitterComponent emitter)
     {
         if (CalculateLoadDamage(emitter) >= emitter.MaxDraw && HasComp<WGShipShieldCostComponent>(uid))
-            emitter.OverloadAccumulator = MathF.Max(emitter.OverloadAccumulator, emitter.DamageOverloadTimePunishment);
+            emitter.OverloadAccumulator = MathF.Max(emitter.OverloadAccumulator, WolfgateOverloadWait(uid, emitter));
     }
 
     /// <summary>Takes a powered ship generator out of recharge mode once its heat is below its power cap, so only the overload wait holds its field down.</summary>
@@ -25,7 +25,8 @@ public sealed partial class ShipShieldsSystem
 
     /// <summary>
     /// Estimates automatic startup with unchanged power and no further damage. A ship's field is down while it waits,
-    /// so it cools at the field-down or venting rate, and a vent holds the field down until no heat is left. Cooling is the ship's, so
+    /// so it cools at the plain rate while overloaded, the field-down rate after and its vent rate while venting, and a
+    /// vent holds the field down until no heat is left. Cooling is the ship's, so
     /// the generator's damage falls by its <paramref name="share"/> of it, and <paramref name="hullCooling"/> is what
     /// the hull adds to the generator's rate.
     /// </summary>
@@ -52,6 +53,10 @@ public sealed partial class ShipShieldsSystem
         // The hull's heat stops at the ship's capacity, which is the generator's own in its range; with the field down the excess is lost.
         if (ship)
             damage = MathF.Min(damage, capacity);
+        // A ship generator's wait and vent scale with the whole ship's capacity, the generator's over its share.
+        var shipCapacity = ship && share > 0f ? capacity / share : capacity;
+        var wait = ship ? WGShipShieldEffects.OverloadWait(emitter.DamageOverloadTimePunishment, shipCapacity)
+            : emitter.DamageOverloadTimePunishment;
 
         // Bound malformed or impractically long configurations without blocking UI updates.
         for (var tick = 0; tick < 2400; tick++)
@@ -64,13 +69,11 @@ public sealed partial class ShipShieldsSystem
                 overload -= EmitterUpdateRate;
             // A ship generator at its power cap starts its full wait after this tick's countdown, as the update does.
             if (ship && capped)
-                overload = MathF.Max(overload, emitter.DamageOverloadTimePunishment);
-            var healed = (emitter.HealPerSecond + hullCooling) * EmitterUpdateRate;
+                overload = MathF.Max(overload, wait);
+            var plain = emitter.HealPerSecond + hullCooling;
             // A ship generator still waiting has its field down: the ship cools by the same rule as every other ship.
-            if (ship)
-                healed *= WGShipShieldEffects.CoolingMultiplier(false, venting);
-            else if (recharging)
-                healed *= emitter.UnpoweredBonus;
+            var healed = (ship ? WGShipShieldEffects.CoolingRate(plain, shipCapacity, false, venting, overload >= 1f)
+                : recharging ? plain * emitter.UnpoweredBonus : plain) * EmitterUpdateRate;
             healed *= share;
             var ventedThisTick = venting;
             damage -= healed;
@@ -83,7 +86,7 @@ public sealed partial class ShipShieldsSystem
             if (ship && WolfgateLoadAt(damage, emitter) < emitter.MaxDraw)
                 recharging = false;
             if (damage > emitter.DamageLimit)
-                overload = emitter.DamageOverloadTimePunishment;
+                overload = wait;
             if (tick == 0)
             {
                 var overloaded = overload >= 1f;

@@ -21,7 +21,9 @@ the ship is in a jump, or (for a module with `blockedByShields`) a shield genera
 less than `shieldLockout` ago. A generator counts as on when it is anchored and switched on, at the machine and at
 the ship's field switch, whether or not it has power or a field up, so a field down to recharge or after an overload
 still locks the module. Any field on the hull from another source counts too. A deflector (an emitter with
-`WGShipShieldDeflector`, such as the MD-10 Parasol) doesn't.
+`WGShipShieldDeflector`, such as the MD-10 Parasol) doesn't. Such a module is also refused while the ship vents
+(`WGShipVentingComponent`) or its generator is overloaded (`WGShipOverloadedComponent`), so lowering the field by hand
+is no way out of either.
 
 Each use plays `activateSound` to everyone aboard and to the pilot, and sends them `WGShipModuleFiredEvent`. On their
 clients `WGShipModuleHelmSystem` lights the module's key red for a moment on every strip showing the ship, shakes the

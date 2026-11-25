@@ -95,6 +95,7 @@ public sealed partial class ShipShieldsSystem
             return false;
         var hull = Comp<WGShipHeatComponent>(grid);
         hull.Venting = true;
+        hull.VentHold = WGShipShieldEffects.MinVentSeconds;
         hull.NextPlume = _wgShieldTiming.CurTime;
         _wgVenting.Add(grid);
         // Clients draw the vent on radar from this.
@@ -120,8 +121,10 @@ public sealed partial class ShipShieldsSystem
         if (!IsWolfgateShipVenting(grid))
             return 0;
         var hull = Comp<WGShipHeatComponent>(grid);
-        var rate = WolfgatePlainCooling(grid, hull) * WGShipShieldEffects.VentCooling;
-        return rate > 0f && float.IsFinite(rate) ? Math.Max(1, (int) MathF.Ceiling(hull.Heat / rate)) : -1;
+        var rate = WolfgateCoolingRate(grid, hull);
+        if (!(rate > 0f) || !float.IsFinite(rate))
+            return -1;
+        return Math.Max(1, (int) MathF.Ceiling(MathF.Max(hull.Heat / rate, hull.VentHold)));
     }
 
     /// <summary>A hot hull glows on long-range sensors by the heat it holds, and a venting one flares on top of that.</summary>

@@ -17,13 +17,14 @@ public sealed partial class ShipShieldsSystem
     {
         if (strength <= 0f || !TryComp<ShipShieldComponent>(shield, out var component))
             return;
-        var actualDamage = TryComp<HitscanBasicDamageComponent>(hitscan, out var damage)
-            ? MathF.Max(0f, (float)(damage.Damage * _wgHitscanDamage.UniversalHitscanDamageModifier).GetTotal()) / strength
+        var hit = TryComp<HitscanBasicDamageComponent>(hitscan, out var damage)
+            ? MathF.Max(0f, (float)(damage.Damage * _wgHitscanDamage.UniversalHitscanDamageModifier).GetTotal())
             : 0f;
+        var actualDamage = hit / strength;
         var impactStrength = actualDamage > 0f ? 1f : 0f;
         if (component.Source is { } source && TryComp<ShipShieldEmitterComponent>(source, out var emitter))
         {
-            var charged = WolfgateHitCharge(source, emitter, actualDamage);
+            var charged = WolfgateHitCharge(source, emitter, actualDamage, hit);
             emitter.Damage += charged;
             impactStrength = WGShipShieldEffects.ImpactStrength(charged,
                 WGShipShieldEffects.EffectiveCapacity(emitter.DamageLimit, emitter.MaxDraw, emitter.PowerModifier, emitter.DamageExp));

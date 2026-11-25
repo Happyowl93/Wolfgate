@@ -91,7 +91,8 @@ public sealed class WGShipHeatTest
             Assert.That(Heat(entities, grid), Is.EqualTo(held - tick).Within(0.01f), "Left alone long enough, hard heat cools under the field too.");
             var stats = entities.System<WGShipShieldShuntSystem>().GetState(grid).Stats!;
             Assert.That(stats.Vents, Is.True);
-            Assert.That(stats.RechargePerSecond, Is.EqualTo(Cooling(entities, emitterUid) * WGShipShieldEffects.VentCooling).Within(0.01f));
+            Assert.That(stats.RechargePerSecond, Is.EqualTo(WGShipShieldEffects.VentRate(Cooling(entities, emitterUid),
+                system.GetWolfgateShipHeat(grid).Capacity)).Within(0.01f));
         });
         await pair.CleanReturnAsync();
     }
@@ -118,7 +119,7 @@ public sealed class WGShipHeatTest
             Assert.That(system.StartWolfgateVent(grid), Is.False, "A cold ship has nothing to vent.");
             Assert.That(controls.GetState(grid).CanVent, Is.False);
 
-            var tick = Cooling(entities, emitterUid) * 1.5f * WGShipShieldEffects.VentCooling;
+            var tick = WGShipShieldEffects.VentRate(Cooling(entities, emitterUid), system.GetWolfgateShipHeat(grid).Capacity) * 1.5f;
             SetHeat(entities, emitterUid, tick * 2.5f);
             Assert.That(controls.GetState(grid).CanVent, Is.True);
             Assert.That(system.StartWolfgateVent(grid), Is.True);
@@ -567,7 +568,8 @@ public sealed class WGShipHeatTest
 
             system.GetWolfgateShipHeat(grid);
             var hull = entities.GetComponent<WGShipHeatComponent>(grid);
-            Assert.That(hull.Capacity, Is.EqualTo(hull.BaseCapacity + tiles * hull.CapacityPerTile).Within(0.01f));
+            Assert.That(hull.Capacity, Is.EqualTo(WGShipShieldEffects.HullCapacity(hull.BaseCapacity, hull.CapacityPerTile,
+                hull.MaxCapacity, tiles)).Within(0.01f));
             Assert.That(hull.Dissipation, Is.EqualTo(hull.Capacity / hull.CoolSeconds).Within(0.01f));
             var small = hull.Capacity;
 
@@ -579,7 +581,8 @@ public sealed class WGShipHeatTest
             }
             // Hulls are measured again on the once-a-second pass.
             system.Update(1.01f);
-            Assert.That(hull.Capacity, Is.EqualTo(small + 40 * hull.CapacityPerTile).Within(0.01f), "A bigger hull holds more heat.");
+            Assert.That(hull.Capacity, Is.EqualTo(WGShipShieldEffects.HullCapacity(hull.BaseCapacity, hull.CapacityPerTile,
+                hull.MaxCapacity, tiles + 40)).Within(0.01f).And.GreaterThan(small), "A bigger hull holds more heat.");
             Assert.That(hull.Dissipation, Is.EqualTo(hull.Capacity / hull.CoolSeconds).Within(0.01f), "And sheds it faster.");
             Assert.That(system.GetWolfgateShipHeat(grid).Capacity, Is.EqualTo(hull.BareCapacity));
 
@@ -671,7 +674,7 @@ public sealed class WGShipHeatTest
             var venting = new GetThermalSignatureEvent();
             entities.EventBus.RaiseLocalEvent(grid, ref venting);
             Assert.That(venting.Signature - hot.Signature, Is.EqualTo(hull.VentSignature).Within(1f), "A vent flares on top of the heat.");
-            var rate = hull.BareDissipation * WGShipShieldEffects.CoolingMultiplier(false, true);
+            var rate = WGShipShieldEffects.VentRate(hull.BareDissipation, hull.BareCapacity);
             Assert.That(rate, Is.GreaterThan(hull.BareDissipation * WGShipShieldEffects.FieldDownCooling), "A vent beats a bare hull's field-down rate.");
             Assert.That(controls.GetState(grid).VentSeconds, Is.EqualTo((int) MathF.Ceiling(hull.Heat / rate)));
 

@@ -260,10 +260,16 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         if (TryComp<FTLComponent>(grid, out var ftl) && ftl.State is FTLState.Travelling or FTLState.Arriving)
             return WGShipModuleLock.Ftl;
 
-        if (module.BlockedByShields
-            && (ShieldOn(grid)
-                || bay.LastShielded is { } seen && now < seen + module.ShieldLockout))
-            return WGShipModuleLock.Shields;
+        if (module.BlockedByShields)
+        {
+            if (ShieldOn(grid) || bay.LastShielded is { } seen && now < seen + module.ShieldLockout)
+                return WGShipModuleLock.Shields;
+            // Lowering the field by hand is no way out of a vent or an overload.
+            if (HasComp<WGShipVentingComponent>(grid))
+                return WGShipModuleLock.Venting;
+            if (HasComp<WGShipOverloadedComponent>(grid))
+                return WGShipModuleLock.Overloaded;
+        }
 
         var ev = new WGShipModuleLockEvent(grid, module);
         RaiseLocalEvent(ref ev);

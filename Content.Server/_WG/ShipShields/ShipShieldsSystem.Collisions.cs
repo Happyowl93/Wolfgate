@@ -74,7 +74,7 @@ public sealed partial class ShipShieldsSystem
         emitter.Recharging = true;
         // A ship generator always waits out an overload; its recharge mode ends as soon as it cools a little.
         if (emitter.Damage >= emitter.DamageLimit || HasComp<WGShipShieldCostComponent>(source))
-            emitter.OverloadAccumulator = MathF.Max(emitter.OverloadAccumulator, emitter.DamageOverloadTimePunishment);
+            emitter.OverloadAccumulator = MathF.Max(emitter.OverloadAccumulator, WolfgateOverloadWait(source, emitter));
         if (RemoveWolfgateEmitterShield(source, emitter, "collision capacity exhausted"))
         {
             PlayWolfgateShieldPowerSound(source, grid, false);
