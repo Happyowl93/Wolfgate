@@ -301,6 +301,8 @@ public sealed partial class ChatSystem : SharedChatSystem
             }
         }
 
+        if (desiredType == InGameICChatType.Speak && WgSpeechMuffledByVacuum(source)) // WOLFGATE(Speech): thin air only carries a whisper
+            desiredType = InGameICChatType.Whisper; // WOLFGATE(Speech)
         // Otherwise, send whatever type.
         switch (desiredType)
         {
