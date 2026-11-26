@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Content.Server._WG.BoardingAction.Components;
@@ -213,6 +214,48 @@ public sealed class WGShipModuleAbilitiesTest
             });
             Assert.That(modules.FittedSlot(grid, Gyros), Is.EqualTo(1));
             Assert.That(entities.IsQueuedForDeletion(kit) || entities.Deleted(kit), Is.True, "The kit wasn't used up.");
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>Mapping presets fit their modules as the ship spawns, in a named slot or the first free one, and go.</summary>
+    [Test]
+    public async Task PresetsFitTheirModules()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var prototypes = server.ResolveDependency<IPrototypeManager>();
+        var modules = entities.System<WGShipModuleSystem>();
+        var grid = map.Grid.Owner;
+        var presets = new List<EntityUid>();
+
+        await server.WaitPost(() =>
+        {
+            presets.Add(entities.SpawnEntity("WGShipModulePresetGunGyros", map.GridCoords));
+            presets.Add(entities.SpawnEntity("WGShipModulePresetGunGyros", map.GridCoords));
+            var fortress = entities.CreateEntityUninitialized("WGShipModulePresetFortressShield", map.GridCoords);
+            entities.GetComponent<WGShipModulePresetComponent>(fortress).Slot = 3;
+            entities.InitializeAndStartEntity(fortress, doMapInit: true);
+            presets.Add(fortress);
+        });
+        await pair.RunTicksSync(5);
+
+        await server.WaitAssertion(() =>
+        {
+            // The gyros take the first free slot, the duplicate is skipped and the fortress lands on hotkey 3.
+            Assert.That(modules.GetFitted(grid, 0)?.Module.Id, Is.EqualTo(Gyros));
+            Assert.That(modules.GetFitted(grid, 1), Is.Null);
+            Assert.That(modules.GetFitted(grid, 2)?.Module.Id, Is.EqualTo(Fortress));
+            Assert.That(presets.All(p => entities.Deleted(p)), Is.True, "A preset outlived its spawn.");
+
+            foreach (var preset in prototypes.EnumeratePrototypes<EntityPrototype>())
+            {
+                if (preset.Abstract || !preset.TryComp<WGShipModulePresetComponent>(out var comp, entities.ComponentFactory))
+                    continue;
+                Assert.That(prototypes.HasIndex(comp.Module), Is.True, $"{preset.ID} names no module.");
+            }
         });
         await pair.CleanReturnAsync();
     }

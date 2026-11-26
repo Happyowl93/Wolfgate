@@ -40,6 +40,11 @@ helm window or cockpit holding that strip by a few pixels, and kicks the view of
 | FS-9 Bastille fortress shield | toggle | research, kit | Absorbed hits heat a quarter as much; guns silent; hard heat every second; field yellow in the world and on radar. |
 | AF-2 ammo feeder | fired, 6 s, 1 charge | research, kit | Guns Mono types `Ballistic` (or, untyped, fed rounds that aren't missiles) fire twice as fast, bursts and the pause after them included; tinted yellow. |
 
+Mappers fit modules into a ship template with preset markers (`presets.yml`, `WGShipModulePreset<Module>`): placed
+anywhere on the grid, each fits its module for free when the ship spawns (`WGShipModulePresetSystem`, on map init) and
+deletes itself, into hotkey `slot` 1-3 if set or the first free slot. A preset for a module the ship already has, or
+for a filled slot, is skipped with a warning.
+
 Every module states its unlock: `free: true`, or a `technology` whose node unlocks its `kit` at the circuit imprinter
 (`recipes.yml`, pack `WGShipModuleKits`, research in `research.yml`). A drydock fits a researched module only with a
 kit (`WGShipModuleKitComponent`) carried anywhere aboard the ship, checked when the job is sold and again when it
@@ -109,6 +114,7 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 - [`Content.Server/_WG/ShipModules/WGShipModuleCommand.cs`](WGShipModuleCommand.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleEvents.cs`](WGShipModuleEvents.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleKitComponent.cs`](WGShipModuleKitComponent.cs)
+- [`Content.Server/_WG/ShipModules/WGShipModulePresetSystem.cs`](WGShipModulePresetSystem.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleSystem.cs`](WGShipModuleSystem.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleSystem.Locks.cs`](WGShipModuleSystem.Locks.cs)
 
@@ -121,6 +127,7 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 - [`Content.Shared/_WG/ShipModules/WGPhaseSkimmer.cs`](../../../Content.Shared/_WG/ShipModules/WGPhaseSkimmer.cs)
 - [`Content.Shared/_WG/ShipModules/WGShipModuleFitting.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModuleFitting.cs)
 - [`Content.Shared/_WG/ShipModules/WGShipModuleKeys.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModuleKeys.cs)
+- [`Content.Shared/_WG/ShipModules/WGShipModulePresetComponent.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModulePresetComponent.cs)
 - [`Content.Shared/_WG/ShipModules/WGShipModulePrototype.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModulePrototype.cs)
 - [`Content.Shared/_WG/ShipModules/WGShipModulesComponent.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModulesComponent.cs)
 
@@ -144,6 +151,7 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 
 - [`Resources/Prototypes/_WG/ShipModules/kits.yml`](../../../Resources/Prototypes/_WG/ShipModules/kits.yml)
 - [`Resources/Prototypes/_WG/ShipModules/modules.yml`](../../../Resources/Prototypes/_WG/ShipModules/modules.yml)
+- [`Resources/Prototypes/_WG/ShipModules/presets.yml`](../../../Resources/Prototypes/_WG/ShipModules/presets.yml)
 - [`Resources/Prototypes/_WG/ShipModules/recipes.yml`](../../../Resources/Prototypes/_WG/ShipModules/recipes.yml)
 - [`Resources/Prototypes/_WG/ShipModules/research.yml`](../../../Resources/Prototypes/_WG/ShipModules/research.yml)
 
