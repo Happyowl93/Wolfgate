@@ -39,10 +39,13 @@ public sealed class WGHackDartShieldTest
 
             var capacity = shields.GetWolfgateShipHeat(grid).Capacity;
             Assert.That(Passes(dart), Is.False, "A cool field stops the dart.");
-            SetHeat(entities, generator, capacity * (WGHackHarpoonSystem.ShieldPierceHeat - 0.02f));
+            Assert.That(WGHackHarpoonSystem.ShieldPierceHeat, Is.EqualTo(0.5f), "The dart pierces from half heat.");
+            SetHeat(entities, generator, capacity * 0.48f);
             Assert.That(Passes(dart), Is.False, "Just under half heat still stops it.");
-            SetHeat(entities, generator, capacity * (WGHackHarpoonSystem.ShieldPierceHeat + 0.02f));
-            Assert.That(Passes(dart), Is.True, "Half full of heat, the field lets the dart through.");
+            SetHeat(entities, generator, capacity * 0.5f);
+            Assert.That(Passes(dart), Is.True, "Exactly half full of heat, the field lets the dart through.");
+            SetHeat(entities, generator, capacity * 0.52f);
+            Assert.That(Passes(dart), Is.True);
             Assert.That(Passes(harpoon), Is.False, "Only the hacking dart slips through.");
         });
         await pair.CleanReturnAsync();
