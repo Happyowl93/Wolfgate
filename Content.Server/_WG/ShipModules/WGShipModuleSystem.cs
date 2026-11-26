@@ -341,6 +341,17 @@ public sealed partial class WGShipModuleSystem : EntitySystem
     /// </summary>
     public bool TryActivate(EntityUid grid, int slot, EntityUid? user, EntityUid helm)
     {
+        return Activate(grid, slot, user, _power.IsPowered(helm));
+    }
+
+    /// <summary>Fires a slot for a crew with no helm in hand, such as an NPC; the ship's power is its last sweep's.</summary>
+    public bool TryActivateAboard(EntityUid grid, int slot, EntityUid? user)
+    {
+        return Activate(grid, slot, user, _poweredHelms.Contains(grid));
+    }
+
+    private bool Activate(EntityUid grid, int slot, EntityUid? user, bool powered)
+    {
         if (!TryComp<WGShipModuleBayComponent>(grid, out var bay)
             || GetFitted(grid, slot) is not { } fitted
             || !_prototype.TryIndex(fitted.Module, out var module))
@@ -375,7 +386,7 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         if (module.BlockedByShields)
             RefreshShields(grid, bay, now);
 
-        var locked = GetLock(grid, bay, module, _power.IsPowered(helm), now);
+        var locked = GetLock(grid, bay, module, powered, now);
         if (locked != WGShipModuleLock.None)
         {
             Refuse(user, $"wg-ship-module-refused-{locked.ToString().ToLowerInvariant()}");
@@ -426,7 +437,6 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         return true;
     }
 
-    /// <summary>Everyone aboard, and a pilot flying the ship from elsewhere, who hears and feels its modules.</summary>
     /// <summary>Players who hear a ship's module sounds: everyone aboard, and the user wherever they are.</summary>
     public Filter Crew(EntityUid grid, EntityUid? user)
     {

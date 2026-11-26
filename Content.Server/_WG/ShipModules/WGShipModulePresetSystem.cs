@@ -3,7 +3,7 @@ using Content.Shared._WG.ShipModules;
 namespace Content.Server._WG.ShipModules;
 
 /// <summary>Fits the modules that mapping markers name when their ship spawns, then deletes the markers.</summary>
-public sealed class WGShipModulePresetSystem : EntitySystem
+public sealed partial class WGShipModulePresetSystem : EntitySystem
 {
     [Dependency] private WGShipModuleSystem _modules = default!;
 
