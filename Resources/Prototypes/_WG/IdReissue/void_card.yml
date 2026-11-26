@@ -7,11 +7,11 @@
   description: An ID card reported lost and voided at the shipyard office, its chip punched through. It opens nothing and pays for nothing.
   components:
   - type: Sprite
-    sprite: Objects/Misc/id_cards.rsi
-    layers:
-    - state: default
-    - state: idunknown
+    sprite: _WG/IdReissue/void_card.rsi
+    state: icon
   - type: Item
+    # In hand it is just a card: the standard ID card's inhands.
+    sprite: Objects/Misc/id_cards.rsi
     size: Small
     heldPrefix: default
     storedRotation: -90

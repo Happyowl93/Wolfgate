@@ -52,6 +52,10 @@ Cards are matched to a character by the `IdCardOwnerComponent` stamp from the Tr
 
 - [`Resources/Locale/en-US/_WG/IdReissue/id-reissue.ftl`](../../../Resources/Locale/en-US/_WG/IdReissue/id-reissue.ftl)
 
+### Textures
+
+- [`Resources/Textures/_WG/IdReissue/void_card.rsi/`](../../../Resources/Textures/_WG/IdReissue/void_card.rsi/)
+
 ## Non-modular edits
 
 None.
