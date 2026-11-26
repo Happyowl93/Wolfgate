@@ -1,9 +1,5 @@
-# Circuit imprinter recipes for ship module kits. A kit's recipe joins the pack along with the research node that
-# unlocks it; every kit module is unlisted for now, so the pack is empty.
-- type: latheRecipePack
-  id: WGShipModuleKits
-  recipes: []
-
+# Circuit imprinter recipes for ship module kits, kept for when a kit module is researchable again: its recipe then goes
+# in a pack on the circuit imprinter's dynamic packs, unlocked by its research node. Every kit module is unlisted for now.
 - type: latheRecipe
   id: WGShipModuleKitPhaseSkimmer
   result: WGShipModuleKitPhaseSkimmer

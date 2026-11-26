@@ -360,7 +360,6 @@
     - ReactorCircuitboards # FH edit\
     - ServiceBoardsGoob #Forge-Change
     - WGXenobiologyBoards # WOLFGATE(Xenobiology): slime grinder and bounty console boards
-    - WGShipModuleKits # WOLFGATE(ShipModules): researched ship module kits
   - type: MaterialStorage
     whitelist:
       tags:

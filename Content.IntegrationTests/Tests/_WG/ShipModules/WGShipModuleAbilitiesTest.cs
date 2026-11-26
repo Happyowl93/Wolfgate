@@ -10,7 +10,6 @@ using Content.Server.Power.Components;
 using Content.Shared._WG.ShipModules;
 using Content.Shared.Damage;
 using Content.Shared.Lathe;
-using Content.Shared.Lathe.Prototypes;
 using Content.Shared.Movement.Systems;
 using Content.Shared.Projectiles;
 using Content.Shared.Research.Prototypes;
@@ -38,7 +37,6 @@ public sealed class WGShipModuleAbilitiesTest
     private const string Feeder = "WGShipModuleAmmoFeeder";
     private const string Gyros = "WGShipModuleGunGyros";
     private const string Fortress = "WGShipModuleFortressShield";
-    private const string KitPack = "WGShipModuleKits";
     private static readonly EntProtoId Imprinter = "CircuitImprinter";
 
     [Test]
@@ -51,11 +49,7 @@ public sealed class WGShipModuleAbilitiesTest
 
         await server.WaitAssertion(() =>
         {
-            var imprinter = prototypes.Index(Imprinter);
-            Assert.That(imprinter.TryComp<LatheComponent>(out var lathe, factory), Is.True);
-            Assert.That(lathe!.DynamicPacks, Does.Contain(new ProtoId<LatheRecipePackPrototype>(KitPack)),
-                "The circuit imprinter doesn't print module kits.");
-            var pack = prototypes.Index<LatheRecipePackPrototype>(KitPack);
+            Assert.That(prototypes.Index(Imprinter).TryComp<LatheComponent>(out var lathe, factory), Is.True);
 
             foreach (var module in prototypes.EnumeratePrototypes<WGShipModulePrototype>())
             {
@@ -78,7 +72,8 @@ public sealed class WGShipModuleAbilitiesTest
                     .Where(r => prototypes.Index(r).Result == module.Kit)
                     .ToList();
                 Assert.That(unlocks, Is.Not.Empty, $"{tech.ID} doesn't unlock {kit.ID}.");
-                Assert.That(pack.Recipes, Does.Contain(unlocks[0]), $"{unlocks[0]} isn't in the kit pack.");
+                Assert.That(lathe!.DynamicPacks.Any(p => prototypes.Index(p).Recipes.Contains(unlocks[0])), Is.True,
+                    $"The circuit imprinter can't print {unlocks[0]}.");
             }
         });
         await pair.CleanReturnAsync();

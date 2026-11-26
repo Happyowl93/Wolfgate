@@ -55,12 +55,12 @@ are passive. Only the search for incoming rounds costs anything, and it runs onl
 could fire then (charged, off cooldown and unlocked, so not jets behind a raised shield).
 
 Every module states its unlock: `free: true`, a `technology` whose node unlocks its `kit` at the circuit imprinter
-(`recipes.yml`, listed in pack `WGShipModuleKits`), or `unlisted: true`, which keeps it off drydock lists so only
-presets and the `shipmodule` command fit it. The skimmer, gyros, fortress and feeder are unlisted for now; they keep
-their kits and recipes, so making one researchable again takes a technology node, its `technology` line and its recipe
-back in the pack. A drydock fits a researched module only with a kit (`WGShipModuleKitComponent`) carried anywhere
-aboard the ship, checked when the job is sold and again when it finishes, and uses the kit up.
-`WGShipModuleAbilitiesTest` fails a module that states none or more than one.
+(`recipes.yml`, in a pack on the imprinter's dynamic packs), or `unlisted: true`, which keeps it off drydock lists so
+only presets and the `shipmodule` command fit it. The skimmer, gyros, fortress and feeder are unlisted for now; they
+keep their kits and recipes, so making one researchable again takes a technology node, its `technology` line, and a
+recipe pack on the circuit imprinter (a marked upstream edit to `lathe.yml`). A drydock fits a researched module only
+with a kit (`WGShipModuleKitComponent`) carried anywhere aboard the ship, checked when the job is sold and again when it
+finishes, and uses the kit up. `WGShipModuleAbilitiesTest` fails a module that states none or more than one.
 
 A module's `mode` is `Fired` (each press spends a charge; a `duration` keeps it running), `Toggle` (each press switches
 it, no charges) or `Passive` (on while fitted, started on the next tick after a fit or a load). A running or switched-on
@@ -192,6 +192,5 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 - [`Content.Client/Options/UI/Tabs/KeyRebindTab.xaml.cs`](../../../Content.Client/Options/UI/Tabs/KeyRebindTab.xaml.cs): ship module hotkeys
 - [`Content.Client/Shuttles/Systems/ShuttleConsoleSystem.cs`](../../../Content.Client/Shuttles/Systems/ShuttleConsoleSystem.cs): the module hotkeys work while piloting
 - [`Resources/keybinds.yml`](../../../Resources/keybinds.yml): ship module hotkeys while piloting
-- [`Resources/Prototypes/Entities/Structures/Machines/lathe.yml`](../../../Resources/Prototypes/Entities/Structures/Machines/lathe.yml): researched ship module kits
 
 <!-- WOLFGATE-GENERATED END -->
