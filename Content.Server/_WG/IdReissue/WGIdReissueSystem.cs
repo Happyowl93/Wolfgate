@@ -92,8 +92,9 @@ public sealed partial class WGIdReissueSystem : EntitySystem
 
     private void OnSpawnComplete(PlayerSpawnCompleteEvent ev)
     {
+        // The ColoTalk number is left out: the card holds a placeholder until NanoChat loads the character's own.
         if (_idCard.TryFindIdCard(ev.Mob, out var card) && Read(card, null) is { } template)
-            _templates[(ev.Player.UserId, ev.Profile.Name)] = template;
+            _templates[(ev.Player.UserId, ev.Profile.Name)] = template with { ChatNumber = null };
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
@@ -154,9 +155,11 @@ public sealed partial class WGIdReissueSystem : EntitySystem
         EntityUid? source = null;
         if (owned.Count > 0)
         {
-            // The card with the character's crew record is the real ID; another, such as an agent ID a ship was bought on, comes after.
+            // The real ID carries the character's ColoTalk number; an extra deed card from a past reissue shares the crew
+            // record but not the number. Then the card with the crew record, before one without, such as an agent ID.
             source = owned
-                .OrderByDescending(card => template?.Key is { } known && CompOrNull<StationRecordKeyStorageComponent>(card)?.Key is { } held && held.Equals(known))
+                .OrderByDescending(card => template?.ChatNumber is { } chat && CompOrNull<NanoChatCardComponent>(card)?.Number == chat)
+                .ThenByDescending(card => template?.Key is { } known && CompOrNull<StationRecordKeyStorageComponent>(card)?.Key is { } held && held.Equals(known))
                 .ThenByDescending(card => CompOrNull<StationRecordKeyStorageComponent>(card)?.Key != null)
                 .First();
             template = Read(source.Value, template);
@@ -437,7 +440,8 @@ public sealed partial class WGIdReissueSystem : EntitySystem
             id.CompanyName,
             _access.TryGetTags(card)?.ToList() ?? new List<ProtoId<AccessLevelPrototype>>(),
             CompOrNull<StationRecordKeyStorageComponent>(card)?.Key ?? fallback?.Key,
-            CompOrNull<NanoChatCardComponent>(card)?.Number ?? fallback?.ChatNumber);
+            // A character's number never changes, so the first one seen stands: an extra deed card has its own.
+            fallback?.ChatNumber ?? CompOrNull<NanoChatCardComponent>(card)?.Number);
     }
 }
 

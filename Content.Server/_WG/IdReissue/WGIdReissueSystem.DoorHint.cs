@@ -22,7 +22,8 @@ public sealed partial class WGIdReissueSystem
 
     private void OnBeforeDoorOpened(Entity<AccessReaderComponent> ent, ref BeforeDoorOpenedEvent args)
     {
-        if (args.Cancelled || args.User is not { } user || !HasComp<DoorComponent>(ent))
+        // Not gated on the event being cancelled: a bolted, unpowered or otherwise blocked door shuts the owner out too.
+        if (args.User is not { } user || !HasComp<DoorComponent>(ent))
             return;
 
         if (_hinted.TryGetValue(user, out var next) && _timing.CurTime < next)

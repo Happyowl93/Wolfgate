@@ -184,6 +184,21 @@ public sealed class IdReissueTest
                 "A destroyed card is reprinted with its crew record.");
             Assert.That(holders.Any(holder => entMan.GetComponent<NanoChatCardComponent>(holder).Number == chatNumber), Is.True,
                 "A destroyed card is reprinted with its ColoTalk number.");
+
+            // Both cards are lost again: the ID and the extra deed card, which shares the crew record but has its own
+            // number. The next card takes the character's number, not the extra card's.
+            foreach (var held in holders)
+                hands.TryDrop(body, held);
+
+            Assert.That(holders.Any(holder => hands.IsHolding(body, holder)), Is.False, "Precondition: both cards are dropped.");
+            Ask(entMan, dealer, body);
+            Confirm(entMan, dealer, body);
+            var reprinted = hands.EnumerateHeld(body)
+                .Where(held => entMan.HasComponent<IdCardComponent>(held))
+                .Select(held => entMan.GetComponent<NanoChatCardComponent>(held).Number)
+                .ToList();
+            Assert.That(reprinted, Has.Count.EqualTo(2), "Both ships' deeds come back, one card each.");
+            Assert.That(reprinted, Does.Contain(chatNumber), "The reissued ID keeps the character's ColoTalk number, not the extra card's.");
         });
 
         await pair.CleanReturnAsync();
