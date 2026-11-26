@@ -75,6 +75,9 @@ public sealed partial class WGIdReissueSystem : EntitySystem
     /// <summary>Ships whose deed went with a voided card while they were too far off, until a reissue near them fetches it.</summary>
     private readonly Dictionary<(NetUserId User, string Name), HashSet<EntityUid>> _strandedDeeds = new();
 
+    /// <summary>When each character last had an ID reissued.</summary>
+    private readonly Dictionary<(NetUserId User, string Name), TimeSpan> _lastReissue = new();
+
     public override void Initialize()
     {
         base.Initialize();
@@ -97,6 +100,7 @@ public sealed partial class WGIdReissueSystem : EntitySystem
     {
         _templates.Clear();
         _strandedDeeds.Clear();
+        _lastReissue.Clear();
         _hinted.Clear();
     }
 
@@ -116,15 +120,17 @@ public sealed partial class WGIdReissueSystem : EntitySystem
 
     /// <summary>
     /// Works out what a reissue for the user would do, without doing it. Refused while the user carries a valid card
-    /// of their own, so a card is never doubled, and when nothing is known of their ID.
+    /// of their own, so a card is never doubled, within <paramref name="cooldown"/> of their last reissue, and when
+    /// nothing is known of their ID.
     /// </summary>
     /// <param name="issuer">Ships docked to this entity's grid or within <paramref name="range"/> of it have their deeds moved.</param>
-    public bool TryQuote(EntityUid issuer, EntityUid user, float range, [NotNullWhen(true)] out ReissueQuote? quote, [NotNullWhen(false)] out string? error)
+    /// <param name="error">The refusal, as the issuer says it.</param>
+    public bool TryQuote(EntityUid issuer, EntityUid user, float range, TimeSpan cooldown, [NotNullWhen(true)] out ReissueQuote? quote, [NotNullWhen(false)] out string? error)
     {
         quote = null;
         if (!TryComp<ActorComponent>(user, out var actor))
         {
-            error = "wg-id-reissue-no-record";
+            error = Loc.GetString("wg-id-reissue-no-record");
             return false;
         }
 
@@ -133,7 +139,14 @@ public sealed partial class WGIdReissueSystem : EntitySystem
         var owned = CardsOf(userId, name);
         if (CarriesOwnCard(user, owned))
         {
-            error = "wg-id-reissue-carrying";
+            error = Loc.GetString("wg-id-reissue-carrying");
+            return false;
+        }
+
+        if (_lastReissue.TryGetValue((userId, name), out var last) && _timing.CurTime < last + cooldown)
+        {
+            var minutes = (int) Math.Ceiling((last + cooldown - _timing.CurTime).TotalMinutes);
+            error = Loc.GetString("wg-id-reissue-cooldown", ("minutes", minutes));
             return false;
         }
 
@@ -151,7 +164,7 @@ public sealed partial class WGIdReissueSystem : EntitySystem
 
         if (template == null)
         {
-            error = "wg-id-reissue-no-record";
+            error = Loc.GetString("wg-id-reissue-no-record");
             return false;
         }
 
@@ -215,6 +228,7 @@ public sealed partial class WGIdReissueSystem : EntitySystem
         }
 
         Remember(quote.User, quote.Name, printed);
+        _lastReissue[(quote.User, quote.Name)] = _timing.CurTime;
         _adminLog.Add(LogType.Identity, LogImpact.Medium,
             $"{ToPrettyString(user):player} reissued their ID: voided {quote.Lost.Count} card(s), moved {moved.Count} deed(s), left {quote.Distant} far away");
 

@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -162,8 +163,15 @@ public sealed class IdReissueTest
 
         await server.WaitAssertion(() =>
         {
-            // A second reissue reprints the card, fetches the far deed from the voided card and finds the near ship by its registration.
-            entMan.GetComponent<WGTraderIdReissueComponent>(dealer).Fee = 0;
+            // Within the cooldown of the last reissue the dealer refuses.
+            var settings = entMan.GetComponent<WGTraderIdReissueComponent>(dealer);
+            Ask(entMan, dealer, body);
+            Assert.That(settings.Pending, Is.Null, "A reissue within the cooldown is refused.");
+            Assert.That(entMan.GetComponent<TraderComponent>(dealer).CurrentLine, Is.EqualTo(Loc.GetString("wg-id-reissue-cooldown", ("minutes", 15))));
+
+            // Past it, a second reissue reprints the card, fetches the far deed and finds the near ship by its registration.
+            settings.Cooldown = TimeSpan.Zero;
+            settings.Fee = 0;
             Ask(entMan, dealer, body);
             Confirm(entMan, dealer, body);
 

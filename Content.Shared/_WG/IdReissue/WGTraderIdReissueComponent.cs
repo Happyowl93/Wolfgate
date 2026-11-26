@@ -12,6 +12,10 @@ public sealed partial class WGTraderIdReissueComponent : Component
     [DataField]
     public float Range = 150f;
 
+    /// <summary>How long a character waits after one reissue before the next.</summary>
+    [DataField]
+    public TimeSpan Cooldown = TimeSpan.FromMinutes(15);
+
     /// <summary>The customer asked to confirm the quote, until they answer.</summary>
     [ViewVariables]
     public EntityUid? Pending;

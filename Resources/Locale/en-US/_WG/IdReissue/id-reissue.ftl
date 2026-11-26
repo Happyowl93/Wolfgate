@@ -17,5 +17,9 @@ wg-id-reissue-done = There you are. The old card's void now. { $moved ->
 }
 wg-id-reissue-carrying = You've got your own card right there. I only reprint lost ones.
 wg-id-reissue-no-record = I've no record of you to print from.
+wg-id-reissue-cooldown = I printed you a card not long ago. Come back in { $minutes ->
+    [one] a minute
+   *[other] { $minutes } minutes
+}.
 wg-id-reissue-void-name = voided ID card ({ $name })
 wg-id-reissue-door-hint = Your ship doesn't know you without your ID. Lost it? The shipyard dealer at Caelestinus Central can reissue it.

@@ -25,9 +25,9 @@ public sealed partial class WGIdReissueSystem
 
         args.Handled = true;
         var traderEnt = (ent.Owner, trader);
-        if (!TryQuote(ent, args.Customer, ent.Comp.Range, out var quote, out var error))
+        if (!TryQuote(ent, args.Customer, ent.Comp.Range, ent.Comp.Cooldown, out var quote, out var error))
         {
-            _trader.SayAndShow(traderEnt, Loc.GetString(error));
+            _trader.SayAndShow(traderEnt, error);
             return;
         }
 
@@ -56,9 +56,9 @@ public sealed partial class WGIdReissueSystem
         var customer = args.Customer;
 
         // Cards and ships can have moved while the customer was thinking.
-        if (!TryQuote(ent, customer, ent.Comp.Range, out var quote, out var error))
+        if (!TryQuote(ent, customer, ent.Comp.Range, ent.Comp.Cooldown, out var quote, out var error))
         {
-            _trader.SayAndShow(traderEnt, Loc.GetString(error));
+            _trader.SayAndShow(traderEnt, error);
             return;
         }
 
