@@ -30,39 +30,6 @@
     deltaV: 20
     burnTime: 0.4
 
-# Burn drive: several seconds of hard thrust along the nose that the pilot can't steer, brake or stop. Works under a
-# raised field and pays in heat.
-- type: wgShipModule
-  id: WGShipModuleBurnDrive
-  name: wg-ship-module-burn-name
-  description: wg-ship-module-burn-description
-  label: wg-ship-module-burn-label
-  icon:
-    sprite: _Mono/Structures/Shuttles/thruster_large.rsi
-    state: base
-  free: true
-  price: 25000
-  materials:
-    Steel: 6000
-    Plasteel: 2000
-    Plasma: 6000
-    Gold: 1000
-  maxCharges: 1
-  rechargeTime: 30
-  cooldown: 1
-  duration: 5
-  activateSound:
-    path: /Audio/_Mono/Weapons/Guns/Missiles/engine_rocket_01.ogg
-    params:
-      volume: 2
-  deactivateSound:
-    path: /Audio/Effects/shuttle_thruster.ogg
-    params:
-      volume: -4
-      pitch: 0.7
-  jolt: 1.5
-  effect: !type:WGBurnDriveEffect {}
-
 # Phase skimmer: the hull drops out of space and back a short way along its course.
 - type: wgShipModule
   id: WGShipModulePhaseSkimmer
@@ -139,16 +106,19 @@
   mode: Toggle
   cooldown: 2
   activateSound:
-    path: /Audio/_WG/ShipShields/shield_on.ogg
+    path: /Audio/_WG/ShipModules/fortress_on.ogg
     params:
       volume: 2
-      pitch: 0.6
   deactivateSound:
     path: /Audio/_WG/ShipShields/shield_off.ogg
     params:
       pitch: 0.6
   jolt: 0.6
-  effect: !type:WGFortressShieldEffect {}
+  effect: !type:WGFortressShieldEffect
+    hum:
+      path: /Audio/_WG/ShipModules/fortress_hum.ogg
+      params:
+        volume: -2
 
 # Accelerated ammo feeder: ballistic guns fire twice as fast for a few seconds.
 - type: wgShipModule

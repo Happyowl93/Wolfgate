@@ -1,7 +1,5 @@
 using System.Numerics;
-using Content.Client.Shuttles;
 using Content.Shared._WG.ShipModules;
-using Content.Shared.Shuttles.Components;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Shared.Map;
@@ -10,26 +8,17 @@ using Robust.Shared.Timing;
 namespace Content.Client._WG.ShipModules;
 
 /// <summary>
-/// Client effects of ship modules: a skimming hull's ghosts, the rings round guns swung by gyros, the yellow cast on
-/// guns an ammo feeder drives, and the tint of thruster plumes burning chemical fuel.
+/// Client effects of ship modules: a skimming hull's ghosts, the rings round guns swung by gyros, and the yellow cast on
+/// guns an ammo feeder drives.
 /// </summary>
 public sealed partial class WGShipModuleFxSystem : EntitySystem
 {
     [Dependency] private IOverlayManager _overlays = default!;
     [Dependency] private IGameTiming _timing = default!;
-    [Dependency] private AppearanceSystem _appearance = default!;
     [Dependency] private SpriteSystem _sprite = default!;
-
-    /// <summary>Plume colour of thrusters burning frezon.</summary>
-    public static readonly Color FueledPlume = Color.FromHex("#8FE3FF");
-
-    /// <summary>Plume colour of converted thrusters with no fuel left.</summary>
-    public static readonly Color EmptyPlume = Color.FromHex("#FF7A4D").WithAlpha(0.55f);
 
     /// <summary>Light yellow cast on guns an ammo feeder drives.</summary>
     public static readonly Color FeederTint = Color.FromHex("#FFF0A8");
-
-    private static readonly TimeSpan PlumeInterval = TimeSpan.FromSeconds(0.5);
 
     /// <summary>Each tinted gun's own colour, put back when its boost ends.</summary>
     private readonly Dictionary<EntityUid, Color> _feederColors = new();
@@ -39,10 +28,6 @@ public sealed partial class WGShipModuleFxSystem : EntitySystem
 
     /// <summary>Guns spun up by gyros, with when their ring started.</summary>
     public readonly List<(EntityUid Gun, TimeSpan Start)> Swings = new();
-
-    private readonly HashSet<EntityUid> _tinted = new();
-    private readonly HashSet<EntityUid> _stillTinted = new();
-    private TimeSpan _nextPlumes;
 
     public override void Initialize()
     {
@@ -94,59 +79,10 @@ public sealed partial class WGShipModuleFxSystem : EntitySystem
         var now = _timing.RealTime;
         Skims.RemoveAll(s => now - s.Start > Skim.Life || Deleted(s.Ship));
         Swings.RemoveAll(s => now - s.Start > SwingLife || Deleted(s.Gun));
-
-        if (now < _nextPlumes)
-            return;
-
-        _nextPlumes = now + PlumeInterval;
-        TintPlumes();
     }
 
     /// <summary>Seconds a gyro ring lasts.</summary>
     public static readonly TimeSpan SwingLife = TimeSpan.FromSeconds(0.7);
-
-    /// <summary>Colours the plumes of every thruster on a hull burning chemical fuel, and restores those no longer on one.</summary>
-    private void TintPlumes()
-    {
-        _stillTinted.Clear();
-        var grids = EntityQueryEnumerator<WGChemicalThrustComponent, TransformComponent>();
-        while (grids.MoveNext(out _, out var chemical, out var xform))
-        {
-            var color = chemical.Fueled ? FueledPlume : EmptyPlume;
-            var children = xform.ChildEnumerator;
-            while (children.MoveNext(out var child))
-            {
-                // Most of a hull has no appearance; only thrusters carry this key.
-                if (!TryComp<AppearanceComponent>(child, out var appearance)
-                    || !_appearance.TryGetData<bool>(child, ThrusterVisualState.State, out _, appearance))
-                    continue;
-
-                SetPlumeColor(child, color);
-                _stillTinted.Add(child);
-            }
-        }
-
-        foreach (var thruster in _tinted)
-        {
-            if (!_stillTinted.Contains(thruster) && !Deleted(thruster))
-                SetPlumeColor(thruster, Color.White);
-        }
-
-        _tinted.Clear();
-        _tinted.UnionWith(_stillTinted);
-    }
-
-    private void SetPlumeColor(EntityUid thruster, Color color)
-    {
-        if (!TryComp<SpriteComponent>(thruster, out var sprite))
-            return;
-
-        Entity<SpriteComponent?> ent = (thruster, sprite);
-        if (_sprite.LayerMapTryGet(ent, ThrusterVisualLayers.Thrusting, out var layer, false))
-            _sprite.LayerSetColor(ent, layer, color);
-        if (_sprite.LayerMapTryGet(ent, ThrusterVisualLayers.ThrustingUnshaded, out layer, false))
-            _sprite.LayerSetColor(ent, layer, color);
-    }
 
     /// <summary>One skim: where the hull left, where it came back and when.</summary>
     public readonly record struct Skim(EntityUid Ship, Vector2 From, Angle FromRotation, Vector2 To, MapId Map, TimeSpan Start)

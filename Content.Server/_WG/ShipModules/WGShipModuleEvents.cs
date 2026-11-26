@@ -36,7 +36,7 @@ public readonly record struct WGShipModuleActivatedEvent(EntityUid Grid, WGShipM
 [ByRefEvent]
 public readonly record struct WGShipModuleDeactivatedEvent(EntityUid Grid, WGShipModulePrototype Module);
 
-/// <summary>Broadcast as a ship's strip is built, so an effect system can show a reading on its key, such as fuel.</summary>
+/// <summary>Broadcast as a ship's strip is built, so an effect system can show a reading on its key, such as a reserve.</summary>
 [ByRefEvent]
 public record struct WGShipModuleGaugeEvent(EntityUid Grid, WGShipModulePrototype Module)
 {

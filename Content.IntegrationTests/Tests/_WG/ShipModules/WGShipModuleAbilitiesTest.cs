@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Numerics;
-using Content.Server._Crescent.ShipShields;
 using Content.Server._WG.BoardingAction.Components;
 using Content.Server._WG.Drydock;
 using Content.Server._WG.ShipModules;
@@ -16,20 +15,18 @@ using Content.Shared.Weapons.Ranged.Events;
 using Content.Shared.Weapons.Ranged.Systems;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Physics.Components;
-using Robust.Shared.Physics.Systems;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.IntegrationTests.Tests._WG.ShipModules;
 
 /// <summary>
-/// Checks how each ship module is unlocked, and the burn drive, phase skimmer, ammo feeder, gyros and fortress shield
-/// on a test hull.
+/// Checks how each ship module is unlocked, and the phase skimmer, ammo feeder, gyros and fortress shield on a test
+/// hull.
 /// </summary>
 [TestFixture]
 public sealed class WGShipModuleAbilitiesTest
 {
-    private const string Burn = "WGShipModuleBurnDrive";
     private const string Skimmer = "WGShipModulePhaseSkimmer";
     private const string Feeder = "WGShipModuleAmmoFeeder";
     private const string Gyros = "WGShipModuleGunGyros";
@@ -90,9 +87,7 @@ public sealed class WGShipModuleAbilitiesTest
         var timing = server.ResolveDependency<IGameTiming>();
         var prototypes = server.ResolveDependency<IPrototypeManager>();
         var modules = entities.System<WGShipModuleSystem>();
-        var thrust = entities.System<WGShipModuleThrustSystem>();
         var transform = entities.System<SharedTransformSystem>();
-        var shields = entities.System<ShipShieldsSystem>();
         var grid = map.Grid.Owner;
         var tick = (float) timing.TickPeriod.TotalSeconds;
         int Ticks(float seconds) => (int) MathF.Ceiling(seconds / tick);
@@ -105,44 +100,13 @@ public sealed class WGShipModuleAbilitiesTest
             entities.GetComponent<ApcPowerReceiverComponent>(helm).NeedsPower = false;
             pilot = entities.SpawnEntity(null, map.GridCoords);
             entities.AddComponent<PilotComponent>(pilot);
-            modules.Fit(grid, 0, Burn);
         });
         await pair.RunTicksSync(Ticks(1f));
-
-        // Burn drive: a timed use takes the helm's thrust and drives the hull along its nose, heating it.
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(modules.TryActivate(grid, 0, pilot, helm), Is.True);
-            Assert.That(modules.GetFitted(grid, 0)!.Active, Is.True);
-            Assert.That(entities.HasComponent<WGBurnDriveActiveComponent>(grid), Is.True);
-            Assert.That(thrust.LinearFactor(grid), Is.Zero);
-            Assert.That(thrust.TurnFactor(grid), Is.Zero);
-            Assert.That(modules.TryActivate(grid, 0, pilot, helm), Is.False, "A running burn fired again.");
-        });
-        await pair.RunTicksSync(Ticks(1f));
-
-        await server.WaitAssertion(() =>
-        {
-            var velocity = entities.GetComponent<PhysicsComponent>(grid).LinearVelocity;
-            var nose = transform.GetWorldRotation(grid).RotateVec(Vector2.UnitY);
-            Assert.That(Vector2.Dot(velocity, nose), Is.GreaterThan(0.5f), "The burn didn't drive the hull forward.");
-            Assert.That(shields.GetWolfgateShipHeat(grid).Heat, Is.GreaterThan(0f), "The burn left the hull cold.");
-        });
-        await pair.RunTicksSync(Ticks(4.5f));
-
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(modules.GetFitted(grid, 0)!.Active, Is.False, "The burn never ended.");
-            Assert.That(entities.HasComponent<WGBurnDriveActiveComponent>(grid), Is.False);
-            Assert.That(thrust.LinearFactor(grid), Is.EqualTo(1f));
-            modules.Unfit(grid, 0);
-        });
 
         // Phase skimmer: held hulls can't skim; a free one lands its range along the held direction, a charge spent.
         var skim = (WGPhaseSkimmerEffect) prototypes.Index<WGShipModulePrototype>(Skimmer).Effect;
         await server.WaitAssertion(() =>
         {
-            entities.System<SharedPhysicsSystem>().SetLinearVelocity(grid, Vector2.Zero);
             modules.Fit(grid, 2, Skimmer);
             var bay = entities.GetComponent<WGShipModuleBayComponent>(grid);
             var prototype = prototypes.Index<WGShipModulePrototype>(Skimmer);

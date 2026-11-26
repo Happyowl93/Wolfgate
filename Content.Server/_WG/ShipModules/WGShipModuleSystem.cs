@@ -427,7 +427,8 @@ public sealed partial class WGShipModuleSystem : EntitySystem
     }
 
     /// <summary>Everyone aboard, and a pilot flying the ship from elsewhere, who hears and feels its modules.</summary>
-    private Filter Crew(EntityUid grid, EntityUid? user)
+    /// <summary>Players who hear a ship's module sounds: everyone aboard, and the user wherever they are.</summary>
+    public Filter Crew(EntityUid grid, EntityUid? user)
     {
         var crew = Filter.BroadcastGrid(grid);
         if (TryComp<ActorComponent>(user, out var actor))

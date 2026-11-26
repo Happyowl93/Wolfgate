@@ -431,8 +431,7 @@ public sealed partial class MoverController : SharedMoverController
     /// </summary>
     public float GetTorque(ShuttleComponent shuttle)
     {
-        return shuttle.AngularThrust * shuttle.AngularMultiplier * WgShieldTurnFactor(shuttle.Owner) // WOLFGATE(ShipShields): a raised shield field slows the turn
-            * WgModuleTurnFactor(shuttle.Owner); // WOLFGATE(ShipModules): the burn drive locks the turn and chemical fuel speeds it
+        return shuttle.AngularThrust * shuttle.AngularMultiplier * WgShieldTurnFactor(shuttle.Owner); // WOLFGATE(ShipShields): a raised shield field slows the turn
     }
 
     /// <summary>
@@ -481,7 +480,6 @@ public sealed partial class MoverController : SharedMoverController
         }
 
         dir *= WgShieldThrustFactor(xform.Owner); // WOLFGATE(ShipShields): a raised shield field cuts linear thrust
-        dir *= WgModuleThrustFactor(xform.Owner); // WOLFGATE(ShipModules): the burn drive takes the helm's thrust and chemical fuel adds to it
         return dir * shuttle.AccelerationMultiplier * WgAtmosphereManeuvering(xform.Owner); // WOLFGATE(Planets): planet lift and cargo load scale thrust
     }
 
