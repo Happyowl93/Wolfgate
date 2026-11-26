@@ -43,7 +43,7 @@ wg-ship-module-jets-label = JETS
 wg-ship-module-jets-no-direction = Hold a direction to burn along.
 
 wg-ship-module-skimmer-name = PS-2 "Wolf" Phase Skimmer
-wg-ship-module-skimmer-description = Phases the ship out and drops it back up to 120 m along its course: the way it is moving, or the way the pilot steers if it is nearly still. Stops short of other hulls, shakes off missile locks and heats the hull a little. Heavy ships skim less. Three charges, one back every 10 s. Needs research and its kit aboard.
+wg-ship-module-skimmer-description = Phases the ship out and drops it back up to 160 m along its course: the way it is moving, or the way the pilot steers if it is nearly still. Stops short of other hulls, shakes off missile locks and heats the hull a little. Heavy ships skim less. Three charges, one back every 10 s. Needs research and its kit aboard.
 wg-ship-module-skimmer-label = SKIM
 wg-ship-module-skimmer-blocked = No clear space to skim into.
 

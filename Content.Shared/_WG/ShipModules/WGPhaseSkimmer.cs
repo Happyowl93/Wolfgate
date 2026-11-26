@@ -12,7 +12,7 @@ public sealed partial class WGPhaseSkimmerEffect : WGShipModuleEffect
 {
     /// <summary>How far a hull up to <see cref="ReferenceMass"/> skims, in metres.</summary>
     [DataField]
-    public float Range = 120f;
+    public float Range = 160f;
 
     /// <summary>Hull mass up to which a skim goes its full range; a heavier hull skims less in proportion.</summary>
     [DataField]

@@ -35,7 +35,7 @@ helm window or cockpit holding that strip by a few pixels, and kicks the view of
 | Module | Mode | Unlock | What it does |
 |---|---|---|---|
 | MJ-3 Sidestep jets | fired, 3 charges | free | Kick along the held direction; shields off only. |
-| PS-2 Wolf phase skimmer | fired, 3 charges | research, kit | Drops the hull up to 120 m along its course, short of other grids; breaks missile locks. |
+| PS-2 Wolf phase skimmer | fired, 3 charges | research, kit | Drops the hull up to 160 m along its course, short of other grids; breaks missile locks. |
 | GX-4 gun gyros | passive | research, kit | Rotating guns turn 1.5 times as fast; wide swings whir and ring. |
 | FS-9 Bastille fortress shield | toggle | research, kit | Absorbed hits heat a quarter as much; guns silent; hard heat every second; field yellow in the world and on radar. |
 | AF-2 ammo feeder | fired, 6 s, 1 charge | research, kit | Guns Mono types `Ballistic` (or, untyped, fed rounds that aren't missiles) fire twice as fast, bursts and the pause after them included; tinted yellow. |
