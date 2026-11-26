@@ -15,7 +15,7 @@ keeps flying it, but the stolen card buys and opens nothing. A ship is the playe
 deed, when its deed went with a card they voided, or when it is registered to their account under this character's
 name, which covers a card that was destroyed. A card destroyed mid-round is remembered as it was last, so it reprints
 with its current job and ColoTalk number. A player carrying a valid card of their own is refused, so a card is never
-doubled.
+doubled, and a character waits 15 minutes between reissues (the component's `cooldown`).
 
 An owner turned away at a door of their own ship without a valid card of theirs gets a popup pointing them to the
 dealer, at most every 30 seconds.
