@@ -53,13 +53,13 @@ public sealed class WGShipModuleAbilitiesTest
 
             foreach (var module in prototypes.EnumeratePrototypes<WGShipModulePrototype>())
             {
-                Assert.That(module.Free, Is.Not.EqualTo(module.Technology != null),
-                    $"{module.ID} must be either free or need a research node, not both or neither.");
-                if (module.Technology is not { } technology)
-                {
+                var states = (module.Free ? 1 : 0) + (module.Technology != null ? 1 : 0) + (module.Unlisted ? 1 : 0);
+                Assert.That(states, Is.EqualTo(1),
+                    $"{module.ID} must be exactly one of free, researched or unlisted.");
+                if (module.Free)
                     Assert.That(module.Kit, Is.Null, $"Free module {module.ID} names a kit.");
+                if (module.Technology is not { } technology)
                     continue;
-                }
 
                 Assert.That(module.Kit, Is.Not.Null, $"{module.ID} needs research but names no kit.");
                 var kit = prototypes.Index(module.Kit!.Value);
@@ -198,7 +198,7 @@ public sealed class WGShipModuleAbilitiesTest
         });
         await pair.RunTicksSync(2);
 
-        // A researched module's drydock fitting uses up the kit carried aboard.
+        // A kit module's drydock fitting uses up the kit carried aboard.
         await server.WaitAssertion(() =>
         {
             Assert.That(entities.System<WGGunGyrosSystem>().TurnFactor(kinetic, grid, 0), Is.EqualTo(1f));

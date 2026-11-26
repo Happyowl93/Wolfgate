@@ -87,10 +87,15 @@ public sealed partial class WGShipModulePrototype : IPrototype
     public SoundSpecifier? DeactivateSound;
 
     /// <summary>
-    /// Whether any drydock fits it as is. Set exactly one of this or <see cref="Technology"/>; a test checks it.
+    /// Whether any drydock fits it as is. Set exactly one of this, <see cref="Technology"/> or <see cref="Unlisted"/>;
+    /// a test checks it.
     /// </summary>
     [DataField]
     public bool Free;
+
+    /// <summary>Kept off drydock lists and out of research; only mapping presets and admins fit it.</summary>
+    [DataField]
+    public bool Unlisted;
 
     /// <summary>
     /// The research node whose kit (<see cref="Kit"/>) a drydock needs aboard the ship to fit it; null for a free module.

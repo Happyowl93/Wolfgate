@@ -34,7 +34,8 @@ public sealed partial class WGDrydockSystem
         if (!FitsModules(comp)
             || slot < 0
             || slot >= WGShipModulesComponent.SlotCount
-            || !_prototype.TryIndex<WGShipModulePrototype>(moduleId, out var module))
+            || !_prototype.TryIndex<WGShipModulePrototype>(moduleId, out var module)
+            || module.Unlisted)
             return Loc.GetString("drydock-console-unknown-refit");
 
         if (_shipModules.FittedSlot(ship, module.ID) is { } fittedSlot)
@@ -158,6 +159,9 @@ public sealed partial class WGDrydockSystem
         modules.Sort((a, b) => string.CompareOrdinal(a.ID, b.ID));
         foreach (var module in modules)
         {
+            if (module.Unlisted)
+                continue;
+
             var entry = new WGDrydockModuleEntry { Id = module.ID };
             if (ship is { } shipUid)
             {

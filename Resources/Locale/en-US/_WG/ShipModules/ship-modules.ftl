@@ -43,26 +43,21 @@ wg-ship-module-jets-label = JETS
 wg-ship-module-jets-no-direction = Hold a direction to burn along.
 
 wg-ship-module-skimmer-name = PS-2 "Wolf" Phase Skimmer
-wg-ship-module-skimmer-description = Phases the ship out and drops it back up to 160 m along its course: the way it is moving, or the way the pilot steers if it is nearly still. Stops short of other hulls, shakes off missile locks and heats the hull a little. Heavy ships skim less. Three charges, one back every 10 s. Needs research and its kit aboard.
+wg-ship-module-skimmer-description = Phases the ship out and drops it back up to 160 m along its course: the way it is moving, or the way the pilot steers if it is nearly still. Stops short of other hulls, shakes off missile locks and heats the hull a little. Heavy ships skim less. Three charges, one back every 10 s.
 wg-ship-module-skimmer-label = SKIM
 wg-ship-module-skimmer-blocked = No clear space to skim into.
 
 wg-ship-module-gyros-name = GX-4 Advanced Gun Gyros
-wg-ship-module-gyros-description = Every turning ship gun on the hull swings half as fast again. Always on. Needs research and its kit aboard.
+wg-ship-module-gyros-description = Every turning ship gun on the hull swings half as fast again. Always on.
 wg-ship-module-gyros-label = GYROS
 
 wg-ship-module-fortress-name = FS-9 "Bastille" Fortress Shield
-wg-ship-module-fortress-description = Hardens the raised shield field: hits it absorbs heat the ship a quarter as much. While it is on the guns stay silent and the field builds hard heat every second, so it can overload you. Switch it on and off; it drops when the field does. Needs research and its kit aboard.
+wg-ship-module-fortress-description = Hardens the raised shield field: hits it absorbs heat the ship a quarter as much. While it is on the guns stay silent and the field builds hard heat every second, so it can overload you. Switch it on and off; it drops when the field does.
 wg-ship-module-fortress-label = FORTRESS
 
 wg-ship-module-feeder-name = AF-2 Accelerated Ammo Feeder
-wg-ship-module-feeder-description = For 6 s every ballistic ship gun fires twice as fast, and heats the ship twice as fast too. Energy guns and missile launchers are left alone. One charge, back in 24 s. Needs research and its kit aboard.
+wg-ship-module-feeder-description = For 6 s every ballistic ship gun fires twice as fast, and heats the ship twice as fast too. Energy guns and missile launchers are left alone. One charge, back in 24 s.
 wg-ship-module-feeder-label = FEEDER
-
-research-technology-wg-ship-module-gyros = Advanced Gun Gyros
-research-technology-wg-ship-module-feeder = Accelerated Ammo Feeders
-research-technology-wg-ship-module-fortress = Fortress Shielding
-research-technology-wg-ship-module-skimmer = Phase Skimming
 
 ui-options-function-wg-ship-module-first = Ship module 1
 ui-options-function-wg-ship-module-second = Ship module 2

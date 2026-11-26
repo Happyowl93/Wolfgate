@@ -35,20 +35,23 @@ helm window or cockpit holding that strip by a few pixels, and kicks the view of
 | Module | Mode | Unlock | What it does |
 |---|---|---|---|
 | MJ-3 Sidestep jets | fired, 3 charges | free | Kick along the held direction; shields off only. |
-| PS-2 Wolf phase skimmer | fired, 3 charges | research, kit | Drops the hull up to 160 m along its course, short of other grids; breaks missile locks. |
-| GX-4 gun gyros | passive | research, kit | Rotating guns turn 1.5 times as fast; wide swings whir and ring. |
-| FS-9 Bastille fortress shield | toggle | research, kit | Absorbed hits heat a quarter as much; guns silent; hard heat every second; field yellow in the world and on radar. |
-| AF-2 ammo feeder | fired, 6 s, 1 charge | research, kit | Guns Mono types `Ballistic` (or, untyped, fed rounds that aren't missiles) fire twice as fast, bursts and the pause after them included; tinted yellow. |
+| PS-2 Wolf phase skimmer | fired, 3 charges | unlisted | Drops the hull up to 160 m along its course, short of other grids; breaks missile locks. |
+| GX-4 gun gyros | passive | unlisted | Rotating guns turn 1.5 times as fast; wide swings whir and ring. |
+| FS-9 Bastille fortress shield | toggle | unlisted | Absorbed hits heat a quarter as much; guns silent; hard heat every second; field yellow in the world and on radar. |
+| AF-2 ammo feeder | fired, 6 s, 1 charge | unlisted | Guns Mono types `Ballistic` (or, untyped, fed rounds that aren't missiles) fire twice as fast, bursts and the pause after them included; tinted yellow. |
 
 Mappers fit modules into a ship template with preset markers (`presets.yml`, `WGShipModulePreset<Module>`): placed
 anywhere on the grid, each fits its module for free when the ship spawns (`WGShipModulePresetSystem`, on map init) and
 deletes itself, into hotkey `slot` 1-3 if set or the first free slot. A preset for a module the ship already has, or
 for a filled slot, is skipped with a warning.
 
-Every module states its unlock: `free: true`, or a `technology` whose node unlocks its `kit` at the circuit imprinter
-(`recipes.yml`, pack `WGShipModuleKits`, research in `research.yml`). A drydock fits a researched module only with a
-kit (`WGShipModuleKitComponent`) carried anywhere aboard the ship, checked when the job is sold and again when it
-finishes, and uses the kit up. `WGShipModuleAbilitiesTest` fails a module that states neither or both.
+Every module states its unlock: `free: true`, a `technology` whose node unlocks its `kit` at the circuit imprinter
+(`recipes.yml`, listed in pack `WGShipModuleKits`), or `unlisted: true`, which keeps it off drydock lists so only
+presets and the `shipmodule` command fit it. The skimmer, gyros, fortress and feeder are unlisted for now; they keep
+their kits and recipes, so making one researchable again takes a technology node, its `technology` line and its recipe
+back in the pack. A drydock fits a researched module only with a kit (`WGShipModuleKitComponent`) carried anywhere
+aboard the ship, checked when the job is sold and again when it finishes, and uses the kit up.
+`WGShipModuleAbilitiesTest` fails a module that states none or more than one.
 
 A module's `mode` is `Fired` (each press spends a charge; a `duration` keeps it running), `Toggle` (each press switches
 it, no charges) or `Passive` (on while fitted, started on the next tick after a fit or a load). A running or switched-on
@@ -153,7 +156,6 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 - [`Resources/Prototypes/_WG/ShipModules/modules.yml`](../../../Resources/Prototypes/_WG/ShipModules/modules.yml)
 - [`Resources/Prototypes/_WG/ShipModules/presets.yml`](../../../Resources/Prototypes/_WG/ShipModules/presets.yml)
 - [`Resources/Prototypes/_WG/ShipModules/recipes.yml`](../../../Resources/Prototypes/_WG/ShipModules/recipes.yml)
-- [`Resources/Prototypes/_WG/ShipModules/research.yml`](../../../Resources/Prototypes/_WG/ShipModules/research.yml)
 
 ### Localization
 

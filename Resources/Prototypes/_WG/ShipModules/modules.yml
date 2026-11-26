@@ -39,7 +39,7 @@
   icon:
     sprite: _Mono/Structures/ShuttleComponents/drive.rsi
     state: control_on
-  technology: WGShipModulePhaseSkimmerResearch
+  unlisted: true # not researchable for now; presets and admins only
   kit: WGShipModuleKitPhaseSkimmer
   price: 45000
   materials:
@@ -71,7 +71,7 @@
   icon:
     sprite: Structures/Shuttles/gyroscope.rsi
     state: base
-  technology: WGShipModuleGunGyrosResearch
+  unlisted: true # not researchable for now; presets and admins only
   kit: WGShipModuleKitGunGyros
   price: 30000
   materials:
@@ -94,7 +94,7 @@
   icon:
     sprite: _Mono/Structures/ShuttleComponents/shield.rsi
     state: control_on
-  technology: WGShipModuleFortressShieldResearch
+  unlisted: true # not researchable for now; presets and admins only
   kit: WGShipModuleKitFortressShield
   price: 50000
   materials:
@@ -129,7 +129,7 @@
   icon:
     sprite: _Mono/Objects/AmmoLoader/powdergate_sealed.rsi
     state: icon
-  technology: WGShipModuleAmmoFeederResearch
+  unlisted: true # not researchable for now; presets and admins only
   kit: WGShipModuleKitAmmoFeeder
   price: 35000
   materials:

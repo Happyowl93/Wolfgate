@@ -1,11 +1,8 @@
-# Circuit imprinter recipes for ship module kits, unlocked by their research nodes.
+# Circuit imprinter recipes for ship module kits. A kit's recipe joins the pack along with the research node that
+# unlocks it; every kit module is unlisted for now, so the pack is empty.
 - type: latheRecipePack
   id: WGShipModuleKits
-  recipes:
-  - WGShipModuleKitPhaseSkimmer
-  - WGShipModuleKitGunGyros
-  - WGShipModuleKitFortressShield
-  - WGShipModuleKitAmmoFeeder
+  recipes: []
 
 - type: latheRecipe
   id: WGShipModuleKitPhaseSkimmer
