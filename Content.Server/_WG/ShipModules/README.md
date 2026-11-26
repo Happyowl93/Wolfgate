@@ -30,15 +30,54 @@ clients `WGShipModuleHelmSystem` lights the module's key red for a moment on eve
 helm window or cockpit holding that strip by a few pixels, and kicks the view of crew aboard. `jolt` scales both shakes
 (0 for none), and the player's screen shake setting scales them again.
 
+## Modules
+
+| Module | Mode | Unlock | What it does |
+|---|---|---|---|
+| MJ-3 Sidestep jets | fired, 3 charges | free | Kick along the held direction; shields off only. |
+| BD-7 Lancer burn drive | fired, 5 s, 1 charge | free | Hard thrust along the nose; the helm can't steer, brake or thrust; heats the hull. |
+| PS-2 Wolf phase skimmer | fired, 3 charges | research, kit | Drops the hull up to 120 m along its course, short of other grids; breaks missile locks. |
+| GX-4 gun gyros | passive | research, kit | Rotating guns turn 1.5 times as fast; wide swings whir and ring. |
+| FS-9 Bastille fortress shield | toggle | research, kit | Absorbed hits heat a quarter as much; guns silent; hard heat every second; field yellow in the world and on radar. |
+| AF-2 ammo feeder | fired, 6 s, 1 charge | research, kit | Guns Mono types `Ballistic` (or, untyped, fed rounds that aren't missiles) fire twice as fast, bursts and the pause after them included; tinted yellow. |
+
+Every module states its unlock: `free: true`, or a `technology` whose node unlocks its `kit` at the circuit imprinter
+(`recipes.yml`, pack `WGShipModuleKits`, research in `research.yml`). A drydock fits a researched module only with a
+kit (`WGShipModuleKitComponent`) carried anywhere aboard the ship, checked when the job is sold and again when it
+finishes, and uses the kit up. `WGShipModuleAbilitiesTest` fails a module that states neither or both.
+
+A module's `mode` is `Fired` (each press spends a charge; a `duration` keeps it running), `Toggle` (each press switches
+it, no charges) or `Passive` (on while fitted, started on the next tick after a fit or a load). A running or switched-on
+module is switched off by any lock but a dead helm. The strip lights a running key, counts a timed use down, shows
+ON/OFF for a switch and ONLINE or a fuel reading for a passive.
+
+Sounds reuse files already in the repo: the burn drive uses the Mono rocket engine sound, the skimmer uses the void
+blink, Starlight's null phase and `phasein`, the gyros use the mecha hydraulic, the fortress uses the ship shield on/off
+sounds pitched down, and the feeder uses the LMG cock and kinetic reload. Visuals are drawn by `WGShipModuleFxOverlay`
+(skimmer ghosts, gyro rings), the jets' plume and smoke-ring event (the burn drive puffs every second), the yellow cast
+`WGShipModuleFxSystem` puts on boosted guns, and the shield overlay and radar, which draw a hardened field yellow
+(`WGShipShieldHardenedComponent.FieldColor`).
+
+The burn drive scales the helm's thrust through `WGShipModuleThrustSystem`, read by two marked lines in
+`MoverController`. The fortress puts `WGShipShieldHardenedComponent` (ShipShields) on the grid, which the shield heat
+code reads for absorbed hits and the gun lock. The gyros multiply the turn step in `WGTurretTraverseSystem`. The feeder
+divides each boosted gun's time between shots (`QueryFireRateMultiplierEvent`) and takes the same share off the pause
+after a burst. Effect state on grids and guns is unsaved, so a ship saved mid-burn loads with nothing running.
+
+Chemical fuel conversion is withdrawn for now: its prototype and strings are gone, but its code stays (`WGChemicalThrust*`,
+the fuel factor in `WGShipModuleThrustSystem`, the plume tint) so it can come back by restoring the prototype.
+
 ## Adding a module
 
-Add a `wgShipModule` prototype (name, description, strip label, drydock icon, price and materials,
-charges, recharge, cooldown, shield rule, sound, jolt) whose `effect` is a new `WGShipModuleEffect` subclass with
-its settings. A server system handles three broadcast events, acting only when `Module.Effect` is its kind:
-`WGShipModuleLockEvent` to lock it for reasons of its own (add a value to `WGShipModuleLock` with
-`wg-ship-module-status-*` and `wg-ship-module-refused-*` strings), `WGShipModuleActivateAttemptEvent` to refuse a use
-before the charge is spent, and `WGShipModuleActivatedEvent` to do the effect. `WGShipModuleSystem.TryActivate` is the
-one entry point; the network request only adds the check that the sender is piloting that ship.
+Add a `wgShipModule` prototype (name, description, strip label, drydock icon, price and materials, `free` or
+`technology` and `kit`, mode, charges, recharge, cooldown, duration, shield rule, sounds, jolt) whose `effect` is a new
+`WGShipModuleEffect` subclass with its settings. A server system handles the broadcast events, acting only when
+`Module.Effect` is its kind: `WGShipModuleLockEvent` to lock it for reasons of its own (add a value to
+`WGShipModuleLock` with `wg-ship-module-status-*` and `wg-ship-module-refused-*` strings),
+`WGShipModuleActivateAttemptEvent` to refuse a use before the charge is spent, `WGShipModuleActivatedEvent` to do the
+effect, `WGShipModuleDeactivatedEvent` to undo a running one and `WGShipModuleGaugeEvent` to show a reading on its key.
+`WGShipModuleSystem.TryActivate` is the one entry point; the network request only adds the check that the sender is
+piloting that ship.
 
 ## Maneuvering jets
 
@@ -64,15 +103,31 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 
 ### Server
 
+- [`Content.Server/_WG/ShipModules/MoverController.ShipModules.cs`](MoverController.ShipModules.cs)
+- [`Content.Server/_WG/ShipModules/WGAmmoFeederSystem.cs`](WGAmmoFeederSystem.cs)
+- [`Content.Server/_WG/ShipModules/WGBurnDriveSystem.cs`](WGBurnDriveSystem.cs)
+- [`Content.Server/_WG/ShipModules/WGChemicalThrustSystem.cs`](WGChemicalThrustSystem.cs)
+- [`Content.Server/_WG/ShipModules/WGFortressShieldSystem.cs`](WGFortressShieldSystem.cs)
+- [`Content.Server/_WG/ShipModules/WGGunGyrosSystem.cs`](WGGunGyrosSystem.cs)
 - [`Content.Server/_WG/ShipModules/WGManeuveringJetsSystem.cs`](WGManeuveringJetsSystem.cs)
+- [`Content.Server/_WG/ShipModules/WGPhaseSkimmerSystem.cs`](WGPhaseSkimmerSystem.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleBayComponent.cs`](WGShipModuleBayComponent.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleCommand.cs`](WGShipModuleCommand.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleEvents.cs`](WGShipModuleEvents.cs)
+- [`Content.Server/_WG/ShipModules/WGShipModuleKitComponent.cs`](WGShipModuleKitComponent.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleSystem.cs`](WGShipModuleSystem.cs)
+- [`Content.Server/_WG/ShipModules/WGShipModuleSystem.Locks.cs`](WGShipModuleSystem.Locks.cs)
+- [`Content.Server/_WG/ShipModules/WGShipModuleThrustSystem.cs`](WGShipModuleThrustSystem.cs)
 
 ### Shared
 
+- [`Content.Shared/_WG/ShipModules/WGAmmoFeeder.cs`](../../../Content.Shared/_WG/ShipModules/WGAmmoFeeder.cs)
+- [`Content.Shared/_WG/ShipModules/WGBurnDrive.cs`](../../../Content.Shared/_WG/ShipModules/WGBurnDrive.cs)
+- [`Content.Shared/_WG/ShipModules/WGChemicalThrust.cs`](../../../Content.Shared/_WG/ShipModules/WGChemicalThrust.cs)
+- [`Content.Shared/_WG/ShipModules/WGFortressShield.cs`](../../../Content.Shared/_WG/ShipModules/WGFortressShield.cs)
+- [`Content.Shared/_WG/ShipModules/WGGunGyros.cs`](../../../Content.Shared/_WG/ShipModules/WGGunGyros.cs)
 - [`Content.Shared/_WG/ShipModules/WGManeuveringJets.cs`](../../../Content.Shared/_WG/ShipModules/WGManeuveringJets.cs)
+- [`Content.Shared/_WG/ShipModules/WGPhaseSkimmer.cs`](../../../Content.Shared/_WG/ShipModules/WGPhaseSkimmer.cs)
 - [`Content.Shared/_WG/ShipModules/WGShipModuleFitting.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModuleFitting.cs)
 - [`Content.Shared/_WG/ShipModules/WGShipModuleKeys.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModuleKeys.cs)
 - [`Content.Shared/_WG/ShipModules/WGShipModulePrototype.cs`](../../../Content.Shared/_WG/ShipModules/WGShipModulePrototype.cs)
@@ -83,17 +138,23 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 - [`Content.Client/_WG/ShipModules/NavScreen.ShipModules.cs`](../../../Content.Client/_WG/ShipModules/NavScreen.ShipModules.cs)
 - [`Content.Client/_WG/ShipModules/WGManeuveringJetsVisualsSystem.cs`](../../../Content.Client/_WG/ShipModules/WGManeuveringJetsVisualsSystem.cs)
 - [`Content.Client/_WG/ShipModules/WGShipModuleBank.cs`](../../../Content.Client/_WG/ShipModules/WGShipModuleBank.cs)
+- [`Content.Client/_WG/ShipModules/WGShipModuleFxOverlay.cs`](../../../Content.Client/_WG/ShipModules/WGShipModuleFxOverlay.cs)
+- [`Content.Client/_WG/ShipModules/WGShipModuleFxSystem.cs`](../../../Content.Client/_WG/ShipModules/WGShipModuleFxSystem.cs)
 - [`Content.Client/_WG/ShipModules/WGShipModuleHelmSystem.cs`](../../../Content.Client/_WG/ShipModules/WGShipModuleHelmSystem.cs)
 - [`Content.Client/_WG/ShipModules/WGShipModuleHelmSystem.Jolt.cs`](../../../Content.Client/_WG/ShipModules/WGShipModuleHelmSystem.Jolt.cs)
 - [`Content.Client/_WG/ShipModules/WGSmokeRingOverlay.cs`](../../../Content.Client/_WG/ShipModules/WGSmokeRingOverlay.cs)
 
 ### Integration tests
 
+- [`Content.IntegrationTests/Tests/_WG/ShipModules/WGShipModuleAbilitiesTest.cs`](../../../Content.IntegrationTests/Tests/_WG/ShipModules/WGShipModuleAbilitiesTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/ShipModules/WGShipModuleTest.cs`](../../../Content.IntegrationTests/Tests/_WG/ShipModules/WGShipModuleTest.cs)
 
 ### Prototypes
 
+- [`Resources/Prototypes/_WG/ShipModules/kits.yml`](../../../Resources/Prototypes/_WG/ShipModules/kits.yml)
 - [`Resources/Prototypes/_WG/ShipModules/modules.yml`](../../../Resources/Prototypes/_WG/ShipModules/modules.yml)
+- [`Resources/Prototypes/_WG/ShipModules/recipes.yml`](../../../Resources/Prototypes/_WG/ShipModules/recipes.yml)
+- [`Resources/Prototypes/_WG/ShipModules/research.yml`](../../../Resources/Prototypes/_WG/ShipModules/research.yml)
 
 ### Localization
 
@@ -115,6 +176,10 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 
 - [`Content.Client/Options/UI/Tabs/KeyRebindTab.xaml.cs`](../../../Content.Client/Options/UI/Tabs/KeyRebindTab.xaml.cs): ship module hotkeys
 - [`Content.Client/Shuttles/Systems/ShuttleConsoleSystem.cs`](../../../Content.Client/Shuttles/Systems/ShuttleConsoleSystem.cs): the module hotkeys work while piloting
+- [`Content.Server/Physics/Controllers/MoverController.cs`](../../Physics/Controllers/MoverController.cs)
+  - the burn drive locks the turn and chemical fuel speeds it
+  - the burn drive takes the helm's thrust and chemical fuel adds to it
 - [`Resources/keybinds.yml`](../../../Resources/keybinds.yml): ship module hotkeys while piloting
+- [`Resources/Prototypes/Entities/Structures/Machines/lathe.yml`](../../../Resources/Prototypes/Entities/Structures/Machines/lathe.yml): researched ship module kits
 
 <!-- WOLFGATE-GENERATED END -->

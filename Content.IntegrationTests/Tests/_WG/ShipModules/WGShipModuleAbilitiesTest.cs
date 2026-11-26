@@ -1,0 +1,255 @@
+using System.Linq;
+using System.Numerics;
+using Content.Server._Crescent.ShipShields;
+using Content.Server._WG.BoardingAction.Components;
+using Content.Server._WG.Drydock;
+using Content.Server._WG.ShipModules;
+using Content.Server.Power.Components;
+using Content.Shared._WG.ShipModules;
+using Content.Shared.Lathe;
+using Content.Shared.Lathe.Prototypes;
+using Content.Shared.Movement.Systems;
+using Content.Shared.Research.Prototypes;
+using Content.Shared.Shuttles.Components;
+using Content.Shared.Weapons.Ranged.Components;
+using Content.Shared.Weapons.Ranged.Events;
+using Content.Shared.Weapons.Ranged.Systems;
+using Robust.Shared.GameObjects;
+using Robust.Shared.Physics.Components;
+using Robust.Shared.Physics.Systems;
+using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
+
+namespace Content.IntegrationTests.Tests._WG.ShipModules;
+
+/// <summary>
+/// Checks how each ship module is unlocked, and the burn drive, phase skimmer, ammo feeder, gyros and fortress shield
+/// on a test hull.
+/// </summary>
+[TestFixture]
+public sealed class WGShipModuleAbilitiesTest
+{
+    private const string Burn = "WGShipModuleBurnDrive";
+    private const string Skimmer = "WGShipModulePhaseSkimmer";
+    private const string Feeder = "WGShipModuleAmmoFeeder";
+    private const string Gyros = "WGShipModuleGunGyros";
+    private const string Fortress = "WGShipModuleFortressShield";
+    private const string KitPack = "WGShipModuleKits";
+    private static readonly EntProtoId Imprinter = "CircuitImprinter";
+
+    [Test]
+    public async Task EveryModuleSaysHowItIsUnlocked()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var prototypes = server.ResolveDependency<IPrototypeManager>();
+        var factory = server.ResolveDependency<IComponentFactory>();
+
+        await server.WaitAssertion(() =>
+        {
+            var imprinter = prototypes.Index(Imprinter);
+            Assert.That(imprinter.TryComp<LatheComponent>(out var lathe, factory), Is.True);
+            Assert.That(lathe!.DynamicPacks, Does.Contain(new ProtoId<LatheRecipePackPrototype>(KitPack)),
+                "The circuit imprinter doesn't print module kits.");
+            var pack = prototypes.Index<LatheRecipePackPrototype>(KitPack);
+
+            foreach (var module in prototypes.EnumeratePrototypes<WGShipModulePrototype>())
+            {
+                Assert.That(module.Free, Is.Not.EqualTo(module.Technology != null),
+                    $"{module.ID} must be either free or need a research node, not both or neither.");
+                if (module.Technology is not { } technology)
+                {
+                    Assert.That(module.Kit, Is.Null, $"Free module {module.ID} names a kit.");
+                    continue;
+                }
+
+                Assert.That(module.Kit, Is.Not.Null, $"{module.ID} needs research but names no kit.");
+                var kit = prototypes.Index(module.Kit!.Value);
+                Assert.That(kit.TryComp<WGShipModuleKitComponent>(out var kitComp, factory), Is.True,
+                    $"{kit.ID} isn't a module kit.");
+                Assert.That(kitComp!.Module.Id, Is.EqualTo(module.ID), $"{kit.ID} fits another module.");
+
+                var tech = prototypes.Index(technology);
+                var unlocks = tech.RecipeUnlocks
+                    .Where(r => prototypes.Index(r).Result == module.Kit)
+                    .ToList();
+                Assert.That(unlocks, Is.Not.Empty, $"{tech.ID} doesn't unlock {kit.ID}.");
+                Assert.That(pack.Recipes, Does.Contain(unlocks[0]), $"{unlocks[0]} isn't in the kit pack.");
+            }
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task AbilitiesWorkOnAHull()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var entities = server.EntMan;
+        var timing = server.ResolveDependency<IGameTiming>();
+        var prototypes = server.ResolveDependency<IPrototypeManager>();
+        var modules = entities.System<WGShipModuleSystem>();
+        var thrust = entities.System<WGShipModuleThrustSystem>();
+        var transform = entities.System<SharedTransformSystem>();
+        var shields = entities.System<ShipShieldsSystem>();
+        var grid = map.Grid.Owner;
+        var tick = (float) timing.TickPeriod.TotalSeconds;
+        int Ticks(float seconds) => (int) MathF.Ceiling(seconds / tick);
+        EntityUid helm = default;
+        EntityUid pilot = default;
+
+        await server.WaitPost(() =>
+        {
+            helm = entities.SpawnEntity("ComputerShuttle", map.GridCoords);
+            entities.GetComponent<ApcPowerReceiverComponent>(helm).NeedsPower = false;
+            pilot = entities.SpawnEntity(null, map.GridCoords);
+            entities.AddComponent<PilotComponent>(pilot);
+            modules.Fit(grid, 0, Burn);
+        });
+        await pair.RunTicksSync(Ticks(1f));
+
+        // Burn drive: a timed use takes the helm's thrust and drives the hull along its nose, heating it.
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(modules.TryActivate(grid, 0, pilot, helm), Is.True);
+            Assert.That(modules.GetFitted(grid, 0)!.Active, Is.True);
+            Assert.That(entities.HasComponent<WGBurnDriveActiveComponent>(grid), Is.True);
+            Assert.That(thrust.LinearFactor(grid), Is.Zero);
+            Assert.That(thrust.TurnFactor(grid), Is.Zero);
+            Assert.That(modules.TryActivate(grid, 0, pilot, helm), Is.False, "A running burn fired again.");
+        });
+        await pair.RunTicksSync(Ticks(1f));
+
+        await server.WaitAssertion(() =>
+        {
+            var velocity = entities.GetComponent<PhysicsComponent>(grid).LinearVelocity;
+            var nose = transform.GetWorldRotation(grid).RotateVec(Vector2.UnitY);
+            Assert.That(Vector2.Dot(velocity, nose), Is.GreaterThan(0.5f), "The burn didn't drive the hull forward.");
+            Assert.That(shields.GetWolfgateShipHeat(grid).Heat, Is.GreaterThan(0f), "The burn left the hull cold.");
+        });
+        await pair.RunTicksSync(Ticks(4.5f));
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(modules.GetFitted(grid, 0)!.Active, Is.False, "The burn never ended.");
+            Assert.That(entities.HasComponent<WGBurnDriveActiveComponent>(grid), Is.False);
+            Assert.That(thrust.LinearFactor(grid), Is.EqualTo(1f));
+            modules.Unfit(grid, 0);
+        });
+
+        // Phase skimmer: held hulls can't skim; a free one lands its range along the held direction, a charge spent.
+        var skim = (WGPhaseSkimmerEffect) prototypes.Index<WGShipModulePrototype>(Skimmer).Effect;
+        await server.WaitAssertion(() =>
+        {
+            entities.System<SharedPhysicsSystem>().SetLinearVelocity(grid, Vector2.Zero);
+            modules.Fit(grid, 2, Skimmer);
+            var bay = entities.GetComponent<WGShipModuleBayComponent>(grid);
+            var prototype = prototypes.Index<WGShipModulePrototype>(Skimmer);
+            entities.AddComponent<WGFtlDisruptedComponent>(grid).Sources.Add(helm);
+            Assert.That(modules.GetLock(grid, bay, prototype, true, timing.CurTime), Is.EqualTo(WGShipModuleLock.Held));
+            entities.RemoveComponent<WGFtlDisruptedComponent>(grid);
+
+            entities.GetComponent<PilotComponent>(pilot).HeldButtons = ShuttleButtons.StrafeRight;
+            var (start, rotation) = transform.GetWorldPositionRotation(grid);
+            var mass = entities.GetComponent<PhysicsComponent>(grid).Mass;
+            var range = skim.Range * MathF.Max(MathF.Min(1f, skim.ReferenceMass / mass), skim.MinScale);
+            Assert.That(modules.TryActivate(grid, 2, pilot, helm), Is.True);
+            var moved = transform.GetWorldPosition(grid) - start;
+            Assert.That(moved.Length(), Is.EqualTo(range).Within(0.1f));
+            Assert.That(Vector2.Dot(Vector2.Normalize(moved), rotation.RotateVec(Vector2.UnitX)), Is.GreaterThan(0.99f));
+            Assert.That(modules.GetFitted(grid, 2)!.Charges, Is.EqualTo(prototype.MaxCharges - 1));
+            modules.Unfit(grid, 2);
+        });
+
+        // Ammo feeder: ballistic guns fire twice as fast for its duration, a battery-fed cannon Mono types as ballistic
+        // too, and a burst gun's pause after a burst is halved; energy guns are left alone.
+        EntityUid kinetic = default;
+        EntityUid cannon = default;
+        EntityUid energy = default;
+        var feeder = prototypes.Index<WGShipModulePrototype>(Feeder);
+        var factor = ((WGAmmoFeederEffect) feeder.Effect).FireRateFactor;
+        float RateMul(EntityUid gun)
+        {
+            var ev = new QueryFireRateMultiplierEvent(1f);
+            entities.EventBus.RaiseLocalEvent(gun, ref ev);
+            return ev.ReloadTimeMul;
+        }
+
+        await server.WaitPost(() =>
+        {
+            kinetic = entities.SpawnEntity("WeaponTurretL85Autocannon", map.GridCoords);
+            cannon = entities.SpawnEntity("WeaponTurretHades", map.GridCoords);
+            energy = entities.SpawnEntity("WeaponTurretType35", map.GridCoords);
+            modules.Fit(grid, 0, Feeder);
+        });
+        await pair.RunTicksSync(2);
+
+        await server.WaitAssertion(() =>
+        {
+            var feederSystem = entities.System<WGAmmoFeederSystem>();
+            Assert.That(feederSystem.IsBallistic(kinetic), Is.True);
+            Assert.That(feederSystem.IsBallistic(cannon), Is.True, "The battery-fed Hades wasn't counted as ballistic.");
+            Assert.That(feederSystem.IsBallistic(energy), Is.False);
+            Assert.That(modules.TryActivate(grid, 0, pilot, helm), Is.True);
+            Assert.That(entities.HasComponent<WGAmmoFeederBoostedComponent>(kinetic), Is.True);
+            Assert.That(entities.HasComponent<WGAmmoFeederBoostedComponent>(cannon), Is.True);
+            Assert.That(entities.HasComponent<WGAmmoFeederBoostedComponent>(energy), Is.False);
+            Assert.That(RateMul(kinetic), Is.EqualTo(1f / factor).Within(0.001f));
+            Assert.That(RateMul(cannon), Is.EqualTo(1f / factor).Within(0.001f));
+            Assert.That(RateMul(energy), Is.EqualTo(1f).Within(0.001f));
+
+            // A finished burst's cooldown is cut by the feeder's share.
+            var gun = entities.GetComponent<GunComponent>(cannon);
+            Assert.That(gun.SelectedMode, Is.EqualTo(SelectiveFire.Burst));
+            gun.BurstActivated = false;
+            var next = gun.NextFire;
+            var shot = new GunShotEvent(cannon, new(), map.GridCoords);
+            entities.EventBus.RaiseLocalEvent(cannon, ref shot);
+            var saved = (next - gun.NextFire).TotalSeconds;
+            Assert.That(saved, Is.EqualTo(gun.BurstCooldown * (1f - 1f / factor)).Within(0.01));
+        });
+        await pair.RunTicksSync(Ticks((float) feeder.Duration.TotalSeconds + 0.5f));
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.HasComponent<WGAmmoFeederBoostedComponent>(kinetic), Is.False, "The feeder never wound down.");
+            Assert.That(RateMul(kinetic), Is.EqualTo(1f).Within(0.001f));
+            modules.Fit(grid, 1, Gyros);
+            modules.Fit(grid, 2, Fortress);
+        });
+        await pair.RunTicksSync(Ticks(0.5f));
+
+        // Gyros speed every gun's turn while fitted; the fortress needs a raised field.
+        await server.WaitAssertion(() =>
+        {
+            var gyros = (WGGunGyrosEffect) prototypes.Index<WGShipModulePrototype>(Gyros).Effect;
+            Assert.That(entities.System<WGGunGyrosSystem>().TurnFactor(kinetic, grid, 0), Is.EqualTo(gyros.TurnFactor));
+            var bay = entities.GetComponent<WGShipModuleBayComponent>(grid);
+            var fortress = prototypes.Index<WGShipModulePrototype>(Fortress);
+            Assert.That(modules.GetLock(grid, bay, fortress, true, timing.CurTime), Is.EqualTo(WGShipModuleLock.NoField));
+            Assert.That(modules.TryActivate(grid, 2, pilot, helm), Is.False);
+            modules.Unfit(grid, 1);
+        });
+        await pair.RunTicksSync(2);
+
+        // A researched module's drydock fitting uses up the kit carried aboard.
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entities.System<WGGunGyrosSystem>().TurnFactor(kinetic, grid, 0), Is.EqualTo(1f));
+            var gyros = prototypes.Index<WGShipModulePrototype>(Gyros);
+            Assert.That(modules.HasKitFor(grid, gyros), Is.False);
+            var kit = entities.SpawnEntity("WGShipModuleKitGunGyros", map.GridCoords);
+            Assert.That(modules.HasKitFor(grid, gyros), Is.True);
+            entities.System<WGDrydockSystem>().ApplyItem(grid, new WGDrydockWorkItem
+            {
+                Kind = WGDrydockWorkKind.Upgrade,
+                Target = grid,
+                Upgrade = WGShipModuleFitting.Key(1, Gyros),
+            });
+            Assert.That(modules.FittedSlot(grid, Gyros), Is.EqualTo(1));
+            Assert.That(entities.IsQueuedForDeletion(kit) || entities.Deleted(kit), Is.True, "The kit wasn't used up.");
+        });
+        await pair.CleanReturnAsync();
+    }
+}

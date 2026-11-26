@@ -1,0 +1,46 @@
+# Circuit imprinter recipes for ship module kits, unlocked by their research nodes.
+- type: latheRecipePack
+  id: WGShipModuleKits
+  recipes:
+  - WGShipModuleKitPhaseSkimmer
+  - WGShipModuleKitGunGyros
+  - WGShipModuleKitFortressShield
+  - WGShipModuleKitAmmoFeeder
+
+- type: latheRecipe
+  id: WGShipModuleKitPhaseSkimmer
+  result: WGShipModuleKitPhaseSkimmer
+  completetime: 10
+  materials:
+    Steel: 500
+    Glass: 1000
+    Gold: 500
+    Plasma: 500
+
+- type: latheRecipe
+  id: WGShipModuleKitGunGyros
+  result: WGShipModuleKitGunGyros
+  completetime: 8
+  materials:
+    Steel: 500
+    Glass: 750
+    Gold: 300
+
+- type: latheRecipe
+  id: WGShipModuleKitFortressShield
+  result: WGShipModuleKitFortressShield
+  completetime: 10
+  materials:
+    Steel: 500
+    Glass: 1000
+    Gold: 500
+    Plasma: 500
+
+- type: latheRecipe
+  id: WGShipModuleKitAmmoFeeder
+  result: WGShipModuleKitAmmoFeeder
+  completetime: 8
+  materials:
+    Steel: 750
+    Glass: 750
+    Gold: 300

@@ -91,17 +91,20 @@ public sealed partial class WGManeuveringJetsSystem : EntitySystem
         if (TryComp<ThermalSignatureComponent>(args.Grid, out var heat))
             heat.StoredHeat += jets.Heat;
 
-        Puff(args.Grid, direction, jets);
+        Puff(args.Grid, direction, jets.BurnTime);
     }
 
-    /// <summary>Tells the map's clients which of the ship's thrusters push along the burn, for their plumes and smoke rings.</summary>
-    private void Puff(EntityUid grid, Vector2 direction, WGManeuveringJetsEffect jets)
+    /// <summary>
+    /// Tells the map's clients which of the ship's thrusters push along a burn in a world direction, for their plumes
+    /// and smoke rings.
+    /// </summary>
+    public void Puff(EntityUid grid, Vector2 direction, float burnTime)
     {
         if (!TryComp<ShuttleComponent>(grid, out var shuttle))
             return;
 
         var local = (-_transform.GetWorldRotation(grid)).RotateVec(direction);
-        var ev = new WGManeuveringJetsPuffEvent { BurnTime = jets.BurnTime };
+        var ev = new WGManeuveringJetsPuffEvent { BurnTime = burnTime };
         for (var i = 0; i < BucketPush.Length; i++)
         {
             var strength = Vector2.Dot(local, BucketPush[i]);
@@ -132,7 +135,7 @@ public sealed partial class WGManeuveringJetsSystem : EntitySystem
     }
 
     /// <summary>The ship-relative direction a pilot holds, normalized; zero with nothing held.</summary>
-    private Vector2 HeldDirection(EntityUid? user)
+    public Vector2 HeldDirection(EntityUid? user)
     {
         if (!TryComp<PilotComponent>(user, out var pilot))
             return Vector2.Zero;
