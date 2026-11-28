@@ -9509,3 +9509,23 @@ Entries:
   id: 100608
   time: '2026-11-28T10:58:58.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/875
+- author: DriftingSkies
+  changes:
+    - type: Tweak
+      message: >-
+        Safety deposit boxes now take machine guns, the Hristov, and faction
+        weapons up to tier 3. Launchers are still refused.
+    - type: Tweak
+      message: >-
+        Safety deposit boxes now take pills, headsets, faction armour up to tier
+        2, tier 1 stock parts, up to 10 tier 2 stock parts and up to 300u of
+        medicine.
+    - type: Tweak
+      message: >-
+        Medium and large safety deposit boxes now fit backpacks, but not bags of
+        holding.
+    - type: Fix
+      message: Filled medkits no longer lose their pills when deposited.
+  id: 100609
+  time: '2026-11-28T12:05:47.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/876
