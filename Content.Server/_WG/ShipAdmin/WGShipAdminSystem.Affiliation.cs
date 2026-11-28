@@ -20,10 +20,7 @@ public sealed partial class WGShipAdminSystem
             .ToList();
     }
 
-    /// <summary>
-    /// Sets the faction the hull flies for, or none. A ship flying for a player company keeps the faction aside,
-    /// as that module does, and gets it back when it stops.
-    /// </summary>
+    /// <summary>Sets the faction the hull flies for, or none.</summary>
     public bool SetHullFaction(ICommonSession admin, EntityUid grid, string? faction, out string result)
     {
         ProtoId<CompanyPrototype>? picked = null;
@@ -39,16 +36,7 @@ public sealed partial class WGShipAdminSystem
         }
 
         var before = CurrentFaction(grid);
-        if (TryComp<WGCompanyShipComponent>(grid, out var flown))
-        {
-            // Empty, not null, records a faction staff cleared: null means none was set aside yet, and the
-            // company sync would then set aside whatever the hull still carries.
-            flown.PreviousFaction = picked?.Id ?? string.Empty;
-        }
-        else
-        {
-            SetFaction(grid, picked);
-        }
+        SetFaction(grid, picked);
 
         if (TryComp<WGShipAccessComponent>(grid, out var access)
             && access.Mode == WGShipAccessMode.Faction
@@ -57,8 +45,7 @@ public sealed partial class WGShipAdminSystem
 
         Audit(admin, LogImpact.Medium, grid, $"set its hull faction from '{before}' to '{picked?.Id}'");
         var name = picked is { } id ? FactionName(id) : Loc.GetString("wg-ship-admin-none");
-        result = Loc.GetString(flown != null ? "wg-ship-admin-result-faction-company-ship" : "wg-ship-admin-result-faction",
-            ("ship", Name(grid)), ("faction", name));
+        result = Loc.GetString("wg-ship-admin-result-faction", ("ship", Name(grid)), ("faction", name));
         return true;
     }
 
@@ -86,15 +73,9 @@ public sealed partial class WGShipAdminSystem
         return true;
     }
 
-    /// <summary>
-    /// The hull's faction: its own, or the one a company ship set aside. Until the company sync has set it aside,
-    /// the hull still carries it.
-    /// </summary>
+    /// <summary>The hull's faction, or empty for none.</summary>
     private string CurrentFaction(EntityUid grid)
     {
-        if (CompOrNull<WGCompanyShipComponent>(grid)?.PreviousFaction is { } setAside)
-            return setAside == "None" ? string.Empty : setAside;
-
         return TryComp<CompanyComponent>(grid, out var hull) && hull.CompanyName.Id is { Length: > 0 } id && id != "None"
             ? id
             : string.Empty;

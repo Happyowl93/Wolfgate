@@ -39,6 +39,7 @@ public sealed partial class WGCompanyTest
         var server = pair.Server;
         var em = server.EntMan;
         var companies = server.System<WGCompanySystem>();
+        var shuttles = server.System<Content.Shared.Shuttles.Systems.SharedShuttleSystem>();
         var client = pair.Client.System<WGCompanyClientSystem>();
         var ticker = server.System<GameTicker>();
         var preferences = server.ResolveDependency<IServerPreferencesManager>();
@@ -51,6 +52,7 @@ public sealed partial class WGCompanyTest
         int? id = null;
         var paidLoadouts = 0;
         var boughtShip = EntityUid.Invalid;
+        var factionShip = EntityUid.Invalid;
         try
         {
             await server.WaitPost(() =>
@@ -185,16 +187,32 @@ public sealed partial class WGCompanyTest
                 companies.MarkBoughtShip(bought, card);
                 boughtShip = bought;
                 Assert.That(em.GetComponent<Content.Shared._WG.Companies.WGCompanyShipComponent>(bought).Tag, Is.EqualTo("RANK"));
+
+                // One that flies for a faction shows the faction instead.
+                factionShip = em.SpawnEntity(null, Robust.Shared.Map.MapCoordinates.Nullspace);
+                em.AddComponent<Content.Shared.Shuttles.Components.IFFComponent>(factionShip);
+                em.EnsureComponent<Content.Shared._Mono.Company.CompanyComponent>(factionShip).CompanyName = "TSF";
+                companies.MarkBoughtShip(factionShip, card);
                 Assert.That(record.JobTitle, Is.EqualTo("Captain"), "The manifest shows the rank, not the job.");
             });
             await pair.RunTicksSync(pair.SecondsToTicks(2.5f));
             await server.WaitAssertion(() =>
             {
                 Assert.That(string.IsNullOrEmpty(em.GetComponent<Content.Shared._Mono.Company.CompanyComponent>(boughtShip).CompanyName), Is.True,
-                    "The faction company can't override the company's colour on radar labels.");
+                    "A None faction can't override the company's colour on radar labels.");
                 Assert.That(em.GetComponent<Content.Shared.Shuttles.Components.IFFComponent>(boughtShip).Color,
-                    Is.EqualTo(em.GetComponent<Content.Shared._WG.Companies.WGCompanyShipComponent>(boughtShip).Colour));
+                    Is.EqualTo(Content.Shared._WG.Companies.WGCompanyPolicy.RadarColour(
+                        em.GetComponent<Content.Shared._WG.Companies.WGCompanyShipComponent>(boughtShip).Colour)));
+                Assert.That(em.GetComponent<Content.Shared._Mono.Company.CompanyComponent>(factionShip).CompanyName.Id, Is.EqualTo("TSF"),
+                    "The company flag leaves the hull's faction in place.");
+                Assert.That(em.GetComponent<Content.Shared.Shuttles.Components.IFFComponent>(factionShip).Color,
+                    Is.EqualTo(Content.Shared.Shuttles.Components.IFFComponent.IFFColor), "A faction ship keeps its own colour.");
+                Assert.That(shuttles.GetIFFLabel(factionShip), Does.Not.Contain("RANK"), "A faction ship's label leaves the company out.");
+                em.GetComponent<Content.Shared._Mono.Company.CompanyComponent>(boughtShip).CompanyName = "PDV";
             });
+            await pair.RunTicksSync(pair.SecondsToTicks(2.5f));
+            await server.WaitAssertion(() => Assert.That(em.GetComponent<Content.Shared.Shuttles.Components.IFFComponent>(boughtShip).Color,
+                Is.EqualTo(Content.Shared.Shuttles.Components.IFFComponent.IFFColor), "A company ship given a faction gets its own colour back."));
             await pair.Client.WaitAssertion(() => Assert.That(Content.Client._WG.Companies.WGCompanyRankIcons.Get(topRank), Is.Not.Null,
                 "Screens that draw job icons get the rank icon."));
 

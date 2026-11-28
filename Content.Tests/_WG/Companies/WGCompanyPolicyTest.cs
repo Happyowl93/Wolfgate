@@ -1,9 +1,10 @@
 using Content.Shared._WG.Companies;
 using NUnit.Framework;
+using Robust.Shared.Maths;
 
 namespace Content.Tests._WG.Companies;
 
-/// <summary>Covers payroll shares, cuts, rank order and name rules.</summary>
+/// <summary>Covers payroll shares, cuts, rank order, name rules and radar colours.</summary>
 [TestFixture]
 public sealed class WGCompanyPolicyTest
 {
@@ -69,6 +70,33 @@ public sealed class WGCompanyPolicyTest
             Assert.That(message, Is.Empty);
             Assert.That(WGCompanyPolicy.TryNormalizeApplication(new string('a', WGCompanyPolicy.MaximumApplicationLength + 1), out _), Is.False);
             Assert.That(WGCompanyPolicy.TryNormalizeApplication("bell\u0007", out _), Is.False);
+        });
+    }
+
+    [TestCase("#FFD700")]
+    [TestCase("#3399FF")]
+    [TestCase("#FFFFFF")]
+    public void BrightColoursKeepTheirRadarColour(string hex)
+    {
+        var colour = Color.FromHex(hex);
+        Assert.That(WGCompanyPolicy.RadarColour(colour), Is.EqualTo(colour));
+    }
+
+    [TestCase("#000000")]
+    [TestCase("#0000FF")]
+    [TestCase("#301040")]
+    [TestCase("#800000")]
+    public void DarkColoursLiftToTheRadarMinimum(string hex)
+    {
+        var colour = Color.FromHex(hex);
+        var radar = WGCompanyPolicy.RadarColour(colour);
+        Assert.Multiple(() =>
+        {
+            Assert.That(WGCompanyPolicy.Luminance(radar), Is.EqualTo(WGCompanyPolicy.MinimumRadarLuminance).Within(0.001f));
+            Assert.That(radar.A, Is.EqualTo(colour.A));
+            // Lifting toward white keeps the strongest channel the strongest, so the hue survives.
+            if (colour.B > colour.R && colour.B > colour.G)
+                Assert.That(radar.B, Is.GreaterThan(radar.R).And.GreaterThan(radar.G));
         });
     }
 }

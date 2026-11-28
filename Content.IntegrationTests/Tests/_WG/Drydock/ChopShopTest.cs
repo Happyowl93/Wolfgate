@@ -10,7 +10,6 @@ using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared.Station.Components;
 using Content.Shared._Mono.Company;
 using Content.Shared._Mono.Ships.Components;
-using Content.Shared._WG.Companies;
 using Content.Shared._WG.Drydock;
 using Content.Shared.Cargo.Components;
 using Content.Shared.Materials;
@@ -302,11 +301,6 @@ public sealed class ChopShopTest
                 Assert.That(drydock.FactionBreakRefusal(ship, rival), Is.Null, "Another faction can break a faction hull.");
                 Assert.That(drydock.FactionBreakRefusal(ship, none), Is.Null, "A factionless breaker can break a faction hull.");
             });
-
-            // A player company's flag clears the ship's faction and keeps it aside.
-            shipFaction.CompanyName = string.Empty;
-            em.AddComponent<WGCompanyShipComponent>(ship).PreviousFaction = "TSF";
-            Assert.That(drydock.FactionBreakRefusal(ship, own), Is.Not.Null, "A company flag doesn't hide the hull's faction.");
 
             var factionless = DrydockTest.CreateShip(pair, map.MapId, new Vector2(-100f, 0f));
             em.AddComponent<CompanyComponent>(factionless).CompanyName = "None";
