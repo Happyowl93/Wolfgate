@@ -4,7 +4,7 @@ meta:
   engineVersion: 291.0.4
   forkId: wolfgate-mapping
   forkVersion: 20261124-142757-5bcd597-tm740-b8438d08
-  time: 11/27/2026 00:39:29
+  time: 11/28/2026 16:21:38
   entityCount: 1629
 maps: []
 grids:
@@ -6805,9 +6805,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 6.5,-0.5
-      anchored: False
-    - type: Physics
-      bodyType: Dynamic
 - proto: MachineMaterialSilo
   entities:
   - uid: 1814
@@ -8589,6 +8586,9 @@ entities:
     - type: Transform
       parent: 1
       pos: 1.5,0.5
+    - type: WGHullBond
+      hullName: Snake Eater
+      hull: 0bc22110f88d4eb08c456e1362c548c8
 - proto: ShiptestFloorCarpetRedGold
   entities:
   - uid: 404
@@ -10753,7 +10753,7 @@ entities:
       pos: 1.5,0.5
     - type: DeltaPressure
       gridUid: 1
-  - uid: 1041
+  - uid: 1007
     components:
     - type: Transform
       parent: 1

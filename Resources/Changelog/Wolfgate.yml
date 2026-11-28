@@ -9540,3 +9540,26 @@ Entries:
   id: 100610
   time: '2026-11-28T15:17:10.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/877
+- author: Balls2zawall
+  changes:
+    - type: Fix
+      message: 'Fixed missing space fans from the tetsu-kuzu''s '
+  id: 100611
+  time: '2026-11-28T16:27:44.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/879
+- author: Balls2zawall
+  changes:
+    - type: Fix
+      message: Fixed the unanchored FTL drive on the VG Snake Eater.
+    - type: Fix
+      message: Fixed the missing manufacturer label on the VG Snake Eater.
+  id: 100612
+  time: '2026-11-28T16:42:41.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/881
+- author: ImogenOC
+  changes:
+    - type: Remove
+      message: Custom markings no longer have a daily limit on saving new drawings.
+  id: 100613
+  time: '2026-11-28T17:35:48.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/882

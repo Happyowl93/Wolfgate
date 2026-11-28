@@ -53,7 +53,7 @@ art is blocked only asks for it again after reconnecting, so a lifted block show
 on, markings are cut to the wearer's outline), `wg.custom_markings.erase_body` (off, masks are
 dropped from what is saved and those already saved are not applied), `wg.custom_markings.glow` (off, glow is
 dropped from what is saved and art already saved is drawn lit), `wg.custom_markings.daily_art_limit` (most
-new drawings a player may store in a day, 0 for no limit) and `wg.custom_markings.unused_art_days` (how long art
+new drawings a player may store in a day, 0 for no limit, the default) and `wg.custom_markings.unused_art_days` (how long art
 nothing uses is kept, 0 to keep it forever).
 
 ## How it fits together
@@ -100,8 +100,8 @@ nothing uses is kept, 0 to keep it forever).
   (`CustomMarkingEraseBrush`).
 - A library holds 24 entries, but every redraw of an entry stores a new row of art and leaves the old one, since a
   saved character lists its art by hash and must keep it when the entry changes. Two things bound what that adds
-  up to. A player may only store so many new drawings a day (`wg.custom_markings.daily_art_limit`); a drawing the
-  server already holds adds no row and is always allowed. And as the server starts, with no round on and so no
+  up to. A server can cap how many new drawings a player stores in a day (`wg.custom_markings.daily_art_limit`,
+  off by default); a drawing the server already holds adds no row and is always allowed. And as the server starts, with no round on and so no
   body wearing anything, it looks for art that no library holds and no saved character wears
   (`PurgeUnusedCustomMarkingArtAsync`): what it finds is noted with the time, and deleted by a later start once
   `wg.custom_markings.unused_art_days` have passed and it is still unused. Blocked art is never deleted, so a block

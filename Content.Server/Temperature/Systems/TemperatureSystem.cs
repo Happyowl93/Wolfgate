@@ -14,6 +14,7 @@ using Robust.Shared.Physics.Components;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Physics.Events;
 using Content.Shared.Projectiles;
+using Content.Server._WG.LiveFixes; // WOLFGATE(LiveFixes)
 
 namespace Content.Server.Temperature.Systems;
 
@@ -279,7 +280,10 @@ public sealed partial class TemperatureSystem : EntitySystem
             var tempDamage = c / (1 + a * Math.Pow(Math.E, -heatK * diff)) - y;
             _damageable.TryChangeDamage(uid, temperature.HeatDamage * tempDamage, ignoreResistances: true, interruptsDoAfters: false);
         }
-        else if (temperature.CurrentTemperature <= coldDamageThreshold)
+        // WOLFGATE(LiveFixes) START: a cold threshold at or below 0 K means no cold damage; the curve gave NaN there
+        // else if (temperature.CurrentTemperature <= coldDamageThreshold)
+        else if (temperature.CurrentTemperature <= coldDamageThreshold && coldDamageThreshold > 0)
+        // WOLFGATE END
         {
             if (!temperature.TakingDamage)
             {
@@ -288,8 +292,11 @@ public sealed partial class TemperatureSystem : EntitySystem
             }
 
             var diff = Math.Abs(temperature.CurrentTemperature - coldDamageThreshold);
-            var tempDamage =
-                Math.Sqrt(diff * (Math.Pow(temperature.DamageCap.Double(), 2) / coldDamageThreshold));
+            // WOLFGATE(LiveFixes) START: a NaN or infinite multiplier made FixedPoint2 throw, so it deals no damage
+            // var tempDamage =
+            //     Math.Sqrt(diff * (Math.Pow(temperature.DamageCap.Double(), 2) / coldDamageThreshold));
+            var tempDamage = WGColdDamage.Scale(diff, coldDamageThreshold, temperature.DamageCap.Double());
+            // WOLFGATE END
             _damageable.TryChangeDamage(uid, temperature.ColdDamage * tempDamage, ignoreResistances: true, interruptsDoAfters: false);
         }
         else if (temperature.TakingDamage)
