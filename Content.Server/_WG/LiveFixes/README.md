@@ -7,6 +7,10 @@ row the other save removed, retries once against the rows that save left. `WGPro
 per character. Record console filters and a store's starting map are no longer saved, so a ship
 copy doesn't fail or point at something outside the ship.
 
+Cold damage goes through `WGColdDamage`. A cold threshold at or below 0 K (the "immune to cold" mobs) deals no cold
+damage, and a NaN or infinite multiplier deals none either; upstream's curve gave NaN for a mob cooled past a negative
+threshold, and `FixedPoint2` threw on it in the spawn-all test.
+
 The `PendingAcks` race and transfer socket fixes that used to sit here as a patch file are now the first commit of the
 Lupine engine fork; see `Docs/_WG/Engine/README.md`.
 
@@ -17,12 +21,17 @@ Lupine engine fork; see `Docs/_WG/Engine/README.md`.
 
 ### Server
 
+- [`Content.Server/_WG/LiveFixes/WGColdDamage.cs`](WGColdDamage.cs)
 - [`Content.Server/_WG/LiveFixes/WGProfileRows.cs`](WGProfileRows.cs)
 
 ### Integration tests
 
 - [`Content.IntegrationTests/Tests/_WG/LiveFixes/CharacterSaveTest.cs`](../../../Content.IntegrationTests/Tests/_WG/LiveFixes/CharacterSaveTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/LiveFixes/ShipCopySaveTest.cs`](../../../Content.IntegrationTests/Tests/_WG/LiveFixes/ShipCopySaveTest.cs)
+
+### Unit tests
+
+- [`Content.Tests/_WG/LiveFixes/WGColdDamageTest.cs`](../../../Content.Tests/_WG/LiveFixes/WGColdDamageTest.cs)
 
 ### Localization
 
@@ -55,6 +64,9 @@ Lupine engine fork; see `Docs/_WG/Engine/README.md`.
 - [`Content.Server/Database/UserDbDataManager.cs`](../../Database/UserDbDataManager.cs): a repeat disconnect has nothing left to clean up and shouldn't throw
 - [`Content.Server/Explosion/EntitySystems/ExplosionSystem.GridMap.cs`](../../Explosion/EntitySystems/ExplosionSystem.GridMap.cs): a neighbour's change in the same batch may have added this tile already
 - [`Content.Server/StationRecords/Components/GeneralStationRecordConsoleComponent.cs`](../../StationRecords/Components/GeneralStationRecordConsoleComponent.cs): not saved; a set filter has no serializer and failed the ship copy
+- [`Content.Server/Temperature/Systems/TemperatureSystem.cs`](../../Temperature/Systems/TemperatureSystem.cs)
+  - a cold threshold at or below 0 K means no cold damage; the curve gave NaN there
+  - a NaN or infinite multiplier made FixedPoint2 throw, so it deals no damage
 - [`Content.Shared/Chemistry/Reaction/ChemicalReactionSystem.cs`](../../../Content.Shared/Chemistry/Reaction/ChemicalReactionSystem.cs): name the entity and reagents, since the old message can't identify the reaction loop
 - [`Content.Shared/Damage/Components/DamageOnInteractComponent.cs`](../../../Content.Shared/Damage/Components/DamageOnInteractComponent.cs): reactor parts add this in code, and null failed the ship copy
 - [`Content.Shared/Disposal/Unit/SharedDisposalUnitSystem.cs`](../../../Content.Shared/Disposal/Unit/SharedDisposalUnitSystem.cs): not every disposal unit has signal ports
