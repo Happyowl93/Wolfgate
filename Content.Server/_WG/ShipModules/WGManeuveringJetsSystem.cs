@@ -134,15 +134,9 @@ public sealed partial class WGManeuveringJetsSystem : EntitySystem
         return scale * _cargo.GetSpaceFactor(grid);
     }
 
-    /// <summary>
-    /// The ship-relative direction a pilot holds, or an NPC steering the ship's modules asks for, normalized; zero with
-    /// nothing held.
-    /// </summary>
+    /// <summary>The ship-relative direction a pilot holds, normalized; zero with nothing held.</summary>
     public Vector2 HeldDirection(EntityUid grid, EntityUid? user)
     {
-        if (TryComp<WGShipModuleNpcComponent>(grid, out var npc) && npc.Steer != Vector2.Zero)
-            return Vector2.Normalize(npc.Steer);
-
         if (!TryComp<PilotComponent>(user, out var pilot))
             return Vector2.Zero;
 
