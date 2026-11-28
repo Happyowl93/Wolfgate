@@ -9489,3 +9489,43 @@ Entries:
   id: 100606
   time: '2026-11-27T20:50:34.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/868
+- author: Balls2zawall
+  changes:
+    - type: Add
+      message: Added the MMC-GGS Tetsu-kuzu, a new drydock ship for the MMC.
+    - type: Fix
+      message: >-
+        Fixed the Dredgers author credits and lowered the price based on
+        re-appraisal.
+  id: 100607
+  time: '2026-11-27T23:12:11.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/870
+- author: Layla-Veridian
+  changes:
+    - type: Fix
+      message: >-
+        Local chat no longer stops working for everyone after an AI's drone is
+        destroyed.
+  id: 100608
+  time: '2026-11-28T10:58:58.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/875
+- author: DriftingSkies
+  changes:
+    - type: Tweak
+      message: >-
+        Safety deposit boxes now take machine guns, the Hristov, and faction
+        weapons up to tier 3. Launchers are still refused.
+    - type: Tweak
+      message: >-
+        Safety deposit boxes now take pills, headsets, faction armour up to tier
+        2, tier 1 stock parts, up to 10 tier 2 stock parts and up to 300u of
+        medicine.
+    - type: Tweak
+      message: >-
+        Medium and large safety deposit boxes now fit backpacks, but not bags of
+        holding.
+    - type: Fix
+      message: Filled medkits no longer lose their pills when deposited.
+  id: 100609
+  time: '2026-11-28T12:05:47.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/876

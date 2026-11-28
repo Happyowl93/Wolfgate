@@ -1,0 +1,43 @@
+# Vessel prototype made in mapping mode from "Echidna". Check every field before it goes in the game.
+# Grid: put Echidna.yml at Resources/SharedMaps/_WG/Community/ssy_echidna.yml
+# Prototype: put this file, Echidna.vessel.yml, at Resources/Prototypes/_WG/Community/ssy_echidna.yml
+# Guessed from the grid (750 tiles), not set by the mapper: category, engine. Check them.
+# Set by the mapper in the export wizard: name, description, price, class, group, access, requireCrew.
+
+- type: vessel
+  id: WGSSYEchidna
+  parent: BaseVessel
+  name: 'SSY Echidna'
+  description: 'The Savannah Shipyards Echidna is a mech carrier based on the gutted hull of the retired Chandrahas class Syndicate corvette. While not as fearsome as its previous incarnation, the Echidna provides plenty of utility to any scavenging or expeditionary operations.'
+  price: 260500 # appraised at 133217
+  category: Large # 750 tiles
+  group: Shipyard
+  shuttlePath: /SharedMaps/_WG/Community/ssy_echidna.yml
+  guidebookPage: null
+  class:
+  - Expedition
+  - Science
+  - Mercenary
+  - Carrier
+  - MechCarrier
+  engine:
+  - AME
+
+- type: gameMap
+  id: WGSSYEchidna
+  mapName: 'SSY Echidna'
+  mapPath: /SharedMaps/_WG/Community/ssy_echidna.yml
+  isGrid: true
+  minPlayers: 0
+  stations:
+    WGSSYEchidna:
+      stationProto: StandardFrontierVessel
+      components:
+      - type: StationNameSetup
+        mapNameTemplate: 'SSY Echidna {1}'
+        nameGenerator:
+          !type:NanotrasenNameGenerator
+          prefixCreator: '14'
+      - type: StationJobs
+        availableJobs:
+          Contractor: [ 0, 0 ]
