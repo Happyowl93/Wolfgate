@@ -9540,3 +9540,10 @@ Entries:
   id: 100610
   time: '2026-11-28T15:17:10.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/877
+- author: Balls2zawall
+  changes:
+    - type: Fix
+      message: 'Fixed missing space fans from the tetsu-kuzu''s '
+  id: 100611
+  time: '2026-11-28T16:27:44.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/879
