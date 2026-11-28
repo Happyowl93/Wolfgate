@@ -11,6 +11,12 @@ using Robust.Shared.GameObjects;
 
 namespace Content.IntegrationTests.Tests._WG.Ghost;
 
+/// <summary>
+/// The window keeps its view and its folded sections in static fields, which every client in the process shares, so
+/// this runs with nothing else. Side by side, one test's switch to the Place view renamed the other's section between
+/// two rebuilds and the fold was lost.
+/// </summary>
+[NonParallelizable]
 public sealed class GhostOrbitWindowTest : InteractionTest
 {
     /// <summary>A click on a section's header folds it, another opens it again, and a refresh keeps it as it was left.</summary>
