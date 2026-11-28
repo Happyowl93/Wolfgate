@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Content.Server._Mono.NPC.HTN;
-using Content.Server._Mono.Projectiles.TargetSeeking;
 using Content.Server._WG.BoardingAction.Components;
 using Content.Server._WG.Drydock;
 using Content.Server._WG.ShipModules;
@@ -262,11 +261,11 @@ public sealed class WGShipModuleAbilitiesTest
     }
 
     /// <summary>
-    /// A hull an NPC flies feeds its guns while engaged, jets out of the path of an incoming round and skims away from a
-    /// missile lock, with no player at the helm.
+    /// NPCs don't fire modules for now: a hull with an NPC aboard and no player at the helm keeps its jets charged
+    /// through a round on course to hit it.
     /// </summary>
     [Test]
-    public async Task NpcShipsFireTheirModules()
+    public async Task NpcShipsLeaveTheirModulesAlone()
     {
         await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = false, Dirty = true });
         var server = pair.Server;
@@ -277,21 +276,8 @@ public sealed class WGShipModuleAbilitiesTest
         var modules = entities.System<WGShipModuleSystem>();
         var transform = entities.System<SharedTransformSystem>();
         var grid = map.Grid.Owner;
-        var tick = (float) timing.TickPeriod.TotalSeconds;
-        int Ticks(float seconds) => (int) MathF.Ceiling(seconds / tick);
         const string jets = "WGShipModuleManeuveringJets";
-        int MaxCharges(string module) => prototypes.Index<WGShipModulePrototype>(module).MaxCharges;
-
-        // A debug round (20000 damage, or none when harmless) straight at the hull's middle, a second out.
-        void Fire(bool harmless)
-        {
-            var body = entities.GetComponent<PhysicsComponent>(grid);
-            var center = transform.GetWorldPosition(grid) + body.LocalCenter;
-            var round = entities.SpawnEntity("BulletDebug", new MapCoordinates(center - new Vector2(0f, 60f), map.MapId));
-            if (harmless)
-                entities.GetComponent<ProjectileComponent>(round).Damage = new DamageSpecifier();
-            entities.System<SharedPhysicsSystem>().SetLinearVelocity(round, body.LinearVelocity + new Vector2(0f, 60f));
-        }
+        var charges = prototypes.Index<WGShipModulePrototype>(jets).MaxCharges;
 
         await server.WaitPost(() =>
         {
@@ -300,56 +286,23 @@ public sealed class WGShipModuleAbilitiesTest
             var npc = entities.SpawnEntity(null, map.GridCoords);
             entities.AddComponent<ShipTargetingComponent>(npc);
             modules.Fit(grid, 0, jets);
-            modules.Fit(grid, 1, Feeder);
-            modules.Fit(grid, 2, Skimmer);
         });
-        await pair.RunTicksSync(Ticks(1.5f));
+        await pair.RunTicksSync((int) MathF.Ceiling(1f / (float) timing.TickPeriod.TotalSeconds));
+
+        // A harmless round, like a grappling hook, straight at the hull's middle a second out.
+        await server.WaitPost(() =>
+        {
+            var body = entities.GetComponent<PhysicsComponent>(grid);
+            var center = transform.GetWorldPosition(grid) + body.LocalCenter;
+            var round = entities.SpawnEntity("BulletDebug", new MapCoordinates(center - new Vector2(0f, 60f), map.MapId));
+            entities.GetComponent<ProjectileComponent>(round).Damage = new DamageSpecifier();
+            entities.System<SharedPhysicsSystem>().SetLinearVelocity(round, body.LinearVelocity + new Vector2(0f, 60f));
+        });
+        await pair.RunTicksSync((int) MathF.Ceiling(0.6f / (float) timing.TickPeriod.TotalSeconds));
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(modules.GetFitted(grid, 1)!.Active, Is.True, "The NPC never fed its guns.");
-            Assert.That(modules.GetFitted(grid, 0)!.Charges, Is.EqualTo(MaxCharges(jets)));
-
-            Fire(true);
-        });
-        await pair.RunTicksSync(Ticks(0.6f));
-
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(modules.GetFitted(grid, 0)!.Charges, Is.LessThan(MaxCharges(jets)), "The NPC never dodged the round.");
-            Assert.That(modules.GetFitted(grid, 2)!.Charges, Is.EqualTo(MaxCharges(Skimmer)), "The NPC skimmed off a small round.");
-        });
-        await pair.RunTicksSync(Ticks(1.2f));
-
-        // A big round sends it skimming rather than jetting.
-        Vector2 before = default;
-        await server.WaitAssertion(() =>
-        {
-            before = transform.GetWorldPosition(grid);
-            Fire(false);
-        });
-        await pair.RunTicksSync(Ticks(0.6f));
-
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(modules.GetFitted(grid, 2)!.Charges, Is.EqualTo(MaxCharges(Skimmer) - 1), "The NPC never skimmed off the big round.");
-            Assert.That((transform.GetWorldPosition(grid) - before).Length(), Is.GreaterThan(20f));
-        });
-        await pair.RunTicksSync(Ticks(1.2f));
-
-        // So does a missile lock.
-        await server.WaitAssertion(() =>
-        {
-            before = transform.GetWorldPosition(grid);
-            var missile = entities.SpawnEntity(null, new MapCoordinates(before + new Vector2(100f, 0f), map.MapId));
-            entities.AddComponent<TargetSeekingComponent>(missile).CurrentTarget = grid;
-        });
-        await pair.RunTicksSync(Ticks(0.6f));
-
-        await server.WaitAssertion(() =>
-        {
-            Assert.That(modules.GetFitted(grid, 2)!.Charges, Is.EqualTo(MaxCharges(Skimmer) - 2), "The NPC never skimmed off the lock.");
-            Assert.That((transform.GetWorldPosition(grid) - before).Length(), Is.GreaterThan(20f));
+            Assert.That(modules.GetFitted(grid, 0)!.Charges, Is.EqualTo(charges), "An NPC fired the jets.");
         });
         await pair.CleanReturnAsync();
     }

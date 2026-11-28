@@ -45,14 +45,9 @@ anywhere on the grid, each fits its module for free when the ship spawns (`WGShi
 deletes itself, into hotkey `slot` 1-3 if set or the first free slot. A preset for a module the ship already has, or
 for a filled slot, is skipped with a warning.
 
-Ships flown by NPCs use their modules (`WGShipModuleNpcSystem`): a ship with modules fitted and an NPC at its helm
-or guns (Mono ship AI or an NPC crew) and no player piloting it is checked every half second. The jets dodge a round on
-course to hit within 1.2 s, sideways out of its path. The skimmer fires sideways when a missile is locked on within
-250 m, breaking the lock, or when a big round (1000 damage or a blast of 300 intensity) will hit within 1.5 s. The
-fortress goes up while the field took a hit in the last 4 s and the hull is at half heat, and comes down at 85% or
-when the hits stop; the feeder fires while the ship's guns are engaged and the fortress isn't silencing them. Gyros
-are passive. Only the search for incoming rounds costs anything, and it runs only for a ship whose jets or skimmer
-could fire then (charged, off cooldown and unlocked, so not jets behind a raised shield).
+NPCs don't fire modules for now; only passive ones (gyros) work on an NPC ship. `WGShipModuleNpcSystem` (#853) was
+taken out because it counted any NPC officer aboard as flying the ship and dodged grappling hooks, so a player's own
+empty ship jetted away from them. `NpcShipsLeaveTheirModulesAlone` holds that.
 
 Every module states its unlock: `free: true`, a `technology` whose node unlocks its `kit` at the circuit imprinter
 (`recipes.yml`, in a pack on the imprinter's dynamic packs), or `unlisted: true`, which keeps it off drydock lists so
@@ -126,7 +121,6 @@ turned across the exhaust, growing and fading over 1.4 s. The ring sprite is gen
 - [`Content.Server/_WG/ShipModules/WGShipModuleCommand.cs`](WGShipModuleCommand.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleEvents.cs`](WGShipModuleEvents.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleKitComponent.cs`](WGShipModuleKitComponent.cs)
-- [`Content.Server/_WG/ShipModules/WGShipModuleNpcSystem.cs`](WGShipModuleNpcSystem.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModulePresetSystem.cs`](WGShipModulePresetSystem.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleSystem.cs`](WGShipModuleSystem.cs)
 - [`Content.Server/_WG/ShipModules/WGShipModuleSystem.Locks.cs`](WGShipModuleSystem.Locks.cs)

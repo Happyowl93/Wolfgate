@@ -344,12 +344,6 @@ public sealed partial class WGShipModuleSystem : EntitySystem
         return Activate(grid, slot, user, _power.IsPowered(helm));
     }
 
-    /// <summary>Fires a slot for a crew with no helm in hand, such as an NPC; the ship's power is its last sweep's.</summary>
-    public bool TryActivateAboard(EntityUid grid, int slot, EntityUid? user)
-    {
-        return Activate(grid, slot, user, _poweredHelms.Contains(grid));
-    }
-
     private bool Activate(EntityUid grid, int slot, EntityUid? user, bool powered)
     {
         if (!TryComp<WGShipModuleBayComponent>(grid, out var bay)

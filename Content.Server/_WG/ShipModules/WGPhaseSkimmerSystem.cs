@@ -115,15 +115,9 @@ public sealed partial class WGPhaseSkimmerSystem : EntitySystem
         return null;
     }
 
-    /// <summary>
-    /// The way an NPC steering the ship's modules asks for, else along the hull's velocity while it is moving, else the
-    /// held direction, else its nose.
-    /// </summary>
+    /// <summary>Along the hull's velocity while it is moving, else the held direction, else its nose.</summary>
     private Vector2 Direction(EntityUid grid, WGPhaseSkimmerEffect skimmer, PhysicsComponent body, EntityUid? user, Angle rotation)
     {
-        if (TryComp<WGShipModuleNpcComponent>(grid, out var npc) && npc.Steer != Vector2.Zero)
-            return rotation.RotateVec(Vector2.Normalize(npc.Steer));
-
         var velocity = body.LinearVelocity;
         if (velocity.Length() > skimmer.DriftSpeed)
             return Vector2.Normalize(velocity);
