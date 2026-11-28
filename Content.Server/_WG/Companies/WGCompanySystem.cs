@@ -210,7 +210,7 @@ public sealed partial class WGCompanySystem : EntitySystem
             }
             company.Ledger.AddRange(entry.Ledger);
             foreach (var licence in entry.Licences)
-                company.Licences.Add(new Licence { Id = licence.Id, Vessel = licence.Vessel, ShipName = licence.ShipName });
+                company.Licences.Add(new Licence { Id = licence.Id, Vessel = CurrentVesselId(licence.Vessel), ShipName = licence.ShipName });
             foreach (var application in entry.Applications)
             {
                 company.Applications[application.ProfileId] = new Applicant(new NetUserId(application.UserId), application.CharacterName,

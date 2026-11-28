@@ -109,3 +109,4 @@ wg-crash-apc-fault-repaired = You recalibrate the damaged APC regulator. Its out
 
 wg-orbit-flight-refused = There is no air to fly in up here.
 wg-orbit-flight-stopped = There is no air up here and you stop flying.
+wg-orbit-flight-ceiling = The air thins out above you. You can't fly any higher.

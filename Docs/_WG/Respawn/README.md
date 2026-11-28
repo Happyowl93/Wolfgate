@@ -24,6 +24,9 @@ once (`GhostGui`), and `ghostrespawn` doesn't check their timer (`GhostRespawnCo
 - [`Content.Server/_Corvax/Respawn/RespawnSystem.cs`](../../../Content.Server/_Corvax/Respawn/RespawnSystem.cs)
   - with no preset the timer stayed at zero until a restart
   - as above
+  - dying again while a death's timer runs, as a reviver implant loops, doesn't restart it
+  - the respawn time each player's last death set
+  - only a death records itself again, after setting its timer
 - [`Content.Server/_NF/Commands/GhostRespawnCommand.cs`](../../../Content.Server/_NF/Commands/GhostRespawnCommand.cs): admins skip the respawn timer
 
 <!-- WOLFGATE-GENERATED END -->

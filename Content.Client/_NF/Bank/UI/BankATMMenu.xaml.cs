@@ -1,5 +1,6 @@
 using System.Numerics; // WOLFGATE(Savings)
 using Content.Client._NF.Bank;
+using Content.Client.Message; // WOLFGATE(Savings)
 using Content.Client.UserInterface.Controls;
 using Content.Shared._Mono.CCVar;
 using Content.Shared._NF.Bank;
@@ -43,13 +44,13 @@ public sealed partial class BankATMMenu : FancyWindow
 
     private void InitializeSavings()
     {
-        SetSize = MinSize = new Vector2(300, 470);
+        SetSize = MinSize = new Vector2(300, 500);
         ToSavingsButton.OnPressed += _ => RequestSavingsTransfer(true);
         FromSavingsButton.OnPressed += _ => RequestSavingsTransfer(false);
 
         if (IoCManager.Resolve<IPrototypeManager>().TryIndex(WGSavingsInterestPrototype.Default, out var interest))
         {
-            InterestLabel.SetMessage(Loc.GetString("wg-savings-atm-interest",
+            InterestLabel.SetMarkup(Loc.GetString("wg-savings-atm-interest",
                 ("rate", interest.Rate * 100),
                 ("limit", BankSystemExtensions.ToSpesoString(interest.MaxBalance)),
                 ("max", BankSystemExtensions.ToSpesoString(interest.InterestOn(interest.BalanceCap)))));

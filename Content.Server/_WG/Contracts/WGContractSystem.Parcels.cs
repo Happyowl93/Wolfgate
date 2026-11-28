@@ -4,6 +4,7 @@ using Content.Shared.Interaction;
 using Content.Shared.Lock;
 using Content.Shared.Mind.Components;
 using Content.Shared.Mobs.Components;
+using Content.Shared.Popups;
 using Content.Shared.Stacks;
 using Content.Shared.Storage;
 using Content.Server.Storage.Components;
@@ -164,10 +165,14 @@ public sealed partial class WGContractSystem
             : Array.Empty<EntityUid>();
     }
 
-    /// <summary>Hands a new parcel to whoever took the contract, if they have a free hand; else it stays where it was left.</summary>
+    /// <summary>
+    /// Hands a new parcel to whoever took the contract, if they have a free hand; else it stays where it was left and
+    /// they are told so.
+    /// </summary>
     private void HandParcel(EntityUid parcel, EntityUid mob)
     {
-        _hands.TryPickupAnyHand(mob, parcel, checkActionBlocker: false);
+        if (!_hands.TryPickupAnyHand(mob, parcel, checkActionBlocker: false) && !_hands.TryGetEmptyHand(mob, out _))
+            _popup.PopupEntity(Loc.GetString("wg-contract-parcel-hands-full"), parcel, mob, PopupType.Medium);
     }
 
     /// <summary>A parcel whose contract fell through gives its goods back where it is: into the bag it sits in, else the floor.</summary>

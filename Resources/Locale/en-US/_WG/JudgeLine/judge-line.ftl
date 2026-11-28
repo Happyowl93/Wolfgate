@@ -42,6 +42,7 @@ wg-judgeline-status-inbound = The judge ship is out of FTL and closing on you.
 wg-judgeline-status-on-scene = The judges are on scene.
 wg-judgeline-status-switched = The judges found a different emergency and are dealing with it: {$kind}.
 wg-judgeline-status-aboard = You're aboard. The judges are taking you to {$station}.
+wg-judgeline-status-not-aboard = You're not aboard yet. The judges are coming back for you.
 wg-judgeline-status-diverted = {$refused} won't take the judge ship. Heading to {$station} instead.
 wg-judgeline-status-hauled = The judges pulled you aboard.
 wg-judgeline-status-disembark = Docked. Please get off the judge ship.

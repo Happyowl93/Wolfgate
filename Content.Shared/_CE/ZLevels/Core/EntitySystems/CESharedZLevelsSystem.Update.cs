@@ -142,7 +142,8 @@ public abstract partial class CESharedZLevelsSystem
 
         if (zPhysicsComponent.LocalPosition >= 1)
         {
-            if (HasTileAbove(entity) || WgSealedAbove((entity.Owner, zPhysicsComponent))) // WOLFGATE(Caverns): ground over a cavern is a ceiling even where it isn't loaded
+            if (HasTileAbove(entity) || WgSealedAbove((entity.Owner, zPhysicsComponent)) // WOLFGATE(Caverns): ground over a cavern is a ceiling even where it isn't loaded
+                || WgRoofedAbove(entity.Owner)) // WOLFGATE(Planets): a landed vessel's roof is a ceiling, so flyers can't rise out through it
             {
                 if (zPhysicsComponent.Velocity >= ImpactVelocityLimit)
                 {

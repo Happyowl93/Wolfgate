@@ -148,6 +148,7 @@ borg-bound AI, the overwatch view and the chassis company.
 
 ### Localization
 
+- [`Resources/Locale/en-US/_WG/Cyborgs/emotes.ftl`](../../../Resources/Locale/en-US/_WG/Cyborgs/emotes.ftl)
 - [`Resources/Locale/en-US/_WG/Cyborgs/power.ftl`](../../../Resources/Locale/en-US/_WG/Cyborgs/power.ftl)
 - [`Resources/Locale/en-US/_WG/Cyborgs/viper_group.ftl`](../../../Resources/Locale/en-US/_WG/Cyborgs/viper_group.ftl)
 
@@ -168,6 +169,7 @@ borg-bound AI, the overwatch view and the chassis company.
 - [`Content.Server/Silicons/Borgs/BorgSystem.cs`](../../Silicons/Borgs/BorgSystem.cs)
   - the charge changes every tick with the headlight on
   - an empty cell raises this on every failed draw
+  - a merge leftover switched on every module even without a charged cell
 - [`Content.Server/Silicons/StationAi/StationAiSystem.cs`](../../Silicons/StationAi/StationAiSystem.cs): a core whose hologram or eye was deleted no longer breaks every IC message
 - [`Content.Shared/_CorvaxNext/Silicons/Borgs/SharedAiRemoteControlSystem.cs`](../../../Content.Shared/_CorvaxNext/Silicons/Borgs/SharedAiRemoteControlSystem.cs)
   - a destroyed core leaves the AI in the borg instead of throwing on the deleted brain

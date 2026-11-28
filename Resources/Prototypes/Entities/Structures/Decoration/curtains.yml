@@ -16,8 +16,9 @@
           !type:PhysShapeAabb
           bounds: "-0.49,-0.49,0.49,0.49"
         density: 100
-        mask:
-        - FullTileMask
+        # WOLFGATE: a closed curtain pushed the crates it closed on, off the grid in flight; it still blocks sight
+        # mask:
+        # - FullTileMask
         layer:
         - Opaque
   - type: Door

@@ -6,6 +6,7 @@ using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
 using Content.Shared.Item.ItemToggle;
 using Content.Shared.Item.ItemToggle.Components;
+using Content.Shared.Popups; // WOLFGATE(LiveFixes)
 using Robust.Server.GameObjects;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
@@ -24,6 +25,7 @@ public sealed partial class PlantAnalyzerSystem : EntitySystem
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
     [Dependency] private readonly UserInterfaceSystem _ui = default!;
     [Dependency] private readonly TransformSystem _transform = default!;
+    [Dependency] private SharedPopupSystem _wgPopup = default!; // WOLFGATE(LiveFixes)
 
     public override void Initialize()
     {
@@ -48,6 +50,15 @@ public sealed partial class PlantAnalyzerSystem : EntitySystem
     {
         if (args.Target is not { } target || !args.CanReach || ent.Comp.DoAfter != null || !IsPlantTarget(target))
             return;
+
+        // WOLFGATE(LiveFixes) START: growth stages can't be extracted, so say so instead of failing silently
+        if (ent.Comp.Mode == PlantAnalyzerMode.Extract && ent.Comp.Gene == PlantGeneId.GrowthStages)
+        {
+            _wgPopup.PopupEntity(Loc.GetString("wg-plant-analyzer-growth-stages-locked"), args.User, args.User);
+            args.Handled = true;
+            return;
+        }
+        // WOLFGATE END
 
         var operation = new PlantAnalyzerDoAfterEvent(ent.Comp.Mode, ent.Comp.Gene, ent.Comp.DatabankIndex);
         var delay = operation.Mode == PlantAnalyzerMode.Scan

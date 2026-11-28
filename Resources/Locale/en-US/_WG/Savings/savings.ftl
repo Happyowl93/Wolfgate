@@ -2,7 +2,7 @@
 wg-savings-atm-amount = Savings amount
 wg-savings-atm-to-savings = To savings
 wg-savings-atm-from-savings = From savings
-wg-savings-atm-interest = [color=gray]Savings are shared by all your characters, hold up to {$limit} and earn {$rate}% each round you survive, up to {$max} a round.[/color]
+wg-savings-atm-interest = [color=gray]Shared by all your characters. Holds up to {$limit} and earns {$rate}% (at most {$max}) each round you survive.[/color]
 
 # Transfers
 wg-savings-moved-to-savings = Moved {$amount} into savings.

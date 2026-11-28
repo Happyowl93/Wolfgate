@@ -86,7 +86,9 @@ states. The title mark is the `paw` glyph in `ui_icons.rsi`, tinted by the windo
 
 ## Non-modular edits
 
-- [`Content.Client/CartridgeLoader/CartridgeLoaderBoundUserInterface.cs`](../../../Content.Client/CartridgeLoader/CartridgeLoaderBoundUserInterface.cs): expose the hosted cartridge to the PDA shell
+- [`Content.Client/CartridgeLoader/CartridgeLoaderBoundUserInterface.cs`](../../../Content.Client/CartridgeLoader/CartridgeLoaderBoundUserInterface.cs)
+  - expose the hosted cartridge to the PDA shell
+  - setting the same program up again built a fresh fragment the screen never showed, so
 - [`Content.Client/PDA/PdaBoundUserInterface.cs`](../../../Content.Client/PDA/PdaBoundUserInterface.cs)
   - TGUI-style shell
   - program notification toggle

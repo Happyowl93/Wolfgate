@@ -97,6 +97,7 @@
     interfaces:
       enum.WGPoolUiKey.Key:
         type: PoolBoundUserInterface
+        interactionRange: 2.5
 
 - type: entity
   parent: BaseStructure

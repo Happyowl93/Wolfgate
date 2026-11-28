@@ -288,6 +288,7 @@ it back up to Okay after any drain, a Kelotane overdose included, before their d
 - [`Content.Shared/_Impstation/Thaven/ThavenMoodPrototype.cs`](../../../Content.Shared/_Impstation/Thaven/ThavenMoodPrototype.cs): Thaven moods, ported from HardLight
 - [`Content.Shared/_Impstation/Thaven/ThavenMoodsBoundComponent.cs`](../../../Content.Shared/_Impstation/Thaven/ThavenMoodsBoundComponent.cs): Thaven moods, ported from HardLight
 - [`Content.Shared/_Impstation/Thaven/ThavenMoodsEuiState.cs`](../../../Content.Shared/_Impstation/Thaven/ThavenMoodsEuiState.cs): Thaven moods, ported from HardLight
+- [`Content.Shared/_Mono/Claws/ClawsSystem.NailClippers.cs`](../../../Content.Shared/_Mono/Claws/ClawsSystem.NailClippers.cs): using a multi-tool in hand switches its mode instead of clipping your own claws
 - [`Content.Shared/_Shitmed/Body/Systems/SharedBodySystem.PartAppearance.cs`](../../../Content.Shared/_Shitmed/Body/Systems/SharedBodySystem.PartAppearance.cs): chassis parts sit in their own category
 - [`Content.Shared/_Starlight/Actions/Stasis/SharedStasisFrozenSystem.cs`](../../../Content.Shared/_Starlight/Actions/Stasis/SharedStasisFrozenSystem.cs): Avali stasis, ported from HardLight
 - [`Content.Shared/_Starlight/Actions/Stasis/SharedStasisSystem.cs`](../../../Content.Shared/_Starlight/Actions/Stasis/SharedStasisSystem.cs): Avali stasis, ported from HardLight
@@ -457,6 +458,9 @@ it back up to Okay after any drain, a Kelotane overdose included, before their d
 - [`Resources/Prototypes/_DV/Entities/Mobs/Species/feroxi.yml`](../../../Resources/Prototypes/_DV/Entities/Mobs/Species/feroxi.yml)
   - was 0.2; Feroxi never get thirsty, so they never dry out either
   - no drain, a Kelotane overdose included, makes a Feroxi thirsty
+- [`Resources/Prototypes/_DV/Entities/Mobs/Species/harpy.yml`](../../../Resources/Prototypes/_DV/Entities/Mobs/Species/harpy.yml)
+  - moved above Hair, as on the in-game harpy
+  - horns draw over hair in the character editor
 - [`Resources/Prototypes/_DV/Entities/Mobs/Species/rodentia.yml`](../../../Resources/Prototypes/_DV/Entities/Mobs/Species/rodentia.yml): HardLight balance, squeeze instead of walking under tables
 - [`Resources/Prototypes/_DV/Entities/Mobs/Species/skrell.yml`](../../../Resources/Prototypes/_DV/Entities/Mobs/Species/skrell.yml)
   - psionic components (InnatePsionicPowers, PsionicBonusChance) dropped - Wolfgate has no psionics system.

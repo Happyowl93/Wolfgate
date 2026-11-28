@@ -187,6 +187,7 @@ wg-contract-crate-short = The manifest is short: {$missing}.
 wg-contract-parcel-took = Took {$count}. Still needed: {$missing}.
 wg-contract-parcel-full = Took {$count}. The manifest is complete; carry the parcel onto the contractor's station.
 wg-contract-parcel-nothing = Nothing here the manifest needs. Still needed: {$missing}.
+wg-contract-parcel-hands-full = Your hands are full, so the contract parcel was left here.
 
 ## Where to go, and what to do
 

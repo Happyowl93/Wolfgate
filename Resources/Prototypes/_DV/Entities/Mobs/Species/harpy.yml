@@ -237,7 +237,7 @@
     - map: [ "enum.HumanoidVisualLayers.TailOversuit" ] # WOLFGATE(Genitals): split tail layers ported from HardLight/Floof
     - map: [ "enum.HumanoidVisualLayers.FacialHair" ]
     - map: [ "enum.HumanoidVisualLayers.HeadSide" ]
-    - map: [ "enum.HumanoidVisualLayers.HeadTop" ]
+    # - map: [ "enum.HumanoidVisualLayers.HeadTop" ] # WOLFGATE(Species): moved above Hair, as on the in-game harpy
     - map: [ "enum.HumanoidVisualLayers.Tail" ]
     - map: [ "helmetcover" ]
     - map: [ "helmetattachment" ]
@@ -249,6 +249,7 @@
       visible: false
     - map: [ "enum.HumanoidVisualLayers.RArmExtension" ] # Frontier
     - map: [ "enum.HumanoidVisualLayers.Hair" ]
+    - map: [ "enum.HumanoidVisualLayers.HeadTop" ] # WOLFGATE(Species): horns draw over hair in the character editor
     - map: [ "mask" ]
     - map: [ "head" ]
 

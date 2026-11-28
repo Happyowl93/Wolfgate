@@ -101,8 +101,20 @@ public sealed partial class RespawnSystem : EntitySystem
             return;
 
         var respawnData = GetRespawnData(session.UserId);
+        // WOLFGATE(Respawn) START: dying again while a death's timer runs, as a reviver implant loops, doesn't restart it
+        // Only a timer this method set counts, so a shorter cryosleep timer is never carried over to a death.
+        if (_wgDeathDeadlines.TryGetValue(session.UserId, out var deadline)
+            && deadline == respawnData.RespawnTime
+            && deadline > _timing.CurTime)
+            return;
+        // WOLFGATE END
+
         SetRespawnTime(session.UserId, ref respawnData, _timing.CurTime + TimeSpan.FromSeconds(_respawnTime));
+        _wgDeathDeadlines[session.UserId] = respawnData.RespawnTime; // WOLFGATE(Respawn)
     }
+
+    // WOLFGATE(Respawn): the respawn time each player's last death set
+    private readonly Dictionary<NetUserId, TimeSpan> _wgDeathDeadlines = new();
 
     private void OnMindRemoved(EntityUid entity, MindContainerComponent _, MindRemovedMessage e)
     {
@@ -191,6 +203,7 @@ public sealed partial class RespawnSystem : EntitySystem
     {
         data.RespawnTime = nextSpawn;
         data.LastCryoSleep = cryoTime;
+        _wgDeathDeadlines.Remove(user); // WOLFGATE(Respawn): only a death records itself again, after setting its timer
 
         if (_player.TryGetSessionById(user, out var session)) // Frontier: try first, if no valid session, nothing to do.
             RaiseNetworkEvent(new RespawnResetEvent(nextSpawn), session);

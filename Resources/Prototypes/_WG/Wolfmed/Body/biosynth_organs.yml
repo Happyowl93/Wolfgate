@@ -1,0 +1,23 @@
+# Bio-synthetic kidneys and stomach for the medical biofabricator, beside Shitmed's heart, liver, lungs and eyes.
+
+- type: entity
+  parent: OrganHumanKidneys
+  id: WGBioSynthKidneys
+
+- type: entity
+  parent: OrganHumanStomach
+  id: WGBioSynthStomach
+
+- type: latheRecipe
+  id: WGSynthKidneys
+  result: WGBioSynthKidneys
+  completetime: 10
+  materials:
+    Biomass: 7
+
+- type: latheRecipe
+  id: WGSynthStomach
+  result: WGBioSynthStomach
+  completetime: 10
+  materials:
+    Biomass: 7

@@ -271,7 +271,7 @@
   components:
   - type: InstantAction
     checkCanInteract: false
-    checkConsciousness: false
+    checkConsciousness: true # WOLFGATE: no falling asleep while critical or dead
     icon: { sprite: Clothing/Head/Hats/pyjamasyndicatered.rsi, state: icon }
     event: !type:SleepActionEvent
 

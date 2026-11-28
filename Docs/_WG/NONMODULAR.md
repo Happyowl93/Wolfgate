@@ -133,6 +133,9 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
   - an instant do-after has already ended, so nothing would ever delete the effect
 - [`Content.Server/_Mono/AmmoLoader/AmmoLoaderSystem.cs`](../../Content.Server/_Mono/AmmoLoader/AmmoLoaderSystem.cs): an infinite magazine reports no rounds, which hid it and blocked unloading
 - [`Content.Server/_Mono/Botany/PlantAnalyzer/PlantAnalyzerSystem.cs`](../../Content.Server/_Mono/Botany/PlantAnalyzer/PlantAnalyzerSystem.cs): was 0.01, so the slightest drift silently cancelled the scan
+- [`Content.Server/_Mono/Botany/PlantAnalyzer/PlantAnalyzerSystem.Genes.cs`](../../Content.Server/_Mono/Botany/PlantAnalyzer/PlantAnalyzerSystem.Genes.cs)
+  - growth stages belong to the plant's sprite, so another plant's count asked for missing frames
+  - a banked growth stage gene no longer changes the plant
 - [`Content.Server/_Mono/Detection/ThermalSignatureSystem.cs`](../../Content.Server/_Mono/Detection/ThermalSignatureSystem.cs): one bad source must not poison a grid's heat for good
 - [`Content.Server/_Mono/FireControl/FireControlRotateComponent.cs`](../../Content.Server/_Mono/FireControl/FireControlRotateComponent.cs): restore the licence header removed by Kill Spdx
 - [`Content.Server/_Mono/FireControl/FireControlSystem.cs`](../../Content.Server/_Mono/FireControl/FireControlSystem.cs): restore the licence header removed by Kill Spdx
@@ -355,6 +358,7 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
   - a switched-off or folded shield blocks nothing
   - the attempt repeats every tick while the trigger is held
 - [`Content.Shared/CCVar/CCVars.Game.cs`](../../Content.Shared/CCVar/CCVars.Game.cs): off, froze round end for 45 s at 90 players
+- [`Content.Shared/Chemistry/EntitySystems/SharedSolutionContainerSystem.cs`](../../Content.Shared/Chemistry/EntitySystems/SharedSolutionContainerSystem.cs): an emptied glass drops its last drink's sprite
 - [`Content.Shared/Clothing/EntitySystems/HideLayerClothingSystem.cs`](../../Content.Shared/Clothing/EntitySystems/HideLayerClothingSystem.cs)
   - a modsuit seal adds and removes this on a worn helmet, which raises no equip events
   - layers follow the component while the clothing is worn
@@ -363,6 +367,9 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
   - whatever the piece replaced goes back on, instead of staying shut inside the piece
   - a suit deleted along with its wearer can't take the piece back
   - another suit's piece goes back to its suit, and what it covered is kept under this one
+- [`Content.Shared/Clothing/MagbootsSystem.cs`](../../Content.Shared/Clothing/MagbootsSystem.cs)
+  - worn check for magboots
+  - only worn magboots apply, so boots toggled in hand leave no alert behind
 - [`Content.Shared/Construction/Steps/ArbitraryInsertConstructionGraphStep.cs`](../../Content.Shared/Construction/Steps/ArbitraryInsertConstructionGraphStep.cs): step names may be loc keys or plain text
 - [`Content.Shared/Damage/Systems/DamageableSystem.cs`](../../Content.Shared/Damage/Systems/DamageableSystem.cs): restore the licence header removed by Kill Spdx
 - [`Content.Shared/DisplacementMap/DisplacementData.cs`](../../Content.Shared/DisplacementMap/DisplacementData.cs): wizden#38042, the stencil one draws nothing in UI sprite views
@@ -479,6 +486,7 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
 - [`Resources/Prototypes/_Goobstation/Body/Parts/tajaran.yml`](../../Resources/Prototypes/_Goobstation/Body/Parts/tajaran.yml): 5% faster sprint than the base leg
 - [`Resources/Prototypes/_Goobstation/Damage/modifier_sets.yml`](../../Resources/Prototypes/_Goobstation/Damage/modifier_sets.yml): no extra brute damage (was 1.15), unlike felinids; heat and cold unchanged
 - [`Resources/Prototypes/_Goobstation/Entities/Clothing/Eyes/glasses.yml`](../../Resources/Prototypes/_Goobstation/Entities/Clothing/Eyes/glasses.yml): an invalid default leaves the chameleon menu empty
+- [`Resources/Prototypes/_Goobstation/Entities/Clothing/OuterClothing/hardsuits.yml`](../../Resources/Prototypes/_Goobstation/Entities/Clothing/OuterClothing/hardsuits.yml): turned in like the other PDV T3 hardsuits
 - [`Resources/Prototypes/_Goobstation/Entities/Mobs/Species/tajaran.yml`](../../Resources/Prototypes/_Goobstation/Entities/Mobs/Species/tajaran.yml)
   - full-size sprite, matching the human-size hitbox
   - claws deal only Slash, unlike felinids
@@ -580,6 +588,7 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
 - [`Resources/Prototypes/_Mono/Recipes/Lathes/Packs/universal_ship_ammo.yml`](../../Resources/Prototypes/_Mono/Recipes/Lathes/Packs/universal_ship_ammo.yml): restore the licence header removed by Kill Spdx
 - [`Resources/Prototypes/_Mono/Recipes/Lathes/turrets.yml`](../../Resources/Prototypes/_Mono/Recipes/Lathes/turrets.yml): restore the licence header removed by Kill Spdx
 - [`Resources/Prototypes/_Mono/Research/shuttlecomps.yml`](../../Resources/Prototypes/_Mono/Research/shuttlecomps.yml): restore the licence header removed by Kill Spdx
+- [`Resources/Prototypes/_Mono/Roles/Jobs/Crocus/infantry_tsf.yml`](../../Resources/Prototypes/_Mono/Roles/Jobs/Crocus/infantry_tsf.yml): AllAccess gave infantry Captain, HoS and Command access but not Tsfmc, so their own garrison stayed shut
 - [`Resources/Prototypes/_Mono/Roles/Jobs/Medical/medic.yml`](../../Resources/Prototypes/_Mono/Roles/Jobs/Medical/medic.yml): responders start with advanced jaws of life
 - [`Resources/Prototypes/_Mono/Roles/Jobs/TSFMC/civilian.yml`](../../Resources/Prototypes/_Mono/Roles/Jobs/TSFMC/civilian.yml): TSF contractors speak and understand Sol Common
 - [`Resources/Prototypes/_Mono/Shipyard/PDV/europa.yml`](../../Resources/Prototypes/_Mono/Shipyard/PDV/europa.yml): Europa refit fills its four empty hardpoints with GS-001 Equinox autocannons.
@@ -605,6 +614,7 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
 - [`Resources/Prototypes/_NF/Guidebook/rules.yml`](../../Resources/Prototypes/_NF/Guidebook/rules.yml): Frontier ruleset is unused, only MonolithRuleset is shown in-game and on Symphony
 - [`Resources/Prototypes/_NF/Recipes/Lathes/misc.yml`](../../Resources/Prototypes/_NF/Recipes/Lathes/misc.yml): Add whistle to mercfab and vend
 - [`Resources/Prototypes/_NF/Recipes/Lathes/Packs/Deprecated/mercenary_techfab.yml`](../../Resources/Prototypes/_NF/Recipes/Lathes/Packs/Deprecated/mercenary_techfab.yml): Add whistle to mercfab and vend
+- [`Resources/Prototypes/_NF/Roles/Jobs/Civilian/mercenary.yml`](../../Resources/Prototypes/_NF/Roles/Jobs/Civilian/mercenary.yml): round-setup scenarios offer Mercenary, so its loadout must be settable (Mono had it unselectable)
 - [`Resources/Prototypes/_NF/Roles/Jobs/Medical/doc.yml`](../../Resources/Prototypes/_NF/Roles/Jobs/Medical/doc.yml)
   - the Medical department has no roles since Monolith#4807, so count medic time instead
   - the Director of Care boards ships to rescue people like the responders
@@ -615,6 +625,7 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
 - [`Resources/Prototypes/_Shitmed/Body/Organs/cybernetic.yml`](../../Resources/Prototypes/_Shitmed/Body/Organs/cybernetic.yml): priced as a printed part, not the 4500 harvested organ it inherits
 - [`Resources/Prototypes/_Shitmed/Entities/Objects/Devices/Circuitboards/Machine/production.yml`](../../Resources/Prototypes/_Shitmed/Entities/Objects/Devices/Circuitboards/Machine/production.yml): a machine part under stackRequirements can't be inserted; the frame reads parts from requirements
 - [`Resources/Prototypes/_StarLight/Entities/Mobs/Species/felionoid.yml`](../../Resources/Prototypes/_StarLight/Entities/Mobs/Species/felionoid.yml): OwO accent removed
+- [`Resources/Prototypes/Actions/types.yml`](../../Resources/Prototypes/Actions/types.yml): no falling asleep while critical or dead
 - [`Resources/Prototypes/Atmospherics/gases.yml`](../../Resources/Prototypes/Atmospherics/gases.yml): a tritium is worth the same as frezon or as nitrium, 10 -> 5 (Mono 1\<10)
 - [`Resources/Prototypes/Catalog/Cargo/cargo_atmospherics.yml`](../../Resources/Prototypes/Catalog/Cargo/cargo_atmospherics.yml): bought plasma costs what it is worth as tritium feedstock, 7000 -> 45000 (Mono - Gas sell prices)
 - [`Resources/Prototypes/Catalog/Fills/Crates/engines.yml`](../../Resources/Prototypes/Catalog/Fills/Crates/engines.yml): the IRE rebrand missed this crate
@@ -634,6 +645,8 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
   - vend price for the EngiVend, instead of its scrap value
 - [`Resources/Prototypes/Entities/Mobs/base.yml`](../../Resources/Prototypes/Entities/Mobs/base.yml): restore the licence header removed by Kill Spdx
 - [`Resources/Prototypes/Entities/Objects/Consumable/Food/Baked/cake.yml`](../../Resources/Prototypes/Entities/Objects/Consumable/Food/Baked/cake.yml): OwO accent removed
+- [`Resources/Prototypes/Entities/Objects/Devices/chameleon_projector.yml`](../../Resources/Prototypes/Entities/Objects/Devices/chameleon_projector.yml): a spent medipen's disguise draws nothing, so its user turns invisible
+- [`Resources/Prototypes/Entities/Objects/Devices/door_remote.yml`](../../Resources/Prototypes/Entities/Objects/Devices/door_remote.yml): the Overseer's remote opens the Caelestinus command doors it is issued for
 - [`Resources/Prototypes/Entities/Objects/Devices/pda.yml`](../../Resources/Prototypes/Entities/Objects/Devices/pda.yml): E and Z open the PDA instead of searching for a player to control it
 - [`Resources/Prototypes/Entities/Objects/Misc/identification_cards.yml`](../../Resources/Prototypes/Entities/Objects/Misc/identification_cards.yml): the universal card opens the Underground Black Market too
 - [`Resources/Prototypes/Entities/Objects/Misc/paper.yml`](../../Resources/Prototypes/Entities/Objects/Misc/paper.yml): leave the use for the paper's own window to open
@@ -643,6 +656,7 @@ Standalone edits outside `_WG` that serve no module: files with an untagged `WOL
   - gun tuning copied from BaseWeaponBallisticTurret (the angles are Mono's).
   - fire modes copied from BaseWeaponBallisticTurret.
 - [`Resources/Prototypes/Entities/Structures/catwalk.yml`](../../Resources/Prototypes/Entities/Structures/catwalk.yml): restore the licence header removed by Kill Spdx
+- [`Resources/Prototypes/Entities/Structures/Decoration/curtains.yml`](../../Resources/Prototypes/Entities/Structures/Decoration/curtains.yml): a closed curtain pushed the crates it closed on, off the grid in flight; it still blocks sight
 - [`Resources/Prototypes/Entities/Structures/Lighting/base_lighting.yml`](../../Resources/Prototypes/Entities/Structures/Lighting/base_lighting.yml): draw over posters at the same depth instead of flickering with them
 - [`Resources/Prototypes/Entities/Structures/Lighting/strobe_lighting.yml`](../../Resources/Prototypes/Entities/Structures/Lighting/strobe_lighting.yml): draw over posters at the same depth instead of flickering with them
 - [`Resources/Prototypes/Entities/Structures/Machines/chemistry.yml`](../../Resources/Prototypes/Entities/Structures/Machines/chemistry.yml): a tabletop machine's fixture, so it anchors on tables and counters like the grinder

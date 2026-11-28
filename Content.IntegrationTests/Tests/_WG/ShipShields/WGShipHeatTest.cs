@@ -547,7 +547,9 @@ public sealed class WGShipHeatTest
             var ev = new GunShotEvent(user, ammo, entities.GetComponent<TransformComponent>(gun).Coordinates);
             entities.EventBus.RaiseLocalEvent(gun, ref ev);
             var hull = entities.GetComponent<WGShipHeatComponent>(map.Grid.Owner);
-            Assert.That(hull.Heat, Is.EqualTo((hit + explosive.MaxIntensity * perIntensity) * hull.FireHeat).Within(0.01f),
+            // The Hydra sets its own share of a shot's damage; the blast is still counted at its peak tile.
+            var share = entities.GetComponentOrNull<WGShipGunHeatComponent>(gun)?.DamageShare ?? hull.FireHeat;
+            Assert.That(hull.Heat, Is.EqualTo((hit + explosive.MaxIntensity * perIntensity) * share).Within(0.01f),
                 "A shell's blast heats its ship at the damage of its peak tile, not its whole spread.");
         });
         await pair.CleanReturnAsync();

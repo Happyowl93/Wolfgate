@@ -63,7 +63,9 @@ public sealed partial class MedicalPatchSystem : EntitySystem
 
     private void OnStuck(Entity<MedicalPatchComponent> patch, ref EntityStuckEvent args)
     {
-        EnsureComp<UnremoveableComponent>(patch);
+        // WOLFGATE(Wolfmed) START: Unremoveable also blocked the sticker container, so a patch could never come off
+        // EnsureComp<UnremoveableComponent>(patch);
+        // WOLFGATE END
         if (!_solutions.TryGetSolution(patch.Owner, patch.Comp.SolutionName, out _, out var solution))
             return;
         _adminLog.Add(LogType.ForceFeed,

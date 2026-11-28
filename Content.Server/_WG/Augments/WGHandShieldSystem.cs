@@ -103,6 +103,16 @@ public sealed class WGHandShieldSystem : SharedWGHandShieldSystem
         return true;
     }
 
+    /// <summary>Whether a raised shield faces an attacker, so a blow from them, and what it injects, is stopped.</summary>
+    public bool ShieldsFrom(EntityUid body, EntityUid attacker)
+    {
+        if (attacker == body || !TryComp<WGHandShieldUserComponent>(body, out var user))
+            return false;
+
+        var from = _transform.GetWorldPosition(attacker) - _transform.GetWorldPosition(body);
+        return Covers((body, user), from, out _);
+    }
+
     private bool IsBlow(EntityUid body, EntityUid? origin, EntityUid? tool, [NotNullWhen(true)] out EntityUid? attacker)
     {
         attacker = origin;

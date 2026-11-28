@@ -2,6 +2,7 @@ using Content.Shared._Mono.Claws.Components;
 using Content.Shared.DoAfter;
 using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
+using Content.Shared.Tools.Components; // WOLFGATE(Species)
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._Mono.Claws;
@@ -18,6 +19,10 @@ public abstract partial class SharedClawsSystem
     private void OnUse(Entity<NailClipperComponent> ent, ref UseInHandEvent args)
     {
         if (args.Handled)
+            return;
+
+        // WOLFGATE(Species): using a multi-tool in hand switches its mode instead of clipping your own claws
+        if (HasComp<MultipleToolComponent>(ent))
             return;
 
         args.Handled = TryClipNails(ent, ent, args.User);

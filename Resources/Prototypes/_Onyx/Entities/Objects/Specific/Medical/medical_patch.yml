@@ -87,6 +87,9 @@
 
 - type: construction
   id: MedicalPatchMakeshift
+  # WOLFGATE(Wolfmed): the recipe showed blank in the crafting menu
+  name: makeshift patch
+  description: A cloth patch that slowly feeds whatever it holds to whoever wears it.
   graph: MedicalPatchMakeshift
   icon: # WOLFGATE(Wolfmed): Wolfgate's construction prototype requires an icon; Onyx's linter did not
     sprite: _Onyx/Objects/Medical/medical_patch.rsi
@@ -112,6 +115,9 @@
 
 - type: construction
   id: SilkPatchMakeshift
+  # WOLFGATE(Wolfmed): the recipe showed blank in the crafting menu
+  name: makeshift silk patch
+  description: A makeshift patch woven from spider silk.
   graph: SilkPatchMakeshift
   icon: # WOLFGATE(Wolfmed): Wolfgate's construction prototype requires an icon; Onyx's linter did not
     sprite: _Onyx/Objects/Medical/medical_patch.rsi

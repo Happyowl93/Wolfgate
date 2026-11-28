@@ -15,6 +15,27 @@
     # - 0,0,3,1
     - 0,0,6,1
     # WOLFGATE END
+    # WOLFGATE(Wolfmed) START: medical gear only, so a kit is no longer a 7x2 pouch for anything small
+    whitelist:
+      components:
+      - Healing
+      - Hypospray
+      - Injector
+      - Pill
+      - Tourniquet
+      - WolfmedSplint
+      - WolfmedSkinGraft
+      - MedicalPatch
+      - HealthAnalyzer
+      - BreathMask
+      tags:
+      - PillCanister
+      - Bottle
+      - Syringe
+      - Dropper
+      - Spray
+      - GasTank
+    # WOLFGATE END
   - type: Item
     size: Normal # Frontier: Large<Normal
     shape: # Frontier
@@ -109,6 +130,27 @@
     # WOLFGATE(Wolfmed) START: playtest 5: 7x2 like the other kits, room for a tourniquet, a splint and an epinephrine pen.
     # - 0,0,3,1
     - 0,0,6,1
+    # WOLFGATE END
+    # WOLFGATE(Wolfmed) START: medical gear only, so a kit is no longer a 7x2 pouch for anything small
+    whitelist:
+      components:
+      - Healing
+      - Hypospray
+      - Injector
+      - Pill
+      - Tourniquet
+      - WolfmedSplint
+      - WolfmedSkinGraft
+      - MedicalPatch
+      - HealthAnalyzer
+      - BreathMask
+      tags:
+      - PillCanister
+      - Bottle
+      - Syringe
+      - Dropper
+      - Spray
+      - GasTank
     # WOLFGATE END
   - type: Item
     size: Normal

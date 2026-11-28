@@ -30,6 +30,7 @@
   - type: Access
     groups:
     - Command
+    - Caelestinus # WOLFGATE: the Overseer's remote opens the Caelestinus command doors it is issued for
 
 - type: entity
   parent: DoorRemoteDefault

@@ -135,6 +135,7 @@ Skipped ("dirty-disposed").
 - [`Content.Server/_WG/Wolfmed/Surgery/SurgerySystem.Autodoc.cs`](Surgery/SurgerySystem.Autodoc.cs)
 - [`Content.Server/_WG/Wolfmed/Surgery/WolfmedChassisRepairSurgerySystem.cs`](Surgery/WolfmedChassisRepairSurgerySystem.cs)
 - [`Content.Server/_WG/Wolfmed/Surgery/WolfmedWoundSurgerySystem.cs`](Surgery/WolfmedWoundSurgerySystem.cs)
+- [`Content.Server/_WG/Wolfmed/SurgerySystem.Numb.cs`](SurgerySystem.Numb.cs)
 - [`Content.Server/_WG/Wolfmed/Targeting/WolfmedNpcAimSystem.cs`](Targeting/WolfmedNpcAimSystem.cs)
 - [`Content.Server/_WG/Wolfmed/WolfmedBodyPartLifecycleSystem.cs`](WolfmedBodyPartLifecycleSystem.cs)
 - [`Content.Server/_WG/Wolfmed/Wounds/WolfmedCauteryAnnounceComponent.cs`](Wounds/WolfmedCauteryAnnounceComponent.cs)
@@ -519,6 +520,7 @@ Skipped ("dirty-disposed").
 - [`Resources/Prototypes/_WG/Wolfmed/Autodoc/programs.yml`](../../../Resources/Prototypes/_WG/Wolfmed/Autodoc/programs.yml)
 - [`Resources/Prototypes/_WG/Wolfmed/Autodoc/triage.yml`](../../../Resources/Prototypes/_WG/Wolfmed/Autodoc/triage.yml)
 - [`Resources/Prototypes/_WG/Wolfmed/Autodoc/voice.yml`](../../../Resources/Prototypes/_WG/Wolfmed/Autodoc/voice.yml)
+- [`Resources/Prototypes/_WG/Wolfmed/Body/biosynth_organs.yml`](../../../Resources/Prototypes/_WG/Wolfmed/Body/biosynth_organs.yml)
 - [`Resources/Prototypes/_WG/Wolfmed/Body/fractures.yml`](../../../Resources/Prototypes/_WG/Wolfmed/Body/fractures.yml)
 - [`Resources/Prototypes/_WG/Wolfmed/Body/organs.yml`](../../../Resources/Prototypes/_WG/Wolfmed/Body/organs.yml)
 - [`Resources/Prototypes/_WG/Wolfmed/Body/parts.yml`](../../../Resources/Prototypes/_WG/Wolfmed/Body/parts.yml)
@@ -599,6 +601,7 @@ Skipped ("dirty-disposed").
 - [`Resources/Locale/en-US/_WG/Wolfmed/autodoc-ui.ftl`](../../../Resources/Locale/en-US/_WG/Wolfmed/autodoc-ui.ftl)
 - [`Resources/Locale/en-US/_WG/Wolfmed/autodoc-voice.ftl`](../../../Resources/Locale/en-US/_WG/Wolfmed/autodoc-voice.ftl)
 - [`Resources/Locale/en-US/_WG/Wolfmed/autodoc.ftl`](../../../Resources/Locale/en-US/_WG/Wolfmed/autodoc.ftl)
+- [`Resources/Locale/en-US/_WG/Wolfmed/biosynth-organs.ftl`](../../../Resources/Locale/en-US/_WG/Wolfmed/biosynth-organs.ftl)
 - [`Resources/Locale/en-US/_WG/Wolfmed/bob-sounds.ftl`](../../../Resources/Locale/en-US/_WG/Wolfmed/bob-sounds.ftl)
 - [`Resources/Locale/en-US/_WG/Wolfmed/burns.ftl`](../../../Resources/Locale/en-US/_WG/Wolfmed/burns.ftl)
 - [`Resources/Locale/en-US/_WG/Wolfmed/condition-emotes.ftl`](../../../Resources/Locale/en-US/_WG/Wolfmed/condition-emotes.ftl)
@@ -1126,7 +1129,9 @@ Skipped ("dirty-disposed").
   - D15, only the primary stream exists, so the CirculatoryStreamComponent bookkeeping
   - P5-2/P5-D3. Wolfgate has exactly one blood solution per body (server-only
 - [`Content.Server/_Onyx/Medical/MedicalPatchComponent.cs`](../../_Onyx/Medical/MedicalPatchComponent.cs): ported from Onyx for Wolfmed.
-- [`Content.Server/_Onyx/Medical/MedicalPatchSystem.cs`](../../_Onyx/Medical/MedicalPatchSystem.cs): ported from Onyx for Wolfmed.
+- [`Content.Server/_Onyx/Medical/MedicalPatchSystem.cs`](../../_Onyx/Medical/MedicalPatchSystem.cs)
+  - ported from Onyx for Wolfmed.
+  - Unremoveable also blocked the sticker container, so a patch could never come off
 - [`Content.Server/_Onyx/Medical/Tourniquet/TourniquetSystem.cs`](../../_Onyx/Medical/Tourniquet/TourniquetSystem.cs)
   - D10 — Onyx's TargetingComponent registers as "Targeting", colliding with Shitmed's; use Shitmed's identical field instead
   - D10 — WoundTargetResolver replaces the absent TargetResolverSystem
@@ -1199,6 +1204,7 @@ Skipped ("dirty-disposed").
 - [`Content.Server/_Shitmed/DelayedDeath/DelayedDeathSystem.cs`](../../_Shitmed/DelayedDeath/DelayedDeathSystem.cs)
   - BRAIN
   - BRAIN: a missing heart is cardiac arrest on a wound host, not a countdown to death.
+- [`Content.Server/_Shitmed/Medical/Surgery/SurgerySystem.cs`](../../_Shitmed/Medical/Surgery/SurgerySystem.cs): a numb patient doesn't scream under the knife
 - [`Content.Server/_Starlight/Actions/Stasis/StasisSystem.cs`](../../_Starlight/Actions/Stasis/StasisSystem.cs)
   - a wound host's stasis runs in WolfmedStasisSystem
   - a wound host keeps a hit's share before it is a wound, in WolfmedStasisSystem.
@@ -1877,7 +1883,9 @@ Skipped ("dirty-disposed").
 - [`Resources/Prototypes/_Onyx/Alerts/alerts.yml`](../../../Resources/Prototypes/_Onyx/Alerts/alerts.yml): WP7: only BrokenBones is ported; ModsuitPower/Centered/HierophantBeat/DragonPower/SneakAttack/LossOfSurprise are unrelated features.
 - [`Resources/Prototypes/_Onyx/Chemistry/circulatory_streams.yml`](../../../Resources/Prototypes/_Onyx/Chemistry/circulatory_streams.yml): ported from Onyx for Wolfmed.
 - [`Resources/Prototypes/_Onyx/Entities/categories.yml`](../../../Resources/Prototypes/_Onyx/Entities/categories.yml): only the StatusEffects entityCategory from Onyx's Resources/Prototypes/Entities/categories.yml.
-- [`Resources/Prototypes/_Onyx/Entities/Objects/Specific/Medical/medical_patch.yml`](../../../Resources/Prototypes/_Onyx/Entities/Objects/Specific/Medical/medical_patch.yml): Wolfgate's construction prototype requires an icon; Onyx's linter did not
+- [`Resources/Prototypes/_Onyx/Entities/Objects/Specific/Medical/medical_patch.yml`](../../../Resources/Prototypes/_Onyx/Entities/Objects/Specific/Medical/medical_patch.yml)
+  - the recipe showed blank in the crafting menu
+  - Wolfgate's construction prototype requires an icon; Onyx's linter did not
 - [`Resources/Prototypes/_Onyx/Reagents/Medicine/medicine.yml`](../../../Resources/Prototypes/_Onyx/Reagents/Medicine/medicine.yml)
   - vendored from ONYX Resources/Prototypes/_Onyx/Reagents/Medicine/medicine.yml (pin 2f5bab9),
   - every `Bloodstream:` metabolism group header is translated to `Medicine:` — Wolfgate has no
@@ -2110,6 +2118,7 @@ Skipped ("dirty-disposed").
 - [`Resources/Prototypes/Entities/Objects/Specific/Medical/healthanalyzer.yml`](../../../Resources/Prototypes/Entities/Objects/Specific/Medical/healthanalyzer.yml): health analyzers no longer need a power cell. The slot stays so existing fills and maps load;
 - [`Resources/Prototypes/Entities/Objects/Specific/Medical/medkits.yml`](../../../Resources/Prototypes/Entities/Objects/Specific/Medical/medkits.yml)
   - ITEMS, playtest 5: 7x2, room for the tourniquet, splint, suture and painkillers.
+  - medical gear only, so a kit is no longer a 7x2 pouch for anything small
   - playtest 5: 7x2 like the other kits, room for a tourniquet, a splint and an epinephrine pen.
 - [`Resources/Prototypes/Entities/Objects/Specific/Research/anomaly.yml`](../../../Resources/Prototypes/Entities/Objects/Specific/Research/anomaly.yml): a blunt weapon can execute, with bludgeoning lines in place of the throat-slitting ones
 - [`Resources/Prototypes/Entities/Objects/Specific/Robotics/borg_modules.yml`](../../../Resources/Prototypes/Entities/Objects/Specific/Robotics/borg_modules.yml)
@@ -2174,6 +2183,7 @@ Skipped ("dirty-disposed").
   - playtest 5: the plain suture prints from the start, no research.
   - ITEMS: the empty synthetic repair kit beside the other empty kits.
   - AUTODOC: researched now, in NFMedicalBoards
+  - the kidneys and stomach were missing from the biofabricator
 - [`Resources/Prototypes/Research/civilianservices.yml`](../../../Resources/Prototypes/Research/civilianservices.yml): AUTODOC: the program disks moved to High-End Surgery with the pod
 - [`Resources/Prototypes/SoundCollections/gasp.yml`](../../../Resources/Prototypes/SoundCollections/gasp.yml): the dying gasp is Bobstation's (owner's pick, playtest 4); organic bodies only
 - [`Resources/Prototypes/SoundCollections/gun_impacts.yml`](../../../Resources/Prototypes/SoundCollections/gun_impacts.yml): playtest 4, the owner's Bob flesh impacts replace the Skyrat ones (WOLFGATE(Weapons))

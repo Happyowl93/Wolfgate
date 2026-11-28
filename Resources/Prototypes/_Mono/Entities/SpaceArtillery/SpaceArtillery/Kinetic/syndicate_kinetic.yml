@@ -162,6 +162,11 @@
   parent: BallisticArtillery
   description: A main cannonade of syndicate origin, the hydra is a monstrous tri-barreled battery of 130-millimeter pain, designed to shatter corpations' toughest vessels. Loads with a similar mechanism as the anaconda handgun.
   components:
+  # WOLFGATE(ShipShields) START: its HE shells carry little damage, so a burst heated a quarter of a Cyrexa cycle
+  # At 1.05 of each shot's damage a three-round burst lands just above the Cyrexa's two-round cycle.
+  - type: WGShipGunHeat
+    damageShare: 1.05
+  # WOLFGATE END
   - type: StaticPrice
     price: 20000
   - type: Sprite

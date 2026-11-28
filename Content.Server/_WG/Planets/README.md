@@ -856,6 +856,7 @@ left dirty, and built again when someone comes near or a path is asked for acros
 - [`Content.Shared/_CE/ZLevels/Core/EntitySystems/CESharedZLevelsSystem.Update.cs`](../../../Content.Shared/_CE/ZLevels/Core/EntitySystems/CESharedZLevelsSystem.Update.cs)
   - z-motion carried off the z-network is cleared, not kept for the next planet.
   - a ghost never sticks to stairs or stays between levels
+  - a landed vessel's roof is a ceiling, so flyers can't rise out through it
   - a thrown body stays InAir until the throw lands, or friction eats a jump at once.
 - [`Content.Shared/_CE/ZLevels/Core/EntitySystems/CESharedZLevelsSystem.WallCollision.cs`](../../../Content.Shared/_CE/ZLevels/Core/EntitySystems/CESharedZLevelsSystem.WallCollision.cs): retain the contacted obstacle for crash ploughing.
 - [`Content.Shared/_CE/ZLevels/Flight/CESharedZFlightSystem.Controllable.cs`](../../../Content.Shared/_CE/ZLevels/Flight/CESharedZFlightSystem.Controllable.cs): a refused take-off (orbit) must not leave the preventive visuals running

@@ -6,6 +6,7 @@ using Content.Server._WG.RoundSetup;
 using Content.Shared.Mobs.Components;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared._WG.Companies;
+using Content.Shared._WG.Prototypes;
 using Content.Shared._WG.RoundSetup;
 using Content.Shared.Preferences;
 using Robust.Shared.Containers;
@@ -77,6 +78,19 @@ public sealed partial class WGCompanySystem
     private int LaunchedCount(Company company) => company.Licences.Count(licence => _launched.ContainsKey(licence.Id));
 
     private int ShipyardPrice(string vessel) => _prototypes.TryIndex<VesselPrototype>(vessel, out var prototype) ? prototype.Price : 0;
+
+    /// <summary>
+    /// A stored licence's vessel id, moved off the old WF prefix when only the renamed vessel exists, so a licence
+    /// bought before the rename still launches. A vessel that kept its WF id is left alone.
+    /// </summary>
+    private string CurrentVesselId(string vessel)
+    {
+        if (_prototypes.HasIndex<VesselPrototype>(vessel))
+            return vessel;
+
+        var renamed = WGLegacyPrototypeIds.Prefix(vessel);
+        return _prototypes.HasIndex<VesselPrototype>(renamed) ? renamed : vessel;
+    }
 
     private WGCompanyLicence[] SnapshotLicences(Company company) => company.Licences.Select(licence =>
         new WGCompanyLicence(licence.Id, licence.Vessel,

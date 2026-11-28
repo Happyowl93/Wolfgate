@@ -169,6 +169,10 @@ public sealed partial class SurgerySystem : SharedSurgerySystem
         if (HasComp<ForcedSleepingComponent>(args.Body))
             return;
 
+        // WOLFGATE(Wolfmed): a numb patient doesn't scream under the knife
+        if (WgIsNumb(args.Body))
+            return;
+
         _chat.TryEmoteWithChat(args.Body, ent.Comp.Emote);
     }
     private void OnStepSpawnComplete(Entity<SurgeryStepSpawnEffectComponent> ent, ref SurgeryStepEvent args) =>

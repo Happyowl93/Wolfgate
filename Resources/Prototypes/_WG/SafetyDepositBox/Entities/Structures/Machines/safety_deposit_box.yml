@@ -149,6 +149,13 @@
       - WeaponLauncherPanzero
       - WeaponLauncherMyoko
       - GunAttachmentQLG20 # under-barrel grenade launchers
+    - name: safety-deposit-refused-viper-hardsuits
+      prototypes:
+      # Viper Group suits carry no contraband tier; only the BROOD mk.I counts as tier 1.
+      - ClothingOuterHardsuitViperGroupStandard
+      - ClothingOuterHardsuitViperGroupMedic
+      - ClothingOuterHardsuitViperGroupJuggernaut
+      - ClothingOuterHardsuitViperGroupShield
     - name: safety-deposit-refused-bluespace-storage
       prototypes:
       - ClothingBackpackHolding # the messenger variant included

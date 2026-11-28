@@ -136,6 +136,18 @@ public sealed partial class WGDrydockSystem : EntitySystem
         return best;
     }
 
+    /// <summary>Whether any of a ship's tiles lie in the console's berth area, whatever other grids pass through it.</summary>
+    public bool HasTilesInBerth(EntityUid console, WGDrydockConsoleComponent comp, EntityUid ship)
+    {
+        if (!TryGetBerth(console, comp, out var berth) || !TryComp<MapGridComponent>(ship, out var grid)
+            || Transform(ship).MapID != Transform(berth.Grid).MapID)
+            return false;
+
+        var (stationPos, stationRot) = _transform.GetWorldPositionRotation(Transform(berth.Grid));
+        var worldArea = new Box2Rotated(berth.Area.Translated(stationPos), stationRot, stationPos);
+        return _map.GetTilesIntersecting(ship, grid, worldArea).Any();
+    }
+
     /// <summary>Whether the centre of a ship's bounds lies in the console's berth area.</summary>
     private bool CentredInBerth(EntityUid console, WGDrydockConsoleComponent comp, EntityUid ship)
     {

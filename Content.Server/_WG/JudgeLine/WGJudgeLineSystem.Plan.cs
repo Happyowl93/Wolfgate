@@ -391,6 +391,16 @@ public sealed partial class WGJudgeLineSystem
         if (call.Station is not { } dropOff)
             return aboard;
 
+        // Off the ship before it got there, as from a brush with its hull: go back for them.
+        if (!aboard && call.Docked == null && !DockedWith(ship.Grid, dropOff))
+        {
+            call.Aboard = false;
+            call.Station = null;
+            Begin(call, ship);
+            Notify(call, Loc.GetString("wg-judgeline-status-not-aboard"));
+            return true;
+        }
+
         if (!DockedWith(ship.Grid, dropOff))
         {
             // Turned away, or the order ended without a berth: try the next station.

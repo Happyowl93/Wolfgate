@@ -40,6 +40,7 @@ Lupine engine fork; see `Docs/_WG/Engine/README.md`.
 ## Non-modular edits
 
 - [`Content.Server/_CE/ZLevels/Chat/CEZLevelsSpeakingSystem.cs`](../../_CE/ZLevels/Chat/CEZLevelsSpeakingSystem.cs): the speaker can be deleted with its map before this fires
+- [`Content.Server/_Mono/Botany/PlantAnalyzer/PlantAnalyzerSystem.cs`](../../_Mono/Botany/PlantAnalyzer/PlantAnalyzerSystem.cs): growth stages can't be extracted, so say so instead of failing silently
 - [`Content.Server/_Mono/StationEvents/AutoExtendRuleComponent.cs`](../../_Mono/StationEvents/AutoExtendRuleComponent.cs): guards near a vault kept it from ever leaving after its departure warning
 - [`Content.Server/_Mono/StationEvents/AutoExtendRuleSystem.cs`](../../_Mono/StationEvents/AutoExtendRuleSystem.cs)
   - extensions are capped

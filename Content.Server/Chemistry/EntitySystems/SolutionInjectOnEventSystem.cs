@@ -52,7 +52,7 @@ public sealed partial class SolutionInjectOnCollideSystem : EntitySystem
         // MeleeHitEvent is weird, so we have to filter to make sure we actually
         // hit something and aren't just examining the weapon.
         if (args.IsHit)
-            TryInjectTargets((entity.Owner, entity.Comp), args.HitEntities, args.User);
+            TryInjectTargets((entity.Owner, entity.Comp), WgUnshielded(args.HitEntities, args.User), args.User); // WOLFGATE(Augments): a raised hand shield stops what a blocked bite injects
     }
 
     private void OnInjectOverTime(Entity<SolutionInjectWhileEmbeddedComponent> entity, ref InjectOverTimeEvent args)

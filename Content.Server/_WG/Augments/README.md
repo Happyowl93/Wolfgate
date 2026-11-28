@@ -235,6 +235,7 @@ scratch, so an unpicked augment comes off it.
 
 - [`Content.Server/_WG/Augments/HealthAnalyzerSystem.Augments.cs`](HealthAnalyzerSystem.Augments.cs)
 - [`Content.Server/_WG/Augments/ServerPreferencesManager.Augments.cs`](ServerPreferencesManager.Augments.cs)
+- [`Content.Server/_WG/Augments/SolutionInjectOnCollideSystem.HandShield.cs`](SolutionInjectOnCollideSystem.HandShield.cs)
 - [`Content.Server/_WG/Augments/WGAdrenalBoosterSystem.cs`](WGAdrenalBoosterSystem.cs)
 - [`Content.Server/_WG/Augments/WGAugmentDropRetractSystem.cs`](WGAugmentDropRetractSystem.cs)
 - [`Content.Server/_WG/Augments/WGAugmentPaidComponent.cs`](WGAugmentPaidComponent.cs)
@@ -421,6 +422,7 @@ scratch, so an unpicked augment comes off it.
   - drawn to the species' own arm shape
   - cut the old arm loose like an augment swap, so the body keeps its arm markings
 - [`Content.Server/_NF/Commands/GhostRespawnCommand.cs`](../../_NF/Commands/GhostRespawnCommand.cs): respawning instead of cryo loses the character's augments
+- [`Content.Server/Chemistry/EntitySystems/SolutionInjectOnEventSystem.cs`](../../Chemistry/EntitySystems/SolutionInjectOnEventSystem.cs): a raised hand shield stops what a blocked bite injects
 - [`Content.Server/Database/ServerDbBase.cs`](../../Database/ServerDbBase.cs)
 - [`Content.Server/Medical/HealthAnalyzerSystem.cs`](../../Medical/HealthAnalyzerSystem.cs): the cyberware in the body
 - [`Content.Server/Preferences/Managers/ServerPreferencesManager.cs`](../../Preferences/Managers/ServerPreferencesManager.cs)

@@ -43,6 +43,12 @@ public abstract class CartridgeLoaderBoundUserInterface : BoundUserInterface
 
         var activeUI = _entManager.GetEntity(loaderUiState.ActiveUI);
 
+        // WOLFGATE(PdaUi) START: setting the same program up again built a fresh fragment the screen never showed, so
+        // its updates went to a detached copy (ColoTalk showing #0000 and no chats)
+        if (activeUI != null && activeUI == _activeProgram && _activeUiFragment != null)
+            return;
+        // WOLFGATE END
+
         _activeProgram = activeUI;
 
         var ui = RetrieveCartridgeUI(activeUI);

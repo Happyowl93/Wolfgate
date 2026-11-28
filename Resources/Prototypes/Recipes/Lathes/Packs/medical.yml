@@ -107,6 +107,10 @@
   - SynthRightArm
   - SynthLeftHand
   - SynthRightHand
+  # WOLFGATE(Wolfmed) START: the kidneys and stomach were missing from the biofabricator
+  - WGSynthKidneys
+  - WGSynthStomach
+  # WOLFGATE END
   # WOLFGATE(Avali) START: Avali limbs
   - WGSynthAvaliHeadEmpty
   - WGSynthAvaliLeftArm

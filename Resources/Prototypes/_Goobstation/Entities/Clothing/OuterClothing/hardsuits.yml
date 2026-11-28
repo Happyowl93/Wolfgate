@@ -53,7 +53,7 @@
 # cybersun stealth
 
 - type: entity
-  parent: ClothingOuterHardsuitBase
+  parent: [ClothingOuterHardsuitBase, BaseC3SyndicateContrabandT3] # WOLFGATE: turned in like the other PDV T3 hardsuits
   id: ClothingOuterHardsuitCybersunStealth
   suffix: stealth
   name: stealth hardsuit

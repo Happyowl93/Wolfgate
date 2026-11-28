@@ -1,6 +1,7 @@
 using Content.Shared.Actions;
 using Content.Shared.Alert;
 using Content.Shared.Atmos.Components;
+using Content.Shared.Clothing.Components; // WOLFGATE: worn check for magboots
 using Content.Shared.Clothing.EntitySystems;
 using Content.Shared.Gravity;
 using Content.Shared.Inventory;
@@ -34,8 +35,12 @@ public sealed partial class SharedMagbootsSystem : EntitySystem
 
     private void OnToggled(Entity<MagbootsComponent> ent, ref ItemToggledEvent args)
     {
-        if (_container.TryGetContainingContainer((ent.Owner, null, null), out var container))
+        // WOLFGATE START: only worn magboots apply, so boots toggled in hand leave no alert behind
+        if (_container.TryGetContainingContainer((ent.Owner, null, null), out var container)
+            && TryComp<ClothingComponent>(ent, out var clothing)
+            && clothing.InSlotFlag is { } slot && (slot & clothing.Slots) != 0)
             UpdateMagbootEffects(container.Owner, ent, args.Activated);
+        // WOLFGATE END
 
         var prefix = args.Activated ? ent.Comp.EnabledPrefix : null; // Goob edit
         _item.SetHeldPrefix(ent, prefix);

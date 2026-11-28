@@ -23,7 +23,7 @@
   - type: PointLight
     enabled: true
   - type: PoweredLight
-    hasLampOnSpawn: LightTube
+    hasLampOnSpawn: LightBulb # was LightTube, which the bulb socket refuses once taken out
   - type: AmbientOnPowered
   - type: AmbientSound
     volume: -15

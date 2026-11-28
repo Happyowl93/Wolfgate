@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 11/15/2026 11:38:48
-  entityCount: 11240
+  entityCount: 11239
 maps:
 - 2838
 grids:
@@ -74346,12 +74346,6 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 8.5,4.5
-  - uid: 9781
-    components:
-    - type: Transform
-      parent: 1
-      rot: -1.5707963267948966 rad
-      pos: -30.5,43.5
   - uid: 9782
     components:
     - type: Transform

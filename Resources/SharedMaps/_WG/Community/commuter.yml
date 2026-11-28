@@ -5,7 +5,7 @@ meta:
   forkId: wolfgate-mapping
   forkVersion: 20261117-170338-3118dcd-0c9797b9
   time: 11/19/2026 03:53:52
-  entityCount: 285
+  entityCount: 286
 maps: []
 grids:
 - 2
@@ -695,6 +695,13 @@ entities:
     - type: Transform
       parent: 2
       pos: -0.5,-6.5
+- proto: CableTerminal
+  entities:
+  - uid: 343
+    components:
+    - type: Transform
+      parent: 2
+      pos: -2.5,-7.5
 - proto: ChairPilotSeat
   entities:
   - uid: 4

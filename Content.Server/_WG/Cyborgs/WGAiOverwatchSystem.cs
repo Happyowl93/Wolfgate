@@ -3,6 +3,8 @@ using Content.Shared.Movement.Components;
 using Content.Shared.Movement.Events;
 using Content.Shared.Movement.Systems;
 using Content.Shared.Silicons.StationAi;
+using Robust.Server.GameObjects;
+using Robust.Shared.Player;
 
 namespace Content.Server._WG.Cyborgs;
 
@@ -15,6 +17,7 @@ public sealed class WGAiOverwatchSystem : EntitySystem
 {
     [Dependency] private SharedContentEyeSystem _contentEye = default!;
     [Dependency] private SharedStationAiSystem _stationAi = default!;
+    [Dependency] private ViewSubscriberSystem _viewSubscriber = default!;
 
     public override void Initialize()
     {
@@ -22,6 +25,19 @@ public sealed class WGAiOverwatchSystem : EntitySystem
 
         SubscribeLocalEvent<OverwatchConsoleComponent, BoundUserInterfaceMessageAttempt>(OnMessageAttempt);
         SubscribeLocalEvent<WGAiOverwatchEyeComponent, MoveInputEvent>(OnEyeMoveInput);
+        SubscribeLocalEvent<RatOverwatchWatchingComponent, PlayerDetachedEvent>(OnWatcherDetached);
+    }
+
+    /// <summary>
+    /// Ends a feed when its watcher's player leaves, such as an AI shunting into a borg, so the view and its static
+    /// are back to normal when they return.
+    /// </summary>
+    private void OnWatcherDetached(Entity<RatOverwatchWatchingComponent> ent, ref PlayerDetachedEvent args)
+    {
+        if (ent.Comp.Watching is { } target && !TerminatingOrDeleted(target))
+            _viewSubscriber.RemoveViewSubscriber(target, args.Player);
+
+        RemComp<RatOverwatchWatchingComponent>(ent);
     }
 
     /// <summary>

@@ -501,13 +501,14 @@ public sealed partial class WGDrydockSystem
     }
 
     /// <summary>
-    /// Whether a job's ship is still in its berth. A hull being broken only has to overlap the berth, since peeling it
-    /// moves its centre.
+    /// Whether a job's ship is still in its berth. A repair needs some of its own tiles there, so another ship passing
+    /// through doesn't take its place; a hull being broken only has to overlap the berth, since peeling it moves its
+    /// centre.
     /// </summary>
     private bool StillBerthed(EntityUid console, WGDrydockConsoleComponent comp, WGDrydockJobComponent job)
     {
         if (!job.Break)
-            return GetBerthedShip(console, comp) == job.Ship;
+            return HasTilesInBerth(console, comp, job.Ship);
 
         if (!TryGetBerth(console, comp, out var berth) || !TryComp<MapGridComponent>(job.Ship, out var grid))
             return false;

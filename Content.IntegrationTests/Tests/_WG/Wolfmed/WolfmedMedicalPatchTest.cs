@@ -21,16 +21,9 @@ namespace Content.IntegrationTests.Tests._WG.Wolfmed;
 /// file is independent of WP12-2's reagent content.
 /// </para>
 /// <para>
-/// WOLFGATE finding, measured here: a stuck patch is genuinely un-unstickable while
-/// <c>UnremoveableComponent</c> is on it. MedicalPatchSystem.OnStuck adds that component, and
-/// SharedInteractionSystem subscribes <c>UnremoveableComponent</c> to
-/// <c>ContainerGettingRemovedAttemptEvent</c> and cancels unconditionally, so
-/// StickySystem.UnstickFromEntity can never take the patch out of the target's sticker container - including
-/// the call MedicalPatchSystem.Update makes itself when the patch runs dry, which makes
-/// <c>singleUse</c>/<c>trashObject</c> unreachable in normal play. This is NOT a port defect: Onyx's own
-/// SharedInteractionSystem cancels identically at the pin, so the vendored file is faithful. Recorded for the
-/// balance pass rather than patched here; the two tests below remove the component first, exactly as the
-/// gib / unequip paths do.
+/// OnStuck no longer adds <c>UnremoveableComponent</c>: it cancels every container removal, so a stuck patch
+/// could never come out of the target's sticker container and <c>singleUse</c>/<c>trashObject</c> never ran
+/// (feedback #1392). The tests below unstick without touching it.
 /// </para>
 /// </remarks>
 [TestFixture]
@@ -138,8 +131,8 @@ public sealed class WolfmedMedicalPatchTest : WolfmedGameTest
             Assert.Multiple(() =>
             {
                 Assert.That(entities.GetComponent<StickyComponent>(patch).StuckTo, Is.EqualTo(target));
-                Assert.That(entities.HasComponent<UnremoveableComponent>(patch), Is.True,
-                    "OnStuck must make a worn patch unremoveable by hand.");
+                Assert.That(entities.HasComponent<UnremoveableComponent>(patch), Is.False,
+                    "a stuck patch must stay removable, or it can never be unstuck (feedback #1392).");
                 // `injectAmmountOnAttatch: 2` on the fixture; OnStuck injects it synchronously.
                 Assert.That(Contained(entities, target), Is.EqualTo(FixedPoint2.New(2)));
             });
@@ -166,9 +159,6 @@ public sealed class WolfmedMedicalPatchTest : WolfmedGameTest
             Assert.That(Contained(entities, target), Is.EqualTo(FixedPoint2.New(12)),
                 "exactly one further 5u transfer must land in 1.1 s at updateTime 1.");
 
-            // WOLFGATE (finding, see the class remarks): UnremoveableComponent has to come off first or
-            // StickySystem.UnstickFromEntity is refused outright, which is what the gib / unequip paths do.
-            entities.RemoveComponent<UnremoveableComponent>(patch);
             entities.System<StickySystem>()
                 .UnstickFromEntity((patch, entities.GetComponent<StickyComponent>(patch)), user);
 
@@ -208,7 +198,6 @@ public sealed class WolfmedMedicalPatchTest : WolfmedGameTest
             Assert.That(CountTrash(entities), Is.Zero);
 
             sticky.StickToEntity((patch, entities.GetComponent<StickyComponent>(patch)), target, user);
-            entities.RemoveComponent<UnremoveableComponent>(patch); // WOLFGATE: see the class remarks.
             sticky.UnstickFromEntity((patch, entities.GetComponent<StickyComponent>(patch)), user);
 
             // `trashObject: WolfmedPatchTrash` on the fixture; OnUnstuck spawns it before queueing the patch.

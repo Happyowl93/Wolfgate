@@ -640,6 +640,12 @@
       collection: Belch
     Bagawk:
       collection: Bagawk
+    Boop:
+      path: /Audio/_EinsteinEngines/Voice/IPC/beep_500.ogg
+    Whirr:
+      collection: IPCWhirrs
+      params:
+        variation: 0
     # WOLFGATE END
 
 # body emotes

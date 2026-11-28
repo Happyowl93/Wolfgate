@@ -219,6 +219,9 @@ module that grips the void like magboots grip a hull.
   - the glove translator lets the suit relay a language radio would otherwise drop.
 - [`Content.Shared/_White/Standing/SharedLayingDownSystem.cs`](../../../Content.Shared/_White/Standing/SharedLayingDownSystem.cs): worn gear can shorten the stand-up do-after
 - [`Content.Shared/Clothing/EntitySystems/SharedChameleonClothingSystem.cs`](../../../Content.Shared/Clothing/EntitySystems/SharedChameleonClothingSystem.cs): MOD chameleon modules drive the disguise from shared code
+- [`Content.Shared/Clothing/MagbootsComponent.cs`](../../../Content.Shared/Clothing/MagbootsComponent.cs)
+  - runtime-granted magboots (voidboots module) reach the client with their settings
+  - the client predicted weightlessness in space and rubberbanded
 - [`Content.Shared/Cuffs/SharedCuffableSystem.cs`](../../../Content.Shared/Cuffs/SharedCuffableSystem.cs): restraint-assist modules shorten the cuff do-after.
 - [`Content.Shared/Emp/SharedEmpSystem.cs`](../../../Content.Shared/Emp/SharedEmpSystem.cs)
   - the EMP ward module shields whatever container it sits in.

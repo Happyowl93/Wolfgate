@@ -1663,6 +1663,66 @@ public sealed class DrydockTest
         await pair.CleanReturnAsync();
     }
 
+    /// <summary>
+    /// #1390: a repair's ship stays berthed only while some of its own tiles are in the berth, on the berth's map, so a
+    /// ship passing through doesn't matter and a ship that left, or jumped away, does.
+    /// </summary>
+    [Test]
+    public async Task RepairBerthNeedsOwnTilesOnTheMap()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var em = server.EntMan;
+        var map = await pair.CreateTestMap();
+        var other = await pair.CreateTestMap();
+        var drydock = server.System<WGDrydockSystem>();
+        var xforms = server.System<SharedTransformSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var yard = SpawnShipyard(pair, map.MapId);
+            var comp = em.GetComponent<WGDrydockConsoleComponent>(yard.Console);
+            Assert.That(drydock.TryGetBerth(yard.Console, comp, out var berth), "The host's crane should make a berth.");
+
+            var ship = CreateDamagedShip(pair, map.MapId);
+            PlaceOver(pair, ship, yard.Grid, berth.Area.Center);
+            Assert.That(drydock.HasTilesInBerth(yard.Console, comp, ship), Is.True, "A ship over the berth should be in it.");
+
+            var at = xforms.GetWorldPosition(ship);
+            xforms.SetCoordinates(ship, new EntityCoordinates(other.MapUid, at));
+            Assert.That(drydock.HasTilesInBerth(yard.Console, comp, ship), Is.False,
+                "A ship on another map at the same coordinates should not be in the berth.");
+
+            xforms.SetCoordinates(ship, new EntityCoordinates(map.MapUid, at + new Vector2(200f, 0f)));
+            Assert.That(drydock.HasTilesInBerth(yard.Console, comp, ship), Is.False, "A ship that left should not be in the berth.");
+
+            // A hull that rings the berth: its bounds hold the berth, but none of its tiles lie in it.
+            var maps = server.System<SharedMapSystem>();
+            var berthWorld = xforms.GetWorldMatrix(berth.Grid).TransformBox(berth.Area);
+            var ring = maps.CreateGridEntity(map.MapId);
+            var (left, bottom) = ((int) MathF.Floor(berthWorld.Left) - 2, (int) MathF.Floor(berthWorld.Bottom) - 2);
+            var (right, top) = ((int) MathF.Ceiling(berthWorld.Right) + 2, (int) MathF.Ceiling(berthWorld.Top) + 2);
+            var frame = new List<(Vector2i, Tile)>();
+            for (var x = left; x <= right; x++)
+            {
+                frame.Add((new Vector2i(x, bottom), new Tile(Plating(pair))));
+                frame.Add((new Vector2i(x, top), new Tile(Plating(pair))));
+            }
+            for (var y = bottom + 1; y < top; y++)
+            {
+                frame.Add((new Vector2i(left, y), new Tile(Plating(pair))));
+                frame.Add((new Vector2i(right, y), new Tile(Plating(pair))));
+            }
+            maps.SetTiles(ring.Owner, ring.Comp, frame);
+            Assert.That(xforms.GetWorldMatrix(ring.Owner).TransformBox(ring.Comp.LocalAABB).Contains(berthWorld.Center), Is.True,
+                "The ring's bounds should hold the berth.");
+            Assert.That(drydock.HasTilesInBerth(yard.Console, comp, ring.Owner), Is.False,
+                "A ship whose bounds hold the berth but whose tiles don't should not be in it.");
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
     /// <summary>Powers a host from a debug generator off the arm column, so the column stays clear for a blocker.</summary>
     private static void PowerHostAside(TestPair pair, EntityUid host)
     {

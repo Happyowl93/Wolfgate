@@ -270,6 +270,9 @@ public abstract partial class SharedSolutionContainerSystem : EntitySystem
 
         if (solution.GetPrimaryReagentId() is { } reagent)
             AppearanceSystem.SetData(uid, SolutionContainerVisuals.BaseOverride, reagent.ToString(), appearanceComponent);
+        // WOLFGATE: an emptied glass drops its last drink's sprite
+        else
+            AppearanceSystem.SetData(uid, SolutionContainerVisuals.BaseOverride, string.Empty, appearanceComponent);
     }
 
 
@@ -337,6 +340,9 @@ public abstract partial class SharedSolutionContainerSystem : EntitySystem
 
         if (solution.GetPrimaryReagentId() is { } reagent)
             AppearanceSystem.SetData(uid, SolutionContainerVisuals.BaseOverride, reagent.ToString(), appearanceComponent);
+        // WOLFGATE: an emptied glass drops its last drink's sprite
+        else
+            AppearanceSystem.SetData(uid, SolutionContainerVisuals.BaseOverride, string.Empty, appearanceComponent);
     }
 
     /// <summary>

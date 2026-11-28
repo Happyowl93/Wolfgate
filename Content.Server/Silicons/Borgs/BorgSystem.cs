@@ -343,7 +343,9 @@ public sealed partial class BorgSystem : SharedBorgSystem
     {
         Popup.PopupEntity(Loc.GetString("borg-mind-added", ("name", Identity.Name(uid, EntityManager))), uid);
 
-        Toggle.TryActivate(uid);
+        // WOLFGATE(Cyborgs) START: a merge leftover switched on every module even without a charged cell
+        // Toggle.TryActivate(uid);
+        // WOLFGATE END
 
         if (_powerCell.HasDrawCharge(uid))
         {

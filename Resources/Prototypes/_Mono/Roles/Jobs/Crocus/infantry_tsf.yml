@@ -24,7 +24,9 @@
   canBeAntag: false
   setPreference: true # just to config loadout
   accessGroups:
-  - AllAccess
+  # WOLFGATE: AllAccess gave infantry Captain, HoS and Command access but not Tsfmc, so their own garrison stayed shut
+  # - AllAccess
+  - GeneralTsfmcAccess
   access:
   - TsfmcEngineering
   guides:

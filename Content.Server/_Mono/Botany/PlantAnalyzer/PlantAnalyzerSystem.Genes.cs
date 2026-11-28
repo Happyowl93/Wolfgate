@@ -132,6 +132,9 @@ public sealed partial class PlantAnalyzerSystem
                         analyzer.ChemicalBank.Add(data);
                 }
                 return seed.Chemicals.Count > 0;
+            // WOLFGATE: growth stages belong to the plant's sprite, so another plant's count asked for missing frames
+            case PlantGeneId.GrowthStages:
+                return false;
             default:
                 var gene = new PlantGeneData(geneId, ReadGene(seed, geneId));
                 if (!analyzer.GeneBank.Contains(gene))
@@ -190,7 +193,7 @@ public sealed partial class PlantAnalyzerSystem
             case PlantGeneId.Lifespan: seed.Lifespan = gene.Value; break;
             case PlantGeneId.Maturation: seed.Maturation = gene.Value; break;
             case PlantGeneId.Production: seed.Production = gene.Value; break;
-            case PlantGeneId.GrowthStages: seed.GrowthStages = (int) gene.Value; break;
+            case PlantGeneId.GrowthStages: break; // WOLFGATE: a banked growth stage gene no longer changes the plant
             case PlantGeneId.HarvestRepeat: seed.HarvestRepeat = (HarvestType) gene.Value; break;
             case PlantGeneId.Potency: seed.Potency = gene.Value; break;
             case PlantGeneId.Seedless: seed.Seedless = gene.Value != 0f; break;

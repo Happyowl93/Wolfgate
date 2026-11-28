@@ -107,6 +107,7 @@ safety-deposit-refused-component-emag = Emags and access breakers
 
 # Guidebook names of the allow list's refusal groups and allowances
 safety-deposit-refused-launchers = Rocket and grenade launchers
+safety-deposit-refused-viper-hardsuits = Viper Group hardsuits above the BROOD mk.I
 safety-deposit-refused-bluespace-storage = Bags of holding and other bluespace storage
 safety-deposit-refused-built-in-weapons = Weapons built into cyborgs, augments, vehicles and modsuits
 safety-deposit-refused-mech-parts = Mech chassis, limbs and harnesses

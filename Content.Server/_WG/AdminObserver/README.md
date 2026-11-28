@@ -168,6 +168,7 @@ and `WGAdminKitControl` (client).
 ### Client
 
 - [`Content.Client/_WG/AdminObserver/ChatUIController.AdminObserver.cs`](../../../Content.Client/_WG/AdminObserver/ChatUIController.AdminObserver.cs)
+- [`Content.Client/_WG/AdminObserver/DragDropSystem.PostShaders.cs`](../../../Content.Client/_WG/AdminObserver/DragDropSystem.PostShaders.cs)
 - [`Content.Client/_WG/AdminObserver/GhostSystem.AdminObserver.cs`](../../../Content.Client/_WG/AdminObserver/GhostSystem.AdminObserver.cs)
 - [`Content.Client/_WG/AdminObserver/UI/WGAdminKitControl.xaml`](../../../Content.Client/_WG/AdminObserver/UI/WGAdminKitControl.xaml)
 - [`Content.Client/_WG/AdminObserver/UI/WGAdminKitControl.xaml.cs`](../../../Content.Client/_WG/AdminObserver/UI/WGAdminKitControl.xaml.cs)
@@ -237,6 +238,9 @@ and `WGAdminKitControl` (client).
   - the observer panel key works in the admin observer
   - the admin ghost key works from any body
 - [`Content.Client/Interactable/Components/InteractionOutlineComponent.cs`](../../../Content.Client/Interactable/Components/InteractionOutlineComponent.cs): the outline is its own post-shader pass, removed by id
+- [`Content.Client/Interaction/DragDropSystem.cs`](../../../Content.Client/Interaction/DragDropSystem.cs)
+  - a copied pass blacked out the screen once its shader was disposed
+  - a sprite with passes of its own, such as a manifested admin, isn't highlighted
 - [`Content.Client/Options/UI/Tabs/KeyRebindTab.xaml.cs`](../../../Content.Client/Options/UI/Tabs/KeyRebindTab.xaml.cs): admin ghost, manifest and observer panel keys
 - [`Content.Client/UserInterface/Systems/Chat/ChatUIController.cs`](../../../Content.Client/UserInterface/Systems/Chat/ChatUIController.cs)
   - a manifested admin observer speaks in character

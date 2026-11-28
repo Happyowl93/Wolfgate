@@ -25,4 +25,17 @@ public abstract partial class CESharedZLevelsSystem
 
         return TryComp<RoofComponent>(grid, out var roof) && _wgRoof.IsRooved((grid, gridComp, roof), tile);
     }
+
+    /// <summary>
+    /// Whether a body stands on a vessel on a planet layer, so the vessel's roof stops it flying up out of it. The mirror
+    /// of <see cref="WgRoofedBelow"/>, which lands a body from above on that roof.
+    /// </summary>
+    private bool WgRoofedAbove(EntityUid body)
+    {
+        var xform = Transform(body);
+        if (xform.GridUid is not { } grid || grid == xform.MapUid || !HasComp<WGPlanetLayerComponent>(xform.MapUid))
+            return false;
+
+        return !HasComp<WGPlanetCityGridComponent>(grid);
+    }
 }

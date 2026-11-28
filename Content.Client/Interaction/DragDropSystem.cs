@@ -248,6 +248,7 @@ public sealed partial class DragDropSystem : SharedDragDropSystem
             _dragShadow = EntityManager.SpawnEntity("dragshadow", mousePos);
             var dragSprite = Comp<SpriteComponent>(_dragShadow.Value);
             dragSprite.CopyFrom(draggedSprite);
+            WgStripPasses(dragSprite); // WOLFGATE(AdminObserver): a copied pass blacked out the screen once its shader was disposed
             dragSprite.RenderOrder = EntityManager.CurrentTick.Value;
             dragSprite.Color = dragSprite.Color.WithAlpha(0.7f);
             // keep it on top of everything
@@ -455,6 +456,10 @@ public sealed partial class DragDropSystem : SharedDragDropSystem
                 valid = _interactionSystem.InRangeUnobstructed(user.Value, _draggedEntity.Value)
                         && _interactionSystem.InRangeUnobstructed(user.Value, entity);
             }
+
+            // WOLFGATE(AdminObserver): a sprite with passes of its own, such as a manifested admin, isn't highlighted
+            if (WgHasOwnPasses(inRangeSprite))
+                continue;
 
             if (inRangeSprite.PostShader != null &&
                 inRangeSprite.PostShader != _dropTargetInRangeShader &&
