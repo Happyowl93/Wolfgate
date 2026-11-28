@@ -9547,3 +9547,12 @@ Entries:
   id: 100611
   time: '2026-11-28T16:27:44.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/879
+- author: Balls2zawall
+  changes:
+    - type: Fix
+      message: Fixed the unanchored FTL drive on the VG Snake Eater.
+    - type: Fix
+      message: Fixed the missing manufacturer label on the VG Snake Eater.
+  id: 100612
+  time: '2026-11-28T16:42:41.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/881
