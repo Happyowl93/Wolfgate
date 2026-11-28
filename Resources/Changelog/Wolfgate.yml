@@ -9529,3 +9529,14 @@ Entries:
   id: 100609
   time: '2026-11-28T12:05:47.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/876
+- author: Happyowl93
+  changes:
+    - type: Tweak
+      message: >-
+        Ships flying for a faction now show only the faction on IFF, not your
+        player company.
+    - type: Tweak
+      message: Very dark company colours are brightened on radar so they stay readable.
+  id: 100610
+  time: '2026-11-28T15:17:10.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/877
