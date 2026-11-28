@@ -9563,3 +9563,14 @@ Entries:
   id: 100613
   time: '2026-11-28T17:35:48.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/882
+- author: Happyowl93
+  changes:
+    - type: Fix
+      message: >-
+        Ships with maneuvering jets no longer jet away from players trying to
+        grapple or board them when nobody is at the helm.
+    - type: Remove
+      message: NPC ships no longer use their ship modules for now.
+  id: 100614
+  time: '2026-11-28T18:11:59.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/878
