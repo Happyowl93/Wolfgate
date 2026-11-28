@@ -41,12 +41,13 @@ carry no markers; check them on an upstream merge:
   (faction weapons up to tier 3 and armour up to tier 2 by contraband severity, tier 1 faction gear, power cells, tier 1 and 2
   stock parts by exact prototype). An allowance naming severities takes only contraband of them; one naming none takes
   no contraband. An allowance with a `limit` lets in that many items, stacks counted, across the whole box. `refused`
-  groups name launchers, bluespace storage, built-in, mech, magic and admin items, abstract bases included, and refuse
-  everything inheriting from them whatever else lets them in. An item's solutions may hold the `reagentGroups` (food
-  and drink) freely, the `reagentLimits` groups (medicine) past what it spawns with up to a total across the box, and
-  other reagents only up to what its prototype spawns with. Living things, minds, plant analyzers, seeds, emags, body
-  parts, organs and machine parts in raw form (boards, electronics, reactor parts, mech equipment, cyborg modules,
-  vehicle hardpoints) joined the blacklist or the restricted list.
+  groups name launchers, bluespace storage, nuclear delivery beacons, warhead keys, dead-man switches, built-in, mech,
+  magic and admin items, abstract bases included, and refuse everything inheriting from them whatever else lets them
+  in. An item's solutions may hold the `reagentGroups` (food and drink) freely, the `reagentLimits` groups (medicine)
+  past what it spawns with up to a total across the box, and other reagents only up to what its prototype spawns with.
+  Living things, minds, plant analyzers, seeds, emags, body parts, organs and machine parts in raw form (boards,
+  electronics, reactor parts, mech equipment, cyborg modules, vehicle hardpoints) joined the blacklist or the
+  restricted list.
 - `SafetyDepositAllowListSystem.FindRefused`, called by `EjectNestedRefused` on deposit, holds everything in the box,
   however deep, to the blacklist, the allow list and the limits, and hands back what fails. Stored items count first,
   so what goes over a limit comes out of the bags. A hardsuit's helmet is exempt, as it belongs to the suit. Inserting

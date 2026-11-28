@@ -110,6 +110,7 @@ safety-deposit-refused-launchers = Rocket and grenade launchers
 safety-deposit-refused-viper-hardsuits = Viper Group hardsuits above the BROOD mk.I
 safety-deposit-refused-bluespace-storage = Bags of holding and other bluespace storage
 safety-deposit-refused-built-in-weapons = Weapons built into cyborgs, augments, vehicles and modsuits
+safety-deposit-refused-nuclear-ordnance = Nuclear delivery beacons, warhead keys and dead-man switches
 safety-deposit-refused-mech-parts = Mech chassis, limbs and harnesses
 safety-deposit-refused-magic-and-admin = Magic, cult and admin items
 safety-deposit-allowed-faction-weapons = Faction guns, melee weapons, shields and ammunition up to tier 3

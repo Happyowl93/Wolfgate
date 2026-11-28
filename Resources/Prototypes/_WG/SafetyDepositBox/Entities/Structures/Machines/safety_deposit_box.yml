@@ -183,6 +183,11 @@
       - ModsuitDeviceResinMister
       - ModsuitDeviceTether
       - VehicleAPCM56FPWPortGunBase
+    - name: safety-deposit-refused-nuclear-ordnance
+      prototypes:
+      - WGOrdnanceBeaconTactical # nuclear delivery beacon
+      - WGNukeKey # its warhead's key
+      - WGDeadManSwitch
     - name: safety-deposit-refused-mech-parts
       prototypes:
       - BaseMechPart # mech chassis, limbs and harnesses
