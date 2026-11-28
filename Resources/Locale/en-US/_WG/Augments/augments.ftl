@@ -29,6 +29,8 @@ wg-augments-confirm = Confirm purchase
 wg-augments-forfeit = {$name} never made it to cryo, so their cyberware was left behind with the body. You'll have to buy it again in the character creator.
 wg-augments-forfeit-dead = {$name} didn't make it through the round alive in their own body. Their cyberware is lost, and you'll have to buy it again in the character creator.
 wg-augments-stolen = Cyberware cut out of {$name} belongs to someone else now: {$augments}.
+wg-augments-severed = {$name} has lost a part carrying their cyberware: {$augments}. Get it reattached before the shift ends, or the cyberware is lost.
+wg-augments-destroyed = Cyberware cut out of {$name} was destroyed or sold off before it could be reattached: {$augments}. You'll have to buy it again in the character creator.
 
 wg-augment-slot-head = Head
 wg-augment-slot-chest = Chest

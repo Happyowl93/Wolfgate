@@ -127,6 +127,10 @@
     sprite: _WG/Asf/Clothing/Neck/capelet.rsi
   - type: Clothing
     sprite: _WG/Asf/Clothing/Neck/capelet.rsi
+  # Worn under the hair and beard, as SS13 draws the neck layer.
+  - type: WGClothingLayer
+    layer: enum.HumanoidVisualLayers.FacialHair
+    below: true
 
 - type: entity
   parent: ClothingNeckBase

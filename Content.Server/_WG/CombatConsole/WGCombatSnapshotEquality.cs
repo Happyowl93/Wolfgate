@@ -63,7 +63,8 @@ internal static class WGCombatSnapshotEquality
                 if (a.Name != b.Name || !a.Coordinates.Equals(b.Coordinates) || !a.Angle.Equals(b.Angle) ||
                     a.Entity != b.Entity || a.GridDockedWith != b.GridDockedWith || a.LabelName != b.LabelName ||
                     a.RadarColor != b.RadarColor || a.HighlightedRadarColor != b.HighlightedRadarColor ||
-                    a.ReceiveOnly != b.ReceiveOnly || a.DockType != b.DockType || a.WgClampedBy != b.WgClampedBy)
+                    a.ReceiveOnly != b.ReceiveOnly || a.DockType != b.DockType || a.WgClampedBy != b.WgClampedBy ||
+                    a.WgDockLocked != b.WgDockLocked)
                     return false;
             }
         }

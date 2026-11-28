@@ -2,6 +2,7 @@
 # With how layering works, Tail is the highest priority layer- It displays over almost EVERYTHING. Will be used in the future for overlaying over hardsuits, though looks too jank to do it now.
 # For overlaying over Jumpsuits, use RHand as it's the highest priority bodypart layer that DOESN'T display over hardsuits.
 # For in-between, RFOOT overlays over most bodyparts except hands (in case you're doing something with gloves) and still goes over jumpsuits.
+# WOLFGATE(Species): face markings (LED faces, visors, snouts) belong to the Head and use layering to draw at the RHand, RFoot or LFoot layer.
 
 #region PROTOGEN BASE ####
 # Put markings HERE if they can be used by ALL species (Protogen lights/armor are the exception since it always needs to be adjusted..) ####
@@ -17,7 +18,10 @@
 
 - type: marking
   id: ProtogenVisorRound
-  bodyPart: LFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the LFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    rounded: LFoot
   markingCategory: Special
   speciesRestriction: [Protogen, Human, Dwarf] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -26,7 +30,10 @@
 
 - type: marking
   id: ProtogenLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [Protogen, Reptilian, Human, Dwarf] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -35,7 +42,10 @@
 
 - type: marking
   id: ProtogenLEDFaceNoseless
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    noseless: RHand
   markingCategory: Special
   speciesRestriction: [Protogen, Reptilian, Human, Dwarf] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -44,7 +54,10 @@
 
 - type: marking
   id: ProtogenLEDFaceRound
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    rounded: RHand
   markingCategory: Special
   speciesRestriction: [Protogen, Human, Dwarf] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -82,7 +95,10 @@
 
 - type: marking
   id: ProtoVulpVisor
-  bodyPart: LFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the LFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    vulpvisor: LFoot
   markingCategory: Special
   speciesRestriction: [Vulpkanin, Reptilian, Human] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -91,7 +107,10 @@
 
 - type: marking
   id: ProtoVulpVisorFourEyes
-  bodyPart: LFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the LFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    vulpvisor-four-eyes: LFoot
   markingCategory: Special
   speciesRestriction: [Vulpkanin] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -100,7 +119,10 @@
 
 - type: marking
   id: ProtoVulpSnoutLong
-  bodyPart: RFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    snout: RFoot
   markingCategory: Special
   speciesRestriction: [Vulpkanin] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -136,7 +158,10 @@
 
 - type: marking
   id: ProtoVulpLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [Vulpkanin] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -145,7 +170,10 @@
 
 - type: marking
   id: ProtoVulpLEDFaceLong
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    long: RHand
   markingCategory: Special
   speciesRestriction: [Vulpkanin] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -154,7 +182,10 @@
 
 - type: marking
   id: ProtoVulpLEDFaceFourEyes
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    four-eyes: RHand
   markingCategory: Special
   speciesRestriction: [Vulpkanin] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -203,7 +234,10 @@
 
 - type: marking
   id: ProtoVoxVisor
-  bodyPart: RFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    visor: RFoot
   markingCategory: Special
   speciesRestriction: [Vox] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -221,7 +255,10 @@
 
 - type: marking
   id: ProtoVoxLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [Vox] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -250,7 +287,10 @@
 
 - type: marking
   id: ProtoThavenVisor
-  bodyPart: RFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    visor: RFoot
   markingCategory: Special
   speciesRestriction: [Thaven] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -268,7 +308,10 @@
 
 - type: marking
   id: ProtoThavenLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [Thaven] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -297,7 +340,10 @@
 
 - type: marking
   id: ProtoSlimePersonVisor
-  bodyPart: RFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    visor: RFoot
   markingCategory: Special
   speciesRestriction: [SlimePerson] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -306,7 +352,10 @@
 
 - type: marking
   id: ProtoSlimePersonLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [SlimePerson] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -335,7 +384,10 @@
 
 - type: marking
   id: ProtoKinVisor
-  bodyPart: RFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    visor: RFoot
   markingCategory: Special
   speciesRestriction: [Shadekin] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -344,7 +396,10 @@
 
 - type: marking
   id: ProtoKinLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [Shadekin] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -373,7 +428,10 @@
 
 - type: marking
   id: ProtoResomiVisor
-  bodyPart: RFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    visor: RFoot
   markingCategory: Special
   speciesRestriction: [Resomi] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -382,7 +440,10 @@
 
 - type: marking
   id: ProtoResomiLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [Resomi] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -402,7 +463,10 @@
 
 - type: marking
   id: ProtoReptileLEDFaceBoxy
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    boxy: RHand
   markingCategory: Special
   speciesRestriction: [Reptilian, Human, Dwarf] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -431,7 +495,10 @@
 
 - type: marking
   id: ProtoMothVisor
-  bodyPart: RFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    visor: RFoot
   markingCategory: Special
   speciesRestriction: [Moth] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -440,7 +507,10 @@
 
 - type: marking
   id: ProtoMothLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [Moth] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -480,7 +550,10 @@
 
 - type: marking
   id: ProtoFelineVisor
-  bodyPart: RFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    visor: RFoot
   markingCategory: Special
   speciesRestriction: [Felionoid] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -489,7 +562,10 @@
 
 - type: marking
   id: ProtoFelineLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [Felionoid] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -529,7 +605,10 @@
 
 - type: marking
   id: ProtoDionaeVisor
-  bodyPart: RFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    visor: RFoot
   markingCategory: Special
   speciesRestriction: [Diona] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -538,7 +617,10 @@
 
 - type: marking
   id: ProtoDionaeLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [Diona] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -576,7 +658,10 @@
 
 - type: marking
   id: ProtoAvaliVisor
-  bodyPart: RFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    visor: RFoot
   markingCategory: Special
   speciesRestriction: [Avali] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -585,7 +670,10 @@
 
 - type: marking
   id: ProtoAvaliLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [Avali] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -620,7 +708,10 @@
 
 - type: marking
   id: ProtoArachnidVisor
-  bodyPart: RFoot
+  # WOLFGATE(Species): head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
+  bodyPart: Head
+  layering:
+    visor: RFoot
   markingCategory: Special
   speciesRestriction: [Arachnid] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:
@@ -629,7 +720,10 @@
 
 - type: marking
   id: ProtoArachnidLEDFace
-  bodyPart: RHand
+  # WOLFGATE(Species): head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  bodyPart: Head
+  layering:
+    face: RHand
   markingCategory: Special
   speciesRestriction: [Arachnid] # WOLFGATE(Species): shaped for this species; was the Proto subspecies' own
   sprites:

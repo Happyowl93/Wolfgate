@@ -33,6 +33,17 @@ public static class WGTugTrail
         tailForward = tugForward;
     }
 
+    /// <summary>Re-lays the trail in another grid's frame, given the matrix from the old grid's frame to the new one's.</summary>
+    public static void Reframe(List<Vector2> trail, Matrix3x2 transform, ref Vector2 tailForward)
+    {
+        for (var i = 0; i < trail.Count; i++)
+        {
+            trail[i] = Vector2.Transform(trail[i], transform);
+        }
+
+        tailForward = Vector2.TransformNormal(tailForward, transform);
+    }
+
     /// <summary>Moves the head of the trail to where the tug is: forward lays new points, backing up runs back along the old ones.</summary>
     public static void Advance(List<Vector2> trail, Vector2 pos, ref Vector2 tailForward)
     {

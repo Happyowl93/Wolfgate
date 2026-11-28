@@ -1,4 +1,4 @@
-﻿# The Judge Line app, installed on vagrants' PDAs at spawn: call a judge ship to an emergency.
+﻿# The Judge Line app, installed on vagrants' and judges' PDAs at spawn: call a judge ship to an emergency.
 - type: entity
   parent: NFBasePDACartridge
   id: WGJudgeLineCartridge
@@ -41,7 +41,7 @@
     - id: ClothingMaskBreath
       amount: 2
 
-# The ship a vagrant's call sends out. It drops out of FTL near the caller and works the emergency under the Judge
+# The ship a Judge Line call sends out. It drops out of FTL near the caller and works the emergency under the Judge
 # Line's orders (WGJudgeLineSystem), then leaves; nothing schedules it. Pinned while it works, so neither its clock nor
 # finished orders take it away. It fights the sector's threats like the patrols, and anyone the caller's ship is
 # fighting once it is allied with it.

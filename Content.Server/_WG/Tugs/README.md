@@ -13,8 +13,12 @@ can't be opened until it is taken off. Admins spawn both by ID.
 `WGTugSystem` (server) does the coupling and the cargo. The tug lays a trail of its positions in its grid's
 frame; each tick every towed trolley is placed on that trail at its distance behind the tug, facing along it, so the
 cars go where the tug went. Backing up runs the trail backwards, and past the end of the trail the cars run straight
-on. Towed trolleys are kinematic and don't collide; each one costs the tug some top speed and acceleration. A tug that
-leaves its grid (falls, jumps, drives onto another ship) leaves its train behind.
+on. Towed trolleys are kinematic and don't collide; each one costs the tug some top speed and acceleration. A car whose
+place on the trail is inside a wall (or over no floor) holds where it is until the way is clear, so it is never put
+inside a wall. A tug that drives onto a grid docked to its own (through a docking airlock) takes its train along: the
+trail is re-laid in the new grid's frame, and each car changes grid as its place on the trail crosses onto the new
+deck. A tug that leaves its grid any other way (falls, jumps, drives onto a ship it isn't docked to) leaves its train
+behind, and a car still on a grid that undocks mid-crossing drops off with the cars behind it.
 
 The tug is tgstation's ATV and the trolley is DS13's cargo trolley (Daedalus Dock art), both four-directional. The tug is
 drawn over its rider when it faces up or down the screen, the way the ride-on ATV is (client `WGTugVisualsSystem`).

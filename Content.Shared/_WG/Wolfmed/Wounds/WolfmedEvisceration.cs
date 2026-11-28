@@ -122,6 +122,13 @@ public sealed partial class WolfmedEviscerationSpec
     [DataField]
     public List<string> VitalOrgans = new();
 
+    /// <summary>
+    /// Whether cyberware comes out whatever its slot: an augment heart or lungs is not held in like flesh.
+    /// The brain never does.
+    /// </summary>
+    [DataField]
+    public bool Cyberware;
+
     /// <summary>Chance one of the vital slots comes out anyway when the hit was not an explosion.</summary>
     [DataField]
     public float VitalChance = 0.15f;

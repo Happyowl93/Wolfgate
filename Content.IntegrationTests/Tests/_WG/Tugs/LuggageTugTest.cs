@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Content.IntegrationTests.Pair;
 using Content.Server._WG.Tugs;
+using Content.Server.Shuttles.Components;
 using Content.Shared._WG.Tugs;
 using Content.Shared._WG.Vehicles.Base;
 using Content.Shared._WG.Vehicles.Grid.Components;
@@ -22,6 +23,7 @@ using Content.Shared.Movement.Components;
 using Content.Shared.Movement.Systems;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Components;
@@ -381,6 +383,176 @@ public sealed class LuggageTugTest
         {
             Assert.That(Tug(pair, rig).Comp.Trolleys, Is.Empty, "The train stayed coupled to a tug that left its grid.");
             Assert.That(Trolley(pair, rig.Trolleys[0]).Comp.Tug, Is.Null);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// A tug that drives onto a grid docked to its own keeps its train, and the cars follow it across onto that grid;
+    /// once the grids are undocked, changing grid drops the train again.
+    /// </summary>
+    [Test]
+    public async Task TrainFollowsTheTugOntoADockedGrid()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var rig = await Build(pair);
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        var xforms = server.System<SharedTransformSystem>();
+        EntityUid dock = default, otherDock = default;
+        Entity<MapGridComponent> other = default;
+
+        await server.WaitAssertion(() =>
+        {
+            var maps = server.System<SharedMapSystem>();
+            var plating = server.Resolve<ITileDefinitionManager>()["Plating"].TileId;
+            var home = rig.Map.Grid.Owner;
+
+            // A second deck south of the first, one empty row between them, its rows 0 to 39 running up to that gap.
+            other = maps.CreateGridEntity(rig.Map.MapId);
+            for (var x = -10; x < 20; x++)
+            {
+                for (var y = 0; y < 40; y++)
+                {
+                    maps.SetTile(other.Owner, other.Comp, new Vector2i(x, y), new Tile(plating));
+                }
+            }
+
+            xforms.SetWorldPositionRotation(other.Owner, xforms.GetWorldPosition(home) + new Vector2(0f, -56f), xforms.GetWorldRotation(home));
+
+            dock = entMan.SpawnEntity(null, new EntityCoordinates(home, StartX, -14.5f));
+            otherDock = entMan.SpawnEntity(null, new EntityCoordinates(other.Owner, StartX, 39.5f));
+            entMan.AddComponent<DockingComponent>(dock).DockedWith = otherDock;
+            entMan.AddComponent<DockingComponent>(otherDock).DockedWith = dock;
+
+            var tugs = server.System<WGTugSystem>();
+            for (var i = 0; i < 3; i++)
+            {
+                Assert.That(tugs.TryCouple(Tug(pair, rig), Trolley(pair, rig.Trolleys[i])), Is.True);
+            }
+        });
+        await Ride(pair, rig);
+
+        // The tug crosses onto the docked deck, facing south as before.
+        await server.WaitPost(() => xforms.SetCoordinates(rig.Tug, new EntityCoordinates(other.Owner, StartX, 38.5f)));
+        await server.WaitRunTicks(2);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entMan.GetComponent<TransformComponent>(rig.Tug).ParentUid, Is.EqualTo(other.Owner), "Test setup: the tug is not on the docked deck.");
+            Assert.That(Tug(pair, rig).Comp.Trolleys, Has.Count.EqualTo(3), "The train came off a tug that drove onto a docked grid.");
+            Assert.That(Tug(pair, rig).Comp.TrailGrid, Is.EqualTo(other.Owner), "The trail was not carried onto the docked grid.");
+        });
+
+        await server.WaitPost(() => entMan.GetComponent<InputMoverComponent>(rig.Driver).HeldMoveButtons = MoveButtons.Up);
+        await server.WaitRunTicks(150);
+
+        await server.WaitAssertion(() =>
+        {
+            var tug = Local(pair, rig.Tug);
+            Assert.That(tug.Y, Is.LessThan(38.5f - 3f), "The tug barely moved on the docked deck.");
+            Assert.That(Tug(pair, rig).Comp.Trolleys, Has.Count.EqualTo(3), "The train came apart on the docked deck.");
+
+            for (var i = 0; i < 3; i++)
+            {
+                var car = Local(pair, rig.Trolleys[i]);
+                using (Assert.EnterMultipleScope())
+                {
+                    Assert.That(entMan.GetComponent<TransformComponent>(rig.Trolleys[i]).ParentUid, Is.EqualTo(other.Owner), $"Trolley {i + 1} did not follow onto the docked grid.");
+                    Assert.That(car.X, Is.EqualTo(tug.X).Within(0.2f), $"Trolley {i + 1} left the path.");
+                    Assert.That(car.Y - tug.Y, Is.EqualTo(WGTugTrail.Distance(Tug(pair, rig).Comp, i)).Within(0.15f), $"Trolley {i + 1} is not at its spacing.");
+                }
+            }
+        });
+
+        // Undocked, driving back onto the first deck is a grid change like any other.
+        await server.WaitPost(() =>
+        {
+            entMan.GetComponent<InputMoverComponent>(rig.Driver).HeldMoveButtons = MoveButtons.None;
+            entMan.GetComponent<DockingComponent>(dock).DockedWith = null;
+            entMan.GetComponent<DockingComponent>(otherDock).DockedWith = null;
+            xforms.SetCoordinates(rig.Tug, new EntityCoordinates(rig.Map.Grid.Owner, StartX, 0.5f));
+        });
+        await server.WaitRunTicks(2);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Tug(pair, rig).Comp.Trolleys, Is.Empty, "The train stayed coupled to a tug that drove onto an undocked grid.");
+            Assert.That(Trolley(pair, rig.Trolleys[0]).Comp.Tug, Is.Null);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// Re-laying a trail onto a docked grid turned half a turn from the first keeps every point, and the tail's heading,
+    /// where they are in the world, with the matrix the tug system builds (old grid's world matrix, then the new one's
+    /// inverse).
+    /// </summary>
+    [Test]
+    public void TrailReframesOntoARotatedGrid()
+    {
+        var from = Matrix3x2.CreateRotation(0.3f) * Matrix3x2.CreateTranslation(10f, -4f);
+        var to = Matrix3x2.CreateRotation(0.3f + MathF.PI) * Matrix3x2.CreateTranslation(-6f, 21f);
+        Assert.That(Matrix3x2.Invert(to, out var toInverse), Is.True);
+
+        var trail = new List<Vector2> { new(1f, 2f), new(1f, 5f), new(3.5f, 5f) };
+        var world = trail.Select(point => Vector2.Transform(point, from)).ToList();
+        var tail = new Vector2(0f, -1f);
+        var tailWorld = Vector2.TransformNormal(tail, from);
+
+        WGTugTrail.Reframe(trail, from * toInverse, ref tail);
+
+        using (Assert.EnterMultipleScope())
+        {
+            for (var i = 0; i < trail.Count; i++)
+            {
+                var back = Vector2.Transform(trail[i], to);
+                Assert.That(Vector2.Distance(back, world[i]), Is.LessThan(0.001f), $"Trail point {i} moved in the world.");
+            }
+
+            Assert.That(Vector2.Distance(Vector2.TransformNormal(tail, to), tailWorld), Is.LessThan(0.001f),
+                "The tail's heading turned in the world.");
+        }
+    }
+
+    /// <summary>A car whose place on the trail is inside a wall holds where it is, and moves on once the way is clear.</summary>
+    [Test]
+    public async Task ACarIsNeverPlacedInAWall()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var rig = await Build(pair);
+        var server = pair.Server;
+        var entMan = server.EntMan;
+        EntityUid wall = default;
+        var start = new Vector2(StartX, StartY + 1f);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(server.System<WGTugSystem>().TryCouple(Tug(pair, rig), Trolley(pair, rig.Trolleys[0])), Is.True);
+
+            // A trail running east from the tug, with a wall on the tile the first car would be put on.
+            var tug = Tug(pair, rig);
+            tug.Comp.Trail.Clear();
+            tug.Comp.Trail.Add(new Vector2(StartX + 2f, StartY));
+            tug.Comp.Trail.Add(Local(pair, rig.Tug));
+            wall = entMan.SpawnEntity("WallSolid", new EntityCoordinates(rig.Map.Grid.Owner, StartX + 1f, StartY));
+        });
+        await server.WaitRunTicks(3);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(Tug(pair, rig).Comp.Trolleys, Has.Count.EqualTo(1), "Test setup: the trolley came uncoupled.");
+            Assert.That((Local(pair, rig.Trolleys[0]) - start).Length(), Is.LessThan(0.05f), "The trolley was put inside the wall.");
+            entMan.DeleteEntity(wall);
+        });
+        await server.WaitRunTicks(3);
+
+        await server.WaitAssertion(() =>
+        {
+            var expected = Local(pair, rig.Tug) + new Vector2(Tug(pair, rig).Comp.HitchDistance, 0f);
+            Assert.That((Local(pair, rig.Trolleys[0]) - expected).Length(), Is.LessThan(0.15f), "The trolley did not move on once the wall was gone.");
         });
 
         await pair.CleanReturnAsync();

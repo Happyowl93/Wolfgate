@@ -3,7 +3,7 @@ using Robust.Shared.Serialization;
 
 namespace Content.Shared._WG.JudgeLine;
 
-/// <summary>The nature of an emergency a vagrant calls the judges to.</summary>
+/// <summary>The nature of an emergency a caller calls the judges to.</summary>
 [Serializable, NetSerializable]
 public enum WGJudgeLineKind : byte
 {

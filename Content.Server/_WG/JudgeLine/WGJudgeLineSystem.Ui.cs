@@ -54,11 +54,11 @@ public sealed partial class WGJudgeLineSystem
             _popup.PopupEntity(refusal, user, user, PopupType.MediumCaution);
     }
 
-    /// <summary>A vagrant at a shuttle console can call the judges for each kind of emergency, or cancel their call.</summary>
+    /// <summary>A vagrant or judge at a shuttle console can call the judges for each kind of emergency, or cancel their call.</summary>
     private void OnGetVerbs(GetVerbsEvent<AlternativeVerb> args)
     {
         if (!args.CanAccess || !args.CanInteract || !HasComp<ShuttleConsoleComponent>(args.Target)
-            || !_config.GetCVar(JudgeLineCVars.Enabled) || !IsVagrant(args.User))
+            || !_config.GetCVar(JudgeLineCVars.Enabled) || !MayCall(args.User))
             return;
 
         var user = args.User;

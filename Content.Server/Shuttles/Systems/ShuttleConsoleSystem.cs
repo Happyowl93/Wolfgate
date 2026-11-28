@@ -396,6 +396,7 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
                 DockType = comp.DockType, // Frontier
                 ReceiveOnly = comp.ReceiveOnly, // Frontier
                 WgClampedBy = WgClampedBy((uid, comp)), // WOLFGATE(Encounters): docking screens show clamped ports.
+                WgDockLocked = WgPortLocked(uid), // WOLFGATE(DockLock): docking screens show locked ports.
             };
 
             gridDocks.Add(state);

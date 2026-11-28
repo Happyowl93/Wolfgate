@@ -26,7 +26,9 @@ A character gets an augment three ways:
   anything else that pays by appraised price buys it as loot; inside the body it is worth no more than any part,
   so a corpse has to be cut open first. Whoever's body holds the marked part when it is saved instead owns the
   augment as paid for. Either way the character it was taken from loses the unlock and the pick, online or not,
-  and is told in chat: when the part is sold or destroyed during the round, or when the taker's body is saved.
+  and is told in chat: when the part is sold or destroyed during the round (`wg-augments-destroyed`), or when the
+  taker's body is saved (`wg-augments-stolen`). A part severed from the body it was counted in warns its owner at
+  once (`wg-augments-severed`) to reattach or recover it before the shift ends.
   A purchase has one mark: a printed or cloned copy has none, is priced like any part and ends with the round; selling
   in the creator removes the mark from the part still in the body; and a character can't sell a part that has left
   its body. A body left behind by `ghostrespawn` keeps its marks for whoever loots it.
@@ -335,6 +337,7 @@ scratch, so an unpicked augment comes off it.
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentReflexBoosterTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentReflexBoosterTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentRespawnTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentRespawnTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentRulesTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentRulesTest.cs)
+- [`Content.IntegrationTests/Tests/_WG/Augments/AugmentSeveredTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentSeveredTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentSpeciesTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentSpeciesTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentThermalEyesTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentThermalEyesTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Augments/AugmentTraitLimbsTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Augments/AugmentTraitLimbsTest.cs)

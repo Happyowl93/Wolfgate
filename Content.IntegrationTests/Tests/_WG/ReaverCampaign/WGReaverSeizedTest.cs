@@ -10,7 +10,9 @@ using Content.Server._WG.ReaverCampaign.Components;
 using Content.Server._WG.ReaverCampaign.Systems;
 using Content.Server.Power.Components;
 using Content.Server.Shuttles.Components;
+using Content.Server.Shuttles.Systems;
 using Content.Shared._Mono.FireControl;
+using Content.Shared.Shuttles.Components;
 using Content.Shared.Access.Components;
 using Robust.Shared.GameObjects;
 
@@ -21,8 +23,8 @@ namespace Content.IntegrationTests.Tests._WG.ReaverCampaign;
 public sealed class WGReaverSeizedTest : WGReaverTestBase
 {
     /// <summary>
-    /// A reinforcement that lost its crew to a boarder is seized at once, hunted wherever it goes, flagged to its own side as an
-    /// attacker before it fires a shot, and its fire is no longer let pass.
+    /// A reinforcement that lost its crew to a boarder is seized once he takes its helm, hunted wherever it goes, flagged to its
+    /// own side as an attacker before it fires a shot, and its fire is no longer let pass.
     /// </summary>
     [Test]
     public async Task CrewlessHullWithABoarderIsSeizedAndHunted()
@@ -57,7 +59,16 @@ public sealed class WGReaverSeizedTest : WGReaverTestBase
 
             KillCrew(inbound, "lead");
             seizure.Check();
-            Assert.That(seizure.IsSeized(taken), Is.True, "With its crew down, the boarder holds it at once.");
+            Assert.That(seizure.IsSeized(taken), Is.False, "Boarding a wreck whose crew is down doesn't take it.");
+
+            var helm = SEntMan.EntityQuery<ShuttleConsoleComponent>()
+                .First(console => SEntMan.GetComponent<TransformComponent>(console.Owner).GridUid == taken);
+            var player = SEntMan.GetEntity(Player);
+            Server.System<SharedTransformSystem>().SetCoordinates(player, SEntMan.GetComponent<TransformComponent>(helm.Owner).Coordinates);
+            SEntMan.EnsureComponent<PilotComponent>(player);
+            Server.System<ShuttleConsoleSystem>().AddPilot(helm.Owner, player, helm);
+            seizure.Check();
+            Assert.That(seizure.IsSeized(taken), Is.True, "With its crew down, the boarder at its helm holds it at once.");
             Assert.That(alerts.IsAttacker(hub, taken), Is.True, "Its own side takes it for an attacker before it fires.");
             Assert.That(Server.System<WGEncounterZoneSystem>().JustSeized(taken), Is.True, "The zones hold their fire while it is hailed.");
             Assert.That(SEntMan.GetComponent<WGReaverPatrolComponent>(patrol).Intercepting, Is.EqualTo(taken),

@@ -460,6 +460,7 @@ public sealed partial class DockingScreen : BoxContainer
 
             _ourDockButtons[dock.Entity] = button;
             DockPorts.AddChild(button);
+            WgAddDockLockToggle(dock); // WOLFGATE(DockLock): each port's lock key sits under its entry
         }
 
         // Button group needs one selected so just show the first one.

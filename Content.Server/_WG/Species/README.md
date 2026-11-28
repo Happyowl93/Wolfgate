@@ -93,6 +93,7 @@ it back up to Okay after any drain, a Kelotane overdose included, before their d
 - [`Content.IntegrationTests/Tests/_WG/Species/MismatchedPartsBodyTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Species/MismatchedPartsBodyTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Species/MismatchedPartsTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Species/MismatchedPartsTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Species/OptionalDefaultMarkingsTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Species/OptionalDefaultMarkingsTest.cs)
+- [`Content.IntegrationTests/Tests/_WG/Species/ProtogenFaceMarkingsTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Species/ProtogenFaceMarkingsTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Species/ReptilianColdSlowdownTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Species/ReptilianColdSlowdownTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Species/ShadekinNightVisionTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Species/ShadekinNightVisionTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Species/SpeciesLoadoutTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Species/SpeciesLoadoutTest.cs)
@@ -534,8 +535,12 @@ it back up to Okay after any drain, a Kelotane overdose included, before their d
   - chassis part, was a Head, Chest, Arms or Legs marking
 - [`Resources/Prototypes/_EinsteinEngines/Voice/speech_emotes.yml`](../../../Resources/Prototypes/_EinsteinEngines/Voice/speech_emotes.yml): was the default scream icon
 - [`Resources/Prototypes/_FarHorizons/Entities/Mobs/Customization/protogen.yml`](../../../Resources/Prototypes/_FarHorizons/Entities/Mobs/Customization/protogen.yml)
+  - face markings (LED faces, visors, snouts) belong to the Head and use layering to draw at the RHand, RFoot or LFoot layer.
   - ported from HardLight
   - shaped for this species; was the Proto subspecies' own
+  - head-owned face marking drawn at the LFoot layer, so a replaced foot keeps it
+  - head-owned face marking drawn at the RHand layer, so a replaced hand keeps it
+  - head-owned face marking drawn at the RFoot layer, so a replaced foot keeps it
 - [`Resources/Prototypes/_FarHorizons/radio_channels.yml`](../../../Resources/Prototypes/_FarHorizons/radio_channels.yml): ported from HardLight
 - [`Resources/Prototypes/_FarHorizons/SoundCollections/disease.yml`](../../../Resources/Prototypes/_FarHorizons/SoundCollections/disease.yml): Protogen subspecies, ported from HardLight
 - [`Resources/Prototypes/_FarHorizons/SoundCollections/emotes.yml`](../../../Resources/Prototypes/_FarHorizons/SoundCollections/emotes.yml): Protogen subspecies, ported from HardLight

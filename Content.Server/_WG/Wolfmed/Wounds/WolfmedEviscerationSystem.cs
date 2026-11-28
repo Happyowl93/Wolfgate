@@ -1,5 +1,7 @@
 using Content.Server._WG.Wolfmed.Gore;
+using Content.Server.Body.Components;
 using Content.Shared._Onyx.Wounds;
+using Content.Shared._Shitmed.Cybernetics;
 using Content.Shared._Shitmed.Medical.Surgery;
 using Content.Shared._Shitmed.Medical.Surgery.Steps.Parts;
 using Content.Shared._WG.Wolfmed.Body;
@@ -114,7 +116,7 @@ public sealed partial class WolfmedEviscerationSystem : EntitySystem
     }
 
     /// <summary>
-    /// Puts the listed organ slots on the deck around the body. The brain is never listed: it is in the
+    /// Puts the listed organ slots, and cyberware if the spec says so, on the deck around the body. The brain is never listed: it is in the
     /// head, and a chassis keeps its positronic one for the same reason.
     /// </summary>
     private void Eject(
@@ -131,6 +133,7 @@ public sealed partial class WolfmedEviscerationSystem : EntitySystem
                 continue;
 
             if (!spec.Organs.Contains(slot) &&
+                !(spec.Cyberware && IsCyberware(organ)) &&
                 !(spec.VitalOrgans.Contains(slot) && (explosion || Roll(spec.VitalChance))))
                 continue;
 
@@ -148,6 +151,12 @@ public sealed partial class WolfmedEviscerationSystem : EntitySystem
         }
 
         _ejecting.Clear();
+    }
+
+    /// <summary>Cybernetic hardware, such as an augment heart or lungs, and never a brain.</summary>
+    private bool IsCyberware(EntityUid organ)
+    {
+        return HasComp<CyberneticsComponent>(organ) && !HasComp<BrainComponent>(organ);
     }
 
     /// <summary>The noise, the spray and the sentence. All of it reuses V2's and G1's shipped specs.</summary>

@@ -18,8 +18,8 @@ namespace Content.Server._WG.Encounters.Systems;
 
 /// <summary>
 /// Notices encounter ships that boarders have taken and marks them with <see cref="WGCrewSeizedHullComponent"/>: one
-/// with none of its crew left alive aboard and a stranger on it, or with a stranger at its helm or gunnery whom its crew
-/// is fighting or never gave leave.
+/// with a stranger at its helm or gunnery and none of its crew left alive aboard, or whom its crew is fighting or
+/// never gave leave. Boarding or looting a dead-crew wreck doesn't seize it.
 /// Every ship of its own side nearby then takes it for an attacker, and keeps doing so while it stays seized. A crew
 /// back aboard with the boarders gone takes the ship back. Hulks are left to their salvage claim.
 /// </summary>
@@ -102,10 +102,11 @@ public sealed partial class WGEncounterSeizureSystem : EntitySystem
                 continue;
 
             var crew = _crews[grid];
-            // With its whole crew down, a stranger aboard holds it.
+            // With its whole crew down, a stranger who takes its helm or guns holds it; boarding or looting doesn't.
             if (crew.Count == 0)
             {
-                Seize(grid);
+                if (strangers.Any(uid => AtControls(grid, uid)))
+                    Seize(grid);
                 continue;
             }
 

@@ -70,6 +70,16 @@ namespace Content.Client.Ame.UI
             // format power statistics to pretty numbers
             CurrentPowerSupply.Text = $"{castState.CurrentPowerSupply:N1}";
             TargetedPowerSupply.Text = $"{castState.TargetedPowerSupply:N1}";
+            // WOLFGATE(IreWarnings) START: core stability and safe injection limit
+            WGCoreStability.Text = Loc.GetString("wg-ire-window-stability-value", ("stability", castState.WGStability));
+            WGCoreStability.FontColorOverride = castState.WGStability switch
+            {
+                < 50 => Color.Red,
+                < 80 => Color.Yellow,
+                _ => null,
+            };
+            WGSafeInjectionLimit.Text = $"{castState.WGSafeInjectionLimit}";
+            // WOLFGATE END
         }
     }
 }

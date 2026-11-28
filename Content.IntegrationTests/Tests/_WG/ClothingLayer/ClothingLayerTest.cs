@@ -210,6 +210,24 @@ public sealed class ClothingLayerTest : InteractionTest
         await AssertDrawn(target, "eyes", true);
     }
 
+    [Test]
+    public async Task CapeletDrawsUnderHairOtherNeckwearOver()
+    {
+        var target = await SpawnTarget("MobHuman");
+
+        await Equip(target, ("WGAsfClothingNeckCapelet", "neck"), ("WGAsfClothingNeckCape", "neck2"));
+        await Client.WaitAssertion(() =>
+        {
+            var spriteUid = ToClient(target);
+            var sprite = CEntMan.GetComponent<SpriteComponent>(spriteUid);
+            var sprites = CEntMan.System<SpriteSystem>();
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), HumanoidVisualLayers.Hair, out var hair, false), Is.True);
+            Assert.That(sprites.LayerMapTryGet((spriteUid, sprite), HumanoidVisualLayers.FacialHair, out var beard, false), Is.True);
+            Assert.That(Indices(target, "neck").Max(), Is.LessThan(Math.Min(hair, beard)), "The capelet drew over the hair.");
+            Assert.That(Indices(target, "neck2").Min(), Is.GreaterThan(hair), "Other neckwear moved under the hair too.");
+        });
+    }
+
     private async Task<EntityUid[]> Equip(NetEntity target, params (string Proto, string Slot)[] items)
     {
         var spawned = new EntityUid[items.Length];

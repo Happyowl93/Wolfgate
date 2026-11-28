@@ -145,6 +145,7 @@ public sealed partial class AmeControllerSystem : EntitySystem
         // WOLFGATE END
 
         var state = GetUiState(uid, controller);
+        WGFillIreState(uid, state); // WOLFGATE(IreWarnings): core stability and safe injection limit for the window
         _userInterfaceSystem.SetUiState(uid, AmeControllerUiKey.Key, state);
 
         controller.NextUIUpdate = _gameTiming.CurTime + controller.UpdateUIPeriod;

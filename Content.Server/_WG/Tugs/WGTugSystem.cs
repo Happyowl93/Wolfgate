@@ -1,4 +1,6 @@
 using System.Numerics;
+using Content.Server._WG.Performance;
+using Content.Server.Shuttles.Components;
 using Content.Shared._WG.Tugs;
 using Content.Shared._WG.Vehicles.Grid.Components;
 using Content.Shared.DoAfter;
@@ -34,6 +36,7 @@ public sealed partial class WGTugSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private SharedMapSystem _maps = default!;
     [Dependency] private TurfSystem _turf = default!;
+    [Dependency] private WGDockIndexSystem _dockIndex = default!;
 
     public override void Initialize()
     {
@@ -357,13 +360,17 @@ public sealed partial class WGTugSystem : EntitySystem
 
     private void UpdateTrain(Entity<WGTugComponent> tug, TransformComponent xform)
     {
-        // A tug that leaves its grid (a fall, a jump, another ship) leaves its train behind.
-        if (tug.Comp.TrailGrid is not { } grid || xform.ParentUid != grid)
+        // A tug that leaves its grid (a fall, a jump, a ship it isn't docked to) leaves its train behind; one that
+        // drives onto a grid docked to its own takes the train across.
+        if (tug.Comp.TrailGrid is not { } trailGrid
+            || (xform.ParentUid != trailGrid && !TryFollowOnto(tug, trailGrid, xform.ParentUid))
+            || !TryComp(xform.ParentUid, out MapGridComponent? gridComp))
         {
             UncoupleFrom(tug, 0);
             return;
         }
 
+        var grid = xform.ParentUid;
         var trail = tug.Comp.Trail;
         var pos = xform.LocalPosition;
         var reversing = TryComp(tug, out GridVehicleMoverComponent? mover) && mover.CurrentSpeed < 0f;
@@ -373,12 +380,11 @@ public sealed partial class WGTugSystem : EntitySystem
         var fallback = -xform.LocalRotation.ToWorldVec();
 
         // The train cannot back through a wall: a car about to enter one stops the tug.
-        if (reversing && mover != null && TryComp(grid, out MapGridComponent? gridComp))
+        if (reversing && mover != null)
         {
             var lastDistance = WGTugTrail.Distance(tug.Comp, tug.Comp.Trolleys.Count - 1);
             var (lastPoint, _) = WGTugTrail.Sample(pos, trail, lastDistance, fallback);
-            var tile = _maps.TileIndicesFor(grid, gridComp, new EntityCoordinates(grid, lastPoint));
-            if (_turf.IsTileBlocked(grid, tile, CollisionGroup.Impassable, gridComp))
+            if (IsPointBlocked((grid, gridComp), lastPoint))
             {
                 // Back where the train last stood free, or the tug would creep into its own cars tick by tick.
                 var last = tug.Comp.LastFreePosition;
@@ -398,31 +404,136 @@ public sealed partial class WGTugSystem : EntitySystem
         for (var i = 0; i < tug.Comp.Trolleys.Count; i++)
         {
             var car = tug.Comp.Trolleys[i];
-            if (TerminatingOrDeleted(car))
+            if (TerminatingOrDeleted(car) || IsCutOff(car, grid))
             {
                 UncoupleFrom(tug, i);
                 return;
             }
 
             var (point, forward) = WGTugTrail.Sample(pos, trail, WGTugTrail.Distance(tug.Comp, i), fallback);
-            PlaceCar(car, grid, point, forward.ToWorldAngle());
+            PlaceCar(car, (grid, gridComp), point, forward.ToWorldAngle());
         }
 
         WGTugTrail.Trim(trail, pos, needed + WGTugTrail.Slack, ref tug.Comp.TailForward);
     }
 
-    private void PlaceCar(EntityUid car, EntityUid grid, Vector2 point, Angle rotation)
+    /// <summary>
+    /// Carries the train's trail onto the grid the tug just drove onto, re-laid in that grid's frame, if the two grids
+    /// are docked to each other.
+    /// </summary>
+    private bool TryFollowOnto(Entity<WGTugComponent> tug, EntityUid from, EntityUid to)
     {
-        var xform = Transform(car);
-        if (xform.ParentUid != grid)
+        if (TerminatingOrDeleted(from) || !HasComp<MapGridComponent>(from) || !HasComp<MapGridComponent>(to)
+            || !IsDockedTo(from, to))
+            return false;
+
+        var reframe = _transform.GetWorldMatrix(from) * _transform.GetInvWorldMatrix(to);
+        WGTugTrail.Reframe(tug.Comp.Trail, reframe, ref tug.Comp.TailForward);
+        tug.Comp.LastFreePosition = Vector2.Transform(tug.Comp.LastFreePosition, reframe);
+        tug.Comp.TrailGrid = to;
+        return true;
+    }
+
+    /// <summary>Whether a car was left on a grid that has since undocked from the train's; it drops off with the cars behind it.</summary>
+    private bool IsCutOff(EntityUid car, EntityUid grid)
+    {
+        var parent = Transform(car).ParentUid;
+        return parent != grid && HasComp<MapGridComponent>(parent) && !IsDockedTo(grid, parent);
+    }
+
+    /// <summary>Whether a dock on one grid is docked to the other grid.</summary>
+    private bool IsDockedTo(EntityUid grid, EntityUid other)
+    {
+        if (_dockIndex.DocksOn(grid) is not { } docks)
+            return false;
+
+        foreach (var dock in docks)
         {
-            _transform.SetCoordinates(car, xform, new EntityCoordinates(grid, point), rotation);
+            if (TryComp(dock, out DockingComponent? docking) && docking.DockedWith is { } with
+                && TryComp(with, out TransformComponent? withXform) && withXform.GridUid == other)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// The grid that holds a point on the trail's grid, and the tile under it: that grid where it has floor, else a
+    /// docked grid with floor there. Null over no floor at all.
+    /// </summary>
+    private (Entity<MapGridComponent> Grid, Vector2 Local, Vector2i Tile)? FloorAt(Entity<MapGridComponent> grid, Vector2 point)
+    {
+        var tile = _maps.TileIndicesFor(grid, grid.Comp, new EntityCoordinates(grid, point));
+        if (!_maps.GetTileRef(grid, grid.Comp, tile).Tile.IsEmpty)
+            return (grid, point, tile);
+
+        var world = Vector2.Transform(point, _transform.GetWorldMatrix(grid));
+        if (DockedFloorAt(grid, world) is not { } docked)
+            return null;
+
+        var local = Vector2.Transform(world, _transform.GetInvWorldMatrix(docked));
+        return (docked, local, _maps.TileIndicesFor(docked, docked.Comp, new EntityCoordinates(docked, local)));
+    }
+
+    /// <summary>Whether a wall stands under a point, on the trail's grid or on the docked grid whose floor is there.</summary>
+    private bool IsPointBlocked(Entity<MapGridComponent> grid, Vector2 point)
+    {
+        return FloorAt(grid, point) is { } floor
+            && _turf.IsTileBlocked(floor.Grid, floor.Tile, CollisionGroup.Impassable, floor.Grid.Comp);
+    }
+
+    /// <summary>A grid docked to this one with floor under the world point, if any.</summary>
+    private Entity<MapGridComponent>? DockedFloorAt(EntityUid grid, Vector2 world)
+    {
+        if (_dockIndex.DocksOn(grid) is not { } docks)
+            return null;
+
+        foreach (var dock in docks)
+        {
+            if (!TryComp(dock, out DockingComponent? docking) || docking.DockedWith is not { } with
+                || !TryComp(with, out TransformComponent? withXform) || withXform.GridUid is not { } other
+                || other == grid || !TryComp(other, out MapGridComponent? otherComp))
+                continue;
+
+            var local = Vector2.Transform(world, _transform.GetInvWorldMatrix(other));
+            var tile = _maps.TileIndicesFor(other, otherComp, new EntityCoordinates(other, local));
+            if (!_maps.GetTileRef(other, otherComp, tile).Tile.IsEmpty)
+                return (other, otherComp);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Puts a car at its point on the trail: on the trail's grid or, while the train crosses a dock, on the docked grid
+    /// whose floor lies there. A point inside a wall or over no floor holds the car where it is, so it is never put in
+    /// a wall to be shoved off the deck.
+    /// </summary>
+    private void PlaceCar(EntityUid car, Entity<MapGridComponent> grid, Vector2 point, Angle rotation)
+    {
+        if (FloorAt(grid, point) is not { } floor)
+            return;
+
+        var target = floor.Grid;
+        var tile = floor.Tile;
+        if (target.Owner != grid.Owner)
+            rotation += _transform.GetWorldRotation(grid) - _transform.GetWorldRotation(target);
+        point = floor.Local;
+
+        var xform = Transform(car);
+        if (xform.ParentUid == target.Owner &&
+            (xform.LocalPosition - point).LengthSquared() < 0.00001f &&
+            Math.Abs(Angle.ShortestDistance(xform.LocalRotation, rotation).Degrees) < 0.5)
+        {
             return;
         }
 
-        if ((xform.LocalPosition - point).LengthSquared() < 0.00001f &&
-            Math.Abs(Angle.ShortestDistance(xform.LocalRotation, rotation).Degrees) < 0.5)
+        if (_turf.IsTileBlocked(target, tile, CollisionGroup.Impassable, target.Comp))
+            return;
+
+        if (xform.ParentUid != target.Owner)
         {
+            _transform.SetCoordinates(car, xform, new EntityCoordinates(target, point), rotation);
             return;
         }
 

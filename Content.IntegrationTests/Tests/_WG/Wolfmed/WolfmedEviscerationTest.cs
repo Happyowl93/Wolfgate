@@ -301,6 +301,53 @@ public sealed class WolfmedEviscerationTest : WolfmedGameTest
     }
 
     /// <summary>
+    /// A cut that leaves flesh behind the ribs still spills the cyberware there: an augment heart and lungs
+    /// come out with the abdomen.
+    /// </summary>
+    [Test]
+    public async Task CutSpillsChestCyberwareTest()
+    {
+        var server = Pair.Server;
+        await server.WaitIdleAsync();
+        var entities = server.ResolveDependency<IEntityManager>();
+        var map = await CreateTestMap();
+
+        await server.WaitAssertion(() =>
+        {
+            var bodies = entities.System<SharedBodySystem>();
+            var body = Patient(entities, map.GridCoords, out var torso);
+            var cyberware = new Dictionary<string, EntityUid>();
+            foreach (var (slot, proto) in new[] { ("heart", "OrganHeartSandevistan"), ("lungs", "OrganInternalAirSystem") })
+            {
+                var old = Organs(entities, torso)[slot];
+                Assert.That(bodies.RemoveOrgan(old), Is.True);
+                entities.DeleteEntity(old);
+                var organ = entities.SpawnEntity(proto, map.GridCoords);
+                Assert.That(bodies.InsertOrgan(torso, organ, slot), Is.True, $"{proto} didn't go in the {slot} slot.");
+                cyberware[slot] = organ;
+            }
+
+            Forced(entities, 1f); // Nothing rolled: flesh in these slots would stay.
+            Cut(entities, body, Cap);
+            Cut(entities, body, BigSlash);
+
+            var after = Organs(entities, torso);
+            Assert.Multiple(() =>
+            {
+                foreach (var (slot, organ) in cyberware)
+                {
+                    Assert.That(after.ContainsKey(slot), Is.False, $"the cyberware in the {slot} slot is still in the torso.");
+                    Assert.That(entities.System<SharedContainerSystem>().IsEntityInContainer(organ), Is.False,
+                        $"the cyberware in the {slot} slot is not on the floor.");
+                }
+
+                foreach (var slot in Abdominal)
+                    Assert.That(after.ContainsKey(slot), Is.False, $"and the {slot} with it.");
+            });
+        });
+    }
+
+    /// <summary>
     /// What a medic can and cannot do with items: gauze holds the flow and nothing more, sutures and
     /// brute packs do nothing at all, and the surgery is the only exit.
     /// </summary>

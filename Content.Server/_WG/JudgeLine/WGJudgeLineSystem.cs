@@ -35,7 +35,7 @@ using Robust.Shared.Utility;
 namespace Content.Server._WG.JudgeLine;
 
 /// <summary>
-/// The Judge Line: a vagrant in the Colossus sector pays to call a judge ship to an emergency. Calls queue for a free
+/// The Judge Line: a vagrant or judge in the Colossus sector pays to call a judge ship to an emergency. Calls queue for a free
 /// responder, which drops out of FTL near the caller after the dispatch delay, checks the emergency is real and deals
 /// with it (see the Plan partial), then leaves.
 /// </summary>
@@ -109,10 +109,12 @@ public sealed partial class WGJudgeLineSystem : EntitySystem
         _nextId = 1;
     }
 
-    /// <summary>Installs the Judge Line app on a vagrant's PDA.</summary>
+    /// <summary>Installs the Judge Line app on a vagrant's or judge's PDA.</summary>
     private void OnPlayerSpawned(PlayerSpawnCompleteEvent ev)
     {
-        if (ev.JobId != SharedGameTicker.FallbackOverflowJob.Id || _companies.CompanyIdOf(ev.Player) != null
+        var vagrant = ev.JobId == SharedGameTicker.FallbackOverflowJob.Id && _companies.CompanyIdOf(ev.Player) == null;
+        var judge = ev.JobId is { } job && WGBenchSystem.JudgeJobs.Contains(job);
+        if ((!vagrant && !judge)
             || !_inventory.TryGetSlotEntity(ev.Mob, "id", out var pda) || !HasComp<CartridgeLoaderComponent>(pda))
             return;
 
@@ -149,6 +151,12 @@ public sealed partial class WGJudgeLineSystem : EntitySystem
             && _companies.CompanyIdOf(actor.PlayerSession) == null;
     }
 
+    /// <summary>Whether someone may use the Judge Line: a vagrant, or a judge or the Overseer calling for backup.</summary>
+    public bool MayCall(EntityUid user)
+    {
+        return IsVagrant(user) || _bench.IsJudge(user);
+    }
+
     /// <summary>The open call someone placed, if any.</summary>
     public WGJudgeLineCall? CallOf(EntityUid caller)
     {
@@ -160,8 +168,8 @@ public sealed partial class WGJudgeLineSystem : EntitySystem
     {
         if (!_config.GetCVar(JudgeLineCVars.Enabled))
             return Loc.GetString("wg-judgeline-refuse-offline");
-        if (!IsVagrant(caller))
-            return Loc.GetString("wg-judgeline-refuse-not-vagrant");
+        if (!MayCall(caller))
+            return Loc.GetString("wg-judgeline-refuse-not-eligible");
         if (CallOf(caller) != null)
             return Loc.GetString("wg-judgeline-refuse-open");
 

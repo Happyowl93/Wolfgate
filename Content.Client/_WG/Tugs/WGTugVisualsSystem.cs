@@ -79,6 +79,13 @@ public sealed class WGTugVisualsSystem : EntitySystem
 
         var pos = xform.LocalPosition;
         var trail = tug.Comp.Trail;
+        // Driven onto a docked grid, the trail carries over in the new grid's frame, as on the server.
+        if (tug.Comp.TrailGrid is { } old && old != grid && trail.Count > 0 && _xforms.HasComp(old))
+        {
+            WGTugTrail.Reframe(trail, _transform.GetWorldMatrix(old) * _transform.GetInvWorldMatrix(grid), ref tug.Comp.TailForward);
+            tug.Comp.TrailGrid = grid;
+        }
+
         if (tug.Comp.TrailGrid != grid || trail.Count == 0 || count > tug.Comp.TrailCars)
         {
             // Like the server on coupling, the trail starts through the cars where they stand.
@@ -100,8 +107,15 @@ public sealed class WGTugVisualsSystem : EntitySystem
         for (var i = 0; i < count; i++)
         {
             var car = tug.Comp.Trolleys[i];
-            if (!_xforms.TryComp(car, out var carXform) || carXform.ParentUid != grid)
+            if (!_xforms.TryComp(car, out var carXform))
                 continue;
+
+            // A car still crossing from the docked grid draws where the server put it.
+            if (carXform.ParentUid != grid)
+            {
+                OffsetCar(car, Vector2.Zero);
+                continue;
+            }
 
             var (point, _) = WGTugTrail.Sample(pos, trail, WGTugTrail.Distance(tug.Comp, i), fallback);
             OffsetCar(car, gridRotation.RotateVec(point - carXform.LocalPosition));

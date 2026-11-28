@@ -132,7 +132,8 @@ public sealed partial class WGEncounterTest
             await Server.WaitAssertion(() =>
             {
                 Assert.That(line.IsVagrant(SPlayer), Is.False, "Someone with no job is no vagrant.");
-                Assert.That(line.Refusal(SPlayer), Is.EqualTo(Server.ResolveDependency<ILocalizationManager>().GetString("wg-judgeline-refuse-not-vagrant")));
+                Assert.That(line.MayCall(SPlayer), Is.False, "Nor a judge.");
+                Assert.That(line.Refusal(SPlayer), Is.EqualTo(Server.ResolveDependency<ILocalizationManager>().GetString("wg-judgeline-refuse-not-eligible")));
                 strikes = line.Strikes(SEntMan.GetComponent<ActorComponent>(SPlayer).PlayerSession.UserId);
                 var caller = ClampDeck(at).Grid;
                 SEntMan.GetComponent<ShuttleComponent>(caller).LinearThrust[0] = 1000f;
@@ -210,6 +211,61 @@ public sealed partial class WGEncounterTest
 
                 Server.System<SharedRoleSystem>().MindRemoveRole<JobRoleComponent>(mindId);
             });
+        });
+    }
+
+    /// <summary>
+    /// A judge stranded off-station may call their own people for backup, on the same terms as a vagrant: the call
+    /// takes the fee, and closing it starts the cooldown.
+    /// </summary>
+    [Test]
+    public async Task JudgeLineTakesCallsFromJudges()
+    {
+        await WithQuickJudges(async () =>
+        {
+            var line = Server.System<WGJudgeLineSystem>();
+            var bank = Server.System<BankSystem>();
+            var config = Server.ResolveDependency<IConfigurationManager>();
+            var fee = config.GetCVar(JudgeLineCVars.Fee);
+            EntityUid mindId = default;
+            try
+            {
+                await Server.WaitAssertion(() =>
+                {
+                    line.SectorOverride = MapData.MapId;
+                    var grid = ClampDeck(new Vector2(90000, -94000)).Grid;
+                    Server.System<SharedTransformSystem>().SetCoordinates(SPlayer, new EntityCoordinates(grid, new Vector2(1.5f, 0.5f)));
+
+                    var minds = Server.System<MindSystem>();
+                    mindId = minds.CreateMind(ServerSession.UserId).Owner;
+                    minds.TransferTo(mindId, SPlayer, ghostCheckOverride: true, createGhost: false);
+                    Server.System<SharedRoleSystem>().MindAddJobRole(mindId, silent: true, jobPrototype: "SecurityGuard");
+                    Assert.That(line.IsVagrant(SPlayer), Is.False, "A judge is no vagrant.");
+                    Assert.That(line.MayCall(SPlayer), Is.True, "A judge may call the Judge Line.");
+
+                    SEntMan.EnsureComponent<BankAccountComponent>(SPlayer);
+                    bank.TryGetBalance(SPlayer, out var balance);
+                    if (balance < fee)
+                        bank.TryBankDeposit(SPlayer, fee - balance, tax: false);
+                    bank.TryGetBalance(SPlayer, out var before);
+
+                    config.SetCVar(JudgeLineCVars.Responders, 0);
+                    Assert.That(line.TryCall(SPlayer, WGJudgeLineKind.Stranded, out var refusal), Is.True, refusal);
+                    bank.TryGetBalance(SPlayer, out var charged);
+                    Assert.That(charged, Is.EqualTo(before - fee), "A judge pays the fee too.");
+
+                    Assert.That(line.Cancel(SPlayer), Is.True);
+                    Assert.That(line.Refusal(SPlayer), Is.Not.Null, "A judge waits out the cooldown like anyone.");
+                });
+            }
+            finally
+            {
+                await Server.WaitPost(() =>
+                {
+                    if (mindId.IsValid())
+                        Server.System<SharedRoleSystem>().MindRemoveRole<JobRoleComponent>(mindId);
+                });
+            }
         });
     }
 

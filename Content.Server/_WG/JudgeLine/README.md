@@ -1,9 +1,10 @@
 # JudgeLine
 
-A 911 line for vagrants. A vagrant (the overflow job, in no company) in the Colossus sector pays `wg.judgeline.fee`
-(50,000) to call a Caelestinus judge ship to an emergency, from the Judge Line PDA app (installed on vagrants' PDAs
-at spawn) or from the Judge Line verbs on any shuttle console. A caller on a station, owing the Bench, barred for
-hoaxes or on cooldown is refused.
+A 911 line for vagrants and judges. A vagrant (the overflow job, in no company) or a judge or the Overseer (the
+Bench's `WGBenchSystem.JudgeJobs`, so a stranded judge can call their own people for backup) in the Colossus sector
+pays `wg.judgeline.fee` (50,000) to call a Caelestinus judge ship to an emergency, from the Judge Line PDA app
+(installed on vagrants' and judges' PDAs at spawn) or from the Judge Line verbs on any shuttle console. Judges get no
+exemption: a caller on a station, owing the Bench, barred for hoaxes or on cooldown is refused.
 
 `WGJudgeLineSystem` queues calls for up to `wg.judgeline.responders` responders. A dispatched responder
 (`WGEncounterJudgeResponder`: Hornet, Lightning, Petra or Roswell with a pilot, gunner, paramedic and two guards)

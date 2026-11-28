@@ -443,6 +443,9 @@ namespace Content.Server.Shuttles.Systems
             if (WgClampHolds(uid, dock)) // WOLFGATE(Encounters): a raider's docking clamps hold the ship until released at its helm.
                 return;
 
+            if (WgDockLockRefusesUndock(uid, dock, args.Actor)) // WOLFGATE(DockLock): a locked port won't undock from its own helm
+                return;
+
             if (!CanUndock(dock))
             {
                 _popup.PopupCursor(Loc.GetString("shuttle-console-undock-fail"));
@@ -497,6 +500,9 @@ namespace Content.Server.Shuttles.Systems
                 return;
             }
 
+            if (WgDockLockRefusesDock(uid, ourDock.Value, targetDock.Value, args.Actor)) // WOLFGATE(DockLock): a locked port takes no new docking
+                return;
+
             // TODO: Move the CanDock stuff to the port state and also validate that stuff
             // Also need to check preventpilot + enabled / dockedwith
             if (!CanDock((ourDock.Value, ourDockComp), (targetDock.Value, targetDockComp)))
@@ -530,6 +536,11 @@ namespace Content.Server.Shuttles.Systems
                 return false;
             }
 
+            // WOLFGATE(DockLock) START: a locked port takes no new docking, from a helm or an autopilot
+            if (WgDockLocked(dockA) || WgDockLocked(dockB))
+                return false;
+            // WOLFGATE END
+
             // Frontier: mask docking types
             if ((dockA.Comp.DockType & dockB.Comp.DockType) == DockType.None)
                 return false;
@@ -552,6 +563,8 @@ namespace Content.Server.Shuttles.Systems
         {
             if (args.DockEntities.Count == 0)
                 return;
+
+            WgDockLockHoldAll(uid, args.DockEntities, args.Actor); // WOLFGATE(DockLock): locked ports stay docked
 
             var undockedAny = false;
 

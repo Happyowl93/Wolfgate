@@ -192,6 +192,11 @@ public sealed partial class ShipTargetingSystem : EntitySystem
 
             var targetMapPos = destMapPos.Offset(leadBy * hitTime);
 
+            // WOLFGATE(Drones) START: a drone holds fire while its carrier or a friendly ship is in the line
+            if (WGDroneHoldsFire(user, uid, targetMapPos))
+                continue;
+            // WOLFGATE END
+
             _cannon.AttemptFire(uid, user ?? uid, _transform.ToCoordinates(targetMapPos), noServer: true); // WOLFGATE(NpcCrew): attribute crew bursts without changing the muzzle.
         }
     }

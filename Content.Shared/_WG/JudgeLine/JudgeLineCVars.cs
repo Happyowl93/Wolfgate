@@ -2,11 +2,11 @@ using Robust.Shared.Configuration;
 
 namespace Content.Shared._WG.JudgeLine;
 
-/// <summary>Settings for the Judge Line, the vagrants' emergency call.</summary>
+/// <summary>Settings for the Judge Line, the emergency call for vagrants and judges.</summary>
 [CVarDefs]
 public sealed class JudgeLineCVars
 {
-    /// <summary>Whether vagrants can call the judges.</summary>
+    /// <summary>Whether vagrants and judges can call the judges.</summary>
     public static readonly CVarDef<bool> Enabled =
         CVarDef.Create("wg.judgeline.enabled", true, CVar.SERVERONLY);
 

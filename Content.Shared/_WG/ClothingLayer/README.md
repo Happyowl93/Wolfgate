@@ -79,6 +79,11 @@ item draws just above that layer and everything that slot is wearing, or with `b
 # Welding goggles over a hat.
 - type: WGClothingLayer
   layer: head
+
+# A capelet under the hair and beard (the ASF capelet), as SS13 draws the neck layer.
+- type: WGClothingLayer
+  layer: enum.HumanoidVisualLayers.FacialHair
+  below: true
 ```
 
 It is SS13's `alternate_worn_layer`. A layer the wearer doesn't have (a mannequin has no feet) leaves the item at its

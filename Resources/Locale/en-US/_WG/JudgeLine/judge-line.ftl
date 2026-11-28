@@ -15,7 +15,7 @@ wg-judgeline-kind-adrift-hint = You're in space with no ship.
 wg-judgeline-kind-assault-hint = You're being attacked in person.
 
 wg-judgeline-app-title = Judge Line
-wg-judgeline-app-intro = Call a Caelestinus judge ship to an emergency. Vagrants only, Colossus sector only. Costs {$fee} spesos. If the judges find no emergency, you lose the fee and can't call again for a while.
+wg-judgeline-app-intro = Call a Caelestinus judge ship to an emergency. Vagrants and judges only, Colossus sector only. Costs {$fee} spesos. If the judges find no emergency, you lose the fee and can't call again for a while.
 wg-judgeline-app-cancel = Cancel call
 wg-judgeline-app-queued = Waiting for a free ship (place {$place})
 wg-judgeline-app-dispatched = Judges arriving in {$seconds}s
@@ -26,7 +26,7 @@ wg-judgeline-app-open = [bold]{$kind}[/bold]: {$phase}
 
 wg-judgeline-refuse-offline = The Judge Line is closed.
 wg-judgeline-refuse-kind = That's not an emergency the judges handle.
-wg-judgeline-refuse-not-vagrant = The Judge Line only takes calls from vagrants.
+wg-judgeline-refuse-not-eligible = The Judge Line only takes calls from vagrants and judges.
 wg-judgeline-refuse-open = You already have a call open.
 wg-judgeline-refuse-sector = The judges only answer in the Colossus sector.
 wg-judgeline-refuse-station = You're on a station. Get help there.
@@ -48,7 +48,7 @@ wg-judgeline-status-hauled = The judges pulled you aboard.
 wg-judgeline-status-disembark = Docked. Please get off the judge ship.
 wg-judgeline-status-relief = The judges left you a relief crate with fuel and repair supplies. Their engineer is coming aboard to fuel your generator.
 wg-judgeline-status-refuelled = The judges fuelled your generator.
-wg-judgeline-status-resolved = Emergency over. The judges are leaving. Stay safe, vagrant.
+wg-judgeline-status-resolved = Emergency over. The judges are leaving. Stay safe.
 wg-judgeline-status-timeout = The judges can't stay any longer and are leaving.
 wg-judgeline-status-hoax = The judges found no emergency. Your fee is kept. False calls: {$strikes} of {$limit}.
 wg-judgeline-status-betrayed = Your ship fired on the judges. The call is void.
@@ -65,7 +65,7 @@ wg-judgeline-radio-boarded = Judges docking. Boarding party, stand down.
 wg-judgeline-radio-medical = Judges docking with a paramedic aboard.
 wg-judgeline-radio-stranded = Judges docking with relief supplies.
 wg-judgeline-radio-adrift = Judges alongside. Get to our airlock, we'll take you in.
-wg-judgeline-radio-assault = Judges on scene. Whoever's attacking that vagrant, back off.
+wg-judgeline-radio-assault = Judges on scene. Whoever's attacking our caller, back off.
 wg-judgeline-radio-hoax = No emergency here. Don't waste the judges' time.
 wg-judgeline-radio-leaving = Judges leaving. Fly safe.
 

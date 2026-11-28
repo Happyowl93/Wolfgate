@@ -42,7 +42,8 @@ the natural ground back instead of station plating and lattice (`WGPlanetTileBre
 the ground breaks the station way, down to the ground they built on. A blast never leaves plating or lattice on the
 ground: natural ground holds or opens into the caverns, and a player's floor never breaks through. Jetpacks only
 work in orbit and lattice goes straight onto natural ground. A room built on a planet holds its own air once it has a
-floor: bare ground counts as outdoors and keeps the planet's air. A world whose air its own life couldn't breathe lists
+floor: bare ground counts as outdoors and keeps the planet's air. So does a hole dug through soft ground to the layer
+below (Merak's sand), and the lattice and floor laid over it start from that air, not a vacuum. A world whose air its own life couldn't breathe lists
 that life in `WGPlanetNatives` on its network (wildlife tables, entities, slime breeds), and `WGPlanetNativesSystem`
 gives each `BreathingImmunity` while it is there; Carcinoma's carbon dioxide (`_WG/PlanetVents`) is the one so far.
 Players use landing thruster kits, parachutes and the
@@ -464,6 +465,7 @@ left dirty, and built again when someone comes near or a path is asked for acros
 - [`Content.IntegrationTests/Tests/_WG/Planets/CrashBreakupFallTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Planets/CrashBreakupFallTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Planets/CrashThrustTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Planets/CrashThrustTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Planets/CrashVehicleFallTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Planets/CrashVehicleFallTest.cs)
+- [`Content.IntegrationTests/Tests/_WG/Planets/DugHoleAtmosphereTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Planets/DugHoleAtmosphereTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Planets/FlightAudioLoadTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Planets/FlightAudioLoadTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Planets/FlightReadinessTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Planets/FlightReadinessTest.cs)
 - [`Content.IntegrationTests/Tests/_WG/Planets/FlightSafetyTest.cs`](../../../Content.IntegrationTests/Tests/_WG/Planets/FlightSafetyTest.cs)

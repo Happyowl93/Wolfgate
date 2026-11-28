@@ -9,7 +9,7 @@ public partial class SharedAmeControllerComponent : Component
 }
 
 [Serializable, NetSerializable]
-public sealed class AmeControllerBoundUserInterfaceState : BoundUserInterfaceState
+public sealed partial class AmeControllerBoundUserInterfaceState : BoundUserInterfaceState // WOLFGATE(IreWarnings): partial for the stability readout
 {
     public readonly bool HasPower;
     public readonly bool IsMaster;

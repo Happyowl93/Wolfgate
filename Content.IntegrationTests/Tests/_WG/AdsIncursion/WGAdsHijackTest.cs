@@ -28,7 +28,7 @@ public sealed class WGAdsHijackTest : WGAdsTestBase
 {
     private const string AdsProfile = "WGCrewProfileAds";
 
-    /// <summary>A node hull whose crew is downed under a boarder is seized at once; a sweep on patrol is turned to destroy it and takes it for an attacker.</summary>
+    /// <summary>A node hull whose crew is downed is seized once a boarder takes its helm; a sweep on patrol is turned to destroy it and takes it for an attacker.</summary>
     [Test]
     public async Task SeizedHullIsHuntedBySweeps()
     {
@@ -53,7 +53,16 @@ public sealed class WGAdsHijackTest : WGAdsTestBase
             Board(hull);
             KillCrew(node, "lead");
             seizure.Check();
-            Assert.That(seizure.IsSeized(hull), Is.True, "With its crew down, the boarder holds it at once.");
+            Assert.That(seizure.IsSeized(hull), Is.False, "Boarding a wreck whose crew is down doesn't take it.");
+
+            var helm = SEntMan.EntityQuery<ShuttleConsoleComponent>()
+                .First(console => SEntMan.GetComponent<TransformComponent>(console.Owner).GridUid == hull);
+            var player = SEntMan.GetEntity(Player);
+            Server.System<SharedTransformSystem>().SetCoordinates(player, SEntMan.GetComponent<TransformComponent>(helm.Owner).Coordinates);
+            SEntMan.EnsureComponent<PilotComponent>(player);
+            Server.System<ShuttleConsoleSystem>().AddPilot(helm.Owner, player, helm);
+            seizure.Check();
+            Assert.That(seizure.IsSeized(hull), Is.True, "With its crew down, the boarder at its helm holds it at once.");
             Assert.That(comp.Interdicting, Is.EqualTo(hull), "The sweep is pulled off patrol for it.");
             Assert.That(comp.Hunting && comp.Attacking, Is.True);
             Assert.That(Orders(sweep).Any(order => order.Kind == WGCrewObjectiveKind.Attack && order.Target == SEntMan.GetNetEntity(hull)),

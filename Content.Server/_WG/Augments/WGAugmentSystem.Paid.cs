@@ -7,6 +7,7 @@ using Content.Shared._WG.Augments;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Organ;
 using Content.Shared.Body.Part;
+using Content.Shared.Humanoid;
 using Content.Shared.Preferences;
 using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
@@ -33,6 +34,54 @@ public sealed partial class WGAugmentSystem
     {
         SubscribeLocalEvent<WGAugmentPaidComponent, PriceCalculationEvent>(OnPaidPrice);
         SubscribeLocalEvent<WGAugmentPaidComponent, EntityTerminatingEvent>(OnPaidTerminating);
+        // BodyComponent's removal event is taken by SharedBodySystem; paid augments are only marked on humanoids.
+        SubscribeLocalEvent<HumanoidAppearanceComponent, BodyPartRemovedEvent>(OnPartSevered);
+    }
+
+    /// <summary>Warns each character whose paid-for augments leave its body with a severed part.</summary>
+    private void OnPartSevered(Entity<HumanoidAppearanceComponent> ent, ref BodyPartRemovedEvent args)
+    {
+        if (_ticker.RunLevel != GameRunLevel.InRound || TerminatingOrDeleted(ent) || TerminatingOrDeleted(args.Part))
+            return;
+
+        foreach (var (owner, ids) in SeveredMarks(ent, args.Part))
+            WarnSevered(owner, ids);
+    }
+
+    /// <summary>The paid-for augments counted in a body that a part and everything under it carry, by owner.</summary>
+    internal Dictionary<WGAugmentOwner, HashSet<ProtoId<WGAugmentPrototype>>> SeveredMarks(EntityUid body, Entity<BodyPartComponent> part)
+    {
+        var marks = new Dictionary<WGAugmentOwner, HashSet<ProtoId<WGAugmentPrototype>>>();
+        foreach (var (child, childComp) in _body.GetBodyPartChildren(part, part.Comp))
+        {
+            Collect(child);
+            foreach (var (organ, _) in _body.GetPartOrgans(child, childComp))
+                Collect(organ);
+        }
+
+        return marks;
+
+        void Collect(EntityUid uid)
+        {
+            if (!TryComp<WGAugmentPaidComponent>(uid, out var paid))
+                return;
+
+            foreach (var (id, mark) in paid.Augments)
+            {
+                if (mark.Owner is { } owner && mark.Body == body)
+                    marks.GetOrNew(owner).Add(id);
+            }
+        }
+    }
+
+    private void WarnSevered(WGAugmentOwner owner, HashSet<ProtoId<WGAugmentPrototype>> ids)
+    {
+        if (!_players.TryGetSessionById(owner.User, out var session)
+            || _preferences.GetPreferencesOrNull(owner.User)?.Characters.GetValueOrDefault(owner.Slot) is not HumanoidCharacterProfile profile)
+            return;
+
+        var names = string.Join(", ", ids.Select(id => _proto.TryIndex(id, out var augment) ? WGAugmentRules.Name(augment, _proto) : id.Id));
+        _chat.DispatchServerMessage(session, Loc.GetString("wg-augments-severed", ("name", profile.Name), ("augments", names)));
     }
 
     /// <summary>A marked part outside the body it was counted in is worth what its augments sell back for.</summary>
@@ -63,7 +112,7 @@ public sealed partial class WGAugmentSystem
         var lost = ent.Comp.Augments
             .Where(a => a.Value.Owner != null && a.Value.Body != body && !BeingDeleted(a.Value.Body))
             .GroupBy(a => a.Value.Owner!.Value, a => a.Key);
-        return Task.WhenAll(lost.Select(owned => Revoke(owned.Key, owned.ToHashSet())).ToList());
+        return Task.WhenAll(lost.Select(owned => Revoke(owned.Key, owned.ToHashSet(), "wg-augments-destroyed")).ToList());
     }
 
     private bool BeingDeleted(EntityUid uid)
@@ -205,9 +254,9 @@ public sealed partial class WGAugmentSystem
 
     /// <summary>
     /// Takes augments off the profile of the character they were taken from, online or not, once someone else has
-    /// kept or sold the hardware.
+    /// kept or sold the hardware, telling them with <paramref name="message"/>.
     /// </summary>
-    private Task Revoke(WGAugmentOwner victim, HashSet<ProtoId<WGAugmentPrototype>> ids)
+    private Task Revoke(WGAugmentOwner victim, HashSet<ProtoId<WGAugmentPrototype>> ids, string message = "wg-augments-stolen")
     {
         // The victim's body is read like any other: these slots no longer count as changed in the creator.
         if (_played.TryGetValue(victim.User, out var played) && played.Slot == victim.Slot)
@@ -217,10 +266,10 @@ public sealed partial class WGAugmentSystem
             played.SpawnedImplants.ExceptWith(ids);
         }
 
-        return Queued(victim.User, () => RevokeProfile(victim, ids));
+        return Queued(victim.User, () => RevokeProfile(victim, ids, message));
     }
 
-    private async Task RevokeProfile(WGAugmentOwner victim, HashSet<ProtoId<WGAugmentPrototype>> ids)
+    private async Task RevokeProfile(WGAugmentOwner victim, HashSet<ProtoId<WGAugmentPrototype>> ids, string message)
     {
         try
         {
@@ -233,8 +282,8 @@ public sealed partial class WGAugmentSystem
 
                 var names = string.Join(", ", ids.Where(profile.AugmentUnlocks.Contains)
                     .Select(id => WGAugmentRules.Name(_proto.Index(id), _proto)));
-                _chat.DispatchServerMessage(session, Loc.GetString("wg-augments-stolen", ("name", profile.Name), ("augments", names)));
-                Log.Info($"{profile.Name} of user {victim.User} lost stolen augments: {string.Join(", ", ids)}.");
+                _chat.DispatchServerMessage(session, Loc.GetString(message, ("name", profile.Name), ("augments", names)));
+                Log.Info($"{profile.Name} of user {victim.User} lost augments ({message}): {string.Join(", ", ids)}.");
 
                 var selected = cached.SelectedCharacterIndex;
                 await _preferences.SetProfile(victim.User, victim.Slot, left);

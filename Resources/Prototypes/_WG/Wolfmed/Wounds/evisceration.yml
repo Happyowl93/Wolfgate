@@ -34,6 +34,8 @@
     - heart
     - lungs
     vitalChance: 0.15
+    # Cyberware in any slot comes out too: an augment heart or lungs isn't held in like flesh.
+    cyberware: true
     scatterSpeed: 2.5
     spillVolume: 30
 

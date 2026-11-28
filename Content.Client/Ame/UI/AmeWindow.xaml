@@ -56,5 +56,19 @@
             <Label Name="TargetedPowerSupply" Text="0" />
             <Label Text=" kW" />
         </BoxContainer>
+        <!-- WOLFGATE(IreWarnings) START: core stability and safe injection limit -->
+        <BoxContainer></BoxContainer>
+        <BoxContainer Orientation="Horizontal">
+            <Label Text="{Loc 'wg-ire-window-stability-label'}" />
+            <Label Text=" " />
+            <Label Name="WGCoreStability" Text="" />
+        </BoxContainer>
+        <BoxContainer></BoxContainer>
+        <BoxContainer Orientation="Horizontal">
+            <Label Text="{Loc 'wg-ire-window-safe-limit-label'}" />
+            <Label Text=" " />
+            <Label Name="WGSafeInjectionLimit" Text="0" />
+        </BoxContainer>
+        <!-- WOLFGATE END -->
     </GridContainer>
 </DefaultWindow>

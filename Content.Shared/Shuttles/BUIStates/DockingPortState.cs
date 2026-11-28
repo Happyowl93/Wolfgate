@@ -28,4 +28,5 @@ public sealed class DockingPortState
     // End Frontier
 
     public NetEntity? WgClampedBy; // WOLFGATE(Encounters): the raider grid whose docking clamps hold this port's joint.
+    public bool WgDockLocked; // WOLFGATE(DockLock): the port refuses new docking and undocking from its own helm.
 }

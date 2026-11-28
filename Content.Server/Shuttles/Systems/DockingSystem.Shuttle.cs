@@ -192,6 +192,11 @@ public sealed partial class DockingSystem
                     continue;
                 // End Frontier
 
+                // WOLFGATE(DockLock) START: a locked port takes no new docking
+                if (WgDockLocked(dockUid))
+                    continue;
+                // WOLFGATE END
+
                 foreach (var (gridDockUid, gridDock) in gridDocks)
                 {
                     var gridXform = _xformQuery.GetComponent(gridDockUid);
@@ -200,6 +205,11 @@ public sealed partial class DockingSystem
                     if ((gridDock.DockType & dockType) == DockType.None)
                         continue;
                     // End Frontier
+
+                    // WOLFGATE(DockLock) START: a locked port takes no new docking
+                    if (WgDockLocked(gridDockUid))
+                        continue;
+                    // WOLFGATE END
 
                     if (!CanDock(
                             shuttleDock, shuttleDockXform,
@@ -255,6 +265,11 @@ public sealed partial class DockingSystem
                             continue;
                         // End Frontier
 
+                        // WOLFGATE(DockLock) START: a locked port takes no new docking
+                        if (WgDockLocked(otherUid))
+                            continue;
+                        // WOLFGATE END
+
                         foreach (var (otherGridUid, otherGrid) in gridDocks)
                         {
                             if (otherGrid == gridDock)
@@ -264,6 +279,11 @@ public sealed partial class DockingSystem
                             if ((otherGrid.DockType & dockType) == DockType.None)
                                 continue;
                             // End Frontier
+
+                            // WOLFGATE(DockLock) START: a locked port takes no new docking
+                            if (WgDockLocked(otherGridUid))
+                                continue;
+                            // WOLFGATE END
 
                             // WOLFGATE(Performance) START: rule out pairs that land elsewhere before the tile walk, not after
                             // This loop runs for every valid placement, so walking tiles first went quadratic in dock
