@@ -9556,3 +9556,10 @@ Entries:
   id: 100612
   time: '2026-11-28T16:42:41.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/881
+- author: ImogenOC
+  changes:
+    - type: Remove
+      message: Custom markings no longer have a daily limit on saving new drawings.
+  id: 100613
+  time: '2026-11-28T17:35:48.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/882
