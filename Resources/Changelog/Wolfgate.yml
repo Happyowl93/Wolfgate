@@ -9574,3 +9574,114 @@ Entries:
   id: 100614
   time: '2026-11-28T18:11:59.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/878
+- author: ImogenOC
+  changes:
+    - type: Fix
+      message: >-
+        Magboots switched on in your hand no longer leave the magboots alert on
+        you.
+    - type: Fix
+      message: MODsuit voidboots no longer rubberband you in space.
+    - type: Fix
+      message: >-
+        A chameleon projector can't disguise you as a spent medipen any more,
+        which made you invisible.
+    - type: Fix
+      message: The Overseer's command door remote opens Caelestinus command doors.
+    - type: Fix
+      message: The stealth hardsuit can be turned in as contraband.
+    - type: Fix
+      message: Floor lights spawn with a bulb, so you can put it back once it's out.
+    - type: Fix
+      message: >-
+        The pool table window no longer closes on you at the corners of the
+        table.
+    - type: Fix
+      message: Emptied glasses stop showing the drink that was in them.
+    - type: Fix
+      message: >-
+        Medical patches can be peeled off again, and makeshift patches have a
+        name in the crafting menu.
+    - type: Fix
+      message: Numb patients no longer scream during surgery.
+    - type: Add
+      message: The medical biofabricator prints bio-synthetic kidneys and stomachs.
+    - type: Fix
+      message: >-
+        Avali can't fly up into orbit and fall, or fly up out through a landed
+        ship's roof.
+    - type: Fix
+      message: A raised hand shield also stops the poison in a bite it blocks.
+    - type: Fix
+      message: >-
+        Lizards can switch the jaws of life's mode instead of clipping their
+        claws.
+    - type: Fix
+      message: You can't fall asleep while critical or dead.
+    - type: Fix
+      message: Harpy horns draw over hair in the character editor.
+    - type: Fix
+      message: A reviver implant no longer keeps restarting your respawn timer.
+    - type: Fix
+      message: Borgs with no charged cell can't use their modules.
+    - type: Fix
+      message: >-
+        An AI that views a feed and then shunts into a borg gets its normal view
+        back.
+    - type: Fix
+      message: Faction borgs can whirr and boop.
+    - type: Fix
+      message: The ASY Commuter's SMES charges.
+    - type: Fix
+      message: >-
+        Company ship licences bought before the Hammerhead's rename can be
+        launched again.
+    - type: Fix
+      message: A ship flying past Anvilhold's repair bay no longer cancels your repair.
+    - type: Tweak
+      message: >-
+        The docking screen's lock panel is now called FTL Dock Lock, which is
+        what it does.
+    - type: Fix
+      message: >-
+        The Judge Line comes back for you if you fall off their ship before
+        reaching the station.
+    - type: Fix
+      message: Taking a contract with full hands tells you where the parcel was left.
+    - type: Fix
+      message: PDA apps like ColoTalk no longer go blank after the PDA is reopened.
+    - type: Fix
+      message: The ATM's savings text is formatted and fits in the window.
+    - type: Fix
+      message: Admins dragging a manifested admin no longer black-screen their game.
+    - type: Fix
+      message: >-
+        Plant analyzers can't move a plant's growth stages, which broke its
+        sprite.
+    - type: Tweak
+      message: The loudest combat music tracks are quieter, closer to the rest.
+    - type: Fix
+      message: The PDV Helios briefing stage windoor faces the right way.
+    - type: Fix
+      message: A wall no longer blocks a maintenance hatch at Caelestinus Central.
+    - type: Fix
+      message: The Executive's lava lamp can be reached.
+    - type: Tweak
+      message: The Hydra battery builds heat like the other large guns.
+    - type: Tweak
+      message: >-
+        Safety deposit boxes take only the BROOD mk.I of the Viper Group
+        hardsuits.
+    - type: Fix
+      message: Closed curtains no longer push crates off the ship.
+    - type: Tweak
+      message: Medkits only hold medical gear.
+    - type: Fix
+      message: Mercenary's loadout can be set in the lobby.
+    - type: Tweak
+      message: >-
+        TSF infantry IDs carry TSF access instead of command access, and open
+        their garrison.
+  id: 100615
+  time: '2026-11-28T19:35:15.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/883
