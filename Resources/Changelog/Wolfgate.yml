@@ -9685,3 +9685,40 @@ Entries:
   id: 100615
   time: '2026-11-28T19:35:15.0000000+00:00'
   url: https://github.com/VanguardControl/Wolfgate/pull/883
+- author: ImogenOC
+  changes:
+    - type: Add
+      message: >-
+        The IRE window shows core stability and the safe injection limit, and it
+        sounds an alarm when stability drops below half.
+    - type: Fix
+      message: >-
+        Carrier drones hold fire when a shot would cross their own carrier, a
+        sibling drone or a friendly ship.
+    - type: Tweak
+      message: >-
+        A ship whose crew is dead is only seized when a stranger takes its helm
+        or guns, so you can board and loot it.
+    - type: Add
+      message: >-
+        Docking ports can be locked from the docking screen to refuse docking
+        and undocking.
+    - type: Add
+      message: >-
+        You're warned when a limb carrying your augments is cut off, and a
+        destroyed augment no longer says it was stolen.
+    - type: Tweak
+      message: Evisceration can tear out chest cyberware.
+    - type: Fix
+      message: The ASF capelet draws under hair.
+    - type: Fix
+      message: A cybernetic hand or foot no longer removes a protogen's face markings.
+    - type: Tweak
+      message: Judges and the Overseer can call the Judge Line for backup.
+    - type: Fix
+      message: >-
+        Luggage tug trolleys follow the tug through docking airlocks, and no
+        longer end up inside walls.
+  id: 100616
+  time: '2026-11-28T19:35:49.0000000+00:00'
+  url: https://github.com/VanguardControl/Wolfgate/pull/884
