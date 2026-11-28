@@ -241,7 +241,7 @@ public sealed partial class WGCompanyTest
                 var body = owner.AttachedEntity!.Value;
                 var grid = em.GetComponent<TransformComponent>(body).GridUid!.Value;
                 Assert.That(em.GetComponent<Content.Shared.Shuttles.Components.IFFComponent>(grid).Color,
-                    Is.EqualTo(em.GetComponent<WGCompanyShipComponent>(grid).Colour));
+                    Is.EqualTo(WGCompanyPolicy.RadarColour(em.GetComponent<WGCompanyShipComponent>(grid).Colour)));
                 var access = server.System<Content.Server._WG.ShipAccess.WGShipAccessServerSystem>();
                 var ship = new Entity<Content.Shared._WG.ShipAccess.WGShipAccessComponent>(grid, em.GetComponent<Content.Shared._WG.ShipAccess.WGShipAccessComponent>(grid));
                 Assert.That(access.TryLinkCompany(ship, body), Is.True);

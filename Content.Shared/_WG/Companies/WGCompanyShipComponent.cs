@@ -2,7 +2,7 @@ using Robust.Shared.GameStates;
 
 namespace Content.Shared._WG.Companies;
 
-/// <summary>A ship flying under a player company, shown on its IFF label.</summary>
+/// <summary>A ship flying under a player company, shown on its IFF label unless the hull flies for a faction.</summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class WGCompanyShipComponent : Component
 {
@@ -21,8 +21,4 @@ public sealed partial class WGCompanyShipComponent : Component
     /// <summary>The IFF colour before the company's was applied, restored when the ship stops flying for it.</summary>
     [DataField]
     public Color? PreviousIffColour;
-
-    /// <summary>The faction company the ship carried, whose colour would otherwise replace the company's on radar labels.</summary>
-    [DataField]
-    public string? PreviousFaction;
 }
