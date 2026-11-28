@@ -2,6 +2,7 @@ using System.Linq;
 using Content.Server._WG.ShipAccess;
 using Content.Shared._Mono.Company;
 using Content.Shared._WG.Companies;
+using Content.Shared._WG.NpcCrew;
 using Content.Shared._WG.ShipAccess;
 using Content.Shared.Access.Components;
 using Content.Shared.Shuttles.Components;
@@ -107,10 +108,20 @@ public sealed partial class WGCompanySystem
                 ship.Colour = company.Colour;
                 Dirty(uid, ship);
             }
-            // The faction company on a ship overrides the colour of its radar label.
-            if (TryComp<CompanyComponent>(uid, out var faction) && !string.IsNullOrEmpty(faction.CompanyName))
+            // A faction hull shows only its faction; the company's colour is for factionless ships.
+            TryComp<CompanyComponent>(uid, out var faction);
+            if (WGCompanyFamily.Of(faction?.CompanyName.Id).Length > 0)
             {
-                ship.PreviousFaction ??= faction.CompanyName;
+                if (ship.PreviousIffColour is { } own)
+                {
+                    ship.PreviousIffColour = null;
+                    _shuttles.SetIFFColor(uid, own, iff);
+                }
+                continue;
+            }
+            // A "None" faction's white would otherwise replace the company's colour on radar labels.
+            if (faction != null && !string.IsNullOrEmpty(faction.CompanyName))
+            {
                 faction.CompanyName = string.Empty;
                 Dirty(uid, faction);
             }
@@ -171,10 +182,5 @@ public sealed partial class WGCompanySystem
             return;
         if (ship.Comp.PreviousIffColour is { } colour)
             _shuttles.SetIFFColor(ship, colour);
-        if (ship.Comp.PreviousFaction is { } previous && TryComp<CompanyComponent>(ship, out var faction))
-        {
-            faction.CompanyName = previous;
-            Dirty(ship, faction);
-        }
     }
 }

@@ -10,7 +10,6 @@ using Content.Server.Construction.Components;
 using Content.Server.Materials;
 using Content.Shared._Crescent.Hardpoints;
 using Content.Shared._Mono.Company;
-using Content.Shared._WG.Companies;
 using Content.Shared._Mono.ShipRepair.Components;
 using Content.Shared._NF.Shipyard.Components;
 using Content.Shared._WG.Drydock;
@@ -214,13 +213,10 @@ public sealed partial class WGDrydockSystem
         return Loc.GetString("drydock-console-break-own-faction");
     }
 
-    /// <summary>The faction a ship flies for, including one a player company's flag hides, or null.</summary>
+    /// <summary>The faction a ship flies for, or null.</summary>
     private string? ShipFaction(EntityUid ship)
     {
         var faction = CompOrNull<CompanyComponent>(ship)?.CompanyName.Id;
-        if (string.IsNullOrEmpty(faction))
-            faction = CompOrNull<WGCompanyShipComponent>(ship)?.PreviousFaction;
-
         return string.IsNullOrEmpty(faction) || faction == NoFaction ? null : faction;
     }
 

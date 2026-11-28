@@ -68,8 +68,9 @@ public abstract partial class SharedShuttleSystem
             }
         }
 
-        // WOLFGATE(Companies) START: a player company's ship shows its tag and name
-        if (TryComp<Content.Shared._WG.Companies.WGCompanyShipComponent>(gridUid, out var playerCompany))
+        // WOLFGATE(Companies) START: a factionless player company's ship shows its tag and name
+        if (TryComp<Content.Shared._WG.Companies.WGCompanyShipComponent>(gridUid, out var playerCompany)
+            && Content.Shared._WG.NpcCrew.WGCompanyFamily.Of(companyComp?.CompanyName.Id).Length == 0)
         {
             companyName = $"[{playerCompany.Tag}] {playerCompany.Name}";
             companyColor = playerCompany.Colour;

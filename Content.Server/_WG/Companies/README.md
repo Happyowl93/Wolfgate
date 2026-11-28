@@ -85,8 +85,9 @@ character's bank, with an optional note; the member gets a chat message and the 
 
 **Ship access.** Ship access consoles gain a Company mode and a Company door rule beside Crew: choosing either links the
 ship to the player's company (`WGShipCompanyLinkEvent`), and the ID cards of members playing this round open it.
-Company crew and hangar ships link automatically. Their IFF label shows `[TAG] Name` and the radar colour turns to the
-company colour, restored if the ship stops flying for it.
+Company crew and hangar ships link automatically. A factionless company ship's IFF label shows `[TAG] Name` and the
+radar colour turns to the company colour, restored if the ship stops flying for it. A ship whose hull flies for a faction
+shows only the faction, so faction fleets read as one colour.
 
 **Joining as your rank.** Outside crews, Join the round as <rank> in the Company window. In Crew Setup, a member sees
 Join as <rank> on their own company's crews: it takes no opening, gives the rank's base job and puts the rank title on
@@ -224,7 +225,7 @@ tables via `ServerDbBase.Companies`); it reloads at each round restart once pend
 - [`Content.Server/Medical/SuitSensors/SuitSensorSystem.cs`](../../Medical/SuitSensors/SuitSensorSystem.cs): the company rank on the ID, for its custom job icon
 - [`Content.Shared/CrewManifest/SharedCrewManifestSystem.cs`](../../../Content.Shared/CrewManifest/SharedCrewManifestSystem.cs): rank whose custom icon replaces JobIcon
 - [`Content.Shared/Medical/SuitSensor/SharedSuitSensor.cs`](../../../Content.Shared/Medical/SuitSensor/SharedSuitSensor.cs): rank whose custom icon replaces JobIcon
-- [`Content.Shared/Shuttles/Systems/SharedShuttleSystem.IFF.cs`](../../../Content.Shared/Shuttles/Systems/SharedShuttleSystem.IFF.cs): a player company's ship shows its tag and name
+- [`Content.Shared/Shuttles/Systems/SharedShuttleSystem.IFF.cs`](../../../Content.Shared/Shuttles/Systems/SharedShuttleSystem.IFF.cs): a factionless player company's ship shows its tag and name
 - [`Content.Shared/StationRecords/GeneralStationRecord.cs`](../../../Content.Shared/StationRecords/GeneralStationRecord.cs): the holder's company rank, whose custom job icon screens show instead of JobIcon
 - [`Resources/Prototypes/_Mono/companies.yml`](../../../Resources/Prototypes/_Mono/companies.yml): flavour companies replaced by player companies
 
