@@ -171,6 +171,22 @@ public static class WGCompanyPolicy
     public static bool WithinWithdrawCap(bool owner, int cap, int withdrawnToday, int amount) =>
         owner || amount <= cap - withdrawnToday;
 
+    /// <summary>The darkest perceived brightness a company colour may show on radar.</summary>
+    public const float MinimumRadarLuminance = 0.4f;
+
+    /// <summary>A company colour lifted toward white until it reads on the dark radar; brighter colours are unchanged.</summary>
+    public static Color RadarColour(Color colour)
+    {
+        var luminance = Luminance(colour);
+        if (luminance >= MinimumRadarLuminance)
+            return colour;
+        var lift = (MinimumRadarLuminance - luminance) / (1f - luminance);
+        return Color.InterpolateBetween(colour, new Color(1f, 1f, 1f, colour.A), lift);
+    }
+
+    /// <summary>Perceived brightness of a colour, from 0 to 1.</summary>
+    public static float Luminance(Color colour) => colour.R * 0.299f + colour.G * 0.587f + colour.B * 0.114f;
+
     private static bool TryNormalizeLabel(string? input, int maximum, out string label)
     {
         label = string.Empty;

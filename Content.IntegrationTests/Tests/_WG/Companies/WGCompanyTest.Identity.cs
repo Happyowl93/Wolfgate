@@ -201,7 +201,8 @@ public sealed partial class WGCompanyTest
                 Assert.That(string.IsNullOrEmpty(em.GetComponent<Content.Shared._Mono.Company.CompanyComponent>(boughtShip).CompanyName), Is.True,
                     "A None faction can't override the company's colour on radar labels.");
                 Assert.That(em.GetComponent<Content.Shared.Shuttles.Components.IFFComponent>(boughtShip).Color,
-                    Is.EqualTo(em.GetComponent<Content.Shared._WG.Companies.WGCompanyShipComponent>(boughtShip).Colour));
+                    Is.EqualTo(Content.Shared._WG.Companies.WGCompanyPolicy.RadarColour(
+                        em.GetComponent<Content.Shared._WG.Companies.WGCompanyShipComponent>(boughtShip).Colour)));
                 Assert.That(em.GetComponent<Content.Shared._Mono.Company.CompanyComponent>(factionShip).CompanyName.Id, Is.EqualTo("TSF"),
                     "The company flag leaves the hull's faction in place.");
                 Assert.That(em.GetComponent<Content.Shared.Shuttles.Components.IFFComponent>(factionShip).Color,

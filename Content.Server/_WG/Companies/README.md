@@ -86,7 +86,8 @@ character's bank, with an optional note; the member gets a chat message and the 
 **Ship access.** Ship access consoles gain a Company mode and a Company door rule beside Crew: choosing either links the
 ship to the player's company (`WGShipCompanyLinkEvent`), and the ID cards of members playing this round open it.
 Company crew and hangar ships link automatically. A factionless company ship's IFF label shows `[TAG] Name` and the
-radar colour turns to the company colour, restored if the ship stops flying for it. A ship whose hull flies for a faction
+radar colour turns to the company colour (lifted toward white if darker than `WGCompanyPolicy.MinimumRadarLuminance`,
+so it reads on radar), restored if the ship stops flying for it. A ship whose hull flies for a faction
 shows only the faction, so faction fleets read as one colour.
 
 **Joining as your rank.** Outside crews, Join the round as <rank> in the Company window. In Crew Setup, a member sees

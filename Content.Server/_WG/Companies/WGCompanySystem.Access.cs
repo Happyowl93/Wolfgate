@@ -125,10 +125,11 @@ public sealed partial class WGCompanySystem
                 faction.CompanyName = string.Empty;
                 Dirty(uid, faction);
             }
-            if (iff.Color == ship.Colour)
+            var radar = WGCompanyPolicy.RadarColour(ship.Colour);
+            if (iff.Color == radar)
                 continue;
             ship.PreviousIffColour ??= iff.Color;
-            _shuttles.SetIFFColor(uid, ship.Colour, iff);
+            _shuttles.SetIFFColor(uid, radar, iff);
         }
         foreach (var uid in disbanded)
             RemComp<WGCompanyShipComponent>(uid);
