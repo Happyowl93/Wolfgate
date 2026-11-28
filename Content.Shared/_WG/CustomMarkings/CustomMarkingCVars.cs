@@ -52,10 +52,10 @@ public sealed class CustomMarkingCVars
 
     /// <summary>
     /// Most new drawings one player may store in a day. Saving a drawing the server already holds doesn't count,
-    /// and neither does changing an entry's name or placement. 0 for no limit.
+    /// and neither does changing an entry's name or placement. 0, the default, for no limit.
     /// </summary>
     public static readonly CVarDef<int> DailyArtLimit =
-        CVarDef.Create("wg.custom_markings.daily_art_limit", 100, CVar.SERVERONLY);
+        CVarDef.Create("wg.custom_markings.daily_art_limit", 0, CVar.SERVERONLY);
 
     /// <summary>
     /// How many days art is kept once the server has found nothing using it: no library holds it and no saved
